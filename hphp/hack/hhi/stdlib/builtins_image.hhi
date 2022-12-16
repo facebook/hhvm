@@ -53,15 +53,18 @@ function image2wbmp(
 <<__PHPStdLib>>
 function imageaffine(
   resource $image,
-  $affine = varray[],
-  $clip = darray[],
+  HH\FIXME\MISSING_PARAM_TYPE $affine = varray[],
+  HH\FIXME\MISSING_PARAM_TYPE $clip = darray[],
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function imageaffinematrixconcat($m1, $m2): HH\FIXME\MISSING_RETURN_TYPE;
+function imageaffinematrixconcat(
+  HH\FIXME\MISSING_PARAM_TYPE $m1,
+  HH\FIXME\MISSING_PARAM_TYPE $m2,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imageaffinematrixget(
   int $type,
-  $options = darray[],
+  HH\FIXME\MISSING_PARAM_TYPE $options = darray[],
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imagealphablending(
@@ -208,7 +211,7 @@ function imagecolortransparent(
 <<__PHPStdLib>>
 function imageconvolution(
   resource $image,
-  $matrix,
+  HH\FIXME\MISSING_PARAM_TYPE $matrix,
   float $div,
   float $offset,
 ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -309,7 +312,10 @@ function imagecreatetruecolor(
   int $height,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function imagecrop(resource $image, $rect): HH\FIXME\MISSING_RETURN_TYPE;
+function imagecrop(
+  resource $image,
+  HH\FIXME\MISSING_PARAM_TYPE $rect,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imagecropauto(
   resource $image,
@@ -368,7 +374,7 @@ function imagefilledellipse(
 <<__PHPStdLib>>
 function imagefilledpolygon(
   resource $image,
-  $points,
+  HH\FIXME\MISSING_PARAM_TYPE $points,
   int $num_points,
   int $color,
 ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -393,10 +399,10 @@ function imagefilltoborder(
 function imagefilter(
   resource $image,
   int $filtertype,
-  $arg1 = 0,
-  $arg2 = 0,
-  $arg3 = 0,
-  $arg4 = 0,
+  HH\FIXME\MISSING_PARAM_TYPE $arg1 = 0,
+  HH\FIXME\MISSING_PARAM_TYPE $arg2 = 0,
+  HH\FIXME\MISSING_PARAM_TYPE $arg3 = 0,
+  HH\FIXME\MISSING_PARAM_TYPE $arg4 = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imageflip(
@@ -413,19 +419,19 @@ function imageftbbox(
   float $angle,
   string $font_file,
   string $text,
-  $extrainfo = null,
+  HH\FIXME\MISSING_PARAM_TYPE $extrainfo = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imagefttext(
   resource $image,
-  $size,
-  $angle,
+  HH\FIXME\MISSING_PARAM_TYPE $size,
+  HH\FIXME\MISSING_PARAM_TYPE $angle,
   int $x,
   int $y,
   int $col,
   string $font_file,
   string $text,
-  $extrainfo = null,
+  HH\FIXME\MISSING_PARAM_TYPE $extrainfo = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imagegammacorrect(
@@ -454,8 +460,8 @@ function imagegif(
 function imagegrabscreen(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imagegrabwindow(
-  $window,
-  $client_area = 0,
+  HH\FIXME\MISSING_PARAM_TYPE $window,
+  HH\FIXME\MISSING_PARAM_TYPE $client_area = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imageinterlace(
@@ -501,7 +507,7 @@ function imagepng(
 <<__PHPStdLib>>
 function imagepolygon(
   resource $image,
-  $points,
+  HH\FIXME\MISSING_PARAM_TYPE $points,
   int $num_points,
   int $color,
 ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -539,7 +545,10 @@ function imagesetpixel(
   int $color,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function imagesetstyle(resource $image, $style): HH\FIXME\MISSING_RETURN_TYPE;
+function imagesetstyle(
+  resource $image,
+  HH\FIXME\MISSING_PARAM_TYPE $style,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imagesetthickness(
   resource $image,
@@ -588,8 +597,8 @@ function imagettfbbox(
 <<__PHPStdLib>>
 function imagettftext(
   resource $image,
-  $size,
-  $angle,
+  HH\FIXME\MISSING_PARAM_TYPE $size,
+  HH\FIXME\MISSING_PARAM_TYPE $angle,
   int $x,
   int $y,
   int $color,

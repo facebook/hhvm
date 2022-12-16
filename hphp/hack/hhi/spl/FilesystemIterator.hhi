@@ -27,7 +27,10 @@ class FilesystemIterator extends DirectoryIterator {
   protected HH\FIXME\MISSING_PROP_TYPE $flags;
 
   // Methods
-  public function __construct($path, $flags = null);
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $path,
+    HH\FIXME\MISSING_PARAM_TYPE $flags = null,
+  );
   public function current(): HH\FIXME\POISON_MARKER<SplFileInfo>;
   public function getFlags();
   public function key();

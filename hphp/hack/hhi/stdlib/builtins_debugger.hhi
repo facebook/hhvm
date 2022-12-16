@@ -10,8 +10,8 @@
 
 <<__PHPStdLib>>
 function hphpd_install_user_command(
-  $cmd,
-  $clsname,
+  HH\FIXME\MISSING_PARAM_TYPE $cmd,
+  HH\FIXME\MISSING_PARAM_TYPE $clsname,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hphpd_auth_token(): string;
@@ -24,6 +24,11 @@ function hphp_debug_break(bool $condition = true)[]: bool;
 <<__PHPStdLib>>
 function hphp_debugger_attached()[read_globals]: bool;
 <<__PHPStdLib>>
-function hphpd_get_client($name = null): HH\FIXME\MISSING_RETURN_TYPE;
+function hphpd_get_client(
+  HH\FIXME\MISSING_PARAM_TYPE $name = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hphpd_client_ctrl($name, $op): HH\FIXME\MISSING_RETURN_TYPE;
+function hphpd_client_ctrl(
+  HH\FIXME\MISSING_PARAM_TYPE $name,
+  HH\FIXME\MISSING_PARAM_TYPE $op,
+): HH\FIXME\MISSING_RETURN_TYPE;

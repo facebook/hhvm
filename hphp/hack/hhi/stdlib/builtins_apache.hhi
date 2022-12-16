@@ -11,7 +11,7 @@
 <<__PHPStdLib>>
 function apache_note(
   string $note_name,
-  $note_value = "",
+  HH\FIXME\MISSING_PARAM_TYPE $note_value = "",
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apache_notes(dict<string, string> $notes): void {}
@@ -28,7 +28,9 @@ function apache_setenv(
 <<__PHPStdLib>>
 function getallheaders()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function virtual($filename): HH\FIXME\MISSING_RETURN_TYPE {}
+function virtual(
+  HH\FIXME\MISSING_PARAM_TYPE $filename,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apache_get_config(): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>

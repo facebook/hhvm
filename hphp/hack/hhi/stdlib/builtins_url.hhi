@@ -39,8 +39,8 @@ function get_meta_tags(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function http_build_query(
-  $formdata,
-  $numeric_prefix = null,
+  HH\FIXME\MISSING_PARAM_TYPE $formdata,
+  HH\FIXME\MISSING_PARAM_TYPE $numeric_prefix = null,
   string $arg_separator = "",
   int $enc_type = PHP_QUERY_RFC1738,
 )[]: string;

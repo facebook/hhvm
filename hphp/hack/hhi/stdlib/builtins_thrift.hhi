@@ -16,17 +16,17 @@ const int THRIFT_MARK_LEGACY_ARRAYS;
 
 <<__PHPStdLib>>
 function thrift_protocol_write_binary(
-  $transportobj,
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
   string $method_name,
   int $msgtype,
-  $request_struct,
+  HH\FIXME\MISSING_PARAM_TYPE $request_struct,
   int $seqid,
   bool $strict_write,
   bool $oneway = false,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function thrift_protocol_read_binary(
-  $transportobj,
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
   string $obj_typename,
   bool $strict_read,
   int $options = 0,
@@ -37,38 +37,38 @@ function thrift_protocol_set_compact_version(
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function thrift_protocol_write_compact(
-  $transportobj,
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
   string $method_name,
   int $msgtype,
-  $request_struct,
+  HH\FIXME\MISSING_PARAM_TYPE $request_struct,
   int $seqid,
   bool $oneway = false,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function thrift_protocol_write_compact2(
-  $transportobj,
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
   string $method_name,
   int $msgtype,
-  $request_struct,
+  HH\FIXME\MISSING_PARAM_TYPE $request_struct,
   int $seqid,
   bool $oneway = false,
   int $version = 2,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function thrift_protocol_read_compact(
-  $transportobj,
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
   string $obj_typename,
   int $options = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function thrift_protocol_read_compact_struct(
-  $transportobj,
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
   string $obj_typename,
   int $options = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function thrift_protocol_read_binary_struct(
-  $transportobj,
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
   string $obj_typename,
   int $options = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;

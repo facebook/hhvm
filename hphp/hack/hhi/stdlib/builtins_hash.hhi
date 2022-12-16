@@ -42,17 +42,17 @@ function hash_final(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hash_hmac_file(
-  $algo,
-  $filename,
-  $key,
-  $raw_output = false,
+  HH\FIXME\MISSING_PARAM_TYPE $algo,
+  HH\FIXME\MISSING_PARAM_TYPE $filename,
+  HH\FIXME\MISSING_PARAM_TYPE $key,
+  HH\FIXME\MISSING_PARAM_TYPE $raw_output = false,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hash_hmac(
-  $algo,
-  $data,
-  $key,
-  $raw_output = false,
+  HH\FIXME\MISSING_PARAM_TYPE $algo,
+  HH\FIXME\MISSING_PARAM_TYPE $data,
+  HH\FIXME\MISSING_PARAM_TYPE $key,
+  HH\FIXME\MISSING_PARAM_TYPE $raw_output = false,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hash_pbkdf2(
@@ -65,14 +65,14 @@ function hash_pbkdf2(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hash_update_file(
-  $init_context,
+  HH\FIXME\MISSING_PARAM_TYPE $init_context,
   string $filename,
-  $stream_context = null,
+  HH\FIXME\MISSING_PARAM_TYPE $stream_context = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hash_update_stream(
-  $context,
-  $handle,
+  HH\FIXME\MISSING_PARAM_TYPE $context,
+  HH\FIXME\MISSING_PARAM_TYPE $handle,
   int $length = -1,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

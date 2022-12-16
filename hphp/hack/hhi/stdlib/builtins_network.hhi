@@ -93,7 +93,10 @@ function ip2long(string $ip_address)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function long2ip(string $proper_address)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function dns_check_record($host, $type = null): HH\FIXME\MISSING_RETURN_TYPE;
+function dns_check_record(
+  HH\FIXME\MISSING_PARAM_TYPE $host,
+  HH\FIXME\MISSING_PARAM_TYPE $type = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function checkdnsrr(
   string $host,
@@ -108,7 +111,7 @@ function dns_get_record(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function dns_get_mx(
-  $hostname,
+  HH\FIXME\MISSING_PARAM_TYPE $hostname,
   inout $mxhosts,
   inout $weights,
 ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -135,14 +138,19 @@ function pfsockopen(
   float $timeout = 0.0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function socket_get_status($stream): HH\FIXME\MISSING_RETURN_TYPE;
+function socket_get_status(
+  HH\FIXME\MISSING_PARAM_TYPE $stream,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function socket_set_blocking($stream, $mode): HH\FIXME\MISSING_RETURN_TYPE;
+function socket_set_blocking(
+  HH\FIXME\MISSING_PARAM_TYPE $stream,
+  HH\FIXME\MISSING_PARAM_TYPE $mode,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function socket_set_timeout(
-  $stream,
-  $seconds,
-  $microseconds = 0,
+  HH\FIXME\MISSING_PARAM_TYPE $stream,
+  HH\FIXME\MISSING_PARAM_TYPE $seconds,
+  HH\FIXME\MISSING_PARAM_TYPE $microseconds = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function header(
@@ -166,9 +174,13 @@ function headers_sent_with_file_line(
   inout $line,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function header_register_callback($callback): HH\FIXME\MISSING_RETURN_TYPE;
+function header_register_callback(
+  HH\FIXME\MISSING_PARAM_TYPE $callback,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function header_remove($name = null): HH\FIXME\MISSING_RETURN_TYPE;
+function header_remove(
+  HH\FIXME\MISSING_PARAM_TYPE $name = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function setcookie(
   string $name,

@@ -101,7 +101,10 @@ class ZipArchive {
   public function close(): bool;
   public function deleteIndex(int $index): bool;
   public function deleteName(string $name): bool;
-  public function extractTo(string $destination, $entries = varray[]): bool;
+  public function extractTo(
+    string $destination,
+    HH\FIXME\MISSING_PARAM_TYPE $entries = varray[],
+  ): bool;
   public function getArchiveComment(int $flags = 0): string;
   public function getCommentIndex(int $index, int $flags = 0): string;
   public function getCommentName(string $name, int $flags = 0): string;

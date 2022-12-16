@@ -103,11 +103,11 @@ class PDO {
     string $dsn,
     string $username = "",
     string $password = "",
-    $options = null,
+    HH\FIXME\MISSING_PARAM_TYPE $options = null,
   );
   public function prepare(
     string $statement,
-    $options = null,
+    HH\FIXME\MISSING_PARAM_TYPE $options = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function beginTransaction(): HH\FIXME\MISSING_RETURN_TYPE;
   public function inTransaction(): HH\FIXME\MISSING_RETURN_TYPE;
@@ -115,7 +115,7 @@ class PDO {
   public function rollBack(): HH\FIXME\MISSING_RETURN_TYPE;
   public function setAttribute(
     int $attribute,
-    $value,
+    HH\FIXME\MISSING_PARAM_TYPE $value,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getAttribute(int $attribute): HH\FIXME\MISSING_RETURN_TYPE;
   public function exec(string $query): HH\FIXME\MISSING_RETURN_TYPE;
@@ -135,7 +135,9 @@ class PDO {
 }
 class PDOStatement {
   public function __construct();
-  public function execute($params = null): HH\FIXME\MISSING_RETURN_TYPE;
+  public function execute(
+    HH\FIXME\MISSING_PARAM_TYPE $params = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function fetch(
     int $how = 0,
     int $orientation = PDO::FETCH_ORI_NEXT,
@@ -143,19 +145,19 @@ class PDOStatement {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function fetchObject(
     string $class_name = "",
-    $ctor_args = null,
+    HH\FIXME\MISSING_PARAM_TYPE $ctor_args = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function fetchColumn(
     int $column_numner = 0,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function fetchAll(
     int $how = 0,
-    $class_name = null,
-    $ctor_args = null,
+    HH\FIXME\MISSING_PARAM_TYPE $class_name = null,
+    HH\FIXME\MISSING_PARAM_TYPE $ctor_args = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function bindValue(
-    $paramno,
-    $param,
+    HH\FIXME\MISSING_PARAM_TYPE $paramno,
+    HH\FIXME\MISSING_PARAM_TYPE $param,
     int $type = PDO::PARAM_STR,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function rowCount(): HH\FIXME\MISSING_RETURN_TYPE;
@@ -163,14 +165,14 @@ class PDOStatement {
   public function errorInfo(): HH\FIXME\MISSING_RETURN_TYPE;
   public function setAttribute(
     int $attribute,
-    $value,
+    HH\FIXME\MISSING_PARAM_TYPE $value,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getAttribute(int $attribute): HH\FIXME\MISSING_RETURN_TYPE;
   public function columnCount(): HH\FIXME\MISSING_RETURN_TYPE;
   public function getColumnMeta(int $column): HH\FIXME\MISSING_RETURN_TYPE;
   public function setFetchMode(
     int $mode,
-    ...$args
+    HH\FIXME\MISSING_PARAM_TYPE ...$args
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function nextRowset(): HH\FIXME\MISSING_RETURN_TYPE;
   public function closeCursor(): HH\FIXME\MISSING_RETURN_TYPE;

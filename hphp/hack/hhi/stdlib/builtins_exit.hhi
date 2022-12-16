@@ -10,6 +10,6 @@
 
 // exit and die terminate the request
 <<__PHPStdLib>>
-function exit($exit_code_or_message = 0): noreturn;
+function exit(HH\FIXME\MISSING_PARAM_TYPE $exit_code_or_message = 0): noreturn;
 <<__PHPStdLib>>
-function die($exit_code_or_message = 0): noreturn;
+function die(HH\FIXME\MISSING_PARAM_TYPE $exit_code_or_message = 0): noreturn;

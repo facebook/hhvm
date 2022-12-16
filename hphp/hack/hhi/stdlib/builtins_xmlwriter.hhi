@@ -15,7 +15,7 @@ function xmlwriter_open_uri(string $uri): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xmlwriter_set_indent_string(
   resource $xmlwriter,
-  $indentstring,
+  HH\FIXME\MISSING_PARAM_TYPE $indentstring,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xmlwriter_set_indent(
@@ -25,9 +25,9 @@ function xmlwriter_set_indent(
 <<__PHPStdLib>>
 function xmlwriter_start_document(
   resource $xmlwriter,
-  $version = "1.0",
-  $encoding = null,
-  $standalone = null,
+  HH\FIXME\MISSING_PARAM_TYPE $version = "1.0",
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $standalone = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xmlwriter_start_element(
@@ -37,23 +37,23 @@ function xmlwriter_start_element(
 <<__PHPStdLib>>
 function xmlwriter_start_element_ns(
   resource $xmlwriter,
-  $prefix,
+  HH\FIXME\MISSING_PARAM_TYPE $prefix,
   string $name,
-  $uri,
+  HH\FIXME\MISSING_PARAM_TYPE $uri,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xmlwriter_write_element_ns(
   resource $xmlwriter,
-  $prefix,
+  HH\FIXME\MISSING_PARAM_TYPE $prefix,
   string $name,
-  $uri,
-  $content = null,
+  HH\FIXME\MISSING_PARAM_TYPE $uri,
+  HH\FIXME\MISSING_PARAM_TYPE $content = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xmlwriter_write_element(
   resource $xmlwriter,
   string $name,
-  $content = null,
+  HH\FIXME\MISSING_PARAM_TYPE $content = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xmlwriter_end_element(
@@ -148,16 +148,16 @@ function xmlwriter_write_raw(
 function xmlwriter_start_dtd(
   resource $xmlwriter,
   string $qualifiedname,
-  $publicid = null,
-  $systemid = null,
+  HH\FIXME\MISSING_PARAM_TYPE $publicid = null,
+  HH\FIXME\MISSING_PARAM_TYPE $systemid = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xmlwriter_write_dtd(
   resource $xmlwriter,
   string $name,
-  $publicid = null,
-  $systemid = null,
-  $subset = null,
+  HH\FIXME\MISSING_PARAM_TYPE $publicid = null,
+  HH\FIXME\MISSING_PARAM_TYPE $systemid = null,
+  HH\FIXME\MISSING_PARAM_TYPE $subset = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xmlwriter_start_dtd_element(
@@ -214,12 +214,12 @@ function xmlwriter_end_dtd(resource $xmlwriter): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xmlwriter_flush(
   resource $xmlwriter,
-  $empty = true,
+  HH\FIXME\MISSING_PARAM_TYPE $empty = true,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xmlwriter_output_memory(
   resource $xmlwriter,
-  $flush = true,
+  HH\FIXME\MISSING_PARAM_TYPE $flush = true,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 
 class XMLWriter {
@@ -231,25 +231,25 @@ class XMLWriter {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function setIndent(bool $indent): HH\FIXME\MISSING_RETURN_TYPE;
   public function startDocument(
-    $version = "1.0",
-    $encoding = null,
-    $standalone = null,
+    HH\FIXME\MISSING_PARAM_TYPE $version = "1.0",
+    HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
+    HH\FIXME\MISSING_PARAM_TYPE $standalone = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function startElement(string $name): HH\FIXME\MISSING_RETURN_TYPE;
   public function startElementNS(
-    $prefix,
+    HH\FIXME\MISSING_PARAM_TYPE $prefix,
     string $name,
-    $uri,
+    HH\FIXME\MISSING_PARAM_TYPE $uri,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function writeElementNS(
-    $prefix,
+    HH\FIXME\MISSING_PARAM_TYPE $prefix,
     string $name,
-    $uri,
-    $content = null,
+    HH\FIXME\MISSING_PARAM_TYPE $uri,
+    HH\FIXME\MISSING_PARAM_TYPE $content = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function writeElement(
     string $name,
-    $content = null,
+    HH\FIXME\MISSING_PARAM_TYPE $content = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function endElement(): HH\FIXME\MISSING_RETURN_TYPE;
   public function fullEndElement(): HH\FIXME\MISSING_RETURN_TYPE;
@@ -287,14 +287,14 @@ class XMLWriter {
   public function writeRaw(string $content): HH\FIXME\MISSING_RETURN_TYPE;
   public function startDTD(
     string $qualifiedname,
-    $publicid = null,
-    $systemid = null,
+    HH\FIXME\MISSING_PARAM_TYPE $publicid = null,
+    HH\FIXME\MISSING_PARAM_TYPE $systemid = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function writeDTD(
     string $name,
-    $publicid = null,
-    $systemid = null,
-    $subset = null,
+    HH\FIXME\MISSING_PARAM_TYPE $publicid = null,
+    HH\FIXME\MISSING_PARAM_TYPE $systemid = null,
+    HH\FIXME\MISSING_PARAM_TYPE $subset = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function startDTDElement(
     string $qualifiedname,
@@ -324,6 +324,10 @@ class XMLWriter {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function endDTDEntity(): HH\FIXME\MISSING_RETURN_TYPE;
   public function endDTD(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function flush($empty = true): HH\FIXME\MISSING_RETURN_TYPE;
-  public function outputMemory($flush = true): HH\FIXME\MISSING_RETURN_TYPE;
+  public function flush(
+    HH\FIXME\MISSING_PARAM_TYPE $empty = true,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function outputMemory(
+    HH\FIXME\MISSING_PARAM_TYPE $flush = true,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 }

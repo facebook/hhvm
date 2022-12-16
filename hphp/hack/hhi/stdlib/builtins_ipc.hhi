@@ -21,7 +21,7 @@ function msg_queue_exists(int $key): HH\FIXME\MISSING_RETURN_TYPE;
 function msg_send(
   resource $queue,
   int $msgtype,
-  $message,
+  HH\FIXME\MISSING_PARAM_TYPE $message,
   bool $serialize,
   bool $blocking,
   inout $errorcode,
@@ -40,7 +40,10 @@ function msg_receive(
 <<__PHPStdLib>>
 function msg_remove_queue(resource $queue): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function msg_set_queue(resource $queue, $data): HH\FIXME\MISSING_RETURN_TYPE;
+function msg_set_queue(
+  resource $queue,
+  HH\FIXME\MISSING_PARAM_TYPE $data,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function msg_stat_queue(resource $queue): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -83,7 +86,7 @@ function shm_has_var(
 function shm_put_var(
   int $shm_identifier,
   int $variable_key,
-  $variable,
+  HH\FIXME\MISSING_PARAM_TYPE $variable,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function shm_remove_var(

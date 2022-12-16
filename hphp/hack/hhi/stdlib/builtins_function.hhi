@@ -18,16 +18,26 @@ namespace {
     bool $autoload = true,
   )[]: bool;
   <<__PHPStdLib>>
-  function is_callable($v, bool $syntax = false)[]: bool;
+  function is_callable(
+    HH\FIXME\MISSING_PARAM_TYPE $v,
+    bool $syntax = false,
+  )[]: bool;
   <<__PHPStdLib>>
-  function is_callable_with_name($v, bool $syntax, inout $name)[]: bool;
+  function is_callable_with_name(
+    HH\FIXME\MISSING_PARAM_TYPE $v,
+    bool $syntax,
+    inout $name,
+  )[]: bool;
   <<__Deprecated('Use direct invocation instead.')>>
   function call_user_func_array(
-    $function,
+    HH\FIXME\MISSING_PARAM_TYPE $function,
     Container<mixed> $params,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__Deprecated('Use direct invocation instead.')>>
-  function call_user_func($function, ...$args): \HH\FIXME\MISSING_RETURN_TYPE;
+  function call_user_func(
+    HH\FIXME\MISSING_PARAM_TYPE $function,
+    HH\FIXME\MISSING_PARAM_TYPE ...$args
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function register_postsend_function<T>((function(): T) $function): void;
   <<__PHPStdLib>>

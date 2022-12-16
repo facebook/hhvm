@@ -10,41 +10,46 @@
 
 <<__PHPStdLib>>
 function apc_add(
-  $key,
-  $var,
+  HH\FIXME\MISSING_PARAM_TYPE $key,
+  HH\FIXME\MISSING_PARAM_TYPE $var,
   int $ttl = 0,
   int $bump_ttl = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_add_with_pure_sleep(
-  $key,
-  $var,
+  HH\FIXME\MISSING_PARAM_TYPE $key,
+  HH\FIXME\MISSING_PARAM_TYPE $var,
   int $ttl = 0,
   int $bump_ttl = 0,
 )[globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function apc_store(
-  $key,
-  $var,
+  HH\FIXME\MISSING_PARAM_TYPE $key,
+  HH\FIXME\MISSING_PARAM_TYPE $var,
   int $ttl = 0,
   int $bump_ttl = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_store_with_pure_sleep(
-  $key,
-  $var,
+  HH\FIXME\MISSING_PARAM_TYPE $key,
+  HH\FIXME\MISSING_PARAM_TYPE $var,
   int $ttl = 0,
   int $bump_ttl = 0,
 )[globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function apc_fetch($key, inout $success): HH\FIXME\MISSING_RETURN_TYPE {}
+function apc_fetch(
+  HH\FIXME\MISSING_PARAM_TYPE $key,
+  inout $success,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_fetch_with_pure_wakeup(
-  $key,
+  HH\FIXME\MISSING_PARAM_TYPE $key,
   inout $success,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function apc_delete($key): HH\FIXME\MISSING_RETURN_TYPE {}
+function apc_delete(
+  HH\FIXME\MISSING_PARAM_TYPE $key,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_cache_info(
   string $cache_type = "",
@@ -73,7 +78,9 @@ function apc_cas(
   int $new_cas,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_exists($key): HH\FIXME\MISSING_RETURN_TYPE {}
+function apc_exists(
+  HH\FIXME\MISSING_PARAM_TYPE $key,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_extend_ttl(string $key, int $ttl): bool;
 <<__PHPStdLib>>

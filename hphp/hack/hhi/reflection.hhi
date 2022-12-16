@@ -14,11 +14,11 @@ interface Reflector extends IPureStringishObject {
 
 class Reflection {
   public static function getModifierNames(
-    $modifiers,
+    HH\FIXME\MISSING_PARAM_TYPE $modifiers,
   )[]: HH\FIXME\MISSING_RETURN_TYPE;
   public static function export(
     Reflector $reflector,
-    $return = false,
+    HH\FIXME\MISSING_PARAM_TYPE $return = false,
   ): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
@@ -110,7 +110,9 @@ class ReflectionClass implements Reflector {
   public function isSubclassOf(mixed $class)[]: bool;
   public function isTrait()[]: bool;
   public function isUserDefined()[]: bool;
-  public function newInstance(...$args): HH\FIXME\MISSING_RETURN_TYPE;
+  public function newInstance(
+    HH\FIXME\MISSING_PARAM_TYPE ...$args
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function newInstanceArgs(
     Traversable<mixed> $args = varray[],
   )[defaults]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -179,11 +181,11 @@ class ReflectionFunction
 
   public HH\FIXME\MISSING_PROP_TYPE $name = '';
 
-  public function __construct($name)[];
+  public function __construct(HH\FIXME\MISSING_PARAM_TYPE $name)[];
   public function __toString()[]: string;
   public static function export(
-    $name,
-    $return = null,
+    HH\FIXME\MISSING_PARAM_TYPE $name,
+    HH\FIXME\MISSING_PARAM_TYPE $return = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function isDisabled()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function invoke(mixed ...$args): HH\FIXME\MISSING_RETURN_TYPE;
@@ -211,7 +213,10 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
     string $name,
     bool $return = false,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function __construct($class, $name = null)[];
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $class,
+    HH\FIXME\MISSING_PARAM_TYPE $name = null,
+  )[];
 
   public function __toString()[]: string;
   public function isPublic()[]: bool;
@@ -249,11 +254,15 @@ class ReflectionParameter implements Reflector {
 
   private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
   public static function export(
-    $function,
-    $parameter,
-    $return = null,
+    HH\FIXME\MISSING_PARAM_TYPE $function,
+    HH\FIXME\MISSING_PARAM_TYPE $parameter,
+    HH\FIXME\MISSING_PARAM_TYPE $return = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function __construct($function, $parameter, $info = null)[];
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $function,
+    HH\FIXME\MISSING_PARAM_TYPE $parameter,
+    HH\FIXME\MISSING_PARAM_TYPE $info = null,
+  )[];
   public function __toString()[]: string;
   public function getName()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function isPassedByReference()[]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -297,19 +306,22 @@ class ReflectionProperty implements Reflector {
 
   private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
   public static function export(
-    $class,
-    $name,
-    $return = null,
+    HH\FIXME\MISSING_PARAM_TYPE $class,
+    HH\FIXME\MISSING_PARAM_TYPE $name,
+    HH\FIXME\MISSING_PARAM_TYPE $return = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function __construct($class, string $name)[];
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $class,
+    string $name,
+  )[];
   public function __toString()[]: string;
   public function getName()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getValue(
-    $obj = null,
+    HH\FIXME\MISSING_PARAM_TYPE $obj = null,
   )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
   public function setValue(
-    $obj,
-    $value = null,
+    HH\FIXME\MISSING_PARAM_TYPE $obj,
+    HH\FIXME\MISSING_PARAM_TYPE $value = null,
   )[globals, write_props]: HH\FIXME\MISSING_RETURN_TYPE;
   public function isPublic()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function isPrivate()[]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -334,10 +346,10 @@ class ReflectionExtension implements Reflector {
 
   private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
   public static function export(
-    $name,
-    $return = false,
+    HH\FIXME\MISSING_PARAM_TYPE $name,
+    HH\FIXME\MISSING_PARAM_TYPE $return = false,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function __construct($name)[];
+  public function __construct(HH\FIXME\MISSING_PARAM_TYPE $name)[];
   public function __toString()[]: string;
   public function getName()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getVersion()[]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -353,11 +365,14 @@ class ReflectionTypeConstant implements Reflector {
 
   private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
   public static function export(
-    $class,
+    HH\FIXME\MISSING_PARAM_TYPE $class,
     string $name,
-    $return = null,
+    HH\FIXME\MISSING_PARAM_TYPE $return = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function __construct($class, string $name)[];
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $class,
+    string $name,
+  )[];
   public function __toString()[]: string;
   public function getName()[]: string;
   public function isAbstract()[]: bool;

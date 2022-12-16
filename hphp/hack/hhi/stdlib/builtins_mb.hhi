@@ -18,39 +18,41 @@ const int MB_CASE_TITLE;
 function mb_list_encodings()[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_list_encodings_alias_names(
-  $name = null,
+  HH\FIXME\MISSING_PARAM_TYPE $name = null,
 )[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function mb_list_mime_names($name = null)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function mb_list_mime_names(
+  HH\FIXME\MISSING_PARAM_TYPE $name = null,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_check_encoding(
-  $var = null,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $var = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_convert_case(
   string $str,
   int $mode,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_convert_encoding(
   string $str,
   string $to_encoding,
-  $from_encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $from_encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_convert_kana(
   string $str,
-  $option = null,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $option = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_convert_variables(
   string $to_encoding,
-  $from_encoding,
+  HH\FIXME\MISSING_PARAM_TYPE $from_encoding,
   inout $vars,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_decode_mimeheader(
@@ -59,32 +61,32 @@ function mb_decode_mimeheader(
 <<__PHPStdLib>>
 function mb_decode_numericentity(
   string $str,
-  $convmap,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $convmap,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_detect_encoding(
   string $str,
-  $encoding_list = null,
-  $strict = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding_list = null,
+  HH\FIXME\MISSING_PARAM_TYPE $strict = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_detect_order(
-  $encoding_list = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding_list = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_encode_mimeheader(
   string $str,
-  $charset = null,
-  $transfer_encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $charset = null,
+  HH\FIXME\MISSING_PARAM_TYPE $transfer_encoding = null,
   string $linefeed = "\r\n",
   int $indent = 0,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_encode_numericentity(
   string $str,
-  $convmap,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $convmap,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_encoding_aliases(string $str)[]: HH\FIXME\MISSING_RETURN_TYPE {}
@@ -92,14 +94,14 @@ function mb_encoding_aliases(string $str)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 function mb_ereg_match(
   string $pattern,
   string $str,
-  $option = null,
+  HH\FIXME\MISSING_PARAM_TYPE $option = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_ereg_replace(
-  $pattern,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern,
   string $replacement,
   string $str,
-  $option = null,
+  HH\FIXME\MISSING_PARAM_TYPE $option = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_ereg_search_getpos()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
@@ -108,18 +110,18 @@ function mb_ereg_search_getregs()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_ereg_search_init(
   string $str,
-  $pattern = null,
-  $option = null,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern = null,
+  HH\FIXME\MISSING_PARAM_TYPE $option = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_ereg_search_pos(
-  $pattern = null,
-  $option = null,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern = null,
+  HH\FIXME\MISSING_PARAM_TYPE $option = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_ereg_search_regs(
-  $pattern = null,
-  $option = null,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern = null,
+  HH\FIXME\MISSING_PARAM_TYPE $option = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_ereg_search_setpos(
@@ -127,47 +129,47 @@ function mb_ereg_search_setpos(
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_ereg_search(
-  $pattern = null,
-  $option = null,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern = null,
+  HH\FIXME\MISSING_PARAM_TYPE $option = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_ereg(
-  $pattern,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern,
   string $str,
   inout $regs,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_eregi_replace(
-  $pattern,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern,
   string $replacement,
   string $str,
-  $option = null,
+  HH\FIXME\MISSING_PARAM_TYPE $option = null,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_eregi(
-  $pattern,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern,
   string $str,
   inout $regs,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_get_info(
-  $type = null,
+  HH\FIXME\MISSING_PARAM_TYPE $type = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_http_input(
-  $type = null,
+  HH\FIXME\MISSING_PARAM_TYPE $type = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_http_output(
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_internal_encoding(
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_language(
-  $language = null,
+  HH\FIXME\MISSING_PARAM_TYPE $language = null,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_output_handler(
@@ -185,19 +187,19 @@ function mb_preferred_mime_name(
 )[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_regex_encoding(
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_regex_set_options(
-  $options = null,
+  HH\FIXME\MISSING_PARAM_TYPE $options = null,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_send_mail(
   string $to,
   string $subject,
   string $message,
-  $headers = null,
-  $extra_cmd = null,
+  HH\FIXME\MISSING_PARAM_TYPE $headers = null,
+  HH\FIXME\MISSING_PARAM_TYPE $extra_cmd = null,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_split(
@@ -209,107 +211,107 @@ function mb_split(
 function mb_strcut(
   string $str,
   int $start,
-  $length = 0x7FFFFFFF,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $length = 0x7FFFFFFF,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_strimwidth(
   string $str,
   int $start,
   int $width,
-  $trimmarker = null,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $trimmarker = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_stripos(
   string $haystack,
   string $needle,
   int $offset = 0,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_stristr(
   string $haystack,
   string $needle,
   bool $part = false,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_strlen(
   string $str,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_strpos(
   string $haystack,
   string $needle,
   int $offset = 0,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_strrchr(
   string $haystack,
   string $needle,
   bool $part = false,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_strrichr(
   string $haystack,
   string $needle,
   bool $part = false,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_strripos(
   string $haystack,
   string $needle,
   int $offset = 0,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_strrpos(
   string $haystack,
   string $needle,
-  $offset = 0,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $offset = 0,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_strstr(
   string $haystack,
   string $needle,
   bool $part = false,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_strtolower(
   string $str,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_strtoupper(
   string $str,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_strwidth(
   string $str,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_substitute_character(
-  $substrchar = null,
+  HH\FIXME\MISSING_PARAM_TYPE $substrchar = null,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_substr_count(
   string $haystack,
   string $needle,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_substr(
   string $str,
   int $start,
-  $length = 0x7FFFFFFF,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $length = 0x7FFFFFFF,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}

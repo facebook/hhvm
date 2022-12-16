@@ -24,12 +24,12 @@ class SQLite3 {
   public function __construct(
     string $filename,
     int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE,
-    $encryption_key = null,
+    HH\FIXME\MISSING_PARAM_TYPE $encryption_key = null,
   );
   public function open(
     string $filename,
     int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE,
-    $encryption_key = null,
+    HH\FIXME\MISSING_PARAM_TYPE $encryption_key = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function busytimeout(int $msecs): HH\FIXME\MISSING_RETURN_TYPE;
   public function close(): HH\FIXME\MISSING_RETURN_TYPE;
@@ -53,32 +53,35 @@ class SQLite3 {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function createfunction(
     string $name,
-    $callback,
+    HH\FIXME\MISSING_PARAM_TYPE $callback,
     int $argcount = -1,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function createaggregate(
     string $name,
-    $step,
-    $final,
+    HH\FIXME\MISSING_PARAM_TYPE $step,
+    HH\FIXME\MISSING_PARAM_TYPE $final,
     int $argcount = -1,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function openblob(
     string $table,
     string $column,
     int $rowid,
-    $dbname = null,
+    HH\FIXME\MISSING_PARAM_TYPE $dbname = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class SQLite3Stmt {
-  public function __construct($dbobject, string $statement);
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $dbobject,
+    string $statement,
+  );
   public function paramcount(): HH\FIXME\MISSING_RETURN_TYPE;
   public function close(): HH\FIXME\MISSING_RETURN_TYPE;
   public function reset(): HH\FIXME\MISSING_RETURN_TYPE;
   public function clear(): HH\FIXME\MISSING_RETURN_TYPE;
   public function bindvalue(
-    $name,
-    $parameter,
+    HH\FIXME\MISSING_PARAM_TYPE $name,
+    HH\FIXME\MISSING_PARAM_TYPE $parameter,
     int $type = SQLITE3_TEXT,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function execute(): HH\FIXME\MISSING_RETURN_TYPE;

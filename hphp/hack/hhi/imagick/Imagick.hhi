@@ -496,13 +496,19 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   ): bool;
   public function appendImages(bool $stack = false): Imagick;
   public function averageImages(): Imagick;
-  public function blackThresholdImage($threshold): bool;
+  public function blackThresholdImage(
+    HH\FIXME\MISSING_PARAM_TYPE $threshold,
+  ): bool;
   public function blurImage(
     float $radius,
     float $sigma,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
-  public function borderImage($bordercolor, int $width, int $height): bool;
+  public function borderImage(
+    HH\FIXME\MISSING_PARAM_TYPE $bordercolor,
+    int $width,
+    int $height,
+  ): bool;
   public function charcoalImage(float $radius, float $sigma): bool;
   public function chopImage(int $width, int $height, int $x, int $y): bool;
   public function clear(): bool;
@@ -515,13 +521,16 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   ): bool;
   public function coalesceImages(): Imagick;
   public function colorFloodfillImage(
-    $fill,
+    HH\FIXME\MISSING_PARAM_TYPE $fill,
     float $fuzz,
-    $bordercolor,
+    HH\FIXME\MISSING_PARAM_TYPE $bordercolor,
     int $x,
     int $y,
   ): bool;
-  public function colorizeImage($colorize, $opacity): bool;
+  public function colorizeImage(
+    HH\FIXME\MISSING_PARAM_TYPE $colorize,
+    HH\FIXME\MISSING_PARAM_TYPE $opacity,
+  ): bool;
   public function combineImages(int $channelType): Imagick;
   public function commentImage(string $comment): bool;
   public function compareImageChannels(
@@ -538,7 +547,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     int $y,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
-  public function __construct($files = null);
+  public function __construct(HH\FIXME\MISSING_PARAM_TYPE $files = null);
   public function contrastImage(bool $sharpen): bool;
   public function contrastStretchImage(
     float $black_point,
@@ -589,9 +598,9 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function flattenImages(): Imagick;
   public function flipImage(): bool;
   public function floodFillPaintImage(
-    $fill,
+    HH\FIXME\MISSING_PARAM_TYPE $fill,
     float $fuzz,
-    $target,
+    HH\FIXME\MISSING_PARAM_TYPE $target,
     int $x,
     int $y,
     bool $invert,
@@ -599,7 +608,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   ): bool;
   public function flopImage(): bool;
   public function frameImage(
-    $matte_color,
+    HH\FIXME\MISSING_PARAM_TYPE $matte_color,
     int $width,
     int $height,
     int $inner_bevel,
@@ -784,7 +793,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function matteFloodfillImage(
     float $alpha,
     float $fuzz,
-    $bordercolor,
+    HH\FIXME\MISSING_PARAM_TYPE $bordercolor,
     int $x,
     int $y,
   ): bool;
@@ -818,7 +827,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function newImage(
     int $cols,
     int $rows,
-    $background,
+    HH\FIXME\MISSING_PARAM_TYPE $background,
     string $format = "",
   ): bool;
   public function newPseudoImage(
@@ -830,8 +839,8 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function normalizeImage(int $channel = \Imagick::CHANNEL_ALL): bool;
   public function oilPaintImage(float $radius): bool;
   public function opaquePaintImage(
-    $target,
-    $fill,
+    HH\FIXME\MISSING_PARAM_TYPE $target,
+    HH\FIXME\MISSING_PARAM_TYPE $fill,
     float $fuzz,
     bool $invert,
     int $channel = \Imagick::CHANNEL_DEFAULT,
@@ -842,21 +851,21 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function paintFloodfillImage(
-    $fill,
+    HH\FIXME\MISSING_PARAM_TYPE $fill,
     float $fuzz,
-    $bordercolor,
+    HH\FIXME\MISSING_PARAM_TYPE $bordercolor,
     int $x,
     int $y,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function paintOpaqueImage(
-    $target,
-    $fill,
+    HH\FIXME\MISSING_PARAM_TYPE $target,
+    HH\FIXME\MISSING_PARAM_TYPE $fill,
     float $fuzz,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function paintTransparentImage(
-    $target,
+    HH\FIXME\MISSING_PARAM_TYPE $target,
     float $alpha,
     float $fuzz,
   ): bool;
@@ -885,7 +894,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function queryFontMetrics(
     ImagickDraw $properties,
     string $text,
-    $multiline = null,
+    HH\FIXME\MISSING_PARAM_TYPE $multiline = null,
   ): darray;
   public static function queryFonts(string $pattern = "*"): varray;
   public static function queryFormats(string $pattern = "*"): varray;
@@ -932,7 +941,10 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     bool $bestfit = false,
   ): bool;
   public function rollImage(int $x, int $y): bool;
-  public function rotateImage($background, float $degrees): bool;
+  public function rotateImage(
+    HH\FIXME\MISSING_PARAM_TYPE $background,
+    float $degrees,
+  ): bool;
   public function roundCorners(
     float $x_rounding,
     float $y_rounding,
@@ -957,7 +969,9 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   ): bool;
   public function separateImageChannel(int $channel): bool;
   public function sepiaToneImage(float $threshold): bool;
-  public function setBackgroundColor($background): bool;
+  public function setBackgroundColor(
+    HH\FIXME\MISSING_PARAM_TYPE $background,
+  ): bool;
   public function setColorspace(int $COLORSPACE): bool;
   public function setCompression(int $compression): bool;
   public function setCompressionQuality(int $quality): bool;
@@ -969,13 +983,20 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function setImage(Imagick $replace): bool;
   public function setImageAlphaChannel(int $mode): bool;
   public function setImageArtifact(string $artifact, string $value): bool;
-  public function setImageBackgroundColor($background): bool;
+  public function setImageBackgroundColor(
+    HH\FIXME\MISSING_PARAM_TYPE $background,
+  ): bool;
   public function setImageBias(float $bias): bool;
   public function setImageBluePrimary(float $x, float $y): bool;
-  public function setImageBorderColor($border): bool;
+  public function setImageBorderColor(
+    HH\FIXME\MISSING_PARAM_TYPE $border,
+  ): bool;
   public function setImageChannelDepth(int $channel, int $depth): bool;
   public function setImageClipMask(Imagick $clip_mask): bool;
-  public function setImageColormapColor(int $index, $color): bool;
+  public function setImageColormapColor(
+    int $index,
+    HH\FIXME\MISSING_PARAM_TYPE $color,
+  ): bool;
   public function setImageColorspace(int $colorspace): bool;
   public function setImageCompose(int $compose): bool;
   public function setImageCompression(int $compression): bool;
@@ -994,7 +1015,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function setImageInterpolateMethod(int $method): bool;
   public function setImageIterations(int $iterations): bool;
   public function setImageMatte(bool $matte): bool;
-  public function setImageMatteColor($matte): bool;
+  public function setImageMatteColor(HH\FIXME\MISSING_PARAM_TYPE $matte): bool;
   public function setImageOpacity(float $opacity): bool;
   public function setImageOrientation(int $orientation): bool;
   public function setImagePage(int $width, int $height, int $x, int $y): bool;
@@ -1041,7 +1062,11 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function shaveImage(int $columns, int $rows): bool;
-  public function shearImage($background, float $x_shear, float $y_shear): bool;
+  public function shearImage(
+    HH\FIXME\MISSING_PARAM_TYPE $background,
+    float $x_shear,
+    float $y_shear,
+  ): bool;
   public function sigmoidalContrastImage(
     bool $sharpen,
     float $alpha,
@@ -1072,10 +1097,13 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     bool $bestfit = false,
     bool $fill = false,
   ): bool;
-  public function tintImage($tint, $opacity): bool;
+  public function tintImage(
+    HH\FIXME\MISSING_PARAM_TYPE $tint,
+    HH\FIXME\MISSING_PARAM_TYPE $opacity,
+  ): bool;
   public function transformImage(string $crop, string $geometry): Imagick;
   public function transparentPaintImage(
-    $target,
+    HH\FIXME\MISSING_PARAM_TYPE $target,
     float $alpha,
     float $fuzz,
     bool $invert,
@@ -1099,7 +1127,9 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     int $y,
   ): bool;
   public function waveImage(float $amplitude, float $length): bool;
-  public function whiteThresholdImage($threshold): bool;
+  public function whiteThresholdImage(
+    HH\FIXME\MISSING_PARAM_TYPE $threshold,
+  ): bool;
   public function writeImage(string $filename = ""): bool;
   public function writeImageFile(
     resource $filehandle,

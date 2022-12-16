@@ -21,8 +21,8 @@ definition:
 
      $default
        kind: param
-       position: line 33, characters 5-12
-       span: line 33, character 5 - line 33, character 19
+       position: line 33, characters 34-41
+       span: line 33, character 5 - line 33, character 48
        modifiers: 
 
 

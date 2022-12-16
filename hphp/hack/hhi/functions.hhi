@@ -35,7 +35,7 @@ namespace {
   <<__PHPStdLib>>
   function implode(
     string $glue,
-    readonly $pieces,
+    readonly HH\FIXME\MISSING_PARAM_TYPE $pieces,
   )[]: string; // could be Container<Stringish>
   <<__PHPStdLib>>
   function explode(
@@ -64,15 +64,15 @@ namespace {
   function strip_tags(string $str, string $allowable_tags = ''): string;
 
   <<__PHPStdLib>>
-  function intval($v, int $base = 10)[]: int;
+  function intval(HH\FIXME\MISSING_PARAM_TYPE $v, int $base = 10)[]: int;
   <<__PHPStdLib>>
-  function doubleval($v)[]: float;
+  function doubleval(HH\FIXME\MISSING_PARAM_TYPE $v)[]: float;
   <<__PHPStdLib>>
-  function floatval($v)[]: float;
+  function floatval(HH\FIXME\MISSING_PARAM_TYPE $v)[]: float;
   <<__PHPStdLib>>
-  function strval($v)[]: string;
+  function strval(HH\FIXME\MISSING_PARAM_TYPE $v)[]: string;
   <<__PHPStdLib>>
-  function boolval($v)[]: bool;
+  function boolval(HH\FIXME\MISSING_PARAM_TYPE $v)[]: bool;
 
   <<__PHPStdLib>>
   function get_class_constants(string $class_name)[]: darray<string, mixed>;
@@ -80,7 +80,7 @@ namespace {
 
 namespace HH {
   // autoload-map
-  function could_include($file): bool;
+  function could_include(\HH\FIXME\MISSING_PARAM_TYPE $file): bool;
   function autoload_is_native(): bool;
   function autoload_set_paths(
     KeyedContainer<string, KeyedContainer<string, string>> $map,
@@ -137,7 +137,7 @@ namespace HH {
 
   function clear_static_memoization(?string $cls, ?string $func = null): bool;
   function clear_lsb_memoization(string $cls, ?string $func = null): bool;
-  function clear_instance_memoization($obj): bool;
+  function clear_instance_memoization(\HH\FIXME\MISSING_PARAM_TYPE $obj): bool;
 
   function is_list_like(readonly mixed $arg)[]: bool;
   function is_meth_caller(readonly mixed $arg)[]: bool;

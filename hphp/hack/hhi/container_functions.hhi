@@ -24,11 +24,11 @@ namespace {
 
   <<__PHPStdLib>>
   function array_sum/*<T>*/(
-    readonly /*Container<T>*/ $input,
+    readonly /*Container<T>*/ HH\FIXME\MISSING_PARAM_TYPE $input,
   )[]/*: num*/: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function array_product/*<T>*/(
-    readonly /*Container<T>*/ $input,
+    readonly /*Container<T>*/ HH\FIXME\MISSING_PARAM_TYPE $input,
   )[]/*: num*/: \HH\FIXME\MISSING_RETURN_TYPE;
 
   <<__PHPStdLib>>

@@ -16,7 +16,10 @@ class RecursiveDirectoryIterator
   const int FOLLOW_SYMLINKS;
 
   // Methods
-  public function __construct($path, $flags = null);
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $path,
+    HH\FIXME\MISSING_PARAM_TYPE $flags = null,
+  );
   public function hasChildren();
   public function getChildren();
   public function getSubPath();

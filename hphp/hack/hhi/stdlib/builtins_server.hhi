@@ -46,7 +46,11 @@ namespace {
   <<__PHPStdLib>>
   function xbox_task_status(resource $task): bool;
   <<__PHPStdLib>>
-  function xbox_task_result(resource $task, int $timeout_ms, inout $ret): int;
+  function xbox_task_result(
+    resource $task,
+    int $timeout_ms,
+    inout $ret,
+  ): int;
   <<__PHPStdLib>>
   function xbox_process_call_message(string $msg): mixed;
 }

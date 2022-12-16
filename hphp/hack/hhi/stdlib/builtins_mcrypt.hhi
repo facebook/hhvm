@@ -111,7 +111,7 @@ function mcrypt_encrypt(
   string $key,
   string $data,
   string $mode,
-  $iv = null,
+  HH\FIXME\MISSING_PARAM_TYPE $iv = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mcrypt_decrypt(
@@ -119,39 +119,39 @@ function mcrypt_decrypt(
   string $key,
   string $data,
   string $mode,
-  $iv = null,
+  HH\FIXME\MISSING_PARAM_TYPE $iv = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mcrypt_cbc(
   string $cipher,
   string $key,
   string $data,
-  $mode,
-  $iv = null,
+  HH\FIXME\MISSING_PARAM_TYPE $mode,
+  HH\FIXME\MISSING_PARAM_TYPE $iv = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mcrypt_cfb(
   string $cipher,
   string $key,
   string $data,
-  $mode,
-  $iv = null,
+  HH\FIXME\MISSING_PARAM_TYPE $mode,
+  HH\FIXME\MISSING_PARAM_TYPE $iv = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mcrypt_ecb(
   string $cipher,
   string $key,
   string $data,
-  $mode,
-  $iv = null,
+  HH\FIXME\MISSING_PARAM_TYPE $mode,
+  HH\FIXME\MISSING_PARAM_TYPE $iv = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mcrypt_ofb(
   string $cipher,
   string $key,
   string $data,
-  $mode,
-  $iv = null,
+  HH\FIXME\MISSING_PARAM_TYPE $mode,
+  HH\FIXME\MISSING_PARAM_TYPE $iv = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mcrypt_get_block_size(

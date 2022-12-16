@@ -96,7 +96,10 @@ namespace {
    * This uses the far stricter \HH\Lib\Str\SprintfFormat type.
    */
   <<__PHPStdLib>>
-  function sprintf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args)[]: string;
+  function sprintf(
+    \HH\FormatString<PlainSprintf> $fmt,
+    HH\FIXME\MISSING_PARAM_TYPE ...$fmt_args
+  )[]: string;
   /**
    * printf uses PlainSprintf as its format string.
    * This type is very wide and will allow many incorrect calls to typecheck.
@@ -104,7 +107,10 @@ namespace {
    * This uses the far stricter \HH\Lib\Str\SprintfFormat type.
    */
   <<__PHPStdLib>>
-  function printf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): int;
+  function printf(
+    \HH\FormatString<PlainSprintf> $fmt,
+    HH\FIXME\MISSING_PARAM_TYPE ...$fmt_args
+  ): int;
 
 }
 
@@ -115,7 +121,7 @@ namespace HH {
   // Equivalent to invariant(false, $fmt, ...$fmt_args).
   function invariant_violation(
     FormatString<\PlainSprintf> $fmt,
-    ...$fmt_args
+    \HH\FIXME\MISSING_PARAM_TYPE ...$fmt_args
   )[]: noreturn;
 
 }

@@ -135,7 +135,9 @@ namespace HH {
      *
      * @return - An `ImmSet` with the values from the passed `array`(s).
      */
-    public static function fromArrays(...$argv)[]: ImmSet<Tv>;
+    public static function fromArrays(
+      \HH\FIXME\MISSING_PARAM_TYPE ...$argv
+    )[]: ImmSet<Tv>;
 
     /**
      * Creates an `ImmSet` from the keys of the specified container.

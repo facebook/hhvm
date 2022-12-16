@@ -205,7 +205,7 @@ function socket_set_option(
   resource $socket,
   int $level,
   int $optname,
-  $optval,
+  HH\FIXME\MISSING_PARAM_TYPE $optval,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function socket_connect(
@@ -229,7 +229,7 @@ function socket_select(
   inout $read,
   inout $write,
   inout $except,
-  $vtv_sec,
+  HH\FIXME\MISSING_PARAM_TYPE $vtv_sec,
   int $tv_usec = 0,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
@@ -298,10 +298,12 @@ function socket_close(
 function socket_strerror(int $errnum)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function socket_last_error(
-  $socket = null,
+  HH\FIXME\MISSING_PARAM_TYPE $socket = null,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_clear_error($socket = null): HH\FIXME\MISSING_RETURN_TYPE {}
+function socket_clear_error(
+  HH\FIXME\MISSING_PARAM_TYPE $socket = null,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function getaddrinfo(
   string $host,

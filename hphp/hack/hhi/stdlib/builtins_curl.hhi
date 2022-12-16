@@ -600,11 +600,13 @@ namespace {
   const int CURLMIMEOPT_FORMESCAPE;
 
   <<__PHPStdLib>>
-  function curl_init($url = null)[leak_safe]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function curl_init(
+    HH\FIXME\MISSING_PARAM_TYPE $url = null,
+  )[leak_safe]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function curl_init_pooled(
     string $pool_name,
-    $url = null,
+    HH\FIXME\MISSING_PARAM_TYPE $url = null,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function curl_copy_handle(resource $ch): \HH\FIXME\MISSING_RETURN_TYPE;
@@ -616,12 +618,12 @@ namespace {
   function curl_setopt(
     resource $ch,
     int $option,
-    $value,
+    HH\FIXME\MISSING_PARAM_TYPE $value,
   )[write_props]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function curl_setopt_array(
     resource $ch,
-    $options,
+    HH\FIXME\MISSING_PARAM_TYPE $options,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function curl_exec(resource $ch): \HH\FIXME\MISSING_RETURN_TYPE;
@@ -681,7 +683,7 @@ namespace {
   function curl_share_setopt(
     resource $sh,
     int $option,
-    $value,
+    HH\FIXME\MISSING_PARAM_TYPE $value,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
 
   class CURLFile {

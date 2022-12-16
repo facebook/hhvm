@@ -592,7 +592,9 @@ namespace HH {
      *
      * @return - A `Set` with the values from the passed `array`(s).
      */
-    public static function fromArrays(...$argv)[]: Set<Tv>;
+    public static function fromArrays(
+      \HH\FIXME\MISSING_PARAM_TYPE ...$argv
+    )[]: Set<Tv>;
 
     /**
      * Creates a `Set` from the given `Traversable`, or an empty `Set` if `null`

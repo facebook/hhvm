@@ -39,7 +39,9 @@ const int XML_OPTION_TARGET_ENCODING;
 const string XML_SAX_IMPL;
 
 <<__PHPStdLib>>
-function xml_parser_create($encoding = null): HH\FIXME\MISSING_RETURN_TYPE;
+function xml_parser_create(
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_parser_free(resource $parser): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -57,8 +59,8 @@ function xml_parse_into_struct(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_parser_create_ns(
-  $encoding = null,
-  $separator = null,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $separator = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_parser_get_option(
@@ -69,58 +71,58 @@ function xml_parser_get_option(
 function xml_parser_set_option(
   resource $parser,
   int $option,
-  $value,
+  HH\FIXME\MISSING_PARAM_TYPE $value,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_set_character_data_handler(
   resource $parser,
-  $handler,
+  HH\FIXME\MISSING_PARAM_TYPE $handler,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_set_default_handler(
   resource $parser,
-  $handler,
+  HH\FIXME\MISSING_PARAM_TYPE $handler,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_set_element_handler(
   resource $parser,
-  $start_element_handler,
-  $end_element_handler,
+  HH\FIXME\MISSING_PARAM_TYPE $start_element_handler,
+  HH\FIXME\MISSING_PARAM_TYPE $end_element_handler,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_set_processing_instruction_handler(
   resource $parser,
-  $handler,
+  HH\FIXME\MISSING_PARAM_TYPE $handler,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_set_start_namespace_decl_handler(
   resource $parser,
-  $handler,
+  HH\FIXME\MISSING_PARAM_TYPE $handler,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_set_end_namespace_decl_handler(
   resource $parser,
-  $handler,
+  HH\FIXME\MISSING_PARAM_TYPE $handler,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_set_unparsed_entity_decl_handler(
   resource $parser,
-  $handler,
+  HH\FIXME\MISSING_PARAM_TYPE $handler,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_set_external_entity_ref_handler(
   resource $parser,
-  $handler,
+  HH\FIXME\MISSING_PARAM_TYPE $handler,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_set_notation_decl_handler(
   resource $parser,
-  $handler,
+  HH\FIXME\MISSING_PARAM_TYPE $handler,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_set_object(
   resource $parser,
-  $object,
+  HH\FIXME\MISSING_PARAM_TYPE $object,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_get_current_byte_index(

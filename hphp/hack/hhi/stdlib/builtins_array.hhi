@@ -103,9 +103,14 @@ function array_filter<Tk as arraykey, Tv>(
   ?(function(Tv): bool) $callback = null,
 ): KeyedContainer<Tk, Tv>;
 <<__PHPStdLib>>
-function array_flip($trans)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function array_flip(
+  HH\FIXME\MISSING_PARAM_TYPE $trans,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function key_exists($key, $search)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function key_exists(
+  HH\FIXME\MISSING_PARAM_TYPE $key,
+  HH\FIXME\MISSING_PARAM_TYPE $search,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_keys<Tk as arraykey>(
   KeyedContainer<Tk, mixed> $input,
@@ -127,18 +132,24 @@ function array_map<Tk as arraykey, Tin, Tout>(
 
 <<__PHPStdLib>>
 function array_merge_recursive(
-  $array1,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function array_merge($array1, ...$args)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function array_merge(
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_replace_recursive(
-  $array1,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function array_replace($array1, ...$args)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function array_replace(
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_multisort1(inout mixed $arg1): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -211,47 +222,51 @@ function array_multisort9(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_pad(
-  $input,
+  HH\FIXME\MISSING_PARAM_TYPE $input,
   int $pad_size,
-  $pad_value,
+  HH\FIXME\MISSING_PARAM_TYPE $pad_value,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function array_pop(inout $array)[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
+function array_pop(
+  inout $array,
+)[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_push(
   inout $array,
-  $var,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $var,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_rand(
-  $input,
+  HH\FIXME\MISSING_PARAM_TYPE $input,
   int $num_req = 1,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_reduce(
-  $input,
-  $callback,
-  $initial = null,
+  HH\FIXME\MISSING_PARAM_TYPE $input,
+  HH\FIXME\MISSING_PARAM_TYPE $callback,
+  HH\FIXME\MISSING_PARAM_TYPE $initial = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_reverse(
-  $array,
+  HH\FIXME\MISSING_PARAM_TYPE $array,
   bool $preserve_keys = false,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_search(
-  $needle,
-  $haystack,
+  HH\FIXME\MISSING_PARAM_TYPE $needle,
+  HH\FIXME\MISSING_PARAM_TYPE $haystack,
   bool $strict = false,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function array_shift(inout $array)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function array_shift<T>(
+  inout T $array,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_slice(
-  $array,
+  HH\FIXME\MISSING_PARAM_TYPE $array,
   int $offset,
-  $length = null,
+  HH\FIXME\MISSING_PARAM_TYPE $length = null,
   bool $preserve_keys = false,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -263,19 +278,21 @@ function array_splice(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_unique(
-  $array,
+  HH\FIXME\MISSING_PARAM_TYPE $array,
   int $sort_flags = 2,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function array_unshift(
-  inout $array,
-  $var,
-  ...$args
+function array_unshift<T>(
+  inout T $array,
+  HH\FIXME\MISSING_PARAM_TYPE $var,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_values<Tv>(Container<Tv> $input)[]: varray<Tv>;
 <<__PHPStdLib>>
-function shuffle(inout $array)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
+function shuffle<T>(
+  inout T $array,
+)[leak_safe]: void;
 <<
   __Deprecated(
     'Use count(), it does the same thing as sizeof() in PHP and '.
@@ -283,125 +300,141 @@ function shuffle(inout $array)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
   ),
   __PHPStdLib,
 >>
-function sizeof($var)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function sizeof(
+  HH\FIXME\MISSING_PARAM_TYPE $var,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hphp_get_iterator($iterable): HH\FIXME\MISSING_RETURN_TYPE;
+function hphp_get_iterator(
+  HH\FIXME\MISSING_PARAM_TYPE $iterable,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function in_array(
-  $needle,
-  $haystack,
+  HH\FIXME\MISSING_PARAM_TYPE $needle,
+  HH\FIXME\MISSING_PARAM_TYPE $haystack,
   bool $strict = false,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function range($low, $high, $step = 1)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function range(
+  HH\FIXME\MISSING_PARAM_TYPE $low,
+  HH\FIXME\MISSING_PARAM_TYPE $high,
+  HH\FIXME\MISSING_PARAM_TYPE $step = 1,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function array_diff($array1, $array2, ...$args)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function array_diff(
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_udiff(
-  $array1,
-  $array2,
-  $data_compare_func,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE $data_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_diff_assoc(
-  $array1,
-  $array2,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_diff_uassoc(
-  $array1,
-  $array2,
-  $key_compare_func,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE $key_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_udiff_assoc(
-  $array1,
-  $array2,
-  $data_compare_func,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE $data_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_udiff_uassoc(
-  $array1,
-  $array2,
-  $data_compare_func,
-  $key_compare_func,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE $data_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE $key_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_diff_key(
-  $array1,
-  $array2,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_diff_ukey(
-  $array1,
-  $array2,
-  $key_compare_func,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE $key_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_intersect(
-  $array1,
-  $array2,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_uintersect(
-  $array1,
-  $array2,
-  $data_compare_func,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE $data_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_intersect_assoc(
-  $array1,
-  $array2,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_intersect_uassoc(
-  $array1,
-  $array2,
-  $key_compare_func,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE $key_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_uintersect_assoc(
-  $array1,
-  $array2,
-  $data_compare_func,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE $data_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_uintersect_uassoc(
-  $array1,
-  $array2,
-  $data_compare_func,
-  $key_compare_func,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE $data_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE $key_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_intersect_key(
-  $array1,
-  $array2,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_intersect_ukey(
-  $array1,
-  $array2,
-  $key_compare_func,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $array1,
+  HH\FIXME\MISSING_PARAM_TYPE $array2,
+  HH\FIXME\MISSING_PARAM_TYPE $key_compare_func,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function natsort(inout $array): HH\FIXME\MISSING_RETURN_TYPE;
+function natsort(
+  inout $array,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function natcasesort(inout $array): HH\FIXME\MISSING_RETURN_TYPE;
+function natcasesort(
+  inout $array,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function i18n_loc_get_default(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

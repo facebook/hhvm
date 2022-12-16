@@ -69,14 +69,14 @@ class UConverter {
   public function setSubstChars(string $chars): HH\FIXME\MISSING_RETURN_TYPE;
   public function fromUCallback(
     int $reason,
-    $source,
+    HH\FIXME\MISSING_PARAM_TYPE $source,
     int $codepoint,
     inout int $error,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function toUCallback(
     int $reason,
-    $source,
-    $codeunits,
+    HH\FIXME\MISSING_PARAM_TYPE $source,
+    HH\FIXME\MISSING_PARAM_TYPE $codeunits,
     inout int $error,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function convert(
@@ -87,7 +87,7 @@ class UConverter {
     string $str,
     string $toEncoding,
     string $fromEncoding,
-    $options = null,
+    HH\FIXME\MISSING_PARAM_TYPE $options = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getErrorCode(): HH\FIXME\MISSING_RETURN_TYPE;
   public function getErrorMessage(): HH\FIXME\MISSING_RETURN_TYPE;

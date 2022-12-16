@@ -20,12 +20,12 @@ function error_get_last(): HH\FIXME\MISSING_RETURN_TYPE;
 function error_log(
   string $message,
   int $message_type = 0,
-  $destination = null,
-  $extra_headers = null,
+  HH\FIXME\MISSING_PARAM_TYPE $destination = null,
+  HH\FIXME\MISSING_PARAM_TYPE $extra_headers = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function error_reporting(
-  $level = null,
+  HH\FIXME\MISSING_PARAM_TYPE $level = null,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function restore_error_handler(): HH\FIXME\MISSING_RETURN_TYPE;
@@ -33,12 +33,12 @@ function restore_error_handler(): HH\FIXME\MISSING_RETURN_TYPE;
 function restore_exception_handler(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function set_error_handler(
-  $error_handler,
+  HH\FIXME\MISSING_PARAM_TYPE $error_handler,
   int $error_types = E_ALL,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function set_exception_handler(
-  $exception_handler,
+  HH\FIXME\MISSING_PARAM_TYPE $exception_handler,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hphp_set_error_page(string $page): HH\FIXME\MISSING_RETURN_TYPE;

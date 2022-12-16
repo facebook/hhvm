@@ -89,7 +89,10 @@ function chop(
   string $charlist = HPHP_TRIM_CHARLIST,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__Deprecated('Use implode().'), __PHPStdLib>>
-function join($glue, $pieces = null)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function join(
+  HH\FIXME\MISSING_PARAM_TYPE $glue,
+  HH\FIXME\MISSING_PARAM_TYPE $pieces = null,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function str_split(
   string $str,
@@ -102,7 +105,10 @@ function chunk_split(
   string $end = "\r\n",
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function strtok(string $str, $token = null): HH\FIXME\MISSING_RETURN_TYPE;
+function strtok(
+  string $str,
+  HH\FIXME\MISSING_PARAM_TYPE $token = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 /**
  * http://php.net/manual/en/function.str-getcsv.php
  *
@@ -124,36 +130,36 @@ function str_getcsv(
 ): varray<?string>;
 <<__PHPStdLib>>
 function str_replace(
-  $search,
-  $replace,
-  $subject,
+  HH\FIXME\MISSING_PARAM_TYPE $search,
+  HH\FIXME\MISSING_PARAM_TYPE $replace,
+  HH\FIXME\MISSING_PARAM_TYPE $subject,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function str_replace_with_count(
-  $search,
-  $replace,
-  $subject,
+  HH\FIXME\MISSING_PARAM_TYPE $search,
+  HH\FIXME\MISSING_PARAM_TYPE $replace,
+  HH\FIXME\MISSING_PARAM_TYPE $subject,
   inout $count,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>> // not pure: uses global locale for capitalization
 function str_ireplace(
-  $search,
-  $replace,
-  $subject,
+  HH\FIXME\MISSING_PARAM_TYPE $search,
+  HH\FIXME\MISSING_PARAM_TYPE $replace,
+  HH\FIXME\MISSING_PARAM_TYPE $subject,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function str_ireplace_with_count(
-  $search,
-  $replace,
-  $subject,
+  HH\FIXME\MISSING_PARAM_TYPE $search,
+  HH\FIXME\MISSING_PARAM_TYPE $replace,
+  HH\FIXME\MISSING_PARAM_TYPE $subject,
   inout $count,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function substr_replace(
-  $str,
-  $replacement,
-  $start,
-  $length = 0x7FFFFFFF,
+  HH\FIXME\MISSING_PARAM_TYPE $str,
+  HH\FIXME\MISSING_PARAM_TYPE $replacement,
+  HH\FIXME\MISSING_PARAM_TYPE $start,
+  HH\FIXME\MISSING_PARAM_TYPE $length = 0x7FFFFFFF,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function substr(
@@ -230,7 +236,11 @@ function sha1(
   bool $raw_output = false,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function strtr(string $str, $from, $to = null)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function strtr(
+  string $str,
+  HH\FIXME\MISSING_PARAM_TYPE $from,
+  HH\FIXME\MISSING_PARAM_TYPE $to = null,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function convert_cyr_string(
   string $str,
@@ -255,17 +265,23 @@ function hebrevc(
 <<__PHPStdLib>>
 function setlocale(
   int $category,
-  $locale,
-  ...$args
+  HH\FIXME\MISSING_PARAM_TYPE $locale,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function localeconv(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function nl_langinfo(int $item): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function vprintf($format, $args): HH\FIXME\MISSING_RETURN_TYPE;
+function vprintf(
+  HH\FIXME\MISSING_PARAM_TYPE $format,
+  HH\FIXME\MISSING_PARAM_TYPE $args,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function vsprintf($format, $args)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function vsprintf(
+  HH\FIXME\MISSING_PARAM_TYPE $format,
+  HH\FIXME\MISSING_PARAM_TYPE $args,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 function sscanf(string $str, string $format)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function money_format(
@@ -276,8 +292,8 @@ function money_format(
 function number_format(
   float $number,
   int $decimals = 0,
-  $dec_point = ".",
-  $thousands_sep = ",",
+  HH\FIXME\MISSING_PARAM_TYPE $dec_point = ".",
+  HH\FIXME\MISSING_PARAM_TYPE $thousands_sep = ",",
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function strcmp(string $str1, string $str2)[]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -313,19 +329,25 @@ function substr_compare(
   bool $case_insensitivity = false,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function strchr(string $haystack, $needle)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function strchr(
+  string $haystack,
+  HH\FIXME\MISSING_PARAM_TYPE $needle,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function strrchr(string $haystack, $needle)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function strrchr(
+  string $haystack,
+  HH\FIXME\MISSING_PARAM_TYPE $needle,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function strstr(
   string $haystack,
-  $needle,
+  HH\FIXME\MISSING_PARAM_TYPE $needle,
   bool $before_needle = false,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stristr(
   string $haystack,
-  $needle,
+  HH\FIXME\MISSING_PARAM_TYPE $needle,
   bool $before_needle = false,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -336,25 +358,25 @@ function strpbrk(
 <<__PHPStdLib>>
 function strpos(
   string $haystack,
-  $needle,
+  HH\FIXME\MISSING_PARAM_TYPE $needle,
   int $offset = 0,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stripos(
   string $haystack,
-  $needle,
+  HH\FIXME\MISSING_PARAM_TYPE $needle,
   int $offset = 0,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function strrpos(
   string $haystack,
-  $needle,
+  HH\FIXME\MISSING_PARAM_TYPE $needle,
   int $offset = 0,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function strripos(
   string $haystack,
-  $needle,
+  HH\FIXME\MISSING_PARAM_TYPE $needle,
   int $offset = 0,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -412,4 +434,7 @@ function metaphone(
   string $str,
   int $phones = 0,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
-function parse_str(string $str, inout $arr): HH\FIXME\MISSING_RETURN_TYPE;
+function parse_str(
+  string $str,
+  inout $arr,
+): HH\FIXME\MISSING_RETURN_TYPE;

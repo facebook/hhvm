@@ -16,8 +16,8 @@ function pcntl_alarm(int $seconds): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function pcntl_exec(
   string $path,
-  $args = null,
-  $envs = null,
+  HH\FIXME\MISSING_PARAM_TYPE $args = null,
+  HH\FIXME\MISSING_PARAM_TYPE $envs = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function pcntl_fork(): HH\FIXME\MISSING_RETURN_TYPE;
@@ -35,7 +35,7 @@ function pcntl_setpriority(
 <<__PHPStdLib>>
 function pcntl_signal(
   int $signo,
-  $handler,
+  HH\FIXME\MISSING_PARAM_TYPE $handler,
   bool $restart_syscalls = true,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 
@@ -87,9 +87,9 @@ function proc_open(
   string $cmd,
   darray<int, mixed> $descriptorspec,
   inout $pipes,
-  $cwd = null,
-  $env = null,
-  $other_options = null,
+  HH\FIXME\MISSING_PARAM_TYPE $cwd = null,
+  HH\FIXME\MISSING_PARAM_TYPE $env = null,
+  HH\FIXME\MISSING_PARAM_TYPE $other_options = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function proc_terminate(

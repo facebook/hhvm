@@ -92,12 +92,12 @@ function stream_await(
 ): Awaitable<int>;
 <<__PHPStdLib>>
 function stream_context_create(
-  $options = null,
-  $params = null,
+  HH\FIXME\MISSING_PARAM_TYPE $options = null,
+  HH\FIXME\MISSING_PARAM_TYPE $params = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_context_get_default(
-  $options = null,
+  HH\FIXME\MISSING_PARAM_TYPE $options = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_context_get_options(
@@ -105,15 +105,15 @@ function stream_context_get_options(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_context_set_option(
-  $stream_or_context,
-  $wrapper,
-  $option = null,
-  $value = null,
+  HH\FIXME\MISSING_PARAM_TYPE $stream_or_context,
+  HH\FIXME\MISSING_PARAM_TYPE $wrapper,
+  HH\FIXME\MISSING_PARAM_TYPE $option = null,
+  HH\FIXME\MISSING_PARAM_TYPE $value = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_context_set_param(
-  $stream_or_context,
-  $params,
+  HH\FIXME\MISSING_PARAM_TYPE $stream_or_context,
+  HH\FIXME\MISSING_PARAM_TYPE $params,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_copy_to_stream(
@@ -124,8 +124,8 @@ function stream_copy_to_stream(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_encoding(
-  $stream,
-  $encoding = null,
+  HH\FIXME\MISSING_PARAM_TYPE $stream,
+  HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_get_contents(
@@ -137,7 +137,7 @@ function stream_get_contents(
 function stream_get_line(
   resource $handle,
   int $length = 0,
-  $ending = null,
+  HH\FIXME\MISSING_PARAM_TYPE $ending = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_get_meta_data(resource $stream)[]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -148,14 +148,14 @@ function stream_get_wrappers(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_resolve_include_path(
   string $filename,
-  $context = null,
+  HH\FIXME\MISSING_PARAM_TYPE $context = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_select(
   inout $read,
   inout $write,
   inout $except,
-  $vtv_sec,
+  HH\FIXME\MISSING_PARAM_TYPE $vtv_sec,
   int $tv_usec = 0,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -191,7 +191,7 @@ function stream_socket_server(
   inout $errnum,
   inout $errstr,
   int $flags = 0,
-  $context = null,
+  HH\FIXME\MISSING_PARAM_TYPE $context = null,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_socket_client(
@@ -200,14 +200,14 @@ function stream_socket_client(
   inout $errstr,
   float $timeout = 0.0,
   int $flags = 0,
-  $context = null,
+  HH\FIXME\MISSING_PARAM_TYPE $context = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_socket_enable_crypto(
   resource $stream,
   bool $enable,
   int $crypto_type = 0,
-  $session_stream = null,
+  HH\FIXME\MISSING_PARAM_TYPE $session_stream = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_socket_get_name(
@@ -232,7 +232,7 @@ function stream_socket_sendto(
   resource $socket,
   string $data,
   int $flags = 0,
-  $address = null,
+  HH\FIXME\MISSING_PARAM_TYPE $address = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_socket_shutdown(

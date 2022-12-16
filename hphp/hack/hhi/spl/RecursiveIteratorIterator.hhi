@@ -26,8 +26,8 @@ class RecursiveIteratorIterator<Tv> implements OuterIterator<Tv> {
   // Methods
   public function __construct(
     Traversable<Tv> $iterator,
-    $mode = RecursiveIteratorIterator::LEAVES_ONLY,
-    $flags = 0,
+    HH\FIXME\MISSING_PARAM_TYPE $mode = RecursiveIteratorIterator::LEAVES_ONLY,
+    HH\FIXME\MISSING_PARAM_TYPE $flags = 0,
   );
   public function getInnerIterator(): Iterator<Tv>;
   public function current();
@@ -43,9 +43,12 @@ class RecursiveIteratorIterator<Tv> implements OuterIterator<Tv> {
   public function endIteration();
   public function getDepth();
   public function getMaxDepth();
-  public function getSubIterator($level = null);
+  public function getSubIterator(HH\FIXME\MISSING_PARAM_TYPE $level = null);
   public function nextElement();
-  public function setMaxDepth($max_depth = -1);
-  public function call__($func, $params);
+  public function setMaxDepth(HH\FIXME\MISSING_PARAM_TYPE $max_depth = -1);
+  public function call__(
+    HH\FIXME\MISSING_PARAM_TYPE $func,
+    HH\FIXME\MISSING_PARAM_TYPE $params,
+  );
 
 }

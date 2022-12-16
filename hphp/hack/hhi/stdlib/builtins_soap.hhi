@@ -92,39 +92,58 @@ function use_soap_error_handler(
   bool $handler = true,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function is_soap_fault($fault): HH\FIXME\MISSING_RETURN_TYPE;
+function is_soap_fault(
+  HH\FIXME\MISSING_PARAM_TYPE $fault,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function _soap_active_version(): HH\FIXME\MISSING_RETURN_TYPE;
 
 class SoapServer {
-  public function __construct($wsdl, $options = null);
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $wsdl,
+    HH\FIXME\MISSING_PARAM_TYPE $options = null,
+  );
   public function setClass(
     string $name,
-    ...$args
+    HH\FIXME\MISSING_PARAM_TYPE ...$args
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setobject($obj): HH\FIXME\MISSING_RETURN_TYPE;
-  public function addFunction($func): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setobject(
+    HH\FIXME\MISSING_PARAM_TYPE $obj,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function addFunction(
+    HH\FIXME\MISSING_PARAM_TYPE $func,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getfunctions(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function handle($request = null): HH\FIXME\MISSING_RETURN_TYPE;
+  public function handle(
+    HH\FIXME\MISSING_PARAM_TYPE $request = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function setpersistence(int $mode): HH\FIXME\MISSING_RETURN_TYPE;
   public function fault(
-    $code,
+    HH\FIXME\MISSING_PARAM_TYPE $code,
     string $fault,
-    $actor = null,
-    $detail = null,
-    $name = null,
+    HH\FIXME\MISSING_PARAM_TYPE $actor = null,
+    HH\FIXME\MISSING_PARAM_TYPE $detail = null,
+    HH\FIXME\MISSING_PARAM_TYPE $name = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function addSoapHeader($fault): HH\FIXME\MISSING_RETURN_TYPE;
+  public function addSoapHeader(
+    HH\FIXME\MISSING_PARAM_TYPE $fault,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class SoapClient {
-  public function __construct($wsdl, $options = null);
-  public function call__($name, $args): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $wsdl,
+    HH\FIXME\MISSING_PARAM_TYPE $options = null,
+  );
+  public function call__(
+    HH\FIXME\MISSING_PARAM_TYPE $name,
+    HH\FIXME\MISSING_PARAM_TYPE $args,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function __soapcall(
     string $name,
-    $args,
-    $options = null,
-    $input_headers = null,
+    HH\FIXME\MISSING_PARAM_TYPE $args,
+    HH\FIXME\MISSING_PARAM_TYPE $options = null,
+    HH\FIXME\MISSING_PARAM_TYPE $input_headers = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function __getlastrequest(): HH\FIXME\MISSING_RETURN_TYPE;
   public function __getlastresponse(): HH\FIXME\MISSING_RETURN_TYPE;
@@ -141,20 +160,20 @@ class SoapClient {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function __setcookie(
     string $name,
-    $value = null,
+    HH\FIXME\MISSING_PARAM_TYPE $value = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function __setlocation(
-    $new_location = null,
+    HH\FIXME\MISSING_PARAM_TYPE $new_location = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function __setsoapheaders(
-    $headers = null,
+    HH\FIXME\MISSING_PARAM_TYPE $headers = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class SoapVar {
   public function __construct(
-    $data,
-    $type,
+    HH\FIXME\MISSING_PARAM_TYPE $data,
+    HH\FIXME\MISSING_PARAM_TYPE $type,
     string $type_name = "",
     string $type_namespace = "",
     string $node_name = "",
@@ -163,16 +182,16 @@ class SoapVar {
 }
 
 class SoapParam {
-  public function __construct($data, string $name);
+  public function __construct(HH\FIXME\MISSING_PARAM_TYPE $data, string $name);
 }
 
 class SoapHeader {
   public function __construct(
     string $ns,
     string $name,
-    $data = null,
+    HH\FIXME\MISSING_PARAM_TYPE $data = null,
     bool $mustunderstand = false,
-    $actor = null,
+    HH\FIXME\MISSING_PARAM_TYPE $actor = null,
   );
 }
 
@@ -189,12 +208,12 @@ class SoapFault extends Exception {
 
   // Methods
   public function __construct(
-    $code,
-    $message,
-    $actor = null,
-    $detail = null,
-    $name = null,
-    $header = null,
+    HH\FIXME\MISSING_PARAM_TYPE $code,
+    HH\FIXME\MISSING_PARAM_TYPE $message,
+    HH\FIXME\MISSING_PARAM_TYPE $actor = null,
+    HH\FIXME\MISSING_PARAM_TYPE $detail = null,
+    HH\FIXME\MISSING_PARAM_TYPE $name = null,
+    HH\FIXME\MISSING_PARAM_TYPE $header = null,
   );
   public function __toString(): string;
 

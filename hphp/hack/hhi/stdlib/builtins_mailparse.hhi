@@ -34,20 +34,20 @@ function mailparse_msg_parse(
 <<__PHPStdLib>>
 function mailparse_msg_extract_part_file(
   resource $mimemail,
-  $filename,
-  $callbackfunc = "",
+  HH\FIXME\MISSING_PARAM_TYPE $filename,
+  HH\FIXME\MISSING_PARAM_TYPE $callbackfunc = "",
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mailparse_msg_extract_whole_part_file(
   resource $mimemail,
-  $filename,
-  $callbackfunc = "",
+  HH\FIXME\MISSING_PARAM_TYPE $filename,
+  HH\FIXME\MISSING_PARAM_TYPE $callbackfunc = "",
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mailparse_msg_extract_part(
   resource $mimemail,
-  $msgbody,
-  $callbackfunc = "",
+  HH\FIXME\MISSING_PARAM_TYPE $msgbody,
+  HH\FIXME\MISSING_PARAM_TYPE $callbackfunc = "",
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mailparse_msg_get_part_data(

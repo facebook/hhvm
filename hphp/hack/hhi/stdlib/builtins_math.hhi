@@ -34,11 +34,19 @@ const float M_EULER;
 <<__PHPStdLib>>
 function pi()[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function min($value, ...$args)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function min(
+  HH\FIXME\MISSING_PARAM_TYPE $value,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function max($value, ...$args)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function max(
+  HH\FIXME\MISSING_PARAM_TYPE $value,
+  HH\FIXME\MISSING_PARAM_TYPE ...$args
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function abs($number)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function abs(
+  HH\FIXME\MISSING_PARAM_TYPE $number,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function is_finite(float $val)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -46,12 +54,14 @@ function is_infinite(float $val)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function is_nan(float $val)[]: bool;
 <<__PHPStdLib>>
-function ceil($value)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function ceil(
+  HH\FIXME\MISSING_PARAM_TYPE $value,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function floor($value)[]: float;
+function floor(HH\FIXME\MISSING_PARAM_TYPE $value)[]: float;
 <<__PHPStdLib>>
 function round(
-  $val,
+  HH\FIXME\MISSING_PARAM_TYPE $val,
   int $precision = 0,
   int $mode = 1,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -60,23 +70,36 @@ function deg2rad(float $number)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function rad2deg(float $number)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function decbin($number)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function decbin(
+  HH\FIXME\MISSING_PARAM_TYPE $number,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function decoct($number)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function decoct(
+  HH\FIXME\MISSING_PARAM_TYPE $number,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bindec($binary_string)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function bindec(
+  HH\FIXME\MISSING_PARAM_TYPE $binary_string,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hexdec($hex_string)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function hexdec(
+  HH\FIXME\MISSING_PARAM_TYPE $hex_string,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function octdec($octal_string)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function octdec(
+  HH\FIXME\MISSING_PARAM_TYPE $octal_string,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function base_convert(
-  $number,
+  HH\FIXME\MISSING_PARAM_TYPE $number,
   int $frombase,
   int $tobase,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pow($base, $exp)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function pow(
+  HH\FIXME\MISSING_PARAM_TYPE $base,
+  HH\FIXME\MISSING_PARAM_TYPE $exp,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function exp(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -122,20 +145,24 @@ function sqrt(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function getrandmax()[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function srand($seed = null): HH\FIXME\MISSING_RETURN_TYPE;
+function srand(
+  HH\FIXME\MISSING_PARAM_TYPE $seed = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function rand(
   int $min = 0,
-  $max = -1, /* getrandmax */
+  HH\FIXME\MISSING_PARAM_TYPE $max = -1, /* getrandmax */
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mt_getrandmax()[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mt_srand($seed = null): HH\FIXME\MISSING_RETURN_TYPE;
+function mt_srand(
+  HH\FIXME\MISSING_PARAM_TYPE $seed = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mt_rand(
   int $min = 0,
-  $max = -1, /* mt_getrandmax */
+  HH\FIXME\MISSING_PARAM_TYPE $max = -1, /* mt_getrandmax */
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function lcg_value(): HH\FIXME\MISSING_RETURN_TYPE;

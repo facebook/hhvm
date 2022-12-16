@@ -37,35 +37,40 @@ namespace {
 
   <<__PHPStdLib>>
   function fb_serialize(
-    $thing,
+    HH\FIXME\MISSING_PARAM_TYPE $thing,
     int $options = 0,
   )[]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_unserialize(
-    $thing,
+    HH\FIXME\MISSING_PARAM_TYPE $thing,
     inout $success,
     int $options = 0,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_compact_serialize(
-    $thing,
+    HH\FIXME\MISSING_PARAM_TYPE $thing,
     int $options = 0,
   )[]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_compact_unserialize(
-    $thing,
+    HH\FIXME\MISSING_PARAM_TYPE $thing,
     inout $success,
     inout $errcode,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function fb_intercept2(string $name, $handler): \HH\FIXME\MISSING_RETURN_TYPE;
+  function fb_intercept2(
+    string $name,
+    HH\FIXME\MISSING_PARAM_TYPE $handler,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_rename_function(
     string $orig_func_name,
     string $new_func_name,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function fb_utf8ize(inout $input): \HH\FIXME\MISSING_RETURN_TYPE;
+  function fb_utf8ize(
+    inout $input,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_utf8_strlen(string $input)[]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
@@ -83,7 +88,7 @@ namespace {
   <<__PHPStdLib>>
   function xhprof_enable(
     int $flags = 0,
-    $args = null,
+    HH\FIXME\MISSING_PARAM_TYPE $args = null,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function xhprof_disable(): \HH\FIXME\MISSING_RETURN_TYPE;
@@ -104,12 +109,14 @@ namespace {
     bool $new_value,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function fb_set_exit_callback($function): \HH\FIXME\MISSING_RETURN_TYPE;
+  function fb_set_exit_callback(
+    HH\FIXME\MISSING_PARAM_TYPE $function,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_get_last_flush_size(): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_setprofile(
-    $callback,
+    HH\FIXME\MISSING_PARAM_TYPE $callback,
     int $flags = SETPROFILE_FLAGS_DEFAULT,
     vec<string> $functions = vec[],
   ): \HH\FIXME\MISSING_RETURN_TYPE;

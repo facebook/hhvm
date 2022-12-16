@@ -96,32 +96,32 @@ function preg_match_all_with_matches_and_error(
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_replace(
-  $pattern,
-  $replacement,
-  $subject,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern,
+  HH\FIXME\MISSING_PARAM_TYPE $replacement,
+  HH\FIXME\MISSING_PARAM_TYPE $subject,
   int $limit = -1,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_replace_with_error(
-  $pattern,
-  $replacement,
-  $subject,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern,
+  HH\FIXME\MISSING_PARAM_TYPE $replacement,
+  HH\FIXME\MISSING_PARAM_TYPE $subject,
   inout ?int $error,
   int $limit = -1,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_replace_with_count(
-  $pattern,
-  $replacement,
-  $subject,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern,
+  HH\FIXME\MISSING_PARAM_TYPE $replacement,
+  HH\FIXME\MISSING_PARAM_TYPE $subject,
   int $limit,
   inout ?int $count,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_replace_with_count_and_error(
-  $pattern,
-  $replacement,
-  $subject,
+  HH\FIXME\MISSING_PARAM_TYPE $pattern,
+  HH\FIXME\MISSING_PARAM_TYPE $replacement,
+  HH\FIXME\MISSING_PARAM_TYPE $subject,
   int $limit,
   inout ?int $count,
   inout ?int $error,
@@ -145,15 +145,15 @@ function preg_replace_callback_with_error(
 )[ctx $callback]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_replace_callback_array(
-  $patterns_and_callbacks,
-  $subject,
+  HH\FIXME\MISSING_PARAM_TYPE $patterns_and_callbacks,
+  HH\FIXME\MISSING_PARAM_TYPE $subject,
   int $limit,
   inout ?int $count,
 )[defaults]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_replace_callback_array_with_error(
-  $patterns_and_callbacks,
-  $subject,
+  HH\FIXME\MISSING_PARAM_TYPE $patterns_and_callbacks,
+  HH\FIXME\MISSING_PARAM_TYPE $subject,
   int $limit,
   inout ?int $count,
   inout ?int $error,
@@ -162,7 +162,7 @@ function preg_replace_callback_array_with_error(
 function preg_split(
   string $pattern,
   string $subject,
-  $limit = -1,
+  HH\FIXME\MISSING_PARAM_TYPE $limit = -1,
   int $flags = 0,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -170,13 +170,13 @@ function preg_split_with_error(
   string $pattern,
   string $subject,
   inout ?int $error,
-  $limit = -1,
+  HH\FIXME\MISSING_PARAM_TYPE $limit = -1,
   int $flags = 0,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_quote(
   string $str,
-  $delimiter = null,
+  HH\FIXME\MISSING_PARAM_TYPE $delimiter = null,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ereg_replace(

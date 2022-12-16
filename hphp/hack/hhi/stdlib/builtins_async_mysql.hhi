@@ -178,7 +178,7 @@ namespace {
     ): Awaitable<AsyncMysqlQueryResult> {}
     public function queryf(
       HH\FormatString<HH\SQLFormatter> $query,
-      ...$args
+      HH\FIXME\MISSING_PARAM_TYPE ...$args
     ): Awaitable<AsyncMysqlQueryResult> {}
     public function queryAsync(
       \HH\Lib\SQL\Query $query,

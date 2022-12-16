@@ -19,6 +19,9 @@ abstract class FilterIterator<Tv> extends IteratorIterator<Tv> {
   public function key();
   public function current();
   protected function __clone();
-  public function call__($func, $params);
+  public function call__(
+    HH\FIXME\MISSING_PARAM_TYPE $func,
+    HH\FIXME\MISSING_PARAM_TYPE $params,
+  );
   public function getInnerIterator(): Iterator<Tv>;
 }

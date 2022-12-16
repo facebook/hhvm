@@ -18,9 +18,12 @@ class IteratorIterator<Tv> implements OuterIterator<Tv> {
   public function current();
   public function next(): void;
   public function rewind(): void;
-  public function call__($func, $params);
-  protected function _fetch($check);
+  public function call__(
+    HH\FIXME\MISSING_PARAM_TYPE $func,
+    HH\FIXME\MISSING_PARAM_TYPE $params,
+  );
+  protected function _fetch(HH\FIXME\MISSING_PARAM_TYPE $check);
   protected function _getPosition();
-  protected function _setPosition($position);
+  protected function _setPosition(HH\FIXME\MISSING_PARAM_TYPE $position);
 
 }

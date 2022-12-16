@@ -40,7 +40,9 @@ function get_include_path(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function restore_include_path(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function set_include_path($new_include_path): HH\FIXME\MISSING_RETURN_TYPE;
+function set_include_path(
+  HH\FIXME\MISSING_PARAM_TYPE $new_include_path,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function get_included_files(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -60,7 +62,7 @@ function getmyuid(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function getopt(
   string $options,
-  $longopts = null,
+  HH\FIXME\MISSING_PARAM_TYPE $longopts = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function getopt_with_optind(
@@ -95,7 +97,10 @@ function hphp_memory_start_interval(): bool;
 <<__PHPStdLib>>
 function hphp_memory_stop_interval(): bool;
 <<__PHPStdLib>>
-function ini_alter(string $varname, $newvalue): HH\FIXME\MISSING_RETURN_TYPE;
+function ini_alter(
+  string $varname,
+  HH\FIXME\MISSING_PARAM_TYPE $newvalue,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ini_get_all(string $extension = ""): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -103,7 +108,10 @@ function ini_get(string $varname)[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ini_restore(string $varname): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function ini_set(string $varname, $newvalue): HH\FIXME\MISSING_RETURN_TYPE;
+function ini_set(
+  string $varname,
+  HH\FIXME\MISSING_PARAM_TYPE $newvalue,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function memory_get_allocation()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -123,7 +131,9 @@ function php_sapi_name()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function php_uname(string $mode = ""): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function phpcredits($flag = 0): HH\FIXME\MISSING_RETURN_TYPE;
+function phpcredits(
+  HH\FIXME\MISSING_PARAM_TYPE $flag = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function phpinfo(int $what = 0): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

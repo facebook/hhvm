@@ -65,6 +65,13 @@ type POISON_MARKER<+T> = T;
 type MISSING_PROP_TYPE = TANY_MARKER<dynamic>;
 
 /**
+ * We haven't written the type for every parameter to every function in the
+ * codebase yet. Function parameters which are missing their types have this
+ * placeholder instead.
+ */
+type MISSING_PARAM_TYPE = mixed;
+
+/**
  * We haven't written the return type for every function in the codebase yet.
  * Functions which are still missing return types have this placeholder
  * instead.

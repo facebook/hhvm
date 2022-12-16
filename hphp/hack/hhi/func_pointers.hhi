@@ -177,7 +177,7 @@ namespace HH {
   * @return $func_ref A fully typed function reference to the instance method.
    */
   function inst_meth(
-    $inst,
+    \HH\FIXME\MISSING_PARAM_TYPE $inst,
     string $meth_name,
   ): \HH\FIXME\MISSING_RETURN_TYPE; // becomes:
   // function inst_meth<Tobj>(Tobj inst, 'method')
@@ -187,9 +187,10 @@ namespace HH {
    * See http://docs.hhvm.com/hack/reference/function/HH.invariant/
    */
   function invariant(
-    $condition, // e.g. is_int($x) or ($y instanceof SomeClass)
+    \HH\FIXME\MISSING_PARAM_TYPE
+      $condition, // e.g. is_int($x) or ($y instanceof SomeClass)
     FormatString<\PlainSprintf> $f,
-    ...$f_args
+    \HH\FIXME\MISSING_PARAM_TYPE ...$f_args
   )[]: void; // becomes:
   // if (!(<condition>)) { // an Exception is thrown
   //   invariant_violation('sprintf format: %s', 'string', ...);

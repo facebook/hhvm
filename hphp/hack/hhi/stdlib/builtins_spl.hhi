@@ -11,37 +11,43 @@
 <<__PHPStdLib>>
 function spl_classes(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function spl_object_hash($obj)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function spl_object_hash(
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hphp_object_pointer($obj): HH\FIXME\MISSING_RETURN_TYPE;
+function hphp_object_pointer(
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hphp_get_this(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function class_implements(
-  $obj,
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
   bool $autoload = true,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function class_parents(
-  $obj,
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
   bool $autoload = true,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function class_uses(
-  $obj,
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
   bool $autoload = true,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function iterator_apply(
-  $obj,
-  $func,
-  $params = null,
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
+  HH\FIXME\MISSING_PARAM_TYPE $func,
+  HH\FIXME\MISSING_PARAM_TYPE $params = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iterator_count($obj): HH\FIXME\MISSING_RETURN_TYPE;
+function iterator_count(
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function iterator_to_array(
-  $obj,
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
   bool $use_keys = true,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 
@@ -64,10 +70,13 @@ class SplDoublyLinkedList<T>
   public function rewind(): void;
   public function valid(): bool;
 
-  public function offsetExists(/*int*/ $key): bool;
-  public function offsetGet(/*int*/ $key): T;
-  public function offsetSet(/*int*/ $key, T $val): void;
-  public function offsetUnset(/*int*/ $key): void;
+  public function offsetExists(/*int*/ HH\FIXME\MISSING_PARAM_TYPE $key): bool;
+  public function offsetGet(/*int*/ HH\FIXME\MISSING_PARAM_TYPE $key): T;
+  public function offsetSet(/*int*/
+    HH\FIXME\MISSING_PARAM_TYPE $key,
+    T $val,
+  ): void;
+  public function offsetUnset(/*int*/ HH\FIXME\MISSING_PARAM_TYPE $key): void;
 
   public function count(): int;
 }

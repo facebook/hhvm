@@ -27,28 +27,38 @@ namespace {
   <<__PHPStdLib>>
   function trait_exists(string $trait_name, bool $autoload = true)[]: bool;
   <<__PHPStdLib>>
-  function get_class_methods($class_or_object)[]: ?varray_or_darray<string>;
+  function get_class_methods(HH\FIXME\MISSING_PARAM_TYPE $class_or_object)[]: ?varray_or_darray<string>;
   <<__PHPStdLib>>
   function get_class_vars(string $class_name): \HH\FIXME\MISSING_RETURN_TYPE;
-  function get_class(readonly $object)[]: \HH\FIXME\MISSING_RETURN_TYPE;
-  function get_parent_class($object = null)[]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function get_class(
+    readonly HH\FIXME\MISSING_PARAM_TYPE $object,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function get_parent_class(
+    HH\FIXME\MISSING_PARAM_TYPE $object = null,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function is_a(
-    $class_or_object,
+    HH\FIXME\MISSING_PARAM_TYPE $class_or_object,
     string $class_name,
     bool $allow_string = false,
   )[]: bool;
   <<__PHPStdLib>>
   function is_subclass_of(
-    $class_or_object,
+    HH\FIXME\MISSING_PARAM_TYPE $class_or_object,
     string $class_name,
     bool $allow_string = true,
   )[]: bool;
   <<__PHPStdLib>>
-  function method_exists($class_or_object, string $method_name)[]: bool;
+  function method_exists(
+    HH\FIXME\MISSING_PARAM_TYPE $class_or_object,
+    string $method_name,
+  )[]: bool;
   <<__PHPStdLib>>
-  function property_exists($class_or_object, string $property)[]: ?bool;
-  function get_object_vars($object)[]: ?darray;
+  function property_exists(
+    HH\FIXME\MISSING_PARAM_TYPE $class_or_object,
+    string $property,
+  )[]: ?bool;
+  function get_object_vars(HH\FIXME\MISSING_PARAM_TYPE $object)[]: ?darray;
 }
 
 namespace HH {

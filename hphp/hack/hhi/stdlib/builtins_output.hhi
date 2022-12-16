@@ -10,7 +10,7 @@
 
 <<__PHPStdLib>>
 function ob_start(
-  $output_callback = null,
+  HH\FIXME\MISSING_PARAM_TYPE $output_callback = null,
   int $chunk_size = 0,
   int $erase = PHP_OUTPUT_HANDLER_STDFLAGS,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
@@ -39,7 +39,10 @@ function ob_get_status(
   bool $full_status = false,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ob_gzhandler($buffer, $mode): HH\FIXME\MISSING_RETURN_TYPE {}
+function ob_gzhandler(
+  HH\FIXME\MISSING_PARAM_TYPE $buffer,
+  HH\FIXME\MISSING_PARAM_TYPE $mode,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function ob_implicit_flush(bool $flag = true): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
@@ -78,7 +81,7 @@ function hphp_get_hardware_counters(
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function hphp_set_hardware_events(
-  $events = null,
+  HH\FIXME\MISSING_PARAM_TYPE $events = null,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function hphp_clear_hardware_events(): HH\FIXME\MISSING_RETURN_TYPE {}

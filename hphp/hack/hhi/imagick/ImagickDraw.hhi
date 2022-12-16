@@ -185,7 +185,7 @@ class ImagickDraw {
   public function setClipRule(int $fill_rule): bool;
   public function setClipUnits(int $clip_units): bool;
   public function setFillAlpha(float $opacity): bool;
-  public function setFillColor($fill_pixel): bool;
+  public function setFillColor(HH\FIXME\MISSING_PARAM_TYPE $fill_pixel): bool;
   public function setFillOpacity(float $fillOpacity): bool;
   public function setFillPatternURL(string $fill_url): bool;
   public function setFillRule(int $fill_rule): bool;
@@ -199,7 +199,9 @@ class ImagickDraw {
   public function setResolution(float $x, float $y): bool;
   public function setStrokeAlpha(float $opacity): bool;
   public function setStrokeAntialias(bool $stroke_antialias): bool;
-  public function setStrokeColor($stroke_pixel): bool;
+  public function setStrokeColor(
+    HH\FIXME\MISSING_PARAM_TYPE $stroke_pixel,
+  ): bool;
   public function setStrokeDashArray(varray $dashArray): bool;
   public function setStrokeDashOffset(float $dash_offset): bool;
   public function setStrokeLineCap(int $linecap): bool;
@@ -212,7 +214,9 @@ class ImagickDraw {
   public function setTextAntialias(bool $antiAlias): bool;
   public function setTextDecoration(int $decoration): bool;
   public function setTextEncoding(string $encoding): bool;
-  public function setTextUnderColor($under_color): bool;
+  public function setTextUnderColor(
+    HH\FIXME\MISSING_PARAM_TYPE $under_color,
+  ): bool;
   public function setVectorGraphics(string $xml): bool;
   public function setViewbox(int $x1, int $y1, int $x2, int $y2): bool;
   public function skewX(float $degrees): bool;

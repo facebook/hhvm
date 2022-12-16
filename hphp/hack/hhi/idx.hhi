@@ -30,13 +30,13 @@ namespace HH {
   function idx<Tk as arraykey, Tv>(
     ?KeyedContainer<Tk, Tv> $collection,
     ?Tk $index,
-    $default = null,
+    \HH\FIXME\MISSING_PARAM_TYPE $default = null,
   )[]: \HH\FIXME\MISSING_RETURN_TYPE {}
 
   function idx_readonly<Tk as arraykey, Tv>(
     readonly ?KeyedContainer<Tk, Tv> $collection,
     ?Tk $index,
-    $default = null,
+    \HH\FIXME\MISSING_PARAM_TYPE $default = null,
   )[]: readonly Tv {}
 
 }

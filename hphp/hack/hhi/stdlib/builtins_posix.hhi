@@ -57,7 +57,9 @@ function posix_initgroups(
   int $base_group_id,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function posix_isatty($fd): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_isatty(
+  HH\FIXME\MISSING_PARAM_TYPE $fd,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function posix_kill(int $pid, int $sig): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -89,6 +91,8 @@ function posix_strerror(int $errnum): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function posix_times(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function posix_ttyname($fd): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_ttyname(
+  HH\FIXME\MISSING_PARAM_TYPE $fd,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function posix_uname(): HH\FIXME\MISSING_RETURN_TYPE;

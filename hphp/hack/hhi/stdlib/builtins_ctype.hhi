@@ -9,24 +9,46 @@
  */
 
 <<__PHPStdLib>>
-function ctype_alnum($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ctype_alnum(
+  HH\FIXME\MISSING_PARAM_TYPE $text,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_alpha($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ctype_alpha(
+  HH\FIXME\MISSING_PARAM_TYPE $text,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_cntrl($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ctype_cntrl(
+  HH\FIXME\MISSING_PARAM_TYPE $text,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_digit($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ctype_digit(
+  HH\FIXME\MISSING_PARAM_TYPE $text,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_graph($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ctype_graph(
+  HH\FIXME\MISSING_PARAM_TYPE $text,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_lower($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ctype_lower(
+  HH\FIXME\MISSING_PARAM_TYPE $text,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_print($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ctype_print(
+  HH\FIXME\MISSING_PARAM_TYPE $text,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_punct($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ctype_punct(
+  HH\FIXME\MISSING_PARAM_TYPE $text,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_space($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ctype_space(
+  HH\FIXME\MISSING_PARAM_TYPE $text,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_upper($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ctype_upper(
+  HH\FIXME\MISSING_PARAM_TYPE $text,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_xdigit($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ctype_xdigit(
+  HH\FIXME\MISSING_PARAM_TYPE $text,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}

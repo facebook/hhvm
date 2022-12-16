@@ -112,7 +112,7 @@ namespace {
     final public static function getTraceOptions(
     )[read_globals]: \HH\FIXME\MISSING_RETURN_TYPE;
     final public static function setTraceOptions(
-      $opts,
+      HH\FIXME\MISSING_PARAM_TYPE $opts,
     )[globals]: \HH\FIXME\MISSING_RETURN_TYPE;
 
     /**
@@ -132,7 +132,7 @@ namespace {
   class ErrorException extends Exception {
     use ExceptionWithPureGetMessageTrait;
     public function __construct(
-      $message = "",
+      HH\FIXME\MISSING_PARAM_TYPE $message = "",
       int $code = 0,
       protected int $severity = 0,
       string $filename = '' /* __FILE__ */,

@@ -39,7 +39,7 @@ namespace HH {
     public static function idx(
       ?shape(...) $shape,
       arraykey $index,
-      $default = null,
+      \HH\FIXME\MISSING_PARAM_TYPE $default = null,
     )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 
     /**

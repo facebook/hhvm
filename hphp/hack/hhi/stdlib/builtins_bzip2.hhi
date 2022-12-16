@@ -11,7 +11,10 @@
 <<__PHPStdLib>>
 function bzclose(resource $bz): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzopen($filename, string $mode): HH\FIXME\MISSING_RETURN_TYPE;
+function bzopen(
+  HH\FIXME\MISSING_PARAM_TYPE $filename,
+  string $mode,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function bzread(resource $bz, int $length = 1024): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

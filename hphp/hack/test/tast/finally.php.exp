@@ -3,29 +3,29 @@ Errors:
   [4:45-52] The field `foo` is not defined in this shape
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       fd_file_attributes = []; fd_mode = Mstrict;
       fd_fun =
-      { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = ();
+      { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None;
         f_ret = ((Awaitable<shape()>), (Some ([4:35-53], (Happly (([4:35-44], "\\HH\\Awaitable"), [([4:45-52], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [] }))])))));
-        f_name = ([4:16-31], "\\gen_empty_shape"); f_tparams = []; f_where_constraints = [];
-        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((shape()), [5:10-17], (Shape [])))))] };
-        f_fun_kind = FAsync; f_user_attributes = []; f_external = false;
+        f_name = ([4:16-31], "\\gen_empty_shape"); f_tparams = []; f_where_constraints = []; 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((shape()), [5:10-17], (Shape [])))))] }; 
+        f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
       fd_internal = false; fd_module = None });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
-       { f_span = [8:1-16:2]; f_readonly_this = None; f_annotation = ();
-         f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([8:24-39], (Happly (([8:24-33], "\\HH\\Awaitable"), [([8:34-38], (Hprim Tvoid))])))));
-         f_name = ([8:16-20], "\\test"); f_tparams = []; f_where_constraints = [];
+       { f_span = [8:1-16:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([8:24-39], (Happly (([8:24-33], "\\HH\\Awaitable"), [([8:34-38], (Hprim Tvoid))]))))); 
+         f_name = ([8:16-20], "\\test"); f_tparams = []; f_where_constraints = []; 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -48,13 +48,13 @@ Errors:
                    (Expr
                       ((null), [14:5-27],
                        (Call (
-                          (((function(?shape(...) $shape, arraykey $index, $default=_)[]: null)), [14:5-16],
+                          (((function(?shape(...) $shape, arraykey $index, mixed $default=_)[]: null)), [14:5-16],
                            (Class_const (((Shapes), [14:5-11], (CI ([14:5-11], "\\HH\\Shapes"))), ([14:13-16], "idx")))),
                           [], [(Pnormal, ((shape()), [14:17-19], (Lvar ([14:17-19], $s)))); (Pnormal, ((string), [14:21-26], (String "foo")))], None)))))
                   ]
                 )))
              ]
            };
-         f_fun_kind = FAsync; f_user_attributes = []; f_external = false;
+         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None })

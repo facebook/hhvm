@@ -9,22 +9,29 @@
  */
 
 <<__PHPStdLib>>
-function override_function($name, $args, $code): HH\FIXME\MISSING_RETURN_TYPE {}
+function override_function(
+  HH\FIXME\MISSING_PARAM_TYPE $name,
+  HH\FIXME\MISSING_PARAM_TYPE $args,
+  HH\FIXME\MISSING_PARAM_TYPE $code,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function rename_function($orig_name, $new_name): HH\FIXME\MISSING_RETURN_TYPE {}
+function rename_function(
+  HH\FIXME\MISSING_PARAM_TYPE $orig_name,
+  HH\FIXME\MISSING_PARAM_TYPE $new_name,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apd_set_browser_trace(): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apd_set_pprof_trace(
-  $dumpdir = null,
-  $frament = null,
+  HH\FIXME\MISSING_PARAM_TYPE $dumpdir = null,
+  HH\FIXME\MISSING_PARAM_TYPE $frament = null,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apd_set_session_trace_socket(
-  $ip_or_filename,
-  $domain,
-  $port,
-  $mask,
+  HH\FIXME\MISSING_PARAM_TYPE $ip_or_filename,
+  HH\FIXME\MISSING_PARAM_TYPE $domain,
+  HH\FIXME\MISSING_PARAM_TYPE $port,
+  HH\FIXME\MISSING_PARAM_TYPE $mask,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apd_stop_trace(): HH\FIXME\MISSING_RETURN_TYPE {}
@@ -33,4 +40,6 @@ function apd_breakpoint(): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apd_continue(): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apd_echo($output): HH\FIXME\MISSING_RETURN_TYPE {}
+function apd_echo(
+  HH\FIXME\MISSING_PARAM_TYPE $output,
+): HH\FIXME\MISSING_RETURN_TYPE {}

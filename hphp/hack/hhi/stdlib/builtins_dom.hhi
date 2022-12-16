@@ -58,21 +58,21 @@ const int DOM_INVALID_ACCESS_ERR;
 const int DOM_VALIDATION_ERR;
 
 class DOMXPath {
-  public function __construct($doc);
+  public function __construct(HH\FIXME\MISSING_PARAM_TYPE $doc);
   public function evaluate(
     string $expr,
-    $context = null,
+    HH\FIXME\MISSING_PARAM_TYPE $context = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function query(
     string $expr,
-    $context = null,
+    HH\FIXME\MISSING_PARAM_TYPE $context = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function registerNamespace(
     string $prefix,
     string $uri,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function registerPHPFunctions(
-    $funcs = null,
+    HH\FIXME\MISSING_PARAM_TYPE $funcs = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
@@ -140,7 +140,7 @@ class DOMNode {
   public function lookupNamespaceUri(?string $prefix): string;
   public function lookupPrefix(string $namespaceURI): string;
   public function normalize(): void;
-  public function removeChild($node): DOMNode;
+  public function removeChild(HH\FIXME\MISSING_PARAM_TYPE $node): DOMNode;
   public function replaceChild<T as DOMNode>(
     DOMNode $newchildobj,
     T $oldchildobj,
@@ -184,7 +184,10 @@ class DOMDocument extends DOMNode {
   public string $xmlVersion;
 
   // methods
-  public function __construct($version = null, $encoding = null);
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $version = null,
+    HH\FIXME\MISSING_PARAM_TYPE $encoding = null,
+  );
   public function createAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
   public function createAttributeNS(
     string $namespaceuri,
@@ -197,19 +200,19 @@ class DOMDocument extends DOMNode {
   public function createDocumentFragment(): HH\FIXME\MISSING_RETURN_TYPE;
   public function createElement(
     string $name,
-    $value = null,
+    HH\FIXME\MISSING_PARAM_TYPE $value = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function createElementNS(
     string $namespaceuri,
     string $qualifiedname,
-    $value = null,
+    HH\FIXME\MISSING_PARAM_TYPE $value = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function createEntityReference(
     string $name,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function createProcessingInstruction(
     string $target,
-    $data = null,
+    HH\FIXME\MISSING_PARAM_TYPE $data = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function createTextNode(string $data): HH\FIXME\MISSING_RETURN_TYPE;
   public function getElementById(
@@ -221,16 +224,25 @@ class DOMDocument extends DOMNode {
     string $localname,
   ): DOMNodeList<DOMElement>;
   public function importNode(
-    $importednode,
+    HH\FIXME\MISSING_PARAM_TYPE $importednode,
     bool $deep = false,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function load($filename, $options = 0): HH\FIXME\MISSING_RETURN_TYPE;
-  public function loadHTML($source, $options = 0): HH\FIXME\MISSING_RETURN_TYPE;
-  public function loadHTMLFile(
-    $filename,
-    $options = 0,
+  public function load(
+    HH\FIXME\MISSING_PARAM_TYPE $filename,
+    HH\FIXME\MISSING_PARAM_TYPE $options = 0,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function loadXML($source, $options = 0): HH\FIXME\MISSING_RETURN_TYPE;
+  public function loadHTML(
+    HH\FIXME\MISSING_PARAM_TYPE $source,
+    HH\FIXME\MISSING_PARAM_TYPE $options = 0,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function loadHTMLFile(
+    HH\FIXME\MISSING_PARAM_TYPE $filename,
+    HH\FIXME\MISSING_PARAM_TYPE $options = 0,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function loadXML(
+    HH\FIXME\MISSING_PARAM_TYPE $source,
+    HH\FIXME\MISSING_PARAM_TYPE $options = 0,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function normalizeDocument(): HH\FIXME\MISSING_RETURN_TYPE;
   public function registerNodeClass(
     string $baseclass,
@@ -246,10 +258,12 @@ class DOMDocument extends DOMNode {
     string $file,
     int $options = 0,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function saveHTML($node = null): HH\FIXME\MISSING_RETURN_TYPE;
+  public function saveHTML(
+    HH\FIXME\MISSING_PARAM_TYPE $node = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function saveHTMLFile(string $file): HH\FIXME\MISSING_RETURN_TYPE;
   public function saveXML(
-    $node = null,
+    HH\FIXME\MISSING_PARAM_TYPE $node = null,
     int $options = 0,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function schemaValidate(
@@ -274,8 +288,8 @@ class DOMElement extends DOMNode {
   // methods
   public function __construct(
     string $name,
-    $value = null,
-    $namespaceuri = null,
+    HH\FIXME\MISSING_PARAM_TYPE $value = null,
+    HH\FIXME\MISSING_PARAM_TYPE $namespaceuri = null,
   );
   public function getAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
   public function getAttributeNode(string $name): HH\FIXME\MISSING_RETURN_TYPE;
@@ -298,7 +312,9 @@ class DOMElement extends DOMNode {
     string $localname,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function removeAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
-  public function removeAttributeNode($oldattr): HH\FIXME\MISSING_RETURN_TYPE;
+  public function removeAttributeNode(
+    HH\FIXME\MISSING_PARAM_TYPE $oldattr,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function removeAttributeNS(
     string $namespaceuri,
     string $localname,
@@ -307,8 +323,12 @@ class DOMElement extends DOMNode {
     string $name,
     string $value,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setAttributeNode($newattr): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setAttributeNodeNS($newattr): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setAttributeNode(
+    HH\FIXME\MISSING_PARAM_TYPE $newattr,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setAttributeNodeNS(
+    HH\FIXME\MISSING_PARAM_TYPE $newattr,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function setAttributeNS(
     string $namespaceuri,
     string $name,
@@ -319,7 +339,7 @@ class DOMElement extends DOMNode {
     bool $isid,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function setIDAttributeNode(
-    $idattr,
+    HH\FIXME\MISSING_PARAM_TYPE $idattr,
     bool $isid,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function setIDAttributeNS(
@@ -387,14 +407,14 @@ class DOMImplementation {
   // Methods
   public function __construct();
   public function createDocument(
-    $namespaceuri = null,
-    $qualifiedname = null,
-    $doctypeobj = null,
+    HH\FIXME\MISSING_PARAM_TYPE $namespaceuri = null,
+    HH\FIXME\MISSING_PARAM_TYPE $qualifiedname = null,
+    HH\FIXME\MISSING_PARAM_TYPE $doctypeobj = null,
   ): mixed; // DOMDocument or false
   public function createDocumentType(
-    $qualifiedname = null,
-    $publicid = null,
-    $systemid = null,
+    HH\FIXME\MISSING_PARAM_TYPE $qualifiedname = null,
+    HH\FIXME\MISSING_PARAM_TYPE $publicid = null,
+    HH\FIXME\MISSING_PARAM_TYPE $systemid = null,
   ): mixed; // DOMDocumentType or false
   public function hasFeature(string $feature, string $version): bool;
 

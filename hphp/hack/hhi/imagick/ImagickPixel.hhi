@@ -19,8 +19,14 @@ class ImagickPixel {
   public function getColorCount(): int;
   public function getColorValue(int $color): float;
   public function getHSL(): darray;
-  public function isPixelSimilar($color, float $fuzz): bool;
-  public function isSimilar($color, float $fuzz): bool;
+  public function isPixelSimilar(
+    HH\FIXME\MISSING_PARAM_TYPE $color,
+    float $fuzz,
+  ): bool;
+  public function isSimilar(
+    HH\FIXME\MISSING_PARAM_TYPE $color,
+    float $fuzz,
+  ): bool;
   public function setColor(string $color): bool;
   public function setColorValue(int $color, float $value): bool;
   public function setHSL(

@@ -40,15 +40,18 @@ namespace {
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function get_browser(
-    $user_agent = null,
-    $return_array = false,
+    HH\FIXME\MISSING_PARAM_TYPE $user_agent = null,
+    HH\FIXME\MISSING_PARAM_TYPE $return_array = false,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function ignore_user_abort(
     bool $setting = false,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function pack(string $format, ...$args)[]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function pack(
+    string $format,
+    HH\FIXME\MISSING_PARAM_TYPE ...$args
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function sleep(int $seconds): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
@@ -73,7 +76,11 @@ namespace {
   <<__PHPStdLib>>
   function sys_getloadavg(): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function hphp_process_abort($magic): \HH\FIXME\MISSING_RETURN_TYPE;
+  function hphp_process_abort(
+    HH\FIXME\MISSING_PARAM_TYPE $magic,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function hphp_to_string($v)[]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function hphp_to_string(
+    HH\FIXME\MISSING_PARAM_TYPE $v,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 }

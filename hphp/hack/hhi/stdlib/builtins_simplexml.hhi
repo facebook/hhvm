@@ -81,10 +81,19 @@ class SimpleXMLElement {
     string $ns = "",
     bool $is_prefix = false,
   );
-  public function offsetExists($index): HH\FIXME\MISSING_RETURN_TYPE;
-  public function offsetGet($index): HH\FIXME\MISSING_RETURN_TYPE;
-  public function offsetSet($index, $newvalue): HH\FIXME\MISSING_RETURN_TYPE;
-  public function offsetUnset($index): HH\FIXME\MISSING_RETURN_TYPE;
+  public function offsetExists(
+    HH\FIXME\MISSING_PARAM_TYPE $index,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function offsetGet(
+    HH\FIXME\MISSING_PARAM_TYPE $index,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function offsetSet(
+    HH\FIXME\MISSING_PARAM_TYPE $index,
+    HH\FIXME\MISSING_PARAM_TYPE $newvalue,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function offsetUnset(
+    HH\FIXME\MISSING_PARAM_TYPE $index,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getIterator(): HH\FIXME\MISSING_RETURN_TYPE;
   public function count(): HH\FIXME\MISSING_RETURN_TYPE;
   public function xpath(string $path): HH\FIXME\MISSING_RETURN_TYPE;
@@ -111,7 +120,7 @@ class SimpleXMLElement {
   public function addChild(
     string $qname,
     string $value = "",
-    $ns = null,
+    HH\FIXME\MISSING_PARAM_TYPE $ns = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function addAttribute(
     string $qname,

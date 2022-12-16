@@ -42,21 +42,24 @@ function checkdate(
   int $year,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function date_add($datetime, $interval): HH\FIXME\MISSING_RETURN_TYPE;
+function date_add(
+  HH\FIXME\MISSING_PARAM_TYPE $datetime,
+  HH\FIXME\MISSING_PARAM_TYPE $interval,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_create_from_format(
   string $format,
   string $time,
-  $timezone = null,
+  HH\FIXME\MISSING_PARAM_TYPE $timezone = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_create(
-  $time = null,
-  $timezone = null,
+  HH\FIXME\MISSING_PARAM_TYPE $time = null,
+  HH\FIXME\MISSING_PARAM_TYPE $timezone = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_date_set(
-  $object,
+  HH\FIXME\MISSING_PARAM_TYPE $object,
   int $year,
   int $month,
   int $day,
@@ -67,12 +70,15 @@ function date_default_timezone_get(): HH\FIXME\MISSING_RETURN_TYPE;
 function date_default_timezone_set(string $name): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_diff(
-  $datetime,
-  $datetime2,
+  HH\FIXME\MISSING_PARAM_TYPE $datetime,
+  HH\FIXME\MISSING_PARAM_TYPE $datetime2,
   bool $absolute = false,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function date_format($object, string $format): HH\FIXME\MISSING_RETURN_TYPE;
+function date_format(
+  HH\FIXME\MISSING_PARAM_TYPE $object,
+  string $format,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_get_last_errors(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -81,24 +87,32 @@ function date_interval_create_from_date_string(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_interval_format(
-  $interval,
+  HH\FIXME\MISSING_PARAM_TYPE $interval,
   string $format_spec,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_isodate_set(
-  $object,
+  HH\FIXME\MISSING_PARAM_TYPE $object,
   int $year,
   int $week,
   int $day = 1,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function date_modify($object, string $modify): HH\FIXME\MISSING_RETURN_TYPE;
+function date_modify(
+  HH\FIXME\MISSING_PARAM_TYPE $object,
+  string $modify,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function date_offset_get($object): HH\FIXME\MISSING_RETURN_TYPE;
+function date_offset_get(
+  HH\FIXME\MISSING_PARAM_TYPE $object,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_parse(string $date): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function date_sub($datetime, $interval): HH\FIXME\MISSING_RETURN_TYPE;
+function date_sub(
+  HH\FIXME\MISSING_PARAM_TYPE $datetime,
+  HH\FIXME\MISSING_PARAM_TYPE $interval,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_sun_info(
   int $ts,
@@ -125,22 +139,29 @@ function date_sunset(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_time_set(
-  $object,
+  HH\FIXME\MISSING_PARAM_TYPE $object,
   int $hour,
   int $minute,
   int $second = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function date_timestamp_get($datetime): HH\FIXME\MISSING_RETURN_TYPE;
+function date_timestamp_get(
+  HH\FIXME\MISSING_PARAM_TYPE $datetime,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_timestamp_set(
-  $datetime,
+  HH\FIXME\MISSING_PARAM_TYPE $datetime,
   int $timestamp,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function date_timezone_get($object): HH\FIXME\MISSING_RETURN_TYPE;
+function date_timezone_get(
+  HH\FIXME\MISSING_PARAM_TYPE $object,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function date_timezone_set($object, $timezone): HH\FIXME\MISSING_RETURN_TYPE;
+function date_timezone_set(
+  HH\FIXME\MISSING_PARAM_TYPE $object,
+  HH\FIXME\MISSING_PARAM_TYPE $timezone,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date(
   string $format,
@@ -214,7 +235,9 @@ function timezone_identifiers_list(
   string $country = '',
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function timezone_location_get($timezone): HH\FIXME\MISSING_RETURN_TYPE;
+function timezone_location_get(
+  HH\FIXME\MISSING_PARAM_TYPE $timezone,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function timezone_name_from_abbr(
   string $abbr,
@@ -222,9 +245,14 @@ function timezone_name_from_abbr(
   int $isdst = 1,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function timezone_name_get($object): HH\FIXME\MISSING_RETURN_TYPE;
+function timezone_name_get(
+  HH\FIXME\MISSING_PARAM_TYPE $object,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function timezone_offset_get($object, $dt): HH\FIXME\MISSING_RETURN_TYPE;
+function timezone_offset_get(
+  HH\FIXME\MISSING_PARAM_TYPE $object,
+  HH\FIXME\MISSING_PARAM_TYPE $dt,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function timezone_open(string $timezone): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -390,9 +418,11 @@ class DatePeriod implements Iterator<DateTime> {
   const int EXCLUDE_START_DATE;
 
   public function __construct(
-    /* DateTimeInterface */ $start, // date string converts
+    HH\FIXME\MISSING_PARAM_TYPE /* DateTimeInterface */
+      $start, // date string converts
     DateInterval $interval,
-    /* ?DateTimeInterface */ $end = null, // date string converts
+    HH\FIXME\MISSING_PARAM_TYPE /* ?DateTimeInterface */ $end =
+      null, // date string converts
     int $options = 0,
   );
   public function current(): DateTime;

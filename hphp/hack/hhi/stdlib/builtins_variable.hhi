@@ -15,17 +15,17 @@ namespace {
   <<__PHPStdLib>>
   function is_int(readonly mixed $var)[]: bool;
   <<__Deprecated('Use is_int().')>>
-  function is_integer($var)[]: bool;
+  function is_integer(HH\FIXME\MISSING_PARAM_TYPE $var)[]: bool;
   <<__Deprecated('Use is_int().')>>
-  function is_long($var)[]: bool;
+  function is_long(HH\FIXME\MISSING_PARAM_TYPE $var)[]: bool;
   <<__Deprecated('Use is_float().')>>
-  function is_double($var)[]: bool;
+  function is_double(HH\FIXME\MISSING_PARAM_TYPE $var)[]: bool;
   <<__PHPStdLib>>
   function is_float(readonly mixed $var)[]: bool;
   <<__PHPStdLib>>
   function is_numeric(readonly mixed $var)[]: bool;
   <<__Deprecated('Use is_float().')>>
-  function is_real($var)[]: bool;
+  function is_real(HH\FIXME\MISSING_PARAM_TYPE $var)[]: bool;
   <<__PHPStdLib>>
   function is_string(readonly mixed $var)[]: bool;
   function is_scalar(readonly mixed $var)[]: bool;
@@ -39,18 +39,22 @@ namespace {
   function get_resource_type(resource $handle)[]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function print_r(
-    $expression,
+    HH\FIXME\MISSING_PARAM_TYPE $expression,
     bool $ret = false,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function print_r_pure($expression)[]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function print_r_pure(
+    HH\FIXME\MISSING_PARAM_TYPE $expression,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function var_export(
-    $expression,
+    HH\FIXME\MISSING_PARAM_TYPE $expression,
     bool $ret = false,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function var_export_pure($expression)[]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function var_export_pure(
+    HH\FIXME\MISSING_PARAM_TYPE $expression,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function var_dump(
     <<__AcceptDisposable>> readonly mixed $expression,
@@ -58,12 +62,12 @@ namespace {
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function debug_zval_dump(
-    <<__AcceptDisposable>> $variable,
+    <<__AcceptDisposable>> HH\FIXME\MISSING_PARAM_TYPE $variable,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function serialize($value)[defaults]: string;
+  function serialize(HH\FIXME\MISSING_PARAM_TYPE $value)[defaults]: string;
   <<__PHPStdLib>>
-  function serialize_pure($value)[]: string;
+  function serialize_pure(HH\FIXME\MISSING_PARAM_TYPE $value)[]: string;
   <<__PHPStdLib>>
   function unserialize(
     string $str,

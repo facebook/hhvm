@@ -10,8 +10,8 @@
 
 <<__PHPStdLib>>
 function hphp_create_continuation(
-  $clsname,
-  $funcname,
-  $origFuncName,
-  $args = null,
+  HH\FIXME\MISSING_PARAM_TYPE $clsname,
+  HH\FIXME\MISSING_PARAM_TYPE $funcname,
+  HH\FIXME\MISSING_PARAM_TYPE $origFuncName,
+  HH\FIXME\MISSING_PARAM_TYPE $args = null,
 ): HH\FIXME\MISSING_RETURN_TYPE {}

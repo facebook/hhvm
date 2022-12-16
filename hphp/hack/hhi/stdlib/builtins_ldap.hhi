@@ -10,7 +10,7 @@
 
 <<__PHPStdLib>>
 function ldap_connect(
-  $hostname = null,
+  HH\FIXME\MISSING_PARAM_TYPE $hostname = null,
   int $port = 389,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -26,31 +26,31 @@ function ldap_err2str(int $errnum): HH\FIXME\MISSING_RETURN_TYPE;
 function ldap_add(
   resource $link,
   string $dn,
-  $entry,
+  HH\FIXME\MISSING_PARAM_TYPE $entry,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_mod_add(
   resource $link,
   string $dn,
-  $entry,
+  HH\FIXME\MISSING_PARAM_TYPE $entry,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_mod_del(
   resource $link,
   string $dn,
-  $entry,
+  HH\FIXME\MISSING_PARAM_TYPE $entry,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_mod_replace(
   resource $link,
   string $dn,
-  $entry,
+  HH\FIXME\MISSING_PARAM_TYPE $entry,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_modify(
   resource $link,
   string $dn,
-  $entry,
+  HH\FIXME\MISSING_PARAM_TYPE $entry,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_modify_batch(
@@ -61,13 +61,13 @@ function ldap_modify_batch(
 <<__PHPStdLib>>
 function ldap_bind(
   resource $link,
-  $bind_rdn = null,
-  $bind_password = null,
+  HH\FIXME\MISSING_PARAM_TYPE $bind_rdn = null,
+  HH\FIXME\MISSING_PARAM_TYPE $bind_password = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_set_rebind_proc(
   resource $link,
-  $callback,
+  HH\FIXME\MISSING_PARAM_TYPE $callback,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_sort(
@@ -87,18 +87,18 @@ function ldap_get_option(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_set_option(
-  $link,
+  HH\FIXME\MISSING_PARAM_TYPE $link,
   int $option,
-  $newval,
+  HH\FIXME\MISSING_PARAM_TYPE $newval,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_close(resource $link): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_list(
-  $link,
-  $base_dn,
-  $filter,
-  $attributes = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link,
+  HH\FIXME\MISSING_PARAM_TYPE $base_dn,
+  HH\FIXME\MISSING_PARAM_TYPE $filter,
+  HH\FIXME\MISSING_PARAM_TYPE $attributes = null,
   int $attrsonly = 0,
   int $sizelimit = -1,
   int $timelimit = -1,
@@ -106,10 +106,10 @@ function ldap_list(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_read(
-  $link,
-  $base_dn,
-  $filter,
-  $attributes = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link,
+  HH\FIXME\MISSING_PARAM_TYPE $base_dn,
+  HH\FIXME\MISSING_PARAM_TYPE $filter,
+  HH\FIXME\MISSING_PARAM_TYPE $attributes = null,
   int $attrsonly = 0,
   int $sizelimit = -1,
   int $timelimit = -1,
@@ -117,10 +117,10 @@ function ldap_read(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_search(
-  $link,
-  $base_dn,
-  $filter,
-  $attributes = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link,
+  HH\FIXME\MISSING_PARAM_TYPE $base_dn,
+  HH\FIXME\MISSING_PARAM_TYPE $filter,
+  HH\FIXME\MISSING_PARAM_TYPE $attributes = null,
   int $attrsonly = 0,
   int $sizelimit = -1,
   int $timelimit = -1,

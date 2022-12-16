@@ -54,7 +54,7 @@ function transliterator_list_ids(): mixed;
 
 <<__PHPStdLib>>
 function transliterator_transliterate(
-  $tOrId,
+  HH\FIXME\MISSING_PARAM_TYPE $tOrId,
   string $subject,
   int $start = 0,
   int $end = -1,

@@ -383,7 +383,7 @@ Errors:
                       (Class_get (((Foo), [134:3-6], (CI ([134:3-6], "\\Foo"))),
                          (CGexpr
                             ((_), [134:9-30],
-                             (Call ((((function($format, $args)[]: _)), [134:9-17], (Id ([134:9-17], "\\vsprintf"))), 
+                             (Call ((((function(mixed $format, mixed $args)[]: _)), [134:9-17], (Id ([134:9-17], "\\vsprintf"))), 
                                 [], [(Pnormal, ((string), [134:18-22], (String "%s"))); (Pnormal, ((string), [134:24-29], (String "wow")))], None)))),
                          Is_method))),
                      [], [], None)))));

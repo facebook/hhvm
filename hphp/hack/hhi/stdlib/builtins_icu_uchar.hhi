@@ -605,14 +605,18 @@ class IntlChar {
   const int HST_LVT_SYLLABLE;
   const int HST_COUNT;
 
-  static public function chr($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function ord($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function chr(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function ord(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function hasBinaryProperty(
-    $cp,
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
     int $prop,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function getIntPropertyValue(
-    $cp,
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
     int $prop,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function getIntPropertyMaxValue(int $prop): int {
@@ -621,13 +625,17 @@ class IntlChar {
   static public function getIntPropertyMinValue(int $prop): int {
     return 0;
   }
-  static public function getNumericValue($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function getNumericValue(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function enumCharTypes(
     (function(int, int, int): void) $cb,
   ): void {}
-  static public function getBlockCode($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function getBlockCode(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function charName(
-    $cp,
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
     int $choice = IntlChar::UNICODE_CHAR_NAME,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function charFromName(
@@ -635,8 +643,8 @@ class IntlChar {
     int $choice = IntlChar::UNICODE_CHAR_NAME,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function enumCharNames(
-    $start,
-    $limit,
+    HH\FIXME\MISSING_PARAM_TYPE $start,
+    HH\FIXME\MISSING_PARAM_TYPE $limit,
     (function(int, int, string): void) $cb,
     int $choice = IntlChar::UNICODE_CHAR_NAME,
   ): void {}
@@ -656,61 +664,135 @@ class IntlChar {
     return 0;
   }
   static public function foldCase(
-    $cp,
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
     int $options = IntlChar::FOLD_CASE_DEFAULT,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function digit(
-    $cp,
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
     int $radix = 10,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function forDigit(int $digit, int $radix = 10): int {
     return 0;
   }
-  static public function charAge($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function charAge(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
   <<__PHPStdLib>>
   static public function getUnicodeVersion(): darray<arraykey, mixed> {
     return darray[];
   }
   static public function getFC_NFKC_Closure(
-    $cp,
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isUAlphabetic($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isULowercase($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isUUppercase($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isUWhiteSpace($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function islower($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isupper($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function istitle($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isdigit($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isalpha($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isalnum($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isxdigit($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function ispunct($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isgraph($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isblank($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isdefined($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isspace($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isJavaSpaceChar($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isWhitespace($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function iscntrl($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isISOControl($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isprint($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isbase($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isMirrored($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isIDStart($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isIDPart($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isIDIgnorable($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isJavaIDStart($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function isJavaIDPart($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function charDirection($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function charType($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function getCombiningClass($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function charDigitValue($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isUAlphabetic(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isULowercase(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isUUppercase(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isUWhiteSpace(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function islower(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isupper(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function istitle(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isdigit(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isalpha(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isalnum(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isxdigit(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function ispunct(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isgraph(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isblank(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isdefined(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isspace(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isJavaSpaceChar(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isWhitespace(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function iscntrl(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isISOControl(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isprint(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isbase(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isMirrored(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isIDStart(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isIDPart(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isIDIgnorable(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isJavaIDStart(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isJavaIDPart(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function charDirection(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function charType(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function getCombiningClass(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function charDigitValue(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function getBidiPairedBracket(
-    $cp,
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function charMirror($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function tolower($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function toupper($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function totitle($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function charMirror(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function tolower(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function toupper(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function totitle(
+    HH\FIXME\MISSING_PARAM_TYPE $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
 }

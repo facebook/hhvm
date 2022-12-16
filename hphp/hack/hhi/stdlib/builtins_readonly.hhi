@@ -44,7 +44,7 @@ namespace HH\Readonly {
     public static function idx(
       readonly ?shape(...) $shape,
       readonly arraykey $index,
-      $default = null,
+      \HH\FIXME\MISSING_PARAM_TYPE $default = null,
     )[]: readonly mixed;
 
     public static function toArray(

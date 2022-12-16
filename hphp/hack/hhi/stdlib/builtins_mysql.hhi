@@ -158,10 +158,12 @@ function mysql_pconnect_with_db(
 <<__PHPStdLib>>
 function mysql_set_charset(
   string $charset,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_ping($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
+function mysql_ping(
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_escape_string(
   string $unescaped_string,
@@ -169,123 +171,139 @@ function mysql_escape_string(
 <<__PHPStdLib>>
 function mysql_real_escape_string(
   string $unescaped_string,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_client_encoding(
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_close($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
+function mysql_close(
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_errno($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
+function mysql_errno(
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_error($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
+function mysql_error(
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_warning_count(
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_get_client_info(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_get_host_info(
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_get_proto_info(
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_get_server_info(
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_info($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
+function mysql_info(
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_insert_id($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
+function mysql_insert_id(
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_stat($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
+function mysql_stat(
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_thread_id($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
+function mysql_thread_id(
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_create_db(
   string $db,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_select_db(
   string $db,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_drop_db(
   string $db,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_affected_rows(
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_set_timeout(
   int $query_timeout_ms = -1,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_query(
   string $query,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_multi_query(
   string $query,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_next_result(
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_more_results(
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_fetch_result(
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_unbuffered_query(
   string $query,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_db_query(
   string $database,
   string $query,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_list_dbs($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
+function mysql_list_dbs(
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_list_tables(
   string $database,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_list_fields(
   string $database_name,
   string $table_name,
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_list_processes(
-  $link_identifier = null,
+  HH\FIXME\MISSING_PARAM_TYPE $link_identifier = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_db_name(
   resource $result,
-  $row,
-  $field = null,
+  HH\FIXME\MISSING_PARAM_TYPE $row,
+  HH\FIXME\MISSING_PARAM_TYPE $field = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_tablename(
@@ -316,15 +334,15 @@ function mysql_fetch_array(
 function mysql_fetch_lengths(resource $result): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_fetch_object(
-  $result,
+  HH\FIXME\MISSING_PARAM_TYPE $result,
   string $class_name = "stdClass",
-  $params = null,
+  HH\FIXME\MISSING_PARAM_TYPE $params = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_result(
   resource $result,
   int $row,
-  $field = null,
+  HH\FIXME\MISSING_PARAM_TYPE $field = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_fetch_field(

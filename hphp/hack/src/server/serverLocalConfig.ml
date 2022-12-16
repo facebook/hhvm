@@ -403,8 +403,6 @@ type t = {
       If disabled, instead load lazily from shallow classes. *)
   fetch_remote_old_decls: bool;
       (** Option to fetch old decls from remote decl store *)
-  only_fetch_remote_old_decl_during_init: bool;
-      (** Only fetch old decls from remote decl store if during init *)
   skip_hierarchy_checks: bool;
       (** Skip checks on hierarchy e.g. overrides, require extend, etc.
       Set to true only for debugging purposes! *)
@@ -562,7 +560,6 @@ let default =
     force_load_hot_shallow_decls = false;
     populate_member_heaps = true;
     fetch_remote_old_decls = false;
-    only_fetch_remote_old_decl_during_init = false;
     skip_hierarchy_checks = false;
     skip_tast_checks = false;
     num_local_workers = None;
@@ -1045,13 +1042,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let only_fetch_remote_old_decl_during_init =
-    bool_if_min_version
-      "only_fetch_remote_old_decl_during_init"
-      ~default:default.only_fetch_remote_old_decl_during_init
-      ~current_version
-      config
-  in
   let skip_hierarchy_checks =
     bool_if_min_version
       "skip_hierarchy_checks"
@@ -1448,7 +1438,6 @@ let load_ fn ~silent ~current_version overrides =
     force_load_hot_shallow_decls;
     populate_member_heaps;
     fetch_remote_old_decls;
-    only_fetch_remote_old_decl_during_init;
     skip_hierarchy_checks;
     skip_tast_checks;
     num_local_workers;
@@ -1522,8 +1511,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       log_saved_state_age_and_distance =
         options.log_saved_state_age_and_distance;
       fetch_remote_old_decls = options.fetch_remote_old_decls;
-      only_fetch_remote_old_decl_during_init =
-        options.only_fetch_remote_old_decl_during_init;
       ide_max_num_decls = options.ide_max_num_decls;
       ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;
       ide_max_num_linearizations = options.ide_max_num_linearizations;

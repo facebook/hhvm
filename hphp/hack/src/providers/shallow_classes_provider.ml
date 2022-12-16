@@ -28,17 +28,8 @@ let direct_decl_parse_and_cache ctx filename name =
 let fetch_remote_old_decl_flag (ctx : Provider_context.t) =
   TypecheckerOptions.fetch_remote_old_decls (Provider_context.get_tcopt ctx)
 
-let only_fetch_remote_old_decl_during_init (ctx : Provider_context.t) =
-  TypecheckerOptions.only_fetch_remote_old_decl_during_init
-    (Provider_context.get_tcopt ctx)
-
 let fetch_remote_old_decls ctx ~during_init =
-  fetch_remote_old_decl_flag ctx
-  &&
-  if only_fetch_remote_old_decl_during_init ctx then
-    during_init
-  else
-    true
+  fetch_remote_old_decl_flag ctx && during_init
 
 let get (ctx : Provider_context.t) (name : string) : shallow_class option =
   let find_in_direct_decl_parse ~fill_caches path =

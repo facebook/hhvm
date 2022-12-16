@@ -44,7 +44,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_remote_old_decls_no_limit: false,
     tco_force_load_hot_shallow_decls: false,
     tco_fetch_remote_old_decls: false,
-    tco_only_fetch_remote_old_decl_during_init: false,
     tco_populate_member_heaps: true,
     tco_skip_hierarchy_checks: false,
     tco_skip_tast_checks: false,

@@ -129,9 +129,6 @@ let remote_old_decls_no_limit t = t.GlobalOptions.tco_remote_old_decls_no_limit
 
 let fetch_remote_old_decls t = t.GlobalOptions.tco_fetch_remote_old_decls
 
-let only_fetch_remote_old_decl_during_init t =
-  t.GlobalOptions.tco_only_fetch_remote_old_decl_during_init
-
 let force_load_hot_shallow_decls t =
   t.GlobalOptions.tco_force_load_hot_shallow_decls
 

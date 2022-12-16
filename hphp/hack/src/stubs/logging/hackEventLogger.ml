@@ -47,7 +47,6 @@ type rollout_flags = {
   log_from_client_when_slow_monitor_connections: bool;
   log_saved_state_age_and_distance: bool;
   fetch_remote_old_decls: bool;
-  only_fetch_remote_old_decl_during_init: bool;
   ide_max_num_decls: int;
   ide_max_num_shallow_decls: int;
   ide_max_num_linearizations: int;

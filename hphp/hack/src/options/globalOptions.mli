@@ -104,8 +104,6 @@ type t = {
   (* Don't limit amount of remote old decls fetched *)
   tco_fetch_remote_old_decls: bool;
   (* Always load hot shallow decls from saved state *)
-  tco_only_fetch_remote_old_decl_during_init: bool;
-      (** Only fetch old decls remotely if during init. *)
   tco_force_load_hot_shallow_decls: bool;
   (* Populate the member signature heaps.
 
@@ -378,7 +376,6 @@ val make :
   ?tco_force_shallow_decl_fanout:bool ->
   ?tco_remote_old_decls_no_limit:bool ->
   ?tco_fetch_remote_old_decls:bool ->
-  ?tco_only_fetch_remote_old_decl_during_init:bool ->
   ?tco_force_load_hot_shallow_decls:bool ->
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->

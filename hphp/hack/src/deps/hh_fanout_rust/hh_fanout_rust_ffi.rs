@@ -10,7 +10,7 @@ use std::path::PathBuf;
 use ocamlrep_custom::Custom;
 
 #[cfg(fbcode_build)]
-pub struct HhFanoutRustFfi(Box<dyn hh_fanout_api::HhFanoutEdgeAccumulator>);
+pub struct HhFanoutRustFfi(std::cell::RefCell<Box<dyn hh_fanout_api::HhFanoutEdgeAccumulator>>);
 #[cfg(not(fbcode_build))]
 pub struct HhFanoutRustFfi;
 
@@ -31,7 +31,7 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         };
         let hh_decl = Box::new(hh_decl_shmem::DeclShmem::new(log.clone(), decl_state_dir));
         let hh_fanout = hh_fanout_lib::HhFanoutImpl::new(log, fanout_state_dir, hh_decl);
-        Custom::from(HhFanoutRustFfi(Box::new(hh_fanout)))
+        Custom::from(HhFanoutRustFfi(std::cell::RefCell::new(Box::new(hh_fanout))))
     }
 
     fn hh_fanout_ffi_make_hhdg_builder(builder_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
@@ -44,13 +44,13 @@ ocamlrep_ocamlpool::ocaml_ffi! {
             scuba: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log_scuba")),
         };
         let hhdg_builder = hhdg_builder::HhdgBuilder::new(log, builder_state_dir);
-        Custom::from(HhFanoutRustFfi(Box::new(hhdg_builder)))
+        Custom::from(HhFanoutRustFfi(std::cell::RefCell::new(Box::new(hhdg_builder))))
     }
 
     // Each edge is a tuple of (dependency, dependent).
     fn hh_fanout_ffi_add_idep_batch(hh_fanout: Custom<HhFanoutRustFfi>, edges: Vec<(u64, u64)>) {
         use hh24_types::DepGraphEdge;
-        if let Err(err) = hh_fanout.0.commit_edges(
+        if let Err(err) = hh_fanout.0.borrow_mut().commit_edges(
             edges.into_iter().map(|(dependency, dependent)| DepGraphEdge::from_u64(dependency, dependent)).collect()
         ) {
             eprintln!("Error: {err}");

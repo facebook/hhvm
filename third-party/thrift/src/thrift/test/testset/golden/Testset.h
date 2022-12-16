@@ -21,6 +21,7 @@ enum class FieldModifier {
   CustomDefault,
   AlternativeCustomDefault,
   Adapter,
+  OpEncode,
 };
 
 namespace detail {
@@ -3103,6 +3104,3071 @@ struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::Lazy>> {
 };
 
 template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_list_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_list_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_list_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_list_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_list_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_list_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_list_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_list_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_list_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_string_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_string_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_string_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_string_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_string_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_string_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_string_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_string_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_string_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_i64_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_i64_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_i64_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_i64_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_i64_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_i64_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_string_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_string_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_i64_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_map_i64_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_list_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_list_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_list_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_list_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_list_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_list_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_list_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_list_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_list_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_list_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_list_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_list_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_list_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_list_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_list_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_list_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_list_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_list_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_string_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::OpEncode>> {
+  using type = struct_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_bool_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_byte_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_i16_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_i32_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_i64_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_float_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_double_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_binary_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_string_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_bool_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_byte_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_i16_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_i32_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_i64_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_float_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_double_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_binary_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = struct_string_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_bool_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_byte_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_i16_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_i32_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_i64_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_float_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_double_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_binary_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_string_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_bool_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_byte_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_i16_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_i32_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_i64_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_float_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_double_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_binary_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_string_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_string_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_bool_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_byte_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_i16_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_i32_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_i64_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_float_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_double_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_binary_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_string_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_bool_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_byte_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_i16_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_i32_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_i64_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_float_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_double_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_binary_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_string_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_string_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_bool_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_byte_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_i16_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_i32_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_i64_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_float_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_double_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_binary_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_string_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_bool_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_byte_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_i16_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_i32_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_i64_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_float_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_double_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_binary_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_string_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_bool_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_byte_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i16_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i32_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_i64_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_float_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_double_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_binary_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_string_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_set_string_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_set_i64_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_bool_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_byte_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i16_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i32_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_i64_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_float_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_double_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_binary_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_string_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_bool_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_byte_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i16_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i32_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i64_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_float_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_double_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_binary_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_string_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_set_string_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_string_set_i64_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_set_string_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_set_i64_box_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_list_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_list_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_list_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_list_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_list_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_list_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_list_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_list_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_list_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_string_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_string_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_string_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_string_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_string_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_string_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_string_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_string_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_string_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_i64_bool_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_i64_byte_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_i64_i16_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_i64_i32_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_i64_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_i64_float_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_i64_double_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_i64_binary_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_i64_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_string_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_string_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_i64_set_string_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = struct_adapted_map_i64_set_i64_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_list_bool_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_list_byte_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_list_i16_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_list_i32_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_list_i64_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_list_float_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_list_double_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_list_binary_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_list_string_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_set_string_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_set_i64_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_string_bool_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_string_byte_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_string_i16_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_string_i32_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_string_i64_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_string_float_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_string_double_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_string_binary_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_string_string_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_bool_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_byte_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i16_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i32_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i64_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_float_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_double_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_binary_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_string_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_string_set_string_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_string_set_i64_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_set_string_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_set_i64_lazy_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = struct_string_lazy_op_encoded;
+};
+
+template <>
 struct exception_ByFieldType<type::list<type::bool_t>, mod_set<>> {
   using type = exception_list_bool;
 };
@@ -6168,6 +9234,3071 @@ struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::Lazy>> {
 };
 
 template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_list_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_list_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_list_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_list_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_list_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_list_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_list_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_list_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_list_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_string_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_string_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_string_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_string_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_string_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_string_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_string_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_string_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_string_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_i64_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_i64_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_i64_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_i64_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_i64_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_i64_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_string_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_string_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_i64_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_map_i64_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_list_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_list_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_list_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_list_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_list_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_list_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_list_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_list_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_list_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_list_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_list_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_list_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_list_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_list_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_list_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_list_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_list_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_list_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_string_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::OpEncode>> {
+  using type = exception_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_bool_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_byte_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_i16_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_i32_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_i64_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_float_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_double_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_binary_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::CustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_string_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_bool_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_byte_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_i16_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_i32_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_i64_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_float_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_double_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_binary_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::OpEncode>> {
+  using type = exception_string_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_bool_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_byte_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_i16_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_i32_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_i64_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_float_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_double_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_binary_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_string_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_bool_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_byte_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_i16_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_i32_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_i64_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_float_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_double_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_binary_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_string_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_string_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_bool_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_byte_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_i16_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_i32_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_i64_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_float_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_double_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_binary_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_string_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_bool_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_byte_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_i16_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_i32_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_i64_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_float_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_double_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_binary_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_string_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_string_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_bool_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_byte_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_i16_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_i32_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_i64_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_float_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_double_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_binary_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_string_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_bool_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_byte_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_i16_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_i32_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_i64_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_float_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_double_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_binary_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_string_alternative_custom_default_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_bool_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_byte_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i16_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i32_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_i64_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_float_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_double_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_binary_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_string_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_set_string_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_set_i64_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_bool_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_byte_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i16_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i32_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_i64_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_float_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_double_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_binary_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_string_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_bool_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_byte_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i16_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i32_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i64_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_float_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_double_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_binary_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_string_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_set_string_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_string_set_i64_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_set_string_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Box, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_set_i64_box_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_list_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_list_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_list_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_list_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_list_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_list_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_list_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_list_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_list_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_string_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_string_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_string_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_string_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_string_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_string_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_string_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_string_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_string_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_i64_bool_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_i64_byte_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_i64_i16_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_i64_i32_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_i64_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_i64_float_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_i64_double_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_i64_binary_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_i64_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_string_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_string_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_i64_set_string_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Adapter, FieldModifier::OpEncode>> {
+  using type = exception_adapted_map_i64_set_i64_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_list_bool_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_list_byte_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_list_i16_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_list_i32_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_list_i64_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_list_float_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_list_double_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_list_binary_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_list_string_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_set_string_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_set_i64_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_string_bool_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_string_byte_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_string_i16_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_string_i32_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_string_i64_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_string_float_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_string_double_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_string_binary_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_string_string_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_bool_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_byte_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i16_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i32_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i64_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_float_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_double_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_binary_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_string_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_string_set_string_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_string_set_i64_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_set_string_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_set_i64_lazy_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::Lazy, FieldModifier::OpEncode>> {
+  using type = exception_string_lazy_op_encoded;
+};
+
+template <>
 struct union_ByFieldType<type::list<type::bool_t>, mod_set<>> {
   using type = union_list_bool;
 };
@@ -6705,6 +12836,546 @@ struct union_ByFieldType<type::binary_t, mod_set<>> {
 template <>
 struct union_ByFieldType<type::string_t, mod_set<>> {
   using type = union_string;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_list_bool_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_list_byte_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_list_i16_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_list_i32_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_list_i64_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_list_float_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_list_double_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_list_binary_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_list_string_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_set_string_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_set_i64_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_string_bool_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_string_byte_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_string_i16_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_string_i32_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_string_i64_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_string_float_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_string_double_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_string_binary_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_string_string_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_i64_bool_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_i64_byte_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_i64_i16_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_i64_i32_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_i64_i64_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_i64_float_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_i64_double_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_i64_binary_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_i64_string_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_string_set_string_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_string_set_i64_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_i64_set_string_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::OpEncode>> {
+  using type = union_map_i64_set_i64_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_list_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_list_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_list_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_list_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_list_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_list_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_list_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_list_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_list_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_string_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_string_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_string_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_string_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_string_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_string_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_string_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_string_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_string_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_bool_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_byte_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_i16_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_i32_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_float_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_double_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_binary_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_string_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_string_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_set_string_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_set_i64_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_list_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_list_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_list_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_list_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_list_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_list_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_list_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_list_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_list_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_string_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_string_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_string_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_string_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_string_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_string_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_string_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_string_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_string_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_bool_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_byte_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_i16_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_i32_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_float_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_double_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_binary_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_string_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_string_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_set_string_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_set_i64_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::bool_t, mod_set<FieldModifier::OpEncode>> {
+  using type = union_bool_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::byte_t, mod_set<FieldModifier::OpEncode>> {
+  using type = union_byte_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::i16_t, mod_set<FieldModifier::OpEncode>> {
+  using type = union_i16_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::i32_t, mod_set<FieldModifier::OpEncode>> {
+  using type = union_i32_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::i64_t, mod_set<FieldModifier::OpEncode>> {
+  using type = union_i64_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::float_t, mod_set<FieldModifier::OpEncode>> {
+  using type = union_float_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::double_t, mod_set<FieldModifier::OpEncode>> {
+  using type = union_double_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::binary_t, mod_set<FieldModifier::OpEncode>> {
+  using type = union_binary_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::string_t, mod_set<FieldModifier::OpEncode>> {
+  using type = union_string_op_encoded;
 };
 
 

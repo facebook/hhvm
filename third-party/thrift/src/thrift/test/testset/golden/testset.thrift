@@ -2397,6 +2397,3002 @@ struct struct_string_lazy {
   @cpp.Lazy
   1: string field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_string_lazy")
+@cpp.UseOpEncode
+struct struct_empty_op_encoded {
+} (thrift.uri="facebook.com/thrift/test/testset/struct_empty_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_bool_op_encoded {
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_byte_op_encoded {
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i16_op_encoded {
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i32_op_encoded {
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i64_op_encoded {
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_float_op_encoded {
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_double_op_encoded {
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_binary_op_encoded {
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_string_op_encoded {
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_set_string_op_encoded {
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_set_i64_op_encoded {
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_bool_op_encoded {
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_byte_op_encoded {
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i16_op_encoded {
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i32_op_encoded {
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i64_op_encoded {
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_float_op_encoded {
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_double_op_encoded {
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_binary_op_encoded {
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_string_op_encoded {
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_bool_op_encoded {
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_byte_op_encoded {
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i16_op_encoded {
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i32_op_encoded {
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i64_op_encoded {
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_float_op_encoded {
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_double_op_encoded {
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_binary_op_encoded {
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_string_op_encoded {
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_set_string_op_encoded {
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_set_i64_op_encoded {
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_set_string_op_encoded {
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_set_i64_op_encoded {
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_bool_op_encoded {
+  1: bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_byte_op_encoded {
+  1: byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_i16_op_encoded {
+  1: i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_i32_op_encoded {
+  1: i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_i64_op_encoded {
+  1: i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_float_op_encoded {
+  1: float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_double_op_encoded {
+  1: double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_binary_op_encoded {
+  1: binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_string_op_encoded {
+  1: string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_bool_custom_default_op_encoded {
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_bool_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_byte_custom_default_op_encoded {
+  1: byte field_1 = 1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_byte_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_i16_custom_default_op_encoded {
+  1: i16 field_1 = 2;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_i16_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_i32_custom_default_op_encoded {
+  1: i32 field_1 = 3;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_i32_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_i64_custom_default_op_encoded {
+  1: i64 field_1 = 4;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_i64_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_float_custom_default_op_encoded {
+  1: float field_1 = 5;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_float_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_double_custom_default_op_encoded {
+  1: double field_1 = 6;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_double_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_binary_custom_default_op_encoded {
+  1: binary field_1 = "7";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_binary_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_string_custom_default_op_encoded {
+  1: string field_1 = "8";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_string_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_bool_alternative_custom_default_op_encoded {
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_bool_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_byte_alternative_custom_default_op_encoded {
+  1: byte field_1 = 10;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_byte_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_i16_alternative_custom_default_op_encoded {
+  1: i16 field_1 = 20;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_i16_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_i32_alternative_custom_default_op_encoded {
+  1: i32 field_1 = 30;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_i32_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_i64_alternative_custom_default_op_encoded {
+  1: i64 field_1 = 40;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_i64_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_float_alternative_custom_default_op_encoded {
+  1: float field_1 = 50;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_float_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_double_alternative_custom_default_op_encoded {
+  1: double field_1 = 60;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_double_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_binary_alternative_custom_default_op_encoded {
+  1: binary field_1 = "70";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_binary_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_string_alternative_custom_default_op_encoded {
+  1: string field_1 = "80";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_string_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_bool_op_encoded {
+  1: optional list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_byte_op_encoded {
+  1: optional list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i16_op_encoded {
+  1: optional list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i32_op_encoded {
+  1: optional list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i64_op_encoded {
+  1: optional list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_float_op_encoded {
+  1: optional list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_double_op_encoded {
+  1: optional list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_binary_op_encoded {
+  1: optional list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_string_op_encoded {
+  1: optional list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_set_string_op_encoded {
+  1: optional set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_set_i64_op_encoded {
+  1: optional set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_bool_op_encoded {
+  1: optional map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_byte_op_encoded {
+  1: optional map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i16_op_encoded {
+  1: optional map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i32_op_encoded {
+  1: optional map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i64_op_encoded {
+  1: optional map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_float_op_encoded {
+  1: optional map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_double_op_encoded {
+  1: optional map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_binary_op_encoded {
+  1: optional map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_string_op_encoded {
+  1: optional map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_bool_op_encoded {
+  1: optional map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_byte_op_encoded {
+  1: optional map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i16_op_encoded {
+  1: optional map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i32_op_encoded {
+  1: optional map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i64_op_encoded {
+  1: optional map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_float_op_encoded {
+  1: optional map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_double_op_encoded {
+  1: optional map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_binary_op_encoded {
+  1: optional map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_string_op_encoded {
+  1: optional map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_string_op_encoded {
+  1: optional map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i64_op_encoded {
+  1: optional map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_string_op_encoded {
+  1: optional map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i64_op_encoded {
+  1: optional map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_bool_op_encoded {
+  1: optional bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_byte_op_encoded {
+  1: optional byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_i16_op_encoded {
+  1: optional i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_i32_op_encoded {
+  1: optional i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_i64_op_encoded {
+  1: optional i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_float_op_encoded {
+  1: optional float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_double_op_encoded {
+  1: optional double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_binary_op_encoded {
+  1: optional binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_string_op_encoded {
+  1: optional string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_bool_custom_default_op_encoded {
+  1: optional bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_bool_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_byte_custom_default_op_encoded {
+  1: optional byte field_1 = 1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_byte_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_i16_custom_default_op_encoded {
+  1: optional i16 field_1 = 2;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_i16_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_i32_custom_default_op_encoded {
+  1: optional i32 field_1 = 3;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_i32_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_i64_custom_default_op_encoded {
+  1: optional i64 field_1 = 4;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_i64_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_float_custom_default_op_encoded {
+  1: optional float field_1 = 5;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_float_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_double_custom_default_op_encoded {
+  1: optional double field_1 = 6;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_double_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_binary_custom_default_op_encoded {
+  1: optional binary field_1 = "7";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_binary_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_string_custom_default_op_encoded {
+  1: optional string field_1 = "8";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_string_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_bool_alternative_custom_default_op_encoded {
+  1: optional bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_bool_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_byte_alternative_custom_default_op_encoded {
+  1: optional byte field_1 = 10;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_byte_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_i16_alternative_custom_default_op_encoded {
+  1: optional i16 field_1 = 20;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_i16_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_i32_alternative_custom_default_op_encoded {
+  1: optional i32 field_1 = 30;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_i32_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_i64_alternative_custom_default_op_encoded {
+  1: optional i64 field_1 = 40;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_i64_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_float_alternative_custom_default_op_encoded {
+  1: optional float field_1 = 50;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_float_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_double_alternative_custom_default_op_encoded {
+  1: optional double field_1 = 60;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_double_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_binary_alternative_custom_default_op_encoded {
+  1: optional binary field_1 = "70";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_binary_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_string_alternative_custom_default_op_encoded {
+  1: optional string field_1 = "80";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_string_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_bool_op_encoded {
+  1: required list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_byte_op_encoded {
+  1: required list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_i16_op_encoded {
+  1: required list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_i32_op_encoded {
+  1: required list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_i64_op_encoded {
+  1: required list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_float_op_encoded {
+  1: required list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_double_op_encoded {
+  1: required list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_binary_op_encoded {
+  1: required list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_string_op_encoded {
+  1: required list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_set_string_op_encoded {
+  1: required set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_set_i64_op_encoded {
+  1: required set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_bool_op_encoded {
+  1: required map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_byte_op_encoded {
+  1: required map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_i16_op_encoded {
+  1: required map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_i32_op_encoded {
+  1: required map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_i64_op_encoded {
+  1: required map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_float_op_encoded {
+  1: required map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_double_op_encoded {
+  1: required map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_binary_op_encoded {
+  1: required map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_string_op_encoded {
+  1: required map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_bool_op_encoded {
+  1: required map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_byte_op_encoded {
+  1: required map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_i16_op_encoded {
+  1: required map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_i32_op_encoded {
+  1: required map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_i64_op_encoded {
+  1: required map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_float_op_encoded {
+  1: required map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_double_op_encoded {
+  1: required map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_binary_op_encoded {
+  1: required map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_string_op_encoded {
+  1: required map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_set_string_op_encoded {
+  1: required map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_set_i64_op_encoded {
+  1: required map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_string_op_encoded {
+  1: required map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_i64_op_encoded {
+  1: required map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_list_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_string_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_string_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_map_i64_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_map_i64_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_bool_op_encoded {
+  1: required bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_byte_op_encoded {
+  1: required byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_i16_op_encoded {
+  1: required i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_i32_op_encoded {
+  1: required i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_i64_op_encoded {
+  1: required i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_float_op_encoded {
+  1: required float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_double_op_encoded {
+  1: required double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_binary_op_encoded {
+  1: required binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_string_op_encoded {
+  1: required string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_bool_custom_default_op_encoded {
+  1: required bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_bool_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_byte_custom_default_op_encoded {
+  1: required byte field_1 = 1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_byte_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_i16_custom_default_op_encoded {
+  1: required i16 field_1 = 2;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_i16_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_i32_custom_default_op_encoded {
+  1: required i32 field_1 = 3;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_i32_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_i64_custom_default_op_encoded {
+  1: required i64 field_1 = 4;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_i64_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_float_custom_default_op_encoded {
+  1: required float field_1 = 5;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_float_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_double_custom_default_op_encoded {
+  1: required double field_1 = 6;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_double_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_binary_custom_default_op_encoded {
+  1: required binary field_1 = "7";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_binary_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_string_custom_default_op_encoded {
+  1: required string field_1 = "8";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_string_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_bool_alternative_custom_default_op_encoded {
+  1: required bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_bool_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_byte_alternative_custom_default_op_encoded {
+  1: required byte field_1 = 10;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_byte_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_i16_alternative_custom_default_op_encoded {
+  1: required i16 field_1 = 20;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_i16_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_i32_alternative_custom_default_op_encoded {
+  1: required i32 field_1 = 30;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_i32_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_i64_alternative_custom_default_op_encoded {
+  1: required i64 field_1 = 40;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_i64_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_float_alternative_custom_default_op_encoded {
+  1: required float field_1 = 50;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_float_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_double_alternative_custom_default_op_encoded {
+  1: required double field_1 = 60;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_double_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_binary_alternative_custom_default_op_encoded {
+  1: required binary field_1 = "70";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_binary_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_required_string_alternative_custom_default_op_encoded {
+  1: required string field_1 = "80";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_required_string_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_bool_op_encoded {
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_byte_op_encoded {
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_i16_op_encoded {
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_i32_op_encoded {
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_i64_op_encoded {
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_float_op_encoded {
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_double_op_encoded {
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_binary_op_encoded {
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_string_op_encoded {
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_set_i64_op_encoded {
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_bool_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_byte_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_i16_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_i32_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_i64_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_float_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_double_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_binary_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_bool_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_byte_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_i16_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_i32_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_i64_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_float_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_double_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_binary_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_i64_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_i64_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_string_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_map_i64_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_bool_op_encoded {
+  @thrift.TerseWrite
+  1: bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_byte_op_encoded {
+  @thrift.TerseWrite
+  1: byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_i16_op_encoded {
+  @thrift.TerseWrite
+  1: i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_i32_op_encoded {
+  @thrift.TerseWrite
+  1: i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_i64_op_encoded {
+  @thrift.TerseWrite
+  1: i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_float_op_encoded {
+  @thrift.TerseWrite
+  1: float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_double_op_encoded {
+  @thrift.TerseWrite
+  1: double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_binary_op_encoded {
+  @thrift.TerseWrite
+  1: binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_string_op_encoded {
+  @thrift.TerseWrite
+  1: string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_bool_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_bool_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_byte_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: byte field_1 = 1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_byte_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_i16_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i16 field_1 = 2;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i16_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_i32_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i32 field_1 = 3;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i32_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_i64_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i64 field_1 = 4;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i64_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_float_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: float field_1 = 5;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_float_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_double_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: double field_1 = 6;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_double_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_binary_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: binary field_1 = "7";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_binary_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_string_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: string field_1 = "8";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_string_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_bool_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_bool_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_byte_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: byte field_1 = 10;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_byte_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_i16_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i16 field_1 = 20;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i16_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_i32_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i32 field_1 = 30;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i32_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_i64_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i64 field_1 = 40;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i64_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_float_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: float field_1 = 50;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_float_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_double_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: double field_1 = 60;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_double_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_binary_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: binary field_1 = "70";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_binary_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_terse_string_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: string field_1 = "80";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_string_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_bool_box_op_encoded {
+  @thrift.Box
+  1: optional list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_bool_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_byte_box_op_encoded {
+  @thrift.Box
+  1: optional list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_byte_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i16_box_op_encoded {
+  @thrift.Box
+  1: optional list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i16_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i32_box_op_encoded {
+  @thrift.Box
+  1: optional list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i32_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_i64_box_op_encoded {
+  @thrift.Box
+  1: optional list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_i64_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_float_box_op_encoded {
+  @thrift.Box
+  1: optional list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_float_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_double_box_op_encoded {
+  @thrift.Box
+  1: optional list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_double_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_binary_box_op_encoded {
+  @thrift.Box
+  1: optional list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_binary_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_list_string_box_op_encoded {
+  @thrift.Box
+  1: optional list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_list_string_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_set_string_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_set_i64_box_op_encoded {
+  @thrift.Box
+  1: optional set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_set_i64_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_bool_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_bool_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_byte_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_byte_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i16_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i16_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i32_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i32_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_i64_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_i64_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_float_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_float_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_double_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_double_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_binary_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_binary_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_string_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_bool_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_bool_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_byte_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_byte_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i16_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i16_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i32_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i32_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i64_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_i64_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_float_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_float_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_double_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_double_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_binary_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_binary_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_string_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_set_string_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_string_set_i64_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_string_set_i64_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_set_string_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_optional_map_i64_set_i64_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_optional_map_i64_set_i64_box_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_list_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_list_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_list_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_list_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_list_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_list_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_list_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_list_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_list_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_set_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_string_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_string_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_string_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_string_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_string_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_string_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_string_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_string_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_string_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_bool_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_byte_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_i16_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_i32_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_float_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_double_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_binary_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_string_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_string_set_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_set_string_op_encoded")
+@cpp.UseOpEncode
+struct struct_adapted_map_i64_set_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_set_i64_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_bool_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_byte_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i16_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i32_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_float_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_double_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_binary_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_list_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_list_string_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_set_string_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_set_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_set_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_bool_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_byte_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i16_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i32_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_float_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_double_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_binary_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_string_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_bool_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_byte_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i16_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i32_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_float_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_double_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_binary_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_string_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_set_string_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_string_set_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_string_set_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_set_string_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_map_i64_set_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_map_i64_set_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+struct struct_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_string_lazy_op_encoded")
 exception exception_empty {
 } (thrift.uri="facebook.com/thrift/test/testset/exception_empty")
 exception exception_list_bool {
@@ -4779,6 +7775,3002 @@ exception exception_string_lazy {
   @cpp.Lazy
   1: string field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_string_lazy")
+@cpp.UseOpEncode
+exception exception_empty_op_encoded {
+} (thrift.uri="facebook.com/thrift/test/testset/exception_empty_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_bool_op_encoded {
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_byte_op_encoded {
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i16_op_encoded {
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i32_op_encoded {
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i64_op_encoded {
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_float_op_encoded {
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_double_op_encoded {
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_binary_op_encoded {
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_string_op_encoded {
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_set_string_op_encoded {
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_set_i64_op_encoded {
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_bool_op_encoded {
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_byte_op_encoded {
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i16_op_encoded {
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i32_op_encoded {
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i64_op_encoded {
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_float_op_encoded {
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_double_op_encoded {
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_binary_op_encoded {
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_string_op_encoded {
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_bool_op_encoded {
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_byte_op_encoded {
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i16_op_encoded {
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i32_op_encoded {
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i64_op_encoded {
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_float_op_encoded {
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_double_op_encoded {
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_binary_op_encoded {
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_string_op_encoded {
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_set_string_op_encoded {
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_set_i64_op_encoded {
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_set_string_op_encoded {
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_set_i64_op_encoded {
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_bool_op_encoded {
+  1: bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_byte_op_encoded {
+  1: byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_i16_op_encoded {
+  1: i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_i32_op_encoded {
+  1: i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_i64_op_encoded {
+  1: i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_float_op_encoded {
+  1: float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_double_op_encoded {
+  1: double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_binary_op_encoded {
+  1: binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_string_op_encoded {
+  1: string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_bool_custom_default_op_encoded {
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_bool_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_byte_custom_default_op_encoded {
+  1: byte field_1 = 1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_byte_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_i16_custom_default_op_encoded {
+  1: i16 field_1 = 2;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_i16_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_i32_custom_default_op_encoded {
+  1: i32 field_1 = 3;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_i32_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_i64_custom_default_op_encoded {
+  1: i64 field_1 = 4;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_i64_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_float_custom_default_op_encoded {
+  1: float field_1 = 5;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_float_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_double_custom_default_op_encoded {
+  1: double field_1 = 6;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_double_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_binary_custom_default_op_encoded {
+  1: binary field_1 = "7";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_binary_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_string_custom_default_op_encoded {
+  1: string field_1 = "8";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_string_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_bool_alternative_custom_default_op_encoded {
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_bool_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_byte_alternative_custom_default_op_encoded {
+  1: byte field_1 = 10;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_byte_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_i16_alternative_custom_default_op_encoded {
+  1: i16 field_1 = 20;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_i16_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_i32_alternative_custom_default_op_encoded {
+  1: i32 field_1 = 30;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_i32_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_i64_alternative_custom_default_op_encoded {
+  1: i64 field_1 = 40;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_i64_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_float_alternative_custom_default_op_encoded {
+  1: float field_1 = 50;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_float_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_double_alternative_custom_default_op_encoded {
+  1: double field_1 = 60;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_double_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_binary_alternative_custom_default_op_encoded {
+  1: binary field_1 = "70";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_binary_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_string_alternative_custom_default_op_encoded {
+  1: string field_1 = "80";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_string_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_bool_op_encoded {
+  1: optional list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_byte_op_encoded {
+  1: optional list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i16_op_encoded {
+  1: optional list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i32_op_encoded {
+  1: optional list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i64_op_encoded {
+  1: optional list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_float_op_encoded {
+  1: optional list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_double_op_encoded {
+  1: optional list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_binary_op_encoded {
+  1: optional list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_string_op_encoded {
+  1: optional list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_set_string_op_encoded {
+  1: optional set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_set_i64_op_encoded {
+  1: optional set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_bool_op_encoded {
+  1: optional map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_byte_op_encoded {
+  1: optional map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i16_op_encoded {
+  1: optional map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i32_op_encoded {
+  1: optional map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i64_op_encoded {
+  1: optional map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_float_op_encoded {
+  1: optional map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_double_op_encoded {
+  1: optional map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_binary_op_encoded {
+  1: optional map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_string_op_encoded {
+  1: optional map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_bool_op_encoded {
+  1: optional map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_byte_op_encoded {
+  1: optional map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i16_op_encoded {
+  1: optional map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i32_op_encoded {
+  1: optional map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i64_op_encoded {
+  1: optional map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_float_op_encoded {
+  1: optional map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_double_op_encoded {
+  1: optional map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_binary_op_encoded {
+  1: optional map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_string_op_encoded {
+  1: optional map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_string_op_encoded {
+  1: optional map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i64_op_encoded {
+  1: optional map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_string_op_encoded {
+  1: optional map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i64_op_encoded {
+  1: optional map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_bool_op_encoded {
+  1: optional bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_byte_op_encoded {
+  1: optional byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_i16_op_encoded {
+  1: optional i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_i32_op_encoded {
+  1: optional i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_i64_op_encoded {
+  1: optional i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_float_op_encoded {
+  1: optional float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_double_op_encoded {
+  1: optional double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_binary_op_encoded {
+  1: optional binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_string_op_encoded {
+  1: optional string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_bool_custom_default_op_encoded {
+  1: optional bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_bool_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_byte_custom_default_op_encoded {
+  1: optional byte field_1 = 1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_byte_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_i16_custom_default_op_encoded {
+  1: optional i16 field_1 = 2;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_i16_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_i32_custom_default_op_encoded {
+  1: optional i32 field_1 = 3;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_i32_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_i64_custom_default_op_encoded {
+  1: optional i64 field_1 = 4;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_i64_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_float_custom_default_op_encoded {
+  1: optional float field_1 = 5;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_float_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_double_custom_default_op_encoded {
+  1: optional double field_1 = 6;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_double_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_binary_custom_default_op_encoded {
+  1: optional binary field_1 = "7";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_binary_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_string_custom_default_op_encoded {
+  1: optional string field_1 = "8";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_string_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_bool_alternative_custom_default_op_encoded {
+  1: optional bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_bool_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_byte_alternative_custom_default_op_encoded {
+  1: optional byte field_1 = 10;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_byte_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_i16_alternative_custom_default_op_encoded {
+  1: optional i16 field_1 = 20;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_i16_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_i32_alternative_custom_default_op_encoded {
+  1: optional i32 field_1 = 30;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_i32_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_i64_alternative_custom_default_op_encoded {
+  1: optional i64 field_1 = 40;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_i64_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_float_alternative_custom_default_op_encoded {
+  1: optional float field_1 = 50;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_float_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_double_alternative_custom_default_op_encoded {
+  1: optional double field_1 = 60;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_double_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_binary_alternative_custom_default_op_encoded {
+  1: optional binary field_1 = "70";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_binary_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_string_alternative_custom_default_op_encoded {
+  1: optional string field_1 = "80";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_string_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_bool_op_encoded {
+  1: required list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_byte_op_encoded {
+  1: required list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_i16_op_encoded {
+  1: required list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_i32_op_encoded {
+  1: required list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_i64_op_encoded {
+  1: required list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_float_op_encoded {
+  1: required list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_double_op_encoded {
+  1: required list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_binary_op_encoded {
+  1: required list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_string_op_encoded {
+  1: required list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_set_string_op_encoded {
+  1: required set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_set_i64_op_encoded {
+  1: required set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_bool_op_encoded {
+  1: required map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_byte_op_encoded {
+  1: required map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_i16_op_encoded {
+  1: required map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_i32_op_encoded {
+  1: required map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_i64_op_encoded {
+  1: required map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_float_op_encoded {
+  1: required map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_double_op_encoded {
+  1: required map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_binary_op_encoded {
+  1: required map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_string_op_encoded {
+  1: required map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_bool_op_encoded {
+  1: required map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_byte_op_encoded {
+  1: required map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_i16_op_encoded {
+  1: required map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_i32_op_encoded {
+  1: required map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_i64_op_encoded {
+  1: required map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_float_op_encoded {
+  1: required map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_double_op_encoded {
+  1: required map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_binary_op_encoded {
+  1: required map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_string_op_encoded {
+  1: required map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_set_string_op_encoded {
+  1: required map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_set_i64_op_encoded {
+  1: required map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_string_op_encoded {
+  1: required map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_i64_op_encoded {
+  1: required map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: required map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_list_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_string_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_string_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_map_i64_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: required map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_map_i64_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_bool_op_encoded {
+  1: required bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_byte_op_encoded {
+  1: required byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_i16_op_encoded {
+  1: required i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_i32_op_encoded {
+  1: required i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_i64_op_encoded {
+  1: required i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_float_op_encoded {
+  1: required float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_double_op_encoded {
+  1: required double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_binary_op_encoded {
+  1: required binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_string_op_encoded {
+  1: required string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_bool_custom_default_op_encoded {
+  1: required bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_bool_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_byte_custom_default_op_encoded {
+  1: required byte field_1 = 1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_byte_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_i16_custom_default_op_encoded {
+  1: required i16 field_1 = 2;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_i16_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_i32_custom_default_op_encoded {
+  1: required i32 field_1 = 3;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_i32_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_i64_custom_default_op_encoded {
+  1: required i64 field_1 = 4;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_i64_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_float_custom_default_op_encoded {
+  1: required float field_1 = 5;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_float_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_double_custom_default_op_encoded {
+  1: required double field_1 = 6;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_double_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_binary_custom_default_op_encoded {
+  1: required binary field_1 = "7";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_binary_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_string_custom_default_op_encoded {
+  1: required string field_1 = "8";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_string_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_bool_alternative_custom_default_op_encoded {
+  1: required bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_bool_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_byte_alternative_custom_default_op_encoded {
+  1: required byte field_1 = 10;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_byte_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_i16_alternative_custom_default_op_encoded {
+  1: required i16 field_1 = 20;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_i16_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_i32_alternative_custom_default_op_encoded {
+  1: required i32 field_1 = 30;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_i32_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_i64_alternative_custom_default_op_encoded {
+  1: required i64 field_1 = 40;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_i64_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_float_alternative_custom_default_op_encoded {
+  1: required float field_1 = 50;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_float_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_double_alternative_custom_default_op_encoded {
+  1: required double field_1 = 60;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_double_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_binary_alternative_custom_default_op_encoded {
+  1: required binary field_1 = "70";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_binary_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_required_string_alternative_custom_default_op_encoded {
+  1: required string field_1 = "80";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_required_string_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_bool_op_encoded {
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_byte_op_encoded {
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_i16_op_encoded {
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_i32_op_encoded {
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_i64_op_encoded {
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_float_op_encoded {
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_double_op_encoded {
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_binary_op_encoded {
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_string_op_encoded {
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_set_i64_op_encoded {
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_bool_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_byte_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_i16_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_i32_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_i64_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_float_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_double_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_binary_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_bool_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_byte_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_i16_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_i32_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_i64_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_float_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_double_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_binary_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_i64_op_encoded {
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_string_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_i64_op_encoded {
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_string_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_map_i64_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_bool_op_encoded {
+  @thrift.TerseWrite
+  1: bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_byte_op_encoded {
+  @thrift.TerseWrite
+  1: byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_i16_op_encoded {
+  @thrift.TerseWrite
+  1: i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_i32_op_encoded {
+  @thrift.TerseWrite
+  1: i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_i64_op_encoded {
+  @thrift.TerseWrite
+  1: i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_float_op_encoded {
+  @thrift.TerseWrite
+  1: float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_double_op_encoded {
+  @thrift.TerseWrite
+  1: double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_binary_op_encoded {
+  @thrift.TerseWrite
+  1: binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_string_op_encoded {
+  @thrift.TerseWrite
+  1: string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_bool_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_bool_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_byte_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: byte field_1 = 1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_byte_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_i16_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i16 field_1 = 2;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i16_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_i32_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i32 field_1 = 3;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i32_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_i64_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i64 field_1 = 4;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i64_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_float_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: float field_1 = 5;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_float_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_double_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: double field_1 = 6;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_double_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_binary_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: binary field_1 = "7";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_binary_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_string_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: string field_1 = "8";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_string_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_bool_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_bool_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_byte_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: byte field_1 = 10;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_byte_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_i16_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i16 field_1 = 20;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i16_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_i32_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i32 field_1 = 30;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i32_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_i64_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: i64 field_1 = 40;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i64_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_float_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: float field_1 = 50;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_float_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_double_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: double field_1 = 60;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_double_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_binary_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: binary field_1 = "70";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_binary_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_terse_string_alternative_custom_default_op_encoded {
+  @thrift.TerseWrite
+  1: string field_1 = "80";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_string_alternative_custom_default_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_bool_box_op_encoded {
+  @thrift.Box
+  1: optional list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_bool_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_byte_box_op_encoded {
+  @thrift.Box
+  1: optional list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_byte_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i16_box_op_encoded {
+  @thrift.Box
+  1: optional list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i16_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i32_box_op_encoded {
+  @thrift.Box
+  1: optional list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i32_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_i64_box_op_encoded {
+  @thrift.Box
+  1: optional list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_i64_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_float_box_op_encoded {
+  @thrift.Box
+  1: optional list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_float_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_double_box_op_encoded {
+  @thrift.Box
+  1: optional list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_double_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_binary_box_op_encoded {
+  @thrift.Box
+  1: optional list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_binary_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_list_string_box_op_encoded {
+  @thrift.Box
+  1: optional list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_list_string_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_set_string_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_set_i64_box_op_encoded {
+  @thrift.Box
+  1: optional set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_set_i64_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_bool_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_bool_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_byte_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_byte_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i16_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i16_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i32_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i32_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_i64_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_i64_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_float_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_float_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_double_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_double_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_binary_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_binary_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_string_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_bool_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_bool_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_byte_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_byte_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i16_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i16_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i32_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i32_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i64_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_i64_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_float_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_float_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_double_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_double_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_binary_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_binary_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_string_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_set_string_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_string_set_i64_box_op_encoded {
+  @thrift.Box
+  1: optional map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_string_set_i64_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_string_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_set_string_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_optional_map_i64_set_i64_box_op_encoded {
+  @thrift.Box
+  1: optional map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_optional_map_i64_set_i64_box_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_list_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_list_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_list_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_list_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_list_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_list_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_list_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_list_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_list_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_set_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_string_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_string_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_string_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_string_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_string_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_string_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_string_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_string_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_string_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_bool_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_bool_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_byte_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_byte_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_i16_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_i16_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_i32_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_i32_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_float_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_float_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_double_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_double_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_binary_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_binary_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_string_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_string_set_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_set_string_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_set_string_op_encoded")
+@cpp.UseOpEncode
+exception exception_adapted_map_i64_set_i64_op_encoded {
+  @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
+  @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_set_i64_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_bool_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_byte_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i16_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i32_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_float_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_double_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_binary_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_list_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_list_string_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_set_string_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_set_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_set_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_bool_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_byte_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i16_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i32_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_float_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_double_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_binary_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_string_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_bool_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_bool_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_byte_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_byte_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i16_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i16_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i32_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i32_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_float_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_float_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_double_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_double_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_binary_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_binary_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_string_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_set_string_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_string_set_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_string_set_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_set_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_set_string_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_map_i64_set_i64_lazy_op_encoded {
+  @cpp.Lazy
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_map_i64_set_i64_lazy_op_encoded")
+@cpp.UseOpEncode
+exception exception_string_lazy_op_encoded {
+  @cpp.Lazy
+  1: string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_string_lazy_op_encoded")
 union union_empty {
 } (thrift.uri="facebook.com/thrift/test/testset/union_empty")
 union union_list_bool {
@@ -5345,3 +11337,678 @@ union union_string {
   1: string field_1;
   2: string field_2;
 } (thrift.uri="facebook.com/thrift/test/testset/union_string")
+@cpp.UseOpEncode
+union union_empty_op_encoded {
+} (thrift.uri="facebook.com/thrift/test/testset/union_empty_op_encoded")
+@cpp.UseOpEncode
+union union_list_bool_op_encoded {
+  1: list<bool> field_1;
+  2: list<bool> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_bool_op_encoded")
+@cpp.UseOpEncode
+union union_list_byte_op_encoded {
+  1: list<byte> field_1;
+  2: list<byte> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_byte_op_encoded")
+@cpp.UseOpEncode
+union union_list_i16_op_encoded {
+  1: list<i16> field_1;
+  2: list<i16> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_i16_op_encoded")
+@cpp.UseOpEncode
+union union_list_i32_op_encoded {
+  1: list<i32> field_1;
+  2: list<i32> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_i32_op_encoded")
+@cpp.UseOpEncode
+union union_list_i64_op_encoded {
+  1: list<i64> field_1;
+  2: list<i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_i64_op_encoded")
+@cpp.UseOpEncode
+union union_list_float_op_encoded {
+  1: list<float> field_1;
+  2: list<float> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_float_op_encoded")
+@cpp.UseOpEncode
+union union_list_double_op_encoded {
+  1: list<double> field_1;
+  2: list<double> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_double_op_encoded")
+@cpp.UseOpEncode
+union union_list_binary_op_encoded {
+  1: list<binary> field_1;
+  2: list<binary> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_binary_op_encoded")
+@cpp.UseOpEncode
+union union_list_string_op_encoded {
+  1: list<string> field_1;
+  2: list<string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_string_op_encoded")
+@cpp.UseOpEncode
+union union_set_string_op_encoded {
+  1: set<string> field_1;
+  2: set<string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_set_string_op_encoded")
+@cpp.UseOpEncode
+union union_set_i64_op_encoded {
+  1: set<i64> field_1;
+  2: set<i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_set_i64_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_bool_op_encoded {
+  1: map<string, bool> field_1;
+  2: map<string, bool> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_bool_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_byte_op_encoded {
+  1: map<string, byte> field_1;
+  2: map<string, byte> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_byte_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_i16_op_encoded {
+  1: map<string, i16> field_1;
+  2: map<string, i16> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_i16_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_i32_op_encoded {
+  1: map<string, i32> field_1;
+  2: map<string, i32> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_i32_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_i64_op_encoded {
+  1: map<string, i64> field_1;
+  2: map<string, i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_i64_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_float_op_encoded {
+  1: map<string, float> field_1;
+  2: map<string, float> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_float_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_double_op_encoded {
+  1: map<string, double> field_1;
+  2: map<string, double> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_double_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_binary_op_encoded {
+  1: map<string, binary> field_1;
+  2: map<string, binary> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_binary_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_string_op_encoded {
+  1: map<string, string> field_1;
+  2: map<string, string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_string_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_bool_op_encoded {
+  1: map<i64, bool> field_1;
+  2: map<i64, bool> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_bool_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_byte_op_encoded {
+  1: map<i64, byte> field_1;
+  2: map<i64, byte> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_byte_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_i16_op_encoded {
+  1: map<i64, i16> field_1;
+  2: map<i64, i16> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_i16_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_i32_op_encoded {
+  1: map<i64, i32> field_1;
+  2: map<i64, i32> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_i32_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_i64_op_encoded {
+  1: map<i64, i64> field_1;
+  2: map<i64, i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_i64_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_float_op_encoded {
+  1: map<i64, float> field_1;
+  2: map<i64, float> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_float_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_double_op_encoded {
+  1: map<i64, double> field_1;
+  2: map<i64, double> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_double_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_binary_op_encoded {
+  1: map<i64, binary> field_1;
+  2: map<i64, binary> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_binary_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_string_op_encoded {
+  1: map<i64, string> field_1;
+  2: map<i64, string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_string_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_set_string_op_encoded {
+  1: map<string, set<string>> field_1;
+  2: map<string, set<string>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_set_string_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_set_i64_op_encoded {
+  1: map<string, set<i64>> field_1;
+  2: map<string, set<i64>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_set_i64_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_set_string_op_encoded {
+  1: map<i64, set<string>> field_1;
+  2: map<i64, set<string>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_set_string_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_set_i64_op_encoded {
+  1: map<i64, set<i64>> field_1;
+  2: map<i64, set<i64>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_set_i64_op_encoded")
+@cpp.UseOpEncode
+union union_list_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<bool> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: list<bool> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<byte> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: list<byte> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i16> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: list<i16> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i32> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: list<i32> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i64> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: list<i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<float> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: list<float> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<double> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: list<double> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<binary> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: list<binary> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<string> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: list<string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: set<string> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: set<string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: set<i64> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: set<i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, bool> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<string, bool> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, byte> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<string, byte> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, i16> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<string, i16> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, i32> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<string, i32> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, i64> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<string, i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, float> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<string, float> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, double> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<string, double> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, binary> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<string, binary> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, string> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<string, string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_bool_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, bool> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<i64, bool> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_bool_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_byte_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, byte> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<i64, byte> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_byte_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_i16_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, i16> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<i64, i16> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_i16_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_i32_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, i32> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<i64, i32> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_i32_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, i64> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<i64, i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_float_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, float> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<i64, float> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_float_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_double_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, double> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<i64, double> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_double_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_binary_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, binary> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<i64, binary> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_binary_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, string> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<i64, string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<string, set<string>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<string, set<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<string, set<i64>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_set_string_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<i64, set<string>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_set_string_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_set_i64_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: map<i64, set<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: map<i64, set<i64>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_set_i64_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<bool> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: list<bool> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<byte> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: list<byte> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<i16> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: list<i16> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<i32> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: list<i32> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<i64> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: list<i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<float> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: list<float> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<double> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: list<double> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<binary> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: list<binary> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_list_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: list<string> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: list<string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_list_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: set<string> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: set<string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: set<i64> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: set<i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, bool> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<string, bool> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, byte> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<string, byte> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, i16> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<string, i16> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, i32> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<string, i32> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, i64> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<string, i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, float> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<string, float> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, double> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<string, double> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, binary> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<string, binary> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, string> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<string, string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_bool_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, bool> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<i64, bool> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_bool_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_byte_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, byte> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<i64, byte> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_byte_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_i16_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, i16> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<i64, i16> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_i16_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_i32_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, i32> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<i64, i32> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_i32_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, i64> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<i64, i64> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_float_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, float> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<i64, float> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_float_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_double_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, double> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<i64, double> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_double_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_binary_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, binary> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<i64, binary> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_binary_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, string> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<i64, string> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<string, set<string>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_string_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<string, set<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<string, set<i64>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_string_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_set_string_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, set<string>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<i64, set<string>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_set_string_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_map_i64_set_i64_shared_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: map<i64, set<i64>> field_1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: map<i64, set<i64>> field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_map_i64_set_i64_shared_cpp_ref_op_encoded")
+@cpp.UseOpEncode
+union union_bool_op_encoded {
+  1: bool field_1;
+  2: bool field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_bool_op_encoded")
+@cpp.UseOpEncode
+union union_byte_op_encoded {
+  1: byte field_1;
+  2: byte field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_byte_op_encoded")
+@cpp.UseOpEncode
+union union_i16_op_encoded {
+  1: i16 field_1;
+  2: i16 field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_i16_op_encoded")
+@cpp.UseOpEncode
+union union_i32_op_encoded {
+  1: i32 field_1;
+  2: i32 field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_i32_op_encoded")
+@cpp.UseOpEncode
+union union_i64_op_encoded {
+  1: i64 field_1;
+  2: i64 field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_i64_op_encoded")
+@cpp.UseOpEncode
+union union_float_op_encoded {
+  1: float field_1;
+  2: float field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_float_op_encoded")
+@cpp.UseOpEncode
+union union_double_op_encoded {
+  1: double field_1;
+  2: double field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_double_op_encoded")
+@cpp.UseOpEncode
+union union_binary_op_encoded {
+  1: binary field_1;
+  2: binary field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_binary_op_encoded")
+@cpp.UseOpEncode
+union union_string_op_encoded {
+  1: string field_1;
+  2: string field_2;
+} (thrift.uri="facebook.com/thrift/test/testset/union_string_op_encoded")

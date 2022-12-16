@@ -94,14 +94,41 @@ using to_gtest_types_t = typename to_gtest_types<Ts>::type;
   _THRIFT_INST_TESTSET_BATCH(Test, structs, 21); \
   _THRIFT_INST_TESTSET_BATCH(Test, structs, 22); \
   _THRIFT_INST_TESTSET_BATCH(Test, structs, 23); \
-  _THRIFT_INST_TESTSET_LAST(Test, structs, 24)
-_THRIFT_CHECK_TESTSET_BATCHES(structs, 25);
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 24); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 25); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 26); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 27); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 28); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 29); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 30); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 31); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 32); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 33); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 34); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 35); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 36); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 37); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 38); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 39); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 40); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 41); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 42); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 43); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 44); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 45); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 46); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 47); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 48); \
+  _THRIFT_INST_TESTSET_LAST(Test, structs, 49)
+_THRIFT_CHECK_TESTSET_BATCHES(structs, 50);
 
 #define THRIFT_INST_TESTSET_UNIONS(Test)       \
   _THRIFT_INST_TESTSET_BATCH(Test, unions, 0); \
   _THRIFT_INST_TESTSET_BATCH(Test, unions, 1); \
-  _THRIFT_INST_TESTSET_LAST(Test, unions, 2)
-_THRIFT_CHECK_TESTSET_BATCHES(unions, 3);
+  _THRIFT_INST_TESTSET_BATCH(Test, unions, 2); \
+  _THRIFT_INST_TESTSET_BATCH(Test, unions, 3); \
+  _THRIFT_INST_TESTSET_LAST(Test, unions, 4)
+_THRIFT_CHECK_TESTSET_BATCHES(unions, 5);
 
 #define THRIFT_INST_TESTSET_ALL(Test) \
   THRIFT_INST_TESTSET_STRUCTS(Test);  \

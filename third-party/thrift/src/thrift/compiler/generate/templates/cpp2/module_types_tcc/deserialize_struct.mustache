@@ -166,7 +166,7 @@ void <%struct:cpp_underlying_name%>::__fbthrift_read_field_<%field:cpp_name%>_im
   ProtocolReader reader;
   reader.setInput(&<%#field:lazy_ref?%>*<%/field:lazy_ref?%>__fbthrift_serializedData_.<%field:cpp_name%>);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   <% > module_types_tcc/deserialize_field%>
 }
 <%/field:lazy?%>

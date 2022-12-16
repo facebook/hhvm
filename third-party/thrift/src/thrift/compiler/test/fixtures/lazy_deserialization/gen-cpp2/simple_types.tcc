@@ -493,7 +493,7 @@ void LazyFoo::__fbthrift_read_field_field3_impl() const {
   ProtocolReader reader;
   reader.setInput(&__fbthrift_serializedData_.field3);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   this->__fbthrift_field_field3 = ::std::vector<double>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
@@ -504,7 +504,7 @@ void LazyFoo::__fbthrift_read_field_field4_impl() const {
   ProtocolReader reader;
   reader.setInput(&*__fbthrift_serializedData_.field4);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   this->__fbthrift_field_field4 = ::std::vector<::std::int32_t>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);
@@ -1058,7 +1058,7 @@ void OptionalLazyFoo::__fbthrift_read_field_field3_impl() const {
   ProtocolReader reader;
   reader.setInput(&__fbthrift_serializedData_.field3);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   this->__fbthrift_field_field3 = ::std::vector<double>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
@@ -1069,7 +1069,7 @@ void OptionalLazyFoo::__fbthrift_read_field_field4_impl() const {
   ProtocolReader reader;
   reader.setInput(&__fbthrift_serializedData_.field4);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   this->__fbthrift_field_field4 = ::std::vector<::std::int32_t>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);
@@ -1404,7 +1404,7 @@ void LazyCppRef::__fbthrift_read_field_field1_impl() const {
   ProtocolReader reader;
   reader.setInput(&__fbthrift_serializedData_.field1);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::int32_t>>>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, *ptr, _readState);
@@ -1416,7 +1416,7 @@ void LazyCppRef::__fbthrift_read_field_field2_impl() const {
   ProtocolReader reader;
   reader.setInput(&__fbthrift_serializedData_.field2);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::vector<::std::int32_t>>>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, *ptr, _readState);
@@ -1428,7 +1428,7 @@ void LazyCppRef::__fbthrift_read_field_field3_impl() const {
   ProtocolReader reader;
   reader.setInput(&__fbthrift_serializedData_.field3);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::vector<::std::int32_t>>>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, *ptr, _readState);
@@ -1440,7 +1440,7 @@ void LazyCppRef::__fbthrift_read_field_field4_impl() const {
   ProtocolReader reader;
   reader.setInput(&__fbthrift_serializedData_.field4);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::int32_t>>>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, *ptr, _readState);

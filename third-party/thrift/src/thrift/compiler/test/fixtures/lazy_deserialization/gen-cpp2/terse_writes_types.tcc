@@ -473,7 +473,7 @@ void TerseLazyFoo::__fbthrift_read_field_field3_impl() const {
   ProtocolReader reader;
   reader.setInput(&__fbthrift_serializedData_.field3);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   this->__fbthrift_field_field3 = ::std::vector<double>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
@@ -484,7 +484,7 @@ void TerseLazyFoo::__fbthrift_read_field_field4_impl() const {
   ProtocolReader reader;
   reader.setInput(&__fbthrift_serializedData_.field4);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   this->__fbthrift_field_field4 = ::std::vector<::std::int32_t>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);
@@ -1052,7 +1052,7 @@ void TerseOptionalLazyFoo::__fbthrift_read_field_field3_impl() const {
   ProtocolReader reader;
   reader.setInput(&__fbthrift_serializedData_.field3);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   this->__fbthrift_field_field3 = ::std::vector<double>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, this->__fbthrift_field_field3, _readState);
@@ -1063,7 +1063,7 @@ void TerseOptionalLazyFoo::__fbthrift_read_field_field4_impl() const {
   ProtocolReader reader;
   reader.setInput(&__fbthrift_serializedData_.field4);
   ProtocolReader *iprot = &reader;
-  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  FOLLY_MAYBE_UNUSED apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
   _readState.beforeSubobject(iprot);
   this->__fbthrift_field_field4 = ::std::vector<::std::int32_t>();
   ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_field4, _readState);

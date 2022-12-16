@@ -67,6 +67,7 @@ enum class FieldModifier {{
   CustomDefault,
   AlternativeCustomDefault,
   Adapter,
+  OpEncode,
 }};
 
 namespace detail {{
@@ -176,6 +177,24 @@ EXCEPTION_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "exception_{}",
     Target.THRIFT: "exception {}",
     Target.CPP2: CPP2_TYPE_NS + "::exception_t<{}>",
+}
+
+OP_ENCODED_STRUCT_TRANSFORM: Dict[Target, str] = {
+    Target.NAME: "struct_{}_op_encoded",
+    Target.THRIFT: "@cpp.UseOpEncode\nstruct {}",
+    Target.CPP2: CPP2_TYPE_NS + "::struct_t<{}>|FieldModifier::OpEncode",
+}
+
+OP_ENCODED_UNION_TRANSFORM: Dict[Target, str] = {
+    Target.NAME: "union_{}_op_encoded",
+    Target.THRIFT: "@cpp.UseOpEncode\nunion {}",
+    Target.CPP2: CPP2_TYPE_NS + "::union_t<{}>|FieldModifier::OpEncode",
+}
+
+OP_ENCODED_EXCEPTION_TRANSFORM: Dict[Target, str] = {
+    Target.NAME: "exception_{}_op_encoded",
+    Target.THRIFT: "@cpp.UseOpEncode\nexception {}",
+    Target.CPP2: CPP2_TYPE_NS + "::exception_t<{}>|FieldModifier::OpEncode",
 }
 
 LIST_TRANSFORM: Dict[Target, str] = {
@@ -514,14 +533,23 @@ def gen_thrift(path: str) -> None:
         # Generate all structs.
         struct_fields = gen_struct_fields(Target.THRIFT)
         classes.extend(print_thrift_defs(STRUCT_TRANSFORM, struct_fields, file=file))
+        classes.extend(
+            print_thrift_defs(OP_ENCODED_STRUCT_TRANSFORM, struct_fields, file=file)
+        )
 
         # Generate all exceptions, with the struct fields.
         print_thrift_defs(EXCEPTION_TRANSFORM, struct_fields, file=file)
+        print_thrift_defs(OP_ENCODED_EXCEPTION_TRANSFORM, struct_fields, file=file)
 
         # Generate all unions.
         union_fields = gen_union_fields(Target.THRIFT)
         classes.extend(
             print_thrift_defs(UNION_TRANSFORM, union_fields, count=2, file=file)
+        )
+        classes.extend(
+            print_thrift_defs(
+                OP_ENCODED_UNION_TRANSFORM, union_fields, count=2, file=file
+            )
         )
 
 
@@ -538,9 +566,11 @@ def print_cpp2_specialization(
     for field, value_mods in fields.items():
         splits = value_mods.split("|")
         value_t = splits[0]
-        mods = ", ".join(splits[1:])
-        by_type = transform[Target.NAME].format("ByFieldType")
+        mods = splits[1:]
+        mods += transform[Target.CPP2].format(field).split("|")[1:]
+        mods = ", ".join(mods)
         name = transform[Target.NAME].format(field)
+        by_type = name.split("_")[0] + "_ByFieldType"
         print(CPP2_SPECIALIZE_TEMPLATE.format(by_type, value_t, mods, name), file=file)
 
 
@@ -551,13 +581,18 @@ def gen_cpp2(path: str) -> None:
         # Generate specialization for all structs.
         struct_fields = gen_struct_fields(Target.CPP2)
         print_cpp2_specialization(STRUCT_TRANSFORM, struct_fields, file=file)
+        print_cpp2_specialization(OP_ENCODED_STRUCT_TRANSFORM, struct_fields, file=file)
 
         # Generate specialization for all exceptions.
         print_cpp2_specialization(EXCEPTION_TRANSFORM, struct_fields, file=file)
+        print_cpp2_specialization(
+            OP_ENCODED_EXCEPTION_TRANSFORM, struct_fields, file=file
+        )
 
         # Generate specialization for all unions.
         union_fields = gen_union_fields(Target.CPP2)
         print_cpp2_specialization(UNION_TRANSFORM, union_fields, file=file)
+        print_cpp2_specialization(OP_ENCODED_UNION_TRANSFORM, union_fields, file=file)
 
         print(CPP2_FOOTER, file=file)
 

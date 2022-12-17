@@ -1383,6 +1383,9 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
         if (isMaybeThisPropAttr(env, name, AttrLateInit)) {
           return Effects::Throws;
         }
+        if (!isDefinitelyThisPropAttr(env, name, AttrInitialSatisfiesTC)) {
+          return Effects::Throws;
+        }
         if (quiet) return Effects::None;
         auto const elem = thisPropType(env, name);
         assertx(elem.has_value());

@@ -814,6 +814,8 @@ Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
         unreachable();
         return;
       }
+      assertx(!toSet.is(BBottom));
+      assertx(!toPush.is(BBottom));
 
       // Write the element back into the array
       auto const set = array_do_set(env, key, toSet);
@@ -1746,6 +1748,9 @@ Effects miFinalSetOpElem(ISS& env, int32_t nDiscard,
     env, nDiscard, key, keyLoc,
     [&] (const Type& lhsTy) {
       auto const result = typeSetOp(subop, lhsTy, rhsTy);
+      if (result.is(BBottom)) {
+        return std::make_tuple(TBottom, TBottom, Effects::AlwaysThrows);
+      }
       return std::make_tuple(result, result, Effects::Throws);
     }
   );
@@ -1758,6 +1763,9 @@ Effects miFinalIncDecElem(ISS& env, int32_t nDiscard,
     env, nDiscard, key, keyLoc,
     [&] (const Type& before) {
       auto const after = typeIncDec(subop, before);
+      if (after.is(BBottom)) {
+        return std::make_tuple(TBottom, TBottom, Effects::AlwaysThrows);
+      }
       return std::make_tuple(
         after,
         isPre(subop) ? after : before,

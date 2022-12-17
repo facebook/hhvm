@@ -67,9 +67,7 @@ Type typeToInt(Type ty) {
 
 template <class CellOp>
 Type typeArithImpl(Type t1, Type t2, CellOp op) {
-  // TODO: this should be TBottom, but HHBBC straight up chokes on stuff like
-  // vec[null + 58] in Type::checkInvariants
-  if (!t1.couldBe(BNum) || !t2.couldBe(BNum)) return TNum;
+  if (!t1.couldBe(BNum) || !t2.couldBe(BNum)) return TBottom;
   if (auto t = eval_const(t1, t2, op)) return *t;
   if (op == tvMod) return TInt;
 

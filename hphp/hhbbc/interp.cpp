@@ -1208,7 +1208,9 @@ void arithImpl(ISS& env, const Op& /*op*/, Fun fun) {
   constprop(env);
   auto const t1 = popC(env);
   auto const t2 = popC(env);
-  push(env, fun(t2, t1));
+  auto r = fun(t2, t1);
+  if (r.is(BBottom)) unreachable(env);
+  push(env, std::move(r));
 }
 
 void in(ISS& env, const bc::Add& op)    { arithImpl(env, op, typeAdd); }
@@ -1227,6 +1229,7 @@ void in(ISS& env, const bc::BitNot& /*op*/) {
   auto const t = popC(env);
   auto const v = tv(t);
   if (!t.couldBe(BInt | BStr | BSStr | BLazyCls | BCls)) {
+    unreachable(env);
     return push(env, TBottom);
   }
 
@@ -3298,6 +3301,7 @@ void in(ISS& env, const bc::SetOpL& op) {
 
   auto resultTy = typeSetOp(op.subop2, loc, t1);
   setLoc(env, op.loc1, resultTy);
+  if (resultTy.is(BBottom)) unreachable(env);
   push(env, std::move(resultTy));
 }
 

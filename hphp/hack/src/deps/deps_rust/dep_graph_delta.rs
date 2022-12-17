@@ -39,9 +39,13 @@ impl DepGraphDelta {
         for (dependency, dependents) in other.rdeps {
             match self.rdeps.entry(dependency) {
                 Occupied(e) => {
-                    e.into_mut().extend(dependents);
+                    let ds = e.into_mut();
+                    let n = ds.len();
+                    ds.extend(dependents);
+                    self.num_edges += ds.len() - n;
                 }
                 Vacant(e) => {
+                    self.num_edges += dependents.len();
                     e.insert(dependents);
                 }
             }

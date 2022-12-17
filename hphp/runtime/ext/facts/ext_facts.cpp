@@ -714,7 +714,7 @@ Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
     // current request's `.hhvmconfig.hdf` file lives and resolve relative to
     // that.
     auto requestOptions = g_context->getRepoOptionsForRequest();
-    if (!requestOptions) {
+    if (!requestOptions || requestOptions->path().empty()) {
       return std::nullopt;
     }
     return fs::path{requestOptions->path()}.parent_path() / maybeRoot;
@@ -944,7 +944,7 @@ Array HHVM_FUNCTION(
       return {std::string{maybeRoot.toStrNR().get()->slice()}};
     }
     auto* repoOptions = g_context->getRepoOptionsForRequest();
-    if (!repoOptions) {
+    if (!repoOptions || repoOptions->path().empty()) {
       SystemLib::throwInvalidOperationExceptionObject(
           "Could not find a root directory for the current request");
     }

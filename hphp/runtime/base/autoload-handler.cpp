@@ -65,7 +65,7 @@ FactsStore* getFactsForRequest() {
   }
 
   auto* repoOptions = g_context->getRepoOptionsForRequest();
-  if (!repoOptions) {
+  if (!repoOptions || repoOptions->path().empty()) {
     return nullptr;
   }
 

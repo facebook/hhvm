@@ -63,8 +63,7 @@ namespace HH {
     'generic_types' => ?varray<mixed>,
     'root_name' => ?string,
     'access_list' => ?varray<string>,
-  /* HH_FIXME[2071] */
-  'fields' => ?darray,
+    'fields' => ?darray<arraykey, mixed>,
     'allows_unknown_fields' => ?bool,
     'is_cls_cns' => ?bool,
     'optional_shape_field' => ?bool,
@@ -82,16 +81,15 @@ namespace HH {
     'classname' => ?classname<T>,
     // for tuples
     'elem_types' => ?varray<mixed>,
-    'return_type' => mixed,
     // for functions
+    'return_type' => mixed,
     'param_types' => ?varray<mixed>,
     // for arrays, classes
     'generic_types' => ?varray<mixed>,
     'root_name' => ?string,
     'access_list' => ?varray<string>,
     // for shapes
-  /* HH_FIXME[2071] */
-  'fields' => ?darray,
+    'fields' => ?darray<arraykey, mixed>,
     'allows_unknown_fields' => ?bool,
     'is_cls_cns' => ?bool,
     'optional_shape_field' => ?bool,

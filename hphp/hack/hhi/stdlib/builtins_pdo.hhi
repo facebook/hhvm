@@ -186,6 +186,5 @@ class PDOStatement {
   public function __sleep()[]: HH\FIXME\MISSING_RETURN_TYPE;
 }
 class PDOException extends RuntimeException {
-  /* HH_FIXME[2071] */
-  public ?varray $errorInfo = null;
+  public ?varray<mixed> $errorInfo = null;
 }

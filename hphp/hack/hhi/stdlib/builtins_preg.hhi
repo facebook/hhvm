@@ -11,15 +11,13 @@
 <<__PHPStdLib>>
 function preg_grep(
   string $pattern,
-  /* HH_FIXME[2071] */
-  varray_or_darray $input,
+  varray_or_darray<arraykey, mixed> $input,
   int $flags = 0,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_grep_with_error(
   string $pattern,
-  /* HH_FIXME[2071] */
-  varray_or_darray $input,
+  varray_or_darray<arraykey, mixed> $input,
   inout ?int $error,
   int $flags = 0,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;

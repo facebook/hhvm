@@ -57,7 +57,7 @@ function array_change_key_case<Tv>(
   KeyedContainer<arraykey, Tv> $input,
   int $upper = CASE_LOWER,
 )[]: darray<arraykey, Tv>;
-/** inner container will be a varray or darray depending on $preserve_keys */
+/** inner container will be a varray<mixed> or darray<arraykey, mixed> depending on $preserve_keys */
 <<__PHPStdLib>>
 function array_chunk<Tv>(
   Container<Tv> $input,

@@ -11,8 +11,7 @@
 class ImagickDraw {
 
   // Methods
-  /* HH_FIXME[2071] */
-  public function affine(darray $affine): bool;
+  public function affine(darray<arraykey, mixed> $affine): bool;
   public function annotation(float $x, float $y, string $text): bool;
   public function arc(
     float $sx,
@@ -22,8 +21,7 @@ class ImagickDraw {
     float $sd,
     float $ed,
   ): bool;
-  /* HH_FIXME[2071] */
-  public function bezier(varray $coordinates): bool;
+  public function bezier(varray<mixed> $coordinates): bool;
   public function circle(float $ox, float $oy, float $px, float $py): bool;
   public function clear(): bool;
   public function __clone(): void;
@@ -62,8 +60,7 @@ class ImagickDraw {
   public function getGravity(): int;
   public function getStrokeAntialias(): bool;
   public function getStrokeColor(): ImagickPixel;
-  /* HH_FIXME[2071] */
-  public function getStrokeDashArray(): varray;
+  public function getStrokeDashArray(): varray<mixed>;
   public function getStrokeDashOffset(): float;
   public function getStrokeLineCap(): int;
   public function getStrokeLineJoin(): int;
@@ -156,10 +153,8 @@ class ImagickDraw {
   public function pathMoveToRelative(float $x, float $y): bool;
   public function pathStart(): bool;
   public function point(float $x, float $y): bool;
-  /* HH_FIXME[2071] */
-  public function polygon(varray $coordinates): bool;
-  /* HH_FIXME[2071] */
-  public function polyline(varray $coordinates): bool;
+  public function polygon(varray<mixed> $coordinates): bool;
+  public function polyline(varray<mixed> $coordinates): bool;
   public function pop(): bool;
   public function popClipPath(): bool;
   public function popDefs(): bool;
@@ -207,8 +202,7 @@ class ImagickDraw {
   public function setStrokeColor(
     HH\FIXME\MISSING_PARAM_TYPE $stroke_pixel,
   ): bool;
-  /* HH_FIXME[2071] */
-  public function setStrokeDashArray(varray $dashArray): bool;
+  public function setStrokeDashArray(varray<mixed> $dashArray): bool;
   public function setStrokeDashOffset(float $dash_offset): bool;
   public function setStrokeLineCap(int $linecap): bool;
   public function setStrokeLineJoin(int $linejoin): bool;

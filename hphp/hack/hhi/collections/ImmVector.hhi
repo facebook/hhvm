@@ -125,7 +125,7 @@ namespace HH {
      *
      * @return - An `array` with the integer keys from the current `ImmVector`.
      */
-    public readonly function toKeysArray()[]: varray<Tv>;
+    public readonly function toKeysArray()[]: varray<int>;
 
     /**
      * Returns an iterator that points to beginning of the current `ImmVector`.

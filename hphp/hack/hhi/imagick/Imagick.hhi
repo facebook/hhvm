@@ -537,11 +537,9 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     Imagick $image,
     int $channelType,
     int $metricType,
-  /* HH_FIXME[2071] */
-  ): varray;
+  ): varray<mixed>;
   public function compareImageLayers(int $method): Imagick;
-  /* HH_FIXME[2071] */
-  public function compareImages(Imagick $compare, int $metric): varray;
+  public function compareImages(Imagick $compare, int $metric): varray<mixed>;
   public function compositeImage(
     Imagick $composite_object,
     int $composite,
@@ -557,8 +555,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function convolveImage(
-    /* HH_FIXME[2071] */
-    varray $kernel,
+    varray<mixed> $kernel,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function cropImage(int $width, int $height, int $x, int $y): bool;
@@ -575,8 +572,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function displayImages(string $servername): bool;
   public function distortImage(
     int $method,
-    /* HH_FIXME[2071] */
-    varray $arguments,
+    varray<mixed> $arguments,
     bool $bestfit,
   ): bool;
   public function drawImage(ImagickDraw $draw): bool;
@@ -597,8 +593,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     int $height,
     string $map,
     int $storage,
-  /* HH_FIXME[2071] */
-  ): varray;
+  ): varray<int>;
   public function extentImage(int $width, int $height, int $x, int $y): bool;
   public function flattenImages(): Imagick;
   public function flipImage(): bool;
@@ -621,8 +616,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   ): bool;
   public function functionImage(
     int $function,
-    /* HH_FIXME[2071] */
-    varray $arguments,
+    varray<mixed> $arguments,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): bool;
   public function fxImage(
@@ -652,8 +646,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function getImageArtifact(string $artifact): string;
   public function getImageBackgroundColor(): ImagickPixel;
   public function getImageBlob(): string;
-  /* HH_FIXME[2071] */
-  public function getImageBluePrimary(): darray;
+  public function getImageBluePrimary(): darray<arraykey, mixed>;
   public function getImageBorderColor(): ImagickPixel;
   public function getImageChannelDepth(int $channel): int;
   public function getImageChannelDistortion(
@@ -666,18 +659,13 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     int $metric,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): float;
-  /* HH_FIXME[2071] */
-  public function getImageChannelExtrema(int $channel): darray;
+  public function getImageChannelExtrema(int $channel): darray<arraykey, mixed>;
   public function getImageChannelKurtosis(
     int $channel = \Imagick::CHANNEL_DEFAULT,
-  /* HH_FIXME[2071] */
-  ): darray;
-  /* HH_FIXME[2071] */
-  public function getImageChannelMean(int $channel): darray;
-  /* HH_FIXME[2071] */
-  public function getImageChannelRange(int $channel): darray;
-  /* HH_FIXME[2071] */
-  public function getImageChannelStatistics(): darray;
+  ): darray<arraykey, mixed>;
+  public function getImageChannelMean(int $channel): darray<arraykey, mixed>;
+  public function getImageChannelRange(int $channel): darray<arraykey, mixed>;
+  public function getImageChannelStatistics(): darray<arraykey, mixed>;
   public function getImageClipMask(): Imagick;
   public function getImageColormapColor(int $index): ImagickPixel;
   public function getImageColors(): int;
@@ -693,19 +681,15 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     int $metric,
   ): float;
   */
-  /* HH_FIXME[2071] */
-  public function getImageExtrema(): darray;
+  public function getImageExtrema(): darray<arraykey, mixed>;
   public function getImageFilename(): string;
   public function getImageFormat(): string;
   public function getImageGamma(): float;
-  /* HH_FIXME[2071] */
-  public function getImageGeometry(): darray;
+  public function getImageGeometry(): darray<string, int>;
   public function getImageGravity(): int;
-  /* HH_FIXME[2071] */
-  public function getImageGreenPrimary(): darray;
+  public function getImageGreenPrimary(): darray<arraykey, mixed>;
   public function getImageHeight(): int;
-  /* HH_FIXME[2071] */
-  public function getImageHistogram(): varray;
+  public function getImageHistogram(): varray<ImagickPixel>;
   public function getImageIndex(): int;
   public function getImageInterlaceScheme(): int;
   public function getImageInterpolateMethod(): int;
@@ -715,23 +699,19 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function getImageMatteColor(): ImagickPixel;
   public function getImageMimeType(): string;
   public function getImageOrientation(): int;
-  /* HH_FIXME[2071] */
-  public function getImagePage(): darray;
+  public function getImagePage(): darray<arraykey, mixed>;
   public function getImagePixelColor(int $x, int $y): ImagickPixel;
   public function getImageProfile(string $name): string;
   public function getImageProfiles(
     string $pattern = "*",
     bool $with_values = true,
-  /* HH_FIXME[2071] */
-  ): varray_or_darray;
+  ): varray_or_darray<arraykey, mixed>;
   public function getImageProperties(
     string $pattern = "*",
     bool $with_values = true,
-  /* HH_FIXME[2071] */
-  ): varray_or_darray;
+  ): varray_or_darray<arraykey, mixed>;
   public function getImageProperty(string $name): string;
-  /* HH_FIXME[2071] */
-  public function getImageRedPrimary(): darray;
+  public function getImageRedPrimary(): darray<arraykey, mixed>;
   public function getImageRegion(
     int $width,
     int $height,
@@ -739,8 +719,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     int $y,
   ): Imagick;
   public function getImageRenderingIntent(): int;
-  /* HH_FIXME[2071] */
-  public function getImageResolution(): darray;
+  public function getImageResolution(): darray<string, float>;
   public function getImagesBlob(): string;
   public function getImageScene(): int;
   public function getImageSignature(): string;
@@ -750,16 +729,14 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function getImageType(): int;
   public function getImageUnits(): int;
   public function getImageVirtualPixelMethod(): int;
-  /* HH_FIXME[2071] */
-  public function getImageWhitePoint(): darray;
+  public function getImageWhitePoint(): darray<arraykey, mixed>;
   public function getImageWidth(): int;
   public function getInterlaceScheme(): int;
   public function getIteratorIndex(): int;
   public function getNumberImages(): int;
   public function getOption(string $key): string;
   public static function getPackageName(): string;
-  /* HH_FIXME[2071] */
-  public function getPage(): darray;
+  public function getPage(): darray<arraykey, mixed>;
   public function getPixelIterator(): ImagickPixelIterator;
   public function getPixelRegionIterator(
     int $x,
@@ -768,28 +745,22 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     int $rows,
   ): ImagickPixelIterator;
   public function getPointSize(): float;
-  /* HH_FIXME[2071] */
-  public static function getQuantumDepth(): darray;
-  /* HH_FIXME[2071] */
-  public static function getQuantumRange(): darray;
+  public static function getQuantumDepth(): darray<arraykey, mixed>;
+  public static function getQuantumRange(): darray<arraykey, mixed>;
   public static function getReleaseDate(): string;
   public static function getResource(int $type): int;
   public static function getResourceLimit(int $type): int;
-  /* HH_FIXME[2071] */
-  public function getSamplingFactors(): varray;
-  /* HH_FIXME[2071] */
-  public function getSize(): darray;
+  public function getSamplingFactors(): varray<mixed>;
+  public function getSize(): darray<arraykey, mixed>;
   public function getSizeOffset(): int;
-  /* HH_FIXME[2071] */
-  public static function getVersion(): darray;
+  public static function getVersion(): darray<arraykey, mixed>;
   public function haldClutImage(
     Imagick $clut,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): bool;
   public function hasNextImage(): bool;
   public function hasPreviousImage(): bool;
-  /* HH_FIXME[2071] */
-  public function identifyImage(bool $appendRawOutput = false): darray;
+  public function identifyImage(bool $appendRawOutput = false): darray<arraykey, mixed>;
   public function implodeImage(float $radius): bool;
   public function importImagePixels(
     int $x,
@@ -798,8 +769,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     int $height,
     string $map,
     int $storage,
-    /* HH_FIXME[2071] */
-    varray $pixels,
+    varray<mixed> $pixels,
   ): bool;
   public function labelImage(string $label): bool;
   public function levelImage(
@@ -925,12 +895,9 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     ImagickDraw $properties,
     string $text,
     HH\FIXME\MISSING_PARAM_TYPE $multiline = null,
-  /* HH_FIXME[2071] */
-  ): darray;
-  /* HH_FIXME[2071] */
-  public static function queryFonts(string $pattern = "*"): varray;
-  /* HH_FIXME[2071] */
-  public static function queryFormats(string $pattern = "*"): varray;
+  ): darray<arraykey, mixed>;
+  public static function queryFonts(string $pattern = "*"): varray<mixed>;
+  public static function queryFormats(string $pattern = "*"): varray<mixed>;
   public function radialBlurImage(
     float $angle,
     int $channel = \Imagick::CHANNEL_ALL,
@@ -953,10 +920,8 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
     resource $filehandle,
     string $fileName = "",
   ): bool;
-  /* HH_FIXME[2071] */
-  public function readImages(varray $files): bool;
-  /* HH_FIXME[2071] */
-  public function recolorImage(varray $matrix): bool;
+  public function readImages(varray<mixed> $files): bool;
+  public function recolorImage(varray<mixed> $matrix): bool;
   public function reduceNoiseImage(float $radius): bool;
   public function remapImage(Imagick $replacement, int $dither): bool;
   public function removeImage(): bool;
@@ -1076,8 +1041,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function setPointSize(float $point_size): bool;
   public function setResolution(float $x_resolution, float $y_resolution): bool;
   public static function setResourceLimit(int $type, int $limit): bool;
-  /* HH_FIXME[2071] */
-  public function setSamplingFactors(varray $factors): bool;
+  public function setSamplingFactors(varray<mixed> $factors): bool;
   public function setSize(int $columns, int $rows): bool;
   public function setSizeOffset(int $columns, int $rows, int $offset): bool;
   public function setType(int $image_type): bool;
@@ -1113,8 +1077,7 @@ class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
   public function solarizeImage(int $threshold): bool;
   public function sparseColorImage(
     int $SPARSE_METHOD,
-    /* HH_FIXME[2071] */
-    varray $arguments,
+    varray<mixed> $arguments,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): bool;
   public function spliceImage(int $width, int $height, int $x, int $y): bool;

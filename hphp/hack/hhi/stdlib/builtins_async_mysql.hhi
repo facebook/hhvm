@@ -92,8 +92,7 @@ namespace {
   }
 
   class AsyncMysqlConnectionPool {
-    /* HH_FIXME[2071] */
-    public function __construct(darray $options) {}
+    public function __construct(darray<arraykey, mixed> $options) {}
     public function connect(
       string $host,
       int $port,
@@ -130,8 +129,13 @@ namespace {
       dict<string, string> $query_attributes = dict[],
     ): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)> {}
 
-    /* HH_FIXME[2071] */
-    public function getPoolStats(): darray {}
+    public function getPoolStats(): shape(
+      'created_pool_connections' => int,
+      'destroyed_pool_connections' => int,
+      'connections_requested' => int,
+      'pool_hits' => int,
+      'pool_misses' => int,
+    ) {}
   }
 
   class MySSLContextProvider {

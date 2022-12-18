@@ -379,18 +379,15 @@ class ReflectionTypeConstant implements Reflector {
   public function getDeclaringClass()[]: ReflectionClass;
   public function getClass()[]: ReflectionClass;
   public function getAssignedTypeText()[]: ?string;
-  /* HH_FIXME[2071] */
-  public function getTypeStructure()[]: darray;
+  public function getTypeStructure()[]: darray<arraykey, mixed>;
 }
 
 class ReflectionTypeAlias implements Reflector {
   private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
   final public function __construct(string $name)[];
   public function __toString()[]: string;
-  /* HH_FIXME[2071] */
-  public function getTypeStructure()[]: darray;
-  /* HH_FIXME[2071] */
-  public function getResolvedTypeStructure()[]: darray;
+  public function getTypeStructure()[]: darray<arraykey, mixed>;
+  public function getResolvedTypeStructure()[]: darray<arraykey, mixed>;
   public function getAssignedTypeText()[]: string;
   public function getName()[]: string;
   public function getFileName()[]: string;
@@ -407,8 +404,7 @@ class ReflectionType implements IPureStringishObject {
   private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
   public function __construct(
     ?Reflector $param_or_ret = null,
-    /* HH_FIXME[2071] */
-    darray $type_hint_info = darray[],
+    darray<arraykey, mixed> $type_hint_info = darray[],
   );
   public function allowsNull()[]: bool;
   public function isBuiltin()[]: bool;

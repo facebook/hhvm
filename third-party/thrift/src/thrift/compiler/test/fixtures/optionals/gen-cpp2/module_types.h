@@ -209,6 +209,8 @@ class Color final  {
     ::apache::thrift::ident::alpha
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -496,6 +498,8 @@ class Vehicle final  {
     ::apache::thrift::ident::name,
     ::apache::thrift::ident::hasAC
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5};
 
 
   void __fbthrift_clear();
@@ -861,6 +865,8 @@ class Person final  {
     ::apache::thrift::ident::afraidOfAnimal,
     ::apache::thrift::ident::vehicles
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10};
 
 
   void __fbthrift_clear();

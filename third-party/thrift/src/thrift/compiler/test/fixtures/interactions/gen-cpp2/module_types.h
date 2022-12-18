@@ -53,6 +53,8 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
     ::apache::thrift::ident::message
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

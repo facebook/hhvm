@@ -189,6 +189,8 @@ class TrivialTypesStruct final  {
     ::apache::thrift::ident::fieldE
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -553,6 +555,8 @@ class ContainerStruct final  {
     ::apache::thrift::ident::fieldG,
     ::apache::thrift::ident::fieldH
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,12,2,3,4,5,6,7,8};
 
 
   void __fbthrift_clear();
@@ -1038,6 +1042,8 @@ class ExampleUnion final  {
     ::apache::thrift::ident::fieldA,
     ::apache::thrift::ident::fieldB
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
 
 
   void __fbthrift_clear();

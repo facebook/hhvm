@@ -105,6 +105,8 @@ class FOLLY_EXPORT Fiery : public virtual apache::thrift::TException {
     ::apache::thrift::ident::message
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -244,6 +246,8 @@ class FOLLY_EXPORT Serious : public virtual apache::thrift::TException {
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::sonnet
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
 
 
   void __fbthrift_clear();
@@ -388,6 +392,8 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
     ::apache::thrift::ident::error_message,
     ::apache::thrift::ident::internal_error_message
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
 
 
   void __fbthrift_clear();
@@ -589,6 +595,8 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
     ::apache::thrift::ident::internal_error_message
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -789,6 +797,8 @@ class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::
     ::apache::thrift::ident::error_code
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -984,6 +994,8 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
     ::apache::thrift::ident::error_code
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1175,6 +1187,8 @@ class FOLLY_EXPORT Banal : public virtual apache::thrift::TException {
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
 
 
   void __fbthrift_clear();

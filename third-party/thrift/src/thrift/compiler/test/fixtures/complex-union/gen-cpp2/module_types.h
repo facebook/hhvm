@@ -156,6 +156,8 @@ class ComplexUnion final  {
     ::apache::thrift::ident::stringRef
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,5,2,3,9,14};
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -763,6 +765,8 @@ class ListUnion final  {
     ::apache::thrift::ident::stringListValue
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,2,3};
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -1067,6 +1071,8 @@ class DataUnion final  {
     ::apache::thrift::ident::binaryData,
     ::apache::thrift::ident::stringData
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
 
 
   void __fbthrift_clear();
@@ -1374,6 +1380,8 @@ class Val final  {
     ::apache::thrift::ident::typedefValue
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,9};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1606,6 +1614,8 @@ class ValUnion final  {
     ::apache::thrift::ident::v1,
     ::apache::thrift::ident::v2
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
 
 
   void __fbthrift_clear();
@@ -1912,6 +1922,8 @@ class VirtualComplexUnion  {
     ::apache::thrift::ident::thingTwo
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -2216,6 +2228,8 @@ class NonCopyableStruct final  {
     ::apache::thrift::ident::num
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -2336,6 +2350,8 @@ class NonCopyableUnion final  {
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::s
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
 
 
   void __fbthrift_clear();

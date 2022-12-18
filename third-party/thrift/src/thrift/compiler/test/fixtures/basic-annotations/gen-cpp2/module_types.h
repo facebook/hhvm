@@ -185,6 +185,8 @@ class MyStructNestedAnnotation final  {
     ::apache::thrift::ident::name
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -312,6 +314,8 @@ class YourUnion final  {
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
 
 
   void __fbthrift_clear();
@@ -462,6 +466,8 @@ class FOLLY_EXPORT YourException : public virtual apache::thrift::TException {
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -558,21 +564,12 @@ class YourStruct final  {
     ::apache::thrift::ident::my_id
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,2,1,3,4,5,6,7,8,9,10};
+
   static constexpr std::size_t __fbthrift_field_size_v = 10;
 
   template<class T>
-  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                   void,
-                                                   ::apache::thrift::field_id<2>,
-                                                   ::apache::thrift::field_id<1>,
-                                                   ::apache::thrift::field_id<3>,
-                                                   ::apache::thrift::field_id<4>,
-                                                   ::apache::thrift::field_id<5>,
-                                                   ::apache::thrift::field_id<6>,
-                                                   ::apache::thrift::field_id<7>,
-                                                   ::apache::thrift::field_id<8>,
-                                                   ::apache::thrift::field_id<9>,
-                                                   ::apache::thrift::field_id<10>>;
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -1278,6 +1275,8 @@ class SecretStruct final  {
     ::apache::thrift::ident::id,
     ::apache::thrift::ident::password
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
 
 
   void __fbthrift_clear();

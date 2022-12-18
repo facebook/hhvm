@@ -678,6 +678,8 @@ class MyStructFloatFieldThrowExp final  {
     ::apache::thrift::ident::myFloatField
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -966,6 +968,8 @@ class MyStructMapFloatThrowExp final  {
     ::apache::thrift::ident::mapListOfFloats
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1140,6 +1144,8 @@ class MyDataItem final  {
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1236,6 +1242,8 @@ class MyStruct final  {
     ::apache::thrift::ident::sByte,
     ::apache::thrift::ident::mListList
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
 
 
   void __fbthrift_clear();
@@ -2753,6 +2761,8 @@ class SimpleStruct final  {
     ::apache::thrift::ident::name
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -2951,6 +2961,8 @@ class ComplexNestedStruct final  {
     ::apache::thrift::ident::mapKeySetValInt,
     ::apache::thrift::ident::mapKeyListValSet
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18};
 
 
   void __fbthrift_clear();
@@ -3949,6 +3961,8 @@ class MyUnion final  {
     ::apache::thrift::ident::intValue
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6};
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -4547,6 +4561,8 @@ class defaultStruct final  {
     ::apache::thrift::ident::emptyMap,
     ::apache::thrift::ident::enumMapDFset
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23};
 
 
   void __fbthrift_clear();
@@ -5773,6 +5789,8 @@ class MyStructTypeDef final  {
     ::apache::thrift::ident::myMapListOfTypeDef
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -6323,6 +6341,8 @@ class MyUnionFloatFieldThrowExp final  {
     ::apache::thrift::ident::complexNestedStruct
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -6774,6 +6794,8 @@ class TypeRemapped final  {
     ::apache::thrift::ident::binaryTestBuffer
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -7056,6 +7078,8 @@ class FOLLY_EXPORT emptyXcep : public virtual apache::thrift::TException {
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -7138,6 +7162,8 @@ class FOLLY_EXPORT reqXcep : public virtual apache::thrift::TException {
     ::apache::thrift::ident::message,
     ::apache::thrift::ident::errorCode
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
 
 
   void __fbthrift_clear();
@@ -7330,6 +7356,8 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
     ::apache::thrift::ident::message,
     ::apache::thrift::ident::errorCode
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
 
 
   void __fbthrift_clear();
@@ -7534,6 +7562,8 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
     ::apache::thrift::ident::structError,
     ::apache::thrift::ident::lsMap
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6};
 
 
   void __fbthrift_clear();

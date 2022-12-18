@@ -320,11 +320,12 @@ class MyStruct final  {
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
   template<class T>
-  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                   void>;
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -438,25 +439,12 @@ class StructLevelTerseStruct final  {
     ::apache::thrift::ident::struct_field
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+
   static constexpr std::size_t __fbthrift_field_size_v = 14;
 
   template<class T>
-  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                   void,
-                                                   ::apache::thrift::field_id<1>,
-                                                   ::apache::thrift::field_id<2>,
-                                                   ::apache::thrift::field_id<3>,
-                                                   ::apache::thrift::field_id<4>,
-                                                   ::apache::thrift::field_id<5>,
-                                                   ::apache::thrift::field_id<6>,
-                                                   ::apache::thrift::field_id<7>,
-                                                   ::apache::thrift::field_id<8>,
-                                                   ::apache::thrift::field_id<9>,
-                                                   ::apache::thrift::field_id<10>,
-                                                   ::apache::thrift::field_id<11>,
-                                                   ::apache::thrift::field_id<12>,
-                                                   ::apache::thrift::field_id<13>,
-                                                   ::apache::thrift::field_id<14>>;
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -1404,39 +1392,12 @@ class FieldLevelTerseStruct final  {
     ::apache::thrift::ident::struct_field
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
+
   static constexpr std::size_t __fbthrift_field_size_v = 28;
 
   template<class T>
-  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                   void,
-                                                   ::apache::thrift::field_id<1>,
-                                                   ::apache::thrift::field_id<2>,
-                                                   ::apache::thrift::field_id<3>,
-                                                   ::apache::thrift::field_id<4>,
-                                                   ::apache::thrift::field_id<5>,
-                                                   ::apache::thrift::field_id<6>,
-                                                   ::apache::thrift::field_id<7>,
-                                                   ::apache::thrift::field_id<8>,
-                                                   ::apache::thrift::field_id<9>,
-                                                   ::apache::thrift::field_id<10>,
-                                                   ::apache::thrift::field_id<11>,
-                                                   ::apache::thrift::field_id<12>,
-                                                   ::apache::thrift::field_id<13>,
-                                                   ::apache::thrift::field_id<14>,
-                                                   ::apache::thrift::field_id<15>,
-                                                   ::apache::thrift::field_id<16>,
-                                                   ::apache::thrift::field_id<17>,
-                                                   ::apache::thrift::field_id<18>,
-                                                   ::apache::thrift::field_id<19>,
-                                                   ::apache::thrift::field_id<20>,
-                                                   ::apache::thrift::field_id<21>,
-                                                   ::apache::thrift::field_id<22>,
-                                                   ::apache::thrift::field_id<23>,
-                                                   ::apache::thrift::field_id<24>,
-                                                   ::apache::thrift::field_id<25>,
-                                                   ::apache::thrift::field_id<26>,
-                                                   ::apache::thrift::field_id<27>,
-                                                   ::apache::thrift::field_id<28>>;
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),

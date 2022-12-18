@@ -72,6 +72,8 @@ class Struct final  {
     ::apache::thrift::ident::second
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -245,6 +247,8 @@ class BigStruct final  {
     ::apache::thrift::ident::s,
     ::apache::thrift::ident::id
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
 
 
   void __fbthrift_clear();

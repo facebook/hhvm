@@ -93,6 +93,8 @@ class Fields final  {
     ::apache::thrift::ident::injected_field
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,100};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -220,6 +222,8 @@ class FieldsInjectedToEmptyStruct final  {
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::injected_field
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,-1100};
 
 
   void __fbthrift_clear();
@@ -349,6 +353,8 @@ class FieldsInjectedToStruct final  {
     ::apache::thrift::ident::string_field,
     ::apache::thrift::ident::injected_field
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,-1100};
 
 
   void __fbthrift_clear();
@@ -537,6 +543,8 @@ class FieldsInjectedWithIncludedStruct final  {
     ::apache::thrift::ident::injected_structured_annotation_field,
     ::apache::thrift::ident::injected_unstructured_annotation_field
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,-1100,-1101,-1102};
 
 
   void __fbthrift_clear();

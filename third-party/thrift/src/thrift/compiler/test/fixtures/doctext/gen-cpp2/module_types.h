@@ -130,6 +130,8 @@ class A final  {
     ::apache::thrift::ident::useless_field
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -255,6 +257,8 @@ class U final  {
     ::apache::thrift::ident::i,
     ::apache::thrift::ident::s
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
 
 
   void __fbthrift_clear();
@@ -545,6 +549,8 @@ class FOLLY_EXPORT Bang : public virtual apache::thrift::TException {
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::message
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
 
 
   void __fbthrift_clear();

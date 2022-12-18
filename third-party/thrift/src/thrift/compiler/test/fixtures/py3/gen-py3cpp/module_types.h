@@ -342,6 +342,8 @@ class SimpleStruct final  {
     ::apache::thrift::ident::hidden_field
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -840,6 +842,8 @@ class AdaptedUnion final  {
     ::apache::thrift::ident::best
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -1056,6 +1060,8 @@ class FOLLY_EXPORT SimpleException : public virtual apache::thrift::TException {
     ::apache::thrift::ident::err_code
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1192,6 +1198,8 @@ class OptionalRefStruct final  {
     ::apache::thrift::ident::optional_blob
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1320,6 +1328,8 @@ class GeneratedStruct final  {
     ::apache::thrift::ident::the
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1444,6 +1454,8 @@ class FOLLY_EXPORT HiddenException : public virtual apache::thrift::TException {
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::test
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
 
 
   void __fbthrift_clear();
@@ -1588,6 +1600,8 @@ class ComplexStruct final  {
     ::apache::thrift::ident::cdef,
     ::apache::thrift::ident::bytes_with_cpp_type
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9};
 
 
   void __fbthrift_clear();
@@ -2154,6 +2168,8 @@ class BinaryUnion final  {
     ::apache::thrift::ident::iobuf_val
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -2375,6 +2391,8 @@ class BinaryUnionStruct final  {
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::u
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
 
 
   void __fbthrift_clear();

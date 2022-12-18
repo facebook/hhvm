@@ -219,6 +219,8 @@ class Foo final  {
     ::apache::thrift::ident::field4
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -496,6 +498,8 @@ class LazyFoo final  {
     ::apache::thrift::ident::field3,
     ::apache::thrift::ident::field4
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
 
 
   void __fbthrift_clear();
@@ -779,6 +783,8 @@ class OptionalFoo final  {
     ::apache::thrift::ident::field4
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1060,6 +1066,8 @@ class OptionalLazyFoo final  {
     ::apache::thrift::ident::field3,
     ::apache::thrift::ident::field4
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
 
 
   void __fbthrift_clear();
@@ -1345,6 +1353,8 @@ class LazyCppRef final  {
     ::apache::thrift::ident::field4
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1617,6 +1627,8 @@ class IndexedFoo final  {
     ::apache::thrift::ident::field4,
     ::apache::thrift::ident::field_id_to_size
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,100,1,2,3,4,101};
 
 
   void __fbthrift_clear();
@@ -2004,6 +2016,8 @@ class OptionalIndexedFoo final  {
     ::apache::thrift::ident::field_id_to_size
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,100,1,2,3,4,101};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -2387,6 +2401,8 @@ class Empty final  {
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
 
 
   void __fbthrift_clear();

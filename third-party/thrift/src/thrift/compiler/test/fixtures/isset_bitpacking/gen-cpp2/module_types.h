@@ -135,6 +135,8 @@ class Default final  {
     ::apache::thrift::ident::field4
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -440,6 +442,8 @@ class NonAtomic final  {
     ::apache::thrift::ident::field3,
     ::apache::thrift::ident::field4
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
 
 
   void __fbthrift_clear();
@@ -747,6 +751,8 @@ class Atomic final  {
     ::apache::thrift::ident::field4
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1052,6 +1058,8 @@ class AtomicFoo final  {
     ::apache::thrift::ident::field3,
     ::apache::thrift::ident::field4
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
 
 
   void __fbthrift_clear();

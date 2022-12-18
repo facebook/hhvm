@@ -126,6 +126,8 @@ class containerStruct2 final  {
     ::apache::thrift::ident::opt_fieldE
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,101,201,2,102,202,3,103,203,4,5,105,205};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

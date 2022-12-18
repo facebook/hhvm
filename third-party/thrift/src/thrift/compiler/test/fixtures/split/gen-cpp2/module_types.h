@@ -158,6 +158,8 @@ class MyDataItem final  {
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -233,6 +235,8 @@ class MyStruct final  {
     ::apache::thrift::ident::readonly,
     ::apache::thrift::ident::idempotent
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7};
 
 
   void __fbthrift_clear();
@@ -677,6 +681,8 @@ class MyUnion final  {
     ::apache::thrift::ident::myStruct,
     ::apache::thrift::ident::myDataItem
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
 
 
   void __fbthrift_clear();

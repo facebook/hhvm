@@ -233,6 +233,8 @@ class SmallStruct final  {
     ::apache::thrift::ident::small_B
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -431,6 +433,8 @@ class containerStruct final  {
     ::apache::thrift::ident::fieldU,
     ::apache::thrift::ident::fieldX
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23};
 
 
   void __fbthrift_clear();

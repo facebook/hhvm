@@ -220,6 +220,8 @@ class MyStruct final  {
     ::apache::thrift::ident::myBigEnum
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

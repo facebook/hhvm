@@ -49,6 +49,8 @@ class FOLLY_EXPORT FooStreamEx : public virtual apache::thrift::TException {
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -130,6 +132,8 @@ class FOLLY_EXPORT FooEx : public virtual apache::thrift::TException {
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -210,6 +214,8 @@ class FOLLY_EXPORT FooEx2 : public virtual apache::thrift::TException {
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
 
 
   void __fbthrift_clear();

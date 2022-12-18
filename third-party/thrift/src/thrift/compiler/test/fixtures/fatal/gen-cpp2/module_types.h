@@ -1111,6 +1111,8 @@ class union1 final  {
     ::apache::thrift::ident::ue
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,3,5,7};
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -1533,6 +1535,8 @@ class union2 final  {
     ::apache::thrift::ident::us_2,
     ::apache::thrift::ident::ue_2
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
 
 
   void __fbthrift_clear();
@@ -1957,6 +1961,8 @@ class union3 final  {
     ::apache::thrift::ident::ue_3
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -2378,6 +2384,8 @@ class structA final  {
     ::apache::thrift::ident::b
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -2562,6 +2570,8 @@ class unionA final  {
     ::apache::thrift::ident::e,
     ::apache::thrift::ident::a
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5};
 
 
   void __fbthrift_clear();
@@ -3063,6 +3073,8 @@ class structB final  {
     ::apache::thrift::ident::d
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -3269,6 +3281,8 @@ class structC final  {
     ::apache::thrift::ident::o2,
     ::apache::thrift::ident::o3
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30};
 
 
   void __fbthrift_clear();
@@ -4890,6 +4904,8 @@ class struct1 final  {
     ::apache::thrift::ident::field5
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -5287,6 +5303,8 @@ class struct2 final  {
     ::apache::thrift::ident::fieldF,
     ::apache::thrift::ident::fieldG
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7};
 
 
   void __fbthrift_clear();
@@ -5744,6 +5762,8 @@ class struct3 final  {
     ::apache::thrift::ident::fieldQ,
     ::apache::thrift::ident::fieldR
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18};
 
 
   void __fbthrift_clear();
@@ -6749,6 +6769,8 @@ class struct4 final  {
     ::apache::thrift::ident::field3
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,6};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -7028,6 +7050,8 @@ class struct5 final  {
     ::apache::thrift::ident::field3,
     ::apache::thrift::ident::field4
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5};
 
 
   void __fbthrift_clear();
@@ -7367,6 +7391,8 @@ class struct_binary final  {
     ::apache::thrift::ident::bi
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -7496,6 +7522,8 @@ class dep_A_struct final  {
     ::apache::thrift::ident::c,
     ::apache::thrift::ident::i_a
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
 
 
   void __fbthrift_clear();
@@ -7726,6 +7754,8 @@ class dep_B_struct final  {
     ::apache::thrift::ident::i_a
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -7953,6 +7983,8 @@ class annotated final  {
     ::apache::thrift::ident::a
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -8104,6 +8136,8 @@ class union_with_special_names final  {
     ::apache::thrift::ident::field,
     ::apache::thrift::ident::fields
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
 
 
   void __fbthrift_clear();
@@ -10098,6 +10132,8 @@ class struct_with_special_names final  {
     ::apache::thrift::ident::fields
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -11659,16 +11695,12 @@ class struct_with_indirections final  {
     ::apache::thrift::ident::phrase
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5};
+
   static constexpr std::size_t __fbthrift_field_size_v = 5;
 
   template<class T>
-  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                   void,
-                                                   ::apache::thrift::field_id<1>,
-                                                   ::apache::thrift::field_id<2>,
-                                                   ::apache::thrift::field_id<3>,
-                                                   ::apache::thrift::field_id<4>,
-                                                   ::apache::thrift::field_id<5>>;
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -12067,6 +12099,8 @@ class StructWithFieldAdapter final  {
     ::apache::thrift::ident::field
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -12180,6 +12214,8 @@ class UnionWithTypedefFieldAdapter final  {
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::field
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
 
 
   void __fbthrift_clear();

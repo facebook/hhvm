@@ -88,6 +88,8 @@ class Mixin1 final  {
     ::apache::thrift::ident::field1
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -216,6 +218,8 @@ class Mixin2 final  {
     ::apache::thrift::ident::m1,
     ::apache::thrift::ident::field2
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
 
 
   void __fbthrift_clear();
@@ -405,6 +409,8 @@ class Mixin3Base final  {
     ::apache::thrift::ident::field3
   >;
 
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -534,6 +540,8 @@ class Foo final  {
     ::apache::thrift::ident::m2,
     ::apache::thrift::ident::m3
   >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
 
 
   void __fbthrift_clear();

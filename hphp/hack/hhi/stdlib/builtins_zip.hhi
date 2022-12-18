@@ -91,11 +91,13 @@ class ZipArchive {
   public function addGlob(
     string $pattern,
     int $flags = 0,
+    /* HH_FIXME[2071] */
     darray $options = darray[],
   ): bool;
   public function addPattern(
     string $pattern,
     string $path = ".",
+    /* HH_FIXME[2071] */
     darray $options = darray[],
   ): bool;
   public function close(): bool;
@@ -143,7 +145,9 @@ class ZipArchive {
     int $encryption_method,
     string $password,
   ): bool;
+  /* HH_FIXME[2071] */
   public function statIndex(int $index, int $flags = 0): darray;
+  /* HH_FIXME[2071] */
   public function statName(string $name, int $flags = 0): darray;
   public function unchangeAll(): bool;
   public function unchangeArchive(): bool;

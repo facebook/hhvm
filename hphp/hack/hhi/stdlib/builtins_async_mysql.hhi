@@ -92,6 +92,7 @@ namespace {
   }
 
   class AsyncMysqlConnectionPool {
+    /* HH_FIXME[2071] */
     public function __construct(darray $options) {}
     public function connect(
       string $host,
@@ -129,6 +130,7 @@ namespace {
       dict<string, string> $query_attributes = dict[],
     ): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)> {}
 
+    /* HH_FIXME[2071] */
     public function getPoolStats(): darray {}
   }
 

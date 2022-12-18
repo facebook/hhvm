@@ -519,6 +519,7 @@ namespace HH {
      * @return - an `array` containing the values from the current
      *           `KeyedIterable`.
      */
+    /* HH_FIXME[2071] */
     public function toKeysArray(): varray;
     /**
      * Returns an immutable map (`ImmMap`) based on the keys and values of the

@@ -58,6 +58,7 @@ namespace {
     HH\FIXME\MISSING_PARAM_TYPE $class_or_object,
     string $property,
   )[]: ?bool;
+  /* HH_FIXME[2071] */
   function get_object_vars(HH\FIXME\MISSING_PARAM_TYPE $object)[]: ?darray;
 }
 

@@ -11,6 +11,7 @@
 class ImagickDraw {
 
   // Methods
+  /* HH_FIXME[2071] */
   public function affine(darray $affine): bool;
   public function annotation(float $x, float $y, string $text): bool;
   public function arc(
@@ -21,6 +22,7 @@ class ImagickDraw {
     float $sd,
     float $ed,
   ): bool;
+  /* HH_FIXME[2071] */
   public function bezier(varray $coordinates): bool;
   public function circle(float $ox, float $oy, float $px, float $py): bool;
   public function clear(): bool;
@@ -60,6 +62,7 @@ class ImagickDraw {
   public function getGravity(): int;
   public function getStrokeAntialias(): bool;
   public function getStrokeColor(): ImagickPixel;
+  /* HH_FIXME[2071] */
   public function getStrokeDashArray(): varray;
   public function getStrokeDashOffset(): float;
   public function getStrokeLineCap(): int;
@@ -153,7 +156,9 @@ class ImagickDraw {
   public function pathMoveToRelative(float $x, float $y): bool;
   public function pathStart(): bool;
   public function point(float $x, float $y): bool;
+  /* HH_FIXME[2071] */
   public function polygon(varray $coordinates): bool;
+  /* HH_FIXME[2071] */
   public function polyline(varray $coordinates): bool;
   public function pop(): bool;
   public function popClipPath(): bool;
@@ -202,6 +207,7 @@ class ImagickDraw {
   public function setStrokeColor(
     HH\FIXME\MISSING_PARAM_TYPE $stroke_pixel,
   ): bool;
+  /* HH_FIXME[2071] */
   public function setStrokeDashArray(varray $dashArray): bool;
   public function setStrokeDashOffset(float $dash_offset): bool;
   public function setStrokeLineCap(int $linecap): bool;

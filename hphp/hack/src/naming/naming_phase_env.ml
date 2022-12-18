@@ -7,12 +7,9 @@
  *)
 
 module Elab_happly_hint = struct
-  type t = {
-    tparams: SSet.t;
-    in_mode: FileInfo.mode;
-  }
+  type t = { tparams: SSet.t }
 
-  let empty = { tparams = SSet.empty; in_mode = FileInfo.Mstrict }
+  let empty = { tparams = SSet.empty }
 end
 
 module Elab_func_body = struct

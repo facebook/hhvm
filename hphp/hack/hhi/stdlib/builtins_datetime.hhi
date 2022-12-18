@@ -381,6 +381,7 @@ class DateTimeZone {
   const int ALL_WITH_BC;
   const int PER_COUNTRY;
   public function __construct(string $timezone)[];
+  /* HH_FIXME[2071] */
   public function getLocation()[]: darray {}
   public function getName()[]: string {}
   public function getOffset(

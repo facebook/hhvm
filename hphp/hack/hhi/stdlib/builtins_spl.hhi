@@ -163,6 +163,7 @@ class SplFileObject
     string $enclosure = '"',
   ): int;
   public function fread(int $length): string;
+  /* HH_FIXME[2071] */
   public function fscanf(string $format): varray;
   public function fseek(int $offset, int $whence = SEEK_SET): int;
   public function fstat(): darray<arraykey, mixed>;

@@ -41,8 +41,10 @@ namespace {
      */
     public function items()[]: HH\Iterable<Te>;
     public function toVArray(
+    /* HH_FIXME[2071] */
     )[]: varray; /* TODO(T81501116) missing type argument should error */
     public function toDArray(
+    /* HH_FIXME[2071] */
     )[]: darray; /* TODO(T81501116) missing type arguments should error */
   }
 

@@ -479,6 +479,7 @@ namespace HH {
      * @return - The `string` "Pair".
      */
     public function __toString()[]: string;
+    /* HH_FIXME[2071] */
     public function toVArray()[]: varray;
     public function toDArray()[]: darray<int, (Tv1 | Tv2)>;
   }

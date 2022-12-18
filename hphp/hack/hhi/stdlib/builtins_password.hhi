@@ -16,15 +16,18 @@ const int PASSWORD_BCRYPT;
 function password_hash(
   string $password,
   int $algo,
+  /* HH_FIXME[2071] */
   darray $options = darray[],
 ): ?string;
 <<__PHPStdLib>>
 function password_verify(string $password, string $hash): bool;
 <<__PHPStdLib>>
+/* HH_FIXME[2071] */
 function password_get_info(string $hash): darray;
 <<__PHPStdLib>>
 function password_needs_rehash(
   string $password,
   int $algo,
+  /* HH_FIXME[2071] */
   darray $options = darray[],
 ): bool;

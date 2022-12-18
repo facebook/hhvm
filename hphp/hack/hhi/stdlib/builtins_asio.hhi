@@ -24,5 +24,6 @@ namespace HH\Asio {
     Awaitable<mixed> $awaitable,
     int $options = \DEBUG_BACKTRACE_PROVIDE_OBJECT,
     int $limit = 0,
+  /* HH_FIXME[2071] */
   ): ?varray<darray>;
 }

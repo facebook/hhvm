@@ -14,10 +14,12 @@ class ImagickPixel {
   public function clear(): bool;
   public function __construct(string $color = "");
   public function destroy(): bool;
+  /* HH_FIXME[2071] */
   public function getColor(bool $normalized = false): darray;
   public function getColorAsString(): string;
   public function getColorCount(): int;
   public function getColorValue(int $color): float;
+  /* HH_FIXME[2071] */
   public function getHSL(): darray;
   public function isPixelSimilar(
     HH\FIXME\MISSING_PARAM_TYPE $color,

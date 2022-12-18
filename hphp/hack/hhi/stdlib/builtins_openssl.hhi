@@ -255,6 +255,7 @@ function openssl_x509_check_private_key(
 function openssl_x509_checkpurpose(
   HH\FIXME\MISSING_PARAM_TYPE $x509cert,
   int $purpose,
+  /* HH_FIXME[2071] */
   varray $cainfo = varray[],
   string $untrustedfile = "",
 ): HH\FIXME\MISSING_RETURN_TYPE;

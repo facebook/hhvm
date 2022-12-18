@@ -16,11 +16,6 @@ module Env = struct
       =
     tparams
 
-  let in_mode
-      Naming_phase_env.{ elab_happly_hint = Elab_happly_hint.{ in_mode; _ }; _ }
-      =
-    in_mode
-
   let add_tparams ps init =
     List.fold
       ps
@@ -32,46 +27,39 @@ module Env = struct
     let tparams =
       add_tparams ps elab_happly_hint.Naming_phase_env.Elab_happly_hint.tparams
     in
+    let elab_happly_hint = Naming_phase_env.Elab_happly_hint.{ tparams } in
+    Naming_phase_env.{ t with elab_happly_hint }
+
+  let in_class t Aast.{ c_tparams; _ } =
     let elab_happly_hint =
-      Naming_phase_env.Elab_happly_hint.{ elab_happly_hint with tparams }
+      Naming_phase_env.Elab_happly_hint.
+        { tparams = add_tparams c_tparams SSet.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
-  let in_class t Aast.{ c_mode; c_tparams; _ } =
+  let in_fun_def t Aast.{ fd_fun; _ } =
     let elab_happly_hint =
       Naming_phase_env.Elab_happly_hint.
-        { in_mode = c_mode; tparams = add_tparams c_tparams SSet.empty }
+        { tparams = add_tparams fd_fun.Aast.f_tparams SSet.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
-  let in_fun_def t Aast.{ fd_fun; fd_mode; _ } =
+  let in_typedef t Aast.{ t_tparams; _ } =
     let elab_happly_hint =
       Naming_phase_env.Elab_happly_hint.
-        {
-          in_mode = fd_mode;
-          tparams = add_tparams fd_fun.Aast.f_tparams SSet.empty;
-        }
+        { tparams = add_tparams t_tparams SSet.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
-  let in_typedef t Aast.{ t_tparams; t_mode; _ } =
+  let in_gconst t =
     let elab_happly_hint =
-      Naming_phase_env.Elab_happly_hint.
-        { in_mode = t_mode; tparams = add_tparams t_tparams SSet.empty }
+      Naming_phase_env.Elab_happly_hint.{ tparams = SSet.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
-  let in_gconst t Aast.{ cst_mode; _ } =
+  let in_module_def t =
     let elab_happly_hint =
-      Naming_phase_env.Elab_happly_hint.
-        { in_mode = cst_mode; tparams = SSet.empty }
-    in
-    Naming_phase_env.{ t with elab_happly_hint }
-
-  let in_module_def t Aast.{ md_mode; _ } =
-    let elab_happly_hint =
-      Naming_phase_env.Elab_happly_hint.
-        { in_mode = md_mode; tparams = SSet.empty }
+      Naming_phase_env.Elab_happly_hint.{ tparams = SSet.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 end
@@ -164,25 +152,15 @@ let canonical_tycon typarams (pos, name) =
     Tycon (pos, name)
 
 (* TODO[mjt] should we really be special casing `darray`? *)
-let canonicalise_darray in_mode hint_pos pos hints =
+let canonicalise_darray hint_pos pos hints =
   match hints with
-  | [] ->
+  | []
+  | [_] ->
     let err =
-      if not @@ FileInfo.is_hhi in_mode then
-        Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
-      else
-        None
+      Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
     in
     let any = (pos, Aast.Hany) in
     Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cDict), [any; any])), err)
-  | [_] ->
-    let err =
-      if not @@ FileInfo.is_hhi in_mode then
-        Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
-      else
-        None
-    in
-    Ok ((hint_pos, Aast.Hany), err)
   | [key_hint; val_hint] ->
     Ok
       ( ( hint_pos,
@@ -193,14 +171,11 @@ let canonicalise_darray in_mode hint_pos pos hints =
     Error ((hint_pos, Aast.Hany), err)
 
 (* TODO[mjt] should we really be special casing `varray`? *)
-let canonicalise_varray in_mode hint_pos pos hints =
+let canonicalise_varray hint_pos pos hints =
   match hints with
   | [] ->
     let err =
-      if not @@ FileInfo.is_hhi in_mode then
-        Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
-      else
-        None
+      Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
     in
     let any = (pos, Aast.Hany) in
     Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cVec), [any])), err)
@@ -212,14 +187,11 @@ let canonicalise_varray in_mode hint_pos pos hints =
 
 (* TODO[mjt] should we really be special casing `vec_or_dict` both in
    its representation and error handling? *)
-let canonicalise_vec_or_dict in_mode hint_pos pos hints =
+let canonicalise_vec_or_dict hint_pos pos hints =
   match hints with
   | [] ->
     let err =
-      if not @@ FileInfo.is_hhi in_mode then
-        Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
-      else
-        None
+      Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
     in
     let any = (pos, Aast.Hany) in
     Ok ((hint_pos, Aast.Hvec_or_dict (None, any)), err)
@@ -233,7 +205,7 @@ let canonicalise_vec_or_dict in_mode hint_pos pos hints =
 (* After lowering many hints are represented as `Happly(...,...)`. Here
    we canonicalise the representation of type constructor then handle
    errors and further elaboration *)
-let canonicalize_happly in_mode tparams hint_pos tycon hints =
+let canonicalize_happly tparams hint_pos tycon hints =
   match canonical_tycon tparams tycon with
   (* The hint was malformed *)
   | CanonErr err -> Error ((hint_pos, Aast.Herr), Err.naming err)
@@ -285,9 +257,9 @@ let canonicalize_happly in_mode tparams hint_pos tycon hints =
       Ok
         ( (hint_pos, Aast.(Hprim Tstring)),
           Some (Err.naming @@ Naming_error.Classname_param pos) ))
-  | Darray pos -> canonicalise_darray in_mode hint_pos pos hints
-  | Varray pos -> canonicalise_varray in_mode hint_pos pos hints
-  | Vec_or_dict pos -> canonicalise_vec_or_dict in_mode hint_pos pos hints
+  | Darray pos -> canonicalise_darray hint_pos pos hints
+  | Varray pos -> canonicalise_varray hint_pos pos hints
+  | Vec_or_dict pos -> canonicalise_vec_or_dict hint_pos pos hints
   (* The type constructors canonical representation is `Happly` *)
   | Tycon (pos, tycon) ->
     let hint_ = Aast.Happly ((pos, tycon), hints) in
@@ -295,11 +267,11 @@ let canonicalize_happly in_mode tparams hint_pos tycon hints =
 
 let on_typedef (env, t, err) = Ok (Env.in_typedef env t, t, err)
 
-let on_gconst (env, cst, err) = Ok (Env.in_gconst env cst, cst, err)
+let on_gconst (env, cst, err) = Ok (Env.in_gconst env, cst, err)
 
 let on_fun_def (env, fd, err) = Ok (Env.in_fun_def env fd, fd, err)
 
-let on_module_def (env, md, err) = Ok (Env.in_module_def env md, md, err)
+let on_module_def (env, md, err) = Ok (Env.in_module_def env, md, err)
 
 let on_class_ (env, c, err) = Ok (Env.in_class env c, c, err)
 
@@ -316,12 +288,7 @@ let on_hint (env, hint, err_acc) =
   let res =
     match hint with
     | (hint_pos, Aast.Happly (tycon, hints)) ->
-      canonicalize_happly
-        (Env.in_mode env)
-        (Env.tparams env)
-        hint_pos
-        tycon
-        hints
+      canonicalize_happly (Env.tparams env) hint_pos tycon hints
     | _ -> Ok (hint, None)
   in
   match res with

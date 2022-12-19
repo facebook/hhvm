@@ -34,6 +34,23 @@ use crate::types::convert_ty;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
+/// Classes are defined as:
+///
+/// type NAME = [ properties*; ]
+///
+pub(crate) fn write_class(
+    txf: &mut TextualFile<'_>,
+    unit_state: &mut UnitState,
+    class: ir::Class<'_>,
+) -> Result {
+    trace!("Convert Class {}", class.name.as_bstr(&unit_state.strings));
+
+    let class = crate::lower::lower_class(class, Arc::clone(&unit_state.strings));
+
+    let mut state = ClassState::new(txf, unit_state, class);
+    state.write_class()
+}
+
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub(crate) enum IsStatic {
     Static,
@@ -46,43 +63,258 @@ impl IsStatic {
     }
 }
 
-/// Classes are defined as:
-///
-/// type NAME = [ properties*; ]
-///
-pub(crate) fn write_class(
-    txf: &mut TextualFile<'_>,
-    state: &mut UnitState,
-    class: ir::Class<'_>,
-) -> Result {
-    trace!("Convert Class {}", class.name.as_bstr(&state.strings));
+struct ClassState<'a, 'b, 'c> {
+    class: ir::Class<'c>,
+    txf: &'a mut TextualFile<'b>,
+    unit_state: &'a mut UnitState,
+}
 
-    let mut class = crate::lower::lower_class(class, Arc::clone(&state.strings));
+impl<'a, 'b, 'c> ClassState<'a, 'b, 'c> {
+    fn new(
+        txf: &'a mut TextualFile<'b>,
+        unit_state: &'a mut UnitState,
+        class: ir::Class<'c>,
+    ) -> Self {
+        ClassState {
+            class,
+            txf,
+            unit_state,
+        }
+    }
+}
 
-    write_type(txf, state, &class, IsStatic::Static)?;
-    write_type(txf, state, &class, IsStatic::NonStatic)?;
+impl ClassState<'_, '_, '_> {
+    fn write_class(&mut self) -> Result {
+        self.write_type(IsStatic::Static)?;
+        self.write_type(IsStatic::NonStatic)?;
 
-    // Class constants are not inherited so we just turn them into globals.
-    for constant in &class.constants {
-        let name = constant
-            .name
-            .mangle_with_class(class.name, IsStatic::Static, &state.strings);
-        let ty = if let Some(et) = class.enum_type.as_ref() {
-            convert_enum_ty(et, &state.strings)
+        // Class constants are not inherited so we just turn them into globals.
+        for constant in &self.class.constants {
+            let name = constant.name.mangle_with_class(
+                self.class.name,
+                IsStatic::Static,
+                &self.unit_state.strings,
+            );
+            let ty = if let Some(et) = self.class.enum_type.as_ref() {
+                convert_enum_ty(et, &self.unit_state.strings)
+            } else {
+                textual::Ty::mixed()
+            };
+            self.txf.define_global(name, ty);
+        }
+
+        self.write_init_static()?;
+
+        let methods = std::mem::take(&mut self.class.methods);
+        for method in methods {
+            self.write_method(method)?;
+        }
+
+        Ok(())
+    }
+
+    /// Write the type for a (class, is_static) with the properties of the class.
+    fn write_type(&mut self, is_static: IsStatic) -> Result {
+        let mut metadata: IndexMap<&str, textual::Expr> = IndexMap::default();
+
+        let kind = if self.class.flags.is_interface() {
+            "interface"
+        } else if self.class.flags.is_trait() {
+            "trait"
         } else {
-            textual::Ty::mixed()
+            "class"
         };
-        txf.define_global(name, ty);
+        metadata.insert("kind", kind.into());
+        metadata.insert("static", is_static.as_bool().into());
+
+        // Traits say they're final - because they're not "real" classes. But that
+        // will be strange for us since we treat them as bases.
+        if !self.class.flags.is_trait() && !self.class.flags.is_interface() {
+            metadata.insert("final", self.class.flags.is_final().into());
+        }
+
+        let mut fields: Vec<(String, textual::Ty, textual::Visibility)> = Vec::new();
+        let properties = std::mem::take(&mut self.class.properties);
+        for prop in &properties {
+            if prop.flags.is_static() == is_static.as_bool() {
+                self.write_property(&mut fields, prop)?;
+            }
+        }
+        self.class.properties = properties;
+
+        let mut extends: Vec<ir::ClassId> = Vec::new();
+        if let Some(base) = compute_base(&self.class) {
+            extends.push(base);
+        }
+
+        extends.extend(self.class.implements.iter());
+        extends.extend(self.class.uses.iter());
+
+        let extends = extends
+            .into_iter()
+            .map(|id| id.mangle_class(is_static, &self.unit_state.strings))
+            .collect_vec();
+
+        let fields = fields.iter().map(|(name, ty, visibility)| textual::Field {
+            name: name.as_str(),
+            ty,
+            visibility: *visibility,
+        });
+
+        let cname = self
+            .class
+            .name
+            .mangle_class(is_static, &self.unit_state.strings);
+        self.txf.define_type(
+            &cname,
+            &self.class.src_loc,
+            extends.iter().map(String::as_str),
+            fields,
+            metadata.iter().map(|(k, v)| (*k, v)),
+        )?;
+
+        Ok(())
     }
 
-    write_init_static(txf, state, &class)?;
+    fn write_property(
+        &mut self,
+        fields: &mut Vec<(String, textual::Ty, textual::Visibility)>,
+        prop: &ir::Property<'_>,
+    ) -> Result {
+        let ir::Property {
+            name,
+            mut flags,
+            ref attributes,
+            visibility,
+            ref initial_value,
+            ref type_info,
+            doc_comment: _,
+        } = *prop;
 
-    let methods = std::mem::take(&mut class.methods);
-    for method in methods {
-        write_method(txf, state, &class, method)?;
+        flags.clear(ir::Attr::AttrStatic);
+
+        let name = name.mangle(&self.unit_state.strings);
+
+        let vis = if flags.is_private() {
+            textual::Visibility::Private
+        } else if flags.is_protected() {
+            textual::Visibility::Protected
+        } else {
+            textual::Visibility::Public
+        };
+        flags.clear(ir::Attr::AttrPrivate);
+        flags.clear(ir::Attr::AttrProtected);
+        flags.clear(ir::Attr::AttrPublic);
+        flags.clear(ir::Attr::AttrSystemInitialValue);
+
+        if !flags.is_empty() {
+            trace!("CLASS FLAGS: {:?}", flags);
+            textual_todo! { self.txf.write_comment(&format!("TODO: class flags: {flags:?}"))? };
+        }
+        if !attributes.is_empty() {
+            textual_todo! { self.txf.write_comment(&format!("TODO: class attributes: {attributes:?}"))? };
+        }
+        if visibility == ir::Visibility::Private {
+            self.txf.write_comment(&format!("TODO: private {name}"))?;
+        }
+        if let Some(initial_value) = initial_value {
+            self.txf
+                .write_comment(&format!("TODO: initial value {initial_value:?}"))?;
+        }
+
+        let ty = convert_ty(&type_info.enforced, &self.unit_state.strings);
+
+        fields.push((name, ty, vis));
+        Ok(())
     }
 
-    Ok(())
+    /// Build the `init_static` function for a static class.
+    ///
+    /// Declares globals for:
+    ///   - static singleton
+    /// Writes the `init_static` function itself which initializes the globals and
+    /// returns the memoized static singleton.
+    fn write_init_static(&mut self) -> Result {
+        let singleton_name = static_singleton_name(self.class.name, &self.unit_state.strings);
+        self.txf.define_global(
+            singleton_name.clone(),
+            static_ty(self.class.name, &self.unit_state.strings),
+        );
+
+        self.txf.define_function(
+            &init_static_name(self.class.name, &self.unit_state.strings),
+            &self.class.src_loc,
+            &[],
+            &textual::Ty::Void,
+            &[],
+            |fb| {
+                let sz = 0; // TODO: properties
+                let p = hack::call_builtin(fb, hack::Builtin::AllocWords, [sz])?;
+
+                let singleton_expr = textual::Expr::deref(textual::Var::global(singleton_name));
+                fb.store(
+                    singleton_expr,
+                    p,
+                    &static_ty(self.class.name, &self.unit_state.strings),
+                )?;
+
+                // constants
+                for constant in &self.class.constants {
+                    if let Some(value) = constant.value.as_ref() {
+                        let name = constant.name.mangle_with_class(
+                            self.class.name,
+                            IsStatic::Static,
+                            &self.unit_state.strings,
+                        );
+                        let var = textual::Var::global(name);
+                        let value = typed_value::typed_value_expr(value, &self.unit_state.strings);
+                        fb.store(textual::Expr::deref(var), value, &textual::Ty::mixed())?;
+                    }
+                }
+
+                fb.ret(0)?;
+                Ok(())
+            },
+        )
+    }
+
+    fn write_method(&mut self, method: ir::Method<'_>) -> Result {
+        trace!(
+            "Convert Method {}::{}",
+            self.class.name.as_bstr(&self.unit_state.strings),
+            method.name.as_bstr(&self.unit_state.strings)
+        );
+
+        let is_static = match method.attrs.is_static() {
+            true => IsStatic::Static,
+            false => IsStatic::NonStatic,
+        };
+
+        let this_ty = class_ty(self.class.name, is_static, &self.unit_state.strings);
+        let method_info = Arc::new(MethodInfo {
+            class: &self.class,
+            is_static,
+            strings: Arc::clone(&self.unit_state.strings),
+        });
+
+        let func = lower::lower_func(
+            method.func,
+            Some(Arc::clone(&method_info)),
+            Arc::clone(&self.unit_state.strings),
+        );
+        ir::verify::verify_func(&func, &Default::default(), &self.unit_state.strings)?;
+
+        func::write_func(
+            self.txf,
+            self.unit_state,
+            method.name.id,
+            this_ty,
+            func,
+            Some(method_info),
+        )?;
+
+        Ok(())
+    }
 }
 
 fn convert_enum_ty(ti: &ir::TypeInfo, strings: &StringInterner) -> textual::Ty {
@@ -145,69 +377,6 @@ fn static_singleton_name(class: ir::ClassId, strings: &StringInterner) -> String
     name.mangle_with_class(class, IsStatic::Static, strings)
 }
 
-/// Write the type for a (class, is_static) with the properties of the class.
-fn write_type(
-    txf: &mut TextualFile<'_>,
-    state: &mut UnitState,
-    class: &ir::Class<'_>,
-    is_static: IsStatic,
-) -> Result {
-    let mut metadata: IndexMap<&str, textual::Expr> = IndexMap::default();
-
-    let kind = if class.flags.is_interface() {
-        "interface"
-    } else if class.flags.is_trait() {
-        "trait"
-    } else {
-        "class"
-    };
-    metadata.insert("kind", kind.into());
-    metadata.insert("static", is_static.as_bool().into());
-
-    // Traits say they're final - because they're not "real" classes. But that
-    // will be strange for us since we treat them as bases.
-    if !class.flags.is_trait() && !class.flags.is_interface() {
-        metadata.insert("final", class.flags.is_final().into());
-    }
-
-    let mut fields: Vec<(String, textual::Ty, textual::Visibility)> = Vec::new();
-    for prop in &class.properties {
-        if prop.flags.is_static() == is_static.as_bool() {
-            write_property(txf, &mut fields, state, prop)?;
-        }
-    }
-
-    let mut extends: Vec<ir::ClassId> = Vec::new();
-    if let Some(base) = compute_base(class) {
-        extends.push(base);
-    }
-
-    extends.extend(class.implements.iter());
-    extends.extend(class.uses.iter());
-
-    let extends = extends
-        .into_iter()
-        .map(|id| id.mangle_class(is_static, &state.strings))
-        .collect_vec();
-
-    let fields = fields.iter().map(|(name, ty, visibility)| textual::Field {
-        name: name.as_str(),
-        ty,
-        visibility: *visibility,
-    });
-
-    let cname = class.name.mangle_class(is_static, &state.strings);
-    txf.define_type(
-        &cname,
-        &class.src_loc,
-        extends.iter().map(String::as_str),
-        fields,
-        metadata.iter().map(|(k, v)| (*k, v)),
-    )?;
-
-    Ok(())
-}
-
 fn compute_base(class: &ir::Class<'_>) -> Option<ir::ClassId> {
     if class.flags.is_trait() {
         // Traits express bases through a 'require extends'.
@@ -219,144 +388,6 @@ fn compute_base(class: &ir::Class<'_>) -> Option<ir::ClassId> {
     } else {
         class.base
     }
-}
-
-fn write_property(
-    txf: &mut TextualFile<'_>,
-    fields: &mut Vec<(String, textual::Ty, textual::Visibility)>,
-    state: &mut UnitState,
-    prop: &ir::Property<'_>,
-) -> Result {
-    let ir::Property {
-        name,
-        mut flags,
-        ref attributes,
-        visibility,
-        ref initial_value,
-        ref type_info,
-        doc_comment: _,
-    } = *prop;
-
-    flags.clear(ir::Attr::AttrStatic);
-
-    let name = name.mangle(&state.strings);
-
-    let vis = if flags.is_private() {
-        textual::Visibility::Private
-    } else if flags.is_protected() {
-        textual::Visibility::Protected
-    } else {
-        textual::Visibility::Public
-    };
-    flags.clear(ir::Attr::AttrPrivate);
-    flags.clear(ir::Attr::AttrProtected);
-    flags.clear(ir::Attr::AttrPublic);
-    flags.clear(ir::Attr::AttrSystemInitialValue);
-
-    if !flags.is_empty() {
-        trace!("CLASS FLAGS: {:?}", flags);
-        textual_todo! { txf.write_comment(&format!("TODO: class flags: {flags:?}"))? };
-    }
-    if !attributes.is_empty() {
-        textual_todo! { txf.write_comment(&format!("TODO: class attributes: {attributes:?}"))? };
-    }
-    if visibility == ir::Visibility::Private {
-        txf.write_comment(&format!("TODO: private {name}"))?;
-    }
-    if let Some(initial_value) = initial_value {
-        txf.write_comment(&format!("TODO: initial value {initial_value:?}"))?;
-    }
-
-    let ty = convert_ty(&type_info.enforced, &state.strings);
-
-    fields.push((name, ty, vis));
-    Ok(())
-}
-
-/// Build the `init_static` function for a static class.
-///
-/// Declares globals for:
-///   - static singleton
-/// Writes the `init_static` function itself which initializes the globals and
-/// returns the memoized static singleton.
-fn write_init_static(
-    txf: &mut TextualFile<'_>,
-    state: &mut UnitState,
-    class: &ir::Class<'_>,
-) -> Result {
-    let singleton_name = static_singleton_name(class.name, &state.strings);
-    txf.define_global(
-        singleton_name.clone(),
-        static_ty(class.name, &state.strings),
-    );
-
-    txf.define_function(
-        &init_static_name(class.name, &state.strings),
-        &class.src_loc,
-        &[],
-        &textual::Ty::Void,
-        &[],
-        |fb| {
-            let sz = 0; // TODO: properties
-            let p = hack::call_builtin(fb, hack::Builtin::AllocWords, [sz])?;
-
-            let singleton_expr = textual::Expr::deref(textual::Var::global(singleton_name));
-            fb.store(singleton_expr, p, &static_ty(class.name, &state.strings))?;
-
-            // constants
-            for constant in &class.constants {
-                if let Some(value) = constant.value.as_ref() {
-                    let name = constant.name.mangle_with_class(
-                        class.name,
-                        IsStatic::Static,
-                        &state.strings,
-                    );
-                    let var = textual::Var::global(name);
-                    let value = typed_value::typed_value_expr(value, &state.strings);
-                    fb.store(textual::Expr::deref(var), value, &textual::Ty::mixed())?;
-                }
-            }
-
-            fb.ret(0)?;
-            Ok(())
-        },
-    )
-}
-
-fn write_method(
-    txf: &mut TextualFile<'_>,
-    state: &mut UnitState,
-    class: &ir::Class<'_>,
-    method: ir::Method<'_>,
-) -> Result {
-    trace!(
-        "Convert Method {}::{}",
-        class.name.as_bstr(&state.strings),
-        method.name.as_bstr(&state.strings)
-    );
-
-    let is_static = match method.attrs.is_static() {
-        true => IsStatic::Static,
-        false => IsStatic::NonStatic,
-    };
-
-    let this_ty = class_ty(class.name, is_static, &state.strings);
-    let method_info = Arc::new(MethodInfo {
-        class,
-        is_static,
-        strings: Arc::clone(&state.strings),
-    });
-
-    let func = lower::lower_func(
-        method.func,
-        Some(Arc::clone(&method_info)),
-        Arc::clone(&state.strings),
-    );
-    ir::verify::verify_func(&func, &Default::default(), &state.strings)?;
-
-    func::write_func(txf, state, method.name.id, this_ty, func, Some(method_info))?;
-
-    Ok(())
 }
 
 /// Loads the static singleton for a class.

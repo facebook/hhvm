@@ -820,6 +820,61 @@ class cpp_mstch_function : public mstch_function {
   }
 };
 
+namespace {
+bool type_needs_op_encode(
+    const t_type& type, std::set<const t_type*>&& visited = {}) {
+  if ((type.program() &&
+       type.program()->inherit_annotation_or_null(type, kCppUseOpEncodeUri)) ||
+      t_typedef::get_first_structured_annotation_or_null(
+          &type, kCppUseOpEncodeUri) ||
+      gen::cpp::type_resolver::find_first_adapter(type)) {
+    return true;
+  }
+
+  // Permits using a default value in the signature instead of having to wrap.
+  auto fake_move = [](auto& v) -> decltype(auto) { return std::move(v); };
+
+  switch (type.get_true_type()->get_type_value()) {
+    case t_type::type::t_list: {
+      const auto* container = static_cast<const t_list*>(type.get_true_type());
+      if (type_needs_op_encode(*container->elem_type(), fake_move(visited))) {
+        return true;
+      }
+      break;
+    }
+    case t_type::type::t_set: {
+      const auto* container = static_cast<const t_set*>(type.get_true_type());
+      if (type_needs_op_encode(*container->elem_type(), fake_move(visited))) {
+        return true;
+      }
+      break;
+    }
+    case t_type::type::t_map: {
+      const auto* container = static_cast<const t_map*>(type.get_true_type());
+      if (type_needs_op_encode(*container->key_type(), fake_move(visited)) ||
+          type_needs_op_encode(*container->val_type(), fake_move(visited))) {
+        return true;
+      }
+      break;
+    }
+    case t_type::type::t_struct: {
+      const auto* strct = static_cast<const t_struct*>(type.get_true_type());
+      if (!visited.insert(strct).second) {
+        return false;
+      }
+      for (const auto* field : strct->get_members()) {
+        if (type_needs_op_encode(*field->get_type(), fake_move(visited))) {
+          return true;
+        }
+      }
+      break;
+    }
+    default:;
+  }
+  return false;
+}
+} // namespace
+
 class cpp_mstch_type : public mstch_type {
  public:
   cpp_mstch_type(
@@ -996,14 +1051,7 @@ class cpp_mstch_type : public mstch_type {
     }
     return name;
   }
-  mstch::node use_op_encode() {
-    return (type_->program() &&
-            type_->program()->inherit_annotation_or_null(
-                *type_, kCppUseOpEncodeUri)) ||
-        t_typedef::get_first_structured_annotation_or_null(
-               type_, kCppUseOpEncodeUri) ||
-        gen::cpp::type_resolver::find_first_adapter(*type_);
-  }
+  mstch::node use_op_encode() { return type_needs_op_encode(*type_); }
 
  private:
   std::shared_ptr<cpp2_generator_context> cpp_context_;
@@ -1440,12 +1488,7 @@ class cpp_mstch_struct : public mstch_struct {
     return cpp_context_->resolver().get_type_tag(*struct_);
   }
 
-  mstch::node cpp_use_op_encode() {
-    return (struct_->program() &&
-            struct_->program()->inherit_annotation_or_null(
-                *struct_, kCppUseOpEncodeUri)) ||
-        struct_->find_structured_annotation_or_null(kCppUseOpEncodeUri);
-  }
+  mstch::node cpp_use_op_encode() { return type_needs_op_encode(*struct_); }
 
  protected:
   // Computes the alignment of field on the target platform.

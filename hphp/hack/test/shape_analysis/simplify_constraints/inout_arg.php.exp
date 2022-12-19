@@ -6,8 +6,7 @@ Summary for \f:
 [12:18-34] [Parameter]:
   shape()
 Summary for \main1:
-[8:8-22] [Allocation]:
-  shape('a' => int)
+[8:8-22] : dynamic
 Summary for \main2:
 [15:8-22] [Allocation]:
   shape('a' => int)

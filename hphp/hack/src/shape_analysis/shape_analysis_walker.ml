@@ -44,6 +44,12 @@ let dynamic_when_local ~origin pos env entity_ =
   in
   Env.add_constraint env constraint_
 
+let dynamic_always ~origin pos env entity_ =
+  let constraint_ =
+    { hack_pos = pos; origin; constraint_ = Has_dynamic_key entity_ }
+  in
+  Env.add_constraint env constraint_
+
 let failwithpos pos msg =
   raise
   @@ Shape_analysis_exn (Error.mk @@ Format.asprintf "%a: %s" Pos.pp pos msg)
@@ -234,6 +240,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   let decorate ~origin constraint_ = { hack_pos = pos; origin; constraint_ } in
   let mode = env.mode in
   let dynamic_when_local = dynamic_when_local pos in
+  let dynamic_always = dynamic_always pos in
   match e with
   | A.Int _
   | A.Float _
@@ -375,7 +382,12 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let args = List.map ~f:(fun arg -> (Ast_defs.Pnormal, arg)) args in
     let call_expr = (ty, pos, A.Call (base, targs, args, unpacked)) in
     expr_ env call_expr
-  | A.Call (((base_ty, _, _) as base), _targs, args, unpacked) ->
+  | A.Call (((base_ty, _, lhs) as base), _targs, args, unpacked) ->
+    let lhs_is_obj_get =
+      match lhs with
+      | A.Obj_get _ -> true
+      | _ -> false
+    in
     let param_tys =
       match Typing_defs.get_node base_ty with
       | Typing_defs.Tfun ft ->
@@ -387,20 +399,23 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let handle_arg arg_idx env (param_kind, ((_ty, pos, _exp) as arg)) =
       let (env, arg_entity) = expr_ env arg in
       let param_ty_opt = List.nth param_tys arg_idx in
-      let be_conservative =
-        Option.value_map
-          ~default:true
-          param_ty_opt
-          ~f:(Fn.non @@ any_shape_can_flow env.tast_env)
-      in
       let env =
+        let be_conservative =
+          Option.value_map
+            ~default:true
+            param_ty_opt
+            ~f:(Fn.non @@ any_shape_can_flow env.tast_env)
+        in
         if be_conservative then
-          (* During local mode we cannot know what happens to the entity, so we
-             conservatively assume there is a dynamic access. *)
-          Option.fold
-            ~init:env
-            ~f:(dynamic_when_local ~origin:__LINE__)
-            arg_entity
+          let fold_env f = Option.fold ~init:env arg_entity ~f in
+          if lhs_is_obj_get then
+            (* Because HIPS doesn't know about objects yet (T139375375). Note that this isn't
+               as conservative as it could be because of function and method pointers *)
+            fold_env @@ dynamic_always ~origin:__LINE__
+          else
+            (* During local mode we cannot know what happens to the entity, so we
+               conservatively assume there is a dynamic access. *)
+            fold_env @@ dynamic_when_local ~origin:__LINE__
         else
           env
       in

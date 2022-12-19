@@ -308,15 +308,25 @@ impl<'src> AastParser {
         indexed_source_text: &'src IndexedSourceText<'_>,
         script: &PositionedSyntax<'arena>,
     ) -> Result<ScouredComments> {
-        let scourer: ScourComment<'_, PositionedToken<'arena>, PositionedValue<'arena>> =
-            ScourComment {
-                phantom: std::marker::PhantomData,
-                indexed_source_text,
-                collect_fixmes: env.keep_errors,
-                include_line_comments: env.include_line_comments,
-                disable_hh_ignore_error: env.parser_options.po_disable_hh_ignore_error,
-                allowed_decl_fixme_codes: &env.parser_options.po_allowed_decl_fixme_codes,
-            };
-        Ok(scourer.scour_comments(script))
+        if env.scour_comments {
+            let scourer: ScourComment<'_, PositionedToken<'arena>, PositionedValue<'arena>> =
+                ScourComment {
+                    phantom: std::marker::PhantomData,
+                    indexed_source_text,
+                    collect_fixmes: env.keep_errors,
+                    include_line_comments: env.include_line_comments,
+                    disable_hh_ignore_error: env.parser_options.po_disable_hh_ignore_error,
+                    allowed_decl_fixme_codes: &env.parser_options.po_allowed_decl_fixme_codes,
+                };
+            Ok(scourer.scour_comments(script))
+        } else {
+            Ok(ScouredComments {
+                comments: Default::default(),
+                fixmes: Default::default(),
+                misuses: Default::default(),
+                error_pos: Default::default(),
+                bad_ignore_pos: Default::default(),
+            })
+        }
     }
 }

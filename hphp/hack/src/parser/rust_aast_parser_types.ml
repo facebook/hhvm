@@ -20,6 +20,7 @@ type env = {
   show_all_errors: bool;
   is_systemlib: bool;
   parser_options: ParserOptions.t;
+  scour_comments: bool;
 }
 
 type result = {

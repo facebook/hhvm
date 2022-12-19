@@ -414,7 +414,6 @@ fn parse_file(
     let aast_env = AastEnv {
         codegen: true,
         php5_compat_mode: !opts.hhbc.uvs,
-        keep_errors: false,
         is_systemlib,
         elaborate_namespaces,
         parser_options: create_parser_options(opts, type_directed),

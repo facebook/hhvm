@@ -554,6 +554,7 @@ fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Re
         quick_mode: false,
         show_all_errors: true,
         is_systemlib: true,
+        scour_comments: false,
     };
 
     let rel_path = RelativePath::make(Prefix::Dummy, "".into());

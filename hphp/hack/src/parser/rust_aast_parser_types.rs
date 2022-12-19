@@ -28,6 +28,7 @@ pub struct Env {
     pub show_all_errors: bool,
     pub is_systemlib: bool,
     pub parser_options: ParserOptions,
+    pub scour_comments: bool,
 }
 
 #[derive(Debug, ToOcamlRep)]

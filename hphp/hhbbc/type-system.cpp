@@ -1555,7 +1555,7 @@ struct DualDispatchUnionImpl {
     // union together a Vec with something else with a packed
     // specialization, we can keep the packed specialization.
     if (!subtypeAmong(a.bits, BVecN, BArrLikeN)) {
-      return Type { combined, ham };
+      return (*this)(a, DArrLikeMapN{ TInt, b.type });
     }
     auto val = Type{allowedValBits(a.bits, true).first};
     if (!val.strictSubtypeOf(BInitCell)) return Type { combined, ham };
@@ -1577,14 +1577,38 @@ struct DualDispatchUnionImpl {
       union_of(std::move(val), b.val)
     );
   }
-  Type operator()(const DArrLikeNone&, SArray) const {
-    return Type { combined, ham };
+  Type operator()(const DArrLikeNone& a, SArray b) const {
+    assertx(!b->empty());
+    if (auto const p = toDArrLikePacked(b)) {
+      return (*this)(a, *p);
+    }
+    return (*this)(a, *toDArrLikeMap(b));
   }
-  Type operator()(const DArrLikeNone&, const DArrLikePacked&) const {
-    return Type { combined, ham };
+  Type operator()(const DArrLikeNone& a, const DArrLikePacked& b) const {
+    if (!subtypeAmong(a.bits, BVecN, BArrLikeN)) {
+      return (*this)(a, DArrLikeMapN{ packed_key(b), packed_values(b) });
+    }
+    auto val = Type{allowedValBits(a.bits, true).first};
+    if (!val.strictSubtypeOf(BInitCell)) return Type { combined, ham };
+    return packedn_impl(
+      combined,
+      ham,
+      union_of(std::move(val), packed_values(b))
+    );
   }
-  Type operator()(const DArrLikeNone&, const DArrLikeMap&) const {
-    return Type { combined, ham };
+  Type operator()(const DArrLikeNone& a, const DArrLikeMap& b) const {
+    auto key = Type{allowedKeyBits(a.bits).first};
+    auto val = Type{allowedValBits(a.bits, false).first};
+    if (!key.strictSubtypeOf(BArrKey) && !val.strictSubtypeOf(BInitCell)) {
+      return Type { combined, ham };
+    }
+    auto mkv = map_key_values(b);
+    return mapn_impl(
+      combined,
+      ham,
+      union_of(std::move(key), std::move(mkv.first)),
+      union_of(std::move(val), std::move(mkv.second))
+    );
   }
 
 private:

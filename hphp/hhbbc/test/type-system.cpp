@@ -2256,6 +2256,17 @@ TEST(Type, SpecializedArrays) {
     ),
     make_specialized_arrpacked(BKeysetN, {ival(0)})
   );
+
+  {
+    auto const vec1 = make_specialized_arrval(BSVecN, static_vec(s_A.get()));
+    auto const dict1 = make_specialized_arrval(BSDictN, static_dict(s_B.get(), 1));
+    EXPECT_EQ(union_of(vec1, TSKeysetN),
+              make_unmarked(make_specialized_arrmapn(BSKeysetN|BSVecN, TUncArrKey, TUncArrKey)));
+    EXPECT_EQ(union_of(vec1, TKeysetN),
+              make_unmarked(make_specialized_arrmapn(BKeysetN|BSVecN, TArrKey, TArrKey)));
+    EXPECT_EQ(union_of(union_of(vec1, dict1), TKeysetN),
+              union_of(union_of(vec1, TKeysetN), dict1));
+  }
 }
 
 TEST(Type, Split) {

@@ -1,0 +1,80 @@
+{
+  "kind": "overloadset",
+  "name_html": "value",
+  "compoundname_html": "apache::thrift::detail::BitSet::value",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1detail_1_1BitSet_1a5d3c006e204229226dc41e8dc2096ea2",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "T &amp;",
+      "definition_html": "T&amp; apache::thrift::detail::BitSet&lt; T &gt;::value",
+      "argsstring_html": "()",
+      "name_html": "value",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "132",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "132",
+        "bodyend": "132"
+      },
+      "definition": {
+        "simple_html": "T&amp; value()",
+        "simple_raw": "T& value()",
+        "detailed_html": "inline T&amp; value()",
+        "detailed_raw": "inline T& value()",
+        "original_definition_html": "T&amp; apache::thrift::detail::BitSet&lt; T &gt;::value",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/detail/BitSet/value",
+      "href": "/ref/cpp/fns/class/apache/thrift/detail/BitSet/value",
+      "parentid": "classapache_1_1thrift_1_1detail_1_1BitSet",
+      "compoundname_html": "apache::thrift::detail::BitSet::value"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1detail_1_1BitSet_1a53819aff0af68f5d41e1e1e78ada4e93",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "const T &amp;",
+      "definition_html": "const T&amp; apache::thrift::detail::BitSet&lt; T &gt;::value",
+      "argsstring_html": "() const",
+      "name_html": "value",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "134",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "134",
+        "bodyend": "134"
+      },
+      "definition": {
+        "simple_html": "const T&amp; value() const",
+        "simple_raw": "const T& value() const",
+        "detailed_html": "inline const T&amp; value() const",
+        "detailed_raw": "inline const T& value() const",
+        "original_definition_html": "const T&amp; apache::thrift::detail::BitSet&lt; T &gt;::value",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/detail/BitSet/value",
+      "href": "/ref/cpp/fns/class/apache/thrift/detail/BitSet/value",
+      "parentid": "classapache_1_1thrift_1_1detail_1_1BitSet",
+      "compoundname_html": "apache::thrift::detail::BitSet::value"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/detail/BitSet/value",
+  "minprot": "public",
+  "displayname_html": "value",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/value",
+  "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/value"
+}

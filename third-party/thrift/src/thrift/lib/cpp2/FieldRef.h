@@ -247,8 +247,8 @@ using EnableIfImplicit = std::enable_if_t<
 
 } // namespace detail
 
-// A reference to an unqualified field of the possibly const-qualified type
-// std::remove_reference_t<T> in a Thrift-generated struct.
+/// A reference to an unqualified field of the possibly const-qualified type
+/// std::remove_reference_t<T> in a Thrift-generated struct.
 template <typename T>
 class field_ref {
   static_assert(std::is_reference<T>::value, "not a reference");
@@ -266,12 +266,14 @@ class field_ref {
       apache::thrift::detail::BitRef<std::is_const<value_type>::value>;
 
  public:
+  /// Internal constructor
   FOLLY_ERASE field_ref(
       reference_type value,
       typename BitRef::Isset& is_set,
       const uint8_t bit_index = 0) noexcept
       : value_(value), bitref_(is_set, bit_index) {}
 
+  /// Internal constructor
   FOLLY_ERASE field_ref(
       reference_type value,
       typename BitRef::AtomicIsset& is_set,
@@ -301,9 +303,9 @@ class field_ref {
     value.~value_type(); // Force emit destructor...
   }
 
-  // Assignment from field_ref is intentionally not provided to prevent
-  // potential confusion between two possible behaviors, copying and reference
-  // rebinding. The copy_from method is provided instead.
+  /// Assignment from field_ref is intentionally not provided to prevent
+  /// potential confusion between two possible behaviors, copying and reference
+  /// rebinding. The copy_from method is provided instead.
   template <typename U>
   FOLLY_ERASE void copy_from(field_ref<U> other) noexcept(
       std::is_nothrow_assignable<value_type&, U>::value) {
@@ -316,16 +318,17 @@ class field_ref {
     return bool(bitref_);
   }
 
-  // Returns true iff the field is set. field_ref doesn't provide conversion to
-  // bool to avoid confusion between checking if the field is set and getting
-  // the field's value, particularly for bool fields.
+  /// Returns true iff the field is set. field_ref doesn't provide conversion to
+  /// bool to avoid confusion between checking if the field is set and getting
+  /// the field's value, particularly for bool fields.
   FOLLY_ERASE bool is_set() const noexcept { return bool(bitref_); }
 
-  // Returns a reference to the value.
+  /// Returns a reference to the value.
   FOLLY_ERASE reference_type value() const noexcept {
     return static_cast<reference_type>(value_);
   }
 
+  /// Returns a reference to the value.
   FOLLY_ERASE reference_type operator*() const noexcept {
     return static_cast<reference_type>(value_);
   }
@@ -339,11 +342,13 @@ class field_ref {
     return &value_;
   }
 
+  /// Returns a pointer to the value.
   template <typename U = value_type>
   FOLLY_ERASE detail::EnableIfConst<U>* operator->() const noexcept {
     return &value_;
   }
 
+  /// Returns a pointer to the value.
   FOLLY_ERASE value_type* operator->() noexcept { return &value_; }
 
   FOLLY_ERASE reference_type ensure() noexcept {
@@ -351,11 +356,13 @@ class field_ref {
     return static_cast<reference_type>(value_);
   }
 
+  /// Forward operator[] to the value.
   template <typename Index>
   FOLLY_ERASE auto operator[](const Index& index) const -> decltype(auto) {
     return value_[index];
   }
 
+  /// Constructs the value in-place.
   template <typename... Args>
   FOLLY_ERASE value_type& emplace(Args&&... args) {
     bitref_ = false; // C++ Standard requires *this to be empty if
@@ -365,6 +372,7 @@ class field_ref {
     return value_;
   }
 
+  /// Constructs the value in-place.
   template <class U, class... Args>
   FOLLY_ERASE std::enable_if_t<
       std::is_constructible<value_type, std::initializer_list<U>, Args&&...>::

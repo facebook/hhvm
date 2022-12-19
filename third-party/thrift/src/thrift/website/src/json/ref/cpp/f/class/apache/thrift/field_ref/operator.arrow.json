@@ -1,0 +1,131 @@
+{
+  "kind": "overloadset",
+  "name_html": "operator-&gt;",
+  "compoundname_html": "apache::thrift::field_ref::operator-&gt;",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1field__ref_1a267bf4e544868ee4d16b9395cff49bb1",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U",
+          "defval_html": "<code>value_type</code>"
+        }
+      ],
+      "type_html": "FOLLY_ERASE <code>detail::EnableIfNonConst</code>&lt; U &gt; *",
+      "definition_html": "FOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* apache::thrift::field_ref&lt; T &gt;::operator-&gt;",
+      "argsstring_html": "() const noexcept",
+      "name_html": "operator-&gt;",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "341",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "341",
+        "bodyend": "343"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* operator-&gt;() const",
+        "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE detail::EnableIfNonConst<U>* operator->() const",
+        "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* operator-&gt;() const noexcept",
+        "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE detail::EnableIfNonConst<U>* operator->() const noexcept",
+        "original_definition_html": "FOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* apache::thrift::field_ref&lt; T &gt;::operator-&gt;",
+        "original_argsstring_html": "() const noexcept"
+      },
+      "filepath": "fns/class/apache/thrift/field_ref/operator.arrow",
+      "href": "/ref/cpp/fns/class/apache/thrift/field_ref/operator.arrow",
+      "parentid": "classapache_1_1thrift_1_1field__ref",
+      "compoundname_html": "apache::thrift::field_ref::operator-&gt;"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1field__ref_1a99b180b710e263000877e0e703dafa06",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U",
+          "defval_html": "<code>value_type</code>"
+        }
+      ],
+      "type_html": "FOLLY_ERASE <code>detail::EnableIfConst</code>&lt; U &gt; *",
+      "definition_html": "FOLLY_ERASE detail::EnableIfConst&lt;U&gt;* apache::thrift::field_ref&lt; T &gt;::operator-&gt;",
+      "argsstring_html": "() const noexcept",
+      "name_html": "operator-&gt;",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "347",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "347",
+        "bodyend": "349"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
+        "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE detail::EnableIfConst<U>* operator->() const",
+        "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE detail::EnableIfConst&lt;U&gt;* operator-&gt;() const noexcept",
+        "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE detail::EnableIfConst<U>* operator->() const noexcept",
+        "original_definition_html": "FOLLY_ERASE detail::EnableIfConst&lt;U&gt;* apache::thrift::field_ref&lt; T &gt;::operator-&gt;",
+        "original_argsstring_html": "() const noexcept"
+      },
+      "description": {
+        "brief_html": "<p>Returns a pointer to the value. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/field_ref/operator.arrow",
+      "href": "/ref/cpp/fns/class/apache/thrift/field_ref/operator.arrow",
+      "parentid": "classapache_1_1thrift_1_1field__ref",
+      "compoundname_html": "apache::thrift::field_ref::operator-&gt;"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1field__ref_1a79cd40b138c92ba7886b42e4f3234ca8",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "FOLLY_ERASE <code>value_type</code> *",
+      "definition_html": "FOLLY_ERASE value_type* apache::thrift::field_ref&lt; T &gt;::operator-&gt;",
+      "argsstring_html": "() noexcept",
+      "name_html": "operator-&gt;",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "352",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "352",
+        "bodyend": "352"
+      },
+      "definition": {
+        "simple_html": "FOLLY_ERASE value_type* operator-&gt;()",
+        "simple_raw": "FOLLY_ERASE value_type* operator->()",
+        "detailed_html": "inline FOLLY_ERASE value_type* operator-&gt;() noexcept",
+        "detailed_raw": "inline FOLLY_ERASE value_type* operator->() noexcept",
+        "original_definition_html": "FOLLY_ERASE value_type* apache::thrift::field_ref&lt; T &gt;::operator-&gt;",
+        "original_argsstring_html": "() noexcept"
+      },
+      "description": {
+        "brief_html": "<p>Returns a pointer to the value. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/field_ref/operator.arrow",
+      "href": "/ref/cpp/fns/class/apache/thrift/field_ref/operator.arrow",
+      "parentid": "classapache_1_1thrift_1_1field__ref",
+      "compoundname_html": "apache::thrift::field_ref::operator-&gt;"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/field_ref/operator.arrow",
+  "minprot": "public",
+  "displayname_html": "operator-&gt;",
+  "brief_html": "<p>Returns a pointer to the value. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/field_ref/operator.arrow",
+  "refid": "/ref/cpp/f/class/apache/thrift/field_ref/operator.arrow"
+}

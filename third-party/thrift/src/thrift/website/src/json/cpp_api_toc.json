@@ -17,6 +17,16 @@
         "to": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
       }
     ],
+    "column": 2
+  },
+  {
+    "section": "Field Access",
+    "entries": [
+      {
+        "label": "field_ref",
+        "to": "/ref/cpp/class/apache/thrift/field_ref"
+      }
+    ],
     "column": 3
   }
 ]

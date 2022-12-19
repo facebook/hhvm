@@ -1,0 +1,144 @@
+{
+  "refid": "structapache_1_1thrift_1_1detail_1_1can__throw__fn",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::detail::can_throw_fn",
+  "includes": {
+    "refid": "FieldRef_8h",
+    "local": "no",
+    "text_html": "FieldRef.h"
+  },
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1detail_1_1can__throw__fn_1a435d9ff8515fce1ec9a46d5d06c07463",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "FOLLY_ERASE T &amp;&amp;",
+      "definition_html": "FOLLY_ERASE T&amp;&amp; apache::thrift::detail::can_throw_fn::operator()",
+      "argsstring_html": "(T &amp;&amp;value) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "T &amp;&amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1812",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1812",
+        "bodyend": "1814"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nFOLLY_ERASE T&amp;&amp; operator()(T&amp;&amp; value) const",
+        "simple_raw": "template <typename T>\nFOLLY_ERASE T&& operator()(T&& value) const",
+        "detailed_html": "template &lt;typename T&gt;\ninline FOLLY_ERASE T&amp;&amp; operator()(T&amp;&amp; value) const",
+        "detailed_raw": "template <typename T>\ninline FOLLY_ERASE T&& operator()(T&& value) const",
+        "original_definition_html": "FOLLY_ERASE T&amp;&amp; apache::thrift::detail::can_throw_fn::operator()",
+        "original_argsstring_html": "(T &amp;&amp;value) const"
+      },
+      "filepath": "fns/struct/apache/thrift/detail/can_throw_fn/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/detail/can_throw_fn/operator.call"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+    "line": "1810",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+    "bodystart": "1810",
+    "bodyend": "1815"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "detail",
+    "can_throw_fn"
+  ],
+  "enums": [],
+  "types": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "struct can_throw_fn;",
+  "declaration_html": "struct can_throw_fn;",
+  "filepath": "struct/apache/thrift/detail/can_throw_fn",
+  "href": "/ref/cpp/struct/apache/thrift/detail/can_throw_fn",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "operator()",
+          "compoundname_html": "apache::thrift::detail::can_throw_fn::operator()",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1detail_1_1can__throw__fn_1a435d9ff8515fce1ec9a46d5d06c07463",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "FOLLY_ERASE T &amp;&amp;",
+              "definition_html": "FOLLY_ERASE T&amp;&amp; apache::thrift::detail::can_throw_fn::operator()",
+              "argsstring_html": "(T &amp;&amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "T &amp;&amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1812",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1812",
+                "bodyend": "1814"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nFOLLY_ERASE T&amp;&amp; operator()(T&amp;&amp; value) const",
+                "simple_raw": "template <typename T>\nFOLLY_ERASE T&& operator()(T&& value) const",
+                "detailed_html": "template &lt;typename T&gt;\ninline FOLLY_ERASE T&amp;&amp; operator()(T&amp;&amp; value) const",
+                "detailed_raw": "template <typename T>\ninline FOLLY_ERASE T&& operator()(T&& value) const",
+                "original_definition_html": "FOLLY_ERASE T&amp;&amp; apache::thrift::detail::can_throw_fn::operator()",
+                "original_argsstring_html": "(T &amp;&amp;value) const"
+              },
+              "filepath": "fns/struct/apache/thrift/detail/can_throw_fn/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/detail/can_throw_fn/operator.call",
+              "parentid": "structapache_1_1thrift_1_1detail_1_1can__throw__fn",
+              "compoundname_html": "apache::thrift::detail::can_throw_fn::operator()"
+            }
+          ],
+          "filepath": "f/struct/apache/thrift/detail/can_throw_fn/operator.call",
+          "minprot": "public",
+          "displayname_html": "operator()",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/apache/thrift/detail/can_throw_fn/operator.call",
+          "refid": "/ref/cpp/f/struct/apache/thrift/detail/can_throw_fn/operator.call"
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

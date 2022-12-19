@@ -1,0 +1,1610 @@
+{
+  "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+  "kind": "class",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref",
+  "includes": {
+    "refid": "FieldRef_8h",
+    "local": "no",
+    "text_html": "FieldRef.h"
+  },
+  "tparams": [
+    {
+      "type_html": "typename",
+      "declname_html": "T",
+      "defname_html": "T"
+    }
+  ],
+  "types": [
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a6f8e98406ce9d9ee06fdb5a014d1d7cd",
+      "prot": "private",
+      "type_html": "typename folly::remove_cvref_t&lt;T&gt;::element_type",
+      "definition_html": "using apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::element_type =  typename folly::remove_cvref_t&lt;T&gt;::element_type",
+      "argsstring_html": "",
+      "name_html": "element_type",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1590",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1590",
+        "bodyend": "-1"
+      },
+      "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a4875a2766304fd6ab6ecd1462872cfed",
+      "prot": "private",
+      "type_html": "std::remove_reference_t&lt;T&gt;",
+      "definition_html": "using apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::boxed_value_type =  std::remove_reference_t&lt;T&gt;",
+      "argsstring_html": "",
+      "name_html": "boxed_value_type",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1591",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1591",
+        "bodyend": "-1"
+      },
+      "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a6661e96c8179cc1ce9b78d102b096e1d",
+      "prot": "private",
+      "type_html": "folly::FunctionRef&lt;const element_type&amp;()&gt;",
+      "definition_html": "using apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::get_default_t =  folly::FunctionRef&lt;const element_type&amp;()&gt;",
+      "argsstring_html": "",
+      "name_html": "get_default_t",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1598",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1598",
+        "bodyend": "-1"
+      },
+      "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a7b6263012d67728f78304e6816a304bc",
+      "prot": "public",
+      "type_html": "<code>detail::copy_const_t</code>&lt;T, element_type&gt;",
+      "definition_html": "using apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::value_type =  detail::copy_const_t&lt;T, element_type&gt;",
+      "argsstring_html": "",
+      "name_html": "value_type",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1601",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1601",
+        "bodyend": "-1"
+      },
+      "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1aef612efc9baf71a1e2564767603093ec",
+      "prot": "public",
+      "type_html": "<code>detail::copy_reference_t</code>&lt;T,<code> value_type</code>&gt;",
+      "definition_html": "using apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::reference_type =  detail::copy_reference_t&lt;T, value_type&gt;",
+      "argsstring_html": "",
+      "name_html": "reference_type",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1602",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1602",
+        "bodyend": "-1"
+      },
+      "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref"
+    }
+  ],
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a6c60abd628749e56d536877747cd2c2a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "FOLLY_ERASE",
+      "definition_html": "FOLLY_ERASE apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::terse_intern_boxed_field_ref",
+      "argsstring_html": "(T value, get_default_t get_default) noexcept",
+      "name_html": "terse_intern_boxed_field_ref",
+      "param": [
+        {
+          "type_html": "T",
+          "declname_html": "value"
+        },
+        {
+          "type_html": "get_default_t",
+          "declname_html": "get_default"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1604",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1604",
+        "bodyend": "1606"
+      },
+      "definition": {
+        "simple_html": "FOLLY_ERASE terse_intern_boxed_field_ref(T value, get_default_t get_default)",
+        "simple_raw": "FOLLY_ERASE terse_intern_boxed_field_ref(T value, get_default_t get_default)",
+        "detailed_html": "inline FOLLY_ERASE terse_intern_boxed_field_ref(\n    T value, get_default_t get_default) noexcept",
+        "detailed_raw": "inline FOLLY_ERASE terse_intern_boxed_field_ref(\n    T value, get_default_t get_default) noexcept",
+        "original_definition_html": "FOLLY_ERASE apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::terse_intern_boxed_field_ref",
+        "original_argsstring_html": "(T value, get_default_t get_default) noexcept"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a00505691a918425f4509895b5d0792a5",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U"
+        },
+        {
+          "type_html": "typename",
+          "defval_html": "<code>detail::EnableIfImplicit</code>&lt;T, U&gt;"
+        }
+      ],
+      "type_html": "FOLLY_ERASE",
+      "definition_html": "FOLLY_ERASE apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::terse_intern_boxed_field_ref",
+      "argsstring_html": "(const terse_intern_boxed_field_ref&lt; U &gt; &amp;other) noexcept",
+      "name_html": "terse_intern_boxed_field_ref",
+      "param": [
+        {
+          "type_html": "const <code>terse_intern_boxed_field_ref</code>&lt; U &gt; &amp;",
+          "declname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1609",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1609",
+        "bodyend": "1611"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U, typename = detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE terse_intern_boxed_field_ref(\n    const terse_intern_boxed_field_ref&lt;U&gt;&amp; other)",
+        "simple_raw": "template <typename U, typename = detail::EnableIfImplicit<T, U>>\nFOLLY_ERASE terse_intern_boxed_field_ref(\n    const terse_intern_boxed_field_ref<U>& other)",
+        "detailed_html": "template &lt;typename U, typename = detail::EnableIfImplicit&lt;T, U&gt;&gt;\ninline FOLLY_ERASE terse_intern_boxed_field_ref(\n    const terse_intern_boxed_field_ref&lt;U&gt;&amp; other) noexcept",
+        "detailed_raw": "template <typename U, typename = detail::EnableIfImplicit<T, U>>\ninline FOLLY_ERASE terse_intern_boxed_field_ref(\n    const terse_intern_boxed_field_ref<U>& other) noexcept",
+        "original_definition_html": "FOLLY_ERASE apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::terse_intern_boxed_field_ref",
+        "original_argsstring_html": "(const terse_intern_boxed_field_ref&lt; U &gt; &amp;other) noexcept"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a0d035810534dc66fe7fe8d44adf3889c",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U",
+          "defval_html": "<code>value_type</code>"
+        }
+      ],
+      "type_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt; <code>value_type</code> &amp;, U &amp;&amp; &gt;::<code>value</code>, <code>terse_intern_boxed_field_ref</code> &amp; &gt;",
+      "definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value, terse_intern_boxed_field_ref&amp;&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator=",
+      "argsstring_html": "(U &amp;&amp;value)",
+      "name_html": "operator=",
+      "param": [
+        {
+          "type_html": "U &amp;&amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1617",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1617",
+        "bodyend": "1620"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE std::enable_if_t&lt;\n    std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value,\n    terse_intern_boxed_field_ref&amp;&gt;\noperator=(U&amp;&amp; value)",
+        "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE std::enable_if_t<\n    std::is_assignable<value_type&, U&&>::value,\n    terse_intern_boxed_field_ref&>\noperator=(U&& value)",
+        "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE std::enable_if_t&lt;\n    std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value,\n    terse_intern_boxed_field_ref&amp;&gt;\noperator=(U&amp;&amp; value)",
+        "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE std::enable_if_t<\n    std::is_assignable<value_type&, U&&>::value,\n    terse_intern_boxed_field_ref&>\noperator=(U&& value)",
+        "original_definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value, terse_intern_boxed_field_ref&amp;&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator=",
+        "original_argsstring_html": "(U &amp;&amp;value)"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a3837f371b108825f7574bfb7a173a256",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "FOLLY_ERASE <code>terse_intern_boxed_field_ref</code> &amp;",
+      "definition_html": "FOLLY_ERASE terse_intern_boxed_field_ref&amp; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator=",
+      "argsstring_html": "(value_type &amp;&amp;value) noexcept(std::is_nothrow_move_assignable&lt; value_type &gt;::value)",
+      "name_html": "operator=",
+      "param": [
+        {
+          "type_html": "<code>value_type</code> &amp;&amp;",
+          "declname_html": "value"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1624",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1624",
+        "bodyend": "1629"
+      },
+      "definition": {
+        "simple_html": "FOLLY_ERASE terse_intern_boxed_field_ref&amp; operator=(value_type&amp;&amp; value)",
+        "simple_raw": "FOLLY_ERASE terse_intern_boxed_field_ref& operator=(value_type&& value)",
+        "detailed_html": "inline FOLLY_ERASE terse_intern_boxed_field_ref&amp;\noperator=(value_type&amp;&amp; value) noexcept(\n    (std::is_nothrow_move_assignable&lt;value_type&gt;::value))",
+        "detailed_raw": "inline FOLLY_ERASE terse_intern_boxed_field_ref&\noperator=(value_type&& value) noexcept(\n    (std::is_nothrow_move_assignable<value_type>::value))",
+        "original_definition_html": "FOLLY_ERASE terse_intern_boxed_field_ref&amp; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator=",
+        "original_argsstring_html": "(value_type &amp;&amp;value) noexcept(std::is_nothrow_move_assignable&lt; value_type &gt;::value)"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a6dcd3379951cb703dc76046379b40ca2",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U"
+        }
+      ],
+      "type_html": "FOLLY_ERASE void",
+      "definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::copy_from",
+      "argsstring_html": "(const terse_intern_boxed_field_ref&lt; U &gt; &amp;other)",
+      "name_html": "copy_from",
+      "param": [
+        {
+          "type_html": "const <code>terse_intern_boxed_field_ref</code>&lt; U &gt; &amp;",
+          "declname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1632",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1632",
+        "bodyend": "1634"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void copy_from(const terse_intern_boxed_field_ref&lt;U&gt;&amp; other)",
+        "simple_raw": "template <typename U>\nFOLLY_ERASE void copy_from(const terse_intern_boxed_field_ref<U>& other)",
+        "detailed_html": "template &lt;typename U&gt;\ninline FOLLY_ERASE void copy_from(const terse_intern_boxed_field_ref&lt;U&gt;&amp; other)",
+        "detailed_raw": "template <typename U>\ninline FOLLY_ERASE void copy_from(const terse_intern_boxed_field_ref<U>& other)",
+        "original_definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::copy_from",
+        "original_argsstring_html": "(const terse_intern_boxed_field_ref&lt; U &gt; &amp;other)"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/copy_from",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/copy_from"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a2e641a534c6b5cec51437c5ce31a5af7",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U"
+        }
+      ],
+      "type_html": "FOLLY_ERASE void",
+      "definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::move_from",
+      "argsstring_html": "(terse_intern_boxed_field_ref&lt; U &gt; other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, std::remove_reference_t&lt; U &gt; &amp;&amp;&gt;::value)",
+      "name_html": "move_from",
+      "param": [
+        {
+          "type_html": "<code>terse_intern_boxed_field_ref</code>&lt; U &gt;",
+          "declname_html": "other"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1637",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1637",
+        "bodyend": "1641"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void move_from(terse_intern_boxed_field_ref&lt;U&gt; other)",
+        "simple_raw": "template <typename U>\nFOLLY_ERASE void move_from(terse_intern_boxed_field_ref<U> other)",
+        "detailed_html": "template &lt;typename U&gt;\ninline FOLLY_ERASE void\nmove_from(terse_intern_boxed_field_ref&lt;U&gt; other) noexcept(\n    (std::is_nothrow_assignable&lt;value_type&amp;, std::remove_reference_t&lt;U&gt;&amp;&amp;&gt;::\n         value))",
+        "detailed_raw": "template <typename U>\ninline FOLLY_ERASE void\nmove_from(terse_intern_boxed_field_ref<U> other) noexcept(\n    (std::is_nothrow_assignable<value_type&, std::remove_reference_t<U>&&>::\n         value))",
+        "original_definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::move_from",
+        "original_argsstring_html": "(terse_intern_boxed_field_ref&lt; U &gt; other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, std::remove_reference_t&lt; U &gt; &amp;&amp;&gt;::value)"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/move_from",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/move_from"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1abca56e8b25b56ae2ef5a05402e9d0dd3",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "FOLLY_ERASE void",
+      "definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::reset",
+      "argsstring_html": "() noexcept",
+      "name_html": "reset",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1643",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1643",
+        "bodyend": "1646"
+      },
+      "definition": {
+        "simple_html": "FOLLY_ERASE void reset()",
+        "simple_raw": "FOLLY_ERASE void reset()",
+        "detailed_html": "inline FOLLY_ERASE void reset() noexcept",
+        "detailed_raw": "inline FOLLY_ERASE void reset() noexcept",
+        "original_definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::reset",
+        "original_argsstring_html": "() noexcept"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/reset",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/reset"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a24a3538c56c2c0e26e5de695f81411bc",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U",
+          "defval_html": "<code>value_type</code>"
+        }
+      ],
+      "type_html": "FOLLY_ERASE <code>detail::EnableIfNonConst</code>&lt; U, <code>reference_type</code> &gt;",
+      "definition_html": "FOLLY_ERASE detail::EnableIfNonConst&lt;U, reference_type&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::value",
+      "argsstring_html": "()",
+      "name_html": "value",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1649",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1649",
+        "bodyend": "1651"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfNonConst&lt;U, reference_type&gt; value()",
+        "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE detail::EnableIfNonConst<U, reference_type> value()",
+        "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE detail::EnableIfNonConst&lt;U, reference_type&gt; value()",
+        "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE detail::EnableIfNonConst<U, reference_type> value()",
+        "original_definition_html": "FOLLY_ERASE detail::EnableIfNonConst&lt;U, reference_type&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::value",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/value",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/value"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a91198323ac4d7b4fc3a519cdaa8dd04a",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U",
+          "defval_html": "<code>value_type</code>"
+        }
+      ],
+      "type_html": "FOLLY_ERASE <code>detail::EnableIfConst</code>&lt; U, <code>reference_type</code> &gt;",
+      "definition_html": "FOLLY_ERASE detail::EnableIfConst&lt;U, reference_type&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::value",
+      "argsstring_html": "() const",
+      "name_html": "value",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1653",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1653",
+        "bodyend": "1655"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfConst&lt;U, reference_type&gt; value() const",
+        "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE detail::EnableIfConst<U, reference_type> value() const",
+        "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE detail::EnableIfConst&lt;U, reference_type&gt; value() const",
+        "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE detail::EnableIfConst<U, reference_type> value() const",
+        "original_definition_html": "FOLLY_ERASE detail::EnableIfConst&lt;U, reference_type&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::value",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/value",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/value"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a991c411e6cce75a86b149f5f6646907e",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "FOLLY_ERASE <code>reference_type</code>",
+      "definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::ensure",
+      "argsstring_html": "() noexcept",
+      "name_html": "ensure",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1657",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1657",
+        "bodyend": "1659"
+      },
+      "definition": {
+        "simple_html": "FOLLY_ERASE reference_type ensure()",
+        "simple_raw": "FOLLY_ERASE reference_type ensure()",
+        "detailed_html": "inline FOLLY_ERASE reference_type ensure() noexcept",
+        "detailed_raw": "inline FOLLY_ERASE reference_type ensure() noexcept",
+        "original_definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::ensure",
+        "original_argsstring_html": "() noexcept"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/ensure",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/ensure"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a4e67ab43ff1144e19c2ad2cc29e6d5c7",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "FOLLY_ERASE <code>reference_type</code>",
+      "definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator*",
+      "argsstring_html": "()",
+      "name_html": "operator*",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1661",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1661",
+        "bodyend": "1661"
+      },
+      "definition": {
+        "simple_html": "FOLLY_ERASE reference_type operator*()",
+        "simple_raw": "FOLLY_ERASE reference_type operator*()",
+        "detailed_html": "inline FOLLY_ERASE reference_type operator*()",
+        "detailed_raw": "inline FOLLY_ERASE reference_type operator*()",
+        "original_definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator*",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a04cd264988019d576af5303e6f3ba871",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "FOLLY_ERASE <code>reference_type</code>",
+      "definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator*",
+      "argsstring_html": "() const",
+      "name_html": "operator*",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1662",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1662",
+        "bodyend": "1662"
+      },
+      "definition": {
+        "simple_html": "FOLLY_ERASE reference_type operator*() const",
+        "simple_raw": "FOLLY_ERASE reference_type operator*() const",
+        "detailed_html": "inline FOLLY_ERASE reference_type operator*() const",
+        "detailed_raw": "inline FOLLY_ERASE reference_type operator*() const",
+        "original_definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator*",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a8f329534ce701d2671798e011b1ca10f",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U",
+          "defval_html": "<code>value_type</code>"
+        }
+      ],
+      "type_html": "FOLLY_ERASE <code>detail::EnableIfNonConst</code>&lt; U &gt; *",
+      "definition_html": "FOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator-&gt;",
+      "argsstring_html": "()",
+      "name_html": "operator-&gt;",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1669",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1669",
+        "bodyend": "1671"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* operator-&gt;()",
+        "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE detail::EnableIfNonConst<U>* operator->()",
+        "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* operator-&gt;()",
+        "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE detail::EnableIfNonConst<U>* operator->()",
+        "original_definition_html": "FOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator-&gt;",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1ae2e0a317f96c9ccc3e58b4ab7f218196",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U",
+          "defval_html": "<code>value_type</code>"
+        }
+      ],
+      "type_html": "FOLLY_ERASE <code>detail::EnableIfConst</code>&lt; U &gt; *",
+      "definition_html": "FOLLY_ERASE detail::EnableIfConst&lt;U&gt;* apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator-&gt;",
+      "argsstring_html": "() const",
+      "name_html": "operator-&gt;",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1674",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1674",
+        "bodyend": "1676"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
+        "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE detail::EnableIfConst<U>* operator->() const",
+        "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
+        "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE detail::EnableIfConst<U>* operator->() const",
+        "original_definition_html": "FOLLY_ERASE detail::EnableIfConst&lt;U&gt;* apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator-&gt;",
+        "original_argsstring_html": "() const"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a67518f711882f75d66b8dd505035744c",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename...",
+          "declname_html": "Args",
+          "defname_html": "Args"
+        }
+      ],
+      "type_html": "FOLLY_ERASE <code>value_type</code> &amp;",
+      "definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::emplace",
+      "argsstring_html": "(Args &amp;&amp;... args)",
+      "name_html": "emplace",
+      "param": [
+        {
+          "type_html": "Args &amp;&amp;...",
+          "declname_html": "args"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1679",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1679",
+        "bodyend": "1682"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename... Args&gt;\nFOLLY_ERASE value_type&amp; emplace(Args&amp;&amp;... args)",
+        "simple_raw": "template <typename... Args>\nFOLLY_ERASE value_type& emplace(Args&&... args)",
+        "detailed_html": "template &lt;typename... Args&gt;\ninline FOLLY_ERASE value_type&amp; emplace(Args&amp;&amp;... args)",
+        "detailed_raw": "template <typename... Args>\ninline FOLLY_ERASE value_type& emplace(Args&&... args)",
+        "original_definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::emplace",
+        "original_argsstring_html": "(Args &amp;&amp;... args)"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/emplace",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/emplace"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a0156c331308c974f5bcfc53970d66088",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class U"
+        },
+        {
+          "type_html": "class...",
+          "declname_html": "Args",
+          "defname_html": "Args"
+        }
+      ],
+      "type_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt; <code>value_type</code>, std::initializer_list&lt; U &gt; &amp;, Args &amp;&amp;... &gt;::<code>value</code>, <code>value_type</code> &amp; &gt;",
+      "definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;&amp;, Args&amp;&amp;...&gt;:: value, value_type&amp;&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::emplace",
+      "argsstring_html": "(std::initializer_list&lt; U &gt; ilist, Args &amp;&amp;... args)",
+      "name_html": "emplace",
+      "param": [
+        {
+          "type_html": "std::initializer_list&lt; U &gt;",
+          "declname_html": "ilist"
+        },
+        {
+          "type_html": "Args &amp;&amp;...",
+          "declname_html": "args"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1689",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1689",
+        "bodyend": "1693"
+      },
+      "definition": {
+        "simple_html": "template &lt;class U, class... Args&gt;\nFOLLY_ERASE std::enable_if_t&lt;\n    std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;&amp;, Args&amp;&amp;...&gt;::\n        value,\n    value_type&amp;&gt;\nemplace(std::initializer_list&lt;U&gt; ilist, Args&amp;&amp;... args)",
+        "simple_raw": "template <class U, class... Args>\nFOLLY_ERASE std::enable_if_t<\n    std::is_constructible<value_type, std::initializer_list<U>&, Args&&...>::\n        value,\n    value_type&>\nemplace(std::initializer_list<U> ilist, Args&&... args)",
+        "detailed_html": "template &lt;class U, class... Args&gt;\ninline FOLLY_ERASE std::enable_if_t&lt;\n    std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;&amp;, Args&amp;&amp;...&gt;::\n        value,\n    value_type&amp;&gt;\nemplace(std::initializer_list&lt;U&gt; ilist, Args&amp;&amp;... args)",
+        "detailed_raw": "template <class U, class... Args>\ninline FOLLY_ERASE std::enable_if_t<\n    std::is_constructible<value_type, std::initializer_list<U>&, Args&&...>::\n        value,\n    value_type&>\nemplace(std::initializer_list<U> ilist, Args&&... args)",
+        "original_definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;&amp;, Args&amp;&amp;...&gt;:: value, value_type&amp;&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::emplace",
+        "original_argsstring_html": "(std::initializer_list&lt; U &gt; ilist, Args &amp;&amp;... args)"
+      },
+      "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/emplace",
+      "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/emplace"
+    }
+  ],
+  "friends": [
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1acfe2f9eefb07fbe555c996bf2dd3eaea",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U"
+        }
+      ],
+      "type_html": "friend class",
+      "definition_html": "friend class terse_intern_boxed_field_ref",
+      "argsstring_html": "",
+      "name_html": "terse_intern_boxed_field_ref",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1594",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1594",
+        "bodyend": "-1"
+      }
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+    "line": "1584",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+    "bodystart": "1584",
+    "bodyend": "1698"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "terse_intern_boxed_field_ref"
+  ],
+  "enums": [],
+  "members": [
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a674c13d71bef8b42d6423a8d7c3b3451",
+      "prot": "private",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "boxed_value_type &amp;",
+      "definition_html": "boxed_value_type&amp; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::value_",
+      "argsstring_html": "",
+      "name_html": "value_",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1696",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1696",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a88b03ff2b7574477b4c366cfebcecc10",
+      "prot": "private",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "get_default_t",
+      "definition_html": "get_default_t apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::get_default_",
+      "argsstring_html": "",
+      "name_html": "get_default_",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "line": "1697",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+        "bodystart": "1697",
+        "bodyend": "-1"
+      }
+    }
+  ],
+  "declaration_raw": "template < typename T >\nclass terse_intern_boxed_field_ref;",
+  "declaration_html": "template &lt; typename T &gt;\nclass terse_intern_boxed_field_ref;",
+  "filepath": "class/apache/thrift/terse_intern_boxed_field_ref",
+  "href": "/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "terse_intern_boxed_field_ref",
+          "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::terse_intern_boxed_field_ref",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a6c60abd628749e56d536877747cd2c2a",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "FOLLY_ERASE",
+              "definition_html": "FOLLY_ERASE apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::terse_intern_boxed_field_ref",
+              "argsstring_html": "(T value, get_default_t get_default) noexcept",
+              "name_html": "terse_intern_boxed_field_ref",
+              "param": [
+                {
+                  "type_html": "T",
+                  "declname_html": "value"
+                },
+                {
+                  "type_html": "get_default_t",
+                  "declname_html": "get_default"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1604",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1604",
+                "bodyend": "1606"
+              },
+              "definition": {
+                "simple_html": "FOLLY_ERASE terse_intern_boxed_field_ref(T value, get_default_t get_default)",
+                "simple_raw": "FOLLY_ERASE terse_intern_boxed_field_ref(T value, get_default_t get_default)",
+                "detailed_html": "inline FOLLY_ERASE terse_intern_boxed_field_ref(\n    T value, get_default_t get_default) noexcept",
+                "detailed_raw": "inline FOLLY_ERASE terse_intern_boxed_field_ref(\n    T value, get_default_t get_default) noexcept",
+                "original_definition_html": "FOLLY_ERASE apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::terse_intern_boxed_field_ref",
+                "original_argsstring_html": "(T value, get_default_t get_default) noexcept"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "constructor": true,
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::terse_intern_boxed_field_ref"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a00505691a918425f4509895b5d0792a5",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename U"
+                },
+                {
+                  "type_html": "typename",
+                  "defval_html": "<code>detail::EnableIfImplicit</code>&lt;T, U&gt;"
+                }
+              ],
+              "type_html": "FOLLY_ERASE",
+              "definition_html": "FOLLY_ERASE apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::terse_intern_boxed_field_ref",
+              "argsstring_html": "(const terse_intern_boxed_field_ref&lt; U &gt; &amp;other) noexcept",
+              "name_html": "terse_intern_boxed_field_ref",
+              "param": [
+                {
+                  "type_html": "const <code>terse_intern_boxed_field_ref</code>&lt; U &gt; &amp;",
+                  "declname_html": "other"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1609",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1609",
+                "bodyend": "1611"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename U, typename = detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE terse_intern_boxed_field_ref(\n    const terse_intern_boxed_field_ref&lt;U&gt;&amp; other)",
+                "simple_raw": "template <typename U, typename = detail::EnableIfImplicit<T, U>>\nFOLLY_ERASE terse_intern_boxed_field_ref(\n    const terse_intern_boxed_field_ref<U>& other)",
+                "detailed_html": "template &lt;typename U, typename = detail::EnableIfImplicit&lt;T, U&gt;&gt;\ninline FOLLY_ERASE terse_intern_boxed_field_ref(\n    const terse_intern_boxed_field_ref&lt;U&gt;&amp; other) noexcept",
+                "detailed_raw": "template <typename U, typename = detail::EnableIfImplicit<T, U>>\ninline FOLLY_ERASE terse_intern_boxed_field_ref(\n    const terse_intern_boxed_field_ref<U>& other) noexcept",
+                "original_definition_html": "FOLLY_ERASE apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::terse_intern_boxed_field_ref",
+                "original_argsstring_html": "(const terse_intern_boxed_field_ref&lt; U &gt; &amp;other) noexcept"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "constructor": true,
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::terse_intern_boxed_field_ref"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref",
+          "minprot": "public",
+          "displayname_html": "(constructor)",
+          "brief_html": "Constructs the terse_intern_boxed_field_ref.",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref",
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/terse_intern_boxed_field_ref"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "operator=",
+          "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::operator=",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a0d035810534dc66fe7fe8d44adf3889c",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename U",
+                  "defval_html": "<code>value_type</code>"
+                }
+              ],
+              "type_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt; <code>value_type</code> &amp;, U &amp;&amp; &gt;::<code>value</code>, <code>terse_intern_boxed_field_ref</code> &amp; &gt;",
+              "definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value, terse_intern_boxed_field_ref&amp;&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator=",
+              "argsstring_html": "(U &amp;&amp;value)",
+              "name_html": "operator=",
+              "param": [
+                {
+                  "type_html": "U &amp;&amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1617",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1617",
+                "bodyend": "1620"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE std::enable_if_t&lt;\n    std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value,\n    terse_intern_boxed_field_ref&amp;&gt;\noperator=(U&amp;&amp; value)",
+                "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE std::enable_if_t<\n    std::is_assignable<value_type&, U&&>::value,\n    terse_intern_boxed_field_ref&>\noperator=(U&& value)",
+                "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE std::enable_if_t&lt;\n    std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value,\n    terse_intern_boxed_field_ref&amp;&gt;\noperator=(U&amp;&amp; value)",
+                "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE std::enable_if_t<\n    std::is_assignable<value_type&, U&&>::value,\n    terse_intern_boxed_field_ref&>\noperator=(U&& value)",
+                "original_definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value, terse_intern_boxed_field_ref&amp;&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator=",
+                "original_argsstring_html": "(U &amp;&amp;value)"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::operator="
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a3837f371b108825f7574bfb7a173a256",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "FOLLY_ERASE <code>terse_intern_boxed_field_ref</code> &amp;",
+              "definition_html": "FOLLY_ERASE terse_intern_boxed_field_ref&amp; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator=",
+              "argsstring_html": "(value_type &amp;&amp;value) noexcept(std::is_nothrow_move_assignable&lt; value_type &gt;::value)",
+              "name_html": "operator=",
+              "param": [
+                {
+                  "type_html": "<code>value_type</code> &amp;&amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1624",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1624",
+                "bodyend": "1629"
+              },
+              "definition": {
+                "simple_html": "FOLLY_ERASE terse_intern_boxed_field_ref&amp; operator=(value_type&amp;&amp; value)",
+                "simple_raw": "FOLLY_ERASE terse_intern_boxed_field_ref& operator=(value_type&& value)",
+                "detailed_html": "inline FOLLY_ERASE terse_intern_boxed_field_ref&amp;\noperator=(value_type&amp;&amp; value) noexcept(\n    (std::is_nothrow_move_assignable&lt;value_type&gt;::value))",
+                "detailed_raw": "inline FOLLY_ERASE terse_intern_boxed_field_ref&\noperator=(value_type&& value) noexcept(\n    (std::is_nothrow_move_assignable<value_type>::value))",
+                "original_definition_html": "FOLLY_ERASE terse_intern_boxed_field_ref&amp; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator=",
+                "original_argsstring_html": "(value_type &amp;&amp;value) noexcept(std::is_nothrow_move_assignable&lt; value_type &gt;::value)"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::operator="
+            }
+          ],
+          "filepath": "f/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign",
+          "minprot": "public",
+          "displayname_html": "operator=",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign",
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.assign"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "copy_from",
+          "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::copy_from",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a6dcd3379951cb703dc76046379b40ca2",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename U"
+                }
+              ],
+              "type_html": "FOLLY_ERASE void",
+              "definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::copy_from",
+              "argsstring_html": "(const terse_intern_boxed_field_ref&lt; U &gt; &amp;other)",
+              "name_html": "copy_from",
+              "param": [
+                {
+                  "type_html": "const <code>terse_intern_boxed_field_ref</code>&lt; U &gt; &amp;",
+                  "declname_html": "other"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1632",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1632",
+                "bodyend": "1634"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void copy_from(const terse_intern_boxed_field_ref&lt;U&gt;&amp; other)",
+                "simple_raw": "template <typename U>\nFOLLY_ERASE void copy_from(const terse_intern_boxed_field_ref<U>& other)",
+                "detailed_html": "template &lt;typename U&gt;\ninline FOLLY_ERASE void copy_from(const terse_intern_boxed_field_ref&lt;U&gt;&amp; other)",
+                "detailed_raw": "template <typename U>\ninline FOLLY_ERASE void copy_from(const terse_intern_boxed_field_ref<U>& other)",
+                "original_definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::copy_from",
+                "original_argsstring_html": "(const terse_intern_boxed_field_ref&lt; U &gt; &amp;other)"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/copy_from",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/copy_from",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::copy_from"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/terse_intern_boxed_field_ref/copy_from",
+          "minprot": "public",
+          "displayname_html": "copy_from",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/copy_from",
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/copy_from"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "move_from",
+          "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::move_from",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a2e641a534c6b5cec51437c5ce31a5af7",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename U"
+                }
+              ],
+              "type_html": "FOLLY_ERASE void",
+              "definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::move_from",
+              "argsstring_html": "(terse_intern_boxed_field_ref&lt; U &gt; other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, std::remove_reference_t&lt; U &gt; &amp;&amp;&gt;::value)",
+              "name_html": "move_from",
+              "param": [
+                {
+                  "type_html": "<code>terse_intern_boxed_field_ref</code>&lt; U &gt;",
+                  "declname_html": "other"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1637",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1637",
+                "bodyend": "1641"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void move_from(terse_intern_boxed_field_ref&lt;U&gt; other)",
+                "simple_raw": "template <typename U>\nFOLLY_ERASE void move_from(terse_intern_boxed_field_ref<U> other)",
+                "detailed_html": "template &lt;typename U&gt;\ninline FOLLY_ERASE void\nmove_from(terse_intern_boxed_field_ref&lt;U&gt; other) noexcept(\n    (std::is_nothrow_assignable&lt;value_type&amp;, std::remove_reference_t&lt;U&gt;&amp;&amp;&gt;::\n         value))",
+                "detailed_raw": "template <typename U>\ninline FOLLY_ERASE void\nmove_from(terse_intern_boxed_field_ref<U> other) noexcept(\n    (std::is_nothrow_assignable<value_type&, std::remove_reference_t<U>&&>::\n         value))",
+                "original_definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::move_from",
+                "original_argsstring_html": "(terse_intern_boxed_field_ref&lt; U &gt; other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, std::remove_reference_t&lt; U &gt; &amp;&amp;&gt;::value)"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/move_from",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/move_from",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::move_from"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/terse_intern_boxed_field_ref/move_from",
+          "minprot": "public",
+          "displayname_html": "move_from",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/move_from",
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/move_from"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "reset",
+          "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::reset",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1abca56e8b25b56ae2ef5a05402e9d0dd3",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "FOLLY_ERASE void",
+              "definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::reset",
+              "argsstring_html": "() noexcept",
+              "name_html": "reset",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1643",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1643",
+                "bodyend": "1646"
+              },
+              "definition": {
+                "simple_html": "FOLLY_ERASE void reset()",
+                "simple_raw": "FOLLY_ERASE void reset()",
+                "detailed_html": "inline FOLLY_ERASE void reset() noexcept",
+                "detailed_raw": "inline FOLLY_ERASE void reset() noexcept",
+                "original_definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::reset",
+                "original_argsstring_html": "() noexcept"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/reset",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/reset",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::reset"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/terse_intern_boxed_field_ref/reset",
+          "minprot": "public",
+          "displayname_html": "reset",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/reset",
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/reset"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "value",
+          "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::value",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a24a3538c56c2c0e26e5de695f81411bc",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename U",
+                  "defval_html": "<code>value_type</code>"
+                }
+              ],
+              "type_html": "FOLLY_ERASE <code>detail::EnableIfNonConst</code>&lt; U, <code>reference_type</code> &gt;",
+              "definition_html": "FOLLY_ERASE detail::EnableIfNonConst&lt;U, reference_type&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::value",
+              "argsstring_html": "()",
+              "name_html": "value",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1649",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1649",
+                "bodyend": "1651"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfNonConst&lt;U, reference_type&gt; value()",
+                "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE detail::EnableIfNonConst<U, reference_type> value()",
+                "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE detail::EnableIfNonConst&lt;U, reference_type&gt; value()",
+                "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE detail::EnableIfNonConst<U, reference_type> value()",
+                "original_definition_html": "FOLLY_ERASE detail::EnableIfNonConst&lt;U, reference_type&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::value",
+                "original_argsstring_html": "()"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/value",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/value",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::value"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a91198323ac4d7b4fc3a519cdaa8dd04a",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename U",
+                  "defval_html": "<code>value_type</code>"
+                }
+              ],
+              "type_html": "FOLLY_ERASE <code>detail::EnableIfConst</code>&lt; U, <code>reference_type</code> &gt;",
+              "definition_html": "FOLLY_ERASE detail::EnableIfConst&lt;U, reference_type&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::value",
+              "argsstring_html": "() const",
+              "name_html": "value",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1653",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1653",
+                "bodyend": "1655"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfConst&lt;U, reference_type&gt; value() const",
+                "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE detail::EnableIfConst<U, reference_type> value() const",
+                "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE detail::EnableIfConst&lt;U, reference_type&gt; value() const",
+                "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE detail::EnableIfConst<U, reference_type> value() const",
+                "original_definition_html": "FOLLY_ERASE detail::EnableIfConst&lt;U, reference_type&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::value",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/value",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/value",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::value"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/terse_intern_boxed_field_ref/value",
+          "minprot": "public",
+          "displayname_html": "value",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/value",
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/value"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "ensure",
+          "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::ensure",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a991c411e6cce75a86b149f5f6646907e",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "FOLLY_ERASE <code>reference_type</code>",
+              "definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::ensure",
+              "argsstring_html": "() noexcept",
+              "name_html": "ensure",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1657",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1657",
+                "bodyend": "1659"
+              },
+              "definition": {
+                "simple_html": "FOLLY_ERASE reference_type ensure()",
+                "simple_raw": "FOLLY_ERASE reference_type ensure()",
+                "detailed_html": "inline FOLLY_ERASE reference_type ensure() noexcept",
+                "detailed_raw": "inline FOLLY_ERASE reference_type ensure() noexcept",
+                "original_definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::ensure",
+                "original_argsstring_html": "() noexcept"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/ensure",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/ensure",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::ensure"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/terse_intern_boxed_field_ref/ensure",
+          "minprot": "public",
+          "displayname_html": "ensure",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/ensure",
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/ensure"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "operator*",
+          "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::operator*",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a4e67ab43ff1144e19c2ad2cc29e6d5c7",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "FOLLY_ERASE <code>reference_type</code>",
+              "definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator*",
+              "argsstring_html": "()",
+              "name_html": "operator*",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1661",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1661",
+                "bodyend": "1661"
+              },
+              "definition": {
+                "simple_html": "FOLLY_ERASE reference_type operator*()",
+                "simple_raw": "FOLLY_ERASE reference_type operator*()",
+                "detailed_html": "inline FOLLY_ERASE reference_type operator*()",
+                "detailed_raw": "inline FOLLY_ERASE reference_type operator*()",
+                "original_definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator*",
+                "original_argsstring_html": "()"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::operator*"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a04cd264988019d576af5303e6f3ba871",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "FOLLY_ERASE <code>reference_type</code>",
+              "definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator*",
+              "argsstring_html": "() const",
+              "name_html": "operator*",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1662",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1662",
+                "bodyend": "1662"
+              },
+              "definition": {
+                "simple_html": "FOLLY_ERASE reference_type operator*() const",
+                "simple_raw": "FOLLY_ERASE reference_type operator*() const",
+                "detailed_html": "inline FOLLY_ERASE reference_type operator*() const",
+                "detailed_raw": "inline FOLLY_ERASE reference_type operator*() const",
+                "original_definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator*",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::operator*"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul",
+          "minprot": "public",
+          "displayname_html": "operator*",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul",
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.mul"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "operator-&gt;",
+          "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::operator-&gt;",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a8f329534ce701d2671798e011b1ca10f",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename U",
+                  "defval_html": "<code>value_type</code>"
+                }
+              ],
+              "type_html": "FOLLY_ERASE <code>detail::EnableIfNonConst</code>&lt; U &gt; *",
+              "definition_html": "FOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator-&gt;",
+              "argsstring_html": "()",
+              "name_html": "operator-&gt;",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1669",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1669",
+                "bodyend": "1671"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* operator-&gt;()",
+                "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE detail::EnableIfNonConst<U>* operator->()",
+                "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* operator-&gt;()",
+                "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE detail::EnableIfNonConst<U>* operator->()",
+                "original_definition_html": "FOLLY_ERASE detail::EnableIfNonConst&lt;U&gt;* apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator-&gt;",
+                "original_argsstring_html": "()"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::operator-&gt;"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1ae2e0a317f96c9ccc3e58b4ab7f218196",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename U",
+                  "defval_html": "<code>value_type</code>"
+                }
+              ],
+              "type_html": "FOLLY_ERASE <code>detail::EnableIfConst</code>&lt; U &gt; *",
+              "definition_html": "FOLLY_ERASE detail::EnableIfConst&lt;U&gt;* apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator-&gt;",
+              "argsstring_html": "() const",
+              "name_html": "operator-&gt;",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1674",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1674",
+                "bodyend": "1676"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
+                "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE detail::EnableIfConst<U>* operator->() const",
+                "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
+                "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE detail::EnableIfConst<U>* operator->() const",
+                "original_definition_html": "FOLLY_ERASE detail::EnableIfConst&lt;U&gt;* apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::operator-&gt;",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::operator-&gt;"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow",
+          "minprot": "public",
+          "displayname_html": "operator-&gt;",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow",
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/operator.arrow"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "emplace",
+          "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::emplace",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a67518f711882f75d66b8dd505035744c",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename...",
+                  "declname_html": "Args",
+                  "defname_html": "Args"
+                }
+              ],
+              "type_html": "FOLLY_ERASE <code>value_type</code> &amp;",
+              "definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::emplace",
+              "argsstring_html": "(Args &amp;&amp;... args)",
+              "name_html": "emplace",
+              "param": [
+                {
+                  "type_html": "Args &amp;&amp;...",
+                  "declname_html": "args"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1679",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1679",
+                "bodyend": "1682"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename... Args&gt;\nFOLLY_ERASE value_type&amp; emplace(Args&amp;&amp;... args)",
+                "simple_raw": "template <typename... Args>\nFOLLY_ERASE value_type& emplace(Args&&... args)",
+                "detailed_html": "template &lt;typename... Args&gt;\ninline FOLLY_ERASE value_type&amp; emplace(Args&amp;&amp;... args)",
+                "detailed_raw": "template <typename... Args>\ninline FOLLY_ERASE value_type& emplace(Args&&... args)",
+                "original_definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::emplace",
+                "original_argsstring_html": "(Args &amp;&amp;... args)"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/emplace",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/emplace",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::emplace"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref_1a0156c331308c974f5bcfc53970d66088",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "class U"
+                },
+                {
+                  "type_html": "class...",
+                  "declname_html": "Args",
+                  "defname_html": "Args"
+                }
+              ],
+              "type_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt; <code>value_type</code>, std::initializer_list&lt; U &gt; &amp;, Args &amp;&amp;... &gt;::<code>value</code>, <code>value_type</code> &amp; &gt;",
+              "definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;&amp;, Args&amp;&amp;...&gt;:: value, value_type&amp;&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::emplace",
+              "argsstring_html": "(std::initializer_list&lt; U &gt; ilist, Args &amp;&amp;... args)",
+              "name_html": "emplace",
+              "param": [
+                {
+                  "type_html": "std::initializer_list&lt; U &gt;",
+                  "declname_html": "ilist"
+                },
+                {
+                  "type_html": "Args &amp;&amp;...",
+                  "declname_html": "args"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "line": "1689",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
+                "bodystart": "1689",
+                "bodyend": "1693"
+              },
+              "definition": {
+                "simple_html": "template &lt;class U, class... Args&gt;\nFOLLY_ERASE std::enable_if_t&lt;\n    std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;&amp;, Args&amp;&amp;...&gt;::\n        value,\n    value_type&amp;&gt;\nemplace(std::initializer_list&lt;U&gt; ilist, Args&amp;&amp;... args)",
+                "simple_raw": "template <class U, class... Args>\nFOLLY_ERASE std::enable_if_t<\n    std::is_constructible<value_type, std::initializer_list<U>&, Args&&...>::\n        value,\n    value_type&>\nemplace(std::initializer_list<U> ilist, Args&&... args)",
+                "detailed_html": "template &lt;class U, class... Args&gt;\ninline FOLLY_ERASE std::enable_if_t&lt;\n    std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;&amp;, Args&amp;&amp;...&gt;::\n        value,\n    value_type&amp;&gt;\nemplace(std::initializer_list&lt;U&gt; ilist, Args&amp;&amp;... args)",
+                "detailed_raw": "template <class U, class... Args>\ninline FOLLY_ERASE std::enable_if_t<\n    std::is_constructible<value_type, std::initializer_list<U>&, Args&&...>::\n        value,\n    value_type&>\nemplace(std::initializer_list<U> ilist, Args&&... args)",
+                "original_definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;&amp;, Args&amp;&amp;...&gt;:: value, value_type&amp;&gt; apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::emplace",
+                "original_argsstring_html": "(std::initializer_list&lt; U &gt; ilist, Args &amp;&amp;... args)"
+              },
+              "filepath": "fns/class/apache/thrift/terse_intern_boxed_field_ref/emplace",
+              "href": "/ref/cpp/fns/class/apache/thrift/terse_intern_boxed_field_ref/emplace",
+              "parentid": "classapache_1_1thrift_1_1terse__intern__boxed__field__ref",
+              "compoundname_html": "apache::thrift::terse_intern_boxed_field_ref::emplace"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/terse_intern_boxed_field_ref/emplace",
+          "minprot": "public",
+          "displayname_html": "emplace",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/emplace",
+          "refid": "/ref/cpp/f/class/apache/thrift/terse_intern_boxed_field_ref/emplace"
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

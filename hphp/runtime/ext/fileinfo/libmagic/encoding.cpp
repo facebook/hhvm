@@ -71,6 +71,9 @@ file_encoding(struct magic_set *ms, const unsigned char *buf, size_t nbytes, uni
   int rv = 1, ucs_type;
   unsigned char *nbuf = NULL;
 
+  const size_t kMaxSize = 64 * 1024;
+  if (nbytes > kMaxSize) nbytes = kMaxSize;
+
   *type = "text";
   mlen = (nbytes + 1) * sizeof(nbuf[0]);
   if ((nbuf = CAST(unsigned char *, calloc((size_t)1, mlen))) == NULL) {

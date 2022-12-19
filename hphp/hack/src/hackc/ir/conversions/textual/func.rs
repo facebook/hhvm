@@ -666,9 +666,16 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
             SpecialClsRef::ParentCls => {
                 // parent::foo() - Static call to the method in the parent class.
                 let mi = state.expect_method_info();
-                let target =
-                    method.mangle_with_class(mi.class.base.unwrap(), mi.is_static, &state.strings);
+                let is_static = mi.is_static;
+                let base = if let Some(base) = mi.class.base {
+                    base
+                } else {
+                    // Uh oh. We're asking to call parent::foo() when we don't
+                    // have a known parent. This can happen in a trait...
+                    ClassId::from_str("__parent__", &state.strings)
+                };
                 let this = state.load_this()?;
+                let target = method.mangle_with_class(base, is_static, &state.strings);
                 state.fb.call_static(&target, this.into(), args)?
             }
             _ => unreachable!(),

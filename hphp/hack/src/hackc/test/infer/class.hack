@@ -324,6 +324,37 @@ class C {
   }
 }
 
+trait T0 {
+  // TEST-CHECK-BAL: define T0.trait_parent_caller
+  // CHECK: define T0.trait_parent_caller($this: *T0) : *void {
+  // CHECK: local base: *HackMixed
+  // CHECK: #b0:
+  // CHECK:   n0: *T0 = load &$this
+  // CHECK:   n1 = __parent__.test_const(n0)
+  // CHECK:   ret null
+  // CHECK: }
+  public function trait_parent_caller(): void {
+    /* HH_FIXME[4074] This isn't valid Hack but actually occurs in www */
+    parent::test_const();
+  }
+}
+
+trait T1 {
+  require extends C;
+
+  // TEST-CHECK-BAL: define T1.trait_parent_caller
+  // CHECK: define T1.trait_parent_caller($this: *T1) : *void {
+  // CHECK: local base: *HackMixed
+  // CHECK: #b0:
+  // CHECK:   n0: *T1 = load &$this
+  // CHECK:   n1 = __parent__.test_const(n0)
+  // CHECK:   ret null
+  // CHECK: }
+  public function trait_parent_caller(): void {
+    parent::test_const();
+  }
+}
+
 // TEST-CHECK-BAL: global C$static::MY_CONSTANT
 // CHECK: global C$static::MY_CONSTANT : *HackMixed
 

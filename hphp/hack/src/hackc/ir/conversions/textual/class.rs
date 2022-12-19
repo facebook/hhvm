@@ -15,6 +15,8 @@ use std::sync::Arc;
 
 use anyhow::Error;
 use hash::IndexMap;
+use ir::StringInterner;
+use itertools::Itertools;
 use log::trace;
 
 use super::func;
@@ -83,7 +85,7 @@ pub(crate) fn write_class(
     Ok(())
 }
 
-fn convert_enum_ty(ti: &ir::TypeInfo, strings: &ir::StringInterner) -> textual::Ty {
+fn convert_enum_ty(ti: &ir::TypeInfo, strings: &StringInterner) -> textual::Ty {
     // Enum types are unenforced - and yet the constants ARE real type. So scan
     // the text of the type and do the best we can.
     //
@@ -109,13 +111,13 @@ fn convert_enum_ty(ti: &ir::TypeInfo, strings: &ir::StringInterner) -> textual::
 }
 
 /// For a given class return the Ty for its non-static (instance) type.
-pub(crate) fn non_static_ty(class: ir::ClassId, strings: &ir::StringInterner) -> textual::Ty {
+pub(crate) fn non_static_ty(class: ir::ClassId, strings: &StringInterner) -> textual::Ty {
     let cname = class.mangle_class(IsStatic::NonStatic, strings);
     textual::Ty::Ptr(Box::new(textual::Ty::Type(cname)))
 }
 
 /// For a given class return the Ty for its static type.
-pub(crate) fn static_ty(class: ir::ClassId, strings: &ir::StringInterner) -> textual::Ty {
+pub(crate) fn static_ty(class: ir::ClassId, strings: &StringInterner) -> textual::Ty {
     let cname = class.mangle_class(IsStatic::Static, strings);
     textual::Ty::Ptr(Box::new(textual::Ty::Type(cname)))
 }
@@ -123,7 +125,7 @@ pub(crate) fn static_ty(class: ir::ClassId, strings: &ir::StringInterner) -> tex
 pub(crate) fn class_ty(
     class: ir::ClassId,
     is_static: IsStatic,
-    strings: &ir::StringInterner,
+    strings: &StringInterner,
 ) -> textual::Ty {
     match is_static {
         IsStatic::Static => static_ty(class, strings),
@@ -132,13 +134,13 @@ pub(crate) fn class_ty(
 }
 
 /// For a given class return the Ty for its non-static type.
-fn init_static_name(class: ir::ClassId, strings: &ir::StringInterner) -> String {
+fn init_static_name(class: ir::ClassId, strings: &StringInterner) -> String {
     let method = ir::MethodName::new(ffi::Slice::new(b"$init_static"));
     method.mangle_with_class(class, IsStatic::Static, strings)
 }
 
 /// The name of the global singleton for a static class.
-fn static_singleton_name(class: ir::ClassId, strings: &ir::StringInterner) -> String {
+fn static_singleton_name(class: ir::ClassId, strings: &StringInterner) -> String {
     let name = ir::ConstId::new(strings.intern_str("static_singleton"));
     name.mangle_with_class(class, IsStatic::Static, strings)
 }
@@ -175,24 +177,18 @@ fn write_type(
         }
     }
 
-    let mut extends: Vec<String> = Vec::new();
-    if let Some(base) = class.base {
-        extends.push(base.mangle_class(is_static, &state.strings));
+    let mut extends: Vec<ir::ClassId> = Vec::new();
+    if let Some(base) = compute_base(class) {
+        extends.push(base);
     }
 
-    extends.extend(
-        class
-            .implements
-            .iter()
-            .map(|id| id.mangle_class(is_static, &state.strings)),
-    );
+    extends.extend(class.implements.iter());
+    extends.extend(class.uses.iter());
 
-    extends.extend(
-        class
-            .uses
-            .iter()
-            .map(|id| id.mangle_class(is_static, &state.strings)),
-    );
+    let extends = extends
+        .into_iter()
+        .map(|id| id.mangle_class(is_static, &state.strings))
+        .collect_vec();
 
     let fields = fields.iter().map(|(name, ty, visibility)| textual::Field {
         name: name.as_str(),
@@ -210,6 +206,19 @@ fn write_type(
     )?;
 
     Ok(())
+}
+
+fn compute_base(class: &ir::Class<'_>) -> Option<ir::ClassId> {
+    if class.flags.is_trait() {
+        // Traits express bases through a 'require extends'.
+        let req = class
+            .requirements
+            .iter()
+            .find(|r| r.kind == ir::TraitReqKind::MustExtend);
+        req.map(|req| req.name)
+    } else {
+        class.base
+    }
 }
 
 fn write_property(
@@ -354,7 +363,7 @@ fn write_method(
 pub(crate) fn load_static_class(
     fb: &mut textual::FuncBuilder<'_, '_>,
     class: ir::ClassId,
-    strings: &ir::StringInterner,
+    strings: &StringInterner,
 ) -> Result<textual::Sid> {
     // Blindly load the static singleton, assuming it's already been initialized.
     let singleton_name = static_singleton_name(class, strings);

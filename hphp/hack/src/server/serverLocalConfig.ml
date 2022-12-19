@@ -409,6 +409,8 @@ type t = {
       If disabled, instead load lazily from shallow classes. *)
   fetch_remote_old_decls: bool;
       (** Option to fetch old decls from remote decl store *)
+  use_hack_64_naming_table: bool;
+      (** Load naming table from hack/64 saved state. *)
   skip_hierarchy_checks: bool;
       (** Skip checks on hierarchy e.g. overrides, require extend, etc.
       Set to true only for debugging purposes! *)
@@ -572,6 +574,7 @@ let default =
     force_load_hot_shallow_decls = false;
     populate_member_heaps = true;
     fetch_remote_old_decls = false;
+    use_hack_64_naming_table = true;
     skip_hierarchy_checks = false;
     skip_tast_checks = false;
     num_local_workers = None;
@@ -1070,6 +1073,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let use_hack_64_naming_table =
+    bool_if_min_version
+      "use_hack_64_naming_table"
+      ~default:default.use_hack_64_naming_table
+      ~current_version
+      config
+  in
   let skip_hierarchy_checks =
     bool_if_min_version
       "skip_hierarchy_checks"
@@ -1482,6 +1492,7 @@ let load_ fn ~silent ~current_version overrides =
     force_load_hot_shallow_decls;
     populate_member_heaps;
     fetch_remote_old_decls;
+    use_hack_64_naming_table;
     skip_hierarchy_checks;
     skip_tast_checks;
     num_local_workers;
@@ -1557,6 +1568,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       log_saved_state_age_and_distance =
         options.log_saved_state_age_and_distance;
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
+      use_hack_64_naming_table = options.use_hack_64_naming_table;
       fetch_remote_old_decls = options.fetch_remote_old_decls;
       ide_max_num_decls = options.ide_max_num_decls;
       ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;

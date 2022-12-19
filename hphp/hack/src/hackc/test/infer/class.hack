@@ -355,6 +355,21 @@ trait T1 {
   }
 }
 
+// TEST-CHECK-BAL: define $root.dynamic_const
+// CHECK: define $root.dynamic_const($this: *void, $c: *C) : *void {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_string("MY_CONSTANT")
+// CHECK:   n1: *HackMixed = load &$c
+// CHECK:   n2 = $builtins.hhbc_class_get_c(n1)
+// CHECK:   n3 = $builtins.hhbc_cls_cns(n2, n0)
+// CHECK:   n4 = $builtins.hhbc_print(n3)
+// CHECK:   ret null
+// CHECK: }
+function dynamic_const(C $c): void {
+  echo $c::MY_CONSTANT;
+}
+
 // TEST-CHECK-BAL: global C$static::MY_CONSTANT
 // CHECK: global C$static::MY_CONSTANT : *HackMixed
 

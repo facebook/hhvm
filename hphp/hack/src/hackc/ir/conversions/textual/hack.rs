@@ -48,6 +48,8 @@ pub(crate) enum Hhbc {
     ClassGetC,
     #[decl(fn hhbc_class_has_reified_generics(*HackMixed) -> *HackMixed)]
     ClassHasReifiedGenerics,
+    #[decl(fn hhbc_cls_cns(*HackMixed, *HackString) -> *HackMixed)]
+    ClsCns,
     #[decl(fn hhbc_cmp_eq(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpEq,
     #[decl(fn hhbc_cmp_gt(*HackMixed, *HackMixed) -> *HackMixed)]

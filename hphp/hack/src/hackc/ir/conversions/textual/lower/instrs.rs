@@ -326,6 +326,11 @@ impl TransformInstr for LowerInstrs<'_> {
                 let this = builder.emit(Instr::Hhbc(Hhbc::BareThis(op, loc)));
                 builder.hhbc_builtin(builtin, &[this], loc)
             }
+            Instr::Hhbc(Hhbc::ClsCns(cls, const_id, loc)) => {
+                let builtin = hack::Hhbc::ClsCns;
+                let const_id = builder.emit_constant(Constant::String(const_id.id));
+                builder.hhbc_builtin(builtin, &[cls, const_id], loc)
+            }
             Instr::Hhbc(Hhbc::InstanceOfD(vid, cid, loc)) => {
                 let cid = builder.emit_constant(Constant::String(cid.id));
                 builder.hack_builtin(Builtin::IsType, &[vid, cid], loc)

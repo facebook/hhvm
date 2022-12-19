@@ -61,6 +61,7 @@ type rollout_flags = {
   shm_cache_size: int;
   remote_old_decls_no_limit: bool;
   no_marshalled_naming_table_in_saved_state: bool;
+  no_load_two_saved_states: bool;
   use_manifold_cython_client: bool;
   disable_naming_table_fallback_loading: bool;
   use_type_alias_heap: bool;

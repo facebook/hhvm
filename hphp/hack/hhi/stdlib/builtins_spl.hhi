@@ -223,23 +223,23 @@ class GlobIterator extends FilesystemIterator implements Countable {
 class SplStack<T> extends SplDoublyLinkedList<T> {
 }
 
-class SplPriorityQueue<T>
-  implements Iterator<HH\FIXME\POISON_MARKER<T>>, Countable {
+class SplPriorityQueue<Tv, Tp>
+  implements Iterator<HH\FIXME\POISON_MARKER<Tv>>, Countable {
   const int EXTR_BOTH;
   const int EXTR_PRIORITY;
   const int EXTR_DATA;
-  public function compare($a, $b): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function compare(Tp $a, Tp $b): int {}
   public function count(): int {}
-  public function current(): HH\FIXME\POISON_MARKER<T> {}
-  public function extract(): HH\FIXME\MISSING_RETURN_TYPE {}
-  public function insert($value, $priority): HH\FIXME\MISSING_RETURN_TYPE {}
-  public function isEmpty(): HH\FIXME\MISSING_RETURN_TYPE {}
-  public function key(): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function current(): HH\FIXME\POISON_MARKER<Tv> {}
+  public function extract(): HH\FIXME\POISON_MARKER<Tv> {}
+  public function insert(Tv $value, Tp $priority): bool {}
+  public function isEmpty(): bool {}
+  public function key(): int {}
   public function next(): void {}
-  public function recoverFromCorruption(): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function recoverFromCorruption(): bool {}
   public function rewind(): void {}
-  public function setExtractFlags($flags): HH\FIXME\MISSING_RETURN_TYPE {}
-  public function top(): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function setExtractFlags(int $flags): int {}
+  public function top(): HH\FIXME\POISON_MARKER<Tv> {}
   public function valid(): bool {}
 }
 

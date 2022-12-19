@@ -25,6 +25,9 @@ pub struct DepGraphDelta {
 }
 
 impl DepGraphDelta {
+    // The high bit of a value being set distinguishes dependency from dependent.
+    const DEPENDENCY_TAG: u64 = 1 << 63;
+
     pub fn insert(&mut self, dependent: Dep, dependency: Dep) {
         if (self.rdeps.entry(dependency))
             .or_default()
@@ -82,7 +85,7 @@ impl DepGraphDelta {
     /// an arbitrary number of accompanying dependent hashes. To distinguish
     /// between dependency and dependent hashes, we make use of the fact that
     /// hashes are 63-bit (due to the OCaml limitation). We set the MSB for
-    /// dependent hashes.
+    /// dependency hashes.
     fn write_list<W: Write>(
         mut w: W,
         dependency: Dep,
@@ -90,11 +93,11 @@ impl DepGraphDelta {
     ) -> io::Result<()> {
         if dependents.len() != 0 {
             let dependency: u64 = dependency.into();
-            w.write_all(&dependency.to_be_bytes())?;
+            w.write_all(&(dependency | Self::DEPENDENCY_TAG).to_ne_bytes())?;
 
             for dependent in dependents {
                 let dependent: u64 = dependent.into();
-                w.write_all(&(dependent | (1 << 63)).to_be_bytes())?;
+                w.write_all(&dependent.to_ne_bytes())?;
             }
         }
 
@@ -154,13 +157,13 @@ impl DepGraphDelta {
                 r => r?,
             };
 
-            let hash = u64::from_be_bytes(bytes);
-            if (hash & (1 << 63)) == 0 {
+            let hash = u64::from_ne_bytes(bytes);
+            if (hash & Self::DEPENDENCY_TAG) != 0 {
                 // This is a dependency hash.
+                let hash = hash & !Self::DEPENDENCY_TAG;
                 dependency = Some(Dep::new(hash));
             } else {
                 // This is a dependent hash.
-                let hash = hash & !(1 << 63);
                 let dependent = Dep::new(hash);
                 let dependency =
                     dependency.expect("Expected a dependent hash before a dependency hash");

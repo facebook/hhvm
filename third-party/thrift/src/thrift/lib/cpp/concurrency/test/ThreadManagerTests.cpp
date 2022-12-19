@@ -52,7 +52,7 @@ static folly::WorkerProvider* kWorkerProviderGlobal = nullptr;
 
 namespace folly {
 
-#ifdef FOLLY_HAVE_WEAK_SYMBOLS
+#if FOLLY_HAVE_WEAK_SYMBOLS
 FOLLY_KEEP std::unique_ptr<folly::QueueObserverFactory>
 make_queue_observer_factory(
     const std::string&, size_t, folly::WorkerProvider* workerProvider) {

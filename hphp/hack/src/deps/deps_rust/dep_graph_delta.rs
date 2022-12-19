@@ -76,35 +76,40 @@ impl DepGraphDelta {
         self.num_edges == 0
     }
 
-    /// Write all edges in the delta to the writer in a custom format.
+    /// Write one (dependency, dependents) list.
     ///
     /// The format is as follows. Each dependency hash can be followed by
     /// an arbitrary number of accompanying dependent hashes. To distinguish
     /// between dependency and dependent hashes, we make use of the fact that
     /// hashes are 63-bit (due to the OCaml limitation). We set the MSB for
     /// dependent hashes.
+    fn write_list<W: Write>(
+        mut w: W,
+        dependency: Dep,
+        dependents: impl Iterator<Item = Dep> + ExactSizeIterator,
+    ) -> io::Result<()> {
+        if dependents.len() != 0 {
+            let dependency: u64 = dependency.into();
+            w.write_all(&dependency.to_be_bytes())?;
+
+            for dependent in dependents {
+                let dependent: u64 = dependent.into();
+                w.write_all(&(dependent | (1 << 63)).to_be_bytes())?;
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Write all edges in the delta to the writer in a custom format.
     ///
     /// The output is deterministic if the insertion order is deterministic,
     /// but is arbitrary since we're iterating HashMap & HashSet.
     pub fn write_to<W: Write>(&self, mut w: W) -> io::Result<usize> {
         let mut edges_added = 0;
         for (&dependency, dependents) in self.rdeps.iter() {
-            if dependents.is_empty() {
-                continue;
-            }
-
-            let dependency: u64 = dependency.into();
-            w.write_all(&dependency.to_be_bytes())?;
-            for &dependent in dependents.iter() {
-                let dependent: u64 = dependent.into();
-
-                // Hashes are 63-bits, so we have one bit left to distinguish
-                // between dependencies and dependents. Dependents have their
-                // MSB set.
-                let dependent = dependent | (1 << 63);
-                w.write_all(&dependent.to_be_bytes())?;
-                edges_added += 1;
-            }
+            Self::write_list(&mut w, dependency, dependents.iter().copied())?;
+            edges_added += dependents.len();
         }
 
         Ok(edges_added)
@@ -112,25 +117,14 @@ impl DepGraphDelta {
 
     /// Write all edges in the delta to the writer in a custom format.
     ///
-    /// The format is as follows. Each dependency hash can be followed by
-    /// an arbitrary number of accompanying dependent hashes. To distinguish
-    /// between dependency and dependent hashes, we make use of the fact that
-    /// hashes are 63-bit (due to the OCaml limitation). We set the MSB for
-    /// dependent hashes.
-    ///
     /// The output is deterministic sorted order.
     pub fn write_sorted<W: Write>(&self, mut w: W) -> io::Result<()> {
         let mut dependencies: Vec<_> = self.rdeps.iter().collect();
         dependencies.sort_unstable_by_key(|(dep, _)| *dep);
         for (&dependency, dependents) in dependencies {
-            let dependency: u64 = dependency.into();
             let mut dependents: Vec<Dep> = dependents.iter().copied().collect();
             dependents.sort_unstable();
-            w.write_all(&dependency.to_be_bytes())?;
-            for dependent in dependents {
-                let dependent: u64 = dependent.into();
-                w.write_all(&(dependent | (1 << 63)).to_be_bytes())?;
-            }
+            Self::write_list(&mut w, dependency, dependents.into_iter())?;
         }
         Ok(())
     }

@@ -11,6 +11,7 @@ use std::io;
 use std::io::BufReader;
 use std::io::Read;
 use std::path::Path;
+use std::path::PathBuf;
 
 use dep_graph_delta::DepGraphDelta;
 use depgraph_reader::DepGraph;
@@ -30,51 +31,39 @@ struct EdgesDir {
     // For local typechecks, we output edges in a list format
     list_handles: Vec<BufReader<fs::File>>,
     // For remote typechecks, we output edges in a serialized rust structure format
-    struct_handles: Vec<OsString>,
+    struct_handles: Vec<PathBuf>,
 }
 
 impl EdgesDir {
     fn open<P: AsRef<Path>>(dir: P) -> io::Result<EdgesDir> {
-        let list_handles: io::Result<Vec<_>> = fs::read_dir(&dir)?
-            .map(|res| {
-                res.and_then(|entry| {
-                    let path = entry.path();
-                    if path.extension().and_then(|x| x.to_str()) == Some("bin") {
-                        let fh = fs::OpenOptions::new().read(true).open(&entry.path())?;
-                        Ok(Some(BufReader::new(fh)))
-                    } else {
-                        Ok(None)
-                    }
-                })
+        let list_handles = fs::read_dir(&dir)?
+            .map(|entry| {
+                let path = entry?.path();
+                if path.extension().and_then(|x| x.to_str()) == Some("bin") {
+                    let fh = fs::OpenOptions::new().read(true).open(path)?;
+                    Ok(Some(BufReader::new(fh)))
+                } else {
+                    Ok(None)
+                }
             })
-            .filter_map(|x| match x {
-                Err(x) => Some(Err(x)),
-                Ok(Some(x)) => Some(Ok(x)),
-                Ok(None) => None,
-            })
-            .collect();
+            .filter_map(|x| x.transpose())
+            .collect::<io::Result<Vec<_>>>()?;
 
-        let struct_handles: io::Result<Vec<_>> = fs::read_dir(&dir)?
-            .map(|res| {
-                res.map(|entry| {
-                    let path = entry.path();
-                    if path.extension().and_then(|x| x.to_str()) == Some("hhdg_delta") {
-                        Some(OsString::from(&entry.path()))
-                    } else {
-                        None
-                    }
-                })
+        let struct_handles = fs::read_dir(&dir)?
+            .map(|entry| {
+                let path = entry?.path();
+                if path.extension().and_then(|x| x.to_str()) == Some("hhdg_delta") {
+                    Ok(Some(path))
+                } else {
+                    Ok(None)
+                }
             })
-            .filter_map(|x| match x {
-                Err(x) => Some(Err(x)),
-                Ok(Some(x)) => Some(Ok(x)),
-                Ok(None) => None,
-            })
-            .collect();
+            .filter_map(|x| x.transpose())
+            .collect::<io::Result<Vec<PathBuf>>>()?;
 
         Ok(EdgesDir {
-            list_handles: list_handles?,
-            struct_handles: struct_handles?,
+            list_handles,
+            struct_handles,
         })
     }
 
@@ -132,11 +121,8 @@ impl EdgesDir {
         }
     }
 
-    fn read_all_struct_edges_for(source: &OsString, acc: &Edges) -> io::Result<()> {
-        let f = std::fs::OpenOptions::new()
-            .read(true)
-            .open(&source)
-            .unwrap();
+    fn read_all_struct_edges_for(source: &Path, acc: &Edges) -> io::Result<()> {
+        let f = std::fs::OpenOptions::new().read(true).open(source).unwrap();
 
         let mut r = std::io::BufReader::new(f);
 

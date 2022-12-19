@@ -550,7 +550,7 @@ let build_dep_graph_incr ~output ~old_graph ~delta =
 
 let save_state
     ?(load_hhi_files = false)
-    ?(enable_naming_table_fallback = true)
+    ?(enable_naming_table_fallback = false)
     ?custom_config
     disk_changes
     temp_dir =
@@ -575,7 +575,6 @@ let save_state
         {
           !genv.ServerEnv.local_config with
           ServerLocalConfig.enable_naming_table_fallback;
-          no_marshalled_naming_table_in_saved_state = true;
         };
       ServerEnv.config =
         Option.value custom_config ~default:!genv.ServerEnv.config;
@@ -625,12 +624,6 @@ let save_state_with_errors disk_changes temp_dir expected_error : unit =
       !genv with
       ServerEnv.options =
         ServerArgs.set_gen_saved_ignore_type_errors !genv.ServerEnv.options true;
-      ServerEnv.local_config =
-        {
-          !genv.ServerEnv.local_config with
-          ServerLocalConfig.enable_naming_table_fallback = true;
-          no_marshalled_naming_table_in_saved_state = true;
-        };
     }
   in
   let _edges_added =
@@ -638,12 +631,6 @@ let save_state_with_errors disk_changes temp_dir expected_error : unit =
   in
   let output = temp_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
   build_dep_graph ~output ~edges_dir;
-  let _rows_added =
-    SaveStateService.go_naming
-      env.ServerEnv.naming_table
-      (temp_dir ^ "/" ^ saved_naming_filename)
-    |> Result.ok_or_failwith
-  in
   ()
 
 let load_state
@@ -651,7 +638,7 @@ let load_state
     ?(local_changes = [])
     ?(load_hhi_files = false)
     ?(use_precheked_files = ServerLocalConfig.(default.prechecked_files))
-    ?(enable_naming_table_fallback = true)
+    ?(enable_naming_table_fallback = false)
     ?custom_config
     ~disk_state
     saved_state_dir =
@@ -668,7 +655,6 @@ let load_state
           lazy_init = true;
           prechecked_files = use_precheked_files;
           predeclare_ide = true;
-          no_marshalled_naming_table_in_saved_state = true;
           naming_sqlite_path =
             (if enable_naming_table_fallback then
               Some (saved_state_dir ^ "/" ^ saved_naming_filename)

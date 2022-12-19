@@ -472,6 +472,8 @@ type t = {
       (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
   log_saved_state_age_and_distance: bool;
       (** Collects the age of a saved state (in seconds) and distance (in globalrevs) for telemetry *)
+  naming_sqlite_in_hack_64: bool;
+      (** Add sqlite naming table to hack/64 ss job *)
   workload_quantile: quantile option;
       (** Allows to typecheck only a certain quantile of the workload. *)
   rollout_group: string option;
@@ -602,6 +604,7 @@ let default =
     allow_unstable_features = false;
     watchman = Watchman.default;
     log_from_client_when_slow_monitor_connections = false;
+    naming_sqlite_in_hack_64 = false;
     workload_quantile = None;
     rollout_group = None;
     saved_state_manifold_api_key = None;
@@ -1259,6 +1262,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let naming_sqlite_in_hack_64 =
+    bool_if_min_version
+      "naming_sqlite_in_hack_64"
+      ~default:default.naming_sqlite_in_hack_64
+      ~current_version
+      config
+  in
   let force_load_hot_shallow_decls =
     if force_load_hot_shallow_decls && not force_shallow_decl_fanout then (
       Hh_logger.warn
@@ -1512,6 +1522,7 @@ let load_ fn ~silent ~current_version overrides =
     watchman;
     force_remote_type_check;
     log_from_client_when_slow_monitor_connections;
+    naming_sqlite_in_hack_64;
     workload_quantile;
     rollout_group;
     saved_state_manifold_api_key;
@@ -1545,6 +1556,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         options.log_from_client_when_slow_monitor_connections;
       log_saved_state_age_and_distance =
         options.log_saved_state_age_and_distance;
+      naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
       fetch_remote_old_decls = options.fetch_remote_old_decls;
       ide_max_num_decls = options.ide_max_num_decls;
       ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;

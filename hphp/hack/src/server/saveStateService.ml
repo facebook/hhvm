@@ -132,6 +132,25 @@ let dump_naming_errors_decls
     save_contents output_filename naming_table_saved
   );
 
+  if genv.ServerEnv.local_config.ServerLocalConfig.naming_sqlite_in_hack_64 then (
+    let naming_sql_filename = output_filename ^ "_naming.sql" in
+    let (save_result : Naming_sqlite.save_result) =
+      Naming_table.save naming_table naming_sql_filename
+    in
+    Hh_logger.log
+      "Inserted symbols into the naming table:\n%s"
+      (Naming_sqlite.show_save_result save_result);
+    Hh_logger.log
+      "Finished saving naming table with %d errors."
+      (List.length save_result.Naming_sqlite.errors);
+
+    if List.length save_result.Naming_sqlite.errors > 0 then
+      Exit.exit Exit_status.Sql_assertion_failure;
+
+    assert (Sys.file_exists naming_sql_filename);
+    Hh_logger.log "Saved naming table sqlite to '%s'" naming_sql_filename
+  );
+
   (* Let's not write empty error files. *)
   (if Errors.is_empty errors then
     ()

@@ -1329,20 +1329,20 @@ private:
      */
     union Flags {
       struct {
-        bool m_isClosureBody : true;
-        bool m_isAsync : true;
-        bool m_isGenerator : true;
-        bool m_isPairGenerator : true;
-        bool m_isGenerated : true;
-        bool m_hasExtendedSharedData : true;
-        bool m_returnByValue : true; // only for builtins
-        bool m_isMemoizeWrapper : true;
-        bool m_isMemoizeWrapperLSB : true;
+        bool m_isClosureBody : 1;
+        bool m_isAsync : 1;
+        bool m_isGenerator : 1;
+        bool m_isPairGenerator : 1;
+        bool m_isGenerated : 1;
+        bool m_hasExtendedSharedData : 1;
+        bool m_returnByValue : 1; // only for builtins
+        bool m_isMemoizeWrapper : 1;
+        bool m_isMemoizeWrapperLSB : 1;
         MemoizeICType m_memoizeICType : 2;
-        bool m_isPhpLeafFn : true;
-        bool m_hasReifiedGenerics : true;
-        bool m_hasParamsWithMultiUBs : true;
-        bool m_hasReturnWithMultiUBs : true;
+        bool m_isPhpLeafFn : 1;
+        bool m_hasReifiedGenerics : 1;
+        bool m_hasParamsWithMultiUBs : 1;
+        bool m_hasReturnWithMultiUBs : 1;
       };
       uint16_t m_allFlags;
     };

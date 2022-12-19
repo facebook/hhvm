@@ -506,10 +506,26 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
       !std::is_same<ElemClass, type_class::unknown>(),
       "Unable to serialize unknown list element");
 
-  using elem_type = typename Type::value_type;
+  using elem_type = folly::remove_cvref_t<typename Type::value_type>;
   using elem_methods = protocol_methods<ElemClass, elem_type>;
   using elem_ttype = protocol_type<ElemClass, elem_type>;
 
+ private:
+  template <typename Protocol>
+  FOLLY_ERASE static void read_one(Protocol& protocol, Type& out) {
+    if FOLLY_CXX17_CONSTEXPR ( //
+        std::is_const<std::remove_reference_t<typename Type::reference>>{}) {
+      out.emplace_back(folly::invocable_to([&] {
+        elem_type elem;
+        elem_methods::read(protocol, elem);
+        return elem;
+      }));
+    } else {
+      elem_methods::read(protocol, emplace_back_default(out));
+    }
+  }
+
+ public:
   template <typename Protocol>
   static void read(Protocol& protocol, Type& out) {
     std::uint32_t list_size = -1;
@@ -523,7 +539,7 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
       // list size unknown, SimpleJSON protocol won't know type, either
       // so let's just hope that it spits out something that makes sense
       while (protocol.peekList()) {
-        elem_methods::read(protocol, emplace_back_default(out));
+        read_one(protocol, out);
       }
     } else {
       if (reported_type != WireTypeInfo::fromTType(elem_ttype::value)) {
@@ -535,7 +551,7 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
 
         reserve_if_possible(&out, list_size);
         while (list_size--) {
-          elem_methods::read(protocol, emplace_back_default(out));
+          read_one(protocol, out);
         }
       }
     }

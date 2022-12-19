@@ -1080,7 +1080,7 @@ class AsyncMcClientSSLOffloadTest : public TestWithParam<bool> {
 TEST_P(AsyncMcClientSSLOffloadTest, connectErrors) {
   bool verifyCalled = false;
   McSSLUtil::setApplicationSSLVerifier(
-      [&](folly::AsyncSSLSocket*, bool, X509_STORE_CTX*) {
+      [&](folly::AsyncSSLSocket*, bool, X509_STORE_CTX*) noexcept {
         verifyCalled = true;
         return false;
       });

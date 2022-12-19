@@ -550,6 +550,8 @@ let build_dep_graph_incr ~output ~old_graph ~delta =
 
 let save_state
     ?(load_hhi_files = false)
+    ?(store_decls_in_saved_state =
+      ServerLocalConfig.(default.store_decls_in_saved_state))
     ?(enable_naming_table_fallback = false)
     ?custom_config
     disk_changes
@@ -574,6 +576,7 @@ let save_state
       ServerEnv.local_config =
         {
           !genv.ServerEnv.local_config with
+          ServerLocalConfig.store_decls_in_saved_state;
           ServerLocalConfig.enable_naming_table_fallback;
         };
       ServerEnv.config =
@@ -595,9 +598,22 @@ let save_state
     ()
   )
 
-let save_state_incremental env ~old_state_dir new_state_dir =
+let save_state_incremental
+    env
+    ?(store_decls_in_saved_state =
+      ServerLocalConfig.(default.store_decls_in_saved_state))
+    ~old_state_dir
+    new_state_dir =
   assert_no_errors env;
-  genv := !genv;
+  genv :=
+    {
+      !genv with
+      ServerEnv.local_config =
+        {
+          !genv.ServerEnv.local_config with
+          ServerLocalConfig.store_decls_in_saved_state;
+        };
+    };
   let result =
     ServerInit.save_state !genv env (new_state_dir ^ "/" ^ saved_state_filename)
   in

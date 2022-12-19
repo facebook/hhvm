@@ -218,6 +218,8 @@ def _create_saved_state(
             "--gen-saved-ignore-type-errors",
             "--error-format",
             "raw",
+            "--config",
+            "store_decls_in_saved_state=true",
         ]
         + DEFAULT_HH_SERVER_FLAGS
         + [

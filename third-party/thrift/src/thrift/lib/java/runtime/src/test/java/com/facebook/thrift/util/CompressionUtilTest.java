@@ -61,35 +61,31 @@ public class CompressionUtilTest {
   public void testInflateDirectMemory() throws Exception {
     ByteBufAllocator alloc = ByteBufAllocator.DEFAULT;
     ByteBuf in = alloc.buffer();
-    try {
-      InputStream s =
-          Thread.currentThread().getContextClassLoader().getResourceAsStream("lorem.txt");
+    InputStream s = Thread.currentThread().getContextClassLoader().getResourceAsStream("lorem.txt");
 
-      DeflaterInputStream dis = new DeflaterInputStream(s);
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      byte[] buf = new byte[1024];
-      int len;
-      while ((len = dis.read(buf)) > 0) bos.write(buf, 0, len);
-      dis.close();
-      bos.close();
+    DeflaterInputStream dis = new DeflaterInputStream(s);
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    byte[] buf = new byte[1024];
+    int len;
+    while ((len = dis.read(buf)) > 0) bos.write(buf, 0, len);
+    dis.close();
+    bos.close();
 
-      byte[] bytes = bos.toByteArray();
-      in.writeBytes(bytes);
-      ByteBuf out = CompressionUtil.inflate(alloc, in);
+    byte[] bytes = bos.toByteArray();
+    in.writeBytes(bytes);
+    ByteBuf out = CompressionUtil.inflate(alloc, in);
 
-      String deflatedText = out.toString(StandardCharsets.UTF_8);
+    String deflatedText = out.toString(StandardCharsets.UTF_8);
 
-      s = Thread.currentThread().getContextClassLoader().getResourceAsStream("lorem.txt");
+    s = Thread.currentThread().getContextClassLoader().getResourceAsStream("lorem.txt");
 
-      bos = new ByteArrayOutputStream();
-      assert s != null;
-      while ((len = s.read(buf)) > 0) bos.write(buf, 0, len);
+    bos = new ByteArrayOutputStream();
+    assert s != null;
+    while ((len = s.read(buf)) > 0) bos.write(buf, 0, len);
 
-      String text = new String(bos.toByteArray(), StandardCharsets.UTF_8);
+    String text = new String(bos.toByteArray(), StandardCharsets.UTF_8);
 
-      Assert.assertEquals(text, deflatedText);
-    } finally {
-      in.release();
-    }
+    Assert.assertEquals(text, deflatedText);
+    Assert.assertEquals(0, in.refCnt());
   }
 }

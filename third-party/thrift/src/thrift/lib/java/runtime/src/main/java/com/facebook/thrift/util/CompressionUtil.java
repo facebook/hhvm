@@ -83,8 +83,8 @@ public class CompressionUtil {
         return inflateWithByteArray(alloc, in, inflater);
       }
     } finally {
-      if (in.refCnt() > 1) {
-        in.release();
+      if (in.refCnt() > 0) {
+        ReferenceCountUtil.safeRelease(in);
       }
     }
   }

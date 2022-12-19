@@ -442,7 +442,7 @@ fn write_get_class_const(
     // let this = state.load_static_class(class)?;
 
     let name = cid.mangle_with_class(class, IsStatic::Static, &state.strings);
-    let var = textual::Var::Named(name);
+    let var = textual::Var::global(name);
     state.load_mixed(textual::Expr::deref(var))
 }
 
@@ -816,7 +816,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     fn load_this(&mut self) -> Result<textual::Sid> {
-        let var = textual::Var::named("$this");
+        let var = LocalId::Named(self.strings.intern_str("$this"));
         let mi = self.expect_method_info();
         let ty = mi.class_ty();
         let this = self.fb.load(&ty, textual::Expr::deref(var))?;

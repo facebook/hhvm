@@ -32,7 +32,8 @@ pub(crate) struct TextualFile<'a> {
     strings: Arc<StringInterner>,
     pub(crate) internal_functions: HashSet<String>,
     pub(crate) called_functions: HashSet<String>,
-    pub(crate) globals: HashMap<String, Ty>,
+    pub(crate) internal_globals: HashMap<String, Ty>,
+    pub(crate) referenced_globals: HashSet<String>,
 }
 
 impl<'a> TextualFile<'a> {
@@ -42,7 +43,8 @@ impl<'a> TextualFile<'a> {
             strings,
             internal_functions: Default::default(),
             called_functions: Default::default(),
-            globals: Default::default(),
+            internal_globals: Default::default(),
+            referenced_globals: Default::default(),
         }
     }
 
@@ -70,12 +72,21 @@ impl<'a> TextualFile<'a> {
         Ok(())
     }
 
-    pub(crate) fn declare_global(&mut self, name: String, ty: Ty) {
-        self.globals.insert(name, ty);
+    pub(crate) fn define_global(&mut self, name: String, ty: Ty) {
+        self.internal_globals.insert(name, ty);
     }
 
     fn declare_unknown_function(&mut self, name: &str) -> Result {
         writeln!(self.w, "declare {name}(...): *HackMixed")?;
+        Ok(())
+    }
+
+    fn declare_unknown_global(&mut self, name: &str) -> Result {
+        writeln!(
+            self.w,
+            "global {name} : {}",
+            FmtTy(&Ty::SpecialPtr(SpecialTy::Mixed))
+        )?;
         Ok(())
     }
 
@@ -212,27 +223,38 @@ impl<'a> TextualFile<'a> {
         &mut self,
         builtins: &HashMap<&str, T>,
     ) -> Result<HashSet<T>> {
-        if !self.globals.is_empty() {
+        if !self.internal_globals.is_empty() {
             self.write_comment("----- GLOBALS -----")?;
 
-            for (name, ty) in self.globals.iter().sorted_by(|(n1, _), (n2, _)| n1.cmp(n2)) {
+            for (name, ty) in self
+                .internal_globals
+                .iter()
+                .sorted_by(|(n1, _), (n2, _)| n1.cmp(n2))
+            {
                 writeln!(self.w, "global {name} : {}", FmtTy(ty))?;
             }
             self.debug_separator()?;
         }
 
-        let (builtins, mut non_builtins): (HashSet<T>, Vec<String>) = (&self.called_functions
+        let (builtins, mut non_builtin_fns): (HashSet<T>, Vec<String>) = (&self.called_functions
             - &self.internal_functions)
             .into_iter()
             .partition_map(|f| match builtins.get(&f as &str) {
                 Some(b) => itertools::Either::Left(b),
                 None => itertools::Either::Right(f),
             });
-        non_builtins.sort();
-        if !non_builtins.is_empty() {
+        non_builtin_fns.sort();
+
+        let referenced_globals =
+            &self.referenced_globals - &self.internal_globals.keys().cloned().collect();
+
+        if !non_builtin_fns.is_empty() || !referenced_globals.is_empty() {
             self.write_comment("----- EXTERNALS -----")?;
-            for name in non_builtins {
+            for name in non_builtin_fns {
                 self.declare_unknown_function(&name)?;
+            }
+            for name in referenced_globals {
+                self.declare_unknown_global(&name)?;
             }
             self.debug_separator()?;
         }
@@ -272,7 +294,17 @@ impl<'a> TextualFile<'a> {
                 self.w.write_all(b"]")?;
             }
             Expr::Sid(sid) => write!(self.w, "{}", FmtSid(sid))?,
-            Expr::Var(ref var) => write!(self.w, "{}", FmtVar(&self.strings, var))?,
+            Expr::Var(ref var) => {
+                match var {
+                    Var::Global(s) => {
+                        if !self.referenced_globals.contains(s) {
+                            self.referenced_globals.insert(s.to_owned());
+                        }
+                    }
+                    Var::Local(_) => {}
+                }
+                write!(self.w, "{}", FmtVar(&self.strings, var))?
+            }
         }
         Ok(())
     }
@@ -430,19 +462,19 @@ impl fmt::Display for FmtTy<'_> {
 
 #[derive(Clone, Debug)]
 pub(crate) enum Var {
-    Named(String),
-    Hack(LocalId),
+    Global(String),
+    Local(LocalId),
 }
 
 impl Var {
-    pub(crate) fn named(s: impl Into<String>) -> Self {
-        Var::Named(s.into())
+    pub(crate) fn global(s: impl Into<String>) -> Self {
+        Var::Global(s.into())
     }
 }
 
 impl From<LocalId> for Var {
     fn from(lid: LocalId) -> Var {
-        Var::Hack(lid)
+        Var::Local(lid)
     }
 }
 
@@ -452,8 +484,8 @@ impl fmt::Display for FmtVar<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let FmtVar(strings, var) = *self;
         match *var {
-            Var::Named(ref s) => s.fmt(f),
-            Var::Hack(lid) => FmtLid(strings, lid).fmt(f),
+            Var::Global(ref s) => s.fmt(f),
+            Var::Local(lid) => FmtLid(strings, lid).fmt(f),
         }
     }
 }

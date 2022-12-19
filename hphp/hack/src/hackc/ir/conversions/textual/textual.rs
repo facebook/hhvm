@@ -54,10 +54,16 @@ impl<'a> TextualFile<'a> {
     pub(crate) fn declare_function(&mut self, name: &str, tys: &[Ty], ret_ty: &Ty) -> Result {
         write!(self.w, "declare {name}(")?;
 
-        let mut sep = "";
-        for ty in tys {
-            write!(self.w, "{sep}{}", FmtTy(ty))?;
-            sep = ", ";
+        // TODO: For now textual can't handle a mix of types with a trailing
+        // ellipsis.
+        if tys.contains(&Ty::Ellipsis) {
+            write!(self.w, "...")?;
+        } else {
+            let mut sep = "";
+            for ty in tys {
+                write!(self.w, "{sep}{}", FmtTy(ty))?;
+                sep = ", ";
+            }
         }
 
         writeln!(self.w, "): {}", FmtTy(ret_ty))?;
@@ -236,6 +242,7 @@ impl<'a> TextualFile<'a> {
 
     fn write_expr(&mut self, expr: &Expr) -> Result {
         match *expr {
+            Expr::Alloc(ref ty) => write!(self.w, "__sil_allocate(<{}>)", FmtTy(ty))?,
             Expr::Call(ref target, ref params) => {
                 if !self.called_functions.contains(target) {
                     self.called_functions.insert(target.to_owned());
@@ -345,6 +352,12 @@ pub(crate) enum SpecialTy {
     Vec,
 }
 
+impl SpecialTy {
+    fn user_type(&self) -> &str {
+        self.get_str("UserType").unwrap()
+    }
+}
+
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub(crate) enum Ty {
     Ellipsis,
@@ -360,6 +373,21 @@ pub(crate) enum Ty {
 }
 
 impl Ty {
+    pub(crate) fn deref(&self) -> Ty {
+        match self {
+            Ty::Ptr(box sub) => sub.clone(),
+            Ty::VoidPtr => Ty::Void,
+            Ty::SpecialPtr(special) => Ty::Type(special.user_type().to_owned()),
+            Ty::Float
+            | Ty::Int
+            | Ty::Noreturn
+            | Ty::String
+            | Ty::Type(_)
+            | Ty::Void
+            | Ty::Ellipsis => panic!("Unable to deref {}", FmtTy(self)),
+        }
+    }
+
     pub(crate) fn mixed() -> Ty {
         Ty::SpecialPtr(SpecialTy::Mixed)
     }
@@ -391,11 +419,7 @@ impl fmt::Display for FmtTy<'_> {
             Ty::Int => write!(f, "int"),
             Ty::Noreturn => f.write_str("noreturn"),
             Ty::Ptr(sub) => write!(f, "*{}", FmtTy(sub)),
-            Ty::SpecialPtr(special) => {
-                let name = special.get_str("UserType").unwrap();
-                f.write_str("*")?;
-                f.write_str(name)
-            }
+            Ty::SpecialPtr(special) => write!(f, "*{}", special.user_type()),
             Ty::String => write!(f, "*string"),
             Ty::Type(s) => write!(f, "{s}"),
             Ty::Void => f.write_str("void"),
@@ -465,6 +489,7 @@ impl fmt::Display for FmtConst<'_> {
 
 #[derive(Clone, Debug)]
 pub(crate) enum Expr {
+    Alloc(Ty),
     /// foo(1, 2, 3)
     Call(String, Box<[Expr]>),
     /// 0, null, etc
@@ -476,7 +501,6 @@ pub(crate) enum Expr {
     /// a[b]
     Index(Box<Expr>, Box<Expr>),
     Sid(Sid),
-    // TyAscription(Box<Expr>, Ty),
     Var(Var),
 }
 
@@ -724,19 +748,16 @@ impl FuncBuilder<'_, '_> {
     pub(crate) fn write_expr_stmt(&mut self, expr: impl Into<Expr>) -> Result<Sid> {
         let expr = expr.into();
         match expr {
-            Expr::Sid(sid) => Ok(sid),
-            Expr::Call(target, params) => self.call(&target, params),
-            Expr::Const(c) => {
+            Expr::Alloc(_) | Expr::Const(_) | Expr::Deref(_) => {
                 let sid = self.alloc_sid();
-                writeln!(
-                    self.txf.w,
-                    "{INDENT}{dst} = {src}",
-                    dst = FmtSid(sid),
-                    src = FmtConst(&c)
-                )?;
+                write!(self.txf.w, "{INDENT}{} = ", FmtSid(sid))?;
+                self.txf.write_expr(&expr)?;
+                writeln!(self.txf.w)?;
                 Ok(sid)
             }
-            Expr::Deref(_) | Expr::Field(_, _) | Expr::Index(_, _) | Expr::Var(_) => {
+            Expr::Call(target, params) => self.call(&target, params),
+            Expr::Sid(sid) => Ok(sid),
+            Expr::Field(_, _) | Expr::Index(_, _) | Expr::Var(_) => {
                 todo!("EXPR: {expr:?}")
             }
         }

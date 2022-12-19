@@ -278,6 +278,25 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             let vid = write_get_class_const(state, cid, const_id)?;
             state.set_iid(iid, vid);
         }
+        Instr::Hhbc(Hhbc::CreateCl {
+            ref operands,
+            clsid,
+            loc: _,
+        }) => {
+            let ty = class::non_static_ty(clsid, &state.strings).deref();
+            let cons = ir::MethodId::from_str("__construct", &state.strings).mangle_with_class(
+                clsid,
+                IsStatic::NonStatic,
+                &state.strings,
+            );
+            let obj = state.fb.write_expr_stmt(textual::Expr::Alloc(ty))?;
+            let operands = operands
+                .iter()
+                .map(|vid| state.lookup_vid(*vid))
+                .collect_vec();
+            state.fb.call_static(&cons, obj.into(), operands)?;
+            state.set_iid(iid, obj);
+        }
         Instr::Hhbc(Hhbc::CGetL(lid, _) | Hhbc::CUGetL(lid, _) | Hhbc::ConsumeL(lid, _)) => {
             write_load_var(state, iid, lid)?
         }

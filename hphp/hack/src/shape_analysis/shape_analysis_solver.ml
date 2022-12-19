@@ -618,5 +618,9 @@ let equiv
     (ConstraintSet.of_list
        (List.filter_map ~f:only_intra_constr any_constr_list_2))
 
+(* TODO(T140419180): could infer more shapes by not assuming
+`Has_dynamic_key` when an entity flows into a `mixed` param. *)
+let widen = List.map ~f:(fun ent -> Has_dynamic_key ent)
+
 let subsets (ent1 : entity_) (ent2 : entity_) : constraint_ =
   Subsets (ent1, ent2)

@@ -28,4 +28,6 @@ val substitute_inter_intra_forwards :
 
 val equiv : any_constraint list -> any_constraint list -> bool
 
+val widen : entity_ list -> constraint_ list
+
 val subsets : entity_ -> entity_ -> constraint_

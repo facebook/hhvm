@@ -66,6 +66,8 @@ module type Intra = sig
 
   val equiv : any_constraint list -> any_constraint list -> bool
 
+  val widen : intra_entity list -> intra_constraint list
+
   val substitute_inter_intra_backwards :
     inter_constraint -> intra_constraint -> intra_constraint option
 

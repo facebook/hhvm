@@ -5,7 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
+open Hh_prelude
 module ST = Shape_analysis_types
 module SS = Shape_analysis_solver
 module HT = Hips_types
@@ -48,6 +48,8 @@ module Intra_shape :
   let compare_any_constraint = ST.compare_any_constraint
 
   let equiv = SS.equiv
+
+  let widen = SS.widen
 
   let substitute_inter_intra_forwards = SS.substitute_inter_intra_forwards
 

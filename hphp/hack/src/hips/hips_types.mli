@@ -96,6 +96,24 @@ module type Intra = sig
       equivalence of lists of constraints. *)
   val equiv : any_constraint list -> any_constraint list -> bool
 
+  (** The Intra analysis should conservatively approximate these constraints.
+  An example of when this happens is when HIPS cannot see
+  certain definitions or does not understand them yet.
+
+  A specific example:
+  // assume we're doing source-file-granularity analysis
+  // file1.php
+  function foo(int $_): void {}
+
+  // file2.php
+  function main(): void {
+    // our analysis cannot "see" the definition, so we must widen any constraints related to the arg
+    foo(3);
+  }
+
+   *)
+  val widen : intra_entity list -> intra_constraint list
+
   (** Backwards substitutes the intra-procedural constraint in the second argument
       with respect to the inter-procedural constraint in the first argument.
       For instance, calling it with the first argument "(("f", 0), p)" and

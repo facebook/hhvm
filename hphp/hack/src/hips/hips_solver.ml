@@ -188,6 +188,20 @@ module Inter (I : Intra) = struct
     | [class_name; _; const_name] -> Some (class_name, const_name)
     | _ -> None
 
+  let find_matching_param_like constr_list_at f f_idx : param_like_entity option
+      =
+    let open Option.Monad_infix in
+    ( constr_list_at >>= fun constr_list_at_ ->
+      List.find
+        ~f:(function
+          | Inter (ParamLike ((_, g), g_idx)) ->
+            String.equal f g && equal_param_like_index f_idx g_idx
+          | _ -> false)
+        constr_list_at_ )
+    >>= function
+    | Inter (ParamLike param_ent) -> Some param_ent
+    | _ -> None
+
   let substitute (constraint_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
     let open Option.Monad_infix in
@@ -206,17 +220,8 @@ module Inter (I : Intra) = struct
           | ArgLike (((_, f), f_idx), intra_ent) ->
             let constr_list_at = SMap.find_opt f constraint_map in
             let param_constr_opt : inter_constraint option =
-              ( constr_list_at >>= fun constr_list_at_ ->
-                List.find
-                  ~f:(function
-                    | Inter (ParamLike ((_, g), g_idx)) ->
-                      String.equal f g && equal_param_like_index f_idx g_idx
-                    | _ -> false)
-                  constr_list_at_ )
-              >>= function
-              | Inter (ParamLike param_ent) ->
-                Some (ArgLike (param_ent, intra_ent))
-              | _ -> None
+              find_matching_param_like constr_list_at f f_idx
+              >>| fun param_ent -> ArgLike (param_ent, intra_ent)
             in
             let constr_list_backwards =
               match constr_list_at with
@@ -412,6 +417,49 @@ module Inter (I : Intra) = struct
     in
     SMap.fold add_constraints_for_key constraint_map constraint_map
 
+  let find_entities_to_widen (constraint_map : any_constraint list SMap.t) :
+      I.intra_entity list SMap.t =
+    let find_in_inter_constraint = function
+      | ArgLike (((_, f), f_idx), intra_ent) ->
+        let constr_list_at = SMap.find_opt f constraint_map in
+        begin
+          match find_matching_param_like constr_list_at f f_idx with
+          | Some _ -> None
+          | None -> Some intra_ent
+        end
+      | ConstantIdentifier _ ->
+        (*TODO(T139295663) invalidation here. Hard with current handling of constants. *)
+        None
+      | Constant _
+      | ClassExtends _ ->
+        (* TODO(T139295663): This unsoundness can likely be fixed with folded decls *)
+        None
+      (* safe to ignore these cases *)
+      | ConstantInitial _
+      | ParamLike _ ->
+        None
+    in
+    let find_in_any_constraint = function
+      | Intra _ -> None
+      | Inter c -> find_in_inter_constraint c
+    in
+
+    constraint_map |> SMap.map (List.filter_map ~f:find_in_any_constraint)
+
+  (** see `widen` in Hips_types.mli for docs *)
+  let widen constraint_map =
+    let to_widen_by_id = find_entities_to_widen constraint_map in
+    let append_widened id existing_constraints =
+      match SMap.find_opt id to_widen_by_id with
+      | Some entities_to_widen ->
+        entities_to_widen
+        |> I.widen
+        |> List.map ~f:(fun intra_constraint -> Intra intra_constraint)
+        |> List.rev_append existing_constraints
+      | None -> existing_constraints
+    in
+    constraint_map |> SMap.mapi append_widened
+
   let analyse (base_constraint_map : any_constraint list SMap.t) ~verbose :
       solution =
     let debug =
@@ -480,7 +528,12 @@ module Inter (I : Intra) = struct
         else
           analyse_help (completed_iterations + 1) no_dupl_deduced_constraint_map
     in
-    analyse_help
-      0
-      (debug "closed base_constraint_map" @@ close base_constraint_map)
+    let base_constraint_map =
+      base_constraint_map
+      |> close
+      |> debug "closed base_constraint_map"
+      |> widen
+      |> debug "widened base_constraint_map"
+    in
+    analyse_help 0 base_constraint_map
 end

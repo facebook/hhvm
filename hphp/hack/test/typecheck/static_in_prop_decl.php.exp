@@ -1,4 +1,4 @@
-File "static_in_prop_decl.php", line 6, characters 24-35:
-Cannot use `static` or `parent::class` in property declaration (Parsing[1002])
 File "static_in_prop_decl.php", line 6, characters 26-35:
+Expected constant expression for initializer (Parsing[1002])
+File "static_in_prop_decl.php", line 7, characters 35-44:
 Expected constant expression for initializer (Parsing[1002])

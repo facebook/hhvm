@@ -27,32 +27,33 @@ namespace apache {
 namespace thrift {
 namespace op {
 
-// Resolves to the number of definitions contained in Thrift class.
+/// Resolves to the number of definitions contained in Thrift class
 template <typename T>
 FOLLY_INLINE_VARIABLE constexpr std::size_t size_v =
     detail::pa::__fbthrift_field_size_v<T>;
 
-// Gets the ordinal, for example:
-//
-//   // Resolves to ordinal at which the field "foo" was defined in MyS.
-//   using Ord = get_ordinal<ident::foo, MyS>
-//
 template <typename Id, typename T>
 using get_ordinal =
     typename detail::GetOrdinalImpl<Id, type::infer_tag<T>>::type;
+
+/// Gets the ordinal, for example:
+///
+/// * using Ord = get_ordinal_v<ident::foo, MyS>
+///   // Resolves to ordinal at which the field "foo" was defined in MyS.
+///
 template <typename Id, typename T>
 FOLLY_INLINE_VARIABLE constexpr type::Ordinal get_ordinal_v =
     get_ordinal<Id, T>::value;
 
-// Calls the given function with ordinal<1> to ordinal<N>.
+/// Calls the given function with ordinal<1> to ordinal<N>.
 template <typename T, typename F>
 void for_each_ordinal(F&& f) {
   detail::for_each_ordinal_impl(
       std::forward<F>(f), std::make_integer_sequence<size_t, size_v<T>>{});
 }
 
-// Calls the given function with with ordinal<1> to ordinal<N>, returing the
-// first 'true' result produced.
+/// Calls the given function with with ordinal<1> to ordinal<N>, returing the
+/// first 'true' result produced.
 template <typename T, typename F, std::enable_if_t<size_v<T> != 0>* = nullptr>
 decltype(auto) find_by_ordinal(F&& f) {
   return detail::find_by_ordinal_impl(
@@ -63,55 +64,56 @@ template <typename T, typename F>
 std::enable_if_t<size_v<T> == 0, bool> find_by_ordinal(F&&) {
   return false;
 }
-// Gets the field id, for example:
-//
-//   // Resolves to field id assigned to the field "foo" in MyS.
-//   using FieldId = get_field_id<ident::foo, MyS>
-//
+
 template <typename Id, typename T>
 using get_field_id = folly::conditional_t<
     get_ordinal<Id, T>::value == type::Ordinal{},
     type::field_id<0>,
     detail::pa::field_id<T, get_ordinal<Id, T>>>;
+
+/// Gets the field id, for example:
+///
+/// * using FieldId = get_field_id<ident::foo, MyS>
+///   // Resolves to field id assigned to the field "foo" in MyS.
 template <typename Id, typename T>
 FOLLY_INLINE_VARIABLE constexpr FieldId get_field_id_v =
     get_field_id<Id, T>::value;
 
-// Calls the given function with each field_id<{id}> in Thrift class.
+/// Calls the given function with each field_id<{id}> in Thrift class.
 template <typename T, typename F>
 void for_each_field_id(F&& f) {
   for_each_ordinal<T>([&](auto ord) { f(get_field_id<decltype(ord), T>{}); });
 }
 
-// Calls the given function with with each field_id<{id}>, returing the
-// first 'true' result produced.
+/// Calls the given function with with each field_id<{id}>, returing the
+/// first 'true' result produced.
 template <typename T, typename F>
 decltype(auto) find_by_field_id(F&& f) {
   return find_by_ordinal<T>(
       [&](auto ord) { return f(get_field_id<decltype(ord), T>{}); });
 }
 
-// Gets the ident, for example:
-//
-//   // Resolves to thrift::ident::* type associated with field 7 in MyS.
-//   using Ident = get_ident<field_id<7>, MyS>
-//
+/// Gets the ident, for example:
+///
+///   // Resolves to thrift::ident::* type associated with field 7 in MyS.
+///   using Ident = get_ident<field_id<7>, MyS>
+///
 template <typename Id, typename T>
 using get_ident = detail::pa::ident<T, get_ordinal<Id, T>>;
 
-// It calls the given function with each folly::tag<thrift::ident::*>{} in
-// Thrift class.
+/// It calls the given function with each folly::tag<thrift::ident::*>{} in
+/// Thrift class.
 template <typename T, typename F>
 void for_each_ident(F&& f) {
   for_each_ordinal<T>(
       [&](auto ord) { f(folly::tag_t<get_ident<decltype(ord), T>>{}); });
 }
 
-// Gets the Thrift type tag, for example:
-//
-//   // Resolves to Thrift type tag for the field "foo" in MyS.
-//   using Tag = get_type_tag<ident::foo, MyS>
-//
+/// Gets the Thrift type tag, for example:
+///
+///   // Resolves to Thrift type tag for the field "foo" in MyS.
+///   using Tag = get_type_tag<ident::foo, MyS>
+///
 template <typename Id, typename T>
 using get_type_tag = detail::pa::type_tag<T, get_ordinal<Id, T>>;
 
@@ -126,35 +128,35 @@ using get_field_tag = typename std::conditional_t<
 template <typename Id, typename T>
 using get_native_type = type::native_type<get_field_tag<Id, T>>;
 
-// Gets the thrift field name, for example:
-//
-//   // Returns the thrift field name associated with field 7 in MyStruct.
-//   op::get_name_v<field_id<7>, MyStruct>
-//
+/// Gets the thrift field name, for example:
+///
+/// * op::get_name_v<field_id<7>, MyStruct>
+///   // Returns the thrift field name associated with field 7 in MyStruct.
+///
 template <typename Id, typename T>
 FOLLY_INLINE_VARIABLE const folly::StringPiece get_name_v =
     detail::pa::__fbthrift_get_field_name<T, get_ordinal<Id, T>>();
-// TODO(afuller): Migrate usage a remove.
+
 template <typename S, class Id>
 FOLLY_INLINE_VARIABLE const folly::StringPiece get_name =
     detail::pa::__fbthrift_get_field_name<S, get_ordinal<Id, S>>();
 
-// Gets the Thrift field, for example:
-//
-//   op::get<type::field_id<7>>(myStruct) = 4;
-//
+/// Gets the Thrift field, for example:
+///
+///   op::get<type::field_id<7>>(myStruct) = 4;
+///
 template <typename Id = void, typename T = void>
 FOLLY_INLINE_VARIABLE constexpr detail::Get<Id, T> get = {};
 
-// Returns pointer to the value from the given field.
-// Returns nullptr if it doesn't have a value.
-// For example:
-//   // returns foo.field_ref().value()
-//   get_value_or_null(foo.field_ref())
-//   // returns *foo.smart_ptr_ref()
-//   get_value_or_null(foo.smart_ptr_ref())
-//   // returns nullptr if optional field doesn't have a value.
-//   get_value_or_null(foo.optional_ref())
+/// Returns pointer to the value from the given field.
+/// Returns nullptr if it doesn't have a value.
+/// For example:
+/// * get_value_or_null(foo.field_ref())
+///   // returns foo.field_ref().value()
+/// * get_value_or_null(foo.smart_ptr_ref())
+///   // returns *foo.smart_ptr_ref()
+/// * get_value_or_null(foo.optional_ref())
+///   // returns nullptr if optional field doesn't have a value.
 FOLLY_INLINE_VARIABLE constexpr detail::GetValueOrNull getValueOrNull;
 
 // Implementation details.

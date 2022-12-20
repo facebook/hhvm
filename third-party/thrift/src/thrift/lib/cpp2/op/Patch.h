@@ -26,16 +26,16 @@ namespace op {
 
 namespace detail {
 
-// A patch for a boolean, which additionally supports:
-// - invert() - Inverts the patch, in place.
-// - operator!(BoolPatch) - Returns an inverted version of the given patch.
+/// A patch for a boolean, which additionally supports:
+/// - invert() - Inverts the patch, in place.
+/// - operator!(BoolPatch) - Returns an inverted version of the given patch.
 op::BoolPatch patchType(type::bool_t);
 
-// Patches for number types, which additionally support:
-// - add(T value) - Update to the patch to additionally add the given value.
-// - subtract(T value) - Update to the patch to additionally subtract the given
-// value.
-// - operators -, -=, +, += - Alias to the appropriate add and subtract calls.
+/// Patches for number types, which additionally support:
+/// - add(T value) - Update to the patch to additionally add the given value.
+/// - subtract(T value) - Update to the patch to additionally subtract the given
+/// value.
+/// - operators -, -=, +, += - Alias to the appropriate add and subtract calls.
 BytePatch patchType(type::byte_t);
 I16Patch patchType(type::i16_t);
 I32Patch patchType(type::i32_t);
@@ -43,32 +43,32 @@ I64Patch patchType(type::i64_t);
 FloatPatch patchType(type::float_t);
 DoublePatch patchType(type::double_t);
 
-// A patches for a string and binary, which additionally supports:
-// - append(...) - Updates the patch to additionally append the given value.
-// - prepend(U&&) - Updates the patch to additionally prepend the given value.
-// - operators +, += - Alias to the appropriate append and prepend calls.
+/// A patches for a string and binary, which additionally supports:
+/// - append(...) - Updates the patch to additionally append the given value.
+/// - prepend(U&&) - Updates the patch to additionally prepend the given value.
+/// - operators +, += - Alias to the appropriate append and prepend calls.
 op::StringPatch patchType(type::string_t);
 op::BinaryPatch patchType(type::binary_t);
 
 } // namespace detail
 
-// The patch represenations for the base thrift types.
-//
-// All patch types support the following methods:
-// - empty() - Returns true iff the patch is a noop.
-// - reset() - Makes the patch a noop.
-// - apply(T&& value) - Applies the patch to the given value, in place.
-// - merge(P&& next) - Merges the 'next' patch into this one, such that the
-// result is equivalent to applying this and next in sequence.
-// - assign(U&& value) - Updates the patch to assign the given value.
-// - operator=(U&& value) - An alias for assign.
-// - get() - Returns the underlying Thrift representation for the patch.
-//
-// For example:
-//  int32_t value = 1;
-//  I32Patch patch;
-//  patch = 2;          // Equivalent to calling patch.assign(2).
-//  patch.apply(value); // Sets value to 2;
+/// The patch represenations for the base thrift types.
+///
+/// All patch types support the following methods:
+/// - empty() - Returns true iff the patch is a noop.
+/// - reset() - Makes the patch a noop.
+/// - apply(T&& value) - Applies the patch to the given value, in place.
+/// - merge(P&& next) - Merges the 'next' patch into this one, such that the
+/// result is equivalent to applying this and next in sequence.
+/// - assign(U&& value) - Updates the patch to assign the given value.
+/// - operator=(U&& value) - An alias for assign.
+/// - get() - Returns the underlying Thrift representation for the patch.
+///
+/// For example:
+/// * int32_t value = 1;
+/// * I32Patch patch;
+/// * patch = 2;          // Equivalent to calling patch.assign(2).
+/// * patch.apply(value); // Sets value to 2;
 template <typename Tag>
 using patch_type = decltype(detail::patchType(Tag{}));
 

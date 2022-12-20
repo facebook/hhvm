@@ -24,15 +24,16 @@ namespace thrift {
 namespace op {
 
 // TODO: move to Create.h
-// Copies from the src field to the dst field.
-// For example:
-//   // calls dst.field_ref().copy_from(src.field_ref())
-//   copy(src.field_ref(), dst.field_ref())
-//   // If src is nullptr, it sets dst to nullptr, otherwise constructs a new
-//   // unique ptr with the same value.
-//   copy(src.unique_ptr_ref(), dst.unique_ptr_ref())
-//   // If src is nullptr, it sets dst to nullptr, otherwise shares the pointer.
-//   copy(src.shared_ptr_ref(), dst.shared_ptr_ref())
+/// Copies from the src field to the dst field.
+/// For example:
+/// * copy(src.field_ref(), dst.field_ref())
+///   // calls dst.field_ref().copy_from(src.field_ref())
+/// * copy(src.unique_ptr_ref(), dst.unique_ptr_ref())
+///   // If src is nullptr, it sets dst to nullptr, otherwise constructs a new
+///   // unique ptr with the same value.
+/// * copy(src.shared_ptr_ref(), dst.shared_ptr_ref())
+///   // If src is nullptr, it sets dst to nullptr, otherwise shares the
+///   pointer.
 FOLLY_INLINE_VARIABLE constexpr detail::Copy copy{};
 
 } // namespace op

@@ -24,23 +24,23 @@ namespace apache {
 namespace thrift {
 namespace op {
 
-// Returns the default for the given type.
-//
-// Some adapted types might not have default constructor. This allows
-// default constructing those adapted types.
-//
-// For example:
-//   create<type::i32_t>() -> 0
-//   create<adapted<Adapter, type::i32_t>>() -> Adapted<int32_t>{}
-//   create<field_t<FieldId, adapted<FieldAdapter, type::i32_t>>>(Struct)
-//    -> AdaptedWithContext<int32_t>{};
+/// Returns the default for the given type.
+///
+/// Some adapted types might not have default constructor. This allows
+/// default constructing those adapted types.
+///
+/// For example:
+/// * create<type::i32_t>() -> 0
+/// * create<adapted<Adapter, type::i32_t>>() -> Adapted<int32_t>{}
+/// * create<field_t<FieldId, adapted<FieldAdapter, type::i32_t>>>(Struct)
+///    -> AdaptedWithContext<int32_t>{};
 template <typename Tag>
 FOLLY_INLINE_VARIABLE constexpr detail::Create<Tag> create{};
 
-// Ensures the given field. If the field doesn't exist, emplaces the field.
-// For example:
-//   // calls foo.field_ref().ensure()
-//   ensure<field_tag>(foo)
+/// Ensures the given field. If the field doesn't exist, emplaces the field.
+/// For example:
+/// * ensure<field_tag>(foo)
+///   // calls foo.field_ref().ensure()
 template <typename Id = void, typename Tag = void>
 FOLLY_INLINE_VARIABLE constexpr detail::Ensure<Id, Tag> ensure{};
 

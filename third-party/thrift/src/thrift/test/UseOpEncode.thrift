@@ -64,8 +64,6 @@ struct OpEncodeStruct {
     cpp.type = "::apache::thrift::test::IndirectionIOBuf",
     cpp.indirection,
   ) buf;
-
-  17: i64 (cpp.type = "Timestamp", cpp.indirection) timestamp;
 }
 
 struct Baz {

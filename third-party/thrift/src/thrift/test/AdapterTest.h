@@ -310,18 +310,4 @@ struct NonComparableWrapperAdapter {
   }
 };
 
-class Timestamp {
- public:
-  FBTHRIFT_CPP_DEFINE_MEMBER_INDIRECTION_FN(value());
-
-  uint64_t value() const { return v_; }
-  uint64_t& value() { return v_; }
-
-  bool operator==(Timestamp that) const { return v_ == that.v_; }
-  bool operator<(Timestamp that) const { return v_ < that.v_; }
-
- private:
-  uint64_t v_{0};
-};
-
 } // namespace apache::thrift::test

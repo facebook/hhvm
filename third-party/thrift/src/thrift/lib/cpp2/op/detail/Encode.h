@@ -773,6 +773,24 @@ struct Decode<type::cpp_type<T, Tag>> : Decode<Tag> {
   }
 };
 
+// Wraps underlying type of adapter in cpp_type tag when necessary.
+// Should not be necessary once cpp.indirection is deleted.
+template <typename Adapter, typename Tag, typename U, typename = void>
+struct adapter_underlying_type_tag {
+  using type = Tag;
+};
+template <typename Adapter, typename Tag, typename U>
+struct adapter_underlying_type_tag<
+    Adapter,
+    Tag,
+    U,
+    folly::void_t<
+        type::infer_tag<::apache::thrift::adapt_detail::
+                            thrift_t<Adapter, folly::remove_cvref_t<U>>>>> {
+  using type = type::infer_tag<::apache::thrift::adapt_detail::
+                                   thrift_t<Adapter, folly::remove_cvref_t<U>>>;
+};
+
 template <typename Adapter, typename Tag>
 struct Decode<type::adapted<Adapter, Tag>> {
   template <typename Protocol, typename U>
@@ -781,7 +799,9 @@ struct Decode<type::adapted<Adapter, Tag>> {
         has_inplace_toThrift<Adapter, folly::remove_cvref_t<U>>::value;
     folly::if_constexpr<hasInplaceToThrift>(
         [&](auto tag) {
-          using T = decltype(tag);
+          using T =
+              typename adapter_underlying_type_tag<Adapter, decltype(tag), U>::
+                  type;
           Decode<T>{}(prot, Adapter::toThrift(m));
         },
         [&](auto tag) {

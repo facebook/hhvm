@@ -93,8 +93,8 @@ struct NameAndDType {
   std::string name;
   DType dtype;
 
-  explicit NameAndDType(const std::string& name, DType dtype = DType::Unknown)
-      : name(name), dtype(dtype) {}
+  explicit NameAndDType(std::string name, DType dtype = DType::Unknown)
+      : name(std::move(name)), dtype(dtype) {}
 };
 
 /** This is a helper for settling out subscription events.
@@ -625,7 +625,7 @@ void appendGlobResultToNameAndDTypeVec(
     // our DType enum is declared in terms of those bits
     auto dtype = i < numDTypes ? static_cast<DType>(glob.dtypes().value()[i])
                                : DType::Unknown;
-    results.emplace_back(name, dtype);
+    results.emplace_back(std::move(name), dtype);
     ++i;
   }
 }
@@ -901,6 +901,7 @@ class EdenView final : public QueryableView {
     auto rel = computeRelativePathPiece(ctx);
 
     std::vector<std::string> globStrings;
+    globStrings.reserve(query->paths->size());
     // Translate the path list into a list of globs
     for (auto& path : *query->paths) {
       if (path.depth > 0) {

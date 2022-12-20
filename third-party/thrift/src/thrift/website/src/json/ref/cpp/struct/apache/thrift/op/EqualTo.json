@@ -1,0 +1,54 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1EqualTo",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::EqualTo",
+  "basecompoundref": [
+    {
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "detail::EqualTo&lt; LTag, RTag &gt;"
+    }
+  ],
+  "includes": {
+    "refid": "Compare_8h",
+    "local": "no",
+    "text_html": "Compare.h"
+  },
+  "tparams": [
+    {
+      "type_html": "typename LTag",
+      "defval_html": "void"
+    },
+    {
+      "type_html": "typename RTag",
+      "defval_html": "LTag"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/Compare.h",
+    "line": "28",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/Compare.h",
+    "bodystart": "28",
+    "bodyend": "28"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "EqualTo"
+  ],
+  "enums": [],
+  "types": [],
+  "functions": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "template <\n  typename LTag = void,\n  typename RTag = LTag\n> struct EqualTo;",
+  "declaration_html": "template &lt;\n  typename LTag = void,\n  typename RTag = LTag\n&gt; struct EqualTo;",
+  "filepath": "struct/apache/thrift/op/EqualTo",
+  "href": "/ref/cpp/struct/apache/thrift/op/EqualTo",
+  "overloadgroups": [],
+  "free_overloadgroups": []
+}

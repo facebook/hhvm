@@ -275,7 +275,10 @@ export function FreeVariables({data}) {
                 </td>
                 <td>
                   {"description" in v &&
+                    <div>
+                    <div dangerouslySetInnerHTML={{__html: v.description.brief_html}} />
                     <div dangerouslySetInnerHTML={{__html: v.description.detailed_html}} />
+                    </div>
                   }
                 </td>
               </tr>

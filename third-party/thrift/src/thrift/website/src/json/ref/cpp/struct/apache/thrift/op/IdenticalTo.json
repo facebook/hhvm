@@ -1,0 +1,50 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1IdenticalTo",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::IdenticalTo",
+  "basecompoundref": [
+    {
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "detail::IdenticalTo&lt; Tag &gt;"
+    }
+  ],
+  "includes": {
+    "refid": "Compare_8h",
+    "local": "no",
+    "text_html": "Compare.h"
+  },
+  "tparams": [
+    {
+      "type_html": "typename Tag",
+      "defval_html": "void"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/Compare.h",
+    "line": "45",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/Compare.h",
+    "bodystart": "45",
+    "bodyend": "45"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "IdenticalTo"
+  ],
+  "enums": [],
+  "types": [],
+  "functions": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "template < typename Tag = void >\nstruct IdenticalTo;",
+  "declaration_html": "template &lt; typename Tag = void &gt;\nstruct IdenticalTo;",
+  "filepath": "struct/apache/thrift/op/IdenticalTo",
+  "href": "/ref/cpp/struct/apache/thrift/op/IdenticalTo",
+  "overloadgroups": [],
+  "free_overloadgroups": []
+}

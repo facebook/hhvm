@@ -114,7 +114,7 @@
         "original_argsstring_html": "(reference_type value, typename BitRef::Isset &amp;is_set, const uint8_t bit_index=0) noexcept"
       },
       "description": {
-        "brief_html": "<p>Internal Constructor. </p>"
+        "brief_html": "<p>Internal constructor. </p>"
       },
       "filepath": "fns/class/apache/thrift/field_ref/field_ref",
       "href": "/ref/cpp/fns/class/apache/thrift/field_ref/field_ref"
@@ -163,7 +163,7 @@
         "original_argsstring_html": "(reference_type value, typename BitRef::AtomicIsset &amp;is_set, const uint8_t bit_index=0) noexcept"
       },
       "description": {
-        "brief_html": "<p>Internal Constructor. </p>"
+        "brief_html": "<p>Internal constructor. </p>"
       },
       "filepath": "fns/class/apache/thrift/field_ref/field_ref",
       "href": "/ref/cpp/fns/class/apache/thrift/field_ref/field_ref"
@@ -922,7 +922,7 @@
                 "original_argsstring_html": "(reference_type value, typename BitRef::Isset &amp;is_set, const uint8_t bit_index=0) noexcept"
               },
               "description": {
-                "brief_html": "<p>Internal Constructor. </p>"
+                "brief_html": "<p>Internal constructor. </p>"
               },
               "filepath": "fns/class/apache/thrift/field_ref/field_ref",
               "href": "/ref/cpp/fns/class/apache/thrift/field_ref/field_ref",
@@ -974,7 +974,7 @@
                 "original_argsstring_html": "(reference_type value, typename BitRef::AtomicIsset &amp;is_set, const uint8_t bit_index=0) noexcept"
               },
               "description": {
-                "brief_html": "<p>Internal Constructor. </p>"
+                "brief_html": "<p>Internal constructor. </p>"
               },
               "filepath": "fns/class/apache/thrift/field_ref/field_ref",
               "href": "/ref/cpp/fns/class/apache/thrift/field_ref/field_ref",

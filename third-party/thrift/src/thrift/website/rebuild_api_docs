@@ -15,7 +15,8 @@ buck2 run //fbcref/docgen:maker -- \
   --allowlist \
     'thrift/lib/cpp/TProcessorEventHandler.h' \
     'thrift/lib/cpp/protocol/TCompactProtocol.*' \
-    'thrift/lib/cpp2/FieldRef.h'
+    'thrift/lib/cpp2/FieldRef.h' \
+    'thrift/lib/cpp2/op/(?!detail/).*'
 
 # Make the table of contents
 toc=$(cat << EOTOC
@@ -27,6 +28,16 @@ Serialization
 
 Field Access
   cpp/class/apache/thrift/field_ref
+
+Operator Library
+  cpp/file/thrift/lib/cpp2/op/Clear.h
+  cpp/file/thrift/lib/cpp2/op/Compare.h
+  cpp/file/thrift/lib/cpp2/op/Copy.h
+  cpp/file/thrift/lib/cpp2/op/Create.h
+  cpp/file/thrift/lib/cpp2/op/Encode.h
+  cpp/file/thrift/lib/cpp2/op/Get.h
+  cpp/file/thrift/lib/cpp2/op/Hash.h
+  cpp/file/thrift/lib/cpp2/op/Patch.h
 EOTOC
 )
 python3.6 ../../fbcref/docgen/tocgen.py "$toc" > src/json/cpp_api_toc.json

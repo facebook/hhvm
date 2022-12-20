@@ -1,0 +1,62 @@
+{
+  "kind": "overloadset",
+  "name_html": "registerStdSerializers",
+  "compoundname_html": "apache::thrift::op::registerStdSerializers",
+  "functions": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1acdb06f18f0bb74ebd476ab7725dc497f",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Tag"
+        },
+        {
+          "type_html": "type::StandardProtocol...",
+          "declname_html": "Ps",
+          "defname_html": "Ps"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::registerStdSerializers",
+      "argsstring_html": "(type::TypeRegistry &amp;registry)",
+      "name_html": "registerStdSerializers",
+      "param": [
+        {
+          "type_html": "type::TypeRegistry &amp;",
+          "declname_html": "registry"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/StdSerializer.h",
+        "line": "67",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/StdSerializer.h",
+        "bodystart": "67",
+        "bodyend": "76"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Tag, type::StandardProtocol... Ps&gt;\nvoid registerStdSerializers(type::TypeRegistry&amp; registry)",
+        "simple_raw": "template <typename Tag, type::StandardProtocol... Ps>\nvoid registerStdSerializers(type::TypeRegistry& registry)",
+        "detailed_html": "template &lt;typename Tag, type::StandardProtocol... Ps&gt;\nvoid registerStdSerializers(type::TypeRegistry&amp; registry)",
+        "detailed_raw": "template <typename Tag, type::StandardProtocol... Ps>\nvoid registerStdSerializers(type::TypeRegistry& registry)",
+        "original_definition_html": "void apache::thrift::op::registerStdSerializers",
+        "original_argsstring_html": "(type::TypeRegistry &amp;registry)"
+      },
+      "compoundname_html": "apache::thrift::op::registerStdSerializers",
+      "namespace_html": "apache::thrift::op"
+    }
+  ],
+  "filepath": "f/assoc/file/thrift/lib/cpp2/op/StdSerializer.h/registerStdSerializers",
+  "namespace_html": "apache::thrift::op",
+  "minprot": "public",
+  "displayname_html": "registerStdSerializers",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/op/StdSerializer.h/registerStdSerializers",
+  "refid": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/op/StdSerializer.h/registerStdSerializers"
+}

@@ -1,0 +1,54 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1Less",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::Less",
+  "basecompoundref": [
+    {
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "detail::LessThan&lt; LTag, RTag &gt;"
+    }
+  ],
+  "includes": {
+    "refid": "Compare_8h",
+    "local": "no",
+    "text_html": "Compare.h"
+  },
+  "tparams": [
+    {
+      "type_html": "typename LTag",
+      "defval_html": "void"
+    },
+    {
+      "type_html": "typename RTag",
+      "defval_html": "LTag"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/Compare.h",
+    "line": "60",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/Compare.h",
+    "bodystart": "60",
+    "bodyend": "60"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "Less"
+  ],
+  "enums": [],
+  "types": [],
+  "functions": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "template <\n  typename LTag = void,\n  typename RTag = LTag\n> struct Less;",
+  "declaration_html": "template &lt;\n  typename LTag = void,\n  typename RTag = LTag\n&gt; struct Less;",
+  "filepath": "struct/apache/thrift/op/Less",
+  "href": "/ref/cpp/struct/apache/thrift/op/Less",
+  "overloadgroups": [],
+  "free_overloadgroups": []
+}

@@ -27,6 +27,44 @@
         "to": "/ref/cpp/class/apache/thrift/field_ref"
       }
     ],
+    "column": 2
+  },
+  {
+    "section": "Operator Library",
+    "entries": [
+      {
+        "label": "Clear",
+        "to": "/ref/cpp/file/thrift/lib/cpp2/op/Clear.h"
+      },
+      {
+        "label": "Compare",
+        "to": "/ref/cpp/file/thrift/lib/cpp2/op/Compare.h"
+      },
+      {
+        "label": "Copy",
+        "to": "/ref/cpp/file/thrift/lib/cpp2/op/Copy.h"
+      },
+      {
+        "label": "Create",
+        "to": "/ref/cpp/file/thrift/lib/cpp2/op/Create.h"
+      },
+      {
+        "label": "Encode",
+        "to": "/ref/cpp/file/thrift/lib/cpp2/op/Encode.h"
+      },
+      {
+        "label": "Get",
+        "to": "/ref/cpp/file/thrift/lib/cpp2/op/Get.h"
+      },
+      {
+        "label": "Hash",
+        "to": "/ref/cpp/file/thrift/lib/cpp2/op/Hash.h"
+      },
+      {
+        "label": "Patch",
+        "to": "/ref/cpp/file/thrift/lib/cpp2/op/Patch.h"
+      }
+    ],
     "column": 3
   }
 ]

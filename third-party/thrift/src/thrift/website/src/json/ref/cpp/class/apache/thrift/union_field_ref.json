@@ -44,7 +44,7 @@
     {
       "refid": "classapache_1_1thrift_1_1union__field__ref_1a7cecddca96acb00ee081953e08e5985f",
       "prot": "private",
-      "type_html": "typename std::conditional_t&lt;\n    is_cpp_ref_or_boxed::value,\n    folly::remove_cvref_t&lt;T&gt;,\n    element_type_adapter&gt;::element_type",
+      "type_html": "typename std::conditional_t&lt;\n    <code>is_cpp_ref_or_boxed::value</code>,\n    folly::remove_cvref_t&lt;T&gt;,\n    element_type_adapter&gt;::element_type",
       "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::element_type =  typename std::conditional_t&lt; is_cpp_ref_or_boxed::value, folly::remove_cvref_t&lt;T&gt;, element_type_adapter&gt;::element_type",
       "argsstring_html": "",
       "name_html": "element_type",

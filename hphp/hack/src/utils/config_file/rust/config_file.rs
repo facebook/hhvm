@@ -6,10 +6,11 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
+use bstr::ByteSlice;
 use sha1::Digest;
 use sha1::Sha1;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ConfigFile {
     map: BTreeMap<String, String>,
 }
@@ -29,36 +30,42 @@ impl ConfigFile {
     pub fn from_file_with_sha1(path: impl AsRef<Path>) -> std::io::Result<(String, Self)> {
         let path = path.as_ref();
         let contents = std::fs::read(path)?;
-        let hash = format!("{:x}", Sha1::digest(&contents));
-        Ok((hash, Self::from_slice(&contents)))
+        Ok(Self::from_slice_with_sha1(&contents))
+    }
+
+    pub fn from_slice_with_sha1(bytes: &[u8]) -> (String, Self) {
+        let hash = format!("{:x}", Sha1::digest(bytes));
+        let config = Self::from_slice(bytes);
+        (hash, config)
+    }
+
+    fn parse_line(line: &[u8]) -> Option<(String, String)> {
+        let mut key_value_iter = line.splitn(2, |&c| c == b'=');
+        let key = key_value_iter.next()?.trim();
+        let value = key_value_iter.next()?.trim();
+        Some((
+            String::from_utf8_lossy(key).into_owned(),
+            String::from_utf8_lossy(value).into_owned(),
+        ))
     }
 
     pub fn from_slice(bytes: &[u8]) -> Self {
-        use bstr::ByteSlice;
-
-        let mut map = BTreeMap::new();
-
-        for line in bytes.lines() {
-            if matches!(line.get(0), Some(b'#')) {
-                continue;
-            }
-            let mut key_value_iter = line.splitn(2, |&c| c == b'=');
-            let key = match key_value_iter.next() {
-                Some(key) => key.trim(),
-                None => continue,
-            };
-            let value = match key_value_iter.next() {
-                Some(value) => value.trim(),
-                None => continue,
-            };
-
-            map.insert(
-                String::from_utf8_lossy(key).into_owned(),
-                String::from_utf8_lossy(value).into_owned(),
-            );
-        }
-
+        let map = (bytes.lines())
+            .filter_map(|line| match line.first() {
+                Some(b'#') => None,
+                _ => Self::parse_line(line),
+            })
+            .collect();
         Self { map }
+    }
+
+    pub fn from_args<'i, I>(kvs: I) -> Self
+    where
+        I: IntoIterator<Item = &'i [u8]>,
+    {
+        Self {
+            map: kvs.into_iter().filter_map(Self::parse_line).collect(),
+        }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -112,6 +119,15 @@ impl FromIterator<(String, String)> for ConfigFile {
         Self {
             map: BTreeMap::from_iter(iter),
         }
+    }
+}
+
+impl IntoIterator for ConfigFile {
+    type Item = (String, String);
+    type IntoIter = std::collections::btree_map::IntoIter<String, String>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.map.into_iter()
     }
 }
 

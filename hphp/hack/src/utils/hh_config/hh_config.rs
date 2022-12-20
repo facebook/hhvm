@@ -7,10 +7,9 @@ use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::path::Path;
 
+use config_file::ConfigFile;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::global_options::GlobalOptions;
-use sha1::Digest;
-use sha1::Sha1;
 
 pub const FILE_PATH_RELATIVE_TO_ROOT: &str = ".hhconfig";
 
@@ -28,138 +27,133 @@ pub struct HhConfig {
 
     pub opts: GlobalOptions,
 
-    /// Config file lines that did not match any setting known to this parser.
-    pub unknown: Vec<String>,
+    /// Config settings that did not match any setting known to this parser.
+    pub unknown: Vec<(String, String)>,
 }
 
 impl HhConfig {
-    pub fn from_root(root: &Path) -> std::io::Result<Self> {
-        let hhconfig_path = root.join(FILE_PATH_RELATIVE_TO_ROOT);
-        let hhconfig_contents = std::fs::read(&hhconfig_path)?;
-        Ok(Self::from_slice(&hhconfig_contents))
+    pub fn from_root(root: impl AsRef<Path>) -> std::io::Result<Self> {
+        let hhconfig_path = root.as_ref().join(FILE_PATH_RELATIVE_TO_ROOT);
+        let (hash, config) = ConfigFile::from_file_with_sha1(hhconfig_path)?;
+        Ok(Self {
+            hash,
+            ..Self::from_config(config)
+        })
     }
 
     pub fn from_slice(bytes: &[u8]) -> Self {
-        use bstr::ByteSlice;
+        let (hash, config) = ConfigFile::from_slice_with_sha1(bytes);
+        Self {
+            hash,
+            ..Self::from_config(config)
+        }
+    }
 
+    pub fn from_config(config: ConfigFile) -> Self {
         let mut c = Self::default();
-        for line in bytes.lines() {
-            if matches!(line.get(0), Some(b'#')) {
-                continue;
-            }
-            let mut key_value_iter = line.splitn(2, |&c| c == b'=');
-            let key = match key_value_iter.next() {
-                Some(key) => key.trim(),
-                None => continue,
-            };
-            let value = match key_value_iter.next() {
-                Some(value) => value.trim(),
-                None => continue,
-            };
-
+        for (key, value) in config {
             let go = &mut c.opts;
-            match key {
-                b"auto_namespace_map" => {
-                    let map: BTreeMap<String, String> = parse_json(value);
+            match key.as_str() {
+                "auto_namespace_map" => {
+                    let map: BTreeMap<String, String> = parse_json(&value);
                     go.po_auto_namespace_map = map.into_iter().collect();
                 }
-                b"disable_xhp_element_mangling" => {
-                    go.po_disable_xhp_element_mangling = parse_json(value);
+                "disable_xhp_element_mangling" => {
+                    go.po_disable_xhp_element_mangling = parse_json(&value);
                 }
-                b"disable_xhp_children_declarations" => {
-                    go.po_disable_xhp_children_declarations = parse_json(value);
+                "disable_xhp_children_declarations" => {
+                    go.po_disable_xhp_children_declarations = parse_json(&value);
                 }
-                b"interpret_soft_types_as_like_types" => {
-                    go.po_interpret_soft_types_as_like_types = parse_json(value);
+                "interpret_soft_types_as_like_types" => {
+                    go.po_interpret_soft_types_as_like_types = parse_json(&value);
                 }
-                b"everything_sdt" => {
-                    go.tco_everything_sdt = parse_json(value);
+                "everything_sdt" => {
+                    go.tco_everything_sdt = parse_json(&value);
                 }
-                b"deregister_php_stdlib" => {
-                    go.po_deregister_php_stdlib = parse_json(value);
+                "deregister_php_stdlib" => {
+                    go.po_deregister_php_stdlib = parse_json(&value);
                 }
-                b"version" => {
-                    c.version = Some(parse_string(value));
+                "version" => {
+                    c.version = Some(value);
                 }
-                b"ignored_paths" => {
-                    c.ignored_paths = parse_json(value);
+                "ignored_paths" => {
+                    c.ignored_paths = parse_json(&value);
                 }
-                b"enable_experimental_tc_features" => {
-                    go.tco_experimental_features = parse_sset(value);
+                "enable_experimental_tc_features" => {
+                    go.tco_experimental_features = parse_sset(&value);
                 }
-                b"enable_xhp_class_modifier" => {
-                    go.po_enable_xhp_class_modifier = parse_json(value);
+                "enable_xhp_class_modifier" => {
+                    go.po_enable_xhp_class_modifier = parse_json(&value);
                 }
-                b"disallow_invalid_arraykey" => {
-                    go.tco_disallow_invalid_arraykey = parse_json(value);
+                "disallow_invalid_arraykey" => {
+                    go.tco_disallow_invalid_arraykey = parse_json(&value);
                 }
-                b"check_xhp_attribute" => {
-                    go.tco_check_xhp_attribute = parse_json(value);
+                "check_xhp_attribute" => {
+                    go.tco_check_xhp_attribute = parse_json(&value);
                 }
-                b"disallow_silence" => {
-                    go.po_disallow_silence = parse_json(value);
+                "disallow_silence" => {
+                    go.po_disallow_silence = parse_json(&value);
                 }
-                b"check_redundant_generics" => {
-                    go.tco_check_redundant_generics = parse_json(value);
+                "check_redundant_generics" => {
+                    go.tco_check_redundant_generics = parse_json(&value);
                 }
-                b"disallow_func_ptrs_in_constants" => {
-                    go.po_disallow_func_ptrs_in_constants = parse_json(value);
+                "disallow_func_ptrs_in_constants" => {
+                    go.po_disallow_func_ptrs_in_constants = parse_json(&value);
                 }
-                b"disallow_fun_and_cls_meth_pseudo_funcs" => {
-                    go.po_disallow_fun_and_cls_meth_pseudo_funcs = parse_json(value);
+                "disallow_fun_and_cls_meth_pseudo_funcs" => {
+                    go.po_disallow_fun_and_cls_meth_pseudo_funcs = parse_json(&value);
                 }
-                b"enable_strict_string_concat_interp" => {
-                    go.tco_enable_strict_string_concat_interp = parse_json(value);
+                "enable_strict_string_concat_interp" => {
+                    go.tco_enable_strict_string_concat_interp = parse_json(&value);
                 }
-                b"disallow_inst_meth" => {
-                    go.po_disallow_inst_meth = parse_json(value);
+                "disallow_inst_meth" => {
+                    go.po_disallow_inst_meth = parse_json(&value);
                 }
-                b"allowed_expression_tree_visitors" => {
-                    go.tco_allowed_expression_tree_visitors = parse_svec(value);
+                "allowed_expression_tree_visitors" => {
+                    go.tco_allowed_expression_tree_visitors = parse_svec(&value);
                 }
-                b"math_new_code" => {
-                    go.tco_math_new_code = parse_json(value);
+                "math_new_code" => {
+                    go.tco_math_new_code = parse_json(&value);
                 }
-                b"explicit_consistent_constructors" => {
-                    go.tco_explicit_consistent_constructors = parse_json(value);
+                "explicit_consistent_constructors" => {
+                    go.tco_explicit_consistent_constructors = parse_json(&value);
                 }
-                b"enable_strict_const_semantics" => {
-                    go.tco_enable_strict_const_semantics = parse_json(value);
+                "enable_strict_const_semantics" => {
+                    go.tco_enable_strict_const_semantics = parse_json(&value);
                 }
-                b"require_types_tco_require_types_class_consts" => {
-                    go.tco_require_types_class_consts = parse_json(value);
+                "require_types_tco_require_types_class_consts" => {
+                    go.tco_require_types_class_consts = parse_json(&value);
                 }
-                b"strict_wellformedness" => {
-                    go.tco_strict_wellformedness = parse_json(value);
+                "strict_wellformedness" => {
+                    go.tco_strict_wellformedness = parse_json(&value);
                 }
-                b"disable_hh_ignore_error" => {
-                    go.po_disable_hh_ignore_error = parse_json(value);
+                "disable_hh_ignore_error" => {
+                    go.po_disable_hh_ignore_error = parse_json(&value);
                 }
-                b"allowed_fixme_codes_strict" => {
-                    go.allowed_fixme_codes_strict = parse_iset(value);
+                "allowed_fixme_codes_strict" => {
+                    go.allowed_fixme_codes_strict = parse_iset(&value);
                 }
-                b"allowed_decl_fixme_codes" => {
-                    go.po_allowed_decl_fixme_codes = parse_iset(value);
+                "allowed_decl_fixme_codes" => {
+                    go.po_allowed_decl_fixme_codes = parse_iset(&value);
                 }
-                b"code_agnostic_fixme" => {
-                    go.code_agnostic_fixme = parse_json(value);
+                "code_agnostic_fixme" => {
+                    go.code_agnostic_fixme = parse_json(&value);
                 }
-                b"allowed_files_for_module_declarations" => {
-                    go.tco_allowed_files_for_module_declarations = parse_svec(value);
+                "allowed_files_for_module_declarations" => {
+                    go.tco_allowed_files_for_module_declarations = parse_svec(&value);
                 }
-                b"expression_tree_virtualize_functions" => {
-                    go.tco_expression_tree_virtualize_functions = parse_json(value);
+                "expression_tree_virtualize_functions" => {
+                    go.tco_expression_tree_virtualize_functions = parse_json(&value);
                 }
-                b"tco_global_access_check_on_write" => {
-                    go.tco_global_access_check_on_write = parse_json(value);
+                "tco_global_access_check_on_write" => {
+                    go.tco_global_access_check_on_write = parse_json(&value);
                 }
-                b"tco_global_access_check_on_read" => {
-                    go.tco_global_access_check_on_read = parse_json(value);
+                "tco_global_access_check_on_read" => {
+                    go.tco_global_access_check_on_read = parse_json(&value);
                 }
-                _ => c.unknown.push(parse_string(line)),
+                _ => c.unknown.push((key, value)),
             }
         }
-        c.hash = format!("{:x}", Sha1::digest(bytes));
         c
     }
 
@@ -168,30 +162,26 @@ impl HhConfig {
     }
 }
 
-fn parse_json<'de, T: serde::de::Deserialize<'de>>(value: &'de [u8]) -> T {
-    serde_json::from_slice(value).unwrap()
+fn parse_json<'de, T: serde::de::Deserialize<'de>>(value: &'de str) -> T {
+    serde_json::from_slice(value.as_bytes()).unwrap()
 }
 
-fn parse_string(value: &[u8]) -> String {
-    String::from_utf8_lossy(value).into_owned()
-}
-
-fn parse_sset(value: &[u8]) -> BTreeSet<String> {
-    parse_string(value)
+fn parse_sset(value: &str) -> BTreeSet<String> {
+    value
         .split_terminator(',')
-        .map(|s| s.trim().into())
+        .map(|s| s.trim().to_owned())
         .collect()
 }
 
-fn parse_svec(value: &[u8]) -> Vec<String> {
-    parse_string(value)
+fn parse_svec(value: &str) -> Vec<String> {
+    value
         .split_terminator(',')
-        .map(|s| s.trim().into())
+        .map(|s| s.trim().to_owned())
         .collect()
 }
 
-fn parse_iset(value: &[u8]) -> BTreeSet<isize> {
-    parse_string(value)
+fn parse_iset(value: &str) -> BTreeSet<isize> {
+    value
         .split_terminator(',')
         .map(|s| s.trim().parse().unwrap())
         .collect()

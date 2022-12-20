@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "lib.rs"
+path = "config_file.rs"
 
 [dependencies]
 bstr = { version = "1.0", features = ["serde", "std", "unicode"] }

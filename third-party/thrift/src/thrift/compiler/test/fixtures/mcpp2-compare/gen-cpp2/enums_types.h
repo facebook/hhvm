@@ -224,36 +224,26 @@ using _AnEnumA_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumA>
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _AnEnumA_EnumMapFactory::ValuesToNamesMapType _AnEnumA_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _AnEnumA_EnumMapFactory::NamesToValuesMapType _AnEnumA_NAMES_TO_VALUES;
 #endif
 using _AnEnumB_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumB>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _AnEnumB_EnumMapFactory::ValuesToNamesMapType _AnEnumB_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _AnEnumB_EnumMapFactory::NamesToValuesMapType _AnEnumB_NAMES_TO_VALUES;
 #endif
 using _AnEnumC_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumC>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _AnEnumC_EnumMapFactory::ValuesToNamesMapType _AnEnumC_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _AnEnumC_EnumMapFactory::NamesToValuesMapType _AnEnumC_NAMES_TO_VALUES;
 #endif
 using _AnEnumD_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumD>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _AnEnumD_EnumMapFactory::ValuesToNamesMapType _AnEnumD_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _AnEnumD_EnumMapFactory::NamesToValuesMapType _AnEnumD_NAMES_TO_VALUES;
 #endif
 using _AnEnumE_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumE>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _AnEnumE_EnumMapFactory::ValuesToNamesMapType _AnEnumE_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _AnEnumE_EnumMapFactory::NamesToValuesMapType _AnEnumE_NAMES_TO_VALUES;
 #endif
 }}} // facebook::ns::qwerty
 

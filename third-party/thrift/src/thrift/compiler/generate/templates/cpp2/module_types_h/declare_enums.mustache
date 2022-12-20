@@ -88,8 +88,6 @@ using _<%enum:cpp_name%>_EnumMapFactory = apache::thrift::detail::TEnumMapFactor
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _<%enum:cpp_name%>_EnumMapFactory::ValuesToNamesMapType _<%enum:cpp_name%>_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _<%enum:cpp_name%>_EnumMapFactory::NamesToValuesMapType _<%enum:cpp_name%>_NAMES_TO_VALUES;
 #endif
 <%/enum:legacy_api?%>
 <%/program:enums%>

@@ -357,50 +357,36 @@ using _Metasyntactic_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Me
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _Metasyntactic_EnumMapFactory::ValuesToNamesMapType _Metasyntactic_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _Metasyntactic_EnumMapFactory::NamesToValuesMapType _Metasyntactic_NAMES_TO_VALUES;
 #endif
 using _MyEnum1_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum1>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _MyEnum1_EnumMapFactory::ValuesToNamesMapType _MyEnum1_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _MyEnum1_EnumMapFactory::NamesToValuesMapType _MyEnum1_NAMES_TO_VALUES;
 #endif
 using _MyEnum2_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum2>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _MyEnum2_EnumMapFactory::ValuesToNamesMapType _MyEnum2_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _MyEnum2_EnumMapFactory::NamesToValuesMapType _MyEnum2_NAMES_TO_VALUES;
 #endif
 using _MyEnum3_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum3>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _MyEnum3_EnumMapFactory::ValuesToNamesMapType _MyEnum3_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _MyEnum3_EnumMapFactory::NamesToValuesMapType _MyEnum3_NAMES_TO_VALUES;
 #endif
 using _MyEnum4_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum4>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _MyEnum4_EnumMapFactory::ValuesToNamesMapType _MyEnum4_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _MyEnum4_EnumMapFactory::NamesToValuesMapType _MyEnum4_NAMES_TO_VALUES;
 #endif
 using _MyBitmaskEnum1_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyBitmaskEnum1>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _MyBitmaskEnum1_EnumMapFactory::ValuesToNamesMapType _MyBitmaskEnum1_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _MyBitmaskEnum1_EnumMapFactory::NamesToValuesMapType _MyBitmaskEnum1_NAMES_TO_VALUES;
 #endif
 using _MyBitmaskEnum2_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyBitmaskEnum2>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _MyBitmaskEnum2_EnumMapFactory::ValuesToNamesMapType _MyBitmaskEnum2_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _MyBitmaskEnum2_EnumMapFactory::NamesToValuesMapType _MyBitmaskEnum2_NAMES_TO_VALUES;
 #endif
 }}} // test::fixtures::enums
 

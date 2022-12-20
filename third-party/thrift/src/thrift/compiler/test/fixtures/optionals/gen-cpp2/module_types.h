@@ -171,8 +171,6 @@ using _Animal_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Animal>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _Animal_EnumMapFactory::ValuesToNamesMapType _Animal_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _Animal_EnumMapFactory::NamesToValuesMapType _Animal_NAMES_TO_VALUES;
 #endif
 } // cpp2
 

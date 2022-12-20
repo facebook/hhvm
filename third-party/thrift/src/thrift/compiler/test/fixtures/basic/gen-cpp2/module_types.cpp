@@ -33,7 +33,6 @@ namespace test { namespace fixtures { namespace basic {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _MyEnum_EnumMapFactory::ValuesToNamesMapType _MyEnum_VALUES_TO_NAMES = _MyEnum_EnumMapFactory::makeValuesToNamesMap();
-const _MyEnum_EnumMapFactory::NamesToValuesMapType _MyEnum_NAMES_TO_VALUES = _MyEnum_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // test::fixtures::basic
@@ -59,7 +58,6 @@ namespace test { namespace fixtures { namespace basic {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _HackEnum_EnumMapFactory::ValuesToNamesMapType _HackEnum_VALUES_TO_NAMES = _HackEnum_EnumMapFactory::makeValuesToNamesMap();
-const _HackEnum_EnumMapFactory::NamesToValuesMapType _HackEnum_NAMES_TO_VALUES = _HackEnum_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // test::fixtures::basic

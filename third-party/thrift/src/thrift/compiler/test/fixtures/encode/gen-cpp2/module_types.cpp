@@ -33,7 +33,6 @@ namespace facebook { namespace thrift { namespace test {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _Enum_EnumMapFactory::ValuesToNamesMapType _Enum_VALUES_TO_NAMES = _Enum_EnumMapFactory::makeValuesToNamesMap();
-const _Enum_EnumMapFactory::NamesToValuesMapType _Enum_NAMES_TO_VALUES = _Enum_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // facebook::thrift::test

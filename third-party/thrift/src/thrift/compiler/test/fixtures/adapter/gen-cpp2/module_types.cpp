@@ -33,7 +33,6 @@ namespace facebook { namespace thrift { namespace test {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _Color_EnumMapFactory::ValuesToNamesMapType _Color_VALUES_TO_NAMES = _Color_EnumMapFactory::makeValuesToNamesMap();
-const _Color_EnumMapFactory::NamesToValuesMapType _Color_NAMES_TO_VALUES = _Color_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // facebook::thrift::test
@@ -59,7 +58,6 @@ namespace facebook { namespace thrift { namespace test {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _ThriftAdaptedEnum_EnumMapFactory::ValuesToNamesMapType _ThriftAdaptedEnum_VALUES_TO_NAMES = _ThriftAdaptedEnum_EnumMapFactory::makeValuesToNamesMap();
-const _ThriftAdaptedEnum_EnumMapFactory::NamesToValuesMapType _ThriftAdaptedEnum_NAMES_TO_VALUES = _ThriftAdaptedEnum_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // facebook::thrift::test

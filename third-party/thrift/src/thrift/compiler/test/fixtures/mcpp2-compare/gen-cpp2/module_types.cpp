@@ -33,7 +33,6 @@ namespace some { namespace valid { namespace ns {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _MyEnumA_EnumMapFactory::ValuesToNamesMapType _MyEnumA_VALUES_TO_NAMES = _MyEnumA_EnumMapFactory::makeValuesToNamesMap();
-const _MyEnumA_EnumMapFactory::NamesToValuesMapType _MyEnumA_NAMES_TO_VALUES = _MyEnumA_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // some::valid::ns
@@ -59,7 +58,6 @@ namespace some { namespace valid { namespace ns {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _AnnotatedEnum_EnumMapFactory::ValuesToNamesMapType _AnnotatedEnum_VALUES_TO_NAMES = _AnnotatedEnum_EnumMapFactory::makeValuesToNamesMap();
-const _AnnotatedEnum_EnumMapFactory::NamesToValuesMapType _AnnotatedEnum_NAMES_TO_VALUES = _AnnotatedEnum_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // some::valid::ns
@@ -85,7 +83,6 @@ namespace some { namespace valid { namespace ns {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _AnnotatedEnum2_EnumMapFactory::ValuesToNamesMapType _AnnotatedEnum2_VALUES_TO_NAMES = _AnnotatedEnum2_EnumMapFactory::makeValuesToNamesMap();
-const _AnnotatedEnum2_EnumMapFactory::NamesToValuesMapType _AnnotatedEnum2_NAMES_TO_VALUES = _AnnotatedEnum2_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // some::valid::ns
@@ -111,7 +108,6 @@ namespace some { namespace valid { namespace ns {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _MyEnumB_EnumMapFactory::ValuesToNamesMapType _MyEnumB_VALUES_TO_NAMES = _MyEnumB_EnumMapFactory::makeValuesToNamesMap();
-const _MyEnumB_EnumMapFactory::NamesToValuesMapType _MyEnumB_NAMES_TO_VALUES = _MyEnumB_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // some::valid::ns

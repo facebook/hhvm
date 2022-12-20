@@ -33,7 +33,6 @@ namespace test { namespace fixtures { namespace enums {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _Metasyntactic_EnumMapFactory::ValuesToNamesMapType _Metasyntactic_VALUES_TO_NAMES = _Metasyntactic_EnumMapFactory::makeValuesToNamesMap();
-const _Metasyntactic_EnumMapFactory::NamesToValuesMapType _Metasyntactic_NAMES_TO_VALUES = _Metasyntactic_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // test::fixtures::enums
@@ -59,7 +58,6 @@ namespace test { namespace fixtures { namespace enums {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _MyEnum1_EnumMapFactory::ValuesToNamesMapType _MyEnum1_VALUES_TO_NAMES = _MyEnum1_EnumMapFactory::makeValuesToNamesMap();
-const _MyEnum1_EnumMapFactory::NamesToValuesMapType _MyEnum1_NAMES_TO_VALUES = _MyEnum1_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // test::fixtures::enums
@@ -85,7 +83,6 @@ namespace test { namespace fixtures { namespace enums {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _MyEnum2_EnumMapFactory::ValuesToNamesMapType _MyEnum2_VALUES_TO_NAMES = _MyEnum2_EnumMapFactory::makeValuesToNamesMap();
-const _MyEnum2_EnumMapFactory::NamesToValuesMapType _MyEnum2_NAMES_TO_VALUES = _MyEnum2_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // test::fixtures::enums
@@ -111,7 +108,6 @@ namespace test { namespace fixtures { namespace enums {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _MyEnum3_EnumMapFactory::ValuesToNamesMapType _MyEnum3_VALUES_TO_NAMES = _MyEnum3_EnumMapFactory::makeValuesToNamesMap();
-const _MyEnum3_EnumMapFactory::NamesToValuesMapType _MyEnum3_NAMES_TO_VALUES = _MyEnum3_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // test::fixtures::enums
@@ -137,7 +133,6 @@ namespace test { namespace fixtures { namespace enums {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _MyEnum4_EnumMapFactory::ValuesToNamesMapType _MyEnum4_VALUES_TO_NAMES = _MyEnum4_EnumMapFactory::makeValuesToNamesMap();
-const _MyEnum4_EnumMapFactory::NamesToValuesMapType _MyEnum4_NAMES_TO_VALUES = _MyEnum4_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // test::fixtures::enums
@@ -163,7 +158,6 @@ namespace test { namespace fixtures { namespace enums {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _MyBitmaskEnum1_EnumMapFactory::ValuesToNamesMapType _MyBitmaskEnum1_VALUES_TO_NAMES = _MyBitmaskEnum1_EnumMapFactory::makeValuesToNamesMap();
-const _MyBitmaskEnum1_EnumMapFactory::NamesToValuesMapType _MyBitmaskEnum1_NAMES_TO_VALUES = _MyBitmaskEnum1_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // test::fixtures::enums
@@ -189,7 +183,6 @@ namespace test { namespace fixtures { namespace enums {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _MyBitmaskEnum2_EnumMapFactory::ValuesToNamesMapType _MyBitmaskEnum2_VALUES_TO_NAMES = _MyBitmaskEnum2_EnumMapFactory::makeValuesToNamesMap();
-const _MyBitmaskEnum2_EnumMapFactory::NamesToValuesMapType _MyBitmaskEnum2_NAMES_TO_VALUES = _MyBitmaskEnum2_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }}} // test::fixtures::enums

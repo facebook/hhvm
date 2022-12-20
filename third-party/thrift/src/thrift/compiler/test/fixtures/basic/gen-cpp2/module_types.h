@@ -188,15 +188,11 @@ using _MyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _MyEnum_EnumMapFactory::ValuesToNamesMapType _MyEnum_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _MyEnum_EnumMapFactory::NamesToValuesMapType _MyEnum_NAMES_TO_VALUES;
 #endif
 using _HackEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<HackEnum>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _HackEnum_EnumMapFactory::ValuesToNamesMapType _HackEnum_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _HackEnum_EnumMapFactory::NamesToValuesMapType _HackEnum_NAMES_TO_VALUES;
 #endif
 }}} // test::fixtures::basic
 

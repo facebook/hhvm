@@ -580,15 +580,11 @@ using _Color_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Color>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _Color_EnumMapFactory::ValuesToNamesMapType _Color_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _Color_EnumMapFactory::NamesToValuesMapType _Color_NAMES_TO_VALUES;
 #endif
 using _ThriftAdaptedEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<ThriftAdaptedEnum>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _ThriftAdaptedEnum_EnumMapFactory::ValuesToNamesMapType _ThriftAdaptedEnum_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _ThriftAdaptedEnum_EnumMapFactory::NamesToValuesMapType _ThriftAdaptedEnum_NAMES_TO_VALUES;
 #endif
 }}} // facebook::thrift::test
 

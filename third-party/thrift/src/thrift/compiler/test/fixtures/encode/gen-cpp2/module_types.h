@@ -147,8 +147,6 @@ using _Enum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Enum>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _Enum_EnumMapFactory::ValuesToNamesMapType _Enum_VALUES_TO_NAMES;
-[[deprecated("use apache::thrift::TEnumTraits")]]
-extern const _Enum_EnumMapFactory::NamesToValuesMapType _Enum_NAMES_TO_VALUES;
 #endif
 }}} // facebook::thrift::test
 

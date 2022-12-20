@@ -33,7 +33,6 @@ namespace cpp2 {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _B_EnumMapFactory::ValuesToNamesMapType _B_VALUES_TO_NAMES = _B_EnumMapFactory::makeValuesToNamesMap();
-const _B_EnumMapFactory::NamesToValuesMapType _B_NAMES_TO_VALUES = _B_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 } // cpp2

@@ -52,12 +52,6 @@
 namespace apache {
 namespace thrift {
 
-struct ltstr {
-  bool operator()(const char* s1, const char* s2) const {
-    return strcmp(s1, s2) < 0;
-  }
-};
-
 /**
  * Specialization fwd-decl in _types.h.
  * Specialization defn in _data.h.
@@ -116,20 +110,12 @@ template <typename EnumTypeT>
 struct TEnumMapFactory {
   using EnumType = EnumTypeT;
   using ValuesToNamesMapType = std::map<EnumType, const char*>;
-  using NamesToValuesMapType = std::map<const char*, EnumType, ltstr>;
   using Traits = TEnumTraits<EnumType>;
 
   static ValuesToNamesMapType makeValuesToNamesMap() {
     ValuesToNamesMapType _return;
     for (size_t i = 0; i < Traits::size; ++i) {
       _return.emplace(EnumType(Traits::values[i]), Traits::names[i].data());
-    }
-    return _return;
-  }
-  static NamesToValuesMapType makeNamesToValuesMap() {
-    NamesToValuesMapType _return;
-    for (size_t i = 0; i < Traits::size; ++i) {
-      _return.emplace(Traits::names[i].data(), EnumType(Traits::values[i]));
     }
     return _return;
   }

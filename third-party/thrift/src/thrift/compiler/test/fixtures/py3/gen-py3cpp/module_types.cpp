@@ -33,7 +33,6 @@ namespace py3 { namespace simple {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _AnEnum_EnumMapFactory::ValuesToNamesMapType _AnEnum_VALUES_TO_NAMES = _AnEnum_EnumMapFactory::makeValuesToNamesMap();
-const _AnEnum_EnumMapFactory::NamesToValuesMapType _AnEnum_NAMES_TO_VALUES = _AnEnum_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }} // py3::simple
@@ -59,7 +58,6 @@ namespace py3 { namespace simple {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _AnEnumRenamed_EnumMapFactory::ValuesToNamesMapType _AnEnumRenamed_VALUES_TO_NAMES = _AnEnumRenamed_EnumMapFactory::makeValuesToNamesMap();
-const _AnEnumRenamed_EnumMapFactory::NamesToValuesMapType _AnEnumRenamed_NAMES_TO_VALUES = _AnEnumRenamed_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }} // py3::simple
@@ -85,7 +83,6 @@ namespace py3 { namespace simple {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _Flags_EnumMapFactory::ValuesToNamesMapType _Flags_VALUES_TO_NAMES = _Flags_EnumMapFactory::makeValuesToNamesMap();
-const _Flags_EnumMapFactory::NamesToValuesMapType _Flags_NAMES_TO_VALUES = _Flags_EnumMapFactory::makeNamesToValuesMap();
 FOLLY_POP_WARNING
 #endif
 }} // py3::simple

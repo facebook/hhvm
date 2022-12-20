@@ -5131,7 +5131,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
             if self.env.parser_options.po_const_default_func_args {
-                self.check_constant_expression_allow_static(&x.default_value);
+                self.check_constant_expression(
+                    &x.default_value,
+                    // `static` in constant
+                    !self
+                        .env
+                        .parser_options
+                        .po_disallow_static_constants_in_default_func_args,
+                )
             }
         }
     }

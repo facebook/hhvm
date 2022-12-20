@@ -498,6 +498,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (bool_opt "allow_all_locations_for_type_constant_in_enum_class" config)
       ?tco_populate_dead_unsafe_cast_heap:
         (bool_opt "populate_dead_unsafe_cast_heap" config)
+      ?po_disallow_static_constants_in_default_func_args:
+        (bool_opt "disallow_static_constants_in_default_func_args" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

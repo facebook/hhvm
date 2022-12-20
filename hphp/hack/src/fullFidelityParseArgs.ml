@@ -50,6 +50,7 @@ type t = {
   disallow_fun_and_cls_meth_pseudo_funcs: bool;
   disallow_inst_meth: bool;
   ignore_missing_json: bool;
+  disallow_static_constants_in_default_func_args: bool;
 }
 
 let make
@@ -91,7 +92,8 @@ let make
     enable_xhp_class_modifier
     disallow_fun_and_cls_meth_pseudo_funcs
     disallow_inst_meth
-    ignore_missing_json =
+    ignore_missing_json
+    disallow_static_constants_in_default_func_args =
   {
     full_fidelity_json_parse_tree;
     full_fidelity_json;
@@ -132,6 +134,7 @@ let make
     disallow_fun_and_cls_meth_pseudo_funcs;
     disallow_inst_meth;
     ignore_missing_json;
+    disallow_static_constants_in_default_func_args;
   }
 
 let parse_args () =
@@ -193,6 +196,7 @@ let parse_args () =
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
   let disallow_inst_meth = ref false in
   let ignore_missing_json = ref false in
+  let disallow_static_constants_in_default_func_arg = ref false in
   let options =
     [
       (* modes *)
@@ -344,6 +348,9 @@ No errors are filtered out."
       ( "--ignore-missing-json",
         Arg.Set ignore_missing_json,
         "Ignore missing nodes in JSON output" );
+      ( "--disallow-static-constants-in-default-func-args",
+        Arg.Set disallow_static_constants_in_default_func_arg,
+        "Disallow `static::*` in default arguments for functions" );
     ]
   in
   Arg.parse options push_file usage;
@@ -403,6 +410,7 @@ No errors are filtered out."
     !disallow_fun_and_cls_meth_pseudo_funcs
     !disallow_inst_meth
     !ignore_missing_json
+    !disallow_static_constants_in_default_func_arg
 
 let to_parser_options args =
   let popt = ParserOptions.default in
@@ -473,6 +481,11 @@ let to_parser_options args =
   in
   let popt =
     ParserOptions.with_disallow_inst_meth popt args.disallow_inst_meth
+  in
+  let popt =
+    ParserOptions.with_disallow_static_constants_in_default_func_args
+      popt
+      args.disallow_static_constants_in_default_func_args
   in
   popt
 

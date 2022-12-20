@@ -141,6 +141,12 @@ let with_interpret_soft_types_as_like_types po b =
 
 let with_everything_sdt po b = { po with GlobalOptions.tco_everything_sdt = b }
 
+let with_disallow_static_constants_in_default_func_args po b =
+  {
+    po with
+    GlobalOptions.po_disallow_static_constants_in_default_func_args = b;
+  }
+
 let make
     ~auto_namespace_map
     ~codegen
@@ -216,6 +222,7 @@ type ffi_t =
   * bool
   * bool
   * bool
+  * bool
 
 let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
   ( hhvm_compat_mode,
@@ -237,4 +244,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disallow_fun_and_cls_meth_pseudo_funcs po,
     interpret_soft_types_as_like_types po,
     disallow_inst_meth po,
-    po.GlobalOptions.tco_is_systemlib )
+    po.GlobalOptions.tco_is_systemlib,
+    po.GlobalOptions.po_disallow_static_constants_in_default_func_args )

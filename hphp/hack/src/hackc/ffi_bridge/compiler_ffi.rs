@@ -91,6 +91,7 @@ pub mod compile_ffi {
         enable_enum_classes: bool,
         enable_xhp_class_modifier: bool,
         enable_class_level_where_clauses: bool,
+        disallow_static_constants_in_default_func_args: bool,
     }
 
     struct DeclParserConfig {
@@ -264,6 +265,9 @@ impl compile_ffi::NativeEnv {
                     po_enable_class_level_where_clauses: self
                         .parser_flags
                         .enable_class_level_where_clauses,
+                    po_disallow_static_constants_in_default_func_args: self
+                        .parser_flags
+                        .disallow_static_constants_in_default_func_args,
                     ..Default::default()
                 },
             },

@@ -340,6 +340,7 @@ type t = {
      heap. This is only needed in dead UNSAFE_CAST removal mode. This option
      controls whether the heap will be populated or not. *)
   tco_populate_dead_unsafe_cast_heap: bool;
+  po_disallow_static_constants_in_default_func_args: bool;
 }
 [@@deriving eq, show]
 
@@ -480,6 +481,7 @@ val make :
   ?tco_allow_all_locations_for_type_constant_in_enum_class:bool ->
   ?tco_allowed_locations_for_type_constant_in_enum_class:string list ->
   ?tco_populate_dead_unsafe_cast_heap:bool ->
+  ?po_disallow_static_constants_in_default_func_args:bool ->
   unit ->
   t
 

@@ -165,6 +165,7 @@ type t = {
   tco_allow_all_locations_for_type_constant_in_enum_class: bool;
   tco_allowed_locations_for_type_constant_in_enum_class: string list;
   tco_populate_dead_unsafe_cast_heap: bool;
+  po_disallow_static_constants_in_default_func_args: bool;
 }
 [@@deriving eq, show]
 
@@ -307,6 +308,7 @@ let default =
     tco_allow_all_locations_for_type_constant_in_enum_class = false;
     tco_allowed_locations_for_type_constant_in_enum_class = [];
     tco_populate_dead_unsafe_cast_heap = false;
+    po_disallow_static_constants_in_default_func_args = false;
   }
 
 let make
@@ -480,6 +482,8 @@ let make
       default.tco_allowed_locations_for_type_constant_in_enum_class)
     ?(tco_populate_dead_unsafe_cast_heap =
       default.tco_populate_dead_unsafe_cast_heap)
+    ?(po_disallow_static_constants_in_default_func_args =
+      default.po_disallow_static_constants_in_default_func_args)
     () =
   {
     tco_experimental_features;
@@ -619,6 +623,7 @@ let make
     tco_allow_all_locations_for_type_constant_in_enum_class;
     tco_allowed_locations_for_type_constant_in_enum_class;
     tco_populate_dead_unsafe_cast_heap;
+    po_disallow_static_constants_in_default_func_args;
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier

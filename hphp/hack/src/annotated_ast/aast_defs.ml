@@ -347,7 +347,7 @@ and ('ex, 'en) expr_ =
       (** Shape literal.
        *
        *     shape('x' => 1, 'y' => 2) *)
-  | ValCollection of vc_kind * 'ex targ option * ('ex, 'en) expr list
+  | ValCollection of (pos * vc_kind) * 'ex targ option * ('ex, 'en) expr list
       (** Collection literal for indexable structures.
        *
        *     Vector {1, 2}
@@ -356,7 +356,7 @@ and ('ex, 'en) expr_ =
        *     vec[1, 2]
        *     keyset[] *)
   | KeyValCollection of
-      kvc_kind * ('ex targ * 'ex targ) option * ('ex, 'en) field list
+      (pos * kvc_kind) * ('ex targ * 'ex targ) option * ('ex, 'en) field list
       (** Collection literal for key-value structures.
        *
        *     dict['x' => 1, 'y' => 2]

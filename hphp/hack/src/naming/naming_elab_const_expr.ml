@@ -68,12 +68,12 @@ let rec const_expr_err in_mode acc (_, pos, expr_) =
     let acc = const_expr_err in_mode acc e3 in
     Option.value_map ~default:acc ~f:(const_expr_err in_mode acc) e2_opt
   | Aast.Darray (_, kvs)
-  | Aast.(KeyValCollection (Dict, _, kvs)) ->
+  | Aast.(KeyValCollection ((_, Dict), _, kvs)) ->
     List.fold_left kvs ~init:acc ~f:(fun acc (ek, ev) ->
         let acc = const_expr_err in_mode acc ek in
         const_expr_err in_mode acc ev)
   | Aast.Varray (_, exprs)
-  | Aast.(ValCollection ((Vec | Keyset), _, exprs))
+  | Aast.(ValCollection ((_, (Vec | Keyset)), _, exprs))
   | Aast.Tuple exprs ->
     List.fold_left exprs ~init:acc ~f:(fun acc e ->
         const_expr_err in_mode acc e)

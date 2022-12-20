@@ -114,9 +114,9 @@
                                                   (Pnormal,
                                                    ((), [4:3-13],
                                                     (Shape
-                                                       [((SFlit_str ([4:3-13], "splices")), ((), [4:3-13], (KeyValCollection (Dict, None, []))));
-                                                         ((SFlit_str ([4:3-13], "functions")), ((), [4:3-13], (ValCollection (Vec, None, [((), [4:37-40], (Lvar ([4:37-40], $0fp0)))]))));
-                                                         ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (Vec, None, []))))])));
+                                                       [((SFlit_str ([4:3-13], "splices")), ((), [4:3-13], (KeyValCollection (([4:3-13], Dict), None, []))));
+                                                         ((SFlit_str ([4:3-13], "functions")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, [((), [4:37-40], (Lvar ([4:37-40], $0fp0)))]))));
+                                                         ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))))])));
                                                   (Pnormal,
                                                    ((), [4:14-47],
                                                     (Lfun (
@@ -161,10 +161,11 @@
                                                                     ((SFlit_str ([4:14-47], "end_line")), ((), [4:14-47], (Int "4")));
                                                                     ((SFlit_str ([4:14-47], "start_column")), ((), [4:14-47], (Int "13")));
                                                                     ((SFlit_str ([4:14-47], "end_column")), ((), [4:14-47], (Int "46")))])));
-                                                                    (Pnormal, ((), [Pos.none], (ValCollection (Vec, None, []))));
+                                                                    (Pnormal, ((), [Pos.none], (ValCollection (([Pos.none], Vec), None, []))));
                                                                     (Pnormal,
                                                                     ((), [4:23-45],
-                                                                    (ValCollection (Vec, None,
+                                                                    (ValCollection ((
+                                                                    [4:23-45], Vec), None,
                                                                     [((), [4:23-45],
                                                                     (Call (
                                                                     ((), [4:23-45],
@@ -195,7 +196,8 @@
                                                                     Pnormal, ((), [4:29-33], True))], None))));
                                                                     (Pnormal,
                                                                     ((), [4:37-42],
-                                                                    (ValCollection (Vec, None,
+                                                                    (ValCollection ((
+                                                                    [4:37-42], Vec), None,
                                                                     [((), [4:37-42],
                                                                     (Call (
                                                                     ((), [4:37-42],
@@ -225,8 +227,8 @@
                                                                     ((SFlit_str ([4:37-42], "end_line")), ((), [4:37-42], (Int "4")));
                                                                     ((SFlit_str ([4:37-42], "start_column")), ((), [4:37-42], (Int "36")));
                                                                     ((SFlit_str ([4:37-42], "end_column")), ((), [4:37-42], (Int "41")))]))); (
-                                                                    Pnormal, ((), [4:37-40], (Lvar ([4:37-40], $0fp0))))], None)))); (
-                                                                    Pnormal, ((), [Pos.none], (ValCollection (Vec, None, []))))], None)))]))))], None)))]))))],
+                                                                    Pnormal, ((), [4:37-40], (Lvar ([4:37-40], $0fp0))))], None))));
+                                                                    (Pnormal, ((), [Pos.none], (ValCollection (([Pos.none], Vec), None, []))))], None)))]))))], None)))]))))],
                                                                    None))))))
                                                              ]
                                                            };

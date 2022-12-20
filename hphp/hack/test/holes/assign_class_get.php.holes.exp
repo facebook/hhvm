@@ -22,7 +22,7 @@
           cv_is_static = true; cv_span = [6:32-57] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Private; cv_type = ((Vector<string>), (Some ([7:18-32], (Happly (([7:18-24], "\\HH\\Vector"), [([7:25-31], (Hprim Tstring))])))));
-          cv_id = ([7:33-42], "vec_prop"); cv_expr = (Some ((Vector<string>), [7:45-54], (ValCollection (Vector, None, [])))); 
+          cv_id = ([7:33-42], "vec_prop"); cv_expr = (Some ((Vector<string>), [7:45-54], (ValCollection (([7:45-51], Vector), None, [])))); 
           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
           cv_is_static = true; cv_span = [7:33-54] }
         ];

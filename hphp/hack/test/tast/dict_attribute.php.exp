@@ -31,7 +31,9 @@
          [{ ua_name = ([3:9-11], "\\Fi");
             ua_params =
             [((dict<string, int>), [3:12-36],
-              (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+              (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                 )))
+              ]
             }
            ];
          fa_namespace =
@@ -60,7 +62,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -89,7 +93,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -118,7 +124,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -147,7 +155,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -176,7 +186,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -205,7 +217,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -234,7 +248,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -263,7 +279,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -292,7 +310,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -313,7 +333,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -335,7 +357,9 @@
             [{ ua_name = ([20:15-16], "\\P");
                ua_params =
                [((dict<string, int>), [20:17-41],
-                 (KeyValCollection (Dict, None, [(((string), [20:22-25], (String "a")), ((int), [20:29-30], (Int "1"))); (((string), [20:32-35], (String "b")), ((int), [20:39-40], (Int "2")))])))]
+                 (KeyValCollection (([20:17-21], Dict), None,
+                    [(((string), [20:22-25], (String "a")), ((int), [20:29-30], (Int "1"))); (((string), [20:32-35], (String "b")), ((int), [20:39-40], (Int "2")))])))
+                 ]
                }
               ];
             param_visibility = None }
@@ -346,7 +370,9 @@
          [{ ua_name = ([19:3-4], "\\F");
             ua_params =
             [((dict<string, int>), [19:5-29],
-              (KeyValCollection (Dict, None, [(((string), [19:10-13], (String "a")), ((int), [19:17-18], (Int "1"))); (((string), [19:20-23], (String "b")), ((int), [19:27-28], (Int "2")))])))]
+              (KeyValCollection (([19:5-9], Dict), None,
+                 [(((string), [19:10-13], (String "a")), ((int), [19:17-18], (Int "1"))); (((string), [19:20-23], (String "b")), ((int), [19:27-28], (Int "2")))])))
+              ]
             }
            ];
          f_external = false; f_doc_comment = None };
@@ -365,7 +391,9 @@
           [{ ua_name = ([26:5-10], "\\SProp");
              ua_params =
              [((dict<string, int>), [26:11-35],
-               (KeyValCollection (Dict, None, [(((string), [26:16-19], (String "a")), ((int), [26:23-24], (Int "1"))); (((string), [26:26-29], (String "b")), ((int), [26:33-34], (Int "2")))])))]
+               (KeyValCollection (([26:11-15], Dict), None,
+                  [(((string), [26:16-19], (String "a")), ((int), [26:23-24], (Int "1"))); (((string), [26:26-29], (String "b")), ((int), [26:33-34], (Int "2")))])))
+               ]
              }
             ];
           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = true; 
@@ -377,7 +405,9 @@
            [{ ua_name = ([24:5-10], "\\IProp");
               ua_params =
               [((dict<string, int>), [24:11-35],
-                (KeyValCollection (Dict, None, [(((string), [24:16-19], (String "a")), ((int), [24:23-24], (Int "1"))); (((string), [24:26-29], (String "b")), ((int), [24:33-34], (Int "2")))])))]
+                (KeyValCollection (([24:11-15], Dict), None,
+                   [(((string), [24:16-19], (String "a")), ((int), [24:23-24], (Int "1"))); (((string), [24:26-29], (String "b")), ((int), [24:33-34], (Int "2")))])))
+                ]
               }
              ];
            cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
@@ -393,7 +423,9 @@
           [{ ua_name = ([28:5-8], "\\Met");
              ua_params =
              [((dict<string, int>), [28:9-33],
-               (KeyValCollection (Dict, None, [(((string), [28:14-17], (String "a")), ((int), [28:21-22], (Int "1"))); (((string), [28:24-27], (String "b")), ((int), [28:31-32], (Int "2")))])))]
+               (KeyValCollection (([28:9-13], Dict), None,
+                  [(((string), [28:14-17], (String "a")), ((int), [28:21-22], (Int "1"))); (((string), [28:24-27], (String "b")), ((int), [28:31-32], (Int "2")))])))
+               ]
              }
             ];
           m_readonly_ret = None; m_ret = ((void), (Some ([29:27-31], (Hprim Tvoid)))); 
@@ -408,7 +440,9 @@
        [{ ua_name = ([22:3-4], "\\C");
           ua_params =
           [((dict<string, int>), [22:5-29],
-            (KeyValCollection (Dict, None, [(((string), [22:10-13], (String "a")), ((int), [22:17-18], (Int "1"))); (((string), [22:20-23], (String "b")), ((int), [22:27-28], (Int "2")))])))]
+            (KeyValCollection (([22:5-9], Dict), None, [(((string), [22:10-13], (String "a")), ((int), [22:17-18], (Int "1"))); (((string), [22:20-23], (String "b")), ((int), [22:27-28], (Int "2")))]
+               )))
+            ]
           }
          ];
        c_file_attributes =
@@ -416,7 +450,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -442,7 +478,9 @@
        [{ ua_name = ([32:3-4], "\\E");
           ua_params =
           [((dict<string, int>), [32:5-29],
-            (KeyValCollection (Dict, None, [(((string), [32:10-13], (String "a")), ((int), [32:17-18], (Int "1"))); (((string), [32:20-23], (String "b")), ((int), [32:27-28], (Int "2")))])))]
+            (KeyValCollection (([32:5-9], Dict), None, [(((string), [32:10-13], (String "a")), ((int), [32:17-18], (Int "1"))); (((string), [32:20-23], (String "b")), ((int), [32:27-28], (Int "2")))]
+               )))
+            ]
           }
          ];
        c_file_attributes =
@@ -450,7 +488,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =
@@ -468,7 +508,9 @@
        [{ ua_name = ([35:3-9], "\\TAlias");
           ua_params =
           [((dict<string, int>), [35:10-34],
-            (KeyValCollection (Dict, None, [(((string), [35:15-18], (String "a")), ((int), [35:22-23], (Int "1"))); (((string), [35:25-28], (String "b")), ((int), [35:32-33], (Int "2")))])))]
+            (KeyValCollection (([35:10-14], Dict), None,
+               [(((string), [35:15-18], (String "a")), ((int), [35:22-23], (Int "1"))); (((string), [35:25-28], (String "b")), ((int), [35:32-33], (Int "2")))])))
+            ]
           }
          ];
        t_file_attributes =
@@ -476,7 +518,9 @@
           [{ ua_name = ([3:9-11], "\\Fi");
              ua_params =
              [((dict<string, int>), [3:12-36],
-               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+               (KeyValCollection (([3:12-16], Dict), None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))]
+                  )))
+               ]
              }
             ];
           fa_namespace =

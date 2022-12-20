@@ -3446,7 +3446,7 @@ and expr_
           make_ty,
           key_bound ) =
       match e with
-      | ValCollection (kind, _, _) ->
+      | ValCollection ((kind_pos, kind), _, _) ->
         let class_name = Nast.vc_kind_to_name kind in
         let (subtype_val, coerce_for_op, key_bound) =
           match kind with
@@ -3468,7 +3468,8 @@ and expr_
           class_name,
           subtype_val,
           coerce_for_op,
-          (fun th elements -> Aast.ValCollection (kind, th, elements)),
+          (fun th elements ->
+            Aast.ValCollection ((kind_pos, kind), th, elements)),
           (fun value_ty ->
             MakeType.class_type (Reason.Rwitness p) class_name [value_ty]),
           key_bound )
@@ -3477,7 +3478,7 @@ and expr_
           "varray",
           array_value,
           false,
-          (fun th elements -> Aast.ValCollection (Vec, th, elements)),
+          (fun th elements -> Aast.ValCollection ((p, Vec), th, elements)),
           (fun value_ty -> MakeType.varray (Reason.Rwitness p) value_ty),
           None )
       | _ ->
@@ -3522,18 +3523,18 @@ and expr_
   | KeyValCollection (_, th, l) ->
     let (get_expected_kind, name, make_expr, make_ty) =
       match e with
-      | KeyValCollection (kind, _, _) ->
+      | KeyValCollection ((kind_pos, kind), _, _) ->
         let class_name = Nast.kvc_kind_to_name kind in
         ( get_kvc_inst env p kind,
           class_name,
-          (fun th pairs -> Aast.KeyValCollection (kind, th, pairs)),
+          (fun th pairs -> Aast.KeyValCollection ((kind_pos, kind), th, pairs)),
           (fun k v -> MakeType.class_type (Reason.Rwitness p) class_name [k; v])
         )
       | Darray _ ->
         let name = "darray" in
         ( get_kvc_inst env p Dict,
           name,
-          (fun th pairs -> Aast.KeyValCollection (Dict, th, pairs)),
+          (fun th pairs -> Aast.KeyValCollection ((p, Dict), th, pairs)),
           (fun k v -> MakeType.darray (Reason.Rwitness p) k v) )
       | _ ->
         (* The parent match makes this case impossible *)
@@ -4876,7 +4877,10 @@ and expr_
               _,
               [
                 _;
-                (_, _, (Varray (_, children) | ValCollection (Vec, _, children)));
+                ( _,
+                  _,
+                  (Varray (_, children) | ValCollection ((_, Vec), _, children))
+                );
                 _;
                 _;
               ],

@@ -448,10 +448,11 @@ module Visitor_DEPRECATED = struct
 
       method on_shape : 'a -> (Ast_defs.shape_field_name * expr) list -> 'a
 
-      method on_valCollection : 'a -> vc_kind -> targ option -> expr list -> 'a
+      method on_valCollection :
+        'a -> pos * vc_kind -> targ option -> expr list -> 'a
 
       method on_keyValCollection :
-        'a -> kvc_kind -> (targ * targ) option -> field list -> 'a
+        'a -> pos * kvc_kind -> (targ * targ) option -> field list -> 'a
 
       method on_collection :
         'a -> unit collection_targ option -> afield list -> 'a

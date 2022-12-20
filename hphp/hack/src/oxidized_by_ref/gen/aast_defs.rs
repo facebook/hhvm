@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<815c8f06ffff83e2fdf0fae4a6753d82>>
+// @generated SignedSource<<092fd90d14df6099aac3f4e64d26f31f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -699,7 +699,7 @@ pub enum Expr_<'a, Ex, En> {
     #[rust_to_ocaml(inline_tuple)]
     ValCollection(
         &'a (
-            oxidized::aast_defs::VcKind,
+            (&'a Pos<'a>, oxidized::aast_defs::VcKind),
             Option<&'a Targ<'a, Ex>>,
             &'a [&'a Expr<'a, Ex, En>],
         ),
@@ -713,7 +713,7 @@ pub enum Expr_<'a, Ex, En> {
     #[rust_to_ocaml(inline_tuple)]
     KeyValCollection(
         &'a (
-            oxidized::aast_defs::KvcKind,
+            (&'a Pos<'a>, oxidized::aast_defs::KvcKind),
             Option<&'a (&'a Targ<'a, Ex>, &'a Targ<'a, Ex>)>,
             &'a [&'a Field<'a, Ex, En>],
         ),

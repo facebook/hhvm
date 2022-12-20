@@ -48,7 +48,7 @@
                     [],
                     [(Pnormal,
                       ((dict<arraykey, mixed>), [8:5-11:6],
-                       (KeyValCollection (Dict, None,
+                       (KeyValCollection (([8:5-9], Dict), None,
                           [(((string), [9:7-10], (String "a")), ((int), [9:14-16], (Lvar ([9:14-16], $a)))); (((string), [10:7-10], (String "b")), ((string), [10:14-16], (Lvar ([10:14-16], $b))))]))))
                       ],
                     None)))))

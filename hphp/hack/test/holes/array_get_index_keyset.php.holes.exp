@@ -18,7 +18,9 @@
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:3-18], (Expr ((keyset<nothing>), [4:3-17], (Binop ((Eq None), ((keyset<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), ((keyset<nothing>), [4:9-17], (ValCollection (Keyset, None, []))))))));
+          [([4:3-18],
+            (Expr
+               ((keyset<nothing>), [4:3-17], (Binop ((Eq None), ((keyset<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), ((keyset<nothing>), [4:9-17], (ValCollection (([4:9-15], Keyset), None, []))))))));
             ([6:3-13],
              (Expr
                 ((nothing), [6:3-12],

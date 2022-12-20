@@ -1372,17 +1372,17 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
     (env, ty)
   | A.Varray (_, exprs) -> cow_array_literal ~prefix:"varray" exprs
   | A.ValCollection
-      (((A.Vec | A.Keyset | A.ImmSet | A.ImmVector) as kind), _, exprs) ->
+      ((_, ((A.Vec | A.Keyset | A.ImmSet | A.ImmVector) as kind)), _, exprs) ->
     let prefix = A.show_vc_kind kind in
     cow_array_literal ~prefix exprs
-  | A.ValCollection (((A.Vector | A.Set) as kind), _, exprs) ->
+  | A.ValCollection ((_, ((A.Vector | A.Set) as kind)), _, exprs) ->
     let prefix = A.show_vc_kind kind in
     mut_array_literal ~prefix exprs
   | A.Darray (_, fields) -> cow_keyed_array_literal ~prefix:"darray" fields
-  | A.KeyValCollection (((A.Dict | A.ImmMap) as kind), _, fields) ->
+  | A.KeyValCollection ((_, ((A.Dict | A.ImmMap) as kind)), _, fields) ->
     let prefix = A.show_kvc_kind kind in
     cow_keyed_array_literal ~prefix fields
-  | A.KeyValCollection ((A.Map as kind), _, fields) ->
+  | A.KeyValCollection ((_, (A.Map as kind)), _, fields) ->
     let prefix = A.show_kvc_kind kind in
     mut_keyed_array_literal ~prefix fields
   | A.Array_get (arry, ix_opt) ->

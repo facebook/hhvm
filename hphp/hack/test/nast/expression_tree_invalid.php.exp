@@ -62,9 +62,9 @@
                            (Pnormal,
                             ((), [5:3-13],
                              (Shape
-                                [((SFlit_str ([5:3-13], "splices")), ((), [5:3-13], (KeyValCollection (Dict, None, []))));
-                                  ((SFlit_str ([5:3-13], "functions")), ((), [5:3-13], (ValCollection (Vec, None, []))));
-                                  ((SFlit_str ([5:3-13], "static_methods")), ((), [5:3-13], (ValCollection (Vec, None, []))))])));
+                                [((SFlit_str ([5:3-13], "splices")), ((), [5:3-13], (KeyValCollection (([5:3-13], Dict), None, []))));
+                                  ((SFlit_str ([5:3-13], "functions")), ((), [5:3-13], (ValCollection (([5:3-13], Vec), None, []))));
+                                  ((SFlit_str ([5:3-13], "static_methods")), ((), [5:3-13], (ValCollection (([5:3-13], Vec), None, []))))])));
                            (Pnormal,
                             ((), [5:14-20],
                              (Lfun (

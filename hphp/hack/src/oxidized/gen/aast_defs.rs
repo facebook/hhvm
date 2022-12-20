@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bb8fff2dc42c496a3938a8df06034d27>>
+// @generated SignedSource<<b1587427933b0563cc0ce4e214fc71a7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -564,14 +564,20 @@ pub enum Expr_<Ex, En> {
     ///     vec[1, 2]
     ///     keyset[]
     #[rust_to_ocaml(inline_tuple)]
-    ValCollection(Box<(VcKind, Option<Targ<Ex>>, Vec<Expr<Ex, En>>)>),
+    ValCollection(Box<((Pos, VcKind), Option<Targ<Ex>>, Vec<Expr<Ex, En>>)>),
     /// Collection literal for key-value structures.
     ///
     ///     dict['x' => 1, 'y' => 2]
     ///     Map<int, string> {}
     ///     ImmMap {}
     #[rust_to_ocaml(inline_tuple)]
-    KeyValCollection(Box<(KvcKind, Option<(Targ<Ex>, Targ<Ex>)>, Vec<Field<Ex, En>>)>),
+    KeyValCollection(
+        Box<(
+            (Pos, KvcKind),
+            Option<(Targ<Ex>, Targ<Ex>)>,
+            Vec<Field<Ex, En>>,
+        )>,
+    ),
     /// Null literal.
     ///
     ///     null

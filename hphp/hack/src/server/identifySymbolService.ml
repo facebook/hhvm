@@ -343,7 +343,7 @@ let visitor =
               (remove_apostrophes_from_function_eval mid)
               ~is_method:true
               ~is_const:false
-        | Aast.ValCollection (kind, _, _) ->
+        | Aast.ValCollection ((_, kind), _, _) ->
           let type_name =
             match kind with
             | Aast_defs.Vector -> "Vector"
@@ -354,7 +354,7 @@ let visitor =
             | Aast_defs.Vec -> "vec"
           in
           process_class_id (pos, "\\HH\\" ^ type_name)
-        | Aast.KeyValCollection (kind, _, _) ->
+        | Aast.KeyValCollection ((_, kind), _, _) ->
           let type_name =
             match kind with
             | Aast_defs.Map -> "Map"

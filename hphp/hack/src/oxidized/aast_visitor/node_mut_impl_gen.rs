@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ce00e3e118e9b4240ed4a41b11cbb66a>>
+// @generated SignedSource<<a10e0c50dc42968250b31dc93d1312c2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -695,7 +695,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper2<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(VcKind, Option<Targ<Ex>>, Vec<Expr<Ex, En>>)>,
+            a: &'node mut Box<((Pos, VcKind), Option<Targ<Ex>>, Vec<Expr<Ex, En>>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
         ) -> Result<(), P::Error> {
@@ -705,7 +705,11 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper3<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(KvcKind, Option<(Targ<Ex>, Targ<Ex>)>, Vec<Field<Ex, En>>)>,
+            a: &'node mut Box<(
+                (Pos, KvcKind),
+                Option<(Targ<Ex>, Targ<Ex>)>,
+                Vec<Field<Ex, En>>,
+            )>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
         ) -> Result<(), P::Error> {

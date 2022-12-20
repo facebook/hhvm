@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b5f455e08988ea4bffb10850342981e7>>
+// @generated SignedSource<<901d72556b96a5d3cc00bd20f304551e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -859,11 +859,15 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_shape(p0: Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>) -> Self {
         Expr_::Shape(p0)
     }
-    pub fn mk_val_collection(p0: VcKind, p1: Option<Targ<Ex>>, p2: Vec<Expr<Ex, En>>) -> Self {
+    pub fn mk_val_collection(
+        p0: (Pos, VcKind),
+        p1: Option<Targ<Ex>>,
+        p2: Vec<Expr<Ex, En>>,
+    ) -> Self {
         Expr_::ValCollection(Box::new((p0, p1, p2)))
     }
     pub fn mk_key_val_collection(
-        p0: KvcKind,
+        p0: (Pos, KvcKind),
         p1: Option<(Targ<Ex>, Targ<Ex>)>,
         p2: Vec<Field<Ex, En>>,
     ) -> Self {
@@ -1383,7 +1387,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_val_collection(&self) -> Option<(&VcKind, &Option<Targ<Ex>>, &Vec<Expr<Ex, En>>)> {
+    pub fn as_val_collection(
+        &self,
+    ) -> Option<(&(Pos, VcKind), &Option<Targ<Ex>>, &Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::ValCollection(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
@@ -1391,7 +1397,11 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn as_key_val_collection(
         &self,
-    ) -> Option<(&KvcKind, &Option<(Targ<Ex>, Targ<Ex>)>, &Vec<Field<Ex, En>>)> {
+    ) -> Option<(
+        &(Pos, KvcKind),
+        &Option<(Targ<Ex>, Targ<Ex>)>,
+        &Vec<Field<Ex, En>>,
+    )> {
         match self {
             Expr_::KeyValCollection(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
@@ -1709,7 +1719,11 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn as_val_collection_mut(
         &mut self,
-    ) -> Option<(&mut VcKind, &mut Option<Targ<Ex>>, &mut Vec<Expr<Ex, En>>)> {
+    ) -> Option<(
+        &mut (Pos, VcKind),
+        &mut Option<Targ<Ex>>,
+        &mut Vec<Expr<Ex, En>>,
+    )> {
         match self {
             Expr_::ValCollection(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
@@ -1718,7 +1732,7 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_key_val_collection_mut(
         &mut self,
     ) -> Option<(
-        &mut KvcKind,
+        &mut (Pos, KvcKind),
         &mut Option<(Targ<Ex>, Targ<Ex>)>,
         &mut Vec<Field<Ex, En>>,
     )> {
@@ -2072,7 +2086,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_val_collection_into(self) -> Option<(VcKind, Option<Targ<Ex>>, Vec<Expr<Ex, En>>)> {
+    pub fn as_val_collection_into(
+        self,
+    ) -> Option<((Pos, VcKind), Option<Targ<Ex>>, Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::ValCollection(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
@@ -2080,7 +2096,11 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn as_key_val_collection_into(
         self,
-    ) -> Option<(KvcKind, Option<(Targ<Ex>, Targ<Ex>)>, Vec<Field<Ex, En>>)> {
+    ) -> Option<(
+        (Pos, KvcKind),
+        Option<(Targ<Ex>, Targ<Ex>)>,
+        Vec<Field<Ex, En>>,
+    )> {
         match self {
             Expr_::KeyValCollection(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,

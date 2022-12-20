@@ -14,7 +14,7 @@
           [([5:4-32],
             (Return
                (Some ((keyset<int>), [5:11-31],
-                      (ValCollection (Keyset, None, [((string), [5:20-25], (Hole (((string), [5:20-25], (String "bad")), (string), (int), Typing))); ((int), [5:28-29], (Int "1"))]))))))
+                      (ValCollection (([5:11-17], Keyset), None, [((string), [5:20-25], (Hole (((string), [5:20-25], (String "bad")), (string), (int), Typing))); ((int), [5:28-29], (Int "1"))]))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

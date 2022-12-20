@@ -302,7 +302,7 @@ and pp_expr_ ppf = function
       @@ pair ~sep:fat_arrow pp_shape_field_name pp_expr)
       ppf
       flds
-  | Aast.ValCollection (kind, targ_opt, exprs) ->
+  | Aast.ValCollection ((_, kind), targ_opt, exprs) ->
     let delim =
       match kind with
       | Aast_defs.Keyset
@@ -318,7 +318,7 @@ and pp_expr_ ppf = function
            (delim @@ list ~sep:comma pp_expr))
       ppf
       (kind, (targ_opt, exprs))
-  | Aast.KeyValCollection (kind, targs_opt, flds) ->
+  | Aast.KeyValCollection ((_, kind), targs_opt, flds) ->
     let delim =
       match kind with
       | Aast_defs.Dict -> Fmt.brackets

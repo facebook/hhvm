@@ -82,9 +82,10 @@
                                                        ((), [4:8-18],
                                                         (Shape
                                                            [((SFlit_str ([4:8-18], "splices")),
-                                                             ((), [4:8-18], (KeyValCollection (Dict, None, [(((), [4:22-36], (String "$0splice0")), ((), [4:22-36], (Lvar ([4:22-36], $0splice0))))]))));
-                                                             ((SFlit_str ([4:8-18], "functions")), ((), [4:8-18], (ValCollection (Vec, None, []))));
-                                                             ((SFlit_str ([4:8-18], "static_methods")), ((), [4:8-18], (ValCollection (Vec, None, []))))])));
+                                                             ((), [4:8-18],
+                                                              (KeyValCollection (([4:8-18], Dict), None, [(((), [4:22-36], (String "$0splice0")), ((), [4:22-36], (Lvar ([4:22-36], $0splice0))))]))));
+                                                             ((SFlit_str ([4:8-18], "functions")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))));
+                                                             ((SFlit_str ([4:8-18], "static_methods")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))))])));
                                                       (Pnormal,
                                                        ((), [4:19-38],
                                                         (Lfun (

@@ -65,7 +65,7 @@ Errors:
           cc_id = ([8:16-19], "bar"); cc_kind = (CCConcrete ((), [8:22-27], (String "baz"))); 
           cc_span = [8:3-28]; cc_doc_comment = None };
          { cc_user_attributes = []; cc_type = (Some ([9:9-21], (Happly (([9:9-12], "\\HH\\vec"), [([9:13-20], Hnothing)])))); 
-           cc_id = ([9:22-27], "class"); cc_kind = (CCConcrete ((), [9:30-35], (ValCollection (Vec, None, [])))); 
+           cc_id = ([9:22-27], "class"); cc_kind = (CCConcrete ((), [9:30-35], (ValCollection (([9:30-33], Vec), None, [])))); 
            cc_span = [9:3-36]; cc_doc_comment = None }
          ];
        c_typeconsts = [];

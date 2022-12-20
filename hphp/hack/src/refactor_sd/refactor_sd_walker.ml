@@ -125,7 +125,7 @@ let rec expr_
     let (env, _) = expr_ upcasted_info env e1 in
     let (env, _) = expr_ upcasted_info env e2 in
     (env, None)
-  | A.KeyValCollection (kvc_kind, _, field_list) ->
+  | A.KeyValCollection ((_, kvc_kind), _, field_list) ->
     begin
       match kvc_kind with
       | A.Dict ->
@@ -141,7 +141,7 @@ let rec expr_
         (env, Some var)
       | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
     end
-  | A.ValCollection (vc_kind, _, expr_list) ->
+  | A.ValCollection ((_, vc_kind), _, expr_list) ->
     begin
       match vc_kind with
       | A.Vector

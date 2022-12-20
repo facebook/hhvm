@@ -1449,7 +1449,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     };
     use ast::Expr_;
     match &expr.2 {
-        Expr_::ValCollection(v) if v.0 == ast::VcKind::Vec => {
+        Expr_::ValCollection(v) if v.0.1 == ast::VcKind::Vec => {
             emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
         }
         Expr_::Collection(v) if (v.0).1 == "vec" => {
@@ -1458,7 +1458,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
         Expr_::Tuple(_) => {
             emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
         }
-        Expr_::ValCollection(v) if v.0 == ast::VcKind::Keyset => {
+        Expr_::ValCollection(v) if v.0.1 == ast::VcKind::Keyset => {
             emit_value_only_collection(e, env, pos, fields, |v| {
                 Instruct::Opcode(Opcode::NewKeysetArray(v))
             })
@@ -1469,29 +1469,29 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
             })
         }
         Expr_::Collection(v) if (v.0).1 == "dict" => emit_dict(e),
-        Expr_::KeyValCollection(v) if v.0 == ast::KvcKind::Dict => emit_dict(e),
+        Expr_::KeyValCollection(v) if v.0.1 == ast::KvcKind::Dict => emit_dict(e),
         Expr_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "Set" => {
             emit_collection_helper(e, CollectionType::Set)
         }
-        Expr_::ValCollection(v) if v.0 == ast::VcKind::Set => {
+        Expr_::ValCollection(v) if v.0.1 == ast::VcKind::Set => {
             emit_collection_helper(e, CollectionType::Set)
         }
         Expr_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "ImmSet" => {
             emit_collection_helper(e, CollectionType::ImmSet)
         }
-        Expr_::ValCollection(v) if v.0 == ast::VcKind::ImmSet => {
+        Expr_::ValCollection(v) if v.0.1 == ast::VcKind::ImmSet => {
             emit_collection_helper(e, CollectionType::ImmSet)
         }
         Expr_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "Map" => {
             emit_collection_helper(e, CollectionType::Map)
         }
-        Expr_::KeyValCollection(v) if v.0 == ast::KvcKind::Map => {
+        Expr_::KeyValCollection(v) if v.0.1 == ast::KvcKind::Map => {
             emit_collection_helper(e, CollectionType::Map)
         }
         Expr_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "ImmMap" => {
             emit_collection_helper(e, CollectionType::ImmMap)
         }
-        Expr_::KeyValCollection(v) if v.0 == ast::KvcKind::ImmMap => {
+        Expr_::KeyValCollection(v) if v.0.1 == ast::KvcKind::ImmMap => {
             emit_collection_helper(e, CollectionType::ImmMap)
         }
         Expr_::Varray(_) => {
@@ -3299,7 +3299,7 @@ fn emit_keyval_collection_expr<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     e: &'a (
-        ast::KvcKind,
+        (Pos, ast::KvcKind),
         Option<(ast::Targ, ast::Targ)>,
         Vec<ast::Field>,
     ),
@@ -3311,7 +3311,7 @@ fn emit_keyval_collection_expr<'a, 'arena, 'decl>(
             .iter()
             .map(|ast::Field(e1, e2)| (e1.clone(), e2.clone())),
     );
-    let collection_typ = match kind {
+    let collection_typ = match kind.1 {
         aast_defs::KvcKind::Map => CollectionType::Map,
         aast_defs::KvcKind::ImmMap => CollectionType::ImmMap,
         _ => return emit_collection(emitter, env, expression, &fields, None),
@@ -3323,12 +3323,12 @@ fn emit_val_collection<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &'a (ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+    e: &'a ((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let (kind, _, es) = e;
     let fields = mk_afvalues(es);
-    let collection_typ = match kind {
+    let collection_typ = match kind.1 {
         aast_defs::VcKind::Vector => CollectionType::Vector,
         aast_defs::VcKind::ImmVector => CollectionType::ImmVector,
         aast_defs::VcKind::Set => CollectionType::Set,

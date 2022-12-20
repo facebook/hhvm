@@ -24,7 +24,7 @@
              (Expr
                 ((Vector<T>), [16:5-25],
                  (Binop ((Eq None), ((Vector<T>), [16:5-13], (Obj_get (((this), [16:5-10], This), ((Vector<T>), [16:12-13], (Id ([16:12-13], "x"))), OG_nullthrows, Is_prop))),
-                    ((Vector<T>), [16:16-25], (ValCollection (Vector, None, []))))))))
+                    ((Vector<T>), [16:16-25], (ValCollection (([16:16-22], Vector), None, []))))))))
              ]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

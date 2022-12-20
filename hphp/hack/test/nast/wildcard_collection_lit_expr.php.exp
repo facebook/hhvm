@@ -29,7 +29,10 @@
          f_body =
          { fb_ast =
            [([8:3-17],
-             (Expr ((), [8:3-16], (Binop ((Eq None), ((), [8:3-5], (Lvar ([8:3-5], $x))), ((), [8:8-16], (ValCollection (Vec, (Some ((), ([8:12-13], (Happly (([8:12-13], "_"), []))))), []))))))))]
+             (Expr
+                ((), [8:3-16],
+                 (Binop ((Eq None), ((), [8:3-5], (Lvar ([8:3-5], $x))), ((), [8:8-16], (ValCollection (([8:8-11], Vec), (Some ((), ([8:12-13], (Happly (([8:12-13], "_"), []))))), []))))))))
+             ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
@@ -49,7 +52,8 @@
          { fb_ast =
            [([12:3-20],
              (Expr
-                ((), [12:3-19], (Binop ((Eq None), ((), [12:3-5], (Lvar ([12:3-5], $x))), ((), [12:8-19], (ValCollection (Keyset, (Some ((), ([12:15-16], (Happly (([12:15-16], "_"), []))))), []))))))))
+                ((), [12:3-19],
+                 (Binop ((Eq None), ((), [12:3-5], (Lvar ([12:3-5], $x))), ((), [12:8-19], (ValCollection (([12:8-14], Keyset), (Some ((), ([12:15-16], (Happly (([12:15-16], "_"), []))))), []))))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -95,7 +99,7 @@
              (Expr
                 ((), [20:3-20],
                  (Binop ((Eq None), ((), [20:3-5], (Lvar ([20:3-5], $x))),
-                    ((), [20:8-20], (KeyValCollection (Dict, (Some (((), ([20:13-14], (Happly (([20:13-14], "_"), [])))), ((), ([20:16-17], (Happly (([20:16-17], "_"), [])))))), []))))))))
+                    ((), [20:8-20], (KeyValCollection (([20:8-12], Dict), (Some (((), ([20:13-14], (Happly (([20:13-14], "_"), [])))), ((), ([20:16-17], (Happly (([20:16-17], "_"), [])))))), []))))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

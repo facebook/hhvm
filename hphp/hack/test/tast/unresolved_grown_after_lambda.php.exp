@@ -28,7 +28,8 @@ Errors:
           [([4:3-26],
             (Expr
                ((Vector<int>), [4:3-25],
-                (Binop ((Eq None), ((Vector<int>), [4:3-9], (Lvar ([4:3-9], $items))), ((Vector<int>), [4:12-25], (ValCollection (Vector, None, [((int), [4:21-23], (Lvar ([4:21-23], $i)))]))))))));
+                (Binop ((Eq None), ((Vector<int>), [4:3-9], (Lvar ([4:3-9], $items))),
+                   ((Vector<int>), [4:12-25], (ValCollection (([4:12-18], Vector), None, [((int), [4:21-23], (Lvar ([4:21-23], $i)))]))))))));
             ([5:3-12:5],
              (Expr
                 (((function(): int)), [5:3-12:4],

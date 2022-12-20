@@ -84,9 +84,9 @@
                            (Pnormal,
                             ((), [4:3-13],
                              (Shape
-                                [((SFlit_str ([4:3-13], "splices")), ((), [4:3-13], (KeyValCollection (Dict, None, []))));
-                                  ((SFlit_str ([4:3-13], "functions")), ((), [4:3-13], (ValCollection (Vec, None, []))));
-                                  ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (Vec, None, []))))])));
+                                [((SFlit_str ([4:3-13], "splices")), ((), [4:3-13], (KeyValCollection (([4:3-13], Dict), None, []))));
+                                  ((SFlit_str ([4:3-13], "functions")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))));
+                                  ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))))])));
                            (Pnormal,
                             ((), [4:14-32],
                              (Lfun (
@@ -118,10 +118,11 @@
                                                            (SFlit_str ([4:14-32], "end_line")), ((), [4:14-32], (Int "4"))); (
                                                            (SFlit_str ([4:14-32], "start_column")), ((), [4:14-32], (Int "13"))); (
                                                            (SFlit_str ([4:14-32], "end_column")), ((), [4:14-32], (Int "31")))])));
-                                                     (Pnormal, ((), [Pos.none], (ValCollection (Vec, None, []))));
+                                                     (Pnormal, ((), [Pos.none], (ValCollection (([Pos.none], Vec), None, []))));
                                                      (Pnormal,
                                                       ((), [4:23-29],
-                                                       (ValCollection (Vec, None,
+                                                       (ValCollection ((
+                                                          [4:23-29], Vec), None,
                                                           [((), [4:23-29],
                                                             (Call (
                                                                ((), [4:23-29],

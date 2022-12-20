@@ -42,7 +42,7 @@ let on_expr_ (env, expr_, err_acc) =
       let vc_kind = Nast.get_vc_kind cname in
 
       let err = List.filter_map ~f:Fn.id @@ targ_err_opt :: fields_err_opts in
-      Ok (Aast.ValCollection (vc_kind, targ_opt, exprs), err)
+      Ok (Aast.ValCollection ((pos, vc_kind), targ_opt, exprs), err)
     | Aast.Collection ((pos, cname), c_targ_opt, afields)
       when Nast.is_kvc_kind cname ->
       let (targs_opt, targ_err_opt) =
@@ -57,7 +57,7 @@ let on_expr_ (env, expr_, err_acc) =
       in
       let kvc_kind = Nast.get_kvc_kind cname in
       let err = List.filter_map ~f:Fn.id @@ targ_err_opt :: fields_err_opts in
-      Ok (Aast.KeyValCollection (kvc_kind, targs_opt, fields), err)
+      Ok (Aast.KeyValCollection ((pos, kvc_kind), targs_opt, fields), err)
     | Aast.Collection ((pos, cname), _, [])
       when String.equal SN.Collections.cPair cname ->
       Error (pos, [Err.naming @@ Naming_error.Too_few_arguments pos])

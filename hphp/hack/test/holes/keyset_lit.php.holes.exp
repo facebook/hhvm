@@ -15,7 +15,9 @@
             (Expr
                ((keyset<int>), [5:3-23],
                 (Binop ((Eq None), ((keyset<int>), [5:3-5], (Lvar ([5:3-5], $x))),
-                   ((keyset<int>), [5:8-23], (ValCollection (Keyset, None, [((int), [5:15-16], (Int "1")); ((bool), [5:18-22], (Hole (((bool), [5:18-22], True), (bool), (int), Typing)))]))))))))
+                   ((keyset<int>), [5:8-23],
+                    (ValCollection (([5:8-14], Keyset), None, [((int), [5:15-16], (Int "1")); ((bool), [5:18-22], (Hole (((bool), [5:18-22], True), (bool), (int), Typing)))])))
+                   )))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -45,7 +47,9 @@
              (Expr
                 ((keyset<nothing>), [10:3-18],
                  (Binop ((Eq None), ((keyset<nothing>), [10:3-5], (Lvar ([10:3-5], $y))),
-                    ((keyset<nothing>), [10:8-18], (ValCollection (Keyset, None, [((?string), [10:15-17], (Hole (((?string), [10:15-17], (Lvar ([10:15-17], $x))), (?string), (string), Typing)))]))))))))
+                    ((keyset<nothing>), [10:8-18],
+                     (ValCollection (([10:8-14], Keyset), None, [((?string), [10:15-17], (Hole (((?string), [10:15-17], (Lvar ([10:15-17], $x))), (?string), (string), Typing)))])))
+                    )))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

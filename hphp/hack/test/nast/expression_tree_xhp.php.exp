@@ -69,9 +69,9 @@
                                (Pnormal,
                                 ((), [4:8-18],
                                  (Shape
-                                    [((SFlit_str ([4:8-18], "splices")), ((), [4:8-18], (KeyValCollection (Dict, None, []))));
-                                      ((SFlit_str ([4:8-18], "functions")), ((), [4:8-18], (ValCollection (Vec, None, []))));
-                                      ((SFlit_str ([4:8-18], "static_methods")), ((), [4:8-18], (ValCollection (Vec, None, []))))])));
+                                    [((SFlit_str ([4:8-18], "splices")), ((), [4:8-18], (KeyValCollection (([4:8-18], Dict), None, []))));
+                                      ((SFlit_str ([4:8-18], "functions")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))));
+                                      ((SFlit_str ([4:8-18], "static_methods")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))))])));
                                (Pnormal,
                                 ((), [4:19-58],
                                  (Lfun (
@@ -107,7 +107,8 @@
                                                          (Pnormal, ((), [4:19-58], (Class_const (((), [4:20-27], (CI ([4:20-27], "\\:foo:bar"))), ([4:20-27], "class")))));
                                                          (Pnormal,
                                                           ((), [4:19-58],
-                                                           (KeyValCollection (Dict, None,
+                                                           (KeyValCollection ((
+                                                              [4:19-58], Dict), None,
                                                               [(((), [4:28-29], (String "x")),
                                                                 ((), [4:30-33],
                                                                  (Call (
@@ -129,7 +130,8 @@
                                                               ))));
                                                          (Pnormal,
                                                           ((), [4:34-47],
-                                                           (ValCollection (Vec, None,
+                                                           (ValCollection ((
+                                                              [4:34-47], Vec), None,
                                                               [((), [4:34-41],
                                                                 (Call (
                                                                    ((), [4:34-41],
@@ -145,8 +147,8 @@
                                                                     ((SFlit_str ([4:34-41], "start_column")), ((), [4:34-41], (Int "33")));
                                                                     ((SFlit_str ([4:34-41], "end_column")), ((), [4:34-41], (Int "40")))])));
                                                                     (Pnormal, ((), [4:34-41], (Class_const (((), [4:35-38], (CI ([4:35-38], "\\:baz"))), ([4:35-38], "class")))));
-                                                                    (Pnormal, ((), [4:34-41], (KeyValCollection (Dict, None, [])))); (
-                                                                    Pnormal, ((), [Pos.none], (ValCollection (Vec, None, []))))],
+                                                                    (Pnormal, ((), [4:34-41], (KeyValCollection (([4:34-41], Dict), None, []))));
+                                                                    (Pnormal, ((), [Pos.none], (ValCollection (([Pos.none], Vec), None, []))))],
                                                                    None)));
                                                                 ((), [4:42-47],
                                                                  (Call (

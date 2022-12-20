@@ -345,13 +345,17 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
                 set_expr_to_typed_value(emitter, x)
             }
             Expr_::Tuple(x) => tuple_expr_to_typed_value(emitter, x),
-            Expr_::ValCollection(x) if x.0 == ast::VcKind::Vec || x.0 == ast::VcKind::Vector => {
+            Expr_::ValCollection(x)
+                if x.0.1 == ast::VcKind::Vec || x.0.1 == ast::VcKind::Vector =>
+            {
                 valcollection_vec_expr_to_typed_value(emitter, x)
             }
-            Expr_::ValCollection(x) if x.0 == ast::VcKind::Keyset => {
+            Expr_::ValCollection(x) if x.0.1 == ast::VcKind::Keyset => {
                 valcollection_keyset_expr_to_typed_value(emitter, x)
             }
-            Expr_::ValCollection(x) if x.0 == ast::VcKind::Set || x.0 == ast::VcKind::ImmSet => {
+            Expr_::ValCollection(x)
+                if x.0.1 == ast::VcKind::Set || x.0.1 == ast::VcKind::ImmSet =>
+            {
                 valcollection_set_expr_to_typed_value(emitter, x)
             }
             Expr_::KeyValCollection(x) => keyvalcollection_expr_to_typed_value(emitter, x),
@@ -370,7 +374,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
 
 fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
-    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+    x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
     let keys = emitter.alloc.alloc_slice_fill_iter(
         x.2.iter()
@@ -395,7 +399,7 @@ fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
 fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     x: &(
-        ast::KvcKind,
+        (Pos, ast::KvcKind),
         Option<(ast::Targ, ast::Targ)>,
         Vec<ast::Field>,
     ),
@@ -412,7 +416,7 @@ fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
 
 fn valcollection_set_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
-    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+    x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
     let values = emitter
         .alloc
@@ -426,7 +430,7 @@ fn valcollection_set_expr_to_typed_value<'arena, 'decl>(
 
 fn valcollection_vec_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
-    x: &(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
+    x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
     let v: Vec<_> =
         x.2.iter()

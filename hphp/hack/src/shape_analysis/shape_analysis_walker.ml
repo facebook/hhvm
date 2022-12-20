@@ -268,7 +268,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let env = List.fold ~init:env ~f:add_value values in
     (env, collection_entity)
   | A.Darray (_, key_value_pairs)
-  | A.KeyValCollection (A.Dict, _, key_value_pairs) ->
+  | A.KeyValCollection ((_, A.Dict), _, key_value_pairs) ->
     let entity_ = Literal pos in
     let entity = Some entity_ in
     let constraint_ = decorate ~origin:__LINE__ @@ Marks (Allocation, pos) in

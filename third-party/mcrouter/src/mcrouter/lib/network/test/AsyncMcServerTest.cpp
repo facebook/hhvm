@@ -128,9 +128,7 @@ TEST(AsyncMcServer, sslCertCommonName) {
 
 TEST(AsyncMcServer, sslVerify) {
   McSSLUtil::setApplicationSSLVerifier(
-      [](folly::AsyncSSLSocket*, bool, X509_STORE_CTX*) noexcept {
-        return false;
-      });
+      [](folly::AsyncSSLSocket*, bool, X509_STORE_CTX*) { return false; });
   TestServer::Config config;
   config.outOfOrder = false;
   auto server = TestServer::create(std::move(config));
@@ -240,9 +238,7 @@ TEST(AsyncMcServer, tcpZeroCopyEnabled) {
 
 TEST(AsyncMcServer, tcpZeroCopySSLEnabled) {
   McSSLUtil::setApplicationSSLVerifier(
-      [](folly::AsyncSSLSocket*, bool, X509_STORE_CTX*) noexcept {
-        return false;
-      });
+      [](folly::AsyncSSLSocket*, bool, X509_STORE_CTX*) { return false; });
   TestServer::Config config;
   config.tcpZeroCopyThresholdBytes = 12000;
   config.outOfOrder = false;

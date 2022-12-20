@@ -298,7 +298,7 @@ TEST(AsyncFizzBaseKTLSTest, TestFizzClientKTLSServer) {
   };
 
   ServerAcceptor acceptor(
-      &evb, handleClient, [](auto&&) noexcept { ASSERT_FALSE(true); });
+      &evb, handleClient, [](auto&&) { ASSERT_FALSE(true); });
   stopServer = [&] { acceptor.stopAccepting(); };
 
   VLOG(1) << "Server listening on " << acceptor.getLocalAddress().describe();
@@ -362,7 +362,7 @@ TEST(AsyncFizzBaseKTLSTest, TestKTLSClientFizzServer) {
   };
 
   ServerAcceptor acceptor(
-      &evb, handleClient, [](auto&&) noexcept { ASSERT_FALSE(true); });
+      &evb, handleClient, [](auto&&) { ASSERT_FALSE(true); });
   stopServer = [&] { acceptor.stopAccepting(); };
 
   auto clientCtx = makeTestClientContext();
@@ -418,9 +418,7 @@ TEST(AsyncFizzBaseKTLSTest, TestKTLSClientFizzServer) {
   };
 
   ServerAcceptor acceptor2(
-      &evb, handshakeAndAssertResumption, [](auto&&) noexcept {
-        ASSERT_FALSE(true);
-      });
+      &evb, handshakeAndAssertResumption, [](auto&&) { ASSERT_FALSE(true); });
   stopServer = [&] { acceptor2.stopAccepting(); };
 
   {

@@ -1,10 +1,10 @@
 [package]
 name = "deelevate_binding"
-version = "0.2.0"
+version = "0.1.0"
 edition = "2021"
 
 [lib]
 crate-type = ["staticlib", "lib"]
 
 [dependencies]
-deelevate = "0.2"
+deelevate = "0.1"

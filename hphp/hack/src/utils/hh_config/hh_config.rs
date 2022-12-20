@@ -151,6 +151,9 @@ impl HhConfig {
                 "tco_global_access_check_on_read" => {
                     go.tco_global_access_check_on_read = parse_json(&value);
                 }
+                "log_levels" => {
+                    go.log_levels = parse_json(&value);
+                }
                 _ => c.unknown.push((key, value)),
             }
         }
@@ -185,4 +188,18 @@ fn parse_iset(value: &str) -> BTreeSet<isize> {
         .split_terminator(',')
         .map(|s| s.trim().parse().unwrap())
         .collect()
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_log_levels() {
+        let hhconf = HhConfig::from_slice(br#"log_levels={ "pessimise": 1 }"#);
+        assert_eq!(
+            hhconf.opts.log_levels.get("pessimise").copied(),
+            Some(1isize)
+        );
+    }
 }

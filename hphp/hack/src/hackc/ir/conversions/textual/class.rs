@@ -26,7 +26,7 @@ use crate::func::MethodInfo;
 use crate::lower;
 use crate::mangle::Mangle;
 use crate::mangle::MangleClass as _;
-use crate::mangle::MangleWithClass as _;
+use crate::mangle::MangleWithClass;
 use crate::state::UnitState;
 use crate::textual::TextualFile;
 use crate::typed_value;
@@ -65,6 +65,7 @@ impl IsStatic {
 
 struct ClassState<'a, 'b, 'c> {
     class: ir::Class<'c>,
+    needs_factory: bool,
     txf: &'a mut TextualFile<'b>,
     unit_state: &'a mut UnitState,
 }
@@ -75,8 +76,11 @@ impl<'a, 'b, 'c> ClassState<'a, 'b, 'c> {
         unit_state: &'a mut UnitState,
         class: ir::Class<'c>,
     ) -> Self {
+        let needs_factory =
+            !class.flags.is_interface() && !class.flags.is_trait() && !class.flags.is_enum();
         ClassState {
             class,
+            needs_factory,
             txf,
             unit_state,
         }
@@ -90,13 +94,11 @@ impl ClassState<'_, '_, '_> {
 
         // Class constants are not inherited so we just turn them into globals.
         for constant in &self.class.constants {
-            let name = constant.name.mangle_with_class(
-                self.class.name,
-                IsStatic::Static,
-                &self.unit_state.strings,
-            );
+            let name = constant
+                .name
+                .mangle_with_class_state(self, IsStatic::Static);
             let ty = if let Some(et) = self.class.enum_type.as_ref() {
-                convert_enum_ty(et, &self.unit_state.strings)
+                convert_enum_ty(et, self.strings())
             } else {
                 textual::Ty::mixed()
             };
@@ -110,7 +112,15 @@ impl ClassState<'_, '_, '_> {
             self.write_method(method)?;
         }
 
+        if self.needs_factory {
+            self.write_factory(std::iter::empty())?;
+        }
+
         Ok(())
+    }
+
+    fn strings(&self) -> &StringInterner {
+        &self.unit_state.strings
     }
 
     /// Write the type for a (class, is_static) with the properties of the class.
@@ -152,7 +162,7 @@ impl ClassState<'_, '_, '_> {
 
         let extends = extends
             .into_iter()
-            .map(|id| id.mangle_class(is_static, &self.unit_state.strings))
+            .map(|id| id.mangle_class(is_static, self.strings()))
             .collect_vec();
 
         let fields = fields.iter().map(|(name, ty, visibility)| textual::Field {
@@ -161,10 +171,7 @@ impl ClassState<'_, '_, '_> {
             visibility: *visibility,
         });
 
-        let cname = self
-            .class
-            .name
-            .mangle_class(is_static, &self.unit_state.strings);
+        let cname = self.class.name.mangle_class(is_static, self.strings());
         self.txf.define_type(
             &cname,
             &self.class.src_loc,
@@ -278,6 +285,43 @@ impl ClassState<'_, '_, '_> {
         )
     }
 
+    /// Build the factory for a class.
+    fn write_factory<'s>(
+        &mut self,
+        params: impl Iterator<Item = (&'s str, textual::Ty)>,
+    ) -> Result {
+        let strings = &self.unit_state.strings;
+        let name = ir::MethodId::from_str("__factory", strings).mangle_with_class(
+            self.class.name,
+            IsStatic::Static,
+            strings,
+        );
+        let static_ty = static_ty(self.class.name, strings);
+        let ty = non_static_ty(self.class.name, strings);
+        let cons_id = ir::MethodId::from_str("__construct", strings);
+
+        let params = std::iter::once(("$this", static_ty))
+            .chain(params)
+            .collect_vec();
+        let params = params.iter().map(|(s, ty)| (*s, ty)).collect_vec();
+
+        self.txf
+            .define_function(&name, &self.class.src_loc, &params, &ty, &[], |fb| {
+                let mut operands = Vec::new();
+                for (name, ty) in &params[1..] {
+                    let id = strings.intern_str(*name);
+                    let lid = textual::Var::Local(ir::LocalId::Named(id));
+                    operands.push(fb.load(ty, textual::Expr::deref(lid))?);
+                }
+
+                let cons = cons_id.mangle_with_class(self.class.name, IsStatic::NonStatic, strings);
+                let obj = fb.write_expr_stmt(textual::Expr::Alloc(ty.deref()))?;
+                fb.call_static(&cons, obj.into(), operands)?;
+                fb.ret(obj)?;
+                Ok(())
+            })
+    }
+
     fn write_method(&mut self, method: ir::Method<'_>) -> Result {
         trace!(
             "Convert Method {}::{}",
@@ -291,19 +335,45 @@ impl ClassState<'_, '_, '_> {
         };
 
         let this_ty = class_ty(self.class.name, is_static, &self.unit_state.strings);
+        let func = {
+            let method_info = Arc::new(MethodInfo {
+                class: &self.class,
+                is_static,
+                strings: Arc::clone(&self.unit_state.strings),
+            });
+            let func = lower::lower_func(
+                method.func,
+                Some(method_info),
+                Arc::clone(&self.unit_state.strings),
+            );
+            ir::verify::verify_func(&func, &Default::default(), &self.unit_state.strings)?;
+            func
+        };
+
+        if self.needs_factory
+            && self
+                .unit_state
+                .strings
+                .eq_str(method.name.id, "__construct")
+        {
+            self.needs_factory = false;
+
+            let (param_names, param_tys, _) =
+                func::compute_func_params(&func.params, self.unit_state, this_ty.clone())?;
+            self.write_factory(
+                param_names
+                    .iter()
+                    .map(|s| s.as_str())
+                    .zip(param_tys.iter().cloned())
+                    .skip(1),
+            )?;
+        }
+
         let method_info = Arc::new(MethodInfo {
             class: &self.class,
             is_static,
             strings: Arc::clone(&self.unit_state.strings),
         });
-
-        let func = lower::lower_func(
-            method.func,
-            Some(Arc::clone(&method_info)),
-            Arc::clone(&self.unit_state.strings),
-        );
-        ir::verify::verify_func(&func, &Default::default(), &self.unit_state.strings)?;
-
         func::write_func(
             self.txf,
             self.unit_state,
@@ -314,6 +384,24 @@ impl ClassState<'_, '_, '_> {
         )?;
 
         Ok(())
+    }
+}
+
+trait MangleWithClassState {
+    fn mangle_with_class_state(
+        &self,
+        state: &ClassState<'_, '_, '_>,
+        is_static: IsStatic,
+    ) -> String;
+}
+
+impl<T: MangleWithClass> MangleWithClassState for T {
+    fn mangle_with_class_state(
+        &self,
+        state: &ClassState<'_, '_, '_>,
+        is_static: IsStatic,
+    ) -> String {
+        self.mangle_with_class(state.class.name, is_static, &state.unit_state.strings)
     }
 }
 

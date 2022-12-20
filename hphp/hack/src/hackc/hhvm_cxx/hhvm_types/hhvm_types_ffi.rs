@@ -283,6 +283,9 @@ impl Attr {
         self.repr &= !attr.repr;
     }
 
+    pub fn is_enum(&self) -> bool {
+        (*self & Self::AttrEnum) != Self::AttrNone
+    }
     pub fn is_internal(&self) -> bool {
         (*self & Self::AttrInternal) != Self::AttrNone
     }

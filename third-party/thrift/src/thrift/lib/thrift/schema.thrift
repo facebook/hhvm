@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/api.thrift"
-include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/hack.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/any.thrift"
@@ -146,7 +144,6 @@ struct DefinitionAttrs {
    *  - Protocols deprecated in v1+, e.g. JSON and SimpleJson.
    */
   // TODO(afuller): Support aliases to help with renaming.
-  @api.Unique
   1: string name;
 
   /**
@@ -167,7 +164,6 @@ struct DefinitionAttrs {
    * URI can no longer be deserialized.
    */
   // TODO(afuller): Support aliases to help with renaming.
-  @api.Unique
   2: standard.Uri uri;
 
   /**
@@ -209,7 +205,6 @@ struct EnumValue {
    */
   // TODO(afuller): Consider adding support for specifying aliases by specifying
   // multiple definitions for the same value in the IDL.
-  @api.Unique
   2: i32 value;
 }
 
@@ -254,7 +249,6 @@ struct Field {
    *
    * Changing the field ID is always backward *incompatible*.
    */
-  @api.Unique
   1: id.FieldId id;
 
   /** The qualifier for the field. */
@@ -606,7 +600,6 @@ struct Program {
    */
   // TODO(afuller): Allow 'package' as an ident in Thrift and remove trailing
   // '_' (or change the name slightly in some other way).
-  @api.Unique
   2: id.PackageId package_ (cpp.name = "package");
 
   /**

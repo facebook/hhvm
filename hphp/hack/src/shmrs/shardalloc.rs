@@ -13,7 +13,7 @@ use crate::sync::RwLockRef;
 
 /// A pointer to a chunk.
 #[repr(transparent)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, PartialOrd)]
 struct ChunkPtr(*mut u8);
 
 impl ChunkPtr {
@@ -199,6 +199,39 @@ impl ShardAllocControlData {
         self.set_current_chunk(current_chunk, chunk_size);
         true
     }
+
+    /// Attempt to allocate a slice within the current chunk, and move `current_next`
+    /// by the newly allocated slice's size and alignment offset.
+    ///
+    /// If the new slice is too large to fit within the current chunk, we return None,
+    /// signaling to the call site that an additional chunk needs to be allocated
+    /// to accommodate this slice.
+    ///
+    /// Otherwise, return Some(ptr) with `ptr` pointing to the start of the
+    /// successfully allocated slice.
+    fn alloc_slice_within_chunk(&mut self, l: Layout) -> Option<NonNull<[u8]>> {
+        let size = l.size();
+        let header = AllocHeader::new(size);
+        let header_size = std::mem::size_of::<AllocHeader>();
+
+        let align_offset = self.current_next.align_offset(l.align());
+        let mut pointer = unsafe { self.current_next.add(align_offset) };
+        let new_current = unsafe { pointer.add(header_size).add(size) };
+
+        if new_current > self.current_end {
+            return None;
+        }
+
+        debug_assert!(!new_current.is_null());
+        self.current_next = new_current;
+        // Write header into memory
+        unsafe { std::ptr::write(pointer as *mut AllocHeader, header) };
+        // Move pointer by header_size
+        pointer = unsafe { pointer.add(header_size) };
+
+        let slice = unsafe { std::slice::from_raw_parts(pointer, size) };
+        Some(NonNull::from(slice))
+    }
 }
 
 /// The minimum chunk size an allocator can be initialized with.
@@ -257,7 +290,10 @@ impl<'shm> ShardAlloc<'shm> {
         self.file_alloc.allocate(l)
     }
 
-    fn extend(&self, control_data: &mut ShardAllocControlData) -> Result<(), AllocError> {
+    /// Mark the current chunk as filled. Then pop one of the chunks that have
+    /// previously been marked as free to use as the new current chunk for writing.
+    /// If there are no free chunks, ask `FileAlloc` to allocate a new chunk.
+    fn alloc_chunk(&self, control_data: &mut ShardAllocControlData) -> Result<(), AllocError> {
         control_data.mark_current_chunk_as_filled();
         if !control_data.pop_free_chunk(self.chunk_size) {
             let l =
@@ -317,10 +353,6 @@ impl<'shm> ShardAlloc<'shm> {
 
 unsafe impl<'shm> Allocator for ShardAlloc<'shm> {
     fn allocate(&self, l: Layout) -> Result<NonNull<[u8]>, AllocError> {
-        let size = l.size();
-        let header = AllocHeader::new(size);
-        let header_size = std::mem::size_of::<AllocHeader>();
-
         // Large allocations go directly to the underlying file allocator.
         // We'll consider an allocation as large if it is larger than 5% of
         // the chunk size. That means, unusable memory due to internal
@@ -328,40 +360,28 @@ unsafe impl<'shm> Allocator for ShardAlloc<'shm> {
         //
         // We don't special case large allocations when the allocator size is
         // fixed.
-        if !self.is_fixed_size && size > self.chunk_size / 20 {
+        if !self.is_fixed_size && l.size() > self.chunk_size / 20 {
             return self.alloc_large(l);
         }
 
         let mut control_data = self.control_data.write(None).unwrap();
 
-        let align_offset = control_data.current_next.align_offset(l.align());
-        let mut pointer = unsafe { control_data.current_next.add(align_offset) };
-        let mut new_current = unsafe { pointer.add(header_size).add(size) };
+        match control_data.alloc_slice_within_chunk(l) {
+            Some(ptr) => Ok(ptr),
+            None => {
+                // Refuse to allocate another chunk if this allocator is marked to
+                // have a fixed size
+                if self.is_fixed_size && !control_data.current_next.is_null() {
+                    return Err(AllocError);
+                }
+                // Allocate another chunk
+                self.alloc_chunk(&mut control_data)?;
+                // Try allocate the slice within the new chunk
+                let alloc_result = control_data.alloc_slice_within_chunk(l);
 
-        // We must make sure we don't produce null pointers when `size == 0`
-        // and `new_current == NULL`.
-        if new_current > control_data.current_end || new_current.is_null() {
-            // Refuse to allocate another chunk if this allocator is marked to
-            // have a fixed size
-            if self.is_fixed_size && !control_data.current_next.is_null() {
-                return Err(AllocError);
+                alloc_result.ok_or(AllocError)
             }
-
-            self.extend(&mut control_data)?;
-            let align_offset = control_data.current_next.align_offset(l.align());
-            pointer = unsafe { control_data.current_next.add(align_offset) };
-            new_current = unsafe { pointer.add(header_size).add(size) };
         }
-        control_data.current_next = new_current;
-
-        // Write header into memory
-        unsafe { std::ptr::write(pointer as *mut AllocHeader, header) };
-
-        // Move pointer by header_size
-        pointer = unsafe { pointer.add(header_size) };
-
-        let slice = unsafe { std::slice::from_raw_parts(pointer, size) };
-        Ok(NonNull::from(slice))
     }
 
     unsafe fn deallocate(&self, _ptr: NonNull<u8>, _layout: Layout) {
@@ -388,7 +408,7 @@ mod tests {
     }
 
     #[test]
-    fn test_alloc_zero() {
+    fn test_alloc_size_zero() {
         with_file_alloc(|file_alloc| {
             let core_data = RwLock::new(ShardAllocControlData::new());
             let core_data_ref = unsafe { core_data.initialize().unwrap() };
@@ -396,6 +416,48 @@ mod tests {
 
             let layout = std::alloc::Layout::from_size_align(0, 1).unwrap();
             let _ = alloc.allocate(layout).unwrap();
+        })
+    }
+
+    #[test]
+    fn test_alloc_many() {
+        with_file_alloc(|file_alloc| {
+            let core_data = RwLock::new(ShardAllocControlData::new());
+            let core_data_ref = unsafe { core_data.initialize().unwrap() };
+            let alloc = unsafe { ShardAlloc::new(core_data_ref, file_alloc, CHUNK_SIZE, false) };
+
+            let header_size = std::mem::size_of::<AllocHeader>();
+            let slice_size = CHUNK_SIZE / 20 - header_size;
+            let layout = std::alloc::Layout::from_size_align(slice_size, 1).unwrap();
+
+            // Allocate 20 slices.
+            // Each slice combined with its header occupies 1/20 of a chunk.
+            // But because of the 8-byte padding at the start of the chunk,
+            // the last slice we allocate will not fit within the current chunk
+            // and cause a new chunk to be created.
+            for _ in 0..20 {
+                let _ = alloc.allocate(layout).unwrap();
+            }
+
+            let control_data = alloc.control_data.write(None).unwrap();
+
+            // Check chunk bounds.
+            assert_eq!(
+                unsafe { control_data.current_start.0.add(CHUNK_SIZE) },
+                control_data.current_end
+            );
+            // Check the new chunk contains exactly one slice.
+            assert_eq!(
+                unsafe {
+                    control_data
+                        .current_start
+                        .0
+                        .add(std::mem::size_of::<*mut u8>())
+                        .add(header_size)
+                        .add(slice_size)
+                },
+                control_data.current_next
+            );
         })
     }
 

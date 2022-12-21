@@ -8358,9 +8358,10 @@ and class_expr
 
 and call_construct
     p env class_ params el unpacked_element (_, cid_pos, cid_) cid_ty =
+  let r = Reason.Rwitness p in
   let cid_ty =
     if Nast.equal_class_id_ cid_ CIparent then
-      MakeType.this (Reason.Rwitness p)
+      MakeType.this r
     else
       cid_ty
   in
@@ -8392,7 +8393,29 @@ and call_construct
       argument_list_exprs (expr ~allow_awaitable:false) env el
     in
     let should_forget_fakes = true in
-    (env, tel, None, TUtils.terr env Reason.Rnone, should_forget_fakes)
+    (* Construct a default __construct type *)
+    let ft =
+      {
+        ft_tparams = [];
+        ft_where_constraints = [];
+        ft_params = [];
+        ft_implicit_params =
+          { capability = CapDefaults (Pos_or_decl.of_raw_pos p) };
+        ft_flags =
+          make_ft_flags
+            Ast_defs.FSync
+            ~return_disposable:false
+            ~returns_readonly:false
+            ~readonly_this:false
+            ~support_dynamic_type:false
+            ~is_memoized:false
+            ~variadic:false;
+        ft_ret = MakeType.unenforced (MakeType.void r);
+        ft_ifc_decl = default_ifc_fun_decl;
+      }
+    in
+    let ty = mk (r, Tfun ft) in
+    (env, tel, None, ty, should_forget_fakes)
   | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; ce_flags; _ }
     ->
     let def_pos = get_pos m in

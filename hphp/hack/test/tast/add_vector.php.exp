@@ -162,14 +162,14 @@
                   (Call (
                      (((function(X $x): void)), [34:3-10],
                       (Obj_get (((MyPhonyVector<X>), [34:3-5], (Lvar ([34:3-5], $x))), (((function(X $x): void)), [34:7-10], (Id ([34:7-10], "add"))), OG_nullthrows, Is_method))),
-                     [], [(Pnormal, ((B), [34:11-18], (New (((B), [34:15-16], (CI ([34:15-16], "\\B"))), [], [], None, (_)))))], None)))));
+                     [], [(Pnormal, ((B), [34:11-18], (New (((B), [34:15-16], (CI ([34:15-16], "\\B"))), [], [], None, ((function(): void))))))], None)))));
              ([35:3-20],
               (Expr
                  ((void), [35:3-19],
                   (Call (
                      (((function(X $x): void)), [35:3-10],
                       (Obj_get (((MyPhonyVector<X>), [35:3-5], (Lvar ([35:3-5], $x))), (((function(X $x): void)), [35:7-10], (Id ([35:7-10], "add"))), OG_nullthrows, Is_method))),
-                     [], [(Pnormal, ((A), [35:11-18], (New (((A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, (_)))))], None)))));
+                     [], [(Pnormal, ((A), [35:11-18], (New (((A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, ((function(): void))))))], None)))));
              ([36:3-12],
               (Expr
                  ((void), [36:3-11],

@@ -76,7 +76,7 @@
               (Expr
                  ((TestCollection), [15:3-30],
                   (Binop ((Eq None), ((TestCollection), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     ((TestCollection), [15:10-30], (New (((TestCollection), [15:14-28], (CI ([15:14-28], "\\TestCollection"))), [], [], None, (_)))))))));
+                     ((TestCollection), [15:10-30], (New (((TestCollection), [15:14-28], (CI ([15:14-28], "\\TestCollection"))), [], [], None, ((function(): void))))))))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -127,7 +127,7 @@
               (Expr
                  ((TestCollection), [27:3-30],
                   (Binop ((Eq None), ((TestCollection), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     ((TestCollection), [27:10-30], (New (((TestCollection), [27:14-28], (CI ([27:14-28], "\\TestCollection"))), [], [], None, (_)))))))));
+                     ((TestCollection), [27:10-30], (New (((TestCollection), [27:14-28], (CI ([27:14-28], "\\TestCollection"))), [], [], None, ((function(): void))))))))));
              ([30:3-74],
               (Expr
                  ((void), [30:3-73],

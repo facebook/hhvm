@@ -41,7 +41,7 @@ Errors:
          f_readonly_ret = None; f_ret = ((void), (Some ([10:15-19], (Hprim Tvoid)))); 
          f_name = ([10:10-11], "\\g"); f_tparams = []; f_where_constraints = []; 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([11:3-14], (Expr ((Tcat), [11:3-13], (New (((Tcat), [11:7-11], (CI ([11:7-11], "\\Tcat"))), [], [], None, (_))))))] }; 
+         f_body = { fb_ast = [([11:3-14], (Expr ((Tcat), [11:3-13], (New (((Tcat), [11:7-11], (CI ([11:7-11], "\\Tcat"))), [], [], None, ((function(): void)))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None })

@@ -76,7 +76,7 @@
               (Expr
                  ((TestVector), [15:3-26],
                   (Binop ((Eq None), ((TestVector), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     ((TestVector), [15:10-26], (New (((TestVector), [15:14-24], (CI ([15:14-24], "\\TestVector"))), [], [], None, (_)))))))));
+                     ((TestVector), [15:10-26], (New (((TestVector), [15:14-24], (CI ([15:14-24], "\\TestVector"))), [], [], None, ((function(): void))))))))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -127,7 +127,7 @@
               (Expr
                  ((TestVector), [27:3-26],
                   (Binop ((Eq None), ((TestVector), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     ((TestVector), [27:10-26], (New (((TestVector), [27:14-24], (CI ([27:14-24], "\\TestVector"))), [], [], None, (_)))))))));
+                     ((TestVector), [27:10-26], (New (((TestVector), [27:14-24], (CI ([27:14-24], "\\TestVector"))), [], [], None, ((function(): void))))))))));
              ([30:3-65],
               (Expr
                  ((void), [30:3-64],

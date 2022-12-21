@@ -23,7 +23,7 @@
          f_readonly_ret = None; f_ret = ((?A), (Some ([5:23-25], (Hoption ([5:24-25], (Happly (([5:24-25], "\\A"), []))))))); 
          f_name = ([5:10-19], "\\get_A_opt"); f_tparams = []; f_where_constraints = []; 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([6:3-18], (Return (Some ((A), [6:10-17], (New (((A), [6:14-15], (CI ([6:14-15], "\\A"))), [], [], None, (_)))))))] }; 
+         f_body = { fb_ast = [([6:3-18], (Return (Some ((A), [6:10-17], (New (((A), [6:14-15], (CI ([6:14-15], "\\A"))), [], [], None, ((function(): void))))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None });
@@ -40,7 +40,9 @@
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([10:3-16], (Expr ((A), [10:3-15], (Binop ((Eq None), ((A), [10:3-5], (Lvar ([10:3-5], $x))), ((A), [10:8-15], (New (((A), [10:12-13], (CI ([10:12-13], "\\A"))), [], [], None, (_)))))))));
+           [([10:3-16],
+             (Expr
+                ((A), [10:3-15], (Binop ((Eq None), ((A), [10:3-5], (Lvar ([10:3-5], $x))), ((A), [10:8-15], (New (((A), [10:12-13], (CI ([10:12-13], "\\A"))), [], [], None, ((function(): void))))))))));
              ([11:3-13:4],
               (While (((?A), [11:10-12], (Lvar ([11:10-12], $x))),
                  [([11:3-13:4], (AssertEnv (Join, {$#capability $#local_capability $x}))); (
@@ -70,7 +72,9 @@
          f_body =
          { fb_ast =
            [([17:3-18:4],
-             (For ([((A), [17:8-20], (Binop ((Eq None), ((A), [17:8-10], (Lvar ([17:8-10], $x))), ((A), [17:13-20], (New (((A), [17:17-18], (CI ([17:17-18], "\\A"))), [], [], None, (_)))))))],
+             (For (
+                [((A), [17:8-20],
+                  (Binop ((Eq None), ((A), [17:8-10], (Lvar ([17:8-10], $x))), ((A), [17:13-20], (New (((A), [17:17-18], (CI ([17:17-18], "\\A"))), [], [], None, ((function(): void))))))))],
                 (Some ((?A), [17:22-24], (Lvar ([17:22-24], $x)))),
                 [((?A), [17:26-42],
                   (Binop ((Eq None), ((?A), [17:26-28], (Lvar ([17:26-28], $x))), ((?A), [17:31-42], (Call ((((function(): ?A)), [17:31-40], (Id ([17:31-40], "\\get_A_opt"))), [], [], None))))))],

@@ -52,4 +52,29 @@ char *string_sha1(const char *arg, size_t arg_len, bool raw, int &out_len) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+struct SHA1Hasher::Impl {
+  SHA_CTX ctx;
+};
+
+SHA1Hasher::SHA1Hasher()
+  : m_impl{std::make_unique<Impl>()}
+{
+  SHA1_Init(&m_impl->ctx);
+}
+
+SHA1Hasher::~SHA1Hasher() {}
+
+void SHA1Hasher::update(const char* p, size_t s) {
+  SHA1_Update(&m_impl->ctx, p, s);
+}
+
+SHA1 SHA1Hasher::finish() {
+  static_assert(SHA_DIGEST_LENGTH == 20);
+  std::array<uint8_t, 20> digest;
+  SHA1_Final(digest.data(), &m_impl->ctx);
+  return SHA1{digest};
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

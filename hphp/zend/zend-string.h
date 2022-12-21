@@ -24,6 +24,8 @@
 
 #include <folly/Range.h>
 
+#include "hphp/util/sha1.h"
+
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
@@ -143,6 +145,19 @@ std::string string_sha1(folly::StringPiece);
  */
 char *string_bin2hex(const char *input, int &len);
 char *string_bin2hex(const char* input, int len, char* output);
+
+//////////////////////////////////////////////////////////////////////
+
+// Incremental hashing of raw binary data.
+struct SHA1Hasher {
+  SHA1Hasher();
+  ~SHA1Hasher();
+  void update(const char*, size_t);
+  SHA1 finish();
+private:
+  struct Impl;
+  std::unique_ptr<Impl> m_impl;
+};
 
 //////////////////////////////////////////////////////////////////////
 }

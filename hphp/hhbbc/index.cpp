@@ -1268,6 +1268,7 @@ struct ClassInfo2 {
   bool hasNonRegularSubclass{false};
 
   template <typename SerDe> void serde(SerDe& sd) {
+    ScopedStringDataIndexer _;
     sd(name)
       (parent)
       (declInterfaces)
@@ -9600,6 +9601,7 @@ struct AggregateJob {
     std::vector<std::unique_ptr<php::Unit>> units;
 
     template <typename SerDe> void serde(SerDe& sd) {
+      ScopedStringDataIndexer _;
       sd(classes)
         (classInfos)
         (funcs)

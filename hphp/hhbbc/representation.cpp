@@ -75,6 +75,8 @@ template <typename SerDe> void Local::serde(SerDe& sd) {
 }
 
 template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
+  ScopedStringDataIndexer _;
+
   if constexpr (SerDe::deserializing) {
     cls = parentClass;
   } else {
@@ -169,6 +171,7 @@ template <typename SerDe> void Const::serde(SerDe& sd) {
 }
 
 template <typename SerDe> void Class::serde(SerDe& sd) {
+  ScopedStringDataIndexer _;
   sd(name)
     (srcInfo)
     (attrs)
@@ -224,6 +227,7 @@ template <typename SerDe> void FatalInfo::serde(SerDe& sd) {
 }
 
 template <typename SerDe> void Unit::serde(SerDe& sd) {
+  ScopedStringDataIndexer _;
   sd(filename)
     .nullable(fatalInfo)
     (funcs)

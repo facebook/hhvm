@@ -624,11 +624,45 @@ struct BlobEncoderHelper<const StringData*> {
   static void skip(BlobDecoder&);
   static size_t peekSize(BlobDecoder&);
 
+  // Encode each string once. If a string occurs more than once, use a
+  // small integer to refer to it. Faster and smaller if you have a
+  // lot of duplicate strings.
+  struct Indexer {
+    hphp_fast_map<const StringData*, uint32_t> m_indices;
+    std::vector<const StringData*> m_strs;
+  };
+
   // If set, will utilize the UnitEmitter's string table.
   static __thread UnitEmitter* tl_unitEmitter;
   // Likewise, but only for lazy loading (so only deserializing
   // supported).
   static __thread Unit* tl_unit;
+  // If set, use that Indexer to encode strings.
+  static __thread Indexer* tl_indexer;
+};
+
+// Use an Indexer for string serialization (if one isn't already being
+// used) while this is in scope.
+struct ScopedStringDataIndexer {
+  ScopedStringDataIndexer() {
+    if (!BlobEncoderHelper<const StringData*>::tl_indexer) {
+      BlobEncoderHelper<const StringData*>::tl_indexer = &m_indexer;
+      m_used = true;
+    }
+  }
+  ~ScopedStringDataIndexer() {
+    if (m_used) {
+      assertx(BlobEncoderHelper<const StringData*>::tl_indexer == &m_indexer);
+      BlobEncoderHelper<const StringData*>::tl_indexer = nullptr;
+    }
+  }
+  ScopedStringDataIndexer(const ScopedStringDataIndexer&) = delete;
+  ScopedStringDataIndexer(ScopedStringDataIndexer&&) = delete;
+  ScopedStringDataIndexer& operator=(const ScopedStringDataIndexer&) = delete;
+  ScopedStringDataIndexer& operator=(ScopedStringDataIndexer&&) = delete;
+private:
+  BlobEncoderHelper<const StringData*>::Indexer m_indexer;
+  bool m_used{false};
 };
 
 //////////////////////////////////////////////////////////////////////

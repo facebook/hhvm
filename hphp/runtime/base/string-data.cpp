@@ -854,6 +854,8 @@ StringData::substr(int start, int length /* = StringData::MaxSize */) {
 
 __thread UnitEmitter* BlobEncoderHelper<const StringData*>::tl_unitEmitter{nullptr};
 __thread Unit* BlobEncoderHelper<const StringData*>::tl_unit{nullptr};
+__thread BlobEncoderHelper<const StringData*>::Indexer*
+  BlobEncoderHelper<const StringData*>::tl_indexer{nullptr};
 
 void BlobEncoderHelper<const StringData*>::serde(BlobEncoder& encoder,
                                                  const StringData* sd) {
@@ -863,6 +865,20 @@ void BlobEncoderHelper<const StringData*>::serde(BlobEncoder& encoder,
     encoder(id);
     return;
   }
+  if (auto const indexer = tl_indexer) {
+    auto const it = tl_indexer->m_indices.find(sd);
+    if (it == end(tl_indexer->m_indices)) {
+      auto const id = tl_indexer->m_indices.size();
+      assertx(id < std::numeric_limits<std::uint32_t>::max());
+      tl_indexer->m_indices.emplace(sd, id);
+      encoder(uint32_t(0));
+      // Fallthrough and encode the string below
+    } else {
+      encoder(uint32_t(it->second+1));
+      return;
+    }
+  }
+
   if (!sd) {
     encoder(uint32_t(0));
     return;
@@ -886,7 +902,8 @@ void BlobEncoderHelper<const StringData*>::serde(BlobDecoder& decoder,
       sd = ue->lookupLitstrCopy(id).detach();
     }
     return;
-  } else if (auto const u = tl_unit) {
+  }
+  if (auto const u = tl_unit) {
     assertx(makeStatic);
     Id id;
     decoder(id);
@@ -894,24 +911,37 @@ void BlobEncoderHelper<const StringData*>::serde(BlobDecoder& decoder,
     return;
   }
 
-  uint32_t size;
-  decoder(size);
-  if (size == 0) {
-    sd = nullptr;
-    return;
-  }
-  --size;
-  if (size == 0) {
-    sd = staticEmptyString();
+  auto const read = [&] () -> const StringData* {
+    uint32_t size;
+    decoder(size);
+    if (size == 0) return nullptr;
+    --size;
+    if (size == 0) return staticEmptyString();
+    assertx(decoder.remaining() >= size);
+    auto const data = decoder.data();
+    auto const s = makeStatic
+      ? makeStaticString((const char*)data, size)
+      : StringData::Make((const char*)data, size, CopyString);
+    decoder.advance(size);
+    return s;
+  };
+
+  if (auto const indexer = tl_indexer) {
+    assertx(makeStatic);
+    uint32_t id;
+    decoder(id);
+    if (!id) {
+      sd = read();
+      indexer->m_strs.emplace_back(sd);
+    } else {
+      --id;
+      assertx(id < indexer->m_strs.size());
+      sd = indexer->m_strs[id];
+    }
     return;
   }
 
-  assertx(decoder.remaining() >= size);
-  auto const data = decoder.data();
-  sd = makeStatic
-    ? makeStaticString((const char*)data, size)
-    : StringData::Make((const char*)data, size, CopyString);
-  decoder.advance(size);
+  sd = read();
 }
 
 folly::StringPiece
@@ -922,13 +952,15 @@ BlobEncoderHelper<const StringData*>::asStringPiece(BlobDecoder& decoder) {
     auto const sd = ue->lookupLitstr(id);
     if (!sd) return { nullptr, size_t{0} };
     return sd->slice();
-  } else if (auto const u = tl_unit) {
+  }
+  if (auto const u = tl_unit) {
     Id id;
     decoder(id);
     auto const sd = u->lookupLitstrId(id);
     if (!sd) return { nullptr, size_t{0} };
     return sd->slice();
   }
+  assertx(!tl_indexer);
 
   uint32_t size;
   decoder(size);
@@ -947,6 +979,7 @@ void BlobEncoderHelper<const StringData*>::skip(BlobDecoder& decoder) {
     decoder(id);
     return;
   }
+  assertx(!tl_indexer);
 
   uint32_t size;
   decoder(size);
@@ -967,6 +1000,7 @@ size_t BlobEncoderHelper<const StringData*>::peekSize(BlobDecoder& decoder) {
     decoder.retreat(size);
     return size;
   }
+  assertx(!tl_indexer);
 
   auto const before = decoder.advanced();
   uint32_t size;

@@ -109,6 +109,7 @@ HPHP::BlobEncoderHelper<HPHP::ArrayData const*>::tl_unit
 HPHP::BlobEncoderHelper<HPHP::ArrayData const*>::tl_defer
 HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unitEmitter
 HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unit
+HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_indexer
 HPHP::extern_worker::g_in_job
 
 # Native Facts is not request-scoped.

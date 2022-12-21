@@ -805,16 +805,22 @@ fn p_targ<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Targ> {
     Ok(ast::Targ((), p_hint(node, env)?))
 }
 
+fn p_unary_hint<'a>(kw: S<'a>, ty: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
+    Ok(ast::Hint_::Happly(
+        pos_name(kw, env)?,
+        could_map(ty, env, p_hint)?,
+    ))
+}
+
+fn p_binary_hint<'a>(kw: S<'a>, key: S<'a>, ty: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
+    let kw = pos_name(kw, env)?;
+    let key = p_hint(key, env)?;
+    let value = p_hint(ty, env)?;
+    Ok(ast::Hint_::Happly(kw, vec![key, value]))
+}
+
 fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
     use ast::Hint_::*;
-    let unary =
-        |kw, ty, env: &mut Env<'a>| Ok(Happly(pos_name(kw, env)?, could_map(ty, env, p_hint)?));
-    let binary = |kw, key, ty, env: &mut Env<'a>| {
-        let kw = pos_name(kw, env)?;
-        let key = p_hint(key, env)?;
-        let value = p_hint(ty, env)?;
-        Ok(Happly(kw, vec![key, value]))
-    };
 
     match &node.children {
         Token(token) if token.kind() == TK::Variable => {
@@ -886,12 +892,12 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             pos_name(&c.keyword, env)?,
             could_map(&c.type_, env, p_hint)?,
         )),
-        VectorTypeSpecifier(c) => unary(&c.keyword, &c.type_, env),
-        ClassnameTypeSpecifier(c) => unary(&c.keyword, &c.type_, env),
-        TupleTypeExplicitSpecifier(c) => unary(&c.keyword, &c.types, env),
-        VarrayTypeSpecifier(c) => unary(&c.keyword, &c.type_, env),
-        DarrayTypeSpecifier(c) => binary(&c.keyword, &c.key, &c.value, env),
-        DictionaryTypeSpecifier(c) => unary(&c.keyword, &c.members, env),
+        VectorTypeSpecifier(c) => p_unary_hint(&c.keyword, &c.type_, env),
+        ClassnameTypeSpecifier(c) => p_unary_hint(&c.keyword, &c.type_, env),
+        TupleTypeExplicitSpecifier(c) => p_unary_hint(&c.keyword, &c.types, env),
+        VarrayTypeSpecifier(c) => p_unary_hint(&c.keyword, &c.type_, env),
+        DarrayTypeSpecifier(c) => p_binary_hint(&c.keyword, &c.key, &c.value, env),
+        DictionaryTypeSpecifier(c) => p_unary_hint(&c.keyword, &c.members, env),
         GenericTypeSpecifier(c) => {
             let name = pos_name(&c.class_type, env)?;
             let args = &c.argument_list;

@@ -5346,7 +5346,7 @@ void t_hack_generator::generate_php_struct_async_struct_creation_method_header(
       }
       break;
     case ThriftAsyncStructCreationMethod::FROM_CONSTRUCTOR_SHAPE:
-      out << "genFromShape(self::TConstructorShape $shape)[zoned]";
+      out << "genFromShape(self::TConstructorShape $shape)[zoned_shallow]";
       break;
     case ThriftAsyncStructCreationMethod::FROM_SHAPE:
       out << "__genFromShape(self::TShape $shape)";

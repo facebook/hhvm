@@ -163,7 +163,7 @@ class Internship implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThrif
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned_shallow]: Awaitable<this> {
     $obj = new static();
     $weeks = Shapes::idx($shape, 'weeks');
     if ($weeks !== null) {

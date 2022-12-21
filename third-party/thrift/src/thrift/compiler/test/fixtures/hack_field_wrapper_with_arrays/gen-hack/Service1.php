@@ -1218,7 +1218,7 @@ class Service1_func2_args implements \IThriftAsyncStruct, \IThriftStructMetadata
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned_shallow]: Awaitable<this> {
     $obj = new static();
     $arg1 = Shapes::idx($shape, 'arg1');
     if ($arg1 !== null) {
@@ -1421,7 +1421,7 @@ class Service1_func2_result extends \ThriftAsyncStructWithResult implements \ITh
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned_shallow]: Awaitable<this> {
     $obj = new static();
     $success = Shapes::idx($shape, 'success');
     if ($success !== null) {

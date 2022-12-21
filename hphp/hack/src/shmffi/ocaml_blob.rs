@@ -159,6 +159,10 @@ impl CMapValue for HeapValue {
     fn points_to_flushable_data(&self) -> bool {
         false
     }
+
+    fn ptr(&self) -> &NonNull<u8> {
+        &self.data
+    }
 }
 
 /// An OCaml serialized value, in all its forms.

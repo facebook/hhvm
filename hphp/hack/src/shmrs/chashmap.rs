@@ -79,6 +79,10 @@ pub trait CMapValue {
     /// of data "flushable". This function tells us whether a value in the hash map
     /// points to flushable data in the evitcable heap, so that they can be removed.
     fn points_to_flushable_data(&self) -> bool;
+
+    /// A hash map value holds a pointer to its corresponding data in the heap.
+    /// This function returns that pointer.
+    fn ptr(&self) -> &NonNull<u8>;
 }
 
 /// A reference to a value.
@@ -321,6 +325,21 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
         self.maps[shard_index].read(LOCK_TIMEOUT).unwrap()
     }
 
+    /// Remove from the index the ones that don't satisfy the predicate
+    /// and compact everything remaining.
+    #[allow(unused)]
+    fn filter_and_compact<'a, P: FnMut(&mut V) -> bool>(
+        shard: &mut Shard<'shm, 'a, K, V, S>,
+        mut f: P,
+    ) {
+        let entries_to_invalidate = shard.map.drain_filter(|_, value| !f(value));
+        entries_to_invalidate.for_each(|(_, value)| {
+            let data = value.ptr();
+            shard.alloc_evictable.mark_as_unreachable(data)
+        });
+        shard.alloc_evictable.compact()
+    }
+
     /// Empty a shard.
     fn empty_shard<'a>(shard: &mut Shard<'shm, 'a, K, V, S>) {
         // Remove all values that might point to evictable data.
@@ -478,6 +497,12 @@ mod integration_tests {
 
         fn points_to_flushable_data(&self) -> bool {
             false
+        }
+
+        fn ptr(&self) -> &NonNull<u8> {
+            // Since none of the existing unit tests below actually write to
+            // memory, we should not invoke this function to attempt accessing it
+            panic!("This method should not be invoked!")
         }
     }
 

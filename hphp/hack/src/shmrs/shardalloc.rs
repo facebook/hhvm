@@ -53,6 +53,36 @@ impl ChunkPtr {
     }
 }
 
+/// 32-bit header storing information about the slice of data succeeding it.
+#[derive(Debug)]
+struct AllocHeader(u32);
+
+const REACHABLE_MASK: u32 = 1 << 31;
+impl AllocHeader {
+    fn new(data_size: usize) -> Self {
+        let mut header = 0;
+
+        // We use the first bit of the header to determine whether the data
+        // held in the next `data_size` bytes is reachable
+        header |= REACHABLE_MASK;
+
+        // Ensure that the size of data can fit within 31 bits
+        assert!(data_size as u32 <= (u32::MAX >> 1));
+
+        header |= data_size as u32;
+        Self(header)
+    }
+
+    fn mark_as_unreachable(&mut self) {
+        self.0 &= !REACHABLE_MASK;
+    }
+
+    #[allow(unused)]
+    fn reachable(&self) -> bool {
+        self.0 & REACHABLE_MASK != 0
+    }
+}
+
 /// Structure that contains the control data for a shard allocator.
 ///
 /// This structure should be allocated in shared memory. Turn it
@@ -251,11 +281,45 @@ impl<'shm> ShardAlloc<'shm> {
         control_data.mark_current_chunk_as_filled();
         control_data.mark_filled_chunks_as_free();
     }
+
+    // TODO(milliechen): implement
+    pub fn compact(&self) {
+        unimplemented!()
+    }
+
+    /// Given a pointer to a slice of data, find the header preceding it
+    /// and unset its "reachable" bit. Once marked as unreachable, it will
+    /// not be retained during the compaction phase.
+    pub fn mark_as_unreachable(&self, ptr: &NonNull<u8>) {
+        let header_ptr = self.get_header(ptr);
+        let mut header = unsafe { header_ptr.read() };
+        header.mark_as_unreachable();
+        unsafe { header_ptr.write(header) }
+    }
+
+    #[allow(unused)]
+    fn is_data_reachable(&self, ptr: &NonNull<u8>) -> bool {
+        let header_ptr = self.get_header(ptr);
+        let header = unsafe { header_ptr.read() };
+        header.reachable()
+    }
+
+    fn get_header(&self, ptr: &NonNull<u8>) -> *mut AllocHeader {
+        let data_ptr = ptr.as_ptr() as *mut u8;
+        let header_size = std::mem::size_of::<AllocHeader>();
+        let header_ptr = unsafe { data_ptr.sub(header_size) as *mut AllocHeader };
+
+        debug_assert!(!header_ptr.is_null());
+
+        header_ptr
+    }
 }
 
 unsafe impl<'shm> Allocator for ShardAlloc<'shm> {
     fn allocate(&self, l: Layout) -> Result<NonNull<[u8]>, AllocError> {
         let size = l.size();
+        let header = AllocHeader::new(size);
+        let header_size = std::mem::size_of::<AllocHeader>();
 
         // Large allocations go directly to the underlying file allocator.
         // We'll consider an allocation as large if it is larger than 5% of
@@ -272,7 +336,8 @@ unsafe impl<'shm> Allocator for ShardAlloc<'shm> {
 
         let align_offset = control_data.current_next.align_offset(l.align());
         let mut pointer = unsafe { control_data.current_next.add(align_offset) };
-        let mut new_current = unsafe { pointer.add(size) };
+        let mut new_current = unsafe { pointer.add(header_size).add(size) };
+
         // We must make sure we don't produce null pointers when `size == 0`
         // and `new_current == NULL`.
         if new_current > control_data.current_end || new_current.is_null() {
@@ -285,9 +350,16 @@ unsafe impl<'shm> Allocator for ShardAlloc<'shm> {
             self.extend(&mut control_data)?;
             let align_offset = control_data.current_next.align_offset(l.align());
             pointer = unsafe { control_data.current_next.add(align_offset) };
-            new_current = unsafe { pointer.add(size) };
+            new_current = unsafe { pointer.add(header_size).add(size) };
         }
         control_data.current_next = new_current;
+
+        // Write header into memory
+        unsafe { std::ptr::write(pointer as *mut AllocHeader, header) };
+
+        // Move pointer by header_size
+        pointer = unsafe { pointer.add(header_size) };
+
         let slice = unsafe { std::slice::from_raw_parts(pointer, size) };
         Ok(NonNull::from(slice))
     }
@@ -303,6 +375,7 @@ mod tests {
     use crate::sync::RwLock;
 
     const CHUNK_SIZE: usize = 200 * 1024;
+    const SLICE_SIZE: usize = 10 * 1024;
     const FILE_ALLOC_SIZE: usize = 10 * 1024 * 1024;
 
     fn with_file_alloc(f: impl FnOnce(&FileAlloc)) {
@@ -323,6 +396,23 @@ mod tests {
 
             let layout = std::alloc::Layout::from_size_align(0, 1).unwrap();
             let _ = alloc.allocate(layout).unwrap();
+        })
+    }
+
+    #[test]
+    fn test_mark_as_unreachable() {
+        with_file_alloc(|file_alloc| {
+            let core_data = RwLock::new(ShardAllocControlData::new());
+            let core_data_ref = unsafe { core_data.initialize().unwrap() };
+            let alloc = unsafe { ShardAlloc::new(core_data_ref, file_alloc, CHUNK_SIZE, false) };
+
+            let layout = std::alloc::Layout::from_size_align(SLICE_SIZE, 1).unwrap();
+            let slice = alloc.allocate(layout).unwrap();
+            let slice_ptr = NonNull::new(slice.as_ptr() as *mut u8).unwrap();
+
+            assert!(alloc.is_data_reachable(&slice_ptr));
+            alloc.mark_as_unreachable(&slice_ptr);
+            assert!(!alloc.is_data_reachable(&slice_ptr));
         })
     }
 }

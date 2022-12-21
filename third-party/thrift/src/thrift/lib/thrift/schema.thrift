@@ -16,7 +16,6 @@
 
 include "thrift/annotation/hack.thrift"
 include "thrift/annotation/thrift.thrift"
-include "thrift/lib/thrift/any.thrift"
 include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/standard.thrift"
 include "thrift/lib/thrift/protocol.thrift"
@@ -639,7 +638,7 @@ struct Schema {
   2: type.TypeList types;
 
   /** The values, accessible by `ValueId`. */
-  3: any.AnyValueList values;
+  3: list<protocol.Value> values;
 
   /** The packages, accessible by `PackageId`. */
   4: PackageList packages;

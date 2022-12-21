@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/hack.thrift"
+include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/standard.thrift"
@@ -630,6 +631,7 @@ typedef list<Program> ProgramList
 // information and maybe even converts stored `ExternId`s into pointers to the
 // values owned by the schema.
 @thrift.Experimental // TODO(afuller): Adapt!
+@cpp.UseOpEncode
 struct Schema {
   /** The programs included in the schema, accessible by `ProgramId`. */
   1: ProgramList programs;

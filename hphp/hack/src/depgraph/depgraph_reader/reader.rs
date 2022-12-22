@@ -271,7 +271,7 @@ struct Indexer<'bytes> {
 
 impl<'bytes> Indexer<'bytes> {
     fn new(data: &'bytes [u8]) -> Result<Self, String> {
-        if data.len() < 8 * 2 {
+        if data.len() < 8 {
             return Err("not enough bytes to read indexer".to_string());
         }
 

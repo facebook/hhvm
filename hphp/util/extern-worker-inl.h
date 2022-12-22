@@ -258,6 +258,12 @@ inline bool RefId::operator<(const RefId& o) const {
     std::tie(o.m_id, o.m_extra, o.m_size);
 }
 
+inline bool RefId::operator<=(const RefId& o) const {
+  return
+    std::tie(m_id, m_extra, m_size) <=
+    std::tie(o.m_id, o.m_extra, o.m_size);
+}
+
 inline size_t RefId::hash() const {
   return folly::hash::hash_combine(m_id, m_size, m_extra);
 }

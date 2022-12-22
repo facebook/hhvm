@@ -256,9 +256,14 @@ struct MethRef {
     return !(*this == o);
   }
   bool operator<(const MethRef& o) const {
-    if (string_data_lti{}(cls, o.cls)) return true;
-    if (string_data_lti{}(o.cls, cls)) return false;
-    return idx < o.idx;
+    // The ordering for MethRef is arbitrary. Compare by idx and then
+    // by the class name's hash to avoid having to do the more
+    // expensive string comparison.
+    if (idx != o.idx) return idx < o.idx;
+    auto const hash1 = cls->hash();
+    auto const hash2 = o.cls->hash();
+    if (hash1 != hash2) return hash1 < hash2;
+    return string_data_lti{}(cls, o.cls);
   }
 
   struct Hash {
@@ -307,8 +312,6 @@ struct MethTabEntry {
   bool topLevel() const { return cls.tag() & TopLevel; }
   // This method isn't overridden by methods in any regular classes.
   bool noOverrideRegular() const { return cls.tag() & NoOverrideRegular; }
-  // This method is overridden by another which is private.
-  bool hasPrivateSuccessor() const { return cls.tag() & HasPrivateSuccessor; }
 
   void setHasPrivateAncestor() {
     cls.set(Bits(cls.tag() | HasPrivateAncestor), cls.ptr());
@@ -318,9 +321,6 @@ struct MethTabEntry {
   }
   void setNoOverrideRegular() {
     cls.set(Bits(cls.tag() | NoOverrideRegular), cls.ptr());
-  }
-  void setHasPrivateSuccessor() {
-    cls.set(Bits(cls.tag() | HasPrivateSuccessor), cls.ptr());
   }
 
   void clearHasPrivateAncestor() {
@@ -332,9 +332,6 @@ struct MethTabEntry {
   void clearNoOverrideRegular() {
     cls.set(Bits(cls.tag() & ~NoOverrideRegular), cls.ptr());
   }
-  void clearHasPrivateSuccessor() {
-    cls.set(Bits(cls.tag() & ~HasPrivateSuccessor), cls.ptr());
-  }
 
 private:
   // Logically, a MethTabEntry stores a MethRef. However doing so
@@ -345,8 +342,7 @@ private:
   enum Bits : uint8_t {
     HasPrivateAncestor = (1u << 0),
     TopLevel = (1u << 1),
-    NoOverrideRegular = (1u << 2),
-    HasPrivateSuccessor = (1u << 3)
+    NoOverrideRegular = (1u << 2)
   };
   CompactTaggedPtr<const StringData, Bits> cls;
   uint32_t clsIdx;
@@ -692,6 +688,69 @@ struct FFStaticInfoPtrEquals {
   }
 };
 
+/*
+ * Sometimes function resolution can't determine which exact function
+ * something will call, but can restrict it to a family of functions.
+ *
+ * For example, if you want to call a function on a base class, we
+ * will resolve the function to a func family that contains references
+ * to all the possible overriding-functions.
+ *
+ * In general, a func family can contain functions which are used by a
+ * regular class or not. In some contexts, we only care about the
+ * subset which are used by a regular class, and in some contexts we
+ * care about them all. To save memory, we use a single func family
+ * for both cases. The users of the func family should only consult
+ * the subset they care about.
+ *
+ * Besides the possible functions themselves, information in common
+ * about the functions is cached. For example, return type. This
+ * avoids having to iterate over potentially very large sets of
+ * functions.
+ *
+ * This class mirrors the FuncFamily struct but is produced and used
+ * by remote workers. Once everything is converted to use remote
+ * workers, this struct will replace FuncFamily entirely (and be
+ * renamed).
+ */
+struct FuncFamily2 {
+  // Func families don't have any inherent name, but it's convenient
+  // to have an unique id to refer to each one. We produce a SHA1 hash
+  // of all of the methods in the func family.
+  using Id = SHA1;
+
+  Id m_id;
+  // Methods used by a regular classes
+  std::vector<MethRef> m_regular;
+  // Methods used exclusively by non-regular classes, but as a private
+  // method. In some situations, these are treated as if it was on
+  // m_regular.
+  std::vector<MethRef> m_nonRegularPrivate;
+  // Methods used exclusively by non-regular classes
+  std::vector<MethRef> m_nonRegular;
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(m_id)
+      (m_regular)
+      (m_nonRegularPrivate)
+      (m_nonRegular)
+      ;
+  }
+};
+
+// Func families are (usually) very small, but we have a lot of
+// them. To reduce remote worker overhead, we bundle func families
+// together into one blob.
+struct FuncFamilyGroup {
+  std::vector<std::unique_ptr<FuncFamily2>> m_ffs;
+  template <typename SerDe> void serde(SerDe& sd) {
+    // Multiple func families may reuse the same class name, so we
+    // want to de-dup strings.
+    ScopedStringDataIndexer _;
+    sd(m_ffs);
+  }
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -785,6 +844,122 @@ std::string show(const FuncFamilyOrSingle& fam) {
   }
   return "empty";
 }
+
+/*
+ * A method family table entry. Each entry encodes the possible
+ * resolutions of a method call on a particular class. The reason why
+ * this isn't just a func family is because we don't want to create a
+ * func family when there's only one possible method involved (this is
+ * common and if we did we'd create way more func
+ * families). Furthermore, we really want information for two
+ * different resolutions. One resolution is when we're only
+ * considering regular classes, and the other is when considering all
+ * classes. One of these resolutions can correspond to a func family
+ * and the other may not. This struct encodes all the possible cases
+ * that can occur.
+ */
+struct FuncFamilyEntry {
+  // Both "regular" and "all" resolutions map to a func family. This
+  // must always be the same func family because the func family
+  // stores the information necessary for both cases.
+  struct BothFF {
+    FuncFamily2::Id m_ff;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_ff);
+    }
+  };
+  // The "all" resolution maps to a func family but the "regular"
+  // resolution maps to a single method.
+  struct FFAndSingle {
+    FuncFamily2::Id m_ff;
+    MethRef m_regular;
+    // If true, m_regular is actually non-regular, but a private
+    // method (which is sometimes treated as regular).
+    bool m_nonRegularPrivate;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_ff)(m_regular)(m_nonRegularPrivate);
+    }
+  };
+  // The "all" resolution maps to a func family but the "regular"
+  // resolution maps to nothing (for example, there's no regular
+  // classes with that method).
+  struct FFAndNone {
+    FuncFamily2::Id m_ff;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_ff);
+    }
+  };
+  // Both the "all" and "regular" resolutions map to (the same) single
+  // method.
+  struct BothSingle {
+    MethRef m_all;
+    // If true, m_all is actually non-regular, but a private method
+    // (which is sometimes treated as regular).
+    bool m_nonRegularPrivate;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_all)(m_nonRegularPrivate);
+    }
+  };
+  // The "all" resolution maps to a single method but the "regular"
+  // resolution maps to nothing.
+  struct SingleAndNone {
+    MethRef m_all;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_all);
+    }
+  };
+  // No resolutions at all.
+  struct None {
+    template <typename SerDe> void serde(SerDe&) {}
+  };
+
+  boost::variant<
+    BothFF, FFAndSingle, FFAndNone, BothSingle, SingleAndNone, None
+  > m_meths;
+  // A resolution is "incomplete" if there's a subclass which does not
+  // contain any method with that name (not even inheriting it). If a
+  // resolution is incomplete, it means besides the set of resolved
+  // methods, the call might also error due to missing method. This
+  // distinction is only important in a few limited circumstances.
+  bool m_allIncomplete;
+  bool m_regularIncomplete;
+  // Whether any method in the resolution overrides a private
+  // method. This is only of interest when building func families.
+  bool m_privateAncestor;
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    if constexpr (SerDe::deserializing) {
+      m_meths = [&] () -> decltype(m_meths) {
+        uint8_t tag;
+        sd(tag);
+        switch (tag) {
+          case 0: return sd.template make<BothFF>();
+          case 1: return sd.template make<FFAndSingle>();
+          case 2: return sd.template make<FFAndNone>();
+          case 3: return sd.template make<BothSingle>();
+          case 4: return sd.template make<SingleAndNone>();
+          case 5: return sd.template make<None>();
+          default: always_assert(false);
+        }
+      }();
+    } else {
+      match<void>(
+        m_meths,
+        [&] (const BothFF& e)        { sd(uint8_t(0))(e); },
+        [&] (const FFAndSingle& e)   { sd(uint8_t(1))(e); },
+        [&] (const FFAndNone& e)     { sd(uint8_t(2))(e); },
+        [&] (const BothSingle& e)    { sd(uint8_t(3))(e); },
+        [&] (const SingleAndNone& e) { sd(uint8_t(4))(e); },
+        [&] (const None& e)          { sd(uint8_t(5))(e); }
+      );
+    }
+
+    sd(m_allIncomplete)
+       (m_regularIncomplete)
+       (m_privateAncestor)
+      ;
+  }
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -902,8 +1077,8 @@ struct ClassInfo {
    * in the methods table. These correspond to methods implemented by
    * *all* regular subclasses of the abstract class/interface. For
    * that reason, they will only be present in the regular variant of
-   * the map. This is needed to preserve monotonicity (see
-   * expand_abstract_func_families).
+   * the map. This is needed to preserve monotonicity (see comment in
+   * BuildSubclassListJob::process_roots).
    */
   folly::sorted_vector_map<SString, FuncFamilyOrSingle> methodFamilies;
   folly::sorted_vector_map<SString, FuncFamilyOrSingle> methodFamiliesAux;
@@ -1168,6 +1343,19 @@ struct ClassInfo2 {
   SStringToOneT<MethTabEntry> methods;
 
   /*
+   * In most situations, methods are inherited from a parent class, so
+   * if a class declares a method, all of its subclasses are
+   * guaranteed to possess it. An exception to this is with
+   * interfaces, whose methods are not inherited.
+   *
+   * However, when building func-families and other method data, its
+   * useful to know all of the methods declared by all parents of a
+   * class. Most of those methods will be on the method table for this
+   * ClassInfo, but if any aren't, they'll be added to this set.
+   */
+  SStringSet missingMethods;
+
+  /*
    * For classes (abstract and non-abstract), these are the names of
    * the subclasses of this class, including the class itself.
    *
@@ -1206,6 +1394,40 @@ struct ClassInfo2 {
    * A vector of names of all the closures associated with this class.
    */
   CompactVector<SString> closures;
+
+  /*
+   * A (case-sensitive) map from method names to associated
+   * FuncFamilyEntry objects that represent the set of
+   * possibly-overriding methods.
+   *
+   * We do not encode "special" methods in these, as their semantics
+   * are special and it's not useful.
+   *
+   * For every method present in this ClassInfo's method table, there
+   * will be an entry in methodFamilies (unless if AttrNoOverride, see
+   * below). The FuncFamilyEntry will provide the set of
+   * possibly-overriding methods, for both the regular class subset
+   * and all classes.
+   *
+   * If a method is marked as AttrNoOverride, it will not have an
+   * entry in this map. The resolved method is assumed to be the same
+   * method in this ClassInfo's method table. If a method is marked as
+   * noOverrideRegular, it will have an entry in this map, but can be
+   * treated as AttrNoOverride if you're only considering regular
+   * classes.
+   *
+   * There may be more entries in methodFamilies than in the
+   * ClassInfo's method table. For classes which aren't abstract and
+   * aren't interfaces, this is an artifact of how the table is
+   * created and can be ignored. For abstract classes and interfaces,
+   * however, these extra entries correspond to methods implemented by
+   * *all* regular subclasses of the abstract class/interface. In this
+   * situation, only the data in the FuncFamilyEntry corresponding to
+   * the regular subset is meaningful. This is needed to preserve
+   * monotonicity (see comment in
+   * BuildSubclassListJob::process_roots).
+   */
+  SStringToOneT<FuncFamilyEntry> methodFamilies;
 
   /*
    * Copy of attrs from associated php::Class. Might be modified as a
@@ -1248,10 +1470,14 @@ struct ClassInfo2 {
   bool isMockClass{false};
 
   /*
-   * Flags to track if this class is mocked, or if any of its derived
-   * classes are mocked. isSubMocked implies isMocked.
+   * Whether this class is mocked (has a direct subclass for which
+   * is_mock_class() is true).
    */
   bool isMocked{false};
+  /*
+   * Whether isMocked is true for this class, or any of its
+   * subclasses.
+   */
   bool isSubMocked{false};
 
   /*
@@ -1278,10 +1504,12 @@ struct ClassInfo2 {
       (usedTraits)
       (traitProps)
       (methods, string_data_lt{})
+      (missingMethods, string_data_lt{})
       (subclassList)
       (baseList)
       (extraMethods, std::less<MethRef>{})
       (closures)
+      (methodFamilies, string_data_lt{})
       (attrs)
       (hasConstProp)
       (subHasConstProp)
@@ -3035,6 +3263,10 @@ struct Index::IndexData {
   // associated ClassInfo2. Only has entries for instantiable classes.
   ISStringToOneT<UniquePtrRef<ClassInfo2>> classInfoRefs;
 
+  // Maps func-family ids to the func family group which contains the
+  // func family with that id.
+  hphp_fast_map<FuncFamily2::Id, Ref<FuncFamilyGroup>> funcFamilyRefs;
+
   std::unique_ptr<php::Program> program;
 
   ISStringToOneT<php::Class*>      classes;
@@ -3657,127 +3889,6 @@ make_method_family_entry(IndexData& index,
 }
 
 /*
- * Iterate over the subclasses of `base` and construct
- * FuncFamilyOrSingle entries for the set of methods with
- * `name`. Entries for both all entries, and for just the subset on
- * regular classes will be returned.  If `justRegular` is true, then
- * the caller is only interested in the regular class subset (in which
- * case both results will be the same).
- */
-std::pair<FuncFamilyOrSingle, FuncFamilyOrSingle>
-define_func_family(IndexData& index,
-                   const ClassInfo& base,
-                   SString name,
-                   bool justRegular) {
-  hphp_fast_map<const php::Func*, bool> funcSet;
-  // Whether there's any sub-classes which don't have a method with
-  // the name.
-  auto complete = true;
-
-  assertx(!base.subclassList.empty());
-  for (auto const sub : base.subclassList) {
-    // Ignore non-regular classes if we only want the regular subset.
-    if (justRegular && !is_regular_class(*sub->cls)) continue;
-    auto const it = sub->methods.find(name);
-    if (it == end(sub->methods)) {
-      // This subclass doesn't have the method. This can only happen
-      // if the base class is an interface.  They don't get inherited,
-      // nor does an interface inherit anything (this can also happen
-      // with special methods, but we explicitly don't handle
-      // those). Mark this list as being non-complete.
-      assertx(base.cls->attrs & AttrInterface);
-      complete = false;
-      continue;
-    }
-    auto const& mte = it->second;
-    auto const f = func_from_meth_ref(index, mte.meth());
-    auto const isRegular =
-      justRegular ||
-      /* A private method on a non-regular class might still be
-       * callable in a "regular only" context. */
-      ((mte.attrs & AttrPrivate) && mte.topLevel()) ||
-      is_regular_class(*sub->cls);
-    funcSet[f] |= isRegular;
-  }
-
-  if (funcSet.empty()) {
-    // If there wasn't any functions found, we should have encountered
-    // at least one subclass which didn't contain it. If not, it means
-    // the method should have been marked as not being overridden and
-    // we shouldn't be trying to construct a method family for it.
-    assertx(!complete);
-    return std::make_pair(
-      FuncFamilyOrSingle{},
-      FuncFamilyOrSingle{}
-    );
-  }
-
-  FuncFamily::PFuncVec funcs;
-  funcs.reserve(funcSet.size());
-  auto allRegular = true;
-  for (auto const& [func, inRegular] : funcSet) {
-    allRegular &= inRegular;
-    funcs.emplace_back(func, inRegular);
-  }
-  assertx(IMPLIES(justRegular, allRegular));
-
-  // Make FuncFamilyOrSingle entries for the entire list and the
-  // regular subset.
-  auto const [all, regular] = make_method_family_entry(
-    index,
-    std::move(funcs),
-    &base,
-    name,
-    complete
-  );
-
-  // We should have gotten at least something for "all" and it's
-  // incompleteness should reflect that was passed to
-  // make_method_family_entry.
-  assertx(!all.isEmpty());
-  assertx(all.isIncomplete() == !complete);
-
-  // "regular" is always complete (or empty which is neither complete
-  // nor incomplete).
-  assertx(regular.isEmpty() || regular.isComplete());
-
-  // "regular" is always a subset of "all". If "all" is a single func,
-  // "regular" must be a single func or empty.
-  assertx(IMPLIES(all.func(), !regular.funcFamily()));
-
-  // If "all" and "regular" both have func families, they must be the
-  // same func family.
-  assertx(IMPLIES(all.funcFamily() && regular.funcFamily(),
-                  all.funcFamily() == regular.funcFamily()));
-  // If "all" and "regular" both are single funcs, it must be the same
-  // single func.
-  assertx(IMPLIES(all.func() && regular.func(),
-                  all.func() == regular.func()));
-
-  // If "all" has a func family, but "regular" does not, then that
-  // func family should not have allocated space for regular results.
-  assertx(IMPLIES(all.funcFamily() && !regular.funcFamily(),
-                  !all.funcFamily()->m_regular));
-
-  // If we only saw regular classes, then "all" and "regular" should
-  // be the same.
-  assertx(IMPLIES(allRegular, all.funcFamily() == regular.funcFamily()));
-  assertx(IMPLIES(allRegular, all.func() == regular.func()));
-  // Likewise, if allRegular was specified, then the list contains
-  // nothing but methods on regular classes, so we shouldn't have
-  // allocated the extra space on the func family (there's no point,
-  // the results for regular/non-regular will always be identical).
-  assertx(
-    IMPLIES(
-      allRegular && regular.funcFamily(),
-      !regular.funcFamily()->m_regular
-    )
-  );
-
-  return std::make_pair(all, regular);
-}
-
-/*
  * Calculate FuncFamilyOrSingle entries corresponding *all* methods in
  * the program with the given name and insert them in the global
  * name-only method family map.
@@ -3885,114 +3996,6 @@ void define_name_only_func_family(IndexData& index, SString name) {
   assertx(famIt->second.m_regular.isEmpty());
   famIt->second.m_all = all;
   famIt->second.m_regular = regular;
-}
-
-void expand_abstract_func_families(IndexData& index, ClassInfo* cinfo) {
-  assertx(cinfo->cls->attrs & (AttrInterface|AttrAbstract));
-
-  /*
-   * Interfaces can cause monotonicity violations. Suppose we have two
-   * interfaces: I2 and I2. I1 declares a method named Foo. Every
-   * class which implements I2 also implements I1 (therefore I2
-   * implies I1). During analysis, a type is initially Obj<=I1 and we
-   * resolve a call to Foo using I1's func families. After further
-   * optimization, we narrow the type to Obj<=I2. Now when we go to
-   * resolve a call to Foo using I2's func families, we find
-   * nothing. Foo is declared in I1, not in I2, and interface methods
-   * are not inherited. We use the fall back name-only tables, which
-   * might give us a worse type than before. This is a monotonicity
-   * violation because refining the object type gave us worse
-   * analysis.
-   *
-   * To avoid this, we expand an interface's (and abstract class'
-   * which has similar issues) func families to include all methods
-   * defined by *all* of it's (regular) implementations. So, in the
-   * example above, we'd expand I2's func families to include Foo,
-   * since all of I2's implements should define a Foo method (since
-   * they also all implement I1).
-   */
-  hphp_fast_set<SString> extras;
-
-  // First find a regular subclass we can use to initialize our list.
-  auto it = begin(cinfo->subclassList);
-  while (true) {
-    if (it == end(cinfo->subclassList)) return;
-    auto const sub = *it++;
-    if (!is_regular_class(*sub->cls)) continue;
-    assertx(sub != cinfo);
-    for (auto const& elem : sub->methods) {
-      // Don't include ctors or special methods. Not useful.
-      if (elem.first == s_construct.get() ||
-          is_special_method_name(elem.first)) {
-        continue;
-      }
-      if (elem.second.hasPrivateAncestor()) continue;
-      if (cinfo->methods.count(elem.first)) continue;
-      if (cinfo->methodFamilies.count(elem.first)) continue;
-      extras.emplace(elem.first);
-    }
-    if (extras.empty()) return;
-    break;
-  }
-
-  // Then iterate over the rest and remove methods which aren't
-  // implemented in every subclass.
-  while (it != end(cinfo->subclassList)) {
-    auto const sub = *it++;
-    if (!is_regular_class(*sub->cls)) continue;
-    assertx(sub != cinfo);
-    folly::erase_if(
-      extras,
-      [&] (SString meth) {
-        auto const it = sub->methods.find(meth);
-        if (it == end(sub->methods)) return true;
-        return it->second.hasPrivateAncestor();
-      }
-    );
-    if (extras.empty()) return;
-  }
-
-  if (Trace::moduleEnabled(Trace::hhbbc_index, 4)) {
-    FTRACE(4, "Adding extra func-families to {}:\n", cinfo->cls->name);
-    for (auto const DEBUG_ONLY extra : extras) {
-      FTRACE(4, "  {}\n", extra);
-    }
-  }
-
-  std::vector<std::pair<SString, FuncFamilyOrSingle>> expanded;
-  for (auto const name : extras) {
-    // We only care about methods on regular classes, so pass
-    // "justRegular" as true here. We should only get results for the
-    // regular subset.
-    auto const [a, r] = define_func_family(index, *cinfo, name, true);
-    // "all" and "regular" should be identical here, since we asked to
-    // only consider regular classes. We already know these methods
-    // are present on all regular subclasses.
-    assertx(!a.isEmpty());
-    assertx(!r.isEmpty());
-    assertx(a.isComplete());
-    assertx(r.isComplete());
-    assertx(a.funcFamily() == r.funcFamily());
-    assertx(a.func() == r.func());
-    FTRACE(
-      4,
-      "extra method family {}::{}: {}\n",
-      cinfo->cls->name, name, show(r)
-    );
-    assertx(!cinfo->methodFamilies.count(name));
-    expanded.emplace_back(name, r);
-  }
-
-  // Sort the list so we can insert it into methodFamilies (which is a
-  // sorted_vector_map) in bulk.
-  assertx(!expanded.empty());
-  std::sort(
-    begin(expanded), end(expanded),
-    [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
-  );
-  cinfo->methodFamilies.insert(
-    folly::sorted_unique, begin(expanded), end(expanded)
-  );
 }
 
 // Calculate the StaticInfo for the given FuncFamily, and assign it
@@ -4133,12 +4136,6 @@ void define_func_families(IndexData& index) {
   parallel::for_each(
     index.allClassInfos,
     [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      std::vector<std::pair<SString, FuncFamilyOrSingle>> entries;
-      std::vector<std::pair<SString, FuncFamilyOrSingle>> aux;
-
-      assertx(cinfo->methodFamilies.empty());
-      assertx(cinfo->methodFamiliesAux.empty());
-
       for (auto const& [name, mte] : cinfo->methods) {
         auto const func = func_from_meth_ref(index, mte.meth());
 
@@ -4151,138 +4148,7 @@ void define_func_families(IndexData& index) {
             ((mte.attrs & AttrPrivate) && mte.topLevel())) {
           create_func_info(index, func)->regularClassMethod = true;
         }
-
-        // If the method is known not to be overridden, we don't need
-        // a func family.
-        if (mte.attrs & AttrNoOverride) continue;
-
-        assertx(!is_closure_base(*cinfo->cls));
-        assertx(!is_closure(*cinfo->cls));
-
-        // Don't construct func families for special methods, as it's
-        // not particularly useful.
-        if (is_special_method_name(name)) continue;
-
-        auto const [a, r] = define_func_family(
-          index, *cinfo, name, false
-        );
-
-        if (is_regular_class(*cinfo->cls)) {
-          // We know that AttrNoOverride is false, therefore the
-          // method must be overridden in a subclass, so we have to
-          // get at least 2 funcs (so a FuncFamily).
-          assertx(a.funcFamily());
-          // Since this class is regular, this method should at least
-          // be on the regular subset results.
-          assertx(!r.isEmpty());
-          // We can only get incomplete results if this is an
-          // interface.
-          assertx(a.isComplete());
-          assertx(r.isComplete());
-
-          // If there's no override by a regular class, the only func
-          // on the regular subset should be the method on this
-          // class. Otherwise, we should have a func family, and "all"
-          // and "regular" should always have the same func family.
-          if (mte.noOverrideRegular()) {
-            assertx(r.func() == func);
-          } else {
-            assertx(r.funcFamily() == a.funcFamily());
-          }
-
-          FTRACE(4, "method family {}::{}: {}\n",
-                 cinfo->cls->name, name, show(a));
-          entries.emplace_back(name, a);
-        } else {
-          // The method is on this class, so the results for "all"
-          // should have at least have it (so cannot be empty).
-          assertx(!a.isEmpty());
-          // Result can be incomplete, but only if this is an
-          // interface.
-          assertx(IMPLIES(a.isIncomplete(), cinfo->cls->attrs & AttrInterface));
-          // If we got a single func, it should be the func on this
-          // class. The only way we'd get a single func is if the
-          // results are incomplete.
-          assertx(IMPLIES(a.func(), a.isIncomplete()));
-          assertx(IMPLIES(a.func(), a.func() == func));
-
-          // If there's no override by a regular class, we'll either
-          // have an empty set, or a single func the same as this
-          // class' func. If there's no regular subclasses, it will be
-          // empty. Otherwise it will be the single func (we know it's
-          // not overridden so all the existing regular subclasses
-          // must have the same func).
-          if (mte.noOverrideRegular()) {
-            assertx(r.isEmpty() || r.func() == func);
-            assertx(IMPLIES(r.isEmpty(), !cinfo->hasRegularSubclass));
-          } else {
-            // It's possible to get an empty or incomplete set for the
-            // regular subset if this class is an interface.
-            assertx(IMPLIES(r.isEmpty(), cinfo->cls->attrs & AttrInterface));
-            assertx(
-              IMPLIES(r.isIncomplete(), cinfo->cls->attrs & AttrInterface)
-            );
-            // Since it was overridden it's either incomplete, or if
-            // it's a single func, a different func than the one in
-            // this class.
-            assertx(
-              r.isIncomplete() ||
-              ((mte.attrs & AttrPrivate) && mte.topLevel()) ||
-              r.func() != func
-            );
-          }
-
-          // Only bother making an aux entry if it's different from
-          // the normal entry, and if we'll actually use it (if
-          // noOverrideRegular, we won't even check).
-          auto const addAux =
-            !mte.noOverrideRegular() &&
-            (r.isIncomplete() ||
-             a.funcFamily() != r.funcFamily() ||
-             a.func() != r.func());
-
-          FTRACE(
-            4, "method family {}::{}:\n"
-            "  all: {}\n"
-            "{}",
-            cinfo->cls->name, name,
-            show(a),
-            addAux ? folly::sformat("  aux: {}\n", show(r)) : ""
-          );
-          entries.emplace_back(name, a);
-          if (addAux) aux.emplace_back(name, r);
-        }
       }
-
-      // Sort the lists of new entries, so we can insert them into the
-      // method family maps (which are sorted_vector_maps) in bulk.
-      std::sort(
-        begin(entries), end(entries),
-        [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
-      );
-      std::sort(
-        begin(aux), end(aux),
-        [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
-      );
-      if (!entries.empty()) {
-        cinfo->methodFamilies.insert(
-          folly::sorted_unique, begin(entries), end(entries)
-        );
-      }
-      if (!aux.empty()) {
-        cinfo->methodFamiliesAux.insert(
-          folly::sorted_unique, begin(aux), end(aux)
-        );
-      }
-
-      // If this is an interface or abstract class, we may want to add
-      // additional entries to maintain monotonicity.
-      if (cinfo->cls->attrs & (AttrInterface|AttrAbstract)) {
-        expand_abstract_func_families(index, cinfo.get());
-      }
-
-      cinfo->methodFamilies.shrink_to_fit();
-      cinfo->methodFamiliesAux.shrink_to_fit();
     }
   );
 
@@ -4306,7 +4172,9 @@ void define_func_families(IndexData& index) {
           is_special_method_name(name)) continue;
       allMethods.emplace_back(name);
       always_assert(
-        index.methodFamilies.emplace(name, IndexData::MethodFamilyEntry{}).second
+        index.methodFamilies.emplace(
+          name,
+          IndexData::MethodFamilyEntry{}).second
       );
     }
 
@@ -4354,6 +4222,8 @@ void define_func_families(IndexData& index) {
     [&] (FuncInfo& fi) { fi.families.shrink_to_fit(); }
   );
 }
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * ConflictGraph maintains lists of interfaces that conflict with each other
@@ -4683,10 +4553,6 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
 
     // AttrNoOverride implies noOverrideRegular
     always_assert(IMPLIES(mte.attrs & AttrNoOverride, mte.noOverrideRegular()));
-
-    // Having a private successor is only possible if you've been
-    // overridden.
-    always_assert(IMPLIES(mte.hasPrivateSuccessor(), !mte.noOverrideRegular()));
 
     if (!is_special_method_name(name)) {
       // If the class isn't overridden, none of it's methods can be
@@ -5710,13 +5576,8 @@ assign_hierarchial_work(std::vector<SString> roots,
         end(bucket)
       );
 
-      // Nothing already in the bucket should be in the dependency set
-      // (because the classes in the bucket are all roots).
-      if (debug) {
-        for (auto const c : bucket) {
-          always_assert(!deps.count(c));
-        }
-      }
+      // Make sure dependencies and roots are disjoint.
+      for (auto const c : bucket) deps.erase(c);
 
       // For each dependency, store the bucket with the lowest hash.
       for (auto const d : deps) {
@@ -6428,6 +6289,21 @@ private:
 
     if (cls.attrs & AttrInterface) cinfo->implInterfaces.emplace(cls.name);
 
+    // One can specify implementing the same interface multiple
+    // times. It's easier if we ensure the list is unique.
+    std::sort(
+      begin(cinfo->declInterfaces),
+      end(cinfo->declInterfaces),
+      string_data_lti{}
+    );
+    cinfo->declInterfaces.erase(
+      std::unique(
+        begin(cinfo->declInterfaces), end(cinfo->declInterfaces),
+        [&] (SString a, SString b) { return a->isame(b); }
+      ),
+      end(cinfo->declInterfaces)
+    );
+
     if (!build_methods(index, cls, *cinfo, state))    return nullptr;
     if (!build_properties(index, cls, *cinfo, state)) return nullptr;
     if (!build_constants(index, cls, *cinfo, state))  return nullptr;
@@ -6471,6 +6347,7 @@ private:
     // necessary later), except for special methods, which are always
     // considered to be overridden.
     for (auto& [name, mte] : cinfo->methods) {
+      assertx(!cinfo->missingMethods.count(name));
       if (is_special_method_name(name)) {
         attribute_setter(mte.attrs, false, AttrNoOverride);
         mte.clearNoOverrideRegular();
@@ -6493,6 +6370,7 @@ private:
         always_assert(cinfo->attrs & AttrNoReifiedInit);
       }
       always_assert(cinfo->closures.empty());
+      always_assert(cinfo->missingMethods.empty());
       always_assert(!cinfo->hasConstProp);
       always_assert(!cinfo->subHasConstProp);
       always_assert(!cinfo->hasReifiedParent);
@@ -6986,15 +6864,33 @@ private:
                             const php::Class& cls,
                             ClassInfo2& cinfo,
                             State& state) {
+    // Since interface methods are not inherited, any methods in
+    // interfaces this class implements are automatically missing.
+    assertx(cinfo.methods.empty());
+    for (auto const iname : cinfo.declInterfaces) {
+      auto const& iface = index.classInfo(iname);
+      for (auto const& [name, _] : iface.methods) {
+        if (is_special_method_name(name)) continue;
+        cinfo.missingMethods.emplace(name);
+      }
+      for (auto const name : iface.missingMethods) {
+        assertx(!is_special_method_name(name));
+        cinfo.missingMethods.emplace(name);
+      }
+    }
+
     // Interface methods are just stubs which return null. They don't
     // get inherited by their implementations.
     if (cls.attrs & AttrInterface) {
+      assertx(!cls.parentName);
+      assertx(cinfo.usedTraits.empty());
       uint32_t idx = cinfo.methods.size();
       assertx(!idx);
       for (auto const& m : cls.methods) {
         auto const res = cinfo.methods.emplace(m->name, MethTabEntry { *m });
         always_assert(res.second);
         always_assert(state.m_methodIndices.emplace(m->name, idx++).second);
+        cinfo.missingMethods.erase(m->name);
         ITRACE(4, "  {}: adding method {}::{}\n",
                cls.name, cls.name, m->name);
       }
@@ -7038,8 +6934,14 @@ private:
 
     // If there's a parent, start by copying its methods
     if (cls.parentName) {
-      assertx(!(cls.attrs & AttrInterface));
       auto const& parentInfo = index.classInfo(cls.parentName);
+
+      assertx(cinfo.methods.empty());
+      cinfo.missingMethods.insert(
+        begin(parentInfo.missingMethods),
+        end(parentInfo.missingMethods)
+      );
+
       for (auto const& mte : parentInfo.methods) {
         // Don't inherit the 86* methods
         if (HPHP::Func::isSpecial(mte.first)) continue;
@@ -7054,6 +6956,8 @@ private:
             index.methodIdx(cls.parentName, mte.first)
           ).second
         );
+
+        cinfo.missingMethods.erase(mte.first);
 
         ITRACE(
           4,
@@ -7079,8 +6983,14 @@ private:
           m->name
         );
         always_assert(state.m_methodIndices.emplace(m->name, idx++).second);
+        cinfo.missingMethods.erase(m->name);
         continue;
       }
+
+      // If the method is already in our table, it shouldn't be
+      // missing.
+      assertx(!cinfo.missingMethods.count(m->name));
+
       if ((m->attrs & AttrTrait) && (m->attrs & AttrAbstract)) {
         // Abstract methods from traits never override anything.
         continue;
@@ -7096,7 +7006,6 @@ private:
     try {
       TMIData tmid;
       for (auto const tname : cinfo.usedTraits) {
-        assertx(!(cls.attrs & AttrInterface));
         auto const& tcls = index.cls(tname);
         auto const& t = index.classInfo(tname);
         std::vector<std::pair<SString, const MethTabEntry*>>
@@ -7106,6 +7015,12 @@ private:
           auto const idx = index.methodIdx(tname, name);
           assertx(!methods[idx].first);
           methods[idx] = std::make_pair(name, &mte);
+        }
+
+        for (auto const name : t.missingMethods) {
+          assertx(!is_special_method_name(name));
+          if (cinfo.methods.count(name)) continue;
+          cinfo.missingMethods.emplace(name);
         }
 
         for (auto const& [name, mte] : methods) {
@@ -7158,7 +7073,9 @@ private:
           always_assert(
             state.m_methodIndices.emplace(mdata.name, idx++).second
           );
+          cinfo.missingMethods.erase(mdata.name);
         } else {
+          assertx(!cinfo.missingMethods.count(mdata.name));
           if (attrs & AttrAbstract) continue;
           if (emplaced.first->second.meth().cls->isame(cls.name)) continue;
           if (!overridden(emplaced.first->second, MethRef { *method }, attrs)) {
@@ -7552,7 +7469,10 @@ private:
       string_data_lti{}
     );
     cinfo.declInterfaces.erase(
-      std::unique(begin(cinfo.declInterfaces), end(cinfo.declInterfaces)),
+      std::unique(
+        begin(cinfo.declInterfaces), end(cinfo.declInterfaces),
+        [&] (SString a, SString b) { return a->isame(b); }
+      ),
       end(cinfo.declInterfaces)
     );
 
@@ -8256,9 +8176,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
 
 /*
  * Subclass lists are built in a similar manner as flattening classes,
- * except the order is reversed. The "roots" are classes without any
- * parents (the roots of the class hierarchy). The dependencies of a
- * class are all of the transitive children.
+ * except the order is reversed.
  *
  * However, there is one complication: the transitive children of each
  * class can be huge. In fact, for large hierarchies, they can easily
@@ -8287,6 +8205,11 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
  * produce multiple splits, and inputs can be a mix of splits and
  * actual classes. In extreme cases, you might need multiple rounds of
  * splits before processing the class.
+ *
+ * There is one other difference between this and the flatten classes
+ * pass. Unlike in flatten classes, every class (except leafs) are
+ * "roots" here. We do not promote any dependencies. This causes more
+ * work overall, but it lets us process more classes in parallel.
  */
 
 /*
@@ -8300,31 +8223,53 @@ struct BuildSubclassListJob {
   }
   static void fini() {}
 
-  // Intermediate data stored for each class. The data can either come
-  // from a split node, or inferred from a class. This is cached so we
-  // don't have to process any given class/split more than once.
+  // Aggregated data for some group of classes. The data can either
+  // come from a split node, or inferred from a group of classes.
   struct Data {
-    // Subclasses of this class, including this class.
+    // All of the classes comprising this data.
     ISStringSet subclasses;
 
-    // Methods which are present in *all* subclasses.
-    MethRefSet methods;
-    // Methods which are present in all regular subclasses.
-    MethRefSet regularMethods;
+    // Information about all of the methods with a particular name
+    // between all of the classes in this Data.
+    struct MethInfo {
+      // Methods which are present on at least one regular class.
+      MethRefSet regularMeths;
+      // Methods which are only present on non-regular classes, but is
+      // private on at least one class. These are sometimes treated
+      // like a regular class.
+      MethRefSet nonRegularPrivateMeths;
+      // Methods which are only present on non-regular classes (and
+      // never private). These three sets are always disjoint.
+      MethRefSet nonRegularMeths;
+      // Whether all classes in this Data have a method with this
+      // name.
+      bool complete{true};
+      // Whether all regular classes in this Data have a method with
+      // this name.
+      bool regularComplete{true};
+      // Whether any of the methods has a private ancestor.
+      bool privateAncestor{false};
 
-    // Private methods declared by this class directly.
-    SStringSet privates;
-    // Private methods declared by subclasses of this class (but not
-    // this class). If a method has a private successor, it's
-    // considered overridden, even if the private is on a non-regular
-    // class.
-    SStringSet privateSuccessors;
+      template <typename SerDe> void serde(SerDe& sd) {
+        sd(regularMeths, std::less<MethRef>{})
+          (nonRegularPrivateMeths, std::less<MethRef>{})
+          (nonRegularMeths, std::less<MethRef>{})
+          (complete)
+          (regularComplete)
+          (privateAncestor)
+          ;
+      }
+    };
+    SStringToOneT<MethInfo> methods;
+
+    // The classes for whom isMocked would be true due to one of the
+    // classes making up this Data. The classes in this set may not
+    // necessarily be also part of this Data.
+    ISStringSet mockedClasses;
 
     bool hasConstProp{false};
     bool hasReifiedGeneric{false};
 
-    bool isMockClass{false};
-    bool isMocked{false};
     bool isSubMocked{false};
 
     bool hasRegularClass{false};
@@ -8334,14 +8279,10 @@ struct BuildSubclassListJob {
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(subclasses, string_data_lti{})
-        (methods, std::less<MethRef>{})
-        (regularMethods, std::less<MethRef>{})
-        (privates, string_data_lt{})
-        (privateSuccessors, string_data_lt{})
+        (methods, string_data_lt{})
+        (mockedClasses, string_data_lti{})
         (hasConstProp)
         (hasReifiedGeneric)
-        (isMockClass)
-        (isMocked)
         (isSubMocked)
         (hasRegularClass)
         (hasNonRegularClass)
@@ -8351,7 +8292,8 @@ struct BuildSubclassListJob {
     }
   };
 
-  // Split node. Used to summarize some subset of a class' children.
+  // Split node. Used to wrap a Data when summarizing some subset of a
+  // class' children.
   struct Split {
     Split() = default;
     explicit Split(SString name) : name{name} {}
@@ -8381,23 +8323,41 @@ struct BuildSubclassListJob {
     }
   };
 
-  // Each job produces updated classes, and some (perhaps 0) split
-  // nodes.
+  // Job output meant to be downloaded and drive the next round.
+  struct OutputMeta {
+    // For every input ClassInfo, the set of func families present in
+    // that ClassInfo's method family table. If the ClassInfo is used
+    // as a dep later, these func families need to be provided as
+    // well.
+    std::vector<hphp_fast_set<FuncFamily2::Id>> funcFamilyDeps;
+    // The ids of new (not provided as an input) func families
+    // produced. The ids are grouped together to become
+    // FuncFamilyGroups.
+    std::vector<std::vector<FuncFamily2::Id>> newFuncFamilyIds;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(funcFamilyDeps, std::less<FuncFamily2::Id>{})
+        (newFuncFamilyIds)
+        ;
+    }
+  };
   using Output = Multi<
     Variadic<std::unique_ptr<ClassInfo2>>,
-    Variadic<std::unique_ptr<Split>>
+    Variadic<std::unique_ptr<Split>>,
+    Variadic<FuncFamilyGroup>,
+    OutputMeta
   >;
 
   // Each job takes the list of classes and splits which should be
   // produced, dependency classes and splits (which are not updated),
-  // and edges between classes and splits.
+  // edges between classes and splits, and func families (needed by
+  // dependency classes).
   static Output
   run(Variadic<std::unique_ptr<ClassInfo2>> classes,
       Variadic<std::unique_ptr<ClassInfo2>> deps,
       Variadic<std::unique_ptr<Split>> splits,
       Variadic<std::unique_ptr<Split>> splitDeps,
-      Variadic<EdgeToSplit> edges) {
-
+      Variadic<EdgeToSplit> edges,
+      Variadic<FuncFamilyGroup> funcFamilies) {
     // Store mappings of names to classes and edges.
     LocalIndex index;
     for (auto& cinfo : classes.vals) {
@@ -8422,27 +8382,230 @@ struct BuildSubclassListJob {
         index.splits.emplace(split->name, split.get()).second
       );
     }
+    for (auto& group : funcFamilies.vals) {
+      for (auto& ff : group.m_ffs) {
+        auto const id = ff->m_id;
+        // We could have multiple groups which contain the same
+        // FuncFamily, so don't assert uniqueness here. We'll just
+        // take the first one we see (they should all be equivalent).
+        index.funcFamilies.emplace(id, std::move(ff));
+      }
+    }
 
     build_children(index, edges.vals);
     process_roots(index, classes.vals, splits.vals);
-    return std::make_tuple(std::move(classes), std::move(splits));
+
+    OutputMeta meta;
+
+    // Record dependencies for each input class. A func family is a
+    // dependency of the class if it appears in the method families
+    // table.
+    meta.funcFamilyDeps.reserve(classes.vals.size());
+    for (auto const& cinfo : classes.vals) {
+      meta.funcFamilyDeps.emplace_back();
+      auto& deps = meta.funcFamilyDeps.back();
+      for (auto const& [_, entry] : cinfo->methodFamilies) {
+        match<void>(
+          entry.m_meths,
+          [&] (const FuncFamilyEntry::BothFF& e)      { deps.emplace(e.m_ff); },
+          [&] (const FuncFamilyEntry::FFAndSingle& e) { deps.emplace(e.m_ff); },
+          [&] (const FuncFamilyEntry::FFAndNone& e)   { deps.emplace(e.m_ff); },
+          [&] (const FuncFamilyEntry::BothSingle&)    {},
+          [&] (const FuncFamilyEntry::SingleAndNone&) {},
+          [&] (const FuncFamilyEntry::None&)          {}
+        );
+      }
+    }
+
+    Variadic<FuncFamilyGroup> funcFamilyGroups;
+    group_func_families(index, funcFamilyGroups.vals, meta.newFuncFamilyIds);
+
+    return std::make_tuple(
+      std::move(classes),
+      std::move(splits),
+      std::move(funcFamilyGroups),
+      std::move(meta)
+    );
   }
 private:
 
-  struct LocalIndex {
-    ISStringToOneT<ClassInfo2*> classInfos;
-    ISStringToOneT<Split*> splits;
-    ISStringSet top;
-    ISStringToOneT<ISStringSet> children;
-    ISStringToOneT<Data> data;
+  /*
+   * MethInfo caching
+   *
+   * When building a func family, MethRefSets must be sorted, then
+   * hashed in order to generate the unique id. Once we do so, we can
+   * then check if that func family already exists. For large func
+   * families, this can very expensive and we might have to do this
+   * (wasted) work multiple times.
+   *
+   * To avoid this, we add a cache before the sorting/hashing
+   * step. Instead of using a func family id (which is the expensive
+   * thing to generate), the cache is keyed by the set of methods
+   * directly. A commutative hash is used so that we don't actually
+   * have to sort the MethRefSets, and equality is just equality of
+   * the MethRefSets. Moreover, we make use of hetereogenous lookup to
+   * avoid having to copy any MethRefSets (again they can be large)
+   * when doing the lookup.
+   */
+
+  // What is actually stored in the cache. Keeps a copy of the
+  // MethRefSets.
+  struct MethInfoTuple {
+    MethRefSet regular;
+    MethRefSet nonRegularPrivate;
+    MethRefSet nonRegular;
+  };
+  // Used for lookups. Just has pointers to the MethRefSets, so we
+  // don't have to do any copying for the lookup.
+  struct MethInfoTupleProxy {
+    const MethRefSet* regular;
+    const MethRefSet* nonRegularPrivate;
+    const MethRefSet* nonRegular;
   };
 
+  struct MethInfoTupleHasher {
+    using is_transparent = void;
+
+    size_t operator()(const MethInfoTuple& t) const {
+      auto const h1 = folly::hash::commutative_hash_combine_range_generic(
+        0, MethRef::Hash{}, begin(t.regular), end(t.regular)
+      );
+      auto const h2 = folly::hash::commutative_hash_combine_range_generic(
+        0, MethRef::Hash{}, begin(t.nonRegularPrivate), end(t.nonRegularPrivate)
+      );
+      auto const h3 = folly::hash::commutative_hash_combine_range_generic(
+        0, MethRef::Hash{}, begin(t.nonRegular), end(t.nonRegular)
+      );
+      return folly::hash::hash_combine(h1, h2, h3);
+    }
+    size_t operator()(const MethInfoTupleProxy& t) const {
+      auto const h1 = folly::hash::commutative_hash_combine_range_generic(
+        0, MethRef::Hash{}, begin(*t.regular), end(*t.regular)
+      );
+      auto const h2 = folly::hash::commutative_hash_combine_range_generic(
+        0, MethRef::Hash{}, begin(*t.nonRegularPrivate), end(*t.nonRegularPrivate)
+      );
+      auto const h3 = folly::hash::commutative_hash_combine_range_generic(
+        0, MethRef::Hash{}, begin(*t.nonRegular), end(*t.nonRegular)
+      );
+      return folly::hash::hash_combine(h1, h2, h3);
+    }
+  };
+  struct MethInfoTupleEquals {
+    using is_transparent = void;
+
+    bool operator()(const MethInfoTuple& t1, const MethInfoTuple& t2) const {
+      return
+        t1.regular == t2.regular &&
+        t1.nonRegularPrivate == t2.nonRegularPrivate &&
+        t1.nonRegular == t2.nonRegular;
+    }
+    bool operator()(const MethInfoTupleProxy& t1,
+                    const MethInfoTuple& t2) const {
+      return
+        *t1.regular == t2.regular &&
+        *t1.nonRegularPrivate == t2.nonRegularPrivate &&
+        *t1.nonRegular == t2.nonRegular;
+    }
+  };
+
+  struct LocalIndex {
+    // All ClassInfos, whether inputs or dependencies.
+    ISStringToOneT<ClassInfo2*> classInfos;
+    // All splits, whether inputs or dependencies.
+    ISStringToOneT<Split*> splits;
+
+    // ClassInfos and splits which are inputs (IE, we want to
+    // calculate data for).
+    ISStringSet top;
+
+    // Mapping of input ClassInfos/splits to all of their subclasses
+    // present in this Job. Some of the children may be splits, which
+    // means some subset of the children were processed in another
+    // Job.
+    ISStringToOneT<ISStringSet> children;
+
+    // All func families available in this Job, either from inputs, or
+    // created during processing.
+    hphp_fast_map<FuncFamily2::Id, std::unique_ptr<FuncFamily2>> funcFamilies;
+
+    // Above mentioned func family cache. If an entry is present here,
+    // we know the func family already exists and don't need to do
+    // expensive sorting/hashing.
+    hphp_fast_map<
+      MethInfoTuple,
+      FuncFamily2::Id,
+      MethInfoTupleHasher,
+      MethInfoTupleEquals
+    > funcFamilyCache;
+
+    // funcFamilies contains all func families. If a func family is
+    // created during processing, it will be inserted here (used to
+    // determine outputs).
+    std::vector<FuncFamily2::Id> newFuncFamilies;
+  };
+
+  // Take all of the func families produced by this job and group them
+  // together into FuncFamilyGroups. We produce both the
+  // FuncFamilyGroups themselves, but also the associated ids in each
+  // group (which will be output as metadata).
+  static void group_func_families(
+    LocalIndex& index,
+    std::vector<FuncFamilyGroup>& groups,
+    std::vector<std::vector<FuncFamily2::Id>>& ids
+  ) {
+    constexpr size_t kGroupSize = 5000;
+
+    // The grouping algorithm is very simple. First we sort all of the
+    // func families by size. We then just group adjacent families
+    // until their total size exceeds some threshold. Once it does, we
+    // start a new group.
+    std::sort(
+      begin(index.newFuncFamilies),
+      end(index.newFuncFamilies),
+      [&] (const FuncFamily2::Id& id1, const FuncFamily2::Id& id2) {
+        auto const& ff1 = index.funcFamilies.at(id1);
+        auto const& ff2 = index.funcFamilies.at(id2);
+        auto const size1 =
+          ff1->m_regular.size() +
+          ff1->m_nonRegularPrivate.size() +
+          ff1->m_nonRegular.size();
+        auto const size2 =
+          ff2->m_regular.size() +
+          ff2->m_nonRegularPrivate.size() +
+          ff2->m_nonRegular.size();
+        if (size1 != size2) return size1 < size2;
+        return id1 < id2;
+      }
+    );
+
+    size_t current = 0;
+    for (auto const& id : index.newFuncFamilies) {
+      auto& ff = index.funcFamilies.at(id);
+      auto const size =
+        ff->m_regular.size() +
+        ff->m_nonRegularPrivate.size() +
+        ff->m_nonRegular.size();
+      if (groups.empty() || current > kGroupSize) {
+        groups.emplace_back();
+        ids.emplace_back();
+        current = 0;
+      }
+      groups.back().m_ffs.emplace_back(std::move(ff));
+      ids.back().emplace_back(id);
+      current += size;
+    }
+  }
+
   // From the information present in the inputs, calculate a mapping
-  // of classes to their children (which can be other classes or split
-  // nodes). Split nodes have their children stored directly within
-  // them.
+  // of classes and splits to their children (which can be other
+  // classes or split nodes). This is not just direct children, but
+  // all transitive subclasses.
   static void build_children(LocalIndex& index,
                              const std::vector<EdgeToSplit>& edges) {
+    // First record direct children. This can be inferred from the
+    // parents of all present ClassInfos:
+
     auto const onParent = [&] (SString parent, const ClassInfo2* child) {
       // Due to how work is divided, a class might have parents not
       // present in this job. Ignore those.
@@ -8466,77 +8629,388 @@ private:
       }
     }
 
+    // Use the edges provided to the Job to know the mapping from
+    // ClassInfo to split (it cannot be inferred otherwise).
     for (auto const& edge : edges) {
       if (!index.classInfos.count(edge.cls)) continue;
       if (!index.splits.count(edge.split)) continue;
       index.children[edge.cls].emplace(edge.split);
     }
+
+    // Every "top" ClassInfo also has itself as a subclass (this
+    // matches the semantics of the subclass list and simplifies the
+    // processing).
+    for (auto const name : index.top) {
+      if (auto const split = folly::get_default(index.splits, name, nullptr)) {
+        // Copy the children list out of the split and add it to the
+        // map.
+        auto& children = index.children[name];
+        for (auto const child : split->children) {
+          assertx(index.classInfos.count(child) ||
+                  index.splits.count(child));
+          children.emplace(child);
+        }
+      } else {
+        index.children[name].emplace(name);
+      }
+    }
+
+    // For every ClassInfo and split, we now know the direct
+    // children. Iterate and find all transitive children.
+    for (auto& [_, children] : index.children) {
+      auto newChildren1 = children;
+      ISStringSet newChildren2;
+
+      while (!newChildren1.empty()) {
+        newChildren2.clear();
+        for (auto const child : newChildren1) {
+          auto const it = index.children.find(child);
+          if (it == end(index.children)) continue;
+          for (auto const c : it->second) {
+            if (children.count(c)) continue;
+            newChildren2.emplace(c);
+          }
+        }
+
+        std::swap(newChildren1, newChildren2);
+        for (auto const child : newChildren1) {
+          children.emplace(child);
+        }
+      }
+    }
   }
 
-  // Given a list of children, calculate a Data from the union of the
-  // children.
-  template <typename T>
-  static Data data_from_children(LocalIndex& index, const T& children) {
+  // Turn a FuncFamilyEntry into an equivalent Data::MethInfo.
+  static Data::MethInfo
+  meth_info_from_func_family_entry(LocalIndex& index,
+                                   const ClassInfo2& cinfo,
+                                   const FuncFamilyEntry& entry) {
+    Data::MethInfo info;
+    info.complete = !entry.m_allIncomplete;
+    info.regularComplete = !entry.m_regularIncomplete;
+    info.privateAncestor = entry.m_privateAncestor;
+
+    auto const getFF = [&] (const FuncFamily2::Id& id)
+      -> const FuncFamily2& {
+      auto const it = index.funcFamilies.find(id);
+      always_assert_flog(
+        it != end(index.funcFamilies),
+        "While processing class '{}', "
+        "tried to access non-existent func-family '{}'",
+        cinfo.name,
+        id.toString()
+      );
+      return *it->second;
+    };
+
+    match<void>(
+      entry.m_meths,
+      [&] (const FuncFamilyEntry::BothFF& e) {
+        auto const& ff = getFF(e.m_ff);
+        info.regularMeths.insert(
+          begin(ff.m_regular),
+          end(ff.m_regular)
+        );
+        info.nonRegularPrivateMeths.insert(
+          begin(ff.m_nonRegularPrivate),
+          end(ff.m_nonRegularPrivate)
+        );
+        info.nonRegularMeths.insert(
+          begin(ff.m_nonRegular),
+          end(ff.m_nonRegular)
+        );
+      },
+      [&] (const FuncFamilyEntry::FFAndSingle& e) {
+        auto const& ff = getFF(e.m_ff);
+        info.nonRegularMeths.insert(
+          begin(ff.m_nonRegular),
+          end(ff.m_nonRegular)
+        );
+        if (e.m_nonRegularPrivate) {
+          assertx(ff.m_nonRegularPrivate.size() == 1);
+          assertx(ff.m_nonRegularPrivate[0] == e.m_regular);
+          info.nonRegularPrivateMeths.emplace(e.m_regular);
+        } else {
+          assertx(ff.m_regular.size() == 1);
+          assertx(ff.m_regular[0] == e.m_regular);
+          info.regularMeths.emplace(e.m_regular);
+        }
+      },
+      [&] (const FuncFamilyEntry::FFAndNone& e) {
+        auto const& ff = getFF(e.m_ff);
+        assertx(ff.m_regular.empty());
+        info.nonRegularMeths.insert(
+          begin(ff.m_nonRegular),
+          end(ff.m_nonRegular)
+        );
+      },
+      [&] (const FuncFamilyEntry::BothSingle& e) {
+        if (e.m_nonRegularPrivate) {
+          info.nonRegularPrivateMeths.emplace(e.m_all);
+        } else {
+          info.regularMeths.emplace(e.m_all);
+        }
+      },
+      [&] (const FuncFamilyEntry::SingleAndNone& e) {
+        info.nonRegularMeths.emplace(e.m_all);
+      },
+      [&] (const FuncFamilyEntry::None&) {
+        assertx(!info.complete);
+      }
+    );
+
+    return info;
+  }
+
+  // Create a Data representing the single ClassInfo or split with the
+  // name "clsname".
+  static Data build_data(LocalIndex& index, SString clsname, SString top) {
+    // Does this name represent a class?
+    if (auto const cinfo =
+        folly::get_default(index.classInfos, clsname, nullptr)) {
+      // It's a class. We need to build a Data from what's in the
+      // ClassInfo. If the ClassInfo hasn't been processed already
+      // (it's a leaf or its the first round), the data will reflect
+      // just that class. However if the ClassInfo has been processed
+      // (it's a dependencies and it's past the first round), it will
+      // reflect any subclasses of that ClassInfo as well.
+      Data data;
+
+      assertx(!cinfo->subclassList.empty());
+      data.subclasses.insert(
+        begin(cinfo->subclassList),
+        end(cinfo->subclassList)
+      );
+
+      // Use the method family table to build initial MethInfos (if
+      // the ClassInfo hasn't been processed this will be empty).
+      for (auto const& [name, entry] : cinfo->methodFamilies) {
+        data.methods.emplace(
+          name,
+          meth_info_from_func_family_entry(index, *cinfo, entry)
+        );
+      }
+
+      for (auto const& [name, mte] : cinfo->methods) {
+        if (is_special_method_name(name)) continue;
+
+        auto const meth = mte.meth();
+        if (mte.attrs & AttrNoOverride) {
+          // The method is AttrNoOverride, so we shouldn't have seen a
+          // method family entry above.
+          assertx(!data.methods.count(name));
+          auto& info = data.methods[name];
+
+          if (cinfo->isRegularClass || cinfo->hasRegularSubclass) {
+            info.regularMeths.emplace(meth);
+          } else if (bool(mte.attrs & AttrPrivate) && mte.topLevel()) {
+            info.nonRegularPrivateMeths.emplace(meth);
+          } else {
+            info.nonRegularMeths.emplace(meth);
+          }
+
+          assertx(info.complete);
+          assertx(info.regularComplete);
+          assertx(!info.privateAncestor);
+          if (mte.hasPrivateAncestor() &&
+                  (cinfo->isRegularClass || cinfo->hasRegularSubclass)) {
+            info.privateAncestor = true;
+          }
+        } else {
+          // The method isn't AttrNoOverride, so we should have seen a
+          // method family above for it and have a MethInfo for it
+          // already. Unprocessed ClassInfos will have everything as
+          // AttrNoOverride.
+          assertx(data.methods.count(name));
+        }
+      }
+
+      // Create a MethInfo for any missing methods as well.
+      for (auto const name : cinfo->missingMethods) {
+        assertx(!cinfo->methods.count(name));
+        if (data.methods.count(name)) continue;
+        // The MethInfo will be empty, and be marked as incomplete.
+        auto& info = data.methods[name];
+        info.complete = false;
+        if (cinfo->isRegularClass) info.regularComplete = false;
+      }
+
+      data.hasConstProp = cinfo->subHasConstProp;
+      data.hasReifiedGeneric = cinfo->subHasReifiedGeneric;
+
+      // If this is a mock class, any direct parent of this class
+      // should be marked as mocked.
+      if (cinfo->isMockClass) {
+        if (cinfo->parent) data.mockedClasses.emplace(cinfo->parent);
+        for (auto const iface : cinfo->declInterfaces) {
+          data.mockedClasses.emplace(iface);
+        }
+        if (!(cinfo->attrs & AttrNoExpandTrait)) {
+          for (auto const trait : cinfo->usedTraits) {
+            data.mockedClasses.emplace(trait);
+          }
+        }
+      }
+      data.isSubMocked = cinfo->isMocked || cinfo->isSubMocked;
+
+      data.hasRegularClass =
+        cinfo->hasRegularSubclass || cinfo->isRegularClass;
+      data.hasNonRegularClass =
+        cinfo->hasNonRegularSubclass || !cinfo->isRegularClass;
+
+      // If this class is the one we're ultimately calculating results
+      // for, ignore it for the purposes of these booleans. They only
+      // reflect subclasses and not the class itself.
+      if (clsname->isame(top)) {
+        data.hasRegularSubclass = cinfo->hasRegularSubclass;
+        data.hasNonRegularSubclass = cinfo->hasNonRegularSubclass;
+      } else {
+        data.hasRegularSubclass = data.hasRegularClass;
+        data.hasNonRegularSubclass = data.hasNonRegularClass;
+      }
+
+      return data;
+    }
+
+    // It doesn't represent a class. It should represent a
+    // split.
+
+    // A split cannot be both a root and a dependency due to how we
+    // set up the buckets.
+    assertx(!index.top.count(clsname));
+    auto const split = index.splits.at(clsname);
+    assertx(!split->data.subclasses.empty());
+    assertx(split->data.hasRegularClass || split->data.hasNonRegularClass);
+    // Split already contains the Data, so nothing to do but return
+    // it.
+    return split->data;
+  }
+
+  // Obtain a Data for the given class/split named "top".
+  static Data aggregate_data(LocalIndex& index, SString top) {
+    Data data;
+
+    auto const& children = [&] () -> const ISStringSet& {
+      auto const it = index.children.find(top);
+      always_assert(it != end(index.children));
+      return it->second;
+    }();
     assertx(!children.empty());
 
-    Data data;
+    // For each child of the class/split (for classes this includes
+    // the top class itself), we create a Data, then union it together
+    // with the rest.
     auto first = true;
     for (auto const child : children) {
-      // Get the data for this child.
-      auto const& childData = process_children(index, child);
-      // Union the subclasses
+      auto childData = build_data(index, child, top);
+
+      // The first Data has nothing to union with, so just use it as
+      // is.
+      if (first) {
+        data = std::move(childData);
+        first = false;
+        continue;
+      }
+
       data.subclasses.insert(
         begin(childData.subclasses),
         end(childData.subclasses)
       );
 
-      // Union the private method data
-      data.privates.insert(
-        begin(childData.privates),
-        end(childData.privates)
-      );
-      data.privateSuccessors.insert(
-        begin(childData.privateSuccessors),
-        end(childData.privateSuccessors)
-      );
+      // Combine MethInfos for each method name:
+      folly::erase_if(
+        data.methods,
+        [&] (std::pair<const SString, Data::MethInfo>& p) {
+          auto const name = p.first;
+          auto& info = p.second;
 
-      // If this is the first child, just use it's methods. Otherwise
-      // intersect the methods we already have with those in this
-      // child (we only store methods present in every subclass).
-      if (first) {
-        data.methods = childData.methods;
-        first = false;
-      } else {
-        folly::erase_if(
-          data.methods,
-          [&] (const MethRef& r) { return !childData.methods.count(r); }
-        );
-      }
-
-      // If the child has no regular classes, don't change
-      // regularMethods at all. Otherwise use similar logic as we used
-      // for methods.
-      if (childData.hasRegularClass) {
-        if (!data.hasRegularClass) {
-          assertx(data.regularMethods.empty());
-          data.regularMethods = childData.regularMethods;
-        } else {
-          folly::erase_if(
-            data.regularMethods,
-            [&] (const MethRef& r) {
-              return !childData.regularMethods.count(r);
+          if (auto const childInfo =
+              folly::get_ptr(childData.methods, name)) {
+            // There's a MethInfo with that name in the
+            // child. "Promote" the MethRefs if they're in a superior
+            // status in the child.
+            for (auto const& meth : childInfo->regularMeths) {
+              if (info.regularMeths.count(meth)) continue;
+              info.regularMeths.emplace(meth);
+              info.nonRegularPrivateMeths.erase(meth);
+              info.nonRegularMeths.erase(meth);
             }
-          );
+            for (auto const& meth : childInfo->nonRegularPrivateMeths) {
+              if (info.regularMeths.count(meth) ||
+                  info.nonRegularPrivateMeths.count(meth)) {
+                continue;
+              }
+              info.nonRegularPrivateMeths.emplace(meth);
+              info.nonRegularMeths.erase(meth);
+            }
+            for (auto const& meth : childInfo->nonRegularMeths) {
+              if (info.regularMeths.count(meth) ||
+                  info.nonRegularPrivateMeths.count(meth) ||
+                  info.nonRegularMeths.count(meth)) {
+                continue;
+              }
+              info.nonRegularMeths.emplace(meth);
+            }
+            info.complete &= childInfo->complete;
+            if (childData.hasRegularClass) {
+              info.regularComplete &= childInfo->regularComplete;
+              info.privateAncestor |= childInfo->privateAncestor;
+            } else {
+              assertx(childInfo->regularComplete);
+              assertx(!childInfo->privateAncestor);
+            }
+            return false;
+          }
+
+          // There's no MethInfo with that name in the child. We might
+          // still want to keep the MethInfo because it will be needed
+          // for expanding abstract class/interface method
+          // families. If the child has a regular class, we can remove
+          // it (it won't be part of the expansion).
+          return
+            childData.hasRegularClass ||
+            !info.regularComplete ||
+            info.privateAncestor ||
+            is_special_method_name(name) ||
+            name == s_construct.get();
         }
-      } else {
-        assertx(childData.regularMethods.empty());
+      );
+
+      // Since we drop non-matching method names only if the class has
+      // a regular class, it introduces an ordering dependency. If the
+      // first class we encounter has a regular class, everything
+      // works fine. However, if the first class we encounter does not
+      // have a regular class, the Data will have its methods. If we
+      // eventually process a class which does have a regular class,
+      // we'll never process it's non-matching methods (because we
+      // iterate over data.methods). They won't end up in data.methods
+      // whereas they would if a class with regular class was
+      // processed first. Detect this condition and manually add such
+      // methods to data.methods.
+      if (!data.hasRegularClass && childData.hasRegularClass) {
+        for (auto const& [name, info] : childData.methods) {
+          if (!info.regularComplete || info.privateAncestor) continue;
+          if (is_special_method_name(name)) continue;
+          if (name == s_construct.get()) continue;
+          if (data.methods.count(name)) continue;
+          auto& newInfo = data.methods[name];
+          newInfo.regularMeths = info.regularMeths;
+          newInfo.nonRegularPrivateMeths = info.nonRegularPrivateMeths;
+          newInfo.nonRegularMeths = info.nonRegularMeths;
+          newInfo.complete = false;
+          newInfo.regularComplete = true;
+          newInfo.privateAncestor = false;
+        }
       }
+
+      data.mockedClasses.insert(
+        begin(childData.mockedClasses),
+        end(childData.mockedClasses)
+      );
 
       // The rest are booleans which can just be unioned together.
       data.hasConstProp |= childData.hasConstProp;
       data.hasReifiedGeneric |= childData.hasReifiedGeneric;
-      data.isMockClass |= childData.isMockClass;
-      data.isMocked |= childData.isMocked;
       data.isSubMocked |= childData.isSubMocked;
       data.hasRegularClass |= childData.hasRegularClass;
       data.hasNonRegularClass |= childData.hasNonRegularClass;
@@ -8545,6 +9019,182 @@ private:
     }
 
     return data;
+  }
+
+  // Create (or re-use an existing) FuncFamily for the given MethInfo.
+  static FuncFamily2::Id make_func_family(
+    LocalIndex& index,
+    Data::MethInfo& info
+  ) {
+    // We should have more than one method because otherwise we
+    // shouldn't be trying to create a FuncFamily for it.
+    assertx(
+      info.regularMeths.size() +
+      info.nonRegularPrivateMeths.size() +
+      info.nonRegularMeths.size() > 1
+    );
+
+    // Before doing the expensive sorting and hashing, see if this
+    // FuncFamily already exists. If so, just return the id.
+    if (auto const id = folly::get_ptr(
+        index.funcFamilyCache,
+        MethInfoTupleProxy{
+          &info.regularMeths,
+          &info.nonRegularPrivateMeths,
+          &info.nonRegularMeths
+        }
+      )) {
+      return *id;
+    }
+
+    // Nothing in the cache. We need to do the expensive step of
+    // actually creating the FuncFamily.
+
+    // First sort the methods so they're in deterministic order.
+    std::vector<MethRef> regular{
+      begin(info.regularMeths), end(info.regularMeths)
+    };
+    std::vector<MethRef> nonRegularPrivate{
+      begin(info.nonRegularPrivateMeths), end(info.nonRegularPrivateMeths)
+    };
+    std::vector<MethRef> nonRegular{
+      begin(info.nonRegularMeths), end(info.nonRegularMeths)
+    };
+    std::sort(begin(regular), end(regular));
+    std::sort(begin(nonRegularPrivate), end(nonRegularPrivate));
+    std::sort(begin(nonRegular), end(nonRegular));
+
+    // Create the id by hashing the methods:
+    SHA1Hasher hasher;
+    {
+      auto const size1 = regular.size();
+      auto const size2 = nonRegularPrivate.size();
+      auto const size3 = nonRegular.size();
+      hasher.update((const char*)&size1, sizeof(size1));
+      hasher.update((const char*)&size2, sizeof(size2));
+      hasher.update((const char*)&size3, sizeof(size3));
+    }
+    for (auto const& m : regular) {
+      hasher.update(m.cls->data(), m.cls->size());
+      hasher.update((const char*)&m.idx, sizeof(m.idx));
+    }
+    for (auto const& m : nonRegularPrivate) {
+      hasher.update(m.cls->data(), m.cls->size());
+      hasher.update((const char*)&m.idx, sizeof(m.idx));
+    }
+    for (auto const& m : nonRegular) {
+      hasher.update(m.cls->data(), m.cls->size());
+      hasher.update((const char*)&m.idx, sizeof(m.idx));
+    }
+    auto const id = hasher.finish();
+
+    // See if this id exists already. If so, record it in the cache
+    // and we're done.
+    if (index.funcFamilies.count(id)) {
+      index.funcFamilyCache.emplace(
+        MethInfoTuple{
+          std::move(info.regularMeths),
+          std::move(info.nonRegularPrivateMeths),
+          std::move(info.nonRegularMeths)
+        },
+        id
+      );
+      return id;
+    }
+
+    // It's a new id. Create the actual FuncFamily:
+
+    regular.shrink_to_fit();
+    nonRegularPrivate.shrink_to_fit();
+    nonRegular.shrink_to_fit();
+
+    auto ff = std::make_unique<FuncFamily2>();
+    ff->m_id = id;
+    ff->m_regular = std::move(regular);
+    ff->m_nonRegularPrivate = std::move(nonRegularPrivate);
+    ff->m_nonRegular = std::move(nonRegular);
+
+    always_assert(
+      index.funcFamilies.emplace(id, std::move(ff)).second
+    );
+    index.newFuncFamilies.emplace_back(id);
+    index.funcFamilyCache.emplace(
+      MethInfoTuple{
+        std::move(info.regularMeths),
+        std::move(info.nonRegularPrivateMeths),
+        std::move(info.nonRegularMeths)
+      },
+      id
+    );
+
+    return id;
+  }
+
+  // Translate a MethInfo into the appropriate FuncFamilyEntry and add
+  // it to the method families map.
+  static void make_method_family_entry(
+    LocalIndex& index,
+    ClassInfo2& cinfo,
+    SString name,
+    Data::MethInfo& info
+  ) {
+    assertx(!is_special_method_name(name));
+
+    FuncFamilyEntry entry;
+    entry.m_allIncomplete = !info.complete;
+    entry.m_regularIncomplete = !info.regularComplete;
+    entry.m_privateAncestor = info.privateAncestor;
+
+    if (info.regularMeths.size() + info.nonRegularPrivateMeths.size() > 1) {
+      // There's either multiple regularMeths, multiple
+      // nonRegularPrivateMeths, or one of each (remember they are
+      // disjoint). In either case, there's more than one method, so
+      // we need a func family.
+      auto const ff = make_func_family(index, info);
+      entry.m_meths = FuncFamilyEntry::BothFF{ff};
+    } else if (!info.regularMeths.empty() ||
+               !info.nonRegularPrivateMeths.empty()) {
+      // We know their sum isn't greater than one, so only one of them
+      // can be non-empty (and the one that is has only a single
+      // method).
+      auto const r = !info.regularMeths.empty()
+        ? *begin(info.regularMeths)
+        : *begin(info.nonRegularPrivateMeths);
+      if (info.nonRegularMeths.empty()) {
+        // There's only one method and it covers both variants.
+        entry.m_meths =
+          FuncFamilyEntry::BothSingle{r, info.regularMeths.empty()};
+      } else {
+        // nonRegularMeths is non-empty. Since the MethRefSets are
+        // disjoint, overall there's more than one method so need a
+        // func family.
+        auto const nonRegularPrivate = info.regularMeths.empty();
+        auto const ff = make_func_family(index, info);
+        entry.m_meths = FuncFamilyEntry::FFAndSingle{ff, r, nonRegularPrivate};
+      }
+    } else if (info.nonRegularMeths.size() > 1) {
+      // Both regularMeths and nonRegularPrivateMeths is empty. If
+      // there's multiple nonRegularMeths, we need a func family for
+      // the non-regular variant, but the regular variant is empty.
+      auto const ff = make_func_family(index, info);
+      entry.m_meths = FuncFamilyEntry::FFAndNone{ff};
+    } else if (!info.nonRegularMeths.empty()) {
+      // There's exactly one nonRegularMeths method (and nothing for
+      // the regular variant).
+      entry.m_meths =
+        FuncFamilyEntry::SingleAndNone{*begin(info.nonRegularMeths)};
+    } else {
+      // No methods at all
+      assertx(!info.complete);
+      entry.m_meths = FuncFamilyEntry::None{};
+    }
+
+    always_assert(
+      cinfo.methodFamilies.emplace(
+        name,
+        std::move(entry)
+      ).second
+    );
   }
 
   // Calculate the data for each root (those which will we'll provide
@@ -8558,15 +9208,17 @@ private:
       assertx(index.top.count(cinfo->name));
       // Process the children of this class and build a unified Data
       // for it.
-      auto const& data = process_children(index, cinfo->name);
+      auto data = aggregate_data(index, cinfo->name);
 
       // These are just copied directly from Data.
       cinfo->subHasConstProp = data.hasConstProp;
       cinfo->subHasReifiedGeneric = data.hasReifiedGeneric;
       cinfo->hasRegularSubclass = data.hasRegularSubclass;
       cinfo->hasNonRegularSubclass = data.hasNonRegularSubclass;
-      cinfo->isMocked = data.isMocked;
-      cinfo->isSubMocked = data.isSubMocked;
+
+      // This class is mocked if its on the mocked classes list.
+      cinfo->isMocked = data.mockedClasses.count(cinfo->name) > 0;
+      cinfo->isSubMocked = data.isSubMocked || cinfo->isMocked;
 
       // We can use whether we saw regular/non-regular subclasses to
       // infer if this class is overridden.
@@ -8596,36 +9248,175 @@ private:
         AttrNoReifiedInit
       );
 
-      assertx(IMPLIES(!data.hasRegularClass, data.regularMethods.empty()));
-
-      // Update method bits. A method is *not* overridden if the
-      // method is also present on every subclass (which the methods
-      // and regularMethods set tracks).
       for (auto& [name, mte] : cinfo->methods) {
         if (is_special_method_name(name)) continue;
 
+        // Since this is the first time we're processing this class,
+        // all of the methods should be marked as AttrNoOverride.
         assertx(mte.attrs & AttrNoOverride);
         assertx(mte.noOverrideRegular());
 
+        auto& info = [&, name=name] () -> Data::MethInfo& {
+          auto it = data.methods.find(name);
+          always_assert(it != end(data.methods));
+          return it->second;
+        }();
+
         auto const meth = mte.meth();
-        if (data.privateSuccessors.count(name) ||
-            (data.hasRegularSubclass &&
-             !data.regularMethods.count(meth))) {
+
+        // Is this method overridden?
+        auto const noOverride = [&] {
+          // An incomplete method family is always overridden because
+          // the call could fail.
+          if (!info.complete) return false;
+          // If more than one method then no.
+          if (info.regularMeths.size() +
+              info.nonRegularPrivateMeths.size() +
+              info.nonRegularMeths.size() > 1) {
+            return false;
+          }
+          // NB: All of the below checks all return true. The
+          // different conditions are just for checking the right
+          // invariants.
+          if (info.regularMeths.empty()) {
+            // The (single) method isn't on a regular class. This
+            // class shouldn't have any regular classes (the set is
+            // complete so if we did, the method would have been on
+            // it). The (single) method must be on nonRegularMeths or
+            // nonRegularPrivateMeths.
+            assertx(!cinfo->isRegularClass);
+            if (info.nonRegularPrivateMeths.empty()) {
+              assertx(info.nonRegularMeths.count(meth));
+              return true;
+            }
+            assertx(info.nonRegularMeths.empty());
+            assertx(info.nonRegularPrivateMeths.count(meth));
+            return true;
+          }
+          assertx(info.nonRegularPrivateMeths.empty());
+          assertx(info.nonRegularMeths.empty());
+          assertx(info.regularMeths.count(meth));
+          return true;
+        };
+
+        // Is this method overridden in a regular class? (weaker
+        // condition)
+        auto const noOverrideRegular = [&] {
+          // An incomplete method family is always overridden because
+          // the call could fail.
+          if (!info.regularComplete) return false;
+          // If more than one method then no. For the purposes of this
+          // check, non-regular but private methods are included.
+          if (info.regularMeths.size() +
+              info.nonRegularPrivateMeths.size() > 1) {
+            return false;
+          }
+          if (info.regularMeths.empty()) {
+            // The method isn't on a regular class. Like in
+            // noOverride(), the class shouldn't have any regular
+            // classes. If nonRegularPrivateMethos is empty, this
+            // means any possible override is non-regular, so we're
+            // good.
+            assertx(!cinfo->isRegularClass);
+            if (info.nonRegularPrivateMeths.empty()) return true;
+            return (bool)info.nonRegularPrivateMeths.count(meth);
+          }
+          if (cinfo->isRegularClass) {
+            // If this class is regular, the method on this class
+            // should be marked as regular.
+            assertx(info.regularMeths.count(meth));
+            return true;
+          }
+          // We know regularMeths is non-empty, and the size is at
+          // most one. If this method is the (only) one in
+          // regularMeths, it's not overridden by anything.
+          return (bool)info.regularMeths.count(meth);
+        };
+
+        if (!noOverrideRegular()) {
           mte.clearNoOverrideRegular();
           attribute_setter(mte.attrs, false, AttrNoOverride);
-        } else if (!data.methods.count(meth)) {
+        } else if (!noOverride()) {
           attribute_setter(mte.attrs, false, AttrNoOverride);
         }
 
-        assertx(!mte.hasPrivateSuccessor());
-        if (data.privateSuccessors.count(name)) {
-          mte.setHasPrivateSuccessor();
+        if (!(mte.attrs & AttrNoOverride)) {
+          assertx(!(cinfo->attrs & AttrNoOverride));
+          make_method_family_entry(index, *cinfo, name, info);
+        } else if (debug) {
+          always_assert(info.complete);
+          always_assert(info.regularComplete);
+
+          if (cinfo->isRegularClass || cinfo->hasRegularSubclass) {
+            always_assert(info.regularMeths.size() == 1);
+            always_assert(info.regularMeths.count(meth));
+            always_assert(info.nonRegularPrivateMeths.empty());
+            always_assert(info.nonRegularMeths.empty());
+          } else {
+            // If this class isn't regular, it could still have a
+            // regular method which it inherited from a (regular)
+            // parent. There should only be one method across all the
+            // sets though.
+            always_assert(
+              info.regularMeths.size() +
+              info.nonRegularPrivateMeths.size() +
+              info.nonRegularMeths.size() == 1
+            );
+            always_assert(
+              info.regularMeths.count(meth) ||
+              info.nonRegularPrivateMeths.count(meth) ||
+              info.nonRegularMeths.count(meth)
+            );
+          }
+
+          if (mte.hasPrivateAncestor() &&
+              (cinfo->isRegularClass || cinfo->hasRegularSubclass)) {
+            always_assert(info.privateAncestor);
+          } else {
+            always_assert(!info.privateAncestor);
+          }
         }
       }
 
-      // Flatten classes sets up the subclass list to just contain
-      // this class (as if it was a leaf). Since we're updating this
-      // class (and we're the only ones who should be doing so), we're
+      /*
+       * Interfaces can cause monotonicity violations. Suppose we have two
+       * interfaces: I2 and I2. I1 declares a method named Foo. Every
+       * class which implements I2 also implements I1 (therefore I2
+       * implies I1). During analysis, a type is initially Obj<=I1 and we
+       * resolve a call to Foo using I1's func families. After further
+       * optimization, we narrow the type to Obj<=I2. Now when we go to
+       * resolve a call to Foo using I2's func families, we find
+       * nothing. Foo is declared in I1, not in I2, and interface methods
+       * are not inherited. We use the fall back name-only tables, which
+       * might give us a worse type than before. This is a monotonicity
+       * violation because refining the object type gave us worse
+       * analysis.
+       *
+       * To avoid this, we expand an interface's (and abstract class'
+       * which has similar issues) func families to include all methods
+       * defined by *all* of it's (regular) implementations. So, in the
+       * example above, we'd expand I2's func families to include Foo,
+       * since all of I2's implements should define a Foo method (since
+       * they also all implement I1).
+       *
+       * Any MethInfos which are part of the abstract class/interface
+       * method table has already been processed above. Any ones which
+       * haven't are candidates for the above expansion and must also
+       * be placed in the method families table. Note: we do not just
+       * restrict this to just abstract classes or interfaces. This
+       * class may be a child of an abstract class or interfaces and
+       * we need to propagate these "expanded" methods so they're
+       * available in the dependency when we actually process the
+       * abstract class/interface in a later round.
+       */
+      for (auto& [name, info] : data.methods) {
+        if (cinfo->methods.count(name)) continue;
+        make_method_family_entry(index, *cinfo, name, info);
+      }
+
+      // Flatten classes sets up the subclass list to just contain this
+      // class (as if it was a leaf). Since we're updating this class
+      // (and we're the only ones who should be doing so), we're
       // expecting the subclass list to reflect that.
       assertx(cinfo->subclassList.size() == 1);
       assertx(cinfo->subclassList[0]->isame(cinfo->name));
@@ -8642,228 +9433,17 @@ private:
         end(cinfo->subclassList),
         string_data_lti{}
       );
+      assertx(!cinfo->subclassList.empty());
     }
 
     // Splits just store the data directly. Since this split hasn't
     // been processed yet (and no other job should process it), all of
     // the fields should be their default settings.
     for (auto& split : splits) {
-      assertx(!index.data.count(split->name));
       assertx(index.top.count(split->name));
       assertx(!split->children.empty());
-      assertx(split->data.subclasses.empty());
-      assertx(split->data.methods.empty());
-      assertx(split->data.regularMethods.empty());
-      assertx(split->data.privates.empty());
-      assertx(split->data.privateSuccessors.empty());
-      assertx(!split->data.hasConstProp);
-      assertx(!split->data.hasReifiedGeneric);
-      assertx(!split->data.isMockClass);
-      assertx(!split->data.isMocked);
-      assertx(!split->data.isSubMocked);
-      assertx(!split->data.hasRegularClass);
-      assertx(!split->data.hasNonRegularClass);
-      assertx(!split->data.hasRegularSubclass);
-      assertx(!split->data.hasNonRegularSubclass);
-      split->data = data_from_children(index, split->children);
+      split->data = aggregate_data(index, split->name);
     }
-  }
-
-  // Given a name, which could represent a class or a split node,
-  // return the Data for it, processing any transitive children as
-  // necessary. The Data is cached, so every class is only ever
-  // processed once. This function returns a const reference to the
-  // Data. This reference is only guaranteed to be valid until the
-  // next call to process_children, so don't keep it around.
-  static const Data& process_children(LocalIndex& index, SString name) {
-    // If we've already processed this name, just return what was
-    // calculated.
-    if (auto const data = folly::get_ptr(index.data, name)) return *data;
-
-    // Does this name represent a class?
-    if (auto cinfo = folly::get_default(index.classInfos, name, nullptr)) {
-      assertx(!cinfo->subclassList.empty());
-      assertx(IMPLIES(cinfo->subclassList.size() == 1,
-                      cinfo->subclassList[0]->isame(name)));
-      assertx(IMPLIES(cinfo->subclassList.size() > 1,
-                      !index.top.count(name)));
-
-      /*
-       * Obtain the Data for this class. There's two possibilities. The
-       * class might have already been processed in a previous job. In
-       * that case, it's values are correct and we can use those
-       * directly. This can be inferred if the class' subclass list
-       * has more than one entry (which can only happen if the class
-       * is already processed). If the class has no children on this
-       * job, then it's either a legitimate leaf, or was already
-       * processed. If the class is an actual leaf we can treat it as
-       * if it was already processed (class flattening initializes
-       * leafs with their initial correct values).
-       *
-       * The second case is that class has children and isn't already
-       * processed. In that case we process it's children recursively,
-       * combine their Datas, then assign it to this class.
-       */
-      auto data = [&] {
-        auto const children = [&] () -> const ISStringSet* {
-          // If subclass has more than one entry, we know it's already
-          // processed.
-          if (cinfo->subclassList.size() > 1) return nullptr;
-          return folly::get_ptr(index.children, name);
-        }();
-        if (children) {
-          // We need to process children. data_from_children will
-          // union together all of the children information. We then
-          // need to add our own.
-          auto d = data_from_children(index, *children);
-          d.subclasses.emplace(name);
-
-          // Any private methods declared by a child class get added
-          // to the private successor set.
-          d.privateSuccessors.insert(
-            begin(d.privates),
-            end(d.privates)
-          );
-          // The private methods declared by this class will be set
-          // below.
-          d.privates.clear();
-
-          // Build the set of methods which can be propagated to a
-          // parent. A method is only propagated if there's not a
-          // private successor with the same name and the method is
-          // present in all subclasses.
-          MethRefSet meths;
-          for (auto const& [methname, mte] : cinfo->methods) {
-            if (is_special_method_name(methname)) continue;
-            if (!d.privateSuccessors.count(methname)) {
-              meths.emplace(mte.meth());
-            }
-            if (mte.topLevel() && (mte.attrs & AttrPrivate)) {
-              d.privates.emplace(methname);
-            }
-          }
-
-          // Remove any methods from the Data if it's not present on
-          // this class.
-          folly::erase_if(
-            d.methods,
-            [&] (const MethRef& r) { return !meths.count(r); }
-          );
-
-          // Do the same for regularMethods, but only if this is a
-          // regular class.
-          if (cinfo->isRegularClass) {
-            if (!d.hasRegularClass) {
-              // This is a regular class, but none of the children
-              // were regular. The set of regularMethods should just
-              // be this class' methods.
-              assertx(d.regularMethods.empty());
-              d.regularMethods = std::move(meths);
-            } else {
-              folly::erase_if(
-                d.regularMethods,
-                [&] (const MethRef& r) { return !meths.count(r); }
-              );
-            }
-          }
-
-          return d;
-        }
-
-        // This class is already processed (or might be an actual
-        // leaf). It shouldn't be marked as an output class because
-        // that implies it *hasn't* been processed.
-        assertx(!index.top.count(name));
-
-        // The subclass list and method info can be inferred directly
-        // from the ClassInfo.
-        Data d;
-        d.subclasses.insert(
-          begin(cinfo->subclassList),
-          end(cinfo->subclassList)
-        );
-
-        for (auto const& [methname, mte] : cinfo->methods) {
-          if (is_special_method_name(methname)) continue;
-
-          // Initial method info. We can use whether the class is
-          // overridden or not to set up the initial method sets.
-          auto const meth = mte.meth();
-          if (mte.noOverrideRegular()) {
-            if (mte.attrs & AttrNoOverride) {
-              d.methods.emplace(meth);
-            }
-            if (cinfo->isRegularClass || cinfo->hasRegularSubclass) {
-              d.regularMethods.emplace(meth);
-            }
-          } else {
-            assertx(!(mte.attrs & AttrNoOverride));
-          }
-
-          if (mte.hasPrivateSuccessor()) {
-            assertx(!mte.noOverrideRegular());
-            d.privateSuccessors.emplace(methname);
-          }
-
-          if (mte.topLevel() && (mte.attrs & AttrPrivate)) {
-            d.privates.emplace(methname);
-          }
-        }
-
-        // The rest will be handled by the common logic below.
-        return d;
-      }();
-
-      // Common handling for both cases. Update the data (which might
-      // just reflect the subclasses) to also reflect any information
-      // in this class. Depending on which situation we encountered
-      // above, some of these might be redundant.
-
-      // These are true if true on this class, or any subclasses.
-      data.hasConstProp |=
-        cinfo->subHasConstProp || cinfo->hasConstProp;
-      data.hasReifiedGeneric |=
-        cinfo->subHasReifiedGeneric || cinfo->hasReifiedGeneric;
-
-      // A class is mocked *only* if one of it's direct children is a
-      // mock class. Interfaces and traits are never marked as mocked.
-      data.isMocked = cinfo->isMocked;
-      if (!(cinfo->attrs & (AttrInterface | AttrTrait))) {
-        data.isMocked |= data.isMockClass;
-      }
-      data.isSubMocked |= data.isMocked || cinfo->isSubMocked;
-      // Whether this is a mock class is solely determined by this
-      // class, and not any children.
-      data.isMockClass = cinfo->isMockClass;
-
-      // The ordering of these is important:
-      data.hasRegularSubclass =
-        data.hasRegularClass || cinfo->hasRegularSubclass;
-      data.hasNonRegularSubclass =
-        data.hasNonRegularClass || cinfo->hasNonRegularSubclass;
-
-      data.hasRegularClass =
-        data.hasRegularSubclass || cinfo->isRegularClass;
-      data.hasNonRegularClass =
-        data.hasNonRegularSubclass || !cinfo->isRegularClass;
-
-      auto const DEBUG_ONLY [existing, emplaced] =
-        index.data.emplace(name, std::move(data));
-      assertx(emplaced);
-      return existing->second;
-    }
-
-    // It doesn't represent a class. It should represent a
-    // split. Split store Data directly, so no need for caching. We
-    // can just return a reference to its Data.
-
-    // A split cannot be both a root and a dependency due to how we
-    // set up the buckets.
-    assertx(!index.top.count(name));
-    auto const split = index.splits.at(name);
-    assertx(!split->data.subclasses.empty());
-    assertx(split->data.hasRegularClass || split->data.hasNonRegularClass);
-    return split->data;
   }
 };
 
@@ -8895,10 +9475,6 @@ struct SubclassWork {
  *   or not. A class is eligible for processing if its transitive
  *   dependencies are below the maximum size.
  *
- * - Eligible classes are separated into roots and non-roots. A class
- *   is a root if none of its parents are roots and none of its
- *   parents have children which will be turned into split nodes.
- *
  * - Non-eligible classes are ignored and will be processed again next
  *   round. However, if the class has more eligible direct children
  *   than the bucket size, the class' children will be turned into
@@ -8910,10 +9486,8 @@ struct SubclassWork {
  *   nodes instead of the children (this should shrink it
  *   considerably). Each new split becomes a root.
  *
- * - Assign each root to a bucket. Use assign_hierachial_work to map
- *   each root to a bucket. The classes which are non-roots (which are
- *   eligible but not roots) can be used by assign_hierarchial_work as
- *   dependencies (and will be promoted).
+ * - Assign each eligible class to a bucket. Use
+ *   assign_hierachial_work to map each eligible class to a bucket.
  *
  * - Update the processed set. Any class which hasn't been processed
  *   that round should have their dependency set shrunken. Processing
@@ -9054,19 +9628,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
         // is already correct and doesn't need to be updated.
         if (meta.children.empty()) return Action{ Process{cls} };
 
-        if (willProcess(cls)) {
-          // This class is eligible for processing. It might be a
-          // root. A class is a root if none of it's parents are
-          // eligible, and the parents won't split their children.
-          auto const top = std::none_of(
-            begin(meta.parents),
-            end(meta.parents),
-            [&] (SString parent) {
-              return willProcess(parent) || willSplitChildren(parent);
-            }
-          );
-          return top ? Action{ Root{cls} } : Action{ Process{cls} };
-        }
+        if (willProcess(cls)) return Action{ Root{cls} };
 
         // The class isn't eligible and we won't split the
         // children. Nothing to do here but defer it to another
@@ -9228,16 +9790,10 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       // Called to get the class index for promotion from a dependency
       // to an output.
       [&] (SString c) -> Optional<size_t> {
-        // If the class is already processed, it should remain a
-        // dependency.
-        if (processed.count(c)) return std::nullopt;
-        auto const it = subclassMeta.meta.find(c);
-        // Splits should never be promoted
-        if (it == end(subclassMeta.meta)) return std::nullopt;
-        // Leaf classes should never be promoted either. They're
-        // already processed.
-        if (it->second.children.empty()) return std::nullopt;
-        return it->second.idx;
+        // Never promote anything. If it's not already a root, it's
+        // already processed or a leaf class and in either case
+        // there's no need for promotion.
+        return std::nullopt;
       }
     );
 
@@ -9325,6 +9881,8 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
   // going to run a job which it is part of the output.
   ISStringToOneT<UniquePtrRef<BuildSubclassListJob::Split>> splitsToRefs;
 
+  ISStringToOneT<hphp_fast_set<FuncFamily2::Id>> funcFamilyDeps;
+
   // Use the metadata to assign to rounds and buckets.
   auto work = build_subclass_lists_assign(std::move(meta));
 
@@ -9336,9 +9894,16 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
     std::vector<
       std::pair<SString, UniquePtrRef<BuildSubclassListJob::Split>>
     > splits;
+    std::vector<
+      std::pair<FuncFamily2::Id, Ref<FuncFamilyGroup>>
+    > funcFamilies;
+    std::vector<
+      std::pair<SString, hphp_fast_set<FuncFamily2::Id>>
+    > funcFamilyDeps;
   };
 
-  auto const run = [&] (SubclassWork::Bucket bucket) -> coro::Task<Updates> {
+  auto const run = [&] (SubclassWork::Bucket bucket, size_t round)
+    -> coro::Task<Updates> {
     HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
 
     if (bucket.classes.empty() && bucket.splits.empty()) {
@@ -9377,6 +9942,31 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
       | map([&] (SString s) { return splitsToRefs.at(s); })
       | as<std::vector>();
 
+    std::vector<Ref<FuncFamilyGroup>> funcFamilies;
+    if (round > 0) {
+      // Provide the func families associated with any dependency
+      // classes going into this job. We only need to do this after
+      // the first round because in the first round all dependencies
+      // are leafs and won't have any func families.
+      for (auto const c : bucket.deps) {
+        if (auto const deps = folly::get_ptr(funcFamilyDeps, c)) {
+          for (auto const& d : *deps) {
+            funcFamilies.emplace_back(index.funcFamilyRefs.at(d));
+          }
+        }
+      }
+      // Keep the func families in deterministic order and avoid
+      // duplicates.
+      std::sort(begin(funcFamilies), end(funcFamilies));
+      funcFamilies.erase(
+        std::unique(begin(funcFamilies), end(funcFamilies)),
+        end(funcFamilies)
+      );
+    } else {
+      assertx(funcFamilyDeps.empty());
+      assertx(index.funcFamilyRefs.empty());
+    }
+
     // ClassInfos and any dependency splits should already be
     // stored. Any splits as output of the job, or edges need to be
     // uploaded, however.
@@ -9403,7 +9993,8 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
             std::move(deps),
             std::move(splitRefs),
             std::move(splitDeps),
-            std::move(edges)
+            std::move(edges),
+            std::move(funcFamilies)
           )
         ),
         std::move(metadata)
@@ -9412,16 +10003,37 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
     // Every job is a single work-unit, so we should only ever get one
     // result for each one.
     assertx(results.size() == 1);
-    auto& [cinfoRefs, outSplitRefs] = results[0];
+    auto& [cinfoRefs, outSplitRefs, ffRefs, outMetaRef] = results[0];
     assertx(cinfoRefs.size() == bucket.classes.size());
     assertx(outSplitRefs.size() == bucket.splits.size());
 
+    auto outMeta = HPHP_CORO_AWAIT(index.client->load(std::move(outMetaRef)));
+    assertx(outMeta.newFuncFamilyIds.size() == ffRefs.size());
+    assertx(outMeta.funcFamilyDeps.size() == cinfoRefs.size());
+
     Updates updates;
+    updates.classes.reserve(bucket.classes.size());
+    updates.splits.reserve(bucket.splits.size());
+    updates.funcFamilies.reserve(outMeta.newFuncFamilyIds.size());
+    updates.funcFamilyDeps.reserve(outMeta.funcFamilyDeps.size());
+
     for (size_t i = 0, size = bucket.classes.size(); i < size; ++i) {
       updates.classes.emplace_back(bucket.classes[i], cinfoRefs[i]);
     }
     for (size_t i = 0, size = bucket.splits.size(); i < size; ++i) {
       updates.splits.emplace_back(bucket.splits[i], outSplitRefs[i]);
+    }
+    for (size_t i = 0, size = outMeta.newFuncFamilyIds.size(); i < size; ++i) {
+      auto const ref = ffRefs[i];
+      for (auto const& id : outMeta.newFuncFamilyIds[i]) {
+        updates.funcFamilies.emplace_back(id, ref);
+      }
+    }
+    for (size_t i = 0, size = outMeta.funcFamilyDeps.size(); i < size; ++i) {
+      updates.funcFamilyDeps.emplace_back(
+        bucket.classes[i],
+        std::move(outMeta.funcFamilyDeps[i])
+      );
     }
     HPHP_CORO_MOVE_RETURN(updates);
   };
@@ -9429,14 +10041,16 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
   trace_time tracer2{"build subclass lists work"};
   tracer2.ignore_client_stats();
 
-  for (auto& round : work.buckets) {
+  for (size_t roundNum = 0; roundNum < work.buckets.size(); ++roundNum) {
+    auto& round = work.buckets[roundNum];
     // In each round, run all of the work for each bucket
     // simultaneously, gathering up updates from each job.
     auto const updates = coro::wait(coro::collectRange(
       from(round)
         | move
         | map([&] (SubclassWork::Bucket&& b) {
-            return run(std::move(b)).scheduleOn(index.executor->sticky());
+            return run(std::move(b), roundNum)
+              .scheduleOn(index.executor->sticky());
           })
         | as<std::vector>()
     ));
@@ -9452,14 +10066,46 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
         }
       }
     );
+
     // However updating splitsToRefs cannot be, because we're mutating
     // the map by inserting into it. However there's a relatively
     // small number of splits, so this should be fine.
-    for (auto const& u : updates) {
-      for (auto const& [name, ref] : u.splits) {
-        always_assert(splitsToRefs.emplace(name, ref).second);
+    parallel::parallel(
+      [&] {
+        for (auto const& u : updates) {
+          for (auto const& [name, ref] : u.splits) {
+            always_assert(splitsToRefs.emplace(name, ref).second);
+          }
+        }
+      },
+      [&] {
+        for (auto const& u : updates) {
+          for (auto const& [id, ref] : u.funcFamilies) {
+            // The same FuncFamily can be grouped into multiple
+            // different groups. Prefer the group that's smaller and
+            // if they're the same size, use the one with the lowest
+            // id to keep determinism.
+            auto const& [existing, inserted] =
+              index.funcFamilyRefs.emplace(id, ref);
+            if (inserted) continue;
+            if (existing->second.id().m_size < ref.id().m_size) continue;
+            if (ref.id().m_size < existing->second.id().m_size) {
+              existing->second = ref;
+              continue;
+            }
+            if (existing->second.id() <= ref.id()) continue;
+            existing->second = ref;
+          }
+        }
+      },
+      [&] {
+        for (auto const& u : updates) {
+          for (auto& [name, ids] : u.funcFamilyDeps) {
+            always_assert(funcFamilyDeps.emplace(name, std::move(ids)).second);
+          }
+        }
       }
-    }
+    );
   }
 }
 
@@ -9599,6 +10245,7 @@ struct AggregateJob {
     std::vector<std::unique_ptr<ClassInfo2>> classInfos;
     std::vector<std::unique_ptr<php::Func>> funcs;
     std::vector<std::unique_ptr<php::Unit>> units;
+    std::vector<FuncFamilyGroup> funcFamilies;
 
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
@@ -9606,6 +10253,7 @@ struct AggregateJob {
         (classInfos)
         (funcs)
         (units)
+        (funcFamilies)
         ;
     }
   };
@@ -9613,12 +10261,14 @@ struct AggregateJob {
   static Bundle run(Variadic<std::unique_ptr<php::Class>> classes,
                     Variadic<std::unique_ptr<ClassInfo2>> classInfos,
                     Variadic<std::unique_ptr<php::Func>> funcs,
-                    Variadic<std::unique_ptr<php::Unit>> units) {
+                    Variadic<std::unique_ptr<php::Unit>> units,
+                    Variadic<FuncFamilyGroup> funcFamilies) {
     Bundle bundle;
     bundle.classes.reserve(classes.vals.size());
     bundle.classInfos.reserve(classInfos.vals.size());
     bundle.funcs.reserve(funcs.vals.size());
     bundle.units.reserve(units.vals.size());
+    bundle.funcFamilies.reserve(funcFamilies.vals.size());
     for (auto& c : classes.vals) {
       bundle.classes.emplace_back(std::move(c));
     }
@@ -9631,6 +10281,9 @@ struct AggregateJob {
     for (auto& u : units.vals) {
       bundle.units.emplace_back(std::move(u));
     }
+    for (auto& group : funcFamilies.vals) {
+      bundle.funcFamilies.emplace_back(std::move(group));
+    }
     return bundle;
   }
 };
@@ -9639,8 +10292,11 @@ Job<AggregateJob> s_aggregateJob;
 
 // Convert the ClassInfo2s we loaded from extern-worker into their
 // equivalent ClassInfos (and store it in the Index).
-void make_class_infos_local(IndexData& index,
-                            std::vector<std::unique_ptr<ClassInfo2>> remote) {
+void make_class_infos_local(
+  IndexData& index,
+  std::vector<std::unique_ptr<ClassInfo2>> remote,
+  std::vector<std::unique_ptr<FuncFamily2>> funcFamilies
+) {
   trace_time tracer("make class-infos local");
   tracer.ignore_client_stats();
 
@@ -9702,6 +10358,78 @@ void make_class_infos_local(IndexData& index,
     for (auto const s : src) dst.emplace_back(get(s));
     dst.shrink_to_fit();
   };
+
+  struct FFState {
+    explicit FFState(std::unique_ptr<FuncFamily2> ff) : m_ff{std::move(ff)} {}
+    std::unique_ptr<FuncFamily2> m_ff;
+    LockFreeLazyPtrNoDelete<FuncFamily> m_notExpanded;
+    LockFreeLazyPtrNoDelete<FuncFamily> m_expanded;
+
+    FuncFamily* notExpanded(IndexData& index) {
+      return const_cast<FuncFamily*>(
+        &m_notExpanded.get([&] { return make(index, false); })
+      );
+    }
+    FuncFamily* expanded(IndexData& index) {
+      return const_cast<FuncFamily*>(
+        &m_expanded.get([&] { return make(index, true); })
+      );
+    }
+
+    FuncFamily* make(IndexData& index, bool expanded) const {
+      FuncFamily::PFuncVec funcs;
+      funcs.reserve(
+        m_ff->m_regular.size() +
+        (expanded
+         ? 0
+         : (m_ff->m_nonRegularPrivate.size() + m_ff->m_nonRegular.size())
+        )
+      );
+
+      for (auto const& m : m_ff->m_regular) {
+        funcs.emplace_back(func_from_meth_ref(index, m), true);
+      }
+      if (!expanded) {
+        for (auto const& m : m_ff->m_nonRegularPrivate) {
+          funcs.emplace_back(func_from_meth_ref(index, m), true);
+        }
+        for (auto const& m : m_ff->m_nonRegular) {
+          funcs.emplace_back(func_from_meth_ref(index, m), false);
+        }
+      }
+
+      auto const extra = !expanded && !m_ff->m_nonRegular.empty() &&
+        (m_ff->m_regular.size() + m_ff->m_nonRegularPrivate.size()) > 1;
+
+      std::sort(
+        begin(funcs), end(funcs),
+        [] (FuncFamily::PossibleFunc a, const FuncFamily::PossibleFunc b) {
+          if (a.inRegular() && !b.inRegular()) return true;
+          if (!a.inRegular() && b.inRegular()) return false;
+          return string_data_lti{}(a.ptr()->cls->name, b.ptr()->cls->name);
+        }
+      );
+      funcs.shrink_to_fit();
+
+      assertx(funcs.size() > 1);
+      return index.funcFamilies.insert(
+        std::make_unique<FuncFamily>(std::move(funcs), extra),
+        false
+      ).first->first.get();
+    }
+  };
+
+  hphp_fast_map<FuncFamily2::Id, std::unique_ptr<FFState>> ffState;
+  for (auto& ff : funcFamilies) {
+    auto const id = ff->m_id;
+    always_assert(
+      ffState.emplace(
+        id,
+        std::make_unique<FFState>(std::move(ff))
+      ).second
+    );
+  }
+  funcFamilies.clear();
 
   std::mutex extraMethodLock;
 
@@ -9779,6 +10507,164 @@ void make_class_infos_local(IndexData& index,
 
       const_cast<php::Class*>(cinfo->cls)->attrs = rcinfo->attrs;
 
+      auto const noOverrideRegular = [&] (SString name) {
+        if (auto const mte = folly::get_ptr(cinfo->methods, name)) {
+          return mte->noOverrideRegular();
+        }
+        return true;
+      };
+
+      std::vector<std::pair<SString, FuncFamilyOrSingle>> entries;
+      std::vector<std::pair<SString, FuncFamilyOrSingle>> aux;
+      for (auto const& [name, entry] : rcinfo->methodFamilies) {
+        assertx(!is_special_method_name(name));
+
+        auto expanded = false;
+        if (!cinfo->methods.count(name)) {
+          if (!(rcinfo->attrs & (AttrAbstract|AttrInterface))) continue;
+          if (!rcinfo->hasRegularSubclass) continue;
+          if (entry.m_regularIncomplete || entry.m_privateAncestor) continue;
+          if (name == s_construct.get()) continue;
+          expanded = true;
+        }
+
+        match<void>(
+          entry.m_meths,
+          [&, name=name, &entry=entry] (const FuncFamilyEntry::BothFF& e) {
+            auto const it = ffState.find(e.m_ff);
+            assertx(it != end(ffState));
+            auto const& state = it->second;
+
+            if (expanded) {
+              if (state->m_ff->m_regular.empty()) return;
+              if (state->m_ff->m_regular.size() == 1) {
+                entries.emplace_back(
+                  name,
+                  FuncFamilyOrSingle{
+                    func_from_meth_ref(index, state->m_ff->m_regular[0]),
+                    false
+                  }
+                );
+                return;
+              }
+              entries.emplace_back(
+                name,
+                FuncFamilyOrSingle{
+                  state->expanded(index),
+                  false
+                }
+              );
+              return;
+            }
+
+            entries.emplace_back(
+              name,
+              FuncFamilyOrSingle{
+                state->notExpanded(index),
+                entry.m_allIncomplete
+              }
+            );
+          },
+          [&, name=name, &entry=entry] (const FuncFamilyEntry::FFAndSingle& e) {
+            if (expanded) {
+              if (e.m_nonRegularPrivate) return;
+              entries.emplace_back(
+                name,
+                FuncFamilyOrSingle{
+                  func_from_meth_ref(index, e.m_regular),
+                  false
+                }
+              );
+              return;
+            }
+
+            auto const it = ffState.find(e.m_ff);
+            assertx(it != end(ffState));
+
+            entries.emplace_back(
+              name,
+              FuncFamilyOrSingle{
+                it->second->notExpanded(index),
+                entry.m_allIncomplete
+              }
+            );
+            if (noOverrideRegular(name)) return;
+            aux.emplace_back(
+              name,
+              FuncFamilyOrSingle{
+                func_from_meth_ref(index, e.m_regular),
+                false
+              }
+            );
+          },
+          [&, name=name, &entry=entry] (const FuncFamilyEntry::FFAndNone& e) {
+            if (expanded) return;
+            auto const it = ffState.find(e.m_ff);
+            assertx(it != end(ffState));
+
+            entries.emplace_back(
+              name,
+              FuncFamilyOrSingle{
+                it->second->notExpanded(index),
+                entry.m_allIncomplete
+              }
+            );
+            if (!noOverrideRegular(name)) {
+              aux.emplace_back(name, FuncFamilyOrSingle{});
+            }
+          },
+          [&, name=name, &entry=entry] (const FuncFamilyEntry::BothSingle& e) {
+            if (expanded && e.m_nonRegularPrivate) return;
+            entries.emplace_back(
+              name,
+              FuncFamilyOrSingle{
+                func_from_meth_ref(index, e.m_all),
+                !expanded && entry.m_allIncomplete
+              }
+            );
+          },
+          [&, name=name, &entry=entry] (const FuncFamilyEntry::SingleAndNone& e) {
+            if (expanded) return;
+            entries.emplace_back(
+              name,
+              FuncFamilyOrSingle{
+                func_from_meth_ref(index, e.m_all),
+                entry.m_allIncomplete
+              }
+            );
+            if (!noOverrideRegular(name)) {
+              aux.emplace_back(name, FuncFamilyOrSingle{});
+            }
+          },
+          [&, &entry=entry] (const FuncFamilyEntry::None&) {
+            assertx(entry.m_allIncomplete);
+          }
+        );
+      }
+
+      // Sort the lists of new entries, so we can insert them into the
+      // method family maps (which are sorted_vector_maps) in bulk.
+      std::sort(
+        begin(entries), end(entries),
+        [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
+      );
+      std::sort(
+        begin(aux), end(aux),
+        [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
+      );
+      if (!entries.empty()) {
+        cinfo->methodFamilies.insert(
+          folly::sorted_unique, begin(entries), end(entries)
+        );
+      }
+      if (!aux.empty()) {
+        cinfo->methodFamiliesAux.insert(
+          folly::sorted_unique, begin(aux), end(aux)
+        );
+      }
+      cinfo->methodFamilies.shrink_to_fit();
+      cinfo->methodFamiliesAux.shrink_to_fit();
+
       if (!rcinfo->extraMethods.empty()) {
         // This is rare. Only happens with unflattened traits, so we
         // taking a lock here is fine.
@@ -9793,7 +10679,9 @@ void make_class_infos_local(IndexData& index,
       rcinfo.reset();
     }
   );
+
   remote.clear();
+  funcFamilies.clear();
 }
 
 // Switch to "local" mode, in which all calculations are expected to
@@ -9815,7 +10703,7 @@ void make_local(IndexData& index) {
   // actual aggregation.
   auto const sizePerBucket = usingSubprocess
     ? 256*1024*1024
-    : 10*1024*1024;
+    : 32*1024*1024;
 
   /*
    * We'll use the names of the various items as the items to
@@ -9834,13 +10722,16 @@ void make_local(IndexData& index) {
    * all items with that given name, using a set to ensure each RefId
    * is only used once.
    */
+
+  SStringToOneT<Ref<FuncFamilyGroup>> nameToFuncFamilyGroup;
   auto const& [items, totalSize] = [&] {
     SStringSet seen;
     std::vector<SString> items;
     size_t totalSize = 0;
     items.reserve(
       index.unitRefs.size() + index.classRefs.size() +
-      index.classInfoRefs.size() + index.funcRefs.size()
+      index.classInfoRefs.size() + index.funcRefs.size() +
+      index.funcFamilyRefs.size()
     );
     for (auto const& [name, ref] : index.unitRefs) {
       totalSize += ref.id().m_size;
@@ -9858,6 +10749,16 @@ void make_local(IndexData& index) {
       items.emplace_back(name);
     }
     for (auto const& [name, ref] : index.funcRefs) {
+      totalSize += ref.id().m_size;
+      if (!seen.emplace(name).second) continue;
+      items.emplace_back(name);
+    }
+
+    for (auto const& [_, ref] : index.funcFamilyRefs) {
+      auto const name = makeStaticString(ref.id().toString());
+      nameToFuncFamilyGroup.emplace(name, ref);
+    }
+    for (auto const& [name, ref] : nameToFuncFamilyGroup) {
       totalSize += ref.id().m_size;
       if (!seen.emplace(name).second) continue;
       items.emplace_back(name);
@@ -9887,6 +10788,9 @@ void make_local(IndexData& index) {
   // store them until we convert it.
   std::vector<std::unique_ptr<ClassInfo2>> remoteClassInfos;
   remoteClassInfos.reserve(index.classInfoRefs.size());
+  hphp_fast_set<FuncFamily2::Id> remoteFuncFamilyIds;
+  std::vector<std::unique_ptr<FuncFamily2>> remoteFuncFamilies;
+  remoteFuncFamilies.reserve(index.funcFamilyRefs.size());
 
   auto const run = [&] (std::vector<SString> chunks) -> coro::Task<void> {
     HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
@@ -9897,6 +10801,7 @@ void make_local(IndexData& index) {
     std::vector<UniquePtrRef<ClassInfo2>> classInfos;
     std::vector<UniquePtrRef<php::Func>> funcs;
     std::vector<UniquePtrRef<php::Unit>> units;
+    std::vector<Ref<FuncFamilyGroup>> funcFamilies;
 
     // Since a name can map to multiple items, and different case
     // sensitive version of the same name can appear in the same
@@ -9923,6 +10828,10 @@ void make_local(IndexData& index) {
         if (!ids.emplace(r->id()).second) continue;
         funcs.emplace_back(*r);
       }
+      if (auto const r = folly::get_optional(nameToFuncFamilyGroup, name)) {
+        if (!ids.emplace(r->id()).second) continue;
+        funcFamilies.emplace_back(*r);
+      }
     }
 
     AggregateJob::Bundle chunk;
@@ -9941,7 +10850,8 @@ void make_local(IndexData& index) {
             std::move(classes),
             std::move(classInfos),
             std::move(funcs),
-            std::move(units)
+            std::move(units),
+            std::move(funcFamilies)
           )
         ),
         std::move(metadata)
@@ -9953,11 +10863,12 @@ void make_local(IndexData& index) {
     } else {
       // If we're using subprocess mode, we don't need to aggregate
       // and we can just download the items directly.
-      auto [c, cinfo, f, u] = HPHP_CORO_AWAIT(coro::collect(
+      auto [c, cinfo, f, u, ff] = HPHP_CORO_AWAIT(coro::collect(
         index.client->load(std::move(classes)),
         index.client->load(std::move(classInfos)),
         index.client->load(std::move(funcs)),
-        index.client->load(std::move(units))
+        index.client->load(std::move(units)),
+        index.client->load(std::move(funcFamilies))
       ));
       chunk.classes.insert(
         end(chunk.classes),
@@ -9979,6 +10890,11 @@ void make_local(IndexData& index) {
         std::make_move_iterator(begin(u)),
         std::make_move_iterator(end(u))
       );
+      chunk.funcFamilies.insert(
+        end(chunk.funcFamilies),
+        std::make_move_iterator(begin(ff)),
+        std::make_move_iterator(end(ff))
+      );
     }
 
     // And add it to our php::Program.
@@ -9998,6 +10914,13 @@ void make_local(IndexData& index) {
         std::make_move_iterator(begin(chunk.classInfos)),
         std::make_move_iterator(end(chunk.classInfos))
       );
+      for (auto& group : chunk.funcFamilies) {
+        for (auto& ff : group.m_ffs) {
+          if (remoteFuncFamilyIds.emplace(ff->m_id).second) {
+            remoteFuncFamilies.emplace_back(std::move(ff));
+          }
+        }
+      }
     }
 
     HPHP_CORO_RETURN_VOID;
@@ -10017,6 +10940,7 @@ void make_local(IndexData& index) {
   decltype(index.classRefs){}.swap(index.classRefs);
   decltype(index.funcRefs){}.swap(index.funcRefs);
   decltype(index.classInfoRefs){}.swap(index.classInfoRefs);
+  decltype(index.funcFamilyRefs){}.swap(index.funcFamilyRefs);
 
   // Done with any extern-worker stuff at this point:
   index.configRef.reset();
@@ -10060,7 +10984,11 @@ void make_local(IndexData& index) {
   // Buid Index data structures from the php::Program.
   add_program_to_index(index);
   // Convert the ClassInfo2s into ClassInfos.
-  make_class_infos_local(index, std::move(remoteClassInfos));
+  make_class_infos_local(
+    index,
+    std::move(remoteClassInfos),
+    std::move(remoteFuncFamilies)
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -13635,6 +14563,7 @@ void PublicSPropMutations::mergeUnknown(Context ctx) {
 //////////////////////////////////////////////////////////////////////
 
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::ClassInfo2);
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::FuncFamily2);
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::BuildSubclassListJob::Split);
 
 //////////////////////////////////////////////////////////////////////

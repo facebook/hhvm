@@ -220,6 +220,7 @@ struct RefId {
   bool operator==(const RefId&) const;
   bool operator!=(const RefId&) const;
   bool operator<(const RefId&) const;
+  bool operator<=(const RefId&) const;
   size_t hash() const;
 
   struct Hasher {

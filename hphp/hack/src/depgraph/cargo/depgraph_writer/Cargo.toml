@@ -9,12 +9,7 @@ path = "../../depgraph_writer/writer.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
+bytemuck = { version = "1.12.3", features = ["derive"] }
 dep = { path = "../dep" }
-hash = { path = "../../../utils/hash" }
-memmap = "0.7"
-parking_lot = { version = "0.11.2", features = ["send_guard"] }
-rayon = "1.2"
-
-[dev-dependencies]
-depgraph_reader = { path = "../depgraph_reader" }
-tempfile = "3.3"
+log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
+newtype = { path = "../../../utils/newtype" }

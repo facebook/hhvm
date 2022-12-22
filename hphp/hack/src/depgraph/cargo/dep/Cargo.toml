@@ -9,5 +9,6 @@ path = "../../dep/dep.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
+bytemuck = { version = "1.12.3", features = ["derive"] }
 ocamlrep = { path = "../../../ocamlrep" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

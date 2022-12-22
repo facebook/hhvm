@@ -2,537 +2,134 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::io::BufWriter;
 use std::io::Write;
+use std::path::Path;
 
+use bytemuck::Pod;
+use bytemuck::Zeroable;
 pub use dep::Dep;
-use hash::DashMap;
-use hash::HashMap;
-use memmap::MmapMut;
-use parking_lot::Mutex;
-use rayon::prelude::*;
+use log::info;
+use newtype::newtype_int;
+use newtype::IdVec;
 
-const PAGE_ALIGN: u32 = 4096;
+// A 32-bit index into a table of Deps.
+newtype_int!(HashIndex, u32, HashIndexMap, HashIndexSet, Pod, Zeroable);
 
-/// Type-safe hash index wrapper
-#[derive(Copy, Clone)]
-pub struct HashIndex(u32);
+// Type-safe hash list index wrapper
+newtype_int!(
+    HashListIndex,
+    u32,
+    HashListIndexMap,
+    HashListIndexSet,
+    Pod,
+    Zeroable
+);
 
-/// Type-safe hash list index wrapper
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct HashListIndex(pub u32);
+pub struct MemDepGraph {
+    /// Unique hashes, in sorted order.
+    pub hashes: IdVec<HashIndex, Dep>,
 
-impl HashListIndex {
-    #[inline(always)]
-    pub fn incr(self, x: u32) -> Self {
-        Self(self.0 + x)
-    }
+    /// Which edge list each member of `hashes` has (index int `edge_lists`).
+    /// Same length as `hashes`.
+    pub edge_list_indices: IdVec<HashIndex, HashListIndex>,
+
+    /// Unique edge lists in some canonical order.
+    pub edge_lists: IdVec<HashListIndex, Box<[HashIndex]>>,
 }
 
-/// Concurrent hash-to-hash-index map, for writing.
-#[derive(Default)]
-struct IndexerWriter {
-    hash_to_index: DashMap<u64, HashIndex>,
-}
-
-impl IndexerWriter {
-    fn insert(&self, hash: u64, hash_index: HashIndex) {
-        self.hash_to_index.insert(hash, hash_index);
-    }
-
-    fn into_read_only(self) -> Indexer {
-        Indexer {
-            hash_to_index: self.hash_to_index.into_iter().collect(),
-        }
-    }
-}
-
-/// Plain hash-to-hash-index map, for reading.
-#[derive(Clone)]
-pub struct Indexer {
-    hash_to_index: HashMap<u64, HashIndex>,
-}
-
-impl Indexer {
-    fn get(&self, hash: u64) -> Option<HashIndex> {
-        self.hash_to_index.get(&hash).copied()
-    }
-}
-
-/// dependency HashList lookup table, used for construction
-#[derive(Default)]
-pub struct LookupTableWriter {
-    dependency_to_index: DashMap<u64, HashListIndex>,
-}
-
-impl LookupTableWriter {
-    pub fn insert(&self, dependency: u64, hash_list_index: HashListIndex) {
-        self.dependency_to_index.insert(dependency, hash_list_index);
-    }
-
-    fn into_read_only(self) -> LookupTable {
-        LookupTable {
-            dependency_to_index: self.dependency_to_index.into_iter().collect(),
-        }
-    }
-}
-
-/// dependency HashList lookup table, used for reading
-#[derive(Default)]
-struct LookupTable {
-    dependency_to_index: HashMap<u64, HashListIndex>,
-}
-
-impl LookupTable {
-    fn get(&self, dependency: u64) -> Option<HashListIndex> {
-        self.dependency_to_index.get(&dependency).copied()
-    }
-}
-
-const SHARDED_MMAP_SHARD_SIZE: usize = 1 * 1024 * 1024; /* 2048 x 1 MiB = 2 GiB */
-
-/// Utility to provide safe but efficient access to the writable mmap.
-pub struct ShardedMmap<'a> {
-    shards: Vec<Mutex<&'a mut [u8]>>,
-}
-
-impl<'a> ShardedMmap<'a> {
-    fn new(mut bytes: &'a mut [u8]) -> Self {
-        let mut shards = Vec::new();
-
-        while bytes.len() > SHARDED_MMAP_SHARD_SIZE {
-            let (left, right) = bytes.split_at_mut(SHARDED_MMAP_SHARD_SIZE);
-            shards.push(Mutex::new(left));
-            bytes = right;
-        }
-        shards.push(Mutex::new(bytes));
-        Self { shards }
-    }
-
-    fn write(&self, mut at: usize, xs: &[u8]) {
-        let mut start: usize = 0;
-        let end: usize = xs.len();
-        while start < end {
-            let shard_index = at / SHARDED_MMAP_SHARD_SIZE;
-            let shard_offset = at % SHARDED_MMAP_SHARD_SIZE;
-            let shard_end = (shard_index + 1) * SHARDED_MMAP_SHARD_SIZE;
-            let to_write = std::cmp::min(end - start, shard_end - at);
-
-            self.shards.get(shard_index).unwrap().lock()[shard_offset..shard_offset + to_write]
-                .copy_from_slice(&xs[start..start + to_write]);
-
-            at += to_write;
-            start += to_write;
-        }
-    }
-}
-
-/// Phase 1 of writing a dependency graph.
-///
-/// Phase where space is allocated for all hash sets
-pub struct Phase1AllocateHashSets;
-
-/// Phase 2 of writing a dependency graph.
-///
-/// Phase were all hash sets are written to file
-pub struct Phase2WriteHashSets {
-    mmap: MmapMut,
-}
-
-/// Phase 3 of writing a dependency graph.
-///
-/// Link dependencies with hash sets.
-pub struct Phase3RegisterLookupTable {
-    mmap: MmapMut,
-}
-
-/// Data structure that can be used to construct a dependency graph.
-///
-/// Phase is a phantom type parameter (see `Phase*` enums).
-#[must_use]
-pub struct DepGraphWriter<PHASE> {
-    state: DepGraphWriterState,
-    phase: PHASE,
-}
-
-struct DepGraphWriterState {
-    indexer_offset: u32,
-    lookup_table_offset: u32,
-    next_set_offset: u32,
-
-    sorted_hashes: Vec<u64>,
-    indexer: Indexer,
-    lookup_table: LookupTable,
-}
-
-impl DepGraphWriter<Phase1AllocateHashSets> {
-    /// Initialize a new dependency graph writer with the given
-    /// set of sorted hashes.
-    ///
-    /// # Panics
-    ///
-    /// - If the list of hashes is empty.
-    /// - If the given list of hashes is not sorted or deduplicated.
-    pub fn new(sorted_hashes: Vec<u64>) -> std::io::Result<Self> {
-        let num_hashes: u32 = sorted_hashes.len().try_into().unwrap();
-
-        // The indexer starts right after the header
-        let indexer_offset = 4 * 2;
-
-        // Lookup table offset is on page boundary, after indexer
-        let mut lookup_table_offset = indexer_offset + 8 + num_hashes * 8;
-        if lookup_table_offset & (PAGE_ALIGN - 1) != 0 {
-            lookup_table_offset += PAGE_ALIGN;
-            lookup_table_offset &= !(PAGE_ALIGN - 1);
-        }
-
-        // Next set offset is on page boundary, after look up table
-        let mut next_set_offset = lookup_table_offset + num_hashes * 4;
-        if next_set_offset & (PAGE_ALIGN - 1) != 0 {
-            next_set_offset += PAGE_ALIGN;
-            next_set_offset &= !(PAGE_ALIGN - 1);
-        }
-
-        // Check sorted
-        let mut hashes_iter = sorted_hashes.iter();
-        let mut prev_hash = hashes_iter.next();
-        for h in hashes_iter {
-            if h <= prev_hash.unwrap() {
-                panic!("hashes not sorted: {} <= {}", h, prev_hash.unwrap());
-            }
-            prev_hash = Some(h);
-        }
-
-        // Indexer!
-        let indexer = IndexerWriter::default();
-        sorted_hashes.par_iter().enumerate().for_each(|(i, h)| {
-            indexer.insert(*h, HashIndex(i as u32));
-        });
-
-        Ok(Self {
-            state: DepGraphWriterState {
-                indexer_offset,
-                lookup_table_offset,
-                next_set_offset,
-
-                sorted_hashes,
-                indexer: indexer.into_read_only(),
-                lookup_table: LookupTable::default(),
-            },
-
-            phase: Phase1AllocateHashSets,
-        })
-    }
-
-    pub fn first_hash_list_offset(&self) -> u32 {
-        self.state.next_set_offset
-    }
-
-    pub fn size_needed_for_hash_list<H: Copy + Into<u64>>(set: &[H]) -> u32 {
-        let len: u32 = set.len().try_into().unwrap();
-
-        4 + 4 * len
-    }
-
-    pub fn open_writer(
-        mut self,
-        file: &std::fs::File,
-        next_set_offset: HashListIndex,
-    ) -> std::io::Result<DepGraphWriter<Phase2WriteHashSets>> {
-        self.state.next_set_offset = next_set_offset.0;
-        file.set_len(self.state.next_set_offset as u64)?;
-        // Safety: we rely on the memmap library to provide safety.
-        let mmap = unsafe { MmapMut::map_mut(file) }?;
-        Ok(DepGraphWriter {
-            state: self.state,
-            phase: Phase2WriteHashSets { mmap },
-        })
-    }
-}
-
-impl DepGraphWriter<Phase2WriteHashSets> {
-    pub fn clone_indexer(&self) -> Indexer {
-        self.state.indexer.clone()
-    }
-
-    pub fn sharded_mmap<'a>(&'a mut self) -> ShardedMmap<'a> {
-        ShardedMmap::new(&mut self.phase.mmap)
-    }
-
-    pub fn write_hash_list(
-        mmap: &ShardedMmap<'_>,
-        indexer: &Indexer,
-        hash_list_index: HashListIndex,
-        set: &[u64],
-    ) -> std::io::Result<()> {
-        let len: u32 = set.len().try_into().unwrap();
-        let size: usize = (len as usize) * 4 + 4;
-        let mut buf: Vec<u8> = Vec::with_capacity(size);
-
-        buf.write_all(&len.to_ne_bytes())?;
-        for h in set {
-            let HashIndex(i) = indexer.get(*h).unwrap();
-            buf.write_all(&i.to_ne_bytes())?;
-        }
-
-        let offset = hash_list_index.0 as usize;
-        mmap.write(offset as usize, &buf);
-        Ok(())
-    }
-
-    pub fn finalize(self) -> DepGraphWriter<Phase3RegisterLookupTable> {
-        DepGraphWriter {
-            state: self.state,
-            phase: Phase3RegisterLookupTable {
-                mmap: self.phase.mmap,
-            },
-        }
-    }
-}
-
-impl DepGraphWriter<Phase3RegisterLookupTable> {
-    pub fn register_lookup_table(
-        &mut self,
-        lookup_table: LookupTableWriter,
-    ) -> std::io::Result<()> {
-        let lookup_table = lookup_table.into_read_only();
-
-        let mmap =
-            ShardedMmap::new(&mut self.phase.mmap[self.state.lookup_table_offset as usize..]);
-
-        // We write the lookup table
-        self.state
-            .sorted_hashes
-            .par_iter()
-            .enumerate()
-            .for_each(|(i, s)| {
-                let hash_list: HashListIndex = lookup_table.get(*s).unwrap_or(HashListIndex(0));
-                let hash_list: u32 = hash_list.0;
-
-                let offset: usize = i * std::mem::size_of_val(&hash_list);
-                mmap.write(offset, &hash_list.to_ne_bytes());
-            });
-
-        self.state.lookup_table = lookup_table;
-        Ok(())
-    }
-
-    pub fn write_indexer_and_finalize(mut self) -> std::io::Result<()> {
-        let mut buf: &mut [u8] = &mut self.phase.mmap;
-
-        // We write the header
-        buf.write_all(&self.state.indexer_offset.to_ne_bytes())?;
-        buf.write_all(&self.state.lookup_table_offset.to_ne_bytes())?;
-
-        // We write the indexer table
-        let len: u64 = self.state.sorted_hashes.len() as u64;
-        buf.write_all(&len.to_ne_bytes())?;
-        for s in &self.state.sorted_hashes {
-            let s: u64 = *s;
-            buf.write_all(&s.to_ne_bytes())?;
-        }
-
-        self.phase.mmap.flush()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::collections::BTreeSet;
-    use std::fs;
-
-    use depgraph_reader::DepGraphOpener;
-    use hash::HashSet;
-    use tempfile::NamedTempFile;
-
-    use super::*;
-
-    struct T {
-        graph: HashMap<u64, BTreeSet<u64>>,
-    }
-
-    impl T {
-        fn new(graph: &[(u64, &[u64])]) -> Self {
-            let graph = graph
-                .iter()
-                .map(|(k, v)| (*k, BTreeSet::from_iter(v.iter().copied())))
-                .collect();
-            T { graph }
-        }
-
-        fn run(&self) {
-            let path = self.write();
-            let err = match std::panic::catch_unwind(|| self.read_check(&path)) {
-                Ok(err) => err,
-                Err(err) => Some(format!("{:?}", err)),
-            };
-
-            match err {
-                None => std::fs::remove_file(&path).unwrap(),
-                Some(err) => {
-                    panic!("error in test with file {:?}: {}", path, err);
+impl MemDepGraph {
+    /// Returns a succession of dependency -> dependents mappings, containing all of the
+    /// dependents to which that dependency has an edge.
+    pub fn all_edges(&self) -> impl Iterator<Item = (Dep, impl Iterator<Item = Dep> + '_)> + '_ {
+        self.edge_list_indices
+            .iter()
+            .zip(self.hashes.iter())
+            .filter_map(|(&edge_list_index, &dependency)| {
+                let edges = &self.edge_lists[edge_list_index];
+                if edges.is_empty() {
+                    None
+                } else {
+                    Some((dependency, edges.iter().map(|&h| self.hashes[h])))
                 }
-            }
-        }
-
-        fn write(&self) -> std::path::PathBuf {
-            let (_tmpfile, tmpfile_path) = NamedTempFile::new().unwrap().keep().unwrap();
-            let tf = fs::OpenOptions::new()
-                .read(true)
-                .write(true)
-                .open(&tmpfile_path)
-                .unwrap();
-
-            let mut all_hashes: HashSet<u64> = HashSet::default();
-            self.graph.iter().for_each(|(dependency, dependents)| {
-                all_hashes.insert(*dependency);
-                for h in dependents.iter() {
-                    all_hashes.insert(*h);
-                }
-            });
-            let mut all_hashes_vec: Vec<u64> = all_hashes.iter().copied().collect();
-            all_hashes_vec.sort_unstable();
-
-            let writer = DepGraphWriter::new(all_hashes_vec).unwrap();
-
-            let lookup_table = LookupTableWriter::default();
-            let mut all_sets: HashMap<&BTreeSet<u64>, HashListIndex> = HashMap::default();
-            let mut next_offset = HashListIndex(writer.first_hash_list_offset());
-            for (dependency, dependents) in self.graph.iter() {
-                let set_vec: Vec<u64> = dependents.iter().copied().collect();
-
-                let hash_list_index = all_sets.entry(dependents).or_insert_with(|| {
-                    let size_needed = DepGraphWriter::size_needed_for_hash_list(&set_vec);
-                    let old_offset = next_offset;
-                    next_offset = next_offset.incr(size_needed);
-                    old_offset
-                });
-                lookup_table.insert(*dependency, *hash_list_index);
-            }
-
-            let mut writer = writer.open_writer(&tf, next_offset).unwrap();
-            let indexer = writer.clone_indexer();
-            let mmap = writer.sharded_mmap();
-            for (dependents, hash_list_index) in all_sets.iter() {
-                let set_vec: Vec<u64> = dependents.iter().copied().collect();
-                DepGraphWriter::write_hash_list(&mmap, &indexer, *hash_list_index, &set_vec)
-                    .unwrap();
-            }
-
-            let mut writer = writer.finalize();
-            writer.register_lookup_table(lookup_table).unwrap();
-            writer.write_indexer_and_finalize().unwrap();
-
-            tmpfile_path
-        }
-
-        fn read_check(&self, path: &std::path::Path) -> Option<String> {
-            let opener = DepGraphOpener::from_path(path).unwrap();
-            let s = opener.open().unwrap();
-            s.validate_hash_lists().unwrap();
-
-            let new_graph: HashMap<u64, BTreeSet<u64>> = self
-                .graph
-                .keys()
-                .map(|hash| match s.hash_list_for(Dep::new(*hash)) {
-                    None => panic!("no hash set for {}", hash),
-                    Some(set) => ((*hash), s.hash_list_hashes(set).map(|x| x.into()).collect()),
-                })
-                .collect();
-
-            assert_eq!(new_graph, self.graph);
-
-            None
-        }
-    }
-
-    #[test]
-    fn test_1() {
-        T::new(&[(1, &[1, 2])]).run();
-    }
-
-    #[test]
-    fn test_2() {
-        T::new(&[(1, &[1, 2]), (3, &[1, 2]), (5, &[1, 2, 6])]).run();
-    }
-
-    #[test]
-    fn test_3() {
-        T::new(&[
-            (1, &[1, 2]),
-            (3, &[1, 2]),
-            (5, &[1, 2, 6]),
-            (9, &[1, 4, 6, 2]),
-        ])
-        .run();
-    }
-
-    #[test]
-    fn test_4() {
-        let graph: Vec<(u64, Vec<u64>)> = (0..10000)
-            .map(|i| {
-                let adj = Vec::from([i + 1, i + 2, i + 3]);
-                (i, adj)
             })
-            .collect();
-        let graph_ref: Vec<(u64, &[u64])> = graph.iter().map(|(h, s)| (*h, s.as_slice())).collect();
-        T::new(&graph_ref).run();
     }
 }
 
-#[cfg(test)]
-mod sharded_mmap_tests {
-    use super::*;
+/// Write the given `MemDepGraph` to disk.
+pub fn write_dep_graph(output: &Path, g: MemDepGraph) -> std::io::Result<()> {
+    info!("Opening output file at {:?}", output);
+    let f = std::fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .open(output)?;
 
-    #[derive(Debug)]
-    struct TestScenario {
-        mmap_size: usize,
-        write_size: usize,
-        at: usize,
+    let num_deps = g.hashes.len() as u64;
+    let header_size = 8;
+    let indexer_size = 8 + num_deps * 8;
+    let lookup_size = num_deps * 4;
+
+    info!("Calculating hash list offsets");
+    let hash_list_start = header_size + indexer_size + lookup_size;
+    let mut cur_offset = hash_list_start;
+
+    // These are where the hash lists end up in memory.
+    let edge_list_offsets: Vec<u32> = g
+        .edge_lists
+        .iter()
+        .map(|edges| {
+            if edges.is_empty() {
+                // As a special case, the empty list pretends to have file offset 0.
+                0
+            } else {
+                let offset = cur_offset;
+                cur_offset += 4 + 4 * edges.len() as u64;
+                offset as u32
+            }
+        })
+        .collect();
+
+    // Guarantee we didn't blow past the 4GiB file size limit.
+    assert!(cur_offset <= !0u32 as u64 + 1);
+
+    let mut out = BufWriter::new(f);
+
+    // Write out the sections other than the hash lists.
+
+    // Write the header and the size field at the start of the indexer.
+    info!("Writing header");
+    let indexer_offset = header_size as u64;
+    let lookup_offset = indexer_offset + indexer_size as u64;
+    out.write_all(&(indexer_offset as u32).to_ne_bytes())?;
+    out.write_all(&(lookup_offset as u32).to_ne_bytes())?;
+
+    // Write indexer.
+    info!("Writing indexer");
+    out.write_all(&(num_deps as u64).to_ne_bytes())?;
+    out.write_all(bytemuck::cast_slice(&g.hashes))?;
+
+    // Write hash list file offsets.
+    info!("Writing hash list lookup table");
+    for &i in g.edge_list_indices.iter() {
+        out.write_all(&edge_list_offsets[i.0 as usize].to_ne_bytes())?;
     }
 
-    fn test_write(test: TestScenario) {
-        let TestScenario {
-            mmap_size,
-            write_size,
-            at,
-        } = test;
-
-        let mut mmap_vec: Vec<u8> = vec![0; mmap_size];
-        let mut control_vec: Vec<u8> = vec![0; mmap_size];
-        let write_vec: Vec<u8> = vec![1; write_size];
-
-        let sharded_mmap = ShardedMmap::new(&mut mmap_vec);
-        sharded_mmap.write(at, &write_vec);
-        control_vec[at..at + write_size].copy_from_slice(&write_vec);
-        if control_vec != mmap_vec {
-            assert!(false, "{:?} failed", test);
+    // Write edge lists.
+    info!("Writing edge lists");
+    for h in g.edge_lists {
+        if h.is_empty() {
+            // As a special case, empty edge lists aren't stored in the file.
+            continue;
         }
+
+        out.write_all(&(h.len() as u32).to_ne_bytes())?;
+        out.write_all(bytemuck::cast_slice(&h[..]))?;
     }
 
-    #[test]
-    fn test_sharded_mmap() {
-        // Let's write something (1) half the shard size and (2) three
-        // times the shard size at the following positions:
-        let ats = vec![
-            0,
-            2 * SHARDED_MMAP_SHARD_SIZE / 3,
-            SHARDED_MMAP_SHARD_SIZE - 1,
-            SHARDED_MMAP_SHARD_SIZE,
-            SHARDED_MMAP_SHARD_SIZE + 1,
-            4 * SHARDED_MMAP_SHARD_SIZE / 3,
-            5 * SHARDED_MMAP_SHARD_SIZE / 3,
-        ];
-        for at in ats.into_iter() {
-            test_write(TestScenario {
-                mmap_size: 10 * SHARDED_MMAP_SHARD_SIZE,
-                write_size: SHARDED_MMAP_SHARD_SIZE / 2,
-                at,
-            });
-            test_write(TestScenario {
-                mmap_size: 10 * SHARDED_MMAP_SHARD_SIZE,
-                write_size: 3 * SHARDED_MMAP_SHARD_SIZE,
-                at,
-            });
-        }
-    }
+    // Flush the file and close it before logging we are done.
+    drop(out.into_inner()?);
+
+    info!(".hhdg write complete");
+
+    Ok(())
 }

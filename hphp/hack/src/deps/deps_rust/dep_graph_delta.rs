@@ -184,6 +184,48 @@ impl DepGraphDelta {
     }
 }
 
+/// An iterator that yields a sequence of (dependency, dependents) pairs
+/// from a DepGraphDelta file.
+///
+/// It does so in a zero-copy way, simply pointing into the DepGraphDelta
+/// representation (e.g. a memory-mapped file).
+pub struct DepGraphDeltaIterator<'a> {
+    raw_data: &'a [u64],
+}
+
+impl<'a> DepGraphDeltaIterator<'a> {
+    pub fn new(raw_data: &'a [u64]) -> Self {
+        Self { raw_data }
+    }
+}
+
+impl<'a> Iterator for DepGraphDeltaIterator<'a> {
+    type Item = (Dep, &'a [Dep]);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.raw_data.split_first().map(|(&first, rest)| {
+            // Find the next dependency hash, which is indicated by the high
+            // bit being set. Everything in between is a dependent, and we can
+            // just point to them directly.
+            let end = rest
+                .iter()
+                .position(|&x| (x & DepGraphDelta::DEPENDENCY_TAG) != 0)
+                .unwrap_or(rest.len());
+
+            // Advance the iterator to the next edge list (if any).
+            let (dependents, rest) = rest.split_at(end);
+            self.raw_data = rest;
+
+            debug_assert_ne!(first & DepGraphDelta::DEPENDENCY_TAG, 0);
+            let dependency = Dep::new(first & !DepGraphDelta::DEPENDENCY_TAG);
+            let dependents = Dep::from_u64_slice(dependents);
+            (dependency, dependents)
+        })
+    }
+}
+
+impl<'a> std::iter::FusedIterator for DepGraphDeltaIterator<'a> {}
+
 #[cfg(test)]
 mod tests {
     use super::*;

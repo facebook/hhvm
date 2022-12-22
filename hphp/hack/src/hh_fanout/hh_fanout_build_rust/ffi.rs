@@ -19,7 +19,7 @@ ocaml_ffi! {
         env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"),
     );
 
-    hh_fanout_build::build(allow_empty, incremental, new_edges_dir, delta_file, output).unwrap();
+    hh_fanout_build::build(allow_empty, incremental, new_edges_dir, delta_file, output.as_ref()).unwrap();
     std::process::exit(0)
   }
 }

@@ -15,7 +15,9 @@ use ocamlrep::Value;
 use serde::Deserialize;
 use serde::Serialize;
 
+#[repr(transparent)]
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(bytemuck::Pod, bytemuck::Zeroable)]
 #[derive(Serialize, Deserialize)]
 pub struct Dep(u64);
 
@@ -34,6 +36,11 @@ impl Dep {
         } else {
             Some(Dep(self.0 & (!1)))
         }
+    }
+
+    #[inline]
+    pub fn from_u64_slice(s: &[u64]) -> &[Dep] {
+        bytemuck::cast_slice(s)
     }
 }
 

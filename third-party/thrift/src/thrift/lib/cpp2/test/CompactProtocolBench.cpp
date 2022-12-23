@@ -51,9 +51,9 @@ Deep makeDeep(size_t triplesz) {
       for (size_t k = 0; k < triplesz; ++k) {
         data2.datas_ref()->push_back(fmt::format("omg[{}, {}, {}]", i, j, k));
       }
-      data1.deeps_ref()->push_back(move(data2));
+      data1.deeps_ref()->push_back(std::move(data2));
     }
-    data.deeps_ref()->push_back(move(data1));
+    data.deeps_ref()->push_back(std::move(data1));
   }
   return data;
 }

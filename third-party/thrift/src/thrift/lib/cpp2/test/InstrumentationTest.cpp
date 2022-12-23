@@ -206,7 +206,7 @@ class DebuggingFrameHandler : public rocket::SetupFrameHandler {
         std::make_shared<PosixThreadFactory>(PosixThreadFactory::ATTACHED);
     tm_ = std::make_shared<SimpleThreadManager>(1);
     tm_->setNamePrefix("DebugInterface");
-    tm_->threadFactory(move(tf));
+    tm_->threadFactory(std::move(tf));
     tm_->start();
   }
   std::optional<rocket::ProcessorInfo> tryHandle(

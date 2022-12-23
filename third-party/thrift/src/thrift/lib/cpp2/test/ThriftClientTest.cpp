@@ -117,7 +117,7 @@ TEST_F(ThriftClientTest, SyncRpcOptionsTimeout) {
         unique_ptr<HandlerCallback<unique_ptr<string>>> cb) override {
       auto eb = cb->getEventBase();
       eb->runAfterDelay(
-          [cb = move(cb)] { cb->result("hello world"); }, delay_.count());
+          [cb = std::move(cb)] { cb->result("hello world"); }, delay_.count());
     }
 
    private:

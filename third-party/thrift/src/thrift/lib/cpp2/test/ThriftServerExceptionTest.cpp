@@ -29,7 +29,7 @@ using namespace apache::thrift::test;
 
 class lulz : public exception {
  public:
-  explicit lulz(string message) noexcept : message_(move(message)) {}
+  explicit lulz(string message) noexcept : message_(std::move(message)) {}
   const char* what() const noexcept override { return message_.c_str(); }
 
  private:
@@ -87,11 +87,11 @@ class RaiserHandler : public apache::thrift::ServiceHandler<Raiser> {
   RaiserHandler(
       vector<shared_ptr<TProcessorEventHandler>> handlers,
       Function<exception_ptr()> go)
-      : handlers_(move(handlers)), go_(wrap(move(go))) {}
+      : handlers_(std::move(handlers)), go_(wrap(std::move(go))) {}
   RaiserHandler(
       vector<shared_ptr<TProcessorEventHandler>> handlers,
       Function<exception_wrapper()> go)
-      : handlers_(move(handlers)), go_(wrap(move(go))) {}
+      : handlers_(std::move(handlers)), go_(wrap(std::move(go))) {}
 
   unique_ptr<AsyncProcessor> getProcessor() override {
     auto processor = apache::thrift::ServiceHandler<Raiser>::getProcessor();
@@ -103,16 +103,16 @@ class RaiserHandler : public apache::thrift::ServiceHandler<Raiser> {
 
  protected:
   void async_tm_doBland(unique_ptr<HandlerCallback<void>> cb) override {
-    go_(move(cb));
+    go_(std::move(cb));
   }
   void async_tm_doRaise(unique_ptr<HandlerCallback<void>> cb) override {
-    go_(move(cb));
+    go_(std::move(cb));
   }
   void async_tm_get200(unique_ptr<HandlerCallback<string>> cb) override {
-    go_(move(cb));
+    go_(std::move(cb));
   }
   void async_tm_get500(unique_ptr<HandlerCallback<string>> cb) override {
-    go_(move(cb));
+    go_(std::move(cb));
   }
 
   template <typename E>

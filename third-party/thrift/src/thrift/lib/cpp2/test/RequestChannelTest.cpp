@@ -60,7 +60,7 @@ class FunctionSendCallbackTest : public Test {
       function<void(ClientReceiveState&&)> cb) {
     auto client = getClient(addr);
     client->noResponse(
-        make_unique<FunctionSendCallback>(move(cb)),
+        make_unique<FunctionSendCallback>(std::move(cb)),
         68 /* without loss of generality */);
     eb.loop();
   }

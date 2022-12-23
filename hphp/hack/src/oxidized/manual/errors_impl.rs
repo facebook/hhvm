@@ -157,6 +157,21 @@ impl Naming {
         )
     }
 
+    pub fn bad_builtin_type(p: Pos, name: &str, correct_name: &str) -> Error {
+        UserError::new(
+            Self::InvalidBuiltinType as isize,
+            Message(
+                p.clone(),
+                format!("No such type `{}`, did you mean `{}`?", name, correct_name).into(),
+            ),
+            vec![],
+            vec![Quickfix {
+                title: format!("Change to `{}`", correct_name),
+                edits: vec![Edit(correct_name.into(), QfPos::Qpos(p))],
+            }],
+        )
+    }
+
     pub fn method_needs_visibility(first_token_p: Pos, name_p: Pos) -> Error {
         // Create a zero width position at the start of the first token.
         let file = RcOc::clone(first_token_p.filename_rc_ref());

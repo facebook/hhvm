@@ -830,19 +830,22 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
         /* Dirty hack; CastExpression can have type represented by token */
         Token(_) | SimpleTypeSpecifier(_) | QualifiedName(_) => {
             let ast::Id(pos, name) = pos_name(node, env)?;
-            let mut suggest = |name: &str, canonical: &str| {
-                raise_parsing_error(
-                    node,
-                    env,
-                    &syntax_error::invalid_typehint_alias(name, canonical),
-                );
-            };
+
             if "integer".eq_ignore_ascii_case(&name) {
-                suggest(&name, special_typehints::INT);
+                raise_hh_error(
+                    env,
+                    Naming::bad_builtin_type(pos.clone(), &name, special_typehints::INT),
+                );
             } else if "boolean".eq_ignore_ascii_case(&name) {
-                suggest(&name, special_typehints::BOOL);
+                raise_hh_error(
+                    env,
+                    Naming::bad_builtin_type(pos.clone(), &name, special_typehints::BOOL),
+                );
             } else if "double".eq_ignore_ascii_case(&name) || "real".eq_ignore_ascii_case(&name) {
-                suggest(&name, special_typehints::FLOAT);
+                raise_hh_error(
+                    env,
+                    Naming::bad_builtin_type(pos.clone(), &name, special_typehints::FLOAT),
+                );
             }
 
             if env.file_mode() != file_info::Mode::Mhhi && !env.codegen() {

@@ -1,1 +1,1 @@
-Fatal error: Invalid type hint `boolean`. Use `bool` instead in %s on line %d
+Fatal error: No such type `boolean`, did you mean `bool`? in %s on line %d

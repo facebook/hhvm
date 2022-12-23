@@ -1,4 +1,4 @@
 File "use_integer_instead_of_int.php", line 12, characters 23-29:
-Invalid type hint `integer`. Use `int` instead (Parsing[1002])
+No such type `integer`, did you mean `int`? (Naming[2123])
 File "use_integer_instead_of_int.php", line 12, characters 23-29:
 Unbound name: `integer` (Naming[2049])

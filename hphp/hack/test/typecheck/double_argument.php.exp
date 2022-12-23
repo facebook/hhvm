@@ -1,4 +1,4 @@
 File "double_argument.php", line 12, characters 14-19:
-Invalid type hint `double`. Use `float` instead (Parsing[1002])
+No such type `double`, did you mean `float`? (Naming[2123])
 File "double_argument.php", line 12, characters 14-19:
 Unbound name: `double` (Naming[2049])

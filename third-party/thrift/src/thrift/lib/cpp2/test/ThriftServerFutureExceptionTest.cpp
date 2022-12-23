@@ -36,7 +36,7 @@ using AppExnType = AppExn::TApplicationExceptionType;
 
 class RaiserHandler : public apache::thrift::ServiceHandler<Raiser> {
  public:
-  explicit RaiserHandler(function<Future<Unit>()> go) : go_(move(go)) {}
+  explicit RaiserHandler(function<Future<Unit>()> go) : go_(std::move(go)) {}
 
  private:
   Future<Unit> future_doRaise() override { return go_(); }
@@ -57,7 +57,7 @@ class ThriftServerFutureExceptionTest : public testing::Test {
 
 Fiery makeFiery(std::string msg) {
   Fiery e;
-  *e.message_ref() = move(msg);
+  *e.message_ref() = std::move(msg);
   return e;
 }
 

@@ -60,6 +60,7 @@ void testUseOpEncode() {
   original.meta_ref() = "some metadata";
   original.buf_ref() = {folly::IOBuf::wrapBufferAsValue("hi", 2)};
   original.adapted_list_field()->value.push_back(adaptedFoo);
+  original.inplace_adapted_list_field()->value.push_back(adaptedFoo);
 
   original.write(&writer);
 
@@ -67,6 +68,14 @@ void testUseOpEncode() {
   auto serialized = queue.move();
   reader.setInput(serialized.get());
   OpEncodeStruct result;
+
+  // Make sure the fields are cleared
+  ++*foo.field();
+  result.adapted_list_field()->value.push_back(
+      test::TemplatedTestAdapter::fromThrift(foo));
+  result.inplace_adapted_list_field()->value.push_back(
+      test::TemplatedTestAdapter::fromThrift(foo));
+
   result.read(&reader);
   EXPECT_EQ(result, original);
 

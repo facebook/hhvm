@@ -765,6 +765,11 @@ struct Decode<type::adapted<Adapter, Tag>> {
     folly::if_constexpr<hasInplaceToThrift>(
         [&](auto tag) {
           using T = decltype(tag);
+          if (typeTagToTType<T> == TType::T_LIST ||
+              typeTagToTType<T> == TType::T_SET ||
+              typeTagToTType<T> == TType::T_MAP) {
+            adapt_detail::clear<Adapter>(m);
+          }
           Decode<T>{}(prot, Adapter::toThrift(m));
         },
         [&](auto tag) {
@@ -777,6 +782,7 @@ struct Decode<type::adapted<Adapter, Tag>> {
 
   template <typename FieldId, class Struct, class Protocol, class U>
   void operator()(FieldId, Struct& strct, Protocol& prot, U& m) const {
+    // TODO: optimize for inplace toThrift method
     type::native_type<Tag> orig;
     Decode<Tag>{}(prot, orig);
     m = adapt_detail::

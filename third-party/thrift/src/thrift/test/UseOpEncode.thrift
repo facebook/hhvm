@@ -64,6 +64,9 @@ struct OpEncodeStruct {
     cpp.type = "::apache::thrift::test::IndirectionIOBuf",
     cpp.indirection,
   ) buf;
+
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  17: list<AdaptedFoo> inplace_adapted_list_field;
 }
 
 struct Baz {

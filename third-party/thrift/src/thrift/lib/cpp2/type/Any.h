@@ -68,5 +68,39 @@ class AnyData : public detail::Wrap<AnyStruct> {
 };
 
 } // namespace type
+
+template <>
+class Cpp2Ops<type::AnyData> {
+ private:
+  using S = apache::thrift::type::AnyStruct;
+
+ public:
+  using T = type::AnyData;
+
+  template <class P>
+  static uint32_t write(P* p, const T* t) {
+    return Cpp2Ops<S>::write(p, &t->toThrift());
+  }
+
+  template <class P>
+  static void read(P* p, T* t) {
+    return Cpp2Ops<S>::read(p, &t->toThrift());
+  }
+
+  template <class P>
+  static uint32_t serializedSize(const P* p, const T* t) {
+    return Cpp2Ops<S>::serializedSize(p, &t->toThrift());
+  }
+
+  template <class P>
+  static uint32_t serializedSizeZC(const P* p, const T* t) {
+    return Cpp2Ops<S>::serializedSizeZC(p, &t->toThrift());
+  }
+
+  static constexpr apache::thrift::protocol::TType thriftType() {
+    return Cpp2Ops<S>::thriftType();
+  }
+};
+
 } // namespace thrift
 } // namespace apache

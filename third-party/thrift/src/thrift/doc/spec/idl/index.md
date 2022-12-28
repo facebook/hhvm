@@ -6,11 +6,9 @@ Thrift supports serialization and RPC across multiple languages. In order to ach
 
 Thrift schemas and interfaces are defined in `.thrift` files. The Thrift compiler consumes these files to autogenerate structures and RPC boilerplate in different languages.
 
----
+## Base Types
 
-## **Base Types**
-
-### **Primitive Types**
+### Primitive Types
 
 * `bool`: A one bit boolean
 * `byte`: A signed byte (8-bits)
@@ -22,10 +20,11 @@ Thrift schemas and interfaces are defined in `.thrift` files. The Thrift compile
 * `binary`: A byte array
 * `string`: A UTF-8 string
 
-> Note: Thrift does not support unsigned integers because they have no direct translation to native (primitive) types in many of Thrift’s target languages.Note: Some target languages enforce that `string` values are actually UTF-8 encoded and some target languages do not. For example: Java and Python care, while C++ does not. This can appear as cross-language incompatibility.Note: `binary` and `string` are encoded identically for RPC (Binary Protocol & Compact Protocol) and are interchangeable, but will be encoded differently in SimpleJSONProtocol & JSONProtocol: a binary field will be base64 encoded, while a string will be the same (escaped).
+:::note
+Thrift does not support unsigned integers because they have no direct translation to native (primitive) types in many of Thrift’s target languages.Note: Some target languages enforce that `string` values are actually UTF-8 encoded and some target languages do not. For example: Java and Python care, while C++ does not. This can appear as cross-language incompatibility.Note: `binary` and `string` are encoded identically for RPC (Binary Protocol & Compact Protocol) and are interchangeable, but will be encoded differently in SimpleJSONProtocol & JSONProtocol: a binary field will be base64 encoded, while a string will be the same (escaped).
+:::
 
-
-### **Containers**
+### Containers
 
 Thrift has strongly typed containers that map to the most commonly used containers in popular programming languages. They are annotated using the Java Generics style. There are three containers types available:
 
@@ -33,11 +32,15 @@ Thrift has strongly typed containers that map to the most commonly used containe
 * `set<t1>`: An unordered set of unique elements of type t1. Unique elements.
 * `map<t1,t2>`: An unordered map of strictly unique keys of type t1 to values of type t2. Unique elements.
 
-> Note: The default mode is to use ordered sets and maps. However, some languages allow the use of unordered and customized containers - see [Thrift Annotations](/spec/definition/annotation.md#unstructured-annotations-deprecated).
+:::note
+The default mode is to use ordered sets and maps. However, some languages allow the use of unordered and customized containers - see [Thrift Annotations](/spec/definition/annotation.md#unstructured-annotations-deprecated).
+:::
 
-*CAUTION:* Although not enforced, it is strongly encouraged to only use set and map when t1 is either a string or an integer type for the highest compatibility between languages.
+:::caution
+Although not enforced, it is strongly encouraged to only use set and map when t1 is either a string or an integer type for the highest compatibility between languages.
+:::
 
-Thrift also supports nested containers.  Any container can have elements of type containers such as:
+Thrift also supports nested containers. Any container can have elements of type containers such as:
 
 * `set<list<t1>>` , `list<map<t1,t2>>`, and `map<t1, map<t2, t3>>`.
 
@@ -72,6 +75,7 @@ string field12 = "bar"
 string field13 = 'foo:"bar"'
 string field14 = "bar:'foo'"
 ```
+
 Containers should be initialized with JSON formatting in either a single line or in multiple lines. Thrift also allows the use of trailing commas.
 
 ```
@@ -89,7 +93,8 @@ const map<string, list<i32>> AMap = {
   "bar" : [10, 32, 54],
 }
 ```
-### **Enums**
+
+### Enums
 
 Enums allows the serialization of a pre-defined set of values. Values are represented as integers and the values should always be specified
 
@@ -101,20 +106,24 @@ enum Foo {
   Five = 5,
 }
 ```
-> CAUTION: an enum is default initialized with `0`, therefore we **strongly encourage** you to add an `Unknown` entry for `0` so that it is not inadvertently initialized to some meaningful value by accident.
 
+:::caution
+An enum is default initialized with `0`, therefore we **strongly encourage** you to add an `Unknown` entry for `0` so that it is not inadvertently initialized to some meaningless value.
+:::
 
 Enums can also be used in containers.
 
 ```
 struct Bar {
-  list<Foo> = [Foo.Five, Foo.Two]
+  1: list<Foo> foos = [Foo.Five, Foo.Two];
 }
 ```
-> *CAUTION:* Removing and adding enums values can be dangerous - see [https://www.internalfb.com/intern/wiki/Thrift/SchemaEvolution/](https://www.internalfb.com/intern/wiki/Thrift/Versioning).
 
+:::caution
+Removing and adding enum values can be dangerous - see [Schema Compatibility](schema-evolution.md).
+:::
 
-## **Collections**
+## Collections
 
 Every collection type element features a list of fields which are required to have a unique integer identifier. These are used by the deserialization algorithms to identify the correct element within the serialized object. Id's are the first value that every field must have.
 
@@ -126,6 +135,7 @@ struct Foo {
   4: string fieldD,
 }
 ```
+
 It is important to keep in mind the following rules when writing fields for collections:
 
 * Every field needs a unique positive number identifier.
@@ -138,27 +148,30 @@ struct Foo {
   36: i64 field2,
 }
 ```
+
 This gives the flexibility of rearranging the order of the fields within a Thrift file and it won't affect the serialization scheme. For example, these two structs are equivalent in every sense
 
 ```
 struct Foo {
-1: string field1,
-2: i64 field2,
-3: i64 field3,
-4: double field4,
+  1: string field1,
+  2: i64 field2,
+  3: i64 field3,
+  4: double field4,
 }
 
 struct Foo {
-3: i64 field3,
-2: i64 field2,
-4: double field4,
-1: string field1,
+  3: i64 field3,
+  2: i64 field2,
+  4: double field4,
+  1: string field1,
 }
 ```
-> **WARNING:** Do not reuse ids. If a field is removed from a struct, it's a good practice to comment it out as a reminder to not to reuse it - see [Thrift Versioning](https://www.internalfb.com/intern/wiki/Thrift/Versioning).
 
+:::caution
+Do not reuse ids. If a field is removed from a struct, it's a good practice to comment it out as a reminder to not to reuse it.
+:::
 
-### **Structs**
+### Structs
 
 Structs are a collection of fields. Each struct field has a unique integer identifier, a type, a unique field name, a level of required-ness, and a default value. It is easiest to illustrate this concept with an example. You can use trailing comma, semicolon, or nothing at all.
 
@@ -169,9 +182,10 @@ struct Foo {
   3: optional list<string> field3,
 }
 ```
+
 Take struct Foo as an example. Foo has three fields, each with a unique id (1, 2, and 3), a unique name (field1, field2, field3), and a type (e.g. Foo::field1 is an i64). A type can be a base type, a collection, or another struct. Thrift does not support structure inheritance.
 
-### **Exceptions**
+### Exceptions
 
 Exceptions are created in the exact same way as a struct. These help to add useful messages to service functions that can throw exceptions.
 
@@ -181,7 +195,8 @@ exception Foo {
   2: string message,
 } (message = "message") // optional, tells ServiceRouter which field contains the message
 ```
-### **Unions**
+
+### Unions
 
 Unions are similar to structs but can only have at most one field set at a time.
 
@@ -193,9 +208,10 @@ union Foo {
   3: list<string> field3,
 }
 ```
+
 In addition to enforcing the union semantics during serialization and deserialization, union structs are more space efficient in some languages.
 
-### **Intrinsic Default Values**
+### Intrinsic Default Values
 
 If a struct doesn't provide a value to a field, they will be serialized and deserialized with the following default values.
 
@@ -206,7 +222,7 @@ If a struct doesn't provide a value to a field, they will be serialized and dese
 * string or binary: 0 length
 * containers: Empty container
 
-### **Pre-defined value**
+### Pre-defined value
 
 It is also possible to define a custom default value for a struct field.
 
@@ -221,16 +237,20 @@ struct Bar {
   4: list<Foo> = [Foo.A, Foo.B, Foo.C],
 }
 ```
-> *CAUTION:* Avoid using default values on optional fields. It is not possible to tell if the server sent the value, or if it is just the default value.
 
+:::caution
+Avoid using default values on optional fields. It is not possible to tell if the server sent the value, or if it is just the default value.
+:::
 
-> **WARNING:** Do not change default values after setting them. It is hard to know what code may be relying on the previous default values.
+:::caution
+Do not change default values after setting them. It is hard to know what code may be relying on the previous default values.
+:::
 
+:::caution
+Default value relies on default constructor in C++ (see [discussion here](https://fburl.com/6vccs6jw)). Creating the thrift struct with custom constructor (i.e. via `cpp.methods`) will make default value useless. Make sure to initialize primitive types in custom constructor as always, otherwise those variables will not be initialized.
+:::
 
-> **WARNING:** Default value relies on default constructor in C++ (see [discussion here](https://fburl.com/6vccs6jw)). Creating the thrift struct with custom constructor (i.e. via `cpp.methods`) will make default value useless. Make sure to initialize primitive types in custom constructor as always, otherwise those variables will not be initialized.
-
-
-### **Struct Modifiers**
+### Struct Modifiers
 
 Each field may be marked as required or optional. Fields can also be *set *or *unset (*contains or doesn't contain a value). The following specifications determine the serialization and deserialization behaviors of fields.
 
@@ -248,12 +268,11 @@ Each field may be marked as required or optional. Fields can also be *set *or *u
 
 For default and optional fields, a missing field will be marked as unset when it is deserialized. It is possible to provide a default value to a field. If a field has a default value, instead of marking a missing field as unset when deserializing, it will instead be given the default value. Default values should be written in JSON notation.
 
-> **WARNING:** Marking a field as required makes it difficult to remove it from the struct later. It is required to ensure that all users of serialization are “downgraded” to unmarked, and are deployed, before removing the field. When used in RPC, this may involve coordinating deployments of clients and servers. Generally, it's not a practice to use required.
+:::caution
+Marking a field as required makes it difficult to remove it from the struct later. It is required to ensure that all users of serialization are “downgraded” to unmarked, and are deployed, before removing the field. When used in RPC, this may involve coordinating deployments of clients and servers. Generally, it's not a practice to use required.
+:::
 
-
----
-
-## **Constants**
+## Constants
 
 Constants can be specified using the const keyword. These can be used as a default values within a Thrift file, and will be generated in each language minus JS ([see post](https://fb.workplace.com/groups/thriftusers/posts/887649301944483/?comment_id=887654188610661)). Every Base type can be made into a constant.
 
@@ -266,9 +285,8 @@ struct Baz {
   1: list<i32> field1 = Bar,
 }
 ```
----
 
-## **Typedefs**
+## Typedefs
 
 Typedefs can be specified within the IDL, and will generate typedefs in each language.
 
@@ -281,9 +299,8 @@ struct Foo {
   3: StringMap field3 = {'key' : 'value'}
 }
 ```
----
 
-## **Includes**
+## Includes
 
 Thrift allows including other Thrift files to use any of its `const`, `enum`, `struct`, `union`, `exception`, or `services`. These can be referenced from another file by prepending the filename to the struct or service name. This means you cannot include multiple files with the same file name, only differing by path; confusion will reign. There is no aliasing.
 
@@ -296,9 +313,8 @@ struct Baz {
   1: Foo.Bar field1,
 }
 ```
----
 
-## **Namespaces**
+## Namespaces
 
 Namespaces can be specified by language for each enum, struct, exception, and service. Nested namespaces should use a dot `.` to separate each namespace.
 
@@ -312,9 +328,8 @@ struct Baz {
   1: i64 field1,
 }
 ```
----
 
-## **Package**
+## Package
 
 We can specify package name for each thrift file. e.g., `facebook.com/path/to`.
 
@@ -330,14 +345,16 @@ Package name contains "domain/paths". It implies following namespace
 * hack: {paths}
 * java: {reverse(domain)}.{paths}
 
-NOTE: User can override default namespace explicitly by using `namespace` keyword for each languages.
-
+:::note
+User can override default namespace explicitly by using `namespace` keyword for each languages.
+:::
 
 Here is an example
 
 ```
 package "domain.com/path/to/file"
 ```
+
 This package generates following namespace
 
 ```
@@ -348,11 +365,13 @@ namespace php path.to.file
 namespace java2 com.domain.path.to.file
 namespace java.swift com.domain.path.to.file
 ```
+
 If package name doesn't contain filename, it generates different namespace for `py3`
 
 ```
 package "domain.com/path/to"
 ```
+
 This package generates following namespace
 
 ```
@@ -363,7 +382,8 @@ namespace php path.to
 namespace java2 com.domain.path.to
 namespace java.swift com.domain.path.to
 ```
-### File level annotation
+
+### File-Level Annotations
 
 We can apply annotation on the package keyword, in that case the annotation will be applied to the whole file. e.g.
 
@@ -371,11 +391,10 @@ We can apply annotation on the package keyword, in that case the annotation will
 @cpp.TerseWrite
 package "foo.bar/baz"
 ```
+
 This turns all fields in this file into terse-write fields when possible.
 
----
-
-## **Services**
+## Services
 
 An interface for RPC is defined in a Thrift file as a service.
 
@@ -411,25 +430,28 @@ service Bar {
   stream<T1> streamMethod(1: MyRequest request), //5
 }
 ```
-> **WARNING:** New inputs fields can be added to a method, but it is better to define an input struct and add members to it instead. The server cannot distinguish between missing arguments and default values, so a request object is better.
 
+:::caution
+New inputs fields can be added to a method, but it is better to define an input struct and add members to it instead. The server cannot distinguish between missing arguments and default values, so a request object is better.
+:::
 
----
+## Comments
 
-## **Comments**
-
-Comments can be added in bash and c style.
+Comments can be added in Bash and C style.
 
 ```
 /*
-This is a comment
+  This is a comment.
 */
 struct Foo {
-  1: i64 field1, // This is a comment
-  // This is a comment
+  1: i64 field1, // This is a comment,
+  // This is a comment.
   2: required string field2,
-  // 3: i32 deprecated, This whole line is a comment
+  // 3: i32 deprecated, this whole line is a comment.
   4: optional list<double> field4,
 }
 ```
-> Note: It is a good practice to comment out deprecated fields as a reminder to not to reuse it - see [Thrift Versioning](https://www.internalfb.com/intern/wiki/Thrift/Versioning).
+
+:::note
+It is a good practice to comment out deprecated fields as a reminder to not to reuse them.
+:::

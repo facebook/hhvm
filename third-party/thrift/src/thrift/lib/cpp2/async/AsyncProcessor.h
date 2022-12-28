@@ -424,8 +424,8 @@ struct ServerRequestData {
   std::chrono::steady_clock::time_point queueBegin;
 
   // user data
-  intptr_t requestPileUserData;
-  intptr_t concurrencyControllerUserData;
+  intptr_t requestPileUserData = 0;
+  intptr_t concurrencyControllerUserData = 0;
 };
 
 // The ServerRequest is used to hold all the information about a request that we

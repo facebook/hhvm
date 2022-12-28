@@ -104,10 +104,10 @@ class Type : public detail::Wrap<TypeStruct> {
   Type& operator=(const Type&) = default;
   Type& operator=(Type&&) noexcept = default;
 
-  // If the complete type information is present.
+  // If the complete and non-empty type information is present.
   //
-  // Specifically, that all contained 'type name' values have full,
-  // human-readable, Thrift URIs.
+  // Specifically, that all contained 'type name' values are not empty and
+  // have full, human-readable, Thrift URIs.
   bool isFull() const { return isFull(data_); }
 
  private:

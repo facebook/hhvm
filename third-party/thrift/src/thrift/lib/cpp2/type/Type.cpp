@@ -36,6 +36,8 @@ bool Type::isFull(const TypeName& typeName) {
       return isFull(*typeName.unionType_ref());
     case TypeName::Type::exceptionType:
       return isFull(*typeName.exceptionType_ref());
+    case TypeName::Type::__EMPTY__:
+      return false;
     default:
       return true;
   }

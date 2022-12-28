@@ -11,7 +11,7 @@ pub mod types;
 
 #[doc(hidden)]
 pub mod dependencies {
-    pub use include as include;
+    pub use included as included;
     pub use cpp as cpp;
     pub use thrift as thrift;
 }
@@ -21,7 +21,7 @@ pub mod services {
         #[derive(Clone, Debug)]
         pub enum BounceMapExn {
             #[doc(hidden)]
-            Success(include::types::SomeMap),
+            Success(included::types::SomeMap),
             ApplicationException(::fbthrift::ApplicationException),
         }
 
@@ -323,9 +323,9 @@ pub mod client {
 
         fn _bounce_map_impl(
             &self,
-            arg_m: &include::types::SomeMap,
+            arg_m: &included::types::SomeMap,
             rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<include::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
             use ::const_cstr::const_cstr;
             use ::tracing::Instrument as _;
             use ::futures::FutureExt as _;
@@ -421,8 +421,8 @@ pub mod client {
     pub trait SomeService: ::std::marker::Send {
         fn bounce_map(
             &self,
-            arg_m: &include::types::SomeMap,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<include::types::SomeMap, crate::errors::some_service::BounceMapError>>;
+            arg_m: &included::types::SomeMap,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>>;
 
         fn binary_keyed_map(
             &self,
@@ -436,9 +436,9 @@ pub mod client {
     {
         fn bounce_map_with_rpc_opts(
             &self,
-            arg_m: &include::types::SomeMap,
+            arg_m: &included::types::SomeMap,
             rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<include::types::SomeMap, crate::errors::some_service::BounceMapError>>;
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>>;
         fn binary_keyed_map_with_rpc_opts(
             &self,
             arg_r: &[::std::primitive::i64],
@@ -447,7 +447,7 @@ pub mod client {
     }
 
     struct Args_SomeService_bounce_map<'a> {
-        m: &'a include::types::SomeMap,
+        m: &'a included::types::SomeMap,
         _phantom: ::std::marker::PhantomData<&'a ()>,
     }
 
@@ -493,8 +493,8 @@ pub mod client {
     {
         fn bounce_map(
             &self,
-            arg_m: &include::types::SomeMap,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<include::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+            arg_m: &included::types::SomeMap,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
             let rpc_options = T::RpcOptions::default();
             self._bounce_map_impl(
                 arg_m,
@@ -524,9 +524,9 @@ pub mod client {
     {
         fn bounce_map_with_rpc_opts(
             &self,
-            arg_m: &include::types::SomeMap,
+            arg_m: &included::types::SomeMap,
             rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<include::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
             self._bounce_map_impl(
                 arg_m,
                 rpc_options,
@@ -551,8 +551,8 @@ pub mod client {
     {
         fn bounce_map(
             &self,
-            arg_m: &include::types::SomeMap,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<include::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+            arg_m: &included::types::SomeMap,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
             self.as_ref().bounce_map(
                 arg_m,
             )
@@ -576,9 +576,9 @@ pub mod client {
     {
         fn bounce_map_with_rpc_opts(
             &self,
-            arg_m: &include::types::SomeMap,
+            arg_m: &included::types::SomeMap,
             rpc_options: T::RpcOptions,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<include::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
             <Self as ::std::convert::AsRef<dyn SomeServiceExt<T>>>::as_ref(self).bounce_map_with_rpc_opts(
                 arg_m,
                 rpc_options,
@@ -702,8 +702,8 @@ pub mod server {
     pub trait SomeService: ::std::marker::Send + ::std::marker::Sync + 'static {
         async fn bounce_map(
             &self,
-            _m: include::types::SomeMap,
-        ) -> ::std::result::Result<include::types::SomeMap, crate::services::some_service::BounceMapExn> {
+            _m: included::types::SomeMap,
+        ) -> ::std::result::Result<included::types::SomeMap, crate::services::some_service::BounceMapExn> {
             ::std::result::Result::Err(crate::services::some_service::BounceMapExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "SomeService",
@@ -731,8 +731,8 @@ pub mod server {
     {
         async fn bounce_map(
             &self,
-            m: include::types::SomeMap,
-        ) -> ::std::result::Result<include::types::SomeMap, crate::services::some_service::BounceMapExn> {
+            m: included::types::SomeMap,
+        ) -> ::std::result::Result<included::types::SomeMap, crate::services::some_service::BounceMapExn> {
             (**self).bounce_map(
                 m,
             ).await
@@ -756,7 +756,7 @@ pub mod server {
     }
 
     struct Args_SomeService_bounce_map {
-        m: include::types::SomeMap,
+        m: included::types::SomeMap,
     }
     impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_SomeService_bounce_map {
         #[inline]
@@ -1264,10 +1264,10 @@ pub mod mock {
     impl<'mock> super::client::SomeService for SomeService<'mock> {
         fn bounce_map(
             &self,
-            arg_m: &include::types::SomeMap,
-        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<include::types::SomeMap, crate::errors::some_service::BounceMapError>> {
+            arg_m: &included::types::SomeMap,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError>> {
             let mut closure = self.bounce_map.closure.lock().unwrap();
-            let closure: &mut dyn ::std::ops::FnMut(include::types::SomeMap) -> _ = &mut **closure;
+            let closure: &mut dyn ::std::ops::FnMut(included::types::SomeMap) -> _ = &mut **closure;
             ::std::boxed::Box::pin(::futures::future::ready(closure(arg_m.clone())))
         }
         fn binary_keyed_map(
@@ -1285,8 +1285,8 @@ pub mod mock {
 
             pub struct bounce_map<'mock> {
                 pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
-                    dyn ::std::ops::FnMut(include::types::SomeMap) -> ::std::result::Result<
-                        include::types::SomeMap,
+                    dyn ::std::ops::FnMut(included::types::SomeMap) -> ::std::result::Result<
+                        included::types::SomeMap,
                         crate::errors::some_service::BounceMapError,
                     > + ::std::marker::Send + ::std::marker::Sync + 'mock,
                 >>,
@@ -1296,7 +1296,7 @@ pub mod mock {
             impl<'mock> bounce_map<'mock> {
                 pub fn unimplemented() -> Self {
                     Self {
-                        closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: include::types::SomeMap| panic!(
+                        closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: included::types::SomeMap| panic!(
                             "{}::{} is not mocked",
                             "SomeService",
                             "bounce_map",
@@ -1304,16 +1304,16 @@ pub mod mock {
                     }
                 }
 
-                pub fn ret(&self, value: include::types::SomeMap) {
-                    self.mock(move |_: include::types::SomeMap| value.clone());
+                pub fn ret(&self, value: included::types::SomeMap) {
+                    self.mock(move |_: included::types::SomeMap| value.clone());
                 }
 
-                pub fn mock(&self, mut mock: impl ::std::ops::FnMut(include::types::SomeMap) -> include::types::SomeMap + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                pub fn mock(&self, mut mock: impl ::std::ops::FnMut(included::types::SomeMap) -> included::types::SomeMap + ::std::marker::Send + ::std::marker::Sync + 'mock) {
                     let mut closure = self.closure.lock().unwrap();
                     *closure = ::std::boxed::Box::new(move |m| ::std::result::Result::Ok(mock(m)));
                 }
 
-                pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut(include::types::SomeMap) -> ::std::result::Result<include::types::SomeMap, crate::errors::some_service::BounceMapError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut(included::types::SomeMap) -> ::std::result::Result<included::types::SomeMap, crate::errors::some_service::BounceMapError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
                     let mut closure = self.closure.lock().unwrap();
                     *closure = ::std::boxed::Box::new(move |m| mock(m));
                 }
@@ -1324,7 +1324,7 @@ pub mod mock {
                     E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
                 {
                     let mut closure = self.closure.lock().unwrap();
-                    *closure = ::std::boxed::Box::new(move |_: include::types::SomeMap| ::std::result::Result::Err(exception.clone().into()));
+                    *closure = ::std::boxed::Box::new(move |_: included::types::SomeMap| ::std::result::Result::Err(exception.clone().into()));
                 }
             }
 
@@ -1384,7 +1384,7 @@ pub mod errors {
         pub type BounceMapError = ::fbthrift::NonthrowingFunctionError;
 
         impl ::std::convert::From<crate::services::some_service::BounceMapExn> for
-            ::std::result::Result<include::types::SomeMap, BounceMapError>
+            ::std::result::Result<included::types::SomeMap, BounceMapError>
         {
             fn from(e: crate::services::some_service::BounceMapExn) -> Self {
                 match e {

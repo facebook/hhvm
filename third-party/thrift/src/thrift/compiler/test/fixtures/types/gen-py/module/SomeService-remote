@@ -42,7 +42,7 @@ from thrift.util.remote import Function
 from thrift.remote import Remote
 
 FUNCTIONS = {
-    'bounce_map': Function('bounce_map', 'SomeService', 'include.SomeMap', [('include.SomeMap', 'm', 'map<i32, string>')]),
+    'bounce_map': Function('bounce_map', 'SomeService', 'included.SomeMap', [('included.SomeMap', 'm', 'map<i32, string>')]),
     'binary_keyed_map': Function('binary_keyed_map', 'SomeService', 'map<TBinary, i64>', [('list<i64>', 'r', 'list<i64>')]),
 }
 

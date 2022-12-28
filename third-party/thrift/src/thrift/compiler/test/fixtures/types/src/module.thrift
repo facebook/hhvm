@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-include "include.thrift"
+include "included.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
-namespace cpp apache.thrift.fixtures.types
-namespace cpp2 apache.thrift.fixtures.types
+package "apache.org/thrift/fixtures/types"
 
 typedef binary TBinary
 
@@ -41,7 +40,7 @@ struct ContainerStruct {
     cpp.template = "folly::sorted_vector_map",
     rust.type = "sorted_vector_map::SortedVectorMap",
   ) fieldG;
-  8: include.SomeMap fieldH;
+  8: included.SomeMap fieldH;
 }
 
 struct CppTypeStruct {
@@ -62,7 +61,7 @@ enum is_unscoped {
 } (cpp.deprecated_enum_unscoped)
 
 service SomeService {
-  include.SomeMap bounce_map(1: include.SomeMap m);
+  included.SomeMap bounce_map(1: included.SomeMap m);
   map<TBinary, i64> binary_keyed_map(1: list<i64> r);
 }
 
@@ -135,7 +134,7 @@ struct Renaming {
 
 struct AnnotatedTypes {
   1: TBinary (noop_annotation) binary_field;
-  2: include.SomeListOfTypeMap (noop_annotation) list_field;
+  2: included.SomeListOfTypeMap (noop_annotation) list_field;
 }
 
 # Validates that C++ codegen performes appropriate topological sorting of

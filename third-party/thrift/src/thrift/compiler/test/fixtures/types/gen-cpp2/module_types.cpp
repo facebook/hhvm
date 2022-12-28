@@ -110,6 +110,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::decorated_struct>::trans
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* decorated_struct::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/decorated_struct";
+}
+
 const folly::StringPiece decorated_struct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<decorated_struct>::fields_names[folly::to_underlying(ord) - 1];
@@ -157,11 +161,7 @@ bool decorated_struct::operator==(FOLLY_MAYBE_UNUSED const decorated_struct& rhs
 }
 
 bool decorated_struct::operator<(FOLLY_MAYBE_UNUSED const decorated_struct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return lhs.field_ref() < rhs.field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -205,6 +205,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::ContainerStruct>::transl
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* ContainerStruct::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/ContainerStruct";
+}
 
 const folly::StringPiece ContainerStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -312,6 +316,10 @@ bool ContainerStruct::operator==(FOLLY_MAYBE_UNUSED const ContainerStruct& rhs) 
     return false;
   }
   return true;
+}
+
+bool ContainerStruct::operator<(FOLLY_MAYBE_UNUSED const ContainerStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::std::int32_t>& ContainerStruct::get_fieldA() const& {
@@ -427,6 +435,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::CppTypeStruct>::translat
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* CppTypeStruct::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/CppTypeStruct";
+}
+
 const folly::StringPiece CppTypeStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CppTypeStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -474,11 +486,7 @@ bool CppTypeStruct::operator==(FOLLY_MAYBE_UNUSED const CppTypeStruct& rhs) cons
 }
 
 bool CppTypeStruct::operator<(FOLLY_MAYBE_UNUSED const CppTypeStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return lhs.fieldA_ref() < rhs.fieldA_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const std::list<int32_t>& CppTypeStruct::get_fieldA() const& {
@@ -531,6 +539,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::VirtualStruct>::translat
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* VirtualStruct::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/VirtualStruct";
+}
+
 const folly::StringPiece VirtualStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<VirtualStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -578,11 +590,7 @@ bool VirtualStruct::operator==(FOLLY_MAYBE_UNUSED const VirtualStruct& rhs) cons
 }
 
 bool VirtualStruct::operator<(FOLLY_MAYBE_UNUSED const VirtualStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
-    return lhs.MyIntField_ref() < rhs.MyIntField_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -626,6 +634,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::MyStructWithForwardRefEn
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* MyStructWithForwardRefEnum::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/MyStructWithForwardRefEnum";
+}
 
 const folly::StringPiece MyStructWithForwardRefEnum::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -682,14 +694,7 @@ bool MyStructWithForwardRefEnum::operator==(FOLLY_MAYBE_UNUSED const MyStructWit
 }
 
 bool MyStructWithForwardRefEnum::operator<(FOLLY_MAYBE_UNUSED const MyStructWithForwardRefEnum& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return lhs.a_ref() < rhs.a_ref();
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return lhs.b_ref() < rhs.b_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -735,6 +740,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::TrivialNumeric>::transla
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* TrivialNumeric::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/TrivialNumeric";
+}
+
 const folly::StringPiece TrivialNumeric::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TrivialNumeric>::fields_names[folly::to_underlying(ord) - 1];
@@ -775,14 +784,7 @@ bool TrivialNumeric::operator==(FOLLY_MAYBE_UNUSED const TrivialNumeric& rhs) co
 }
 
 bool TrivialNumeric::operator<(FOLLY_MAYBE_UNUSED const TrivialNumeric& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return lhs.a_ref() < rhs.a_ref();
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return lhs.b_ref() < rhs.b_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -828,6 +830,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::TrivialNestedWithDefault
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* TrivialNestedWithDefault::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/TrivialNestedWithDefault";
+}
+
 const folly::StringPiece TrivialNestedWithDefault::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TrivialNestedWithDefault>::fields_names[folly::to_underlying(ord) - 1];
@@ -868,14 +874,7 @@ bool TrivialNestedWithDefault::operator==(FOLLY_MAYBE_UNUSED const TrivialNested
 }
 
 bool TrivialNestedWithDefault::operator<(FOLLY_MAYBE_UNUSED const TrivialNestedWithDefault& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.z_ref() == rhs.z_ref())) {
-    return lhs.z_ref() < rhs.z_ref();
-  }
-  if (!(lhs.n_ref() == rhs.n_ref())) {
-    return lhs.n_ref() < rhs.n_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::apache::thrift::fixtures::types::TrivialNumeric& TrivialNestedWithDefault::get_n() const& {
@@ -935,6 +934,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::ComplexString>::translat
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* ComplexString::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/ComplexString";
+}
+
 const folly::StringPiece ComplexString::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ComplexString>::fields_names[folly::to_underlying(ord) - 1];
@@ -990,14 +993,7 @@ bool ComplexString::operator==(FOLLY_MAYBE_UNUSED const ComplexString& rhs) cons
 }
 
 bool ComplexString::operator<(FOLLY_MAYBE_UNUSED const ComplexString& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return lhs.a_ref() < rhs.a_ref();
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return lhs.b_ref() < rhs.b_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::string, ::std::int32_t>& ComplexString::get_b() const& {
@@ -1050,6 +1046,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::ComplexNestedWithDefault
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* ComplexNestedWithDefault::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/ComplexNestedWithDefault";
+}
 
 const folly::StringPiece ComplexNestedWithDefault::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1106,14 +1106,7 @@ bool ComplexNestedWithDefault::operator==(FOLLY_MAYBE_UNUSED const ComplexNested
 }
 
 bool ComplexNestedWithDefault::operator<(FOLLY_MAYBE_UNUSED const ComplexNestedWithDefault& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.z_ref() == rhs.z_ref())) {
-    return lhs.z_ref() < rhs.z_ref();
-  }
-  if (!(lhs.n_ref() == rhs.n_ref())) {
-    return lhs.n_ref() < rhs.n_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::apache::thrift::fixtures::types::ComplexString& ComplexNestedWithDefault::get_n() const& {
@@ -1172,6 +1165,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::MinPadding>::translateFi
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* MinPadding::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/MinPadding";
+}
 
 const folly::StringPiece MinPadding::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1244,23 +1241,7 @@ bool MinPadding::operator==(FOLLY_MAYBE_UNUSED const MinPadding& rhs) const {
 }
 
 bool MinPadding::operator<(FOLLY_MAYBE_UNUSED const MinPadding& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.small_ref() == rhs.small_ref())) {
-    return lhs.small_ref() < rhs.small_ref();
-  }
-  if (!(lhs.big_ref() == rhs.big_ref())) {
-    return lhs.big_ref() < rhs.big_ref();
-  }
-  if (!(lhs.medium_ref() == rhs.medium_ref())) {
-    return lhs.medium_ref() < rhs.medium_ref();
-  }
-  if (!(lhs.biggish_ref() == rhs.biggish_ref())) {
-    return lhs.biggish_ref() < rhs.biggish_ref();
-  }
-  if (!(lhs.tiny_ref() == rhs.tiny_ref())) {
-    return lhs.tiny_ref() < rhs.tiny_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1307,6 +1288,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::MinPaddingWithCustomType
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* MinPaddingWithCustomType::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/MinPaddingWithCustomType";
+}
 
 const folly::StringPiece MinPaddingWithCustomType::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1375,11 +1360,11 @@ void MinPaddingWithCustomType::__fbthrift_clear_terse_fields() {
 }
 
 bool MinPaddingWithCustomType::__fbthrift_is_empty() const {
-  return this->__fbthrift_field_small == ::std::int8_t() &&
- this->__fbthrift_field_big == ::std::int64_t() &&
- this->__fbthrift_field_medium == ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType>() &&
- this->__fbthrift_field_biggish == ::std::int32_t() &&
- this->__fbthrift_field_tiny == ::std::int8_t();
+  return ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_small) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_big) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<3>, MinPaddingWithCustomType>>(this->__fbthrift_field_medium) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_biggish) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_tiny);
 }
 
 bool MinPaddingWithCustomType::operator==(FOLLY_MAYBE_UNUSED const MinPaddingWithCustomType& rhs) const {
@@ -1403,23 +1388,7 @@ bool MinPaddingWithCustomType::operator==(FOLLY_MAYBE_UNUSED const MinPaddingWit
 }
 
 bool MinPaddingWithCustomType::operator<(FOLLY_MAYBE_UNUSED const MinPaddingWithCustomType& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.small_ref() == rhs.small_ref())) {
-    return lhs.small_ref() < rhs.small_ref();
-  }
-  if (!(lhs.big_ref() == rhs.big_ref())) {
-    return lhs.big_ref() < rhs.big_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_medium, rhs.__fbthrift_field_medium)) {
-    return ::apache::thrift::adapt_detail::less<::my::Adapter>(lhs.__fbthrift_field_medium, rhs.__fbthrift_field_medium);
-  }
-  if (!(lhs.biggish_ref() == rhs.biggish_ref())) {
-    return lhs.biggish_ref() < rhs.biggish_ref();
-  }
-  if (!(lhs.tiny_ref() == rhs.tiny_ref())) {
-    return lhs.tiny_ref() < rhs.tiny_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1466,6 +1435,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::MyStruct>::translateFiel
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* MyStruct::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/MyStruct";
+}
 
 const folly::StringPiece MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1580,6 +1553,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::MyDataItem>::translateFi
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* MyDataItem::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/MyDataItem";
+}
+
 const folly::StringPiece MyDataItem::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyDataItem>::fields_names[folly::to_underlying(ord) - 1];
@@ -1642,6 +1619,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::Renamed>::translateField
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* Renamed::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/Renaming";
+}
+
 const folly::StringPiece Renamed::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Renamed>::fields_names[folly::to_underlying(ord) - 1];
@@ -1676,11 +1657,7 @@ bool Renamed::operator==(FOLLY_MAYBE_UNUSED const Renamed& rhs) const {
 }
 
 bool Renamed::operator<(FOLLY_MAYBE_UNUSED const Renamed& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.bar_ref() == rhs.bar_ref())) {
-    return lhs.bar_ref() < rhs.bar_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1724,6 +1701,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::AnnotatedTypes>::transla
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* AnnotatedTypes::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/AnnotatedTypes";
+}
 
 const folly::StringPiece AnnotatedTypes::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1779,6 +1760,10 @@ bool AnnotatedTypes::operator==(FOLLY_MAYBE_UNUSED const AnnotatedTypes& rhs) co
   return true;
 }
 
+bool AnnotatedTypes::operator<(FOLLY_MAYBE_UNUSED const AnnotatedTypes& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
 const ::apache::thrift::fixtures::types::SomeListOfTypeMap& AnnotatedTypes::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
@@ -1829,6 +1814,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageRoot>::trans
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* ForwardUsageRoot::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/ForwardUsageRoot";
+}
 
 const folly::StringPiece ForwardUsageRoot::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1896,14 +1885,7 @@ bool ForwardUsageRoot::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageRoot& rhs
 }
 
 bool ForwardUsageRoot::operator<(FOLLY_MAYBE_UNUSED const ForwardUsageRoot& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.ForwardUsageStruct_ref() == rhs.ForwardUsageStruct_ref())) {
-    return lhs.ForwardUsageStruct_ref() < rhs.ForwardUsageStruct_ref();
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.ForwardUsageByRef_ref(), rhs.ForwardUsageByRef_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.ForwardUsageByRef_ref(), rhs.ForwardUsageByRef_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::apache::thrift::fixtures::types::ForwardUsageStruct* ForwardUsageRoot::get_ForwardUsageStruct() const& {
@@ -1969,6 +1951,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageStruct>::tra
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* ForwardUsageStruct::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/ForwardUsageStruct";
+}
+
 const folly::StringPiece ForwardUsageStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ForwardUsageStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -2021,11 +2007,7 @@ bool ForwardUsageStruct::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageStruct&
 }
 
 bool ForwardUsageStruct::operator<(FOLLY_MAYBE_UNUSED const ForwardUsageStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.foo_ref(), rhs.foo_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.foo_ref(), rhs.foo_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2074,6 +2056,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageByRef>::tran
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* ForwardUsageByRef::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/ForwardUsageByRef";
+}
 
 const folly::StringPiece ForwardUsageByRef::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2127,11 +2113,7 @@ bool ForwardUsageByRef::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageByRef& r
 }
 
 bool ForwardUsageByRef::operator<(FOLLY_MAYBE_UNUSED const ForwardUsageByRef& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.foo_ref(), rhs.foo_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.foo_ref(), rhs.foo_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2181,6 +2163,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteMap>::translat
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* IncompleteMap::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/IncompleteMap";
+}
+
 const folly::StringPiece IncompleteMap::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<IncompleteMap>::fields_names[folly::to_underlying(ord) - 1];
@@ -2228,11 +2214,7 @@ bool IncompleteMap::operator==(FOLLY_MAYBE_UNUSED const IncompleteMap& rhs) cons
 }
 
 bool IncompleteMap::operator<(FOLLY_MAYBE_UNUSED const IncompleteMap& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return lhs.field_ref() < rhs.field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* IncompleteMap::get_field() const& {
@@ -2285,6 +2267,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteMapDep>::trans
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* IncompleteMapDep::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/IncompleteMapDep";
+}
+
 const folly::StringPiece IncompleteMapDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<IncompleteMapDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -2311,8 +2297,7 @@ bool IncompleteMapDep::operator==(FOLLY_MAYBE_UNUSED const IncompleteMapDep& rhs
 }
 
 bool IncompleteMapDep::operator<(FOLLY_MAYBE_UNUSED const IncompleteMapDep& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2354,6 +2339,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteMap>::translateF
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* CompleteMap::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/CompleteMap";
+}
 
 const folly::StringPiece CompleteMap::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2399,6 +2388,10 @@ bool CompleteMap::operator==(FOLLY_MAYBE_UNUSED const CompleteMap& rhs) const {
     return false;
   }
   return true;
+}
+
+bool CompleteMap::operator<(FOLLY_MAYBE_UNUSED const CompleteMap& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* CompleteMap::get_field() const& {
@@ -2451,6 +2444,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteMapDep>::transla
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* CompleteMapDep::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/CompleteMapDep";
+}
+
 const folly::StringPiece CompleteMapDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CompleteMapDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -2477,8 +2474,7 @@ bool CompleteMapDep::operator==(FOLLY_MAYBE_UNUSED const CompleteMapDep& rhs) co
 }
 
 bool CompleteMapDep::operator<(FOLLY_MAYBE_UNUSED const CompleteMapDep& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2520,6 +2516,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteList>::transla
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* IncompleteList::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/IncompleteList";
+}
 
 const folly::StringPiece IncompleteList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2568,11 +2568,7 @@ bool IncompleteList::operator==(FOLLY_MAYBE_UNUSED const IncompleteList& rhs) co
 }
 
 bool IncompleteList::operator<(FOLLY_MAYBE_UNUSED const IncompleteList& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return lhs.field_ref() < rhs.field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* IncompleteList::get_field() const& {
@@ -2625,6 +2621,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::IncompleteListDep>::tran
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* IncompleteListDep::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/IncompleteListDep";
+}
+
 const folly::StringPiece IncompleteListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<IncompleteListDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -2651,8 +2651,7 @@ bool IncompleteListDep::operator==(FOLLY_MAYBE_UNUSED const IncompleteListDep& r
 }
 
 bool IncompleteListDep::operator<(FOLLY_MAYBE_UNUSED const IncompleteListDep& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2694,6 +2693,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteList>::translate
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* CompleteList::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/CompleteList";
+}
 
 const folly::StringPiece CompleteList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2742,11 +2745,7 @@ bool CompleteList::operator==(FOLLY_MAYBE_UNUSED const CompleteList& rhs) const 
 }
 
 bool CompleteList::operator<(FOLLY_MAYBE_UNUSED const CompleteList& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return lhs.field_ref() < rhs.field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* CompleteList::get_field() const& {
@@ -2799,6 +2798,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::CompleteListDep>::transl
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* CompleteListDep::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/CompleteListDep";
+}
+
 const folly::StringPiece CompleteListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CompleteListDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -2825,8 +2828,7 @@ bool CompleteListDep::operator==(FOLLY_MAYBE_UNUSED const CompleteListDep& rhs) 
 }
 
 bool CompleteListDep::operator<(FOLLY_MAYBE_UNUSED const CompleteListDep& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2868,6 +2870,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::AdaptedList>::translateF
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* AdaptedList::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/AdaptedList";
+}
 
 const folly::StringPiece AdaptedList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2916,11 +2922,7 @@ bool AdaptedList::operator==(FOLLY_MAYBE_UNUSED const AdaptedList& rhs) const {
 }
 
 bool AdaptedList::operator<(FOLLY_MAYBE_UNUSED const AdaptedList& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return lhs.field_ref() < rhs.field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* AdaptedList::get_field() const& {
@@ -2974,6 +2976,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::detail::AdaptedListDep>:
 namespace apache { namespace thrift { namespace fixtures { namespace types {namespace detail {
 
 
+const char* AdaptedListDep::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/AdaptedListDep";
+}
+
 const folly::StringPiece AdaptedListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AdaptedListDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -3021,11 +3027,7 @@ bool AdaptedListDep::operator==(FOLLY_MAYBE_UNUSED const AdaptedListDep& rhs) co
 }
 
 bool AdaptedListDep::operator<(FOLLY_MAYBE_UNUSED const AdaptedListDep& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return lhs.field_ref() < rhs.field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::apache::thrift::fixtures::types::AdaptedList& AdaptedListDep::get_field() const& {
@@ -3085,6 +3087,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::DependentAdaptedList>::t
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* DependentAdaptedList::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/DependentAdaptedList";
+}
+
 const folly::StringPiece DependentAdaptedList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<DependentAdaptedList>::fields_names[folly::to_underlying(ord) - 1];
@@ -3132,11 +3138,7 @@ bool DependentAdaptedList::operator==(FOLLY_MAYBE_UNUSED const DependentAdaptedL
 }
 
 bool DependentAdaptedList::operator<(FOLLY_MAYBE_UNUSED const DependentAdaptedList& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return lhs.field_ref() < rhs.field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* DependentAdaptedList::get_field() const& {
@@ -3190,6 +3192,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::detail::DependentAdapted
 namespace apache { namespace thrift { namespace fixtures { namespace types {namespace detail {
 
 
+const char* DependentAdaptedListDep::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/DependentAdaptedListDep";
+}
+
 const folly::StringPiece DependentAdaptedListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<DependentAdaptedListDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -3233,11 +3239,7 @@ bool DependentAdaptedListDep::operator==(FOLLY_MAYBE_UNUSED const DependentAdapt
 }
 
 bool DependentAdaptedListDep::operator<(FOLLY_MAYBE_UNUSED const DependentAdaptedListDep& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.field_ref(), rhs.field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.field_ref(), rhs.field_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -3281,6 +3283,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::AllocatorAware>::transla
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* AllocatorAware::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/AllocatorAware";
+}
 
 const folly::StringPiece AllocatorAware::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3409,29 +3415,7 @@ bool AllocatorAware::operator==(FOLLY_MAYBE_UNUSED const AllocatorAware& rhs) co
 }
 
 bool AllocatorAware::operator<(FOLLY_MAYBE_UNUSED const AllocatorAware& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.aa_list_ref() == rhs.aa_list_ref())) {
-    return lhs.aa_list_ref() < rhs.aa_list_ref();
-  }
-  if (!(lhs.aa_set_ref() == rhs.aa_set_ref())) {
-    return lhs.aa_set_ref() < rhs.aa_set_ref();
-  }
-  if (!(lhs.aa_map_ref() == rhs.aa_map_ref())) {
-    return lhs.aa_map_ref() < rhs.aa_map_ref();
-  }
-  if (!(lhs.aa_string_ref() == rhs.aa_string_ref())) {
-    return lhs.aa_string_ref() < rhs.aa_string_ref();
-  }
-  if (!(lhs.not_a_container_ref() == rhs.not_a_container_ref())) {
-    return lhs.not_a_container_ref() < rhs.not_a_container_ref();
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.aa_unique_ref(), rhs.aa_unique_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.aa_unique_ref(), rhs.aa_unique_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.aa_shared_ref(), rhs.aa_shared_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.aa_shared_ref(), rhs.aa_shared_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::std::int32_t>& AllocatorAware::get_aa_list() const& {
@@ -3507,6 +3491,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::AllocatorAware2>::transl
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* AllocatorAware2::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/AllocatorAware2";
+}
+
 const folly::StringPiece AllocatorAware2::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AllocatorAware2>::fields_names[folly::to_underlying(ord) - 1];
@@ -3567,11 +3555,7 @@ bool AllocatorAware2::operator==(FOLLY_MAYBE_UNUSED const AllocatorAware2& rhs) 
 }
 
 bool AllocatorAware2::operator<(FOLLY_MAYBE_UNUSED const AllocatorAware2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.not_a_container_ref() == rhs.not_a_container_ref())) {
-    return lhs.not_a_container_ref() < rhs.not_a_container_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -3616,6 +3600,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::TypedefStruct>::translat
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* TypedefStruct::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/TypedefStruct";
+}
 
 const folly::StringPiece TypedefStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3680,17 +3668,7 @@ bool TypedefStruct::operator==(FOLLY_MAYBE_UNUSED const TypedefStruct& rhs) cons
 }
 
 bool TypedefStruct::operator<(FOLLY_MAYBE_UNUSED const TypedefStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.i32_field_ref() == rhs.i32_field_ref())) {
-    return lhs.i32_field_ref() < rhs.i32_field_ref();
-  }
-  if (!(lhs.IntTypedef_field_ref() == rhs.IntTypedef_field_ref())) {
-    return lhs.IntTypedef_field_ref() < rhs.IntTypedef_field_ref();
-  }
-  if (!(lhs.UintTypedef_field_ref() == rhs.UintTypedef_field_ref())) {
-    return lhs.UintTypedef_field_ref() < rhs.UintTypedef_field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -3737,6 +3715,10 @@ void TccStructTraits<::apache::thrift::fixtures::types::StructWithDoubleUndersco
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
+const char* StructWithDoubleUnderscores::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/StructWithDoubleUnderscores";
+}
+
 const folly::StringPiece StructWithDoubleUnderscores::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithDoubleUnderscores>::fields_names[folly::to_underlying(ord) - 1];
@@ -3771,11 +3753,7 @@ bool StructWithDoubleUnderscores::operator==(FOLLY_MAYBE_UNUSED const StructWith
 }
 
 bool StructWithDoubleUnderscores::operator<(FOLLY_MAYBE_UNUSED const StructWithDoubleUnderscores& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.__field_ref() == rhs.__field_ref())) {
-    return lhs.__field_ref() < rhs.__field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

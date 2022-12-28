@@ -10,7 +10,7 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	include0 "include"
+	included0 "included"
 	cpp1 "thrift/annotation/cpp"
 	thrift2 "thrift/annotation/thrift"
 
@@ -23,13 +23,13 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = include0.GoUnusedProtection__
+var _ = included0.GoUnusedProtection__
 var _ = cpp1.GoUnusedProtection__
 var _ = thrift2.GoUnusedProtection__
 type SomeService interface {
   // Parameters:
   //  - M
-  BounceMap(m include0.SomeMap) (_r include0.SomeMap, err error)
+  BounceMap(m included0.SomeMap) (_r included0.SomeMap, err error)
   // Parameters:
   //  - R
   BinaryKeyedMap(r []int64) (_r map[string]int64, err error)
@@ -39,7 +39,7 @@ type SomeServiceClientInterface interface {
   thrift.ClientInterface
   // Parameters:
   //  - M
-  BounceMap(m include0.SomeMap) (_r include0.SomeMap, err error)
+  BounceMap(m included0.SomeMap) (_r included0.SomeMap, err error)
   // Parameters:
   //  - R
   BinaryKeyedMap(r []int64) (_r map[string]int64, err error)
@@ -76,7 +76,7 @@ func NewSomeServiceClientProtocol(prot thrift.Protocol) *SomeServiceClient {
 
 // Parameters:
 //  - M
-func (p *SomeServiceClient) BounceMap(m include0.SomeMap) (_r include0.SomeMap, err error) {
+func (p *SomeServiceClient) BounceMap(m included0.SomeMap) (_r included0.SomeMap, err error) {
   args := SomeServiceBounceMapArgs{
     M : m,
   }
@@ -86,7 +86,7 @@ func (p *SomeServiceClient) BounceMap(m include0.SomeMap) (_r include0.SomeMap, 
 }
 
 
-func (p *SomeServiceClient) recvBounceMap() (value include0.SomeMap, err error) {
+func (p *SomeServiceClient) recvBounceMap() (value included0.SomeMap, err error) {
   var __result SomeServiceBounceMapResult
   err = p.CC.RecvMsg("bounce_map", &__result)
   if err != nil { return }
@@ -153,7 +153,7 @@ func NewSomeServiceThreadsafeClientProtocol(prot thrift.Protocol) *SomeServiceTh
 
 // Parameters:
 //  - M
-func (p *SomeServiceThreadsafeClient) BounceMap(m include0.SomeMap) (_r include0.SomeMap, err error) {
+func (p *SomeServiceThreadsafeClient) BounceMap(m included0.SomeMap) (_r included0.SomeMap, err error) {
   p.Mu.Lock()
   defer p.Mu.Unlock()
   args := SomeServiceBounceMapArgs{
@@ -165,7 +165,7 @@ func (p *SomeServiceThreadsafeClient) BounceMap(m include0.SomeMap) (_r include0
 }
 
 
-func (p *SomeServiceThreadsafeClient) recvBounceMap() (value include0.SomeMap, err error) {
+func (p *SomeServiceThreadsafeClient) recvBounceMap() (value included0.SomeMap, err error) {
   var __result SomeServiceBounceMapResult
   err = p.CC.RecvMsg("bounce_map", &__result)
   if err != nil { return }
@@ -218,7 +218,7 @@ func NewSomeServiceChannelClient(channel thrift.RequestChannel) *SomeServiceChan
 
 // Parameters:
 //  - M
-func (p *SomeServiceChannelClient) BounceMap(ctx context.Context, m include0.SomeMap) (_r include0.SomeMap, err error) {
+func (p *SomeServiceChannelClient) BounceMap(ctx context.Context, m included0.SomeMap) (_r included0.SomeMap, err error) {
   args := SomeServiceBounceMapArgs{
     M : m,
   }
@@ -398,7 +398,7 @@ func (p *someServiceProcessorBinaryKeyedMap) Run(argStruct thrift.Struct) (thrif
 //  - M
 type SomeServiceBounceMapArgs struct {
   thrift.IRequest
-  M include0.SomeMap `thrift:"m,1" db:"m" json:"m"`
+  M included0.SomeMap `thrift:"m,1" db:"m" json:"m"`
 }
 
 func NewSomeServiceBounceMapArgs() *SomeServiceBounceMapArgs {
@@ -406,7 +406,7 @@ func NewSomeServiceBounceMapArgs() *SomeServiceBounceMapArgs {
 }
 
 
-func (p *SomeServiceBounceMapArgs) GetM() include0.SomeMap {
+func (p *SomeServiceBounceMapArgs) GetM() included0.SomeMap {
   return p.M
 }
 type SomeServiceBounceMapArgsBuilder struct {
@@ -425,12 +425,12 @@ func (p SomeServiceBounceMapArgsBuilder) Emit() *SomeServiceBounceMapArgs{
   }
 }
 
-func (s *SomeServiceBounceMapArgsBuilder) M(m include0.SomeMap) *SomeServiceBounceMapArgsBuilder {
+func (s *SomeServiceBounceMapArgsBuilder) M(m included0.SomeMap) *SomeServiceBounceMapArgsBuilder {
   s.obj.M = m
   return s
 }
 
-func (s *SomeServiceBounceMapArgs) SetM(m include0.SomeMap) *SomeServiceBounceMapArgs {
+func (s *SomeServiceBounceMapArgs) SetM(m included0.SomeMap) *SomeServiceBounceMapArgs {
   s.M = m
   return s
 }
@@ -472,7 +472,7 @@ func (p *SomeServiceBounceMapArgs)  ReadField1(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(include0.SomeMap, size)
+  tMap := make(included0.SomeMap, size)
   p.M =  tMap
   for i := 0; i < size; i ++ {
     var _key33 int32
@@ -539,16 +539,16 @@ func (p *SomeServiceBounceMapArgs) String() string {
 //  - Success
 type SomeServiceBounceMapResult struct {
   thrift.IResponse
-  Success include0.SomeMap `thrift:"success,0,optional" db:"success" json:"success,omitempty"`
+  Success included0.SomeMap `thrift:"success,0,optional" db:"success" json:"success,omitempty"`
 }
 
 func NewSomeServiceBounceMapResult() *SomeServiceBounceMapResult {
   return &SomeServiceBounceMapResult{}
 }
 
-var SomeServiceBounceMapResult_Success_DEFAULT include0.SomeMap
+var SomeServiceBounceMapResult_Success_DEFAULT included0.SomeMap
 
-func (p *SomeServiceBounceMapResult) GetSuccess() include0.SomeMap {
+func (p *SomeServiceBounceMapResult) GetSuccess() included0.SomeMap {
   return p.Success
 }
 func (p *SomeServiceBounceMapResult) IsSetSuccess() bool {
@@ -571,12 +571,12 @@ func (p SomeServiceBounceMapResultBuilder) Emit() *SomeServiceBounceMapResult{
   }
 }
 
-func (s *SomeServiceBounceMapResultBuilder) Success(success include0.SomeMap) *SomeServiceBounceMapResultBuilder {
+func (s *SomeServiceBounceMapResultBuilder) Success(success included0.SomeMap) *SomeServiceBounceMapResultBuilder {
   s.obj.Success = success
   return s
 }
 
-func (s *SomeServiceBounceMapResult) SetSuccess(success include0.SomeMap) *SomeServiceBounceMapResult {
+func (s *SomeServiceBounceMapResult) SetSuccess(success included0.SomeMap) *SomeServiceBounceMapResult {
   s.Success = success
   return s
 }
@@ -618,7 +618,7 @@ func (p *SomeServiceBounceMapResult)  ReadField0(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(include0.SomeMap, size)
+  tMap := make(included0.SomeMap, size)
   p.Success =  tMap
   for i := 0; i < size; i ++ {
     var _key35 int32

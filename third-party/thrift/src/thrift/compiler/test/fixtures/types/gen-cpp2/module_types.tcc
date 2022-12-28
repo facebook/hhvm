@@ -2225,23 +2225,23 @@ template <class Protocol_>
 uint32_t MinPaddingWithCustomType::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("MinPaddingWithCustomType");
-  if (!(this->__fbthrift_field_small == ::std::int8_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_small))) {
     xfer += prot_->serializedFieldSize("small", apache::thrift::protocol::T_BYTE, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int8_t>::serializedSize<false>(*prot_, this->__fbthrift_field_small);
   }
-  if (!(this->__fbthrift_field_big == ::std::int64_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_big))) {
     xfer += prot_->serializedFieldSize("big", apache::thrift::protocol::T_I64, 2);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::serializedSize<false>(*prot_, this->__fbthrift_field_big);
   }
-  if (!(this->__fbthrift_field_medium == ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType>())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<3>, MinPaddingWithCustomType>>(this->__fbthrift_field_medium))) {
     xfer += prot_->serializedFieldSize("medium", apache::thrift::protocol::T_I16, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter>(*prot_, this->__fbthrift_field_medium, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, ::my::Adapter::toThrift(this->__fbthrift_field_medium));});
   }
-  if (!(this->__fbthrift_field_biggish == ::std::int32_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_biggish))) {
     xfer += prot_->serializedFieldSize("biggish", apache::thrift::protocol::T_I32, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_biggish);
   }
-  if (!(this->__fbthrift_field_tiny == ::std::int8_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_tiny))) {
     xfer += prot_->serializedFieldSize("tiny", apache::thrift::protocol::T_BYTE, 5);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int8_t>::serializedSize<false>(*prot_, this->__fbthrift_field_tiny);
   }
@@ -2253,23 +2253,23 @@ template <class Protocol_>
 uint32_t MinPaddingWithCustomType::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("MinPaddingWithCustomType");
-  if (!(this->__fbthrift_field_small == ::std::int8_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_small))) {
     xfer += prot_->serializedFieldSize("small", apache::thrift::protocol::T_BYTE, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int8_t>::serializedSize<false>(*prot_, this->__fbthrift_field_small);
   }
-  if (!(this->__fbthrift_field_big == ::std::int64_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_big))) {
     xfer += prot_->serializedFieldSize("big", apache::thrift::protocol::T_I64, 2);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::serializedSize<false>(*prot_, this->__fbthrift_field_big);
   }
-  if (!(this->__fbthrift_field_medium == ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType>())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<3>, MinPaddingWithCustomType>>(this->__fbthrift_field_medium))) {
     xfer += prot_->serializedFieldSize("medium", apache::thrift::protocol::T_I16, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter>(*prot_, this->__fbthrift_field_medium, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, ::my::Adapter::toThrift(this->__fbthrift_field_medium));});
   }
-  if (!(this->__fbthrift_field_biggish == ::std::int32_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_biggish))) {
     xfer += prot_->serializedFieldSize("biggish", apache::thrift::protocol::T_I32, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_biggish);
   }
-  if (!(this->__fbthrift_field_tiny == ::std::int8_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_tiny))) {
     xfer += prot_->serializedFieldSize("tiny", apache::thrift::protocol::T_BYTE, 5);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int8_t>::serializedSize<false>(*prot_, this->__fbthrift_field_tiny);
   }
@@ -2282,7 +2282,7 @@ uint32_t MinPaddingWithCustomType::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("MinPaddingWithCustomType");
   bool previousFieldHasValue = true;
-  if (!(this->__fbthrift_field_small == ::std::int8_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_small))) {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_BYTE, 1, kPrevFieldId>(*prot_, "small", previousFieldHasValue);
     previousFieldHasValue = true;
@@ -2291,7 +2291,7 @@ uint32_t MinPaddingWithCustomType::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(this->__fbthrift_field_big == ::std::int64_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_big))) {
     constexpr int16_t kPrevFieldId = 1;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I64, 2, kPrevFieldId>(*prot_, "big", previousFieldHasValue);
     previousFieldHasValue = true;
@@ -2300,7 +2300,7 @@ uint32_t MinPaddingWithCustomType::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(this->__fbthrift_field_medium == ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType>())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<3>, MinPaddingWithCustomType>>(this->__fbthrift_field_medium))) {
     constexpr int16_t kPrevFieldId = 2;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I16, 3, kPrevFieldId>(*prot_, "medium", previousFieldHasValue);
     previousFieldHasValue = true;
@@ -2309,7 +2309,7 @@ uint32_t MinPaddingWithCustomType::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(this->__fbthrift_field_biggish == ::std::int32_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_biggish))) {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 4, kPrevFieldId>(*prot_, "biggish", previousFieldHasValue);
     previousFieldHasValue = true;
@@ -2318,7 +2318,7 @@ uint32_t MinPaddingWithCustomType::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(this->__fbthrift_field_tiny == ::std::int8_t())) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_tiny))) {
     constexpr int16_t kPrevFieldId = 4;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_BYTE, 5, kPrevFieldId>(*prot_, "tiny", previousFieldHasValue);
     previousFieldHasValue = true;

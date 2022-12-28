@@ -32,7 +32,7 @@ pub struct ContainerStruct {
     pub fieldE: ::std::vec::Vec<::std::primitive::i32>,
     pub fieldF: ::sorted_vector_map::SortedVectorSet<::std::primitive::i32>,
     pub fieldG: ::sorted_vector_map::SortedVectorMap<::std::primitive::i32, ::std::string::String>,
-    pub fieldH: include::types::SomeMap,
+    pub fieldH: included::types::SomeMap,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -191,7 +191,7 @@ pub struct Renaming {
 #[derive(Clone, PartialEq)]
 pub struct AnnotatedTypes {
     pub binary_field: crate::types::TBinary,
-    pub list_field: include::types::SomeListOfTypeMap,
+    pub list_field: included::types::SomeListOfTypeMap,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -791,6 +791,12 @@ impl ::fbthrift::GetTType for self::decorated_struct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::decorated_struct {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/decorated_struct"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::decorated_struct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -871,6 +877,12 @@ unsafe impl ::std::marker::Sync for self::ContainerStruct {}
 
 impl ::fbthrift::GetTType for self::ContainerStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::ContainerStruct {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/ContainerStruct"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::ContainerStruct
@@ -990,6 +1002,12 @@ impl ::fbthrift::GetTType for self::CppTypeStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::CppTypeStruct {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/CppTypeStruct"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::CppTypeStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1056,6 +1074,12 @@ unsafe impl ::std::marker::Sync for self::VirtualStruct {}
 
 impl ::fbthrift::GetTType for self::VirtualStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::VirtualStruct {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/VirtualStruct"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::VirtualStruct
@@ -1126,6 +1150,12 @@ unsafe impl ::std::marker::Sync for self::MyStructWithForwardRefEnum {}
 
 impl ::fbthrift::GetTType for self::MyStructWithForwardRefEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::MyStructWithForwardRefEnum {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/MyStructWithForwardRefEnum"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::MyStructWithForwardRefEnum
@@ -1203,6 +1233,12 @@ unsafe impl ::std::marker::Sync for self::TrivialNumeric {}
 
 impl ::fbthrift::GetTType for self::TrivialNumeric {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::TrivialNumeric {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/TrivialNumeric"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::TrivialNumeric
@@ -1286,6 +1322,12 @@ impl ::fbthrift::GetTType for self::TrivialNestedWithDefault {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::TrivialNestedWithDefault {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/TrivialNestedWithDefault"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::TrivialNestedWithDefault
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1365,6 +1407,12 @@ unsafe impl ::std::marker::Sync for self::ComplexString {}
 
 impl ::fbthrift::GetTType for self::ComplexString {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::ComplexString {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/ComplexString"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::ComplexString
@@ -1450,6 +1498,12 @@ unsafe impl ::std::marker::Sync for self::ComplexNestedWithDefault {}
 
 impl ::fbthrift::GetTType for self::ComplexNestedWithDefault {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::ComplexNestedWithDefault {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/ComplexNestedWithDefault"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::ComplexNestedWithDefault
@@ -1541,6 +1595,12 @@ unsafe impl ::std::marker::Sync for self::MinPadding {}
 
 impl ::fbthrift::GetTType for self::MinPadding {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::MinPadding {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/MinPadding"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::MinPadding
@@ -1647,6 +1707,12 @@ impl ::fbthrift::GetTType for self::MinPaddingWithCustomType {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::MinPaddingWithCustomType {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/MinPaddingWithCustomType"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MinPaddingWithCustomType
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1749,6 +1815,12 @@ impl ::fbthrift::GetTType for self::MyStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::MyStruct {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/MyStruct"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1836,6 +1908,12 @@ impl ::fbthrift::GetTType for self::MyDataItem {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::MyDataItem {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/MyDataItem"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyDataItem
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1895,6 +1973,12 @@ unsafe impl ::std::marker::Sync for self::Renaming {}
 
 impl ::fbthrift::GetTType for self::Renaming {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::Renaming {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/Renaming"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::Renaming
@@ -1965,6 +2049,12 @@ unsafe impl ::std::marker::Sync for self::AnnotatedTypes {}
 
 impl ::fbthrift::GetTType for self::AnnotatedTypes {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::AnnotatedTypes {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/AnnotatedTypes"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::AnnotatedTypes
@@ -2042,6 +2132,12 @@ unsafe impl ::std::marker::Sync for self::ForwardUsageRoot {}
 
 impl ::fbthrift::GetTType for self::ForwardUsageRoot {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::ForwardUsageRoot {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/ForwardUsageRoot"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::ForwardUsageRoot
@@ -2123,6 +2219,12 @@ impl ::fbthrift::GetTType for self::ForwardUsageStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::ForwardUsageStruct {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/ForwardUsageStruct"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::ForwardUsageStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2191,6 +2293,12 @@ unsafe impl ::std::marker::Sync for self::ForwardUsageByRef {}
 
 impl ::fbthrift::GetTType for self::ForwardUsageByRef {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::ForwardUsageByRef {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/ForwardUsageByRef"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::ForwardUsageByRef
@@ -2263,6 +2371,12 @@ impl ::fbthrift::GetTType for self::IncompleteMap {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::IncompleteMap {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/IncompleteMap"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::IncompleteMap
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2331,6 +2445,12 @@ impl ::fbthrift::GetTType for self::IncompleteMapDep {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::IncompleteMapDep {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/IncompleteMapDep"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::IncompleteMapDep
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2390,6 +2510,12 @@ unsafe impl ::std::marker::Sync for self::CompleteMap {}
 
 impl ::fbthrift::GetTType for self::CompleteMap {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::CompleteMap {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/CompleteMap"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::CompleteMap
@@ -2460,6 +2586,12 @@ impl ::fbthrift::GetTType for self::CompleteMapDep {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::CompleteMapDep {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/CompleteMapDep"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::CompleteMapDep
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2519,6 +2651,12 @@ unsafe impl ::std::marker::Sync for self::IncompleteList {}
 
 impl ::fbthrift::GetTType for self::IncompleteList {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::IncompleteList {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/IncompleteList"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::IncompleteList
@@ -2589,6 +2727,12 @@ impl ::fbthrift::GetTType for self::IncompleteListDep {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::IncompleteListDep {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/IncompleteListDep"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::IncompleteListDep
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2648,6 +2792,12 @@ unsafe impl ::std::marker::Sync for self::CompleteList {}
 
 impl ::fbthrift::GetTType for self::CompleteList {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::CompleteList {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/CompleteList"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::CompleteList
@@ -2718,6 +2868,12 @@ impl ::fbthrift::GetTType for self::CompleteListDep {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::CompleteListDep {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/CompleteListDep"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::CompleteListDep
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2777,6 +2933,12 @@ unsafe impl ::std::marker::Sync for self::AdaptedList {}
 
 impl ::fbthrift::GetTType for self::AdaptedList {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::AdaptedList {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/AdaptedList"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::AdaptedList
@@ -2849,6 +3011,12 @@ impl ::fbthrift::GetTType for self::AdaptedListDep {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::AdaptedListDep {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/AdaptedListDep"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::AdaptedListDep
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2915,6 +3083,12 @@ unsafe impl ::std::marker::Sync for self::DependentAdaptedList {}
 
 impl ::fbthrift::GetTType for self::DependentAdaptedList {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::DependentAdaptedList {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/DependentAdaptedList"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::DependentAdaptedList
@@ -2985,6 +3159,12 @@ unsafe impl ::std::marker::Sync for self::DependentAdaptedListDep {}
 
 impl ::fbthrift::GetTType for self::DependentAdaptedListDep {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::DependentAdaptedListDep {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/DependentAdaptedListDep"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::DependentAdaptedListDep
@@ -3067,6 +3247,12 @@ unsafe impl ::std::marker::Sync for self::AllocatorAware {}
 
 impl ::fbthrift::GetTType for self::AllocatorAware {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::AllocatorAware {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/AllocatorAware"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::AllocatorAware
@@ -3179,6 +3365,12 @@ impl ::fbthrift::GetTType for self::AllocatorAware2 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
+impl ::fbthrift::GetUri for self::AllocatorAware2 {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/AllocatorAware2"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::AllocatorAware2
 where
     P: ::fbthrift::ProtocolWriter,
@@ -3249,6 +3441,12 @@ unsafe impl ::std::marker::Sync for self::TypedefStruct {}
 
 impl ::fbthrift::GetTType for self::TypedefStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::TypedefStruct {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/TypedefStruct"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::TypedefStruct
@@ -3331,6 +3529,12 @@ unsafe impl ::std::marker::Sync for self::StructWithDoubleUnderscores {}
 
 impl ::fbthrift::GetTType for self::StructWithDoubleUnderscores {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::StructWithDoubleUnderscores {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/StructWithDoubleUnderscores"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for self::StructWithDoubleUnderscores

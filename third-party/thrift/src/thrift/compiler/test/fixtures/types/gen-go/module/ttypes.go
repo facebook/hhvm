@@ -10,7 +10,7 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	include0 "include"
+	included0 "included"
 	cpp1 "thrift/annotation/cpp"
 	thrift2 "thrift/annotation/thrift"
 
@@ -23,7 +23,7 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = include0.GoUnusedProtection__
+var _ = included0.GoUnusedProtection__
 var _ = cpp1.GoUnusedProtection__
 var _ = thrift2.GoUnusedProtection__
 var GoUnusedProtection__ int;
@@ -309,7 +309,7 @@ type ContainerStruct struct {
   FieldE []int32 `thrift:"fieldE,5" db:"fieldE" json:"fieldE"`
   FieldF []int32 `thrift:"fieldF,6" db:"fieldF" json:"fieldF"`
   FieldG map[int32]string `thrift:"fieldG,7" db:"fieldG" json:"fieldG"`
-  FieldH include0.SomeMap `thrift:"fieldH,8" db:"fieldH" json:"fieldH"`
+  FieldH included0.SomeMap `thrift:"fieldH,8" db:"fieldH" json:"fieldH"`
   // unused fields # 9 to 11
   FieldA []int32 `thrift:"fieldA,12" db:"fieldA" json:"fieldA"`
 }
@@ -347,7 +347,7 @@ func (p *ContainerStruct) GetFieldG() map[int32]string {
   return p.FieldG
 }
 
-func (p *ContainerStruct) GetFieldH() include0.SomeMap {
+func (p *ContainerStruct) GetFieldH() included0.SomeMap {
   return p.FieldH
 }
 type ContainerStructBuilder struct {
@@ -408,7 +408,7 @@ func (c *ContainerStructBuilder) FieldG(fieldG map[int32]string) *ContainerStruc
   return c
 }
 
-func (c *ContainerStructBuilder) FieldH(fieldH include0.SomeMap) *ContainerStructBuilder {
+func (c *ContainerStructBuilder) FieldH(fieldH included0.SomeMap) *ContainerStructBuilder {
   c.obj.FieldH = fieldH
   return c
 }
@@ -448,7 +448,7 @@ func (c *ContainerStruct) SetFieldG(fieldG map[int32]string) *ContainerStruct {
   return c
 }
 
-func (c *ContainerStruct) SetFieldH(fieldH include0.SomeMap) *ContainerStruct {
+func (c *ContainerStruct) SetFieldH(fieldH included0.SomeMap) *ContainerStruct {
   c.FieldH = fieldH
   return c
 }
@@ -678,7 +678,7 @@ func (p *ContainerStruct)  ReadField8(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(include0.SomeMap, size)
+  tMap := make(included0.SomeMap, size)
   p.FieldH =  tMap
   for i := 0; i < size; i ++ {
     var _key11 int32
@@ -3001,7 +3001,7 @@ func (p *Renaming) String() string {
 //  - ListField
 type AnnotatedTypes struct {
   BinaryField TBinary `thrift:"binary_field,1" db:"binary_field" json:"binary_field"`
-  ListField include0.SomeListOfTypeMap `thrift:"list_field,2" db:"list_field" json:"list_field"`
+  ListField included0.SomeListOfTypeMap `thrift:"list_field,2" db:"list_field" json:"list_field"`
 }
 
 func NewAnnotatedTypes() *AnnotatedTypes {
@@ -3013,7 +3013,7 @@ func (p *AnnotatedTypes) GetBinaryField() TBinary {
   return p.BinaryField
 }
 
-func (p *AnnotatedTypes) GetListField() include0.SomeListOfTypeMap {
+func (p *AnnotatedTypes) GetListField() included0.SomeListOfTypeMap {
   return p.ListField
 }
 type AnnotatedTypesBuilder struct {
@@ -3038,7 +3038,7 @@ func (a *AnnotatedTypesBuilder) BinaryField(binaryField TBinary) *AnnotatedTypes
   return a
 }
 
-func (a *AnnotatedTypesBuilder) ListField(listField include0.SomeListOfTypeMap) *AnnotatedTypesBuilder {
+func (a *AnnotatedTypesBuilder) ListField(listField included0.SomeListOfTypeMap) *AnnotatedTypesBuilder {
   a.obj.ListField = listField
   return a
 }
@@ -3048,7 +3048,7 @@ func (a *AnnotatedTypes) SetBinaryField(binaryField TBinary) *AnnotatedTypes {
   return a
 }
 
-func (a *AnnotatedTypes) SetListField(listField include0.SomeListOfTypeMap) *AnnotatedTypes {
+func (a *AnnotatedTypes) SetListField(listField included0.SomeListOfTypeMap) *AnnotatedTypes {
   a.ListField = listField
   return a
 }
@@ -3104,14 +3104,14 @@ func (p *AnnotatedTypes)  ReadField2(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make(include0.SomeListOfTypeMap, 0, size)
+  tSlice := make(included0.SomeListOfTypeMap, 0, size)
   p.ListField =  tSlice
   for i := 0; i < size; i ++ {
     _, _, size, err := iprot.ReadMapBegin()
     if err != nil {
       return thrift.PrependError("error reading map begin: ", err)
     }
-    tMap := make(include0.SomeMap, size)
+    tMap := make(included0.SomeMap, size)
     _elem16 :=  tMap
     for i := 0; i < size; i ++ {
       var _key17 int32

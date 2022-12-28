@@ -10,7 +10,7 @@
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/SomeServiceAsyncClient.h"
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/types/gen-cpp2/include_types.h"
+#include "thrift/compiler/test/fixtures/types/gen-cpp2/included_types.h"
 #include "thrift/annotation/gen-cpp2/cpp_types.h"
 #include "thrift/annotation/gen-cpp2/thrift_types.h"
 
@@ -41,6 +41,10 @@ template <>
 class ServiceHandler<::apache::thrift::fixtures::types::SomeService> : public apache::thrift::ServerInterface {
  public:
   std::string_view getGeneratedName() const override { return "SomeService"; }
+
+  static const char* __fbthrift_thrift_uri() {
+    return "apache.org/thrift/fixtures/types/SomeService";
+  }
 
   typedef ::apache::thrift::fixtures::types::SomeServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;

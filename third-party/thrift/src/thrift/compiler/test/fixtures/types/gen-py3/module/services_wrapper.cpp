@@ -17,7 +17,7 @@ namespace types {
 SomeServiceWrapper::SomeServiceWrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
   {
-    import_module__services();
+    import_apache__thrift__fixtures__types__module__services();
   }
 
 

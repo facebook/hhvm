@@ -12,7 +12,7 @@ from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProc
 from thrift.protocol.TProtocol import TProtocolException
 
 
-import include.ttypes
+import included.ttypes
 import thrift.annotation.cpp.ttypes
 import thrift.annotation.thrift.ttypes
 

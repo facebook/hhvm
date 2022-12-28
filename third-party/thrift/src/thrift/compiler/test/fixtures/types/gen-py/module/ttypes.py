@@ -12,7 +12,7 @@ from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProc
 from thrift.protocol.TProtocol import TProtocolException
 
 
-import include.ttypes
+import included.ttypes
 import thrift.annotation.cpp.ttypes
 import thrift.annotation.thrift.ttypes
 
@@ -165,13 +165,13 @@ class decorated_struct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.decorated_struct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.decorated_struct, self)
 
   def _to_py_deprecated(self):
@@ -472,13 +472,13 @@ class ContainerStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ContainerStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.ContainerStruct, self)
 
   def _to_py_deprecated(self):
@@ -577,13 +577,13 @@ class CppTypeStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CppTypeStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.CppTypeStruct, self)
 
   def _to_py_deprecated(self):
@@ -669,13 +669,13 @@ class VirtualStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.VirtualStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.VirtualStruct, self)
 
   def _to_py_deprecated(self):
@@ -776,13 +776,13 @@ class MyStructWithForwardRefEnum:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MyStructWithForwardRefEnum, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.MyStructWithForwardRefEnum, self)
 
   def _to_py_deprecated(self):
@@ -883,13 +883,13 @@ class TrivialNumeric:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.TrivialNumeric, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.TrivialNumeric, self)
 
   def _to_py_deprecated(self):
@@ -991,13 +991,13 @@ class TrivialNestedWithDefault:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.TrivialNestedWithDefault, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.TrivialNestedWithDefault, self)
 
   def _to_py_deprecated(self):
@@ -1114,13 +1114,13 @@ class ComplexString:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ComplexString, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.ComplexString, self)
 
   def _to_py_deprecated(self):
@@ -1222,13 +1222,13 @@ class ComplexNestedWithDefault:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ComplexNestedWithDefault, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.ComplexNestedWithDefault, self)
 
   def _to_py_deprecated(self):
@@ -1374,13 +1374,13 @@ class MinPadding:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MinPadding, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.MinPadding, self)
 
   def _to_py_deprecated(self):
@@ -1526,13 +1526,13 @@ class MinPaddingWithCustomType:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MinPaddingWithCustomType, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.MinPaddingWithCustomType, self)
 
   def _to_py_deprecated(self):
@@ -1664,13 +1664,13 @@ class MyStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MyStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.MyStruct, self)
 
   def _to_py_deprecated(self):
@@ -1737,13 +1737,13 @@ class MyDataItem:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MyDataItem, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.MyDataItem, self)
 
   def _to_py_deprecated(self):
@@ -1829,13 +1829,13 @@ class Renaming:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Renaming, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.Renaming, self)
 
   def _to_py_deprecated(self):
@@ -1977,13 +1977,13 @@ class AnnotatedTypes:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AnnotatedTypes, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.AnnotatedTypes, self)
 
   def _to_py_deprecated(self):
@@ -2086,13 +2086,13 @@ class ForwardUsageRoot:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ForwardUsageRoot, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.ForwardUsageRoot, self)
 
   def _to_py_deprecated(self):
@@ -2179,13 +2179,13 @@ class ForwardUsageStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ForwardUsageStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.ForwardUsageStruct, self)
 
   def _to_py_deprecated(self):
@@ -2272,13 +2272,13 @@ class ForwardUsageByRef:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ForwardUsageByRef, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.ForwardUsageByRef, self)
 
   def _to_py_deprecated(self):
@@ -2382,13 +2382,13 @@ class IncompleteMap:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.IncompleteMap, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.IncompleteMap, self)
 
   def _to_py_deprecated(self):
@@ -2455,13 +2455,13 @@ class IncompleteMapDep:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.IncompleteMapDep, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.IncompleteMapDep, self)
 
   def _to_py_deprecated(self):
@@ -2565,13 +2565,13 @@ class CompleteMap:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CompleteMap, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.CompleteMap, self)
 
   def _to_py_deprecated(self):
@@ -2638,13 +2638,13 @@ class CompleteMapDep:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CompleteMapDep, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.CompleteMapDep, self)
 
   def _to_py_deprecated(self):
@@ -2745,13 +2745,13 @@ class IncompleteList:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.IncompleteList, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.IncompleteList, self)
 
   def _to_py_deprecated(self):
@@ -2818,13 +2818,13 @@ class IncompleteListDep:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.IncompleteListDep, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.IncompleteListDep, self)
 
   def _to_py_deprecated(self):
@@ -2925,13 +2925,13 @@ class CompleteList:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CompleteList, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.CompleteList, self)
 
   def _to_py_deprecated(self):
@@ -2998,13 +2998,13 @@ class CompleteListDep:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CompleteListDep, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.CompleteListDep, self)
 
   def _to_py_deprecated(self):
@@ -3105,13 +3105,13 @@ class AdaptedList:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AdaptedList, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.AdaptedList, self)
 
   def _to_py_deprecated(self):
@@ -3198,13 +3198,13 @@ class AdaptedListDep:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AdaptedListDep, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.AdaptedListDep, self)
 
   def _to_py_deprecated(self):
@@ -3305,13 +3305,13 @@ class DependentAdaptedList:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.DependentAdaptedList, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.DependentAdaptedList, self)
 
   def _to_py_deprecated(self):
@@ -3397,13 +3397,13 @@ class DependentAdaptedListDep:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.DependentAdaptedListDep, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.DependentAdaptedListDep, self)
 
   def _to_py_deprecated(self):
@@ -3621,13 +3621,13 @@ class AllocatorAware:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AllocatorAware, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.AllocatorAware, self)
 
   def _to_py_deprecated(self):
@@ -3713,13 +3713,13 @@ class AllocatorAware2:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AllocatorAware2, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.AllocatorAware2, self)
 
   def _to_py_deprecated(self):
@@ -3835,13 +3835,13 @@ class TypedefStruct:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.TypedefStruct, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.TypedefStruct, self)
 
   def _to_py_deprecated(self):
@@ -3927,13 +3927,13 @@ class StructWithDoubleUnderscores:
   def _to_python(self):
     import importlib
     import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
+    python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.StructWithDoubleUnderscores, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
+    py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.StructWithDoubleUnderscores, self)
 
   def _to_py_deprecated(self):

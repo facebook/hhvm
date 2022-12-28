@@ -27,7 +27,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::bou
         new ::apache::thrift::MethodMetadata::Data(
                 "bounce_map",
                 ::apache::thrift::FunctionQualifier::Unspecified,
-                "SomeService");
+                "apache.org/thrift/fixtures/types/SomeService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -43,7 +43,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::bin
         new ::apache::thrift::MethodMetadata::Data(
                 "binary_keyed_map",
                 ::apache::thrift::FunctionQualifier::Unspecified,
-                "SomeService");
+                "apache.org/thrift/fixtures/types/SomeService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 

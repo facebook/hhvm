@@ -149,7 +149,6 @@ struct __fbthrift_strings_module {
   using aa_shared = ::fatal::sequence<char, 'a', 'a', '_', 's', 'h', 'a', 'r', 'e', 'd'>;
   using aa_string = ::fatal::sequence<char, 'a', 'a', '_', 's', 't', 'r', 'i', 'n', 'g'>;
   using aa_unique = ::fatal::sequence<char, 'a', 'a', '_', 'u', 'n', 'i', 'q', 'u', 'e'>;
-  using apache__thrift__fixtures__types = ::fatal::sequence<char, 'a', 'p', 'a', 'c', 'h', 'e', ':', ':', 't', 'h', 'r', 'i', 'f', 't', ':', ':', 'f', 'i', 'x', 't', 'u', 'r', 'e', 's', ':', ':', 't', 'y', 'p', 'e', 's'>;
   using b = ::fatal::sequence<char, 'b'>;
   using bar = ::fatal::sequence<char, 'f', 'o', 'o'>;
   using big = ::fatal::sequence<char, 'b', 'i', 'g'>;
@@ -157,8 +156,6 @@ struct __fbthrift_strings_module {
   using binary_field = ::fatal::sequence<char, 'b', 'i', 'n', 'a', 'r', 'y', '_', 'f', 'i', 'e', 'l', 'd'>;
   using binary_keyed_map = ::fatal::sequence<char, 'b', 'i', 'n', 'a', 'r', 'y', '_', 'k', 'e', 'y', 'e', 'd', '_', 'm', 'a', 'p'>;
   using bounce_map = ::fatal::sequence<char, 'b', 'o', 'u', 'n', 'c', 'e', '_', 'm', 'a', 'p'>;
-  using cpp = ::fatal::sequence<char, 'c', 'p', 'p'>;
-  using cpp2 = ::fatal::sequence<char, 'c', 'p', 'p', '2'>;
   using cpp_allocator = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'a', 'l', 'l', 'o', 'c', 'a', 't', 'o', 'r'>;
   using cpp_declare_bitwise_ops = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'd', 'e', 'c', 'l', 'a', 'r', 'e', '_', 'b', 'i', 't', 'w', 'i', 's', 'e', '_', 'o', 'p', 's'>;
   using cpp_declare_equal_to = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'd', 'e', 'c', 'l', 'a', 'r', 'e', '_', 'e', 'q', 'u', 'a', 'l', '_', 't', 'o'>;
@@ -205,8 +202,6 @@ struct module_module_traits {
   using strings = __fbthrift_strings_module;
   using name = strings::module;
   using namespaces = ::fatal::list<
-      ::fatal::pair<strings::cpp, strings::apache__thrift__fixtures__types>,
-      ::fatal::pair<strings::cpp2, strings::apache__thrift__fixtures__types>
   >;
   using enums = ::fatal::list<
       ::fatal::pair<::apache::thrift::fixtures::types::has_bitwise_ops, strings::has_bitwise_ops>,
@@ -261,8 +256,6 @@ struct module_module_traits {
 class module_tags {
   using __fbthrift_strings = __fbthrift_refl::__fbthrift_strings_module;
   struct __fbthrift_languages {
-    using cpp = __fbthrift_strings::cpp;
-    using cpp2 = __fbthrift_strings::cpp2;
   };
   struct __fbthrift_enums {
     using has_bitwise_ops = __fbthrift_strings::has_bitwise_ops;

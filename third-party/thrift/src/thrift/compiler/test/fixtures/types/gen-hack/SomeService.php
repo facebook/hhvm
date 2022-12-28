@@ -6,15 +6,18 @@
  *  @generated
  */
 
+namespace thrift\fixtures\types;
+
 /**
  * Original thrift service:-
  * SomeService
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/SomeService'))>>
 interface SomeServiceAsyncIf extends \IThriftAsyncIf {
   /**
    * Original thrift definition:-
-   * include.SomeMap
-   *   bounce_map(1: include.SomeMap m);
+   * included.SomeMap
+   *   bounce_map(1: included.SomeMap m);
    */
   public function bounce_map(Map<int, string> $m): Awaitable<Map<int, string>>;
 
@@ -30,11 +33,12 @@ interface SomeServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * SomeService
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/SomeService'))>>
 interface SomeServiceIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
-   * include.SomeMap
-   *   bounce_map(1: include.SomeMap m);
+   * included.SomeMap
+   *   bounce_map(1: included.SomeMap m);
    */
   public function bounce_map(Map<int, string> $m): Map<int, string>;
 
@@ -50,6 +54,7 @@ interface SomeServiceIf extends \IThriftSyncIf {
  * Original thrift service:-
  * SomeService
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/SomeService'))>>
 interface SomeServiceAsyncClientIf extends SomeServiceAsyncIf {
 }
 
@@ -57,11 +62,12 @@ interface SomeServiceAsyncClientIf extends SomeServiceAsyncIf {
  * Original thrift service:-
  * SomeService
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/SomeService'))>>
 interface SomeServiceClientIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
-   * include.SomeMap
-   *   bounce_map(1: include.SomeMap m);
+   * included.SomeMap
+   *   bounce_map(1: included.SomeMap m);
    */
   public function bounce_map(Map<int, string> $m): Awaitable<Map<int, string>>;
 
@@ -87,8 +93,8 @@ class SomeServiceAsyncClient extends \ThriftClientBase implements SomeServiceAsy
 
   /**
    * Original thrift definition:-
-   * include.SomeMap
-   *   bounce_map(1: include.SomeMap m);
+   * included.SomeMap
+   *   bounce_map(1: included.SomeMap m);
    */
   public async function bounce_map(Map<int, string> $m): Awaitable<Map<int, string>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
@@ -96,12 +102,12 @@ class SomeServiceAsyncClient extends \ThriftClientBase implements SomeServiceAsy
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = SomeService_bounce_map_args::fromShape(shape(
+    $args = \thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
       'm' => $m,
     ));
     await $this->asyncHandler_->genBefore("SomeService", "bounce_map", $args);
     $currentseqid = $this->sendImplHelper($args, "bounce_map", false);
-    return await $this->genAwaitResponse(SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -115,12 +121,12 @@ class SomeServiceAsyncClient extends \ThriftClientBase implements SomeServiceAsy
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = SomeService_binary_keyed_map_args::fromShape(shape(
+    $args = \thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
       'r' => new Vector($r),
     ));
     await $this->asyncHandler_->genBefore("SomeService", "binary_keyed_map", $args);
     $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false);
-    return await $this->genAwaitResponse(SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
   }
 
 }
@@ -130,8 +136,8 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
 
   /**
    * Original thrift definition:-
-   * include.SomeMap
-   *   bounce_map(1: include.SomeMap m);
+   * included.SomeMap
+   *   bounce_map(1: included.SomeMap m);
    */
   public async function bounce_map(Map<int, string> $m): Awaitable<Map<int, string>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
@@ -139,12 +145,12 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = SomeService_bounce_map_args::fromShape(shape(
+    $args = \thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
       'm' => $m,
     ));
     await $this->asyncHandler_->genBefore("SomeService", "bounce_map", $args);
     $currentseqid = $this->sendImplHelper($args, "bounce_map", false);
-    return await $this->genAwaitResponse(SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -158,32 +164,32 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = SomeService_binary_keyed_map_args::fromShape(shape(
+    $args = \thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
       'r' => new Vector($r),
     ));
     await $this->asyncHandler_->genBefore("SomeService", "binary_keyed_map", $args);
     $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false);
-    return await $this->genAwaitResponse(SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
   public function send_bounce_map(Map<int, string> $m): int {
-    $args = SomeService_bounce_map_args::fromShape(shape(
+    $args = \thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
       'm' => $m,
     ));
     return $this->sendImplHelper($args, "bounce_map", false);
   }
   public function recv_bounce_map(?int $expectedsequenceid = null): Map<int, string> {
-    return $this->recvImplHelper(SomeService_bounce_map_result::class, "bounce_map", false, $expectedsequenceid);
+    return $this->recvImplHelper(\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $expectedsequenceid);
   }
   public function send_binary_keyed_map(KeyedContainer<int, int> $r): int {
-    $args = SomeService_binary_keyed_map_args::fromShape(shape(
+    $args = \thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
       'r' => new Vector($r),
     ));
     return $this->sendImplHelper($args, "binary_keyed_map", false);
   }
   public function recv_binary_keyed_map(?int $expectedsequenceid = null): Map<string, int> {
-    return $this->recvImplHelper(SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $expectedsequenceid);
+    return $this->recvImplHelper(\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $expectedsequenceid);
   }
 }
 
@@ -240,30 +246,30 @@ class SomeService_bounce_map_args implements \IThriftSyncStruct, \IThriftStructM
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.bounce_map_args",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "name" => "include.SomeMap",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "name" => "included.SomeMap",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_map" => tmeta_ThriftMapType::fromShape(
+                          "t_map" => \tmeta_ThriftMapType::fromShape(
                             shape(
-                              "keyType" => tmeta_ThriftType::fromShape(
+                              "keyType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                 )
                               ),
-                              "valueType" => tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                                 )
                               ),
                             )
@@ -369,30 +375,30 @@ class SomeService_bounce_map_result extends \ThriftSyncStructWithResult implemen
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.SomeService_bounce_map_result",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 0,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "name" => "include.SomeMap",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "name" => "included.SomeMap",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_map" => tmeta_ThriftMapType::fromShape(
+                          "t_map" => \tmeta_ThriftMapType::fromShape(
                             shape(
-                              "keyType" => tmeta_ThriftType::fromShape(
+                              "keyType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                 )
                               ),
-                              "valueType" => tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                                 )
                               ),
                             )
@@ -492,20 +498,20 @@ class SomeService_binary_keyed_map_args implements \IThriftSyncStruct, \IThriftS
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.binary_keyed_map_args",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                         )
                       ),
                     )
@@ -608,34 +614,34 @@ class SomeService_binary_keyed_map_result extends \ThriftSyncStructWithResult im
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.SomeService_binary_keyed_map_result",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 0,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_map" => tmeta_ThriftMapType::fromShape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
                     shape(
-                      "keyType" => tmeta_ThriftType::fromShape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
                               "name" => "module.TBinary",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
                                 )
                               ),
                             )
                           ),
                         )
                       ),
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                         )
                       ),
                     )
@@ -686,30 +692,30 @@ class SomeService_binary_keyed_map_result extends \ThriftSyncStructWithResult im
 
 class SomeServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
-    return tmeta_ThriftService::fromShape(
+    return \tmeta_ThriftService::fromShape(
       shape(
         "name" => "module.SomeService",
         "functions" => vec[
-          tmeta_ThriftFunction::fromShape(
+          \tmeta_ThriftFunction::fromShape(
             shape(
               "name" => "bounce_map",
-              "return_type" => tmeta_ThriftType::fromShape(
+              "return_type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "name" => "include.SomeMap",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "name" => "included.SomeMap",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_map" => tmeta_ThriftMapType::fromShape(
+                          "t_map" => \tmeta_ThriftMapType::fromShape(
                             shape(
-                              "keyType" => tmeta_ThriftType::fromShape(
+                              "keyType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                 )
                               ),
-                              "valueType" => tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                                 )
                               ),
                             )
@@ -721,26 +727,26 @@ class SomeServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                 )
               ),
               "arguments" => vec[
-                tmeta_ThriftField::fromShape(
+                \tmeta_ThriftField::fromShape(
                   shape(
                     "id" => 1,
-                    "type" => tmeta_ThriftType::fromShape(
+                    "type" => \tmeta_ThriftType::fromShape(
                       shape(
-                        "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                        "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                           shape(
-                            "name" => "include.SomeMap",
-                            "underlyingType" => tmeta_ThriftType::fromShape(
+                            "name" => "included.SomeMap",
+                            "underlyingType" => \tmeta_ThriftType::fromShape(
                               shape(
-                                "t_map" => tmeta_ThriftMapType::fromShape(
+                                "t_map" => \tmeta_ThriftMapType::fromShape(
                                   shape(
-                                    "keyType" => tmeta_ThriftType::fromShape(
+                                    "keyType" => \tmeta_ThriftType::fromShape(
                                       shape(
-                                        "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                        "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                       )
                                     ),
-                                    "valueType" => tmeta_ThriftType::fromShape(
+                                    "valueType" => \tmeta_ThriftType::fromShape(
                                       shape(
-                                        "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                        "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                                       )
                                     ),
                                   )
@@ -757,30 +763,30 @@ class SomeServiceStaticMetadata implements \IThriftServiceStaticMetadata {
               ],
             )
           ),
-          tmeta_ThriftFunction::fromShape(
+          \tmeta_ThriftFunction::fromShape(
             shape(
               "name" => "binary_keyed_map",
-              "return_type" => tmeta_ThriftType::fromShape(
+              "return_type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_map" => tmeta_ThriftMapType::fromShape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
                     shape(
-                      "keyType" => tmeta_ThriftType::fromShape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
                               "name" => "module.TBinary",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
                                 )
                               ),
                             )
                           ),
                         )
                       ),
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                         )
                       ),
                     )
@@ -788,16 +794,16 @@ class SomeServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                 )
               ),
               "arguments" => vec[
-                tmeta_ThriftField::fromShape(
+                \tmeta_ThriftField::fromShape(
                   shape(
                     "id" => 1,
-                    "type" => tmeta_ThriftType::fromShape(
+                    "type" => \tmeta_ThriftType::fromShape(
                       shape(
-                        "t_list" => tmeta_ThriftListType::fromShape(
+                        "t_list" => \tmeta_ThriftListType::fromShape(
                           shape(
-                            "valueType" => tmeta_ThriftType::fromShape(
+                            "valueType" => \tmeta_ThriftType::fromShape(
                               shape(
-                                "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                                "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                               )
                             ),
                           )

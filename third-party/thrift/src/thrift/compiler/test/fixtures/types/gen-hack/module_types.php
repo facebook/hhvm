@@ -6,10 +6,13 @@
  *  @generated
  */
 
+namespace thrift\fixtures\types;
+
 /**
  * Original thrift enum:-
  * has_bitwise_ops
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/has_bitwise_ops'))>>
 enum has_bitwise_ops: int {
   none = 0;
   zero = 1;
@@ -20,7 +23,7 @@ enum has_bitwise_ops: int {
 
 class has_bitwise_ops_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
-    return tmeta_ThriftEnum::fromShape(
+    return \tmeta_ThriftEnum::fromShape(
       shape(
         "name" => "module.has_bitwise_ops",
         "elements" => dict[
@@ -47,6 +50,7 @@ class has_bitwise_ops_TEnumStaticMetadata implements \IThriftEnumStaticMetadata 
  * Original thrift enum:-
  * is_unscoped
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/is_unscoped'))>>
 enum is_unscoped: int {
   hello = 0;
   world = 1;
@@ -54,7 +58,7 @@ enum is_unscoped: int {
 
 class is_unscoped_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
-    return tmeta_ThriftEnum::fromShape(
+    return \tmeta_ThriftEnum::fromShape(
       shape(
         "name" => "module.is_unscoped",
         "elements" => dict[
@@ -78,6 +82,7 @@ class is_unscoped_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * Original thrift enum:-
  * MyForwardRefEnum
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/MyForwardRefEnum'))>>
 enum MyForwardRefEnum: int {
   ZERO = 0;
   NONZERO = 12;
@@ -85,7 +90,7 @@ enum MyForwardRefEnum: int {
 
 class MyForwardRefEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
-    return tmeta_ThriftEnum::fromShape(
+    return \tmeta_ThriftEnum::fromShape(
       shape(
         "name" => "module.MyForwardRefEnum",
         "elements" => dict[
@@ -109,6 +114,7 @@ class MyForwardRefEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata
  * Original thrift struct:-
  * decorated_struct
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/decorated_struct'))>>
 class decorated_struct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -155,16 +161,16 @@ class decorated_struct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.decorated_struct",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                 )
               ),
               "name" => "field",
@@ -206,6 +212,7 @@ class decorated_struct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * ContainerStruct
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/ContainerStruct'))>>
 class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -391,20 +398,20 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.ContainerStruct",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 12,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -414,16 +421,16 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "fieldA",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -433,16 +440,16 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "fieldB",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 3,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -452,16 +459,16 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "fieldC",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 4,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -471,16 +478,16 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "fieldD",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 5,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -490,16 +497,16 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "fieldE",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 6,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_set" => tmeta_ThriftSetType::fromShape(
+                  "t_set" => \tmeta_ThriftSetType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -509,21 +516,21 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "fieldF",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 7,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_map" => tmeta_ThriftMapType::fromShape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
                     shape(
-                      "keyType" => tmeta_ThriftType::fromShape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                         )
                       ),
                     )
@@ -533,26 +540,26 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "fieldG",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 8,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "name" => "include.SomeMap",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "name" => "included.SomeMap",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_map" => tmeta_ThriftMapType::fromShape(
+                          "t_map" => \tmeta_ThriftMapType::fromShape(
                             shape(
-                              "keyType" => tmeta_ThriftType::fromShape(
+                              "keyType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                 )
                               ),
-                              "valueType" => tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                                 )
                               ),
                             )
@@ -709,6 +716,7 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * CppTypeStruct
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/CppTypeStruct'))>>
 class CppTypeStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -760,20 +768,20 @@ class CppTypeStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.CppTypeStruct",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -831,6 +839,7 @@ class CppTypeStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * VirtualStruct
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/VirtualStruct'))>>
 class VirtualStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -877,16 +886,16 @@ class VirtualStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.VirtualStruct",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
               "name" => "MyIntField",
@@ -928,6 +937,7 @@ class VirtualStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * MyStructWithForwardRefEnum
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/MyStructWithForwardRefEnum'))>>
 class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -935,12 +945,12 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
     1 => shape(
       'var' => 'a',
       'type' => \TType::I32,
-      'enum' => MyForwardRefEnum::class,
+      'enum' => \thrift\fixtures\types\MyForwardRefEnum::class,
     ),
     2 => shape(
       'var' => 'b',
       'type' => \TType::I32,
-      'enum' => MyForwardRefEnum::class,
+      'enum' => \thrift\fixtures\types\MyForwardRefEnum::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -949,8 +959,8 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
   ];
 
   const type TConstructorShape = shape(
-    ?'a' => ?MyForwardRefEnum,
-    ?'b' => ?MyForwardRefEnum,
+    ?'a' => ?\thrift\fixtures\types\MyForwardRefEnum,
+    ?'b' => ?\thrift\fixtures\types\MyForwardRefEnum,
   );
 
   const int STRUCTURAL_ID = 6098225215594902198;
@@ -958,16 +968,16 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
    * Original thrift field:-
    * 1: enum module.MyForwardRefEnum a
    */
-  public ?MyForwardRefEnum $a;
+  public ?\thrift\fixtures\types\MyForwardRefEnum $a;
   /**
    * Original thrift field:-
    * 2: enum module.MyForwardRefEnum b
    */
-  public ?MyForwardRefEnum $b;
+  public ?\thrift\fixtures\types\MyForwardRefEnum $b;
 
-  public function __construct(?MyForwardRefEnum $a = null, ?MyForwardRefEnum $b = null)[] {
-    $this->a = $a ?? MyForwardRefEnum::NONZERO;
-    $this->b = $b ?? MyForwardRefEnum::NONZERO;
+  public function __construct(?\thrift\fixtures\types\MyForwardRefEnum $a = null, ?\thrift\fixtures\types\MyForwardRefEnum $b = null)[] {
+    $this->a = $a ?? \thrift\fixtures\types\MyForwardRefEnum::NONZERO;
+    $this->b = $b ?? \thrift\fixtures\types\MyForwardRefEnum::NONZERO;
   }
 
   public static function withDefaultValues()[]: this {
@@ -989,21 +999,21 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.MyStructWithForwardRefEnum",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
                       "name" => "module.MyForwardRefEnum",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_enum" => tmeta_ThriftEnumType::fromShape(
+                          "t_enum" => \tmeta_ThriftEnumType::fromShape(
                             shape(
                               "name" => "module.MyForwardRefEnum",
                             )
@@ -1017,17 +1027,17 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
               "name" => "a",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
                       "name" => "module.MyForwardRefEnum",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_enum" => tmeta_ThriftEnumType::fromShape(
+                          "t_enum" => \tmeta_ThriftEnumType::fromShape(
                             shape(
                               "name" => "module.MyForwardRefEnum",
                             )
@@ -1067,10 +1077,10 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
     }
 
     if (idx($parsed, 'a') !== null) {
-      $this->a = MyForwardRefEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, MyForwardRefEnum>($parsed['a']));
+      $this->a = \thrift\fixtures\types\MyForwardRefEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\MyForwardRefEnum>($parsed['a']));
     }
     if (idx($parsed, 'b') !== null) {
-      $this->b = MyForwardRefEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, MyForwardRefEnum>($parsed['b']));
+      $this->b = \thrift\fixtures\types\MyForwardRefEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\MyForwardRefEnum>($parsed['b']));
     }
   }
 
@@ -1080,6 +1090,7 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
  * Original thrift struct:-
  * TrivialNumeric
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/TrivialNumeric'))>>
 class TrivialNumeric implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -1139,27 +1150,27 @@ class TrivialNumeric implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.TrivialNumeric",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                 )
               ),
               "name" => "a",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
                 )
               ),
               "name" => "b",
@@ -1209,6 +1220,7 @@ class TrivialNumeric implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * TrivialNestedWithDefault
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/TrivialNestedWithDefault'))>>
 class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -1220,7 +1232,7 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
     2 => shape(
       'var' => 'n',
       'type' => \TType::STRUCT,
-      'class' => TrivialNumeric::class,
+      'class' => \thrift\fixtures\types\TrivialNumeric::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -1230,7 +1242,7 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
 
   const type TConstructorShape = shape(
     ?'z' => ?int,
-    ?'n' => ?TrivialNumeric,
+    ?'n' => ?\thrift\fixtures\types\TrivialNumeric,
   );
 
   const int STRUCTURAL_ID = 5012136746274172257;
@@ -1243,9 +1255,9 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
    * Original thrift field:-
    * 2: struct module.TrivialNumeric n
    */
-  public ?TrivialNumeric $n;
+  public ?\thrift\fixtures\types\TrivialNumeric $n;
 
-  public function __construct(?int $z = null, ?TrivialNumeric $n = null)[] {
+  public function __construct(?int $z = null, ?\thrift\fixtures\types\TrivialNumeric $n = null)[] {
     $this->z = $z ?? 4;
     $this->n = $n;
   }
@@ -1269,27 +1281,27 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.TrivialNestedWithDefault",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                 )
               ),
               "name" => "z",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.TrivialNumeric",
                     )
@@ -1333,8 +1345,8 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
       }
     }
     if (idx($parsed, 'n') !== null) {
-      $_tmp1 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, TrivialNumeric>($parsed['n']));
-      $_tmp2 = TrivialNumeric::withDefaultValues();
+      $_tmp1 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\TrivialNumeric>($parsed['n']));
+      $_tmp2 = \thrift\fixtures\types\TrivialNumeric::withDefaultValues();
       $_tmp2->readFromJson($_tmp1);
       $this->n = $_tmp2;
     }
@@ -1346,6 +1358,7 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
  * Original thrift struct:-
  * ComplexString
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/ComplexString'))>>
 class ComplexString implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -1414,36 +1427,36 @@ class ComplexString implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.ComplexString",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                 )
               ),
               "name" => "a",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_map" => tmeta_ThriftMapType::fromShape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
                     shape(
-                      "keyType" => tmeta_ThriftType::fromShape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                         )
                       ),
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -1504,6 +1517,7 @@ class ComplexString implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * ComplexNestedWithDefault
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/ComplexNestedWithDefault'))>>
 class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -1515,7 +1529,7 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
     2 => shape(
       'var' => 'n',
       'type' => \TType::STRUCT,
-      'class' => ComplexString::class,
+      'class' => \thrift\fixtures\types\ComplexString::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -1525,7 +1539,7 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
 
   const type TConstructorShape = shape(
     ?'z' => ?string,
-    ?'n' => ?ComplexString,
+    ?'n' => ?\thrift\fixtures\types\ComplexString,
   );
 
   const int STRUCTURAL_ID = 2913723608362321564;
@@ -1538,9 +1552,9 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
    * Original thrift field:-
    * 2: struct module.ComplexString n
    */
-  public ?ComplexString $n;
+  public ?\thrift\fixtures\types\ComplexString $n;
 
-  public function __construct(?string $z = null, ?ComplexString $n = null)[] {
+  public function __construct(?string $z = null, ?\thrift\fixtures\types\ComplexString $n = null)[] {
     $this->z = $z ?? "4";
     $this->n = $n;
   }
@@ -1564,27 +1578,27 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.ComplexNestedWithDefault",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                 )
               ),
               "name" => "z",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.ComplexString",
                     )
@@ -1623,8 +1637,8 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
       $this->z = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['z']);
     }
     if (idx($parsed, 'n') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, ComplexString>($parsed['n']));
-      $_tmp1 = ComplexString::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\ComplexString>($parsed['n']));
+      $_tmp1 = \thrift\fixtures\types\ComplexString::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->n = $_tmp1;
     }
@@ -1636,6 +1650,7 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
  * Original thrift struct:-
  * MinPadding
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/MinPadding'))>>
 class MinPadding implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -1734,60 +1749,60 @@ class MinPadding implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.MinPadding",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
                 )
               ),
               "name" => "small",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
               "name" => "big",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 3,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
                 )
               ),
               "name" => "medium",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 4,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                 )
               ),
               "name" => "biggish",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 5,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
                 )
               ),
               "name" => "tiny",
@@ -1876,6 +1891,7 @@ class MinPadding implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * MinPaddingWithCustomType
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/MinPaddingWithCustomType'))>>
 class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -1984,60 +2000,60 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.MinPaddingWithCustomType",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
                 )
               ),
               "name" => "small",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
               "name" => "big",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 3,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
                 )
               ),
               "name" => "medium",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 4,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                 )
               ),
               "name" => "biggish",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 5,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
                 )
               ),
               "name" => "tiny",
@@ -2130,6 +2146,7 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
  * Original thrift struct:-
  * MyStruct
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/MyStruct'))>>
 class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -2149,7 +2166,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     4 => shape(
       'var' => 'data',
       'type' => \TType::STRUCT,
-      'class' => MyDataItem::class,
+      'class' => \thrift\fixtures\types\MyDataItem::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -2163,7 +2180,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'MyIntField' => ?int,
     ?'MyStringField' => ?string,
     ?'majorVer' => ?int,
-    ?'data' => ?MyDataItem,
+    ?'data' => ?\thrift\fixtures\types\MyDataItem,
   );
 
   const int STRUCTURAL_ID = 2472338421128341558;
@@ -2186,9 +2203,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 4: struct module.MyDataItem data
    */
-  public ?MyDataItem $data;
+  public ?\thrift\fixtures\types\MyDataItem $data;
 
-  public function __construct(?int $MyIntField = null, ?string $MyStringField = null, ?int $majorVer = null, ?MyDataItem $data = null)[] {
+  public function __construct(?int $MyIntField = null, ?string $MyStringField = null, ?int $majorVer = null, ?\thrift\fixtures\types\MyDataItem $data = null)[] {
     $this->MyIntField = $MyIntField ?? 0;
     $this->MyStringField = $MyStringField ?? '';
     $this->majorVer = $majorVer ?? 0;
@@ -2216,54 +2233,54 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.MyStruct",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
               "name" => "MyIntField",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                 )
               ),
               "name" => "MyStringField",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 3,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
               "name" => "majorVer",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 4,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
                       "name" => "module.MyDataItem",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_struct" => tmeta_ThriftStructType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.MyDataItem",
                             )
@@ -2312,8 +2329,8 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
       $this->majorVer = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['majorVer']);
     }
     if (idx($parsed, 'data') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, MyDataItem>($parsed['data']));
-      $_tmp1 = MyDataItem::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\MyDataItem>($parsed['data']));
+      $_tmp1 = \thrift\fixtures\types\MyDataItem::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->data = $_tmp1;
     }
@@ -2325,6 +2342,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * MyDataItem
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/MyDataItem'))>>
 class MyDataItem implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -2358,7 +2376,7 @@ class MyDataItem implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.MyDataItem",
         "is_union" => false,
@@ -2393,6 +2411,7 @@ class MyDataItem implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * Renaming
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/Renaming'))>>
 class Renaming implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -2439,16 +2458,16 @@ class Renaming implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.Renaming",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
               "name" => "foo",
@@ -2490,6 +2509,7 @@ class Renaming implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * AnnotatedTypes
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/AnnotatedTypes'))>>
 class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -2564,26 +2584,26 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.AnnotatedTypes",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
                       "name" => "module.TBinary",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
                               "name" => "module.TBinary",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
                                 )
                               ),
                             )
@@ -2597,40 +2617,40 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "binary_field",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "name" => "include.SomeListOfTypeMap",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "name" => "included.SomeListOfTypeMap",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
-                              "name" => "include.SomeListOfTypeMap",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
+                              "name" => "included.SomeListOfTypeMap",
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_list" => tmeta_ThriftListType::fromShape(
+                                  "t_list" => \tmeta_ThriftListType::fromShape(
                                     shape(
-                                      "valueType" => tmeta_ThriftType::fromShape(
+                                      "valueType" => \tmeta_ThriftType::fromShape(
                                         shape(
-                                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                                             shape(
-                                              "name" => "include.SomeMap",
-                                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                              "name" => "included.SomeMap",
+                                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                                 shape(
-                                                  "t_map" => tmeta_ThriftMapType::fromShape(
+                                                  "t_map" => \tmeta_ThriftMapType::fromShape(
                                                     shape(
-                                                      "keyType" => tmeta_ThriftType::fromShape(
+                                                      "keyType" => \tmeta_ThriftType::fromShape(
                                                         shape(
-                                                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                                         )
                                                       ),
-                                                      "valueType" => tmeta_ThriftType::fromShape(
+                                                      "valueType" => \tmeta_ThriftType::fromShape(
                                                         shape(
-                                                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                                                         )
                                                       ),
                                                     )
@@ -2709,6 +2729,7 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * ForwardUsageRoot
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/ForwardUsageRoot'))>>
 class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -2716,12 +2737,12 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
     1 => shape(
       'var' => 'ForwardUsageStruct',
       'type' => \TType::STRUCT,
-      'class' => ForwardUsageStruct::class,
+      'class' => \thrift\fixtures\types\ForwardUsageStruct::class,
     ),
     2 => shape(
       'var' => 'ForwardUsageByRef',
       'type' => \TType::STRUCT,
-      'class' => ForwardUsageByRef::class,
+      'class' => \thrift\fixtures\types\ForwardUsageByRef::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -2730,8 +2751,8 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'ForwardUsageStruct' => ?ForwardUsageStruct,
-    ?'ForwardUsageByRef' => ?ForwardUsageByRef,
+    ?'ForwardUsageStruct' => ?\thrift\fixtures\types\ForwardUsageStruct,
+    ?'ForwardUsageByRef' => ?\thrift\fixtures\types\ForwardUsageByRef,
   );
 
   const int STRUCTURAL_ID = 839155360071855827;
@@ -2739,14 +2760,14 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: struct module.ForwardUsageStruct ForwardUsageStruct
    */
-  public ?ForwardUsageStruct $ForwardUsageStruct;
+  public ?\thrift\fixtures\types\ForwardUsageStruct $ForwardUsageStruct;
   /**
    * Original thrift field:-
    * 2: struct module.ForwardUsageByRef ForwardUsageByRef
    */
-  public ?ForwardUsageByRef $ForwardUsageByRef;
+  public ?\thrift\fixtures\types\ForwardUsageByRef $ForwardUsageByRef;
 
-  public function __construct(?ForwardUsageStruct $ForwardUsageStruct = null, ?ForwardUsageByRef $ForwardUsageByRef = null)[] {
+  public function __construct(?\thrift\fixtures\types\ForwardUsageStruct $ForwardUsageStruct = null, ?\thrift\fixtures\types\ForwardUsageByRef $ForwardUsageByRef = null)[] {
     $this->ForwardUsageStruct = $ForwardUsageStruct;
     $this->ForwardUsageByRef = $ForwardUsageByRef;
   }
@@ -2770,21 +2791,21 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.ForwardUsageRoot",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
                       "name" => "module.ForwardUsageStruct",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_struct" => tmeta_ThriftStructType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.ForwardUsageStruct",
                             )
@@ -2799,17 +2820,17 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
               "is_optional" => true,
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
                       "name" => "module.ForwardUsageByRef",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_struct" => tmeta_ThriftStructType::fromShape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
                             shape(
                               "name" => "module.ForwardUsageByRef",
                             )
@@ -2850,14 +2871,14 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'ForwardUsageStruct') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, ForwardUsageStruct>($parsed['ForwardUsageStruct']));
-      $_tmp1 = ForwardUsageStruct::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\ForwardUsageStruct>($parsed['ForwardUsageStruct']));
+      $_tmp1 = \thrift\fixtures\types\ForwardUsageStruct::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->ForwardUsageStruct = $_tmp1;
     }
     if (idx($parsed, 'ForwardUsageByRef') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, ForwardUsageByRef>($parsed['ForwardUsageByRef']));
-      $_tmp3 = ForwardUsageByRef::withDefaultValues();
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\ForwardUsageByRef>($parsed['ForwardUsageByRef']));
+      $_tmp3 = \thrift\fixtures\types\ForwardUsageByRef::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
       $this->ForwardUsageByRef = $_tmp3;
     }
@@ -2869,6 +2890,7 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * ForwardUsageStruct
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/ForwardUsageStruct'))>>
 class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -2876,7 +2898,7 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRUCT,
-      'class' => ForwardUsageRoot::class,
+      'class' => \thrift\fixtures\types\ForwardUsageRoot::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -2884,7 +2906,7 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'foo' => ?ForwardUsageRoot,
+    ?'foo' => ?\thrift\fixtures\types\ForwardUsageRoot,
   );
 
   const int STRUCTURAL_ID = 7148256645166217470;
@@ -2892,9 +2914,9 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: struct module.ForwardUsageRoot foo
    */
-  public ?ForwardUsageRoot $foo;
+  public ?\thrift\fixtures\types\ForwardUsageRoot $foo;
 
-  public function __construct(?ForwardUsageRoot $foo = null)[] {
+  public function __construct(?\thrift\fixtures\types\ForwardUsageRoot $foo = null)[] {
     $this->foo = $foo;
   }
 
@@ -2916,16 +2938,16 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.ForwardUsageStruct",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.ForwardUsageRoot",
                     )
@@ -2962,8 +2984,8 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'foo') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, ForwardUsageRoot>($parsed['foo']));
-      $_tmp1 = ForwardUsageRoot::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\ForwardUsageRoot>($parsed['foo']));
+      $_tmp1 = \thrift\fixtures\types\ForwardUsageRoot::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->foo = $_tmp1;
     }
@@ -2975,6 +2997,7 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * ForwardUsageByRef
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/ForwardUsageByRef'))>>
 class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -2982,7 +3005,7 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRUCT,
-      'class' => ForwardUsageRoot::class,
+      'class' => \thrift\fixtures\types\ForwardUsageRoot::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -2990,7 +3013,7 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'foo' => ?ForwardUsageRoot,
+    ?'foo' => ?\thrift\fixtures\types\ForwardUsageRoot,
   );
 
   const int STRUCTURAL_ID = 7148256645166217470;
@@ -2998,9 +3021,9 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: struct module.ForwardUsageRoot foo
    */
-  public ?ForwardUsageRoot $foo;
+  public ?\thrift\fixtures\types\ForwardUsageRoot $foo;
 
-  public function __construct(?ForwardUsageRoot $foo = null)[] {
+  public function __construct(?\thrift\fixtures\types\ForwardUsageRoot $foo = null)[] {
     $this->foo = $foo;
   }
 
@@ -3022,16 +3045,16 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.ForwardUsageByRef",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.ForwardUsageRoot",
                     )
@@ -3068,8 +3091,8 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'foo') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, ForwardUsageRoot>($parsed['foo']));
-      $_tmp1 = ForwardUsageRoot::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\ForwardUsageRoot>($parsed['foo']));
+      $_tmp1 = \thrift\fixtures\types\ForwardUsageRoot::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->foo = $_tmp1;
     }
@@ -3081,6 +3104,7 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * IncompleteMap
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/IncompleteMap'))>>
 class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -3095,7 +3119,7 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
       ),
       'val' => shape(
         'type' => \TType::STRUCT,
-        'class' => IncompleteMapDep::class,
+        'class' => \thrift\fixtures\types\IncompleteMapDep::class,
       ),
       'format' => 'collection',
     ),
@@ -3105,7 +3129,7 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Map<int, IncompleteMapDep>,
+    ?'field' => ?Map<int, \thrift\fixtures\types\IncompleteMapDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -3113,9 +3137,9 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: map<i32, struct module.IncompleteMapDep> field
    */
-  public ?Map<int, IncompleteMapDep> $field;
+  public ?Map<int, \thrift\fixtures\types\IncompleteMapDep> $field;
 
-  public function __construct(?Map<int, IncompleteMapDep> $field = null)[] {
+  public function __construct(?Map<int, \thrift\fixtures\types\IncompleteMapDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -3137,30 +3161,30 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.IncompleteMap",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_map" => tmeta_ThriftMapType::fromShape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
                     shape(
-                      "keyType" => tmeta_ThriftType::fromShape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
                               "name" => "module.IncompleteMapDep",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                                     shape(
                                       "name" => "module.IncompleteMapDep",
                                     )
@@ -3205,12 +3229,12 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, IncompleteMapDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, \thrift\fixtures\types\IncompleteMapDep>>($parsed['field']);
       $_container4 = Map {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_value5 = IncompleteMapDep::withDefaultValues();
+        $_value5 = \thrift\fixtures\types\IncompleteMapDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = IncompleteMapDep::withDefaultValues();
+        $_tmp7 = \thrift\fixtures\types\IncompleteMapDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_value5 = $_tmp7;
         $_container4[$_key1] = $_value5;
@@ -3225,6 +3249,7 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * IncompleteMapDep
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/IncompleteMapDep'))>>
 class IncompleteMapDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -3258,7 +3283,7 @@ class IncompleteMapDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.IncompleteMapDep",
         "is_union" => false,
@@ -3293,6 +3318,7 @@ class IncompleteMapDep implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * CompleteMap
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/CompleteMap'))>>
 class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -3307,7 +3333,7 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
       ),
       'val' => shape(
         'type' => \TType::STRUCT,
-        'class' => CompleteMapDep::class,
+        'class' => \thrift\fixtures\types\CompleteMapDep::class,
       ),
       'format' => 'collection',
     ),
@@ -3317,7 +3343,7 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Map<int, CompleteMapDep>,
+    ?'field' => ?Map<int, \thrift\fixtures\types\CompleteMapDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -3325,9 +3351,9 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: map<i32, struct module.CompleteMapDep> field
    */
-  public ?Map<int, CompleteMapDep> $field;
+  public ?Map<int, \thrift\fixtures\types\CompleteMapDep> $field;
 
-  public function __construct(?Map<int, CompleteMapDep> $field = null)[] {
+  public function __construct(?Map<int, \thrift\fixtures\types\CompleteMapDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -3349,30 +3375,30 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.CompleteMap",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_map" => tmeta_ThriftMapType::fromShape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
                     shape(
-                      "keyType" => tmeta_ThriftType::fromShape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
                               "name" => "module.CompleteMapDep",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                                     shape(
                                       "name" => "module.CompleteMapDep",
                                     )
@@ -3417,12 +3443,12 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, CompleteMapDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, \thrift\fixtures\types\CompleteMapDep>>($parsed['field']);
       $_container4 = Map {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_value5 = CompleteMapDep::withDefaultValues();
+        $_value5 = \thrift\fixtures\types\CompleteMapDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = CompleteMapDep::withDefaultValues();
+        $_tmp7 = \thrift\fixtures\types\CompleteMapDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_value5 = $_tmp7;
         $_container4[$_key1] = $_value5;
@@ -3437,6 +3463,7 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * CompleteMapDep
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/CompleteMapDep'))>>
 class CompleteMapDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -3470,7 +3497,7 @@ class CompleteMapDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.CompleteMapDep",
         "is_union" => false,
@@ -3505,6 +3532,7 @@ class CompleteMapDep implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * IncompleteList
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/IncompleteList'))>>
 class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -3515,7 +3543,7 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
       'etype' => \TType::STRUCT,
       'elem' => shape(
         'type' => \TType::STRUCT,
-        'class' => IncompleteListDep::class,
+        'class' => \thrift\fixtures\types\IncompleteListDep::class,
       ),
       'format' => 'collection',
     ),
@@ -3525,7 +3553,7 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Vector<IncompleteListDep>,
+    ?'field' => ?Vector<\thrift\fixtures\types\IncompleteListDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -3533,9 +3561,9 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: list<struct module.IncompleteListDep> field
    */
-  public ?Vector<IncompleteListDep> $field;
+  public ?Vector<\thrift\fixtures\types\IncompleteListDep> $field;
 
-  public function __construct(?Vector<IncompleteListDep> $field = null)[] {
+  public function __construct(?Vector<\thrift\fixtures\types\IncompleteListDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -3557,25 +3585,25 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.IncompleteList",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
                               "name" => "module.IncompleteListDep",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                                     shape(
                                       "name" => "module.IncompleteListDep",
                                     )
@@ -3620,12 +3648,12 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<IncompleteListDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\thrift\fixtures\types\IncompleteListDep>>($parsed['field']);
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_elem5 = IncompleteListDep::withDefaultValues();
+        $_elem5 = \thrift\fixtures\types\IncompleteListDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = IncompleteListDep::withDefaultValues();
+        $_tmp7 = \thrift\fixtures\types\IncompleteListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
         $_container4 []= $_elem5;
@@ -3640,6 +3668,7 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * IncompleteListDep
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/IncompleteListDep'))>>
 class IncompleteListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -3673,7 +3702,7 @@ class IncompleteListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.IncompleteListDep",
         "is_union" => false,
@@ -3708,6 +3737,7 @@ class IncompleteListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * CompleteList
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/CompleteList'))>>
 class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -3718,7 +3748,7 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
       'etype' => \TType::STRUCT,
       'elem' => shape(
         'type' => \TType::STRUCT,
-        'class' => CompleteListDep::class,
+        'class' => \thrift\fixtures\types\CompleteListDep::class,
       ),
       'format' => 'collection',
     ),
@@ -3728,7 +3758,7 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Vector<CompleteListDep>,
+    ?'field' => ?Vector<\thrift\fixtures\types\CompleteListDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -3736,9 +3766,9 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: list<struct module.CompleteListDep> field
    */
-  public ?Vector<CompleteListDep> $field;
+  public ?Vector<\thrift\fixtures\types\CompleteListDep> $field;
 
-  public function __construct(?Vector<CompleteListDep> $field = null)[] {
+  public function __construct(?Vector<\thrift\fixtures\types\CompleteListDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -3760,25 +3790,25 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.CompleteList",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
                               "name" => "module.CompleteListDep",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                                     shape(
                                       "name" => "module.CompleteListDep",
                                     )
@@ -3823,12 +3853,12 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<CompleteListDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\thrift\fixtures\types\CompleteListDep>>($parsed['field']);
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_elem5 = CompleteListDep::withDefaultValues();
+        $_elem5 = \thrift\fixtures\types\CompleteListDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = CompleteListDep::withDefaultValues();
+        $_tmp7 = \thrift\fixtures\types\CompleteListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
         $_container4 []= $_elem5;
@@ -3843,6 +3873,7 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * CompleteListDep
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/CompleteListDep'))>>
 class CompleteListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -3876,7 +3907,7 @@ class CompleteListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.CompleteListDep",
         "is_union" => false,
@@ -3911,6 +3942,7 @@ class CompleteListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * AdaptedList
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/AdaptedList'))>>
 class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -3921,7 +3953,7 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
       'etype' => \TType::STRUCT,
       'elem' => shape(
         'type' => \TType::STRUCT,
-        'class' => AdaptedListDep::class,
+        'class' => \thrift\fixtures\types\AdaptedListDep::class,
       ),
       'format' => 'collection',
     ),
@@ -3931,7 +3963,7 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Vector<AdaptedListDep>,
+    ?'field' => ?Vector<\thrift\fixtures\types\AdaptedListDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -3939,9 +3971,9 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: list<struct module.AdaptedListDep> field
    */
-  public ?Vector<AdaptedListDep> $field;
+  public ?Vector<\thrift\fixtures\types\AdaptedListDep> $field;
 
-  public function __construct(?Vector<AdaptedListDep> $field = null)[] {
+  public function __construct(?Vector<\thrift\fixtures\types\AdaptedListDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -3963,25 +3995,25 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.AdaptedList",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
                               "name" => "module.AdaptedListDep",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                                     shape(
                                       "name" => "module.AdaptedListDep",
                                     )
@@ -4026,12 +4058,12 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<AdaptedListDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\thrift\fixtures\types\AdaptedListDep>>($parsed['field']);
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_elem5 = AdaptedListDep::withDefaultValues();
+        $_elem5 = \thrift\fixtures\types\AdaptedListDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = AdaptedListDep::withDefaultValues();
+        $_tmp7 = \thrift\fixtures\types\AdaptedListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
         $_container4 []= $_elem5;
@@ -4046,6 +4078,7 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * AdaptedListDep
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/AdaptedListDep'))>>
 class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -4053,7 +4086,7 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
     1 => shape(
       'var' => 'field',
       'type' => \TType::STRUCT,
-      'class' => AdaptedList::class,
+      'class' => \thrift\fixtures\types\AdaptedList::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -4061,7 +4094,7 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?AdaptedList,
+    ?'field' => ?\thrift\fixtures\types\AdaptedList,
   );
 
   const int STRUCTURAL_ID = 4190573964717330521;
@@ -4069,9 +4102,9 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 1: struct module.AdaptedList field
    */
-  public ?AdaptedList $field;
+  public ?\thrift\fixtures\types\AdaptedList $field;
 
-  public function __construct(?AdaptedList $field = null)[] {
+  public function __construct(?\thrift\fixtures\types\AdaptedList $field = null)[] {
     $this->field = $field;
   }
 
@@ -4093,16 +4126,16 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.AdaptedListDep",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.AdaptedList",
                     )
@@ -4145,8 +4178,8 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, AdaptedList>($parsed['field']));
-      $_tmp1 = AdaptedList::withDefaultValues();
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\fixtures\types\AdaptedList>($parsed['field']));
+      $_tmp1 = \thrift\fixtures\types\AdaptedList::withDefaultValues();
       $_tmp1->readFromJson($_tmp0);
       $this->field = $_tmp1;
     }
@@ -4158,6 +4191,7 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * DependentAdaptedList
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/DependentAdaptedList'))>>
 class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -4168,7 +4202,7 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
       'etype' => \TType::STRUCT,
       'elem' => shape(
         'type' => \TType::STRUCT,
-        'class' => DependentAdaptedListDep::class,
+        'class' => \thrift\fixtures\types\DependentAdaptedListDep::class,
       ),
       'format' => 'collection',
     ),
@@ -4178,7 +4212,7 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?Vector<DependentAdaptedListDep>,
+    ?'field' => ?Vector<\thrift\fixtures\types\DependentAdaptedListDep>,
   );
 
   const int STRUCTURAL_ID = 8146873538067102953;
@@ -4186,9 +4220,9 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
    * Original thrift field:-
    * 1: list<struct module.DependentAdaptedListDep> field
    */
-  public ?Vector<DependentAdaptedListDep> $field;
+  public ?Vector<\thrift\fixtures\types\DependentAdaptedListDep> $field;
 
-  public function __construct(?Vector<DependentAdaptedListDep> $field = null)[] {
+  public function __construct(?Vector<\thrift\fixtures\types\DependentAdaptedListDep> $field = null)[] {
     $this->field = $field;
   }
 
@@ -4210,25 +4244,25 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.DependentAdaptedList",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
                               "name" => "module.DependentAdaptedListDep",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
                                     shape(
                                       "name" => "module.DependentAdaptedListDep",
                                     )
@@ -4273,12 +4307,12 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
     }
 
     if (idx($parsed, 'field') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<DependentAdaptedListDep>>($parsed['field']);
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<\thrift\fixtures\types\DependentAdaptedListDep>>($parsed['field']);
       $_container4 = Vector {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_elem5 = DependentAdaptedListDep::withDefaultValues();
+        $_elem5 = \thrift\fixtures\types\DependentAdaptedListDep::withDefaultValues();
         $_tmp6 = \json_encode($_value2);
-        $_tmp7 = DependentAdaptedListDep::withDefaultValues();
+        $_tmp7 = \thrift\fixtures\types\DependentAdaptedListDep::withDefaultValues();
         $_tmp7->readFromJson($_tmp6);
         $_elem5 = $_tmp7;
         $_container4 []= $_elem5;
@@ -4293,6 +4327,7 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
  * Original thrift struct:-
  * DependentAdaptedListDep
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/DependentAdaptedListDep'))>>
 class DependentAdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -4339,16 +4374,16 @@ class DependentAdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetad
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.DependentAdaptedListDep",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
                 )
               ),
               "name" => "field",
@@ -4411,6 +4446,7 @@ class DependentAdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetad
  * Original thrift struct:-
  * AllocatorAware
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/AllocatorAware'))>>
 class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -4554,20 +4590,20 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.AllocatorAware",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -4577,16 +4613,16 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "aa_list",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_set" => tmeta_ThriftSetType::fromShape(
+                  "t_set" => \tmeta_ThriftSetType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -4596,21 +4632,21 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "aa_set",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 3,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_map" => tmeta_ThriftMapType::fromShape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
                     shape(
-                      "keyType" => tmeta_ThriftType::fromShape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -4620,45 +4656,45 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "aa_map",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 4,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                 )
               ),
               "name" => "aa_string",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 5,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                 )
               ),
               "name" => "not_a_container",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 6,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                 )
               ),
               "name" => "aa_unique",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 7,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                 )
               ),
               "name" => "aa_shared",
@@ -4769,6 +4805,7 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * AllocatorAware2
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/AllocatorAware2'))>>
 class AllocatorAware2 implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -4815,16 +4852,16 @@ class AllocatorAware2 implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.AllocatorAware2",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                 )
               ),
               "name" => "not_a_container",
@@ -4871,6 +4908,7 @@ class AllocatorAware2 implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * TypedefStruct
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/TypedefStruct'))>>
 class TypedefStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -4943,32 +4981,32 @@ class TypedefStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.TypedefStruct",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                 )
               ),
               "name" => "i32_field",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
                       "name" => "module.IntTypedef",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -4978,22 +5016,22 @@ class TypedefStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "IntTypedef_field",
             )
           ),
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 3,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
                       "name" => "module.UintTypedef",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
                               "name" => "module.IntTypedef",
-                              "underlyingType" => tmeta_ThriftType::fromShape(
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                 )
                               ),
                             )
@@ -5064,6 +5102,7 @@ class TypedefStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift struct:-
  * StructWithDoubleUnderscores
  */
+<<\ThriftTypeInfo(shape('uri' => 'apache.org/thrift/fixtures/types/StructWithDoubleUnderscores'))>>
 class StructWithDoubleUnderscores implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -5110,16 +5149,16 @@ class StructWithDoubleUnderscores implements \IThriftSyncStruct, \IThriftStructM
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
+    return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.StructWithDoubleUnderscores",
         "fields" => vec[
-          tmeta_ThriftField::fromShape(
+          \tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
+              "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                 )
               ),
               "name" => "__field",

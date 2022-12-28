@@ -9,7 +9,7 @@
 #include <thrift/lib/cpp2/gen/client_h.h>
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/types/gen-cpp2/include_types.h"
+#include "thrift/compiler/test/fixtures/types/gen-cpp2/included_types.h"
 #include "thrift/annotation/gen-cpp2/cpp_types.h"
 #include "thrift/annotation/gen-cpp2/thrift_types.h"
 
@@ -31,6 +31,10 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
 
   char const* getServiceName() const noexcept override {
     return "SomeService";
+  }
+
+  static const char* __fbthrift_thrift_uri() {
+    return "apache.org/thrift/fixtures/types/SomeService";
   }
 
 

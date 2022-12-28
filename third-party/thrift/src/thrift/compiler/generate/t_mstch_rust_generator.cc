@@ -967,7 +967,12 @@ class mstch_rust_value : public mstch_base {
     return type_->is_float() || type_->is_double();
   }
   mstch::node floating_point_value() {
-    auto str = fmt::format("{}", const_value_->get_double());
+    auto str = fmt::format(
+        "{}",
+        const_value_->get_type() == value_type::CV_INTEGER
+            ? const_value_->get_integer()
+            : const_value_->get_double());
+
     if (str.find('.') == std::string::npos &&
         str.find('e') == std::string::npos &&
         str.find('E') == std::string::npos) {

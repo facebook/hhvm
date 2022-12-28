@@ -2055,7 +2055,7 @@ impl ::std::default::Default for self::AdaptTemplatedTestStruct {
             adaptedShortDefault: 2,
             adaptedIntegerDefault: 3,
             adaptedLongDefault: 4,
-            adaptedDoubleDefault: 0.0,
+            adaptedDoubleDefault: 5.0,
             adaptedStringDefault: "6".to_owned(),
             adaptedEnum: crate::types::ThriftAdaptedEnum::One,
             adaptedListDefault: vec![
@@ -2296,7 +2296,7 @@ where
             adaptedShortDefault: field_adaptedShortDefault.unwrap_or(2),
             adaptedIntegerDefault: field_adaptedIntegerDefault.unwrap_or(3),
             adaptedLongDefault: field_adaptedLongDefault.unwrap_or(4),
-            adaptedDoubleDefault: field_adaptedDoubleDefault.unwrap_or(0.0),
+            adaptedDoubleDefault: field_adaptedDoubleDefault.unwrap_or(5.0),
             adaptedStringDefault: field_adaptedStringDefault.unwrap_or_else(|| "6".to_owned()),
             adaptedEnum: field_adaptedEnum.unwrap_or(crate::types::ThriftAdaptedEnum::One),
             adaptedListDefault: field_adaptedListDefault.unwrap_or_else(|| vec![

@@ -34,7 +34,7 @@ pub mod consts {
 
     pub const x: ::std::primitive::f64 = 1.0;
 
-    pub const y: ::std::primitive::f64 = 0.0;
+    pub const y: ::std::primitive::f64 = 1000000.0;
 
     pub const z: ::std::primitive::f64 = 1000000000.0;
 

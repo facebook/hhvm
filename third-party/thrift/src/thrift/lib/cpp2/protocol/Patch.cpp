@@ -587,7 +587,7 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch) {
   ExtractedMasks masks = {noneMask(), noneMask()};
   // If Assign, it is a write operation
   if (findOp(patch, PatchOp::Assign)) {
-    masks = {noneMask(), allMask()};
+    return {noneMask(), allMask()};
   }
   // If Clear, it is a write operation if not intristic default.
   if (auto* clear = findOp(patch, PatchOp::Clear)) {

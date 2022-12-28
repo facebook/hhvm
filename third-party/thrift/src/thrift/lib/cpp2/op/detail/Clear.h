@@ -307,6 +307,10 @@ struct ClearOptionalField {
     }
   }
   template <typename T, typename Struct>
+  void operator()(terse_intern_boxed_field_ref<T> field, Struct&) const {
+    field.reset();
+  }
+  template <typename T, typename Struct>
   void operator()(std::shared_ptr<T>& field, Struct&) const {
     field = nullptr;
   }

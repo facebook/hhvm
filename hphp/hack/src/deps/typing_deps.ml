@@ -699,12 +699,18 @@ end = struct
                idependency)
         then begin
           (* To be kept in sync with typing_deps.rs::hh_custom_dep_graph_save_delta! *)
-          (* output_binary_int outputs the lower 4-bytes only, regardless
-           * of architecture. It outputs in big-endian format.*)
-          Out_channel.output_binary_int handle (idependent lsr 32);
-          Out_channel.output_binary_int handle idependent;
-          Out_channel.output_binary_int handle (idependency lsr 32);
-          Out_channel.output_binary_int handle idependency
+
+          (* Write dependency. *)
+          for i = 0 to 6 do
+            Out_channel.output_byte handle (idependency lsr (i * 8))
+          done;
+          (* Set a tag bit to indicate this is a dependency *)
+          Out_channel.output_byte handle ((idependency lsr 56) + 128);
+
+          (* Write dependent. *)
+          for i = 0 to 7 do
+            Out_channel.output_byte handle (idependent lsr (i * 8))
+          done
         end
       end
       discovered_deps_batch;

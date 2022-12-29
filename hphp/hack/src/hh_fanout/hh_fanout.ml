@@ -911,11 +911,7 @@ to be produced by hh_server
   in
 
   let edges_dir =
-    let doc =
-      "A directory containing the .bin files with all the edges."
-      ^ " The files should just contain a sequence of pairs of big-endian"
-      ^ " encoded 64-bit hashes."
-    in
+    let doc = "A directory containing the .bin files with all the edges." in
     value & opt (some string) None & info ["edges-dir"] ~doc ~docv:"EDGES_DIR"
   in
   let delta_file =

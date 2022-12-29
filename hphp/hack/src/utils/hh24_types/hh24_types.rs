@@ -406,6 +406,11 @@ impl DependencyHash {
     pub fn of_symbol(dep_type: typing_deps_hash::DepType, type_name: &str) -> Self {
         Self(typing_deps_hash::hash1(dep_type, type_name.as_bytes()))
     }
+
+    #[inline]
+    pub fn as_u64(self) -> u64 {
+        self.0
+    }
 }
 
 impl std::fmt::Debug for DependencyHash {

@@ -6,8 +6,6 @@ use std::ffi::OsString;
 use std::fs;
 use std::fs::File;
 use std::io;
-use std::io::BufReader;
-use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicUsize;
@@ -29,31 +27,19 @@ use rayon::prelude::*;
 use smallvec::SmallVec;
 
 struct EdgesDir {
-    // For local typechecks, we output edges in a list format
-    list_handles: Vec<BufReader<fs::File>>,
     // For remote typechecks, we output edges in a serialized rust structure format
     struct_handles: Vec<PathBuf>,
 }
 
 impl EdgesDir {
     fn open<P: AsRef<Path>>(dir: P) -> io::Result<EdgesDir> {
-        let list_handles = fs::read_dir(&dir)?
-            .map(|entry| {
-                let path = entry?.path();
-                if path.extension().and_then(|x| x.to_str()) == Some("bin") {
-                    let fh = fs::OpenOptions::new().read(true).open(path)?;
-                    Ok(Some(BufReader::new(fh)))
-                } else {
-                    Ok(None)
-                }
-            })
-            .filter_map(|x| x.transpose())
-            .collect::<io::Result<Vec<_>>>()?;
-
         let struct_handles = fs::read_dir(&dir)?
             .map(|entry| {
                 let path = entry?.path();
-                if path.extension().and_then(|x| x.to_str()) == Some("hhdg_delta") {
+                if matches!(
+                    path.extension().and_then(|x| x.to_str()),
+                    Some("bin") | Some("hhdg_delta")
+                ) {
                     Ok(Some(path))
                 } else {
                     Ok(None)
@@ -62,14 +48,7 @@ impl EdgesDir {
             .filter_map(|x| x.transpose())
             .collect::<io::Result<Vec<PathBuf>>>()?;
 
-        Ok(EdgesDir {
-            list_handles,
-            struct_handles,
-        })
-    }
-
-    fn list_handle_count(&self) -> usize {
-        self.list_handles.len()
+        Ok(EdgesDir { struct_handles })
     }
 
     fn struct_handle_count(&self) -> usize {
@@ -79,42 +58,9 @@ impl EdgesDir {
     fn read_all_edges(self) -> io::Result<Edges> {
         let mut acc = Edges::new();
 
-        let num_list_handles = self.list_handle_count();
-        let list_result: io::Result<Vec<()>> = self
-            .list_handles
-            .into_par_iter()
-            .with_min_len(1)
-            .with_max_len(1)
-            .enumerate()
-            .map(|(i, handle)| {
-                info!("Reading in list file {}/{}", i + 1, num_list_handles);
-                Self::read_all_list_edges_for(handle, &acc)?;
-                Ok(())
-            })
-            .collect();
-        list_result?;
-
         register_dep_graph_delta_files(&self.struct_handles, &mut acc)?;
 
         Ok(acc)
-    }
-
-    fn read_all_list_edges_for<R: Read>(mut reader: R, acc: &Edges) -> io::Result<()> {
-        let mut bytes: [u8; 8] = [0; 8];
-        loop {
-            if let Err(err) = reader.read_exact(&mut bytes) {
-                if err.kind() == io::ErrorKind::UnexpectedEof {
-                    return Ok(());
-                }
-                return Err(err);
-            }
-            let dependent = Dep::new(u64::from_be_bytes(bytes));
-
-            reader.read_exact(&mut bytes).expect("a dependency hash");
-            let dependency = Dep::new(u64::from_be_bytes(bytes));
-
-            acc.register(dependent, dependency);
-        }
     }
 }
 
@@ -229,11 +175,6 @@ impl Edges {
             shards: std::array::from_fn(|_| Default::default()),
             dep_to_temp_index: DepToHashIndex::new(),
         }
-    }
-
-    /// Add one dependency -> dependent edge to the graph.
-    fn register(&self, dependent: Dep, dependency: Dep) {
-        self.register_many(dependency, std::iter::once(dependent));
     }
 
     /// Register many dependents for one dependency in a single shot.
@@ -419,10 +360,6 @@ pub fn build(
             info!("Opening binary files in {:?}", new_edges_dir);
             let new_edges_dir = EdgesDir::open(new_edges_dir)?;
 
-            info!(
-                "Discovered {} list files with edges",
-                new_edges_dir.list_handle_count()
-            );
             info!(
                 "Discovered {} struct files with edges",
                 new_edges_dir.struct_handle_count()

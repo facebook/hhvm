@@ -1,6 +1,6 @@
 Errors:
   [4:15-28] Unbound name: `NoSuchClass` (an object type)
-  [3:10-14] Functions that do not return a value must have a type of void
+  [3:18-23] Functions that do not return a value must have a type of void
   [4:15-28] Unbound name (typing): `NoSuchClass`
 [(Fun
     { fd_namespace =

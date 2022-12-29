@@ -1338,8 +1338,7 @@ module Primary = struct
       | Missing_assign of Pos.t
       | Non_void_annotation_on_return_void_function of {
           is_async: bool;
-          pos: Pos.t;
-          hint_pos: Pos.t option;
+          hint_pos: Pos.t;
         }
       | Tuple_syntax of Pos.t
 
@@ -1404,7 +1403,7 @@ module Primary = struct
         lazy [],
         [] )
 
-    let non_void_annotation_on_return_void_function is_async pos hint_pos =
+    let non_void_annotation_on_return_void_function is_async hint_pos =
       let (async_indicator, return_type) =
         if is_async then
           ("Async f", "Awaitable<void>")
@@ -1413,22 +1412,19 @@ module Primary = struct
       in
       let claim =
         lazy
-          ( pos,
+          ( hint_pos,
             Printf.sprintf
               "%sunctions that do not return a value must have a type of %s"
               async_indicator
               return_type )
       in
       let quickfixes =
-        match hint_pos with
-        | None -> []
-        | Some hint_pos ->
-          [
-            Quickfix.make
-              ~title:("Change to " ^ Markdown_lite.md_codify return_type)
-              ~new_text:return_type
-              hint_pos;
-          ]
+        [
+          Quickfix.make
+            ~title:("Change to " ^ Markdown_lite.md_codify return_type)
+            ~new_text:return_type
+            hint_pos;
+        ]
       in
 
       (Error_code.NonVoidAnnotationOnReturnVoidFun, claim, lazy [], quickfixes)
@@ -1448,9 +1444,8 @@ module Primary = struct
           { pos; with_value_pos; without_value_pos_opt } ->
         returns_with_and_without_value pos with_value_pos without_value_pos_opt
       | Missing_assign pos -> missing_assign pos
-      | Non_void_annotation_on_return_void_function { is_async; pos; hint_pos }
-        ->
-        non_void_annotation_on_return_void_function is_async pos hint_pos
+      | Non_void_annotation_on_return_void_function { is_async; hint_pos } ->
+        non_void_annotation_on_return_void_function is_async hint_pos
       | Tuple_syntax pos -> tuple_syntax pos
   end
 

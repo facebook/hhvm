@@ -332,8 +332,7 @@ module Primary : sig
       | Missing_assign of Pos.t
       | Non_void_annotation_on_return_void_function of {
           is_async: bool;
-          pos: Pos.t;
-          hint_pos: Pos.t option;
+          hint_pos: Pos.t;
         }
       | Tuple_syntax of Pos.t
   end

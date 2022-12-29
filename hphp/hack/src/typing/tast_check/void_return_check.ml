@@ -49,7 +49,7 @@ let initial_dummy_state =
     active = false;
   }
 
-let validate_state fun_kind env s =
+let validate_state fun_span fun_kind env s =
   (* FIXME: Move as two functions to Ast_defs? *)
   let (is_generator, is_async) =
     let open Ast_defs in
@@ -100,8 +100,8 @@ let validate_state fun_kind env s =
     if is_void_super_ty || is_awaitable_void_super_ty then
       let hint_loc =
         match s.return_type with
-        | None -> None
-        | Some (hint_loc, _) -> Some hint_loc
+        | None -> fun_span
+        | Some (hint_loc, _) -> hint_loc
       in
       ( false,
         lazy
@@ -110,7 +110,7 @@ let validate_state fun_kind env s =
                wellformedness
                @@ Primary.Wellformedness
                   .Non_void_annotation_on_return_void_function
-                    { is_async; pos = s.fun_def_pos; hint_pos = hint_loc })) )
+                    { is_async; hint_pos = hint_loc })) )
     else
       (true, lazy ())
   in
@@ -178,7 +178,13 @@ let visitor =
     val state = ref initial_dummy_state
 
     method traverse_fun_body
-        new_return_type new_fun_pos fun_kind has_implicit_return env traversal =
+        fun_span
+        new_return_type
+        new_fun_pos
+        fun_kind
+        has_implicit_return
+        env
+        traversal =
       let initial_no_value_return =
         if has_implicit_return then
           (* There is an implicit return but we don't know where *)
@@ -205,7 +211,7 @@ let visitor =
         in
         state := new_state;
         traversal ();
-        validate_state fun_kind env !state
+        validate_state fun_span fun_kind env !state
 
     method reset = state := initial_dummy_state
 
@@ -226,6 +232,7 @@ let visitor =
                fun_)
       then
         this#traverse_fun_body
+          fun_.f_span
           (hint_of_type_hint fun_.f_ret)
           (fst fun_.f_name)
           fun_.f_fun_kind
@@ -245,6 +252,7 @@ let visitor =
                method_)
       then
         this#traverse_fun_body
+          method_.m_span
           (hint_of_type_hint method_.m_ret)
           (fst method_.m_name)
           method_.m_fun_kind

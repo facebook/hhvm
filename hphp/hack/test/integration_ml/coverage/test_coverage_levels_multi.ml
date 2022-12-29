@@ -17,7 +17,7 @@ function g(string $x) : int  {
   /* HH_FIXME[4110] purposeful bad type */
   return $x;
 }
-function h($x) : int {
+function h(dynamic $x) : int {
   $a = g('a');
   return $a + $x;
 }
@@ -42,9 +42,9 @@ let test () =
   Test.assert_coverage_levels
     loop_output
     [
-      "checked: 6";
+      "checked: 7";
       "partial: 2";
-      "unchecked: 2";
+      "unchecked: 1";
       "File \"/foo.php\", line 4, characters 10-11: partial";
       "File \"/foo.php\", line 7, characters 10-12: checked";
       "File \"/foo.php\", line 7, characters 3-4: checked";

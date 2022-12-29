@@ -6,10 +6,11 @@
  */
 
 class F {
-  public function g() {
+  public function g():dynamic {
+    return <checked>3</checked>;
   }
 }
 
-function f() {
-  return <unchecked>(</unchecked><checked>new F()</checked><unchecked>)-></unchecked><partial>g</partial><unchecked>()</unchecked>;
+function f():dynamic {
+  return <unchecked>(</unchecked><checked>new F()</checked><unchecked>)-></unchecked><checked>g</checked><unchecked>()</unchecked>;
 }

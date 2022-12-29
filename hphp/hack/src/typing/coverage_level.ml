@@ -128,8 +128,12 @@ let rec is_tany env ty =
   let (env, ty) = Tast_env.expand_type env ty in
   match get_node ty with
   | Tany _
-  | Terr ->
+  | Terr
+  | Tdynamic ->
     (env, Some (get_reason ty))
+  | Tclass ((_, class_name), _, [ty])
+    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+    is_tany env ty
   | Tunion [] -> (env, None)
   | Tunion (h :: tl) ->
     let (env, r_opt) = is_tany env h in

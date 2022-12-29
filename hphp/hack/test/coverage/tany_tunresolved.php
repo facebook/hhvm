@@ -1,7 +1,7 @@
 <?hh
 
 
-function test(bool $b, $untyped): void {
+function test(bool $b, dynamic $untyped): void {
   if ($b) { // checked lvar
 
   }

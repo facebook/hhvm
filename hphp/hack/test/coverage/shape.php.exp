@@ -12,13 +12,13 @@ Checked / Total: 0.000000
 (Checked + Partial * 0.5) / Total: 0.000000
 == lvar ==
 Unchecked: 0
-Partial: 2
-Checked: 2
-Checked / Total: 0.500000
-(Checked + Partial * 0.5) / Total: 0.750000
+Partial: 0
+Checked: 4
+Checked / Total: 1.000000
+(Checked + Partial * 0.5) / Total: 1.000000
 == total ==
 Unchecked: 2
-Partial: 2
-Checked: 3
-Checked / Total: 0.428571
-(Checked + Partial * 0.5) / Total: 0.571429
+Partial: 0
+Checked: 5
+Checked / Total: 0.714286
+(Checked + Partial * 0.5) / Total: 0.714286

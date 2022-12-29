@@ -2435,6 +2435,46 @@ class CompilerFailureTest(unittest.TestCase):
             "[ERROR:foo.thrift:7] Required field is deprecated: `field3`.\n",
         )
 
+    def test_cpp_adapter_compatibility(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                include "thrift/annotation/cpp.thrift"
+
+                @cpp.Adapter{name="Adapter"}
+                typedef i32 Bar1 (cpp.type = "std::uint32_t")
+
+                @cpp.StrongType
+                typedef i32 Bar2 (cpp.type = "std::uint32_t")
+
+                @cpp.Adapter{name="Adapter"}
+                @cpp.StrongType
+                typedef i32 Bar3
+
+                @cpp.Adapter{name="Adapter"}
+                struct A {
+                    1: i32 field;
+                } (cpp.type = "CustomA")
+
+                struct B {
+                    @cpp.Adapter{name="Adapter"}
+                    1: i32 field (cpp.type = "std::uint32_t");
+                }
+                """
+            ),
+        )
+        ret, out, err = self.run_thrift("foo.thrift")
+        self.assertEqual(ret, 1)
+        self.assertEqual(
+            err,
+            "[ERROR:foo.thrift:13] Definition `A` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
+            "[ERROR:foo.thrift:19] Definition `field` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
+            "[ERROR:foo.thrift:3] Definition `Bar1` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
+            "[ERROR:foo.thrift:6] Definition `Bar2` cannot have both cpp.type/cpp.template and @cpp.StrongType annotations\n"
+            "[ERROR:foo.thrift:9] Definition `Bar3` cannot have both @cpp.StrongType and @cpp.Adapter annotations\n",
+        )
+
     def test_cycle(self):
         write_file(
             "foo.thrift",

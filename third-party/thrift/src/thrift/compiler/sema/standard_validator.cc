@@ -1025,6 +1025,29 @@ void validate_reserved_ids_structured(
 void validate_reserved_ids_enum(diagnostic_context& ctx, const t_enum& node) {
   reserved_ids_checker(ctx).check(node);
 }
+
+void validate_custom_cpp_type_annotations(
+    diagnostic_context& ctx, const t_named& node) {
+  const bool hasAdapter =
+      node.find_structured_annotation_or_null(kCppAdapterUri);
+  const bool hasCppType = node.has_annotation(
+      {"cpp.type", "cpp2.type", "cpp.template", "cpp2.template"});
+  const bool isStrongType =
+      node.find_structured_annotation_or_null(kCppStrongTypeUri);
+
+  ctx.check(
+      !(hasCppType && hasAdapter),
+      "Definition `{}` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations",
+      node.name());
+  ctx.check(
+      !(isStrongType && hasAdapter),
+      "Definition `{}` cannot have both @cpp.StrongType and @cpp.Adapter annotations",
+      node.name());
+  ctx.check(
+      !(isStrongType && hasCppType),
+      "Definition `{}` cannot have both cpp.type/cpp.template and @cpp.StrongType annotations",
+      node.name());
+}
 } // namespace
 
 ast_validator standard_validator() {
@@ -1072,6 +1095,7 @@ ast_validator standard_validator() {
   validator.add_definition_visitor(&validate_hack_wrapper_annotation);
   validator.add_definition_visitor(
       &validate_hack_wrapper_and_adapter_annotation);
+  validator.add_definition_visitor(&validate_custom_cpp_type_annotations);
   validator.add_enum_visitor(&validate_cpp_enum_type);
 
   validator.add_const_visitor(&validate_const_type_and_value);

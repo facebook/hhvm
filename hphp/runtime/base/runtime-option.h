@@ -1434,7 +1434,6 @@ struct RuntimeOption {
   F(uint32_t, ThrowOnIterationOverObjects, 0)                           \
   F(bool, DiamondTraitMethods, false)                                   \
   F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
-  F(bool, FastRepoOptionCache, true)                                    \
   /* */
 
 private:

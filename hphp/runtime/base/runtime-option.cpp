@@ -364,7 +364,7 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   // Eval.FatalOnParserOptionMismatch is set. It can cause us to miss out on
   // configs that were added between the current directory and the source file.
   // (Loading these configs would result in a fatal anyway with this option)
-  if (RO::EvalFastRepoOptionCache && !g_context.isNull()) {
+  if (!g_context.isNull()) {
     if (auto const opts = g_context->getRepoOptionsForRequest()) {
       // If path() is empty we have the default() options, which means we have
       // negatively cached the existence of a .hhvmconfig.hdf for this request.
@@ -402,26 +402,6 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
     return file->read();
 
   };
-
-  // Fast path: we have an active request and it has cached a RepoOptions
-  // which has not been modified. This only works when the runtime option
-  // Eval.FatalOnParserOptionMismatch is set. It can cause us to miss out on
-  // configs that were added between the current directory and the source file.
-  // (Loading these configs would result in a fatal anyway with this option)
-  if (!RO::EvalFastRepoOptionCache && !g_context.isNull()) {
-    if (auto const opts = g_context->getRepoOptionsForRequest()) {
-      // If path() is empty we have the default() options, which means we have
-      // negatively cached the existence of a .hhvmconfig.hdf for this request.
-      if (opts->path().empty()) return *opts;
-
-      if (isParentOf(opts->path(), fpath)) {
-        struct stat st;
-        if (wrapped_stat(opts->path().data(), &st) == 0) {
-          if (!CachedRepoOptions::isChanged(opts, st)) return *opts;
-        }
-      }
-    }
-  }
 
   auto const set = [&] (
     RepoOptionCache::const_accessor& rpathAcc,

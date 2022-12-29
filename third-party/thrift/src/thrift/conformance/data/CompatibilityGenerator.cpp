@@ -575,6 +575,9 @@ Test createCompatibilityTest(const Protocol& protocol) {
       protocol));
   addToTest(changeQualifierTestCase<mod_set<FieldModifier::Terse>, mod_set<>>(
       protocol));
+  addToTest(changeQualifierTestCase<
+            mod_set<FieldModifier::Optional>,
+            mod_set<FieldModifier::Terse>>(protocol));
 
   addToTest(changeEnumValueTestCases(protocol));
 

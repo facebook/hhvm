@@ -1089,7 +1089,7 @@ fn p_afield<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Afield> {
 }
 
 // We lower readonly lambda declarations as making the inner lambda have readonly_this.
-fn process_readonly_expr<'a>(mut e: ast::Expr) -> Expr_ {
+fn process_readonly_expr(mut e: ast::Expr) -> Expr_ {
     match &mut e {
         ast::Expr(_, _, Expr_::Efun(ref mut efun)) if efun.0.readonly_this.is_none() => {
             efun.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
@@ -1430,7 +1430,7 @@ fn p_expr_lit<'a>(
                 | (_, Some(TK::OctalLiteral))
                 | (_, Some(TK::HexadecimalLiteral))
                 | (_, Some(TK::BinaryLiteral)) => {
-                    let s = s.replace("_", "");
+                    let s = s.replace('_', "");
                     match parse_int(&s) {
                         Err(ParseIntError::OutOfRange) => {
                             raise_parsing_error(expr, env, &syntax_error::out_of_int_range(&s));
@@ -1457,7 +1457,7 @@ fn p_expr_lit<'a>(
                     if f64::from_str(&s).is_err() {
                         raise_parsing_error(expr, env, &syntax_error::out_of_float_range(&s))
                     }
-                    Ok(Expr_::Float(s.into()))
+                    Ok(Expr_::Float(s))
                 }
                 (_, Some(TK::SingleQuotedStringLiteral)) => {
                     Ok(Expr_::String(mk_str(expr, env, s, unescape_single)))
@@ -3580,7 +3580,7 @@ fn rewrite_fun_ctx<'a>(
 }
 fn rewrite_effect_polymorphism<'a>(
     env: &mut Env<'a>,
-    params: &mut Vec<ast::FunParam>,
+    params: &mut [ast::FunParam],
     tparams: &mut Vec<ast::Tparam>,
     contexts: Option<&ast::Contexts>,
     where_constraints: &mut Vec<ast::WhereConstraintHint>,
@@ -4757,10 +4757,7 @@ fn p_type_constant<'a>(
                 }
                 TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: type_ })
             } else {
-                raise_hh_error(
-                    env,
-                    NastCheck::not_abstract_without_typeconst(name.0.clone()),
-                );
+                raise_hh_error(env, NastCheck::not_abstract_without_typeconst(name.0));
                 raise_missing_syntax("value for the type constant", node, env);
                 return;
             };
@@ -4878,10 +4875,7 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                 };
                 TCConcrete(ast::ClassConcreteTypeconst { c_tc_type })
             } else {
-                raise_hh_error(
-                    env,
-                    NastCheck::not_abstract_without_typeconst(name.0.clone()),
-                );
+                raise_hh_error(env, NastCheck::not_abstract_without_typeconst(name.0));
                 raise_missing_syntax("value for the context constant", node, env);
                 return;
             };

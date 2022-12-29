@@ -316,7 +316,7 @@ impl<'ast> VisitorMut<'ast> for DollarDollarRewriter {
     }
 }
 
-fn rewrite_dollardollars(el: &mut Vec<ast::Expr>) -> Option<Pos> {
+fn rewrite_dollardollars(el: &mut [ast::Expr]) -> Option<Pos> {
     let mut rewriter = DollarDollarRewriter { pos: None };
     for e in el.iter_mut() {
         visit_mut(&mut rewriter, &mut (), e).expect("DollarDollarRewriter never errors");
@@ -1890,7 +1890,7 @@ fn strip_ns(name: &str) -> &str {
 
 fn _virtualize_call(e: Expr, pos: &Pos, should_virtualize_functions: bool) -> Expr {
     if should_virtualize_functions {
-        meth_call(e, "__unwrap", vec![], &pos)
+        meth_call(e, "__unwrap", vec![], pos)
     } else {
         e
     }
@@ -1903,7 +1903,7 @@ fn _virtualize_lambda(
     should_virtualize_functions: bool,
 ) -> Expr {
     if should_virtualize_functions {
-        static_meth_call(visitor_name, et::LAMBDA_TYPE, vec![e], &pos)
+        static_meth_call(visitor_name, et::LAMBDA_TYPE, vec![e], pos)
     } else {
         e
     }

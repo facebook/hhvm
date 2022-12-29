@@ -323,14 +323,6 @@ using NonRepoUnitCache = RankedCHM<
 >;
 NonRepoUnitCache s_nonRepoUnitCache;
 
-// When running in remote unix server mode with UnixServerQuarantineUnits set,
-// we need to cache any unit generated from a file descriptor passed via the
-// client process in a special quarantined cached. Units in this cache may only
-// be loaded in unix server requests from the same user and are never used when
-// handling web requests.
-using PerUserCache = folly::AtomicHashMap<uid_t, NonRepoUnitCache*>;
-PerUserCache s_perUserUnitCaches(10);
-
 struct CachedByHashUnit {
   CachedByHashUnit() = default;
   CachedByHashUnit(const CachedByHashUnit& other) : unit{other.unit.copy()} {}
@@ -1549,9 +1541,7 @@ Optional<SHA1> getHashForFile(const std::string& path,
 
 size_t numLoadedUnits() {
   if (RuntimeOption::RepoAuthoritative) return s_repoUnitCache.size();
-  auto count = s_nonRepoUnitCache.size();
-  for (auto const& p : s_perUserUnitCaches) count += p.second->size();
-  return count;
+  return s_nonRepoUnitCache.size();
 }
 
 Unit* getLoadedUnit(StringData* path) {
@@ -1603,7 +1593,6 @@ void invalidateUnit(StringData* path) {
     }
   };
   erase(s_nonRepoUnitCache);
-  for (auto const& p : s_perUserUnitCaches) erase(*p.second);
 }
 
 String resolveVmInclude(const StringData* path,
@@ -2095,11 +2084,7 @@ private:
 
     // Do a quick check if the total size of the caches is below the
     // threshold. If so, we know there's nothing to do.
-    auto totalCacheSize = s_nonRepoUnitCache.size();
-    for (auto const& p : s_perUserUnitCaches) {
-      totalCacheSize += p.second->size();
-    }
-    if (totalCacheSize <= threshold) return;
+    if (s_nonRepoUnitCache.size() <= threshold) return;
 
     // We might need to reap something. Loop over all of the caches
     // and look for expired Units. Record any that we find.
@@ -2111,7 +2096,7 @@ private:
     std::vector<Expired> expired;
     size_t nonExpired = 0;
 
-    auto const process = [&] (NonRepoUnitCache& cache) {
+    [&](NonRepoUnitCache& cache) {
       // Iterating over the caches is safe because we never remove any
       // entries. We might, however, skip entries or visit an entry
       // more than once. Skipping is fine, we'll just miss a
@@ -2128,9 +2113,7 @@ private:
         }
         expired.emplace_back(Expired{&cache, p.first, lastTime});
       }
-    };
-    process(s_nonRepoUnitCache);
-    for (auto& p : s_perUserUnitCaches) process(*p.second);
+    }(s_nonRepoUnitCache);
 
     // Nothing is expired. We're done.
     if (expired.empty()) return;
@@ -2341,7 +2324,6 @@ ServiceData::CounterCallback s_counters(
 void clearUnitCacheForExit() {
   s_nonRepoUnitCache.clear();
   s_repoUnitCache.clear();
-  s_perUserUnitCaches.clear();
 }
 
 void shutdownUnitPrefetcher() {

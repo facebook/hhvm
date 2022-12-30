@@ -83,7 +83,7 @@ module.exports = {
           },
           items: [
             "spec/idl/idl-reference",
-            "spec/idl/optional-required-fields",
+            "spec/idl/field-qualifiers",
             "spec/idl/structured-annotations",
             "spec/idl/standard-thrift-annotation-library",
             "spec/idl/mixins",

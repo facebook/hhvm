@@ -561,21 +561,26 @@ Qualifier ::=
   "required" | "optional"
 ```
 
-The fields of a Thrift object may assume any value of their types.  In addition the field may also be "uninitialized" (formally "not present").  I.e., the *state* of a field is either *not present*, or *present* with a particular value of their type.
+The fields of a Thrift object may assume any value of their types. In addition the field may also be "uninitialized" (formally "not present").  I.e., the *state* of a field is either *not present*, or *present* with a particular value of their type.
 
-There are three kinds of fields that may be part of a struct type (or exception type):
+There are four kinds of fields that may be part of a struct type (or exception type):
 
-* ~~required: Field is qualified with the reserved word `required`.~~ ([not supported](https://fb.workplace.com/groups/1730279463893632/permalink/2177428059178768/))
+* ~~required: Field is qualified with the reserved word `required`.~~ (deprecated)
 * *optional*: Field is qualified with the reserved word `optional`.
-* *unqualified*: Field is not qualified with either of these reserved words.
+* *terse*: Filed is annotated with the structured annotation `@thrift.TerseWrite`.
+* *unqualified*: Field is not qualified with either of these reserved words or `@thrift.TerseWrite`.
 
 NOTE: Union types may only have optional fields.
 
 ```
+include "thrift/annotation/thrift.thrift"
+
 struct PeopleSearchRequest {
   1: required SearchTypes.Query query; // required field
   2: i32 numResults; // unqualified field
   3: optional Location currentLocation; // optional field
+  @thrift.TerseWrite
+  4: i32 count; // terse field
 }
 ```
 
@@ -583,7 +588,11 @@ These field kinds are different with respect to the states they may assume, and 
 
 ### ~~Required Fields~~
 
-WARNING: Do not use in the new code!
+:::caution
+
+Do not use in the new code!
+
+:::
 
 ~~Required fields are always _present_ and they get initialized to their default value when the object is initialized (or reinitialized).  Generated code must provide a way to change the value of required fields.  When serializing an object, required fields are always encoded into the serialized data.  The serialized data must provide a value during deserialization into a required field.~~
 
@@ -597,7 +606,15 @@ Optional fields start their lifecycle as *not present* (when the object is initi
 
 Unqualified fields are just like optional fields with the following difference: When an object with an unqualified field is serialized and the field is *not present*, the default value of the field is serialized as the value for that field.
 
-NOTE: Regarding unqualified vs. optional field, we don't have a generalized strong recommendation on which one should be used. It depends on individual use cases. If you need to know whether the field is explicit set or not, use optional fields.
+:::note
+
+Regarding unqualified vs. optional field, we don't have a generalized strong recommendation on which one should be used. It depends on individual use cases. If you need to know whether the field is explicit set or not, use optional fields.
+
+:::
+
+### **Terse Fields**
+
+Terse fields do not distinguish whether they are explicitly set. They are skipped during serialization if their values are equal to the [intrinsic default values](./#intrinsic-default-values).
 
 ---
 

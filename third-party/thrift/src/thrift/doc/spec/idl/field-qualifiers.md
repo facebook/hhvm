@@ -1,8 +1,8 @@
-# Optional/Required Fields
+# Field Qualifiers
 
 <!-- https://www.internalfb.com/intern/wiki/Thrift/Thrift_Guide/IDL/optional-required-fields/?noredirect -->
 
-#### Thrift fields can be specified as "optional" or "required".  If neither of these specifiers is used, the default behavior is a mix of the two.
+Thrift fields can be specified as `optional`, `required`, or `@thrift.TerseWrite`.  If neither of these is used, the default behavior is a mix of `optional` and `required`.
 
 ## Fields marked `optional`
 
@@ -12,15 +12,23 @@
 
 ## Fields marked `required`
 
-WARNING: Do not use in the new code. They are deprecated since ~2018. See this workplace Post from Stepan in Thrift FYI: https://fburl.com/thrift/required/nomore
+:::caution
 
+Do not use in the new code. They are not backward or forward compatible. They do not enforce users to initialize required fields.
+
+:::
 
 * Will always be written when serializing a structure.
-* ~~An exception will be thrown if the field is not present in the serialized data when deserializing.~~ ([not enforced](https://fb.workplace.com/groups/1730279463893632/permalink/2177428059178768/))
-   * ~~Corollary: If a new `required` field is introduced, deserializing any existing data written prior to its introduction will **fail** with exceptions.~~
+* Previously an exception was thrown if the field was not present in the serialized data when deserializing, but this is no longer enforced.
 * In C++, the `__isset` member is only written for fields *not* marked required.
 
-## Fields that don't have an `optional`/`required` specifier
+## Fields annotated with `@thrift.TerseWrite`
+
+* It is a [structured annotation](./standard-thrift-annotation-library#thrifttersewrite) that has similar semantics to a field qualifier which makes the field **terse**.
+* Will only be written when serializing a structure if the field is not equal to its [intrinsic default value](./#intrinsic-default-values).
+* Will be cleared to the [intrinsic default value](./#intrinsic-default-values) when deserializing a structure if the field isn't present in the serialized data.
+
+## Fields that don't have a specifier or `@thrift.TerseWrite`
 
 * These fields will be **assumed present**.
 * Will always be written when serializing a structure.
@@ -36,7 +44,13 @@ For primitive types:Fields must be set to `optional` to be nullable in PHP.
 NOTE: In thrift-py, [**all** fields are nullable](https://www.internalfb.com/intern/wiki/Thrift_in_Python/Migrate_from_thrift-py/Types/#unqualified-fields-in-th).
 
 
-#### Terse Writes
+#### Terse Writes (Compiler Option)
+
+:::caution
+
+The `terse_writes` compiler option is deprecated. Please use `@thrift.TerseWrite` instead. Note, `@thrift.TerseWrite` does not have same semantic with `terse_writes` option. It always compares with the [intrinsic default value](./#intrinsic-default-values), supports structured type, and it supports all V1 compatible languages as well.
+
+:::
 
 Some of the space savings of `optional` fields can be obtained with `default` storage (not `optional`, not `required`) by passing the `terse_writes` option to the compiler. `terse_writes` will suppress serializing fields where the values are the same as their present default value, when doing that comparison is cheap (e.g. i32/i64, empty strings/list/map). This will lead to smaller output and lower deserialization cost - particularly when fields are sparsely used.
 

@@ -2,8 +2,11 @@
 
 <!-- https://www.internalfb.com/intern/wiki/Thrift/Thrift_Guide/IDL/Standard_Thrift_Annotation_Library/?noredirect -->
 
-NOTE: Unstructured annotations will be replaced with structured annotations. Please use structured annotations when possible.
+:::note
 
+Unstructured annotations will be replaced with structured annotations. Please use structured annotations when possible.
+
+:::
 
 ## Standard Thrift Annotation Library
 
@@ -624,6 +627,31 @@ Why? Compact protocol stored delta of field id, instead of actual field id in pa
 
 NOTE: This annotation won't reduce payload size for other protocols.
 
+### thrift.TerseWrite
+
+* Where to use: field/struct/package
+* Value: `true`
+* Example:
+
+```
+@thrift.TerseWrite
+package "standard/thrift/annotation/example"
+
+struct Foo {
+  @thrift.TerseWrite
+  1: i32 a;
+}
+
+@thrift.TerseWrite
+struct TerseFoo{
+  1: i32 a;
+}
+
+struct RawFoo {
+  1: i32 a;
+}
+```
+The annotation promotes an unqualified field to a terse field. All `Foo.a`, `TerseFoo.a`, and `RawFoo.a` are terse fields.
 
 ## Rust annotations
 

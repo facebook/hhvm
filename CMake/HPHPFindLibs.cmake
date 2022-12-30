@@ -74,17 +74,6 @@ if (CURL_STATIC)
   add_definitions("-DCURL_STATICLIB")
 endif()
 
-set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")
-CHECK_FUNCTION_EXISTS("curl_multi_select" HAVE_CURL_MULTI_SELECT)
-CHECK_FUNCTION_EXISTS("curl_multi_wait" HAVE_CURL_MULTI_WAIT)
-if (HAVE_CURL_MULTI_SELECT)
-  add_definitions("-DHAVE_CURL_MULTI_SELECT")
-endif()
-if (HAVE_CURL_MULTI_WAIT)
-  add_definitions("-DHAVE_CURL_MULTI_WAIT")
-endif()
-set(CMAKE_REQUIRED_LIBRARIES)
-
 # LibXML2 checks
 find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})

@@ -110,8 +110,11 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
 
   gen(env, EnterTranslation);
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // Assert that we're in the correct function.
+  if (RuntimeOption::EvalHHIRGenerateAsserts &&
+      !curSrcKey(env).trivialDVFuncEntry()) {
+    // Assert that we're in the correct function, but we can't do so
+    // for trivial DV FuncEntries because the frame isn't setup yet
+    // (we skip EnterFrame for them above).
     gen(env, DbgAssertFunc, fp(env));
   }
 }

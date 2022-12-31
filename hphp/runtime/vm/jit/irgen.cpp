@@ -221,6 +221,12 @@ void ringbufferMsg(IRGS& env,
 
 void prepareEntry(IRGS& env) {
   /*
+   * Trivial DV Func Entries don't have the frame setup yet, so we
+   * can't validate the frame or load the context from it.
+   */
+  if (curSrcKey(env).trivialDVFuncEntry()) return;
+
+  /*
    * If assertions are on, before we do anything, each region makes a call to a
    * C++ function that checks the state of everything.
    */
@@ -234,7 +240,7 @@ void prepareEntry(IRGS& env) {
    * region.  The reason is that it's trivially CSEable, so we might as well
    * make it available everywhere.  If nothing uses it, it'll just be DCE'd.
    */
-  if (!curSrcKey(env).trivialDVFuncEntry()) ldCtx(env);
+  ldCtx(env);
 }
 
 void endRegion(IRGS& env) {

@@ -47,21 +47,6 @@ const t_type* find_first_type(const t_type& node) {
   return result;
 }
 
-// TODO(ytj): merge find_first_type and find_first_type_or_template
-const t_type* find_first_type_or_template(const t_type& node) {
-  const t_type* result = nullptr;
-  t_typedef::find_type_if(&node, [&result](const t_type* type) {
-    if (type_resolver::find_type(*type) ||
-        type_resolver::find_template(*type) ||
-        type->find_structured_annotation_or_null(kCppStrongTypeUri)) {
-      result = type;
-      return true;
-    }
-    return false;
-  });
-  return result;
-}
-
 } // namespace
 
 const std::string& type_resolver::get_native_type(
@@ -477,30 +462,35 @@ std::string type_resolver::gen_adapted_type(
 }
 
 std::string type_resolver::gen_type_tag(const t_type& type) {
-  auto tag = gen_thrift_type_tag(type);
-  if (const auto* cpp_type = find_first_type_or_template(type)) {
-    if (cpp_type->find_structured_annotation_or_null(kCppStrongTypeUri)) {
-      tag = fmt::format(
-          "::apache::thrift::type::cpp_type<{}, {}>",
-          get_native_type(*cpp_type),
-          tag);
-    } else if (cpp_type->find_annotation_or_null("cpp.indirection")) {
-      tag = fmt::format(
-          "::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<{}>, {}>",
-          get_native_type(*cpp_type),
-          tag);
-      return tag;
-    } else {
-      tag = fmt::format(
-          "::apache::thrift::type::cpp_type<{}, {}>",
-          get_native_type(*cpp_type),
-          tag);
-    }
+  std::string tag = type.is_typedef()
+      ? gen_type_tag(*static_cast<const t_typedef&>(type).get_type())
+      : gen_thrift_type_tag(type);
+
+  if (type.find_annotation_or_null("cpp.indirection")) {
+    return fmt::format(
+        "::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<{}>, {}>",
+        get_native_type(type),
+        tag);
   }
-  if (const auto* cpp_adapter = find_first_adapter(type)) {
-    tag = fmt::format(
-        "::apache::thrift::type::adapted<{}, {}>", *cpp_adapter, tag);
+
+  if (type_resolver::find_type(type) || type_resolver::find_template(type)) {
+    return fmt::format(
+        "::apache::thrift::type::cpp_type<{}, {}>", get_native_type(type), tag);
   }
+
+  if (const auto* adapter =
+          type.find_structured_annotation_or_null(kCppAdapterUri)) {
+    return fmt::format(
+        "::apache::thrift::type::adapted<{}, {}>",
+        adapter->get_value_from_structured_annotation("name").get_string(),
+        tag);
+  }
+
+  if (type.find_structured_annotation_or_null(kCppStrongTypeUri)) {
+    return fmt::format(
+        "::apache::thrift::type::cpp_type<{}, {}>", get_native_type(type), tag);
+  }
+
   return tag;
 }
 

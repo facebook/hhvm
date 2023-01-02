@@ -1,0 +1,93 @@
+{
+  "kind": "overloadset",
+  "name_html": "ensures",
+  "compoundname_html": "apache::thrift::op::detail::StructPatch::ensures",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch_1a0ef66784167c85e01df46f8213aa76d0",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Id"
+        }
+      ],
+      "type_html": "decltype(auto)",
+      "definition_html": "decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::ensures",
+      "argsstring_html": "()",
+      "name_html": "ensures",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "346",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "346",
+        "bodyend": "348"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) ensures()",
+        "simple_raw": "template <typename Id>\ndecltype(auto) ensures()",
+        "detailed_html": "template &lt;typename Id&gt; private inline decltype(auto) ensures()",
+        "detailed_raw": "template <typename Id> private inline decltype(auto) ensures()",
+        "original_definition_html": "decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::ensures",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/StructPatch/ensures",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/StructPatch/ensures",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch",
+      "compoundname_html": "apache::thrift::op::detail::StructPatch::ensures"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1af91b6b06b099c4ccdb10cf5a5ec7e234",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Id"
+        }
+      ],
+      "type_html": "constexpr bool",
+      "definition_html": "constexpr bool apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensures",
+      "argsstring_html": "() const",
+      "name_html": "ensures",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "119",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "119",
+        "bodyend": "121"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Id&gt;\nconstexpr bool ensures() const",
+        "simple_raw": "template <typename Id>\nconstexpr bool ensures() const",
+        "detailed_html": "template &lt;typename Id&gt;\ninline constexpr bool ensures() const",
+        "detailed_raw": "template <typename Id>\ninline constexpr bool ensures() const",
+        "original_definition_html": "constexpr bool apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensures",
+        "original_argsstring_html": "() const"
+      },
+      "description": {
+        "detailed_html": "<p>Returns if the patch ensures the given field is set (explicitly or implicitly). </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensures",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensures",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
+      "compoundname_html": "apache::thrift::op::detail::StructPatch::ensures"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/StructPatch/ensures",
+  "minprot": "public",
+  "displayname_html": "ensures",
+  "brief_html": "<p>Returns if the patch ensures the given field is set (explicitly or implicitly). </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/ensures",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/ensures"
+}

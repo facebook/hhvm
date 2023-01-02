@@ -1,0 +1,244 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::detail::Create&lt; type::field&lt; Tag, Context &gt; &gt;",
+  "basecompoundref": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::Create&lt; Tag &gt;",
+      "compoundname_html": "apache::thrift::op::detail::Create",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Create"
+    }
+  ],
+  "includes": {
+    "refid": "detail_2Create_8h",
+    "local": "no",
+    "text_html": "Create.h"
+  },
+  "tparams": [
+    {
+      "type_html": "typename Tag"
+    },
+    {
+      "type_html": "typename Context"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
+    "line": "203",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
+    "bodystart": "203",
+    "bodyend": "203"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "detail",
+    "Create&lt; type::field&lt; Tag, Context &gt; &gt;"
+  ],
+  "enums": [],
+  "types": [],
+  "functions": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "template <\n  typename Tag,\n  typename Context\n> struct Create< type::field< Tag, Context > >;",
+  "declaration_html": "template &lt;\n  typename Tag,\n  typename Context\n&gt; struct Create&lt; type::field&lt; Tag, Context &gt; &gt;;",
+  "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4",
+  "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4",
+  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1Create",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "operator()",
+          "compoundname_html": "apache::thrift::op::detail::Create&lt; type::field&lt; Tag, Context &gt; &gt;::operator()",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_1a949c8196c27dea5eee7af2e8b59f2493",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T",
+                  "defval_html": "type::native_type&lt;Tag&gt;"
+                }
+              ],
+              "type_html": "constexpr T",
+              "definition_html": "constexpr T apache::thrift::op::detail::Create&lt; Tag &gt;::operator()",
+              "argsstring_html": "() const",
+              "name_html": "operator()",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
+                "line": "158",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
+                "bodystart": "158",
+                "bodyend": "160"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T = type::native_type&lt;Tag&gt;&gt;\nconstexpr T operator()() const",
+                "simple_raw": "template <typename T = type::native_type<Tag>>\nconstexpr T operator()() const",
+                "detailed_html": "template &lt;typename T = type::native_type&lt;Tag&gt;&gt;\ninline constexpr T operator()() const",
+                "detailed_raw": "template <typename T = type::native_type<Tag>>\ninline constexpr T operator()() const",
+                "original_definition_html": "constexpr T apache::thrift::op::detail::Create&lt; Tag &gt;::operator()",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Create/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Create/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create",
+              "compoundname_html": "apache::thrift::op::detail::Create&lt; type::field&lt; Tag, Context &gt; &gt;::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4_1ad403c2143936204503d3dc13e6287bc3",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T",
+                  "defval_html": "type::native_type&lt;<code>adapted_tag</code>&gt;"
+                }
+              ],
+              "type_html": "constexpr T",
+              "definition_html": "constexpr T apache::thrift::op::detail::Create&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
+              "argsstring_html": "() const",
+              "name_html": "operator()",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
+                "line": "193",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
+                "bodystart": "193",
+                "bodyend": "198"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T = type::native_type&lt;adapted_tag&gt;&gt;\nconstexpr T operator()() const",
+                "simple_raw": "template <typename T = type::native_type<adapted_tag>>\nconstexpr T operator()() const",
+                "detailed_html": "template &lt;typename T = type::native_type&lt;adapted_tag&gt;&gt;\ninline constexpr T operator()() const",
+                "detailed_raw": "template <typename T = type::native_type<adapted_tag>>\ninline constexpr T operator()() const",
+                "original_definition_html": "constexpr T apache::thrift::op::detail::Create&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
+                "original_argsstring_html": "() const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
+              "compoundname_html": "apache::thrift::op::detail::Create&lt; type::field&lt; Tag, Context &gt; &gt;::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d_1a30774b530abe861586498bc7be9e01a1",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename AdapterT",
+                  "defval_html": "Adapter"
+                }
+              ],
+              "type_html": "constexpr adapt_detail::if_not_field_adapter&lt; AdapterT, type::native_type&lt; Tag &gt;, Struct &gt;",
+              "definition_html": "constexpr adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct&gt; apache::thrift::op::detail::Create&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+              "argsstring_html": "(Struct &amp;) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Struct &amp;"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
+                "line": "215",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
+                "bodystart": "215",
+                "bodyend": "217"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp;) const",
+                "simple_raw": "template <typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct>\n    operator()(Struct&) const",
+                "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp;) const",
+                "detailed_raw": "template <typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct>\n    operator()(Struct&) const",
+                "original_definition_html": "constexpr adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct&gt; apache::thrift::op::detail::Create&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+                "original_argsstring_html": "(Struct &amp;) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d",
+              "compoundname_html": "apache::thrift::op::detail::Create&lt; type::field&lt; Tag, Context &gt; &gt;::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d_1a5b7b71d82ede3a848e4af92a2a6e89eb",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename AdapterT",
+                  "defval_html": "Adapter"
+                }
+              ],
+              "type_html": "constexpr adapt_detail::FromThriftFieldIdType&lt; AdapterT, <code>FieldId</code>, type::native_type&lt; Tag &gt;, Struct &gt;",
+              "definition_html": "constexpr adapt_detail:: FromThriftFieldIdType&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt; apache::thrift::op::detail::Create&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+              "argsstring_html": "(Struct &amp;object) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Struct &amp;",
+                  "declname_html": "object"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
+                "line": "222",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
+                "bodystart": "222",
+                "bodyend": "227"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    FromThriftFieldIdType&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp; object) const",
+                "simple_raw": "template <typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    FromThriftFieldIdType<AdapterT, FieldId, type::native_type<Tag>, Struct>\n    operator()(Struct& object) const",
+                "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    FromThriftFieldIdType&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp; object) const",
+                "detailed_raw": "template <typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    FromThriftFieldIdType<AdapterT, FieldId, type::native_type<Tag>, Struct>\n    operator()(Struct& object) const",
+                "original_definition_html": "constexpr adapt_detail:: FromThriftFieldIdType&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt; apache::thrift::op::detail::Create&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+                "original_argsstring_html": "(Struct &amp;object) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d",
+              "compoundname_html": "apache::thrift::op::detail::Create&lt; type::field&lt; Tag, Context &gt; &gt;::operator()"
+            }
+          ],
+          "filepath": "f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4/operator.call",
+          "minprot": "public",
+          "displayname_html": "operator()",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4/operator.call",
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4/operator.call"
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

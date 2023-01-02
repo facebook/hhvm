@@ -1,0 +1,67 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::detail::TypeTagToTType&lt; type::adapted&lt; Adapter, Tag &gt; &gt;",
+  "includes": {
+    "refid": "detail_2Encode_8h",
+    "local": "no",
+    "text_html": "Encode.h"
+  },
+  "tparams": [
+    {
+      "type_html": "typename Adapter"
+    },
+    {
+      "type_html": "typename Tag"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+    "line": "108",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+    "bodystart": "108",
+    "bodyend": "110"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "detail",
+    "TypeTagToTType&lt; type::adapted&lt; Adapter, Tag &gt; &gt;"
+  ],
+  "enums": [],
+  "types": [],
+  "functions": [],
+  "members": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4_1a5ed545cfabeb3f915995cb0aa7fda68b",
+      "prot": "public",
+      "static": "yes",
+      "mutable": "no",
+      "type_html": "constexpr TType",
+      "definition_html": "constexpr TType apache::thrift::op::detail::TypeTagToTType&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::value",
+      "argsstring_html": "",
+      "name_html": "value",
+      "initializer_html": "= <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/TypeTagToTType\">TypeTagToTType</a>&lt;Tag&gt;::value",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "line": "109",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "bodystart": "109",
+        "bodyend": "-1"
+      }
+    }
+  ],
+  "friends": [],
+  "declaration_raw": "template <\n  typename Adapter,\n  typename Tag\n> struct TypeTagToTType< type::adapted< Adapter, Tag > >;",
+  "declaration_html": "template &lt;\n  typename Adapter,\n  typename Tag\n&gt; struct TypeTagToTType&lt; type::adapted&lt; Adapter, Tag &gt; &gt;;",
+  "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
+  "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
+  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeTagToTType",
+  "overloadgroups": [],
+  "free_overloadgroups": []
+}

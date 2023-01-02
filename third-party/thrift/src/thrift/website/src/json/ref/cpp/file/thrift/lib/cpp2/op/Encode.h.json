@@ -5,6 +5,7 @@
   "compoundname_html": "Encode.h",
   "includes": [
     {
+      "refid": "detail_2Encode_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/detail/Encode.h"
     }
@@ -44,7 +45,7 @@
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr detail::SerializedSize&lt; ZeroCopy, Tag &gt;",
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/SerializedSize\">detail::SerializedSize</a>&lt; ZeroCopy, Tag &gt;",
       "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::SerializedSize&lt;ZeroCopy, Tag&gt; apache::thrift::op::serialized_size",
       "argsstring_html": "",
       "name_html": "serialized_size",
@@ -71,7 +72,7 @@
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr detail::Encode&lt; Tag &gt;",
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Encode\">detail::Encode</a>&lt; Tag &gt;",
       "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::Encode&lt;Tag&gt; apache::thrift::op::encode",
       "argsstring_html": "",
       "name_html": "encode",
@@ -98,7 +99,7 @@
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr detail::Decode&lt; Tag &gt;",
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Decode\">detail::Decode</a>&lt; Tag &gt;",
       "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::Decode&lt;Tag&gt; apache::thrift::op::decode",
       "argsstring_html": "",
       "name_html": "decode",

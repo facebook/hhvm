@@ -17,7 +17,7 @@
         "to": "/ref/cpp/class/apache/thrift/protocol/TCompactProtocolT"
       }
     ],
-    "column": 2
+    "column": 1
   },
   {
     "section": "Field Access",
@@ -27,7 +27,7 @@
         "to": "/ref/cpp/class/apache/thrift/field_ref"
       }
     ],
-    "column": 2
+    "column": 1
   },
   {
     "section": "Operator Library",
@@ -63,6 +63,56 @@
       {
         "label": "Patch",
         "to": "/ref/cpp/file/thrift/lib/cpp2/op/Patch.h"
+      }
+    ],
+    "column": 2
+  },
+  {
+    "section": "Patch",
+    "entries": [
+      {
+        "label": "AssignPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/AssignPatch"
+      },
+      {
+        "label": "ListPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/ListPatch"
+      },
+      {
+        "label": "SetPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/SetPatch"
+      },
+      {
+        "label": "MapPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/MapPatch"
+      },
+      {
+        "label": "FieldPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/FieldPatch"
+      },
+      {
+        "label": "StructPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/StructPatch"
+      },
+      {
+        "label": "UnionPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+      },
+      {
+        "label": "StringPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/StringPatch"
+      },
+      {
+        "label": "BinaryPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+      },
+      {
+        "label": "NumberPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/NumberPatch"
+      },
+      {
+        "label": "BoolPatch",
+        "to": "/ref/cpp/class/apache/thrift/op/detail/BoolPatch"
       }
     ],
     "column": 3

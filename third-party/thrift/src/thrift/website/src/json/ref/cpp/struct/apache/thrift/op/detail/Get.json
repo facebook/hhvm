@@ -147,7 +147,7 @@
         "bodyend": "-1"
       },
       "description": {
-        "detailed_html": "<p>Gets the ordinal, for example:</p><p><ul>\n<li><p>using Ord = <code>get_ordinal&lt;ident::foo, MyS&gt;</code> // Resolves to ordinal at which the field \"foo\" was defined in MyS. </p></li></ul>\n</p>"
+        "detailed_html": "<p>Gets the ordinal, for example:</p><p><ul>\n<li><p>using Ord = <code>get_ordinal_v&lt;ident::foo, MyS&gt;</code> // Resolves to ordinal at which the field \"foo\" was defined in MyS. </p></li></ul>\n</p>"
       }
     },
     {
@@ -274,7 +274,7 @@
       "prot": "public",
       "static": "no",
       "mutable": "no",
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr detail::GetValueOrNull",
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/GetValueOrNull\">detail::GetValueOrNull</a>",
       "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::GetValueOrNull apache::thrift::op::getValueOrNull",
       "argsstring_html": "",
       "name_html": "getValueOrNull",

@@ -1,0 +1,55 @@
+{
+  "kind": "overloadset",
+  "name_html": "patchIfSet",
+  "compoundname_html": "apache::thrift::op::detail::StructPatch::patchIfSet",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch_1a47a6d718416068a070de3d8169323aae",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Id"
+        }
+      ],
+      "type_html": "decltype(auto)",
+      "definition_html": "decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::patchIfSet",
+      "argsstring_html": "()",
+      "name_html": "patchIfSet",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "264",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "264",
+        "bodyend": "266"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchIfSet()",
+        "simple_raw": "template <typename Id>\ndecltype(auto) patchIfSet()",
+        "detailed_html": "template &lt;typename Id&gt;\ninline decltype(auto) patchIfSet()",
+        "detailed_raw": "template <typename Id>\ninline decltype(auto) patchIfSet()",
+        "original_definition_html": "decltype(auto) apache::thrift::op::detail::StructPatch&lt; Patch &gt;::patchIfSet",
+        "original_argsstring_html": "()"
+      },
+      "description": {
+        "brief_html": "<p>Returns the proper patch object for the given field. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/StructPatch/patchIfSet",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/StructPatch/patchIfSet",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch",
+      "compoundname_html": "apache::thrift::op::detail::StructPatch::patchIfSet"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/StructPatch/patchIfSet",
+  "minprot": "public",
+  "displayname_html": "patchIfSet",
+  "brief_html": "<p>Returns the proper patch object for the given field. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/patchIfSet",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/StructPatch/patchIfSet"
+}

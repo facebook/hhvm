@@ -1,0 +1,155 @@
+{
+  "kind": "overloadset",
+  "name_html": "clear",
+  "compoundname_html": "apache::thrift::op::detail::Clear::clear",
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a759b20770cd7551854017ac3f266854a",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+      "argsstring_html": "(T &amp;val, type::structured_c)",
+      "name_html": "clear",
+      "param": [
+        {
+          "type_html": "T &amp;",
+          "declname_html": "val"
+        },
+        {
+          "type_html": "type::structured_c"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "line": "75",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "bodystart": "75",
+        "bodyend": "77"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nstatic void clear(T&amp; val, type::structured_c)",
+        "simple_raw": "template <typename T>\nstatic void clear(T& val, type::structured_c)",
+        "detailed_html": "template &lt;typename T&gt;\nprivate inline static void clear(T&amp; val, type::structured_c)",
+        "detailed_raw": "template <typename T>\nprivate inline static void clear(T& val, type::structured_c)",
+        "original_definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+        "original_argsstring_html": "(T &amp;val, type::structured_c)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Clear/clear",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Clear/clear",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear",
+      "compoundname_html": "apache::thrift::op::detail::Clear::clear"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a7ee056846dfd4e828ca75449e28bd7fe",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+      "argsstring_html": "(T &amp;val, type::container_c)",
+      "name_html": "clear",
+      "param": [
+        {
+          "type_html": "T &amp;",
+          "declname_html": "val"
+        },
+        {
+          "type_html": "type::container_c"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "line": "79",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "bodystart": "79",
+        "bodyend": "81"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nstatic void clear(T&amp; val, type::container_c)",
+        "simple_raw": "template <typename T>\nstatic void clear(T& val, type::container_c)",
+        "detailed_html": "template &lt;typename T&gt;\nprivate inline static void clear(T&amp; val, type::container_c)",
+        "detailed_raw": "template <typename T>\nprivate inline static void clear(T& val, type::container_c)",
+        "original_definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+        "original_argsstring_html": "(T &amp;val, type::container_c)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Clear/clear",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Clear/clear",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear",
+      "compoundname_html": "apache::thrift::op::detail::Clear::clear"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a580ae9f4d32197cb62f9322700961a66",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "constexpr void",
+      "definition_html": "static constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+      "argsstring_html": "(T &amp;val, type::all_c)",
+      "name_html": "clear",
+      "param": [
+        {
+          "type_html": "T &amp;",
+          "declname_html": "val"
+        },
+        {
+          "type_html": "type::all_c"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "line": "83",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "bodystart": "83",
+        "bodyend": "85"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nstatic constexpr void clear(T&amp; val, type::all_c)",
+        "simple_raw": "template <typename T>\nstatic constexpr void clear(T& val, type::all_c)",
+        "detailed_html": "template &lt;typename T&gt;\nprivate inline static constexpr void clear(T&amp; val, type::all_c)",
+        "detailed_raw": "template <typename T>\nprivate inline static constexpr void clear(T& val, type::all_c)",
+        "original_definition_html": "static constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+        "original_argsstring_html": "(T &amp;val, type::all_c)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Clear/clear",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Clear/clear",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear",
+      "compoundname_html": "apache::thrift::op::detail::Clear::clear"
+    }
+  ],
+  "filepath": "f/struct/apache/thrift/op/detail/Clear/clear",
+  "minprot": "private",
+  "displayname_html": "clear",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/clear",
+  "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/clear"
+}

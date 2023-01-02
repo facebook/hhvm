@@ -1,0 +1,50 @@
+{
+  "kind": "overloadset",
+  "name_html": "patchIfSet",
+  "compoundname_html": "apache::thrift::op::detail::UnionPatch::patchIfSet",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1aedbf202488dadb071d5b70e2a061155a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "FOLLY_NODISCARD P &amp;",
+      "definition_html": "FOLLY_NODISCARD P&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::patchIfSet",
+      "argsstring_html": "()",
+      "name_html": "patchIfSet",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "408",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "408",
+        "bodyend": "415"
+      },
+      "definition": {
+        "simple_html": "FOLLY_NODISCARD P&amp; patchIfSet()",
+        "simple_raw": "FOLLY_NODISCARD P& patchIfSet()",
+        "detailed_html": "inline FOLLY_NODISCARD P&amp; patchIfSet()",
+        "detailed_raw": "inline FOLLY_NODISCARD P& patchIfSet()",
+        "original_definition_html": "FOLLY_NODISCARD P&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::patchIfSet",
+        "original_argsstring_html": "()"
+      },
+      "description": {
+        "brief_html": "<p>Patch any set value. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/patchIfSet",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/patchIfSet",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
+      "compoundname_html": "apache::thrift::op::detail::UnionPatch::patchIfSet"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/UnionPatch/patchIfSet",
+  "minprot": "public",
+  "displayname_html": "patchIfSet",
+  "brief_html": "<p>Patch any set value. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchIfSet",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/patchIfSet"
+}

@@ -29,7 +29,9 @@ namespace thrift {
 namespace op {
 namespace detail {
 
-// Requires Patch have fields with ids 1:1 with the fields they patch.
+/// Patch for a Thrift field.
+///
+/// Requires Patch have fields with ids 1:1 with the fields they patch.
 template <typename Patch>
 class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
   using Base = BasePatch<Patch, FieldPatch>;
@@ -48,8 +50,10 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
     return patch;
   }
 
+  /// Returns the pointer to the Thrift patch struct.
   Patch* operator->() noexcept { return &data_; }
   const Patch* operator->() const noexcept { return &data_; }
+  /// Returns the reference to the Thrift patch struct.
   Patch& operator*() noexcept { return data_; }
   const Patch& operator*() const noexcept { return data_; }
 
@@ -59,6 +63,7 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
         [&](auto id) { get(id)->apply(op::get<>(id, val)); });
   }
 
+  /// @copydoc AssignPatch::merge
   template <typename U>
   void merge(U&& next) {
     auto&& tval = std::forward<U>(next).toThrift();
@@ -84,12 +89,16 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
   }
 };
 
-// Patch must have the following fields:
-//   optional T assign;
-//   bool clear;
-//   P patchPrior;
-//   T ensure;
-//   P patch;
+/// Create a base patch that supports Ensure operator.
+///
+/// The `Patch` template parameter must be a Thrift struct with the following
+/// fields:
+/// * `optional T assign`
+/// * `bool clear`
+/// * `P patchPrior`
+/// * `T ensure`
+/// * `P patch`
+/// Where `P` is the field patch type for the struct type `T`.
 template <typename Patch, typename Derived>
 class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   using Base = BaseClearPatch<Patch, Derived>;
@@ -101,16 +110,17 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   using Base::Base;
   using Base::operator=;
   using Base::assign;
+  /// Corresponding FieldPatch of this struct patch.
   using patch_type = std::decay_t<decltype(*std::declval<Patch>().patch())>;
 
-  // Returns if the patch ensures the given field is set (explicitly or
-  // implicitly).
+  /// Returns if the patch ensures the given field is set (explicitly or
+  /// implicitly).
   template <typename Id>
   constexpr bool ensures() const {
     return !isAbsent(getEnsure<Id>(data_));
   }
 
-  // Returns if the patch modifies the given field
+  /// Returns if the patch modifies the given field.
   template <typename Id>
   bool modifies() const {
     return hasAssign() || data_.clear() == true ||
@@ -120,12 +130,12 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
         !getRawPatch<Id>(data_.patch()).empty();
   }
 
-  // Ensures the given field is set, and return the associated patch object.
+  /// Ensures the given field is set, and return the associated patch object.
   template <typename Id>
   decltype(auto) ensure() {
     return (maybeEnsure<Id>(), patchAfter<Id>());
   }
-  // Same as above, except uses the provided default value.
+  /// Same as `ensure()` method, except uses the provided default value.
   template <typename Id, typename U = F<Id>>
   decltype(auto) ensure(U&& defaultVal) {
     if (maybeEnsure<Id>()) {
@@ -133,8 +143,8 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     }
     return patchAfter<Id>();
   }
-  // Ensures the given field is initalized, and return the associated patch
-  // object.
+  /// Ensures the given field is initalized, and return the associated patch
+  /// object.
   template <typename Id>
   decltype(auto) patch() {
     return ensure<Id>();
@@ -205,13 +215,16 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   }
 };
 
-// Patch must have the following fields:
-//   optional T assign;
-//   bool clear;
-//   P patchPrior;
-//   T ensure;
-//   P patch;
-// Where P is the field patch type for the struct type T.
+/// Patch for a Thrift struct.
+///
+/// The `Patch` template parameter must be a Thrift struct with the following
+/// fields:
+/// * `optional T assign`
+/// * `bool clear`
+/// * `P patchPrior`
+/// * `T ensure`
+/// * `P patch`
+/// Where `P` is the field patch type for the struct type `T`.
 template <typename Patch>
 class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   using Base = BaseEnsurePatch<Patch, StructPatch>;
@@ -236,7 +249,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     Base::template clear<Id>();
   }
 
-  // Assigns to the given field, ensuring first if needed.
+  /// Assigns to the given field, ensuring first if needed.
   template <typename Id, typename U = F<Id>>
   void assign(U&& val) {
     if (hasValue(data_.assign())) {
@@ -246,7 +259,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     }
   }
 
-  // Returns the proper patch object for the given field.
+  /// Returns the proper patch object for the given field.
   template <typename Id>
   decltype(auto) patchIfSet() {
     return Base::template ensures<Id>() ? patchAfter<Id>() : patchPrior<Id>();
@@ -275,6 +288,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     data_.patch()->apply(val);
   }
 
+  /// @copydoc AssignPatch::merge
   template <typename U>
   void merge(U&& next) {
     if (mergeAssignAndClear(std::forward<U>(next))) {
@@ -344,15 +358,16 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   }
 };
 
-// A patch for an union value.
-//
-// Patch must have the following fields:
-//   optional T assign;
-//   bool clear;
-//   P patchPrior;
-//   T ensure;
-//   P patch;
-// Where P is the field patch type for the union type T.
+/// Patch for a Thrift union.
+///
+/// The `Patch` template parameter must be a Thrift struct with the following
+/// fields:
+/// * `optional T assign`
+/// * `bool clear`
+/// * `P patchPrior`
+/// * `T ensure`
+/// * `P patch`
+/// Where `P` is the field patch type for the union type `T`.
 template <typename Patch>
 class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   using Base = BaseEnsurePatch<Patch, UnionPatch>;
@@ -369,23 +384,27 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   using Base::clear;
   using Base::ensure;
 
+  /// Creates a new patch that ensures the union with a given value.
   template <typename U = T>
   FOLLY_NODISCARD static UnionPatch createEnsure(U&& _default) {
     UnionPatch patch;
     patch.ensure(std::forward<U>(_default));
     return patch;
   }
+  /// Returns the union that's used to ensure.
   T& ensure() { return *data_.ensure(); }
+  /// Ensures the union with a given value.
   P& ensure(const T& val) { return *ensureAnd(val).patch(); }
+  /// Ensures the union with a given value.
   P& ensure(T&& val) { return *ensureAnd(std::move(val)).patch(); }
 
-  // Assigns to the given field, ensuring first if needed.
+  /// Assigns to the given field, ensuring first if needed.
   template <typename Id, typename U = F<Id>>
   void assign(U&& val) {
     op::get<Id>(Base::resetAnd().assign().ensure()) = std::forward<U>(val);
   }
 
-  // Patch any set value.
+  /// Patch any set value.
   FOLLY_NODISCARD P& patchIfSet() {
     if (hasValue(data_.ensure())) {
       return *data_.patch();
@@ -411,6 +430,7 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
     data_.patch()->apply(val);
   }
 
+  /// @copydoc AssignPatch::merge
   template <typename U>
   void merge(U&& next) {
     if (mergeAssignAndClear(std::forward<U>(next))) {

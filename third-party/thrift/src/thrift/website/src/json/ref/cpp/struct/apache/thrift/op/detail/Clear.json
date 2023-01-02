@@ -1,0 +1,678 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::detail::Clear",
+  "includes": {
+    "refid": "detail_2Clear_8h",
+    "local": "no",
+    "text_html": "Clear.h"
+  },
+  "tparams": [
+    {
+      "type_html": "typename TagOrId"
+    },
+    {
+      "type_html": "typename PTag",
+      "defval_html": "void"
+    },
+    {
+      "type_html": "typename",
+      "defval_html": "void"
+    }
+  ],
+  "types": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1ac7bddd6123159dc0f0ac116a51cd9bd4",
+      "prot": "public",
+      "type_html": "TagOrId",
+      "definition_html": "using apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::Tag =  TagOrId",
+      "argsstring_html": "",
+      "name_html": "Tag",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "line": "68",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "bodystart": "68",
+        "bodyend": "-1"
+      },
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear"
+    }
+  ],
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a9f02d3fb0a33f048b09f1e7a3fa07723",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "constexpr void",
+      "definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::operator()",
+      "argsstring_html": "(type::native_type&lt; Tag &gt; &amp;val) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "type::native_type&lt; <code>Tag</code> &gt; &amp;",
+          "declname_html": "val"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "line": "69",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "bodystart": "69",
+        "bodyend": "71"
+      },
+      "definition": {
+        "simple_html": "constexpr void operator()(type::native_type&lt;Tag&gt;&amp; val) const",
+        "simple_raw": "constexpr void operator()(type::native_type<Tag>& val) const",
+        "detailed_html": "inline constexpr void operator()(type::native_type&lt;Tag&gt;&amp; val) const",
+        "detailed_raw": "inline constexpr void operator()(type::native_type<Tag>& val) const",
+        "original_definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::operator()",
+        "original_argsstring_html": "(type::native_type&lt; Tag &gt; &amp;val) const"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Clear/operator.call",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Clear/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a759b20770cd7551854017ac3f266854a",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+      "argsstring_html": "(T &amp;val, type::structured_c)",
+      "name_html": "clear",
+      "param": [
+        {
+          "type_html": "T &amp;",
+          "declname_html": "val"
+        },
+        {
+          "type_html": "type::structured_c"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "line": "75",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "bodystart": "75",
+        "bodyend": "77"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nstatic void clear(T&amp; val, type::structured_c)",
+        "simple_raw": "template <typename T>\nstatic void clear(T& val, type::structured_c)",
+        "detailed_html": "template &lt;typename T&gt;\nprivate inline static void clear(T&amp; val, type::structured_c)",
+        "detailed_raw": "template <typename T>\nprivate inline static void clear(T& val, type::structured_c)",
+        "original_definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+        "original_argsstring_html": "(T &amp;val, type::structured_c)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Clear/clear",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Clear/clear"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a7ee056846dfd4e828ca75449e28bd7fe",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+      "argsstring_html": "(T &amp;val, type::container_c)",
+      "name_html": "clear",
+      "param": [
+        {
+          "type_html": "T &amp;",
+          "declname_html": "val"
+        },
+        {
+          "type_html": "type::container_c"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "line": "79",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "bodystart": "79",
+        "bodyend": "81"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nstatic void clear(T&amp; val, type::container_c)",
+        "simple_raw": "template <typename T>\nstatic void clear(T& val, type::container_c)",
+        "detailed_html": "template &lt;typename T&gt;\nprivate inline static void clear(T&amp; val, type::container_c)",
+        "detailed_raw": "template <typename T>\nprivate inline static void clear(T& val, type::container_c)",
+        "original_definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+        "original_argsstring_html": "(T &amp;val, type::container_c)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Clear/clear",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Clear/clear"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a580ae9f4d32197cb62f9322700961a66",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "constexpr void",
+      "definition_html": "static constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+      "argsstring_html": "(T &amp;val, type::all_c)",
+      "name_html": "clear",
+      "param": [
+        {
+          "type_html": "T &amp;",
+          "declname_html": "val"
+        },
+        {
+          "type_html": "type::all_c"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "line": "83",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+        "bodystart": "83",
+        "bodyend": "85"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nstatic constexpr void clear(T&amp; val, type::all_c)",
+        "simple_raw": "template <typename T>\nstatic constexpr void clear(T& val, type::all_c)",
+        "detailed_html": "template &lt;typename T&gt;\nprivate inline static constexpr void clear(T&amp; val, type::all_c)",
+        "detailed_raw": "template <typename T>\nprivate inline static constexpr void clear(T& val, type::all_c)",
+        "original_definition_html": "static constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+        "original_argsstring_html": "(T &amp;val, type::all_c)"
+      },
+      "filepath": "fns/struct/apache/thrift/op/detail/Clear/clear",
+      "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Clear/clear"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+    "line": "67",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+    "bodystart": "67",
+    "bodyend": "86"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "detail",
+    "Clear"
+  ],
+  "enums": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "template <\n  typename TagOrId,\n  typename PTag = void,\n  typename = void\n> struct Clear;",
+  "declaration_html": "template &lt;\n  typename TagOrId,\n  typename PTag = void,\n  typename = void\n&gt; struct Clear;",
+  "filepath": "struct/apache/thrift/op/detail/Clear",
+  "href": "/ref/cpp/struct/apache/thrift/op/detail/Clear",
+  "specializedBy": [
+    "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4",
+    "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01type_1_1if__id_3_01Id_01_4_00_01type8eba1f58d9d66bf19235ce32d66ddfbe",
+    "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01type_1_1adapted_3_01Adapter_00_01UTag_01_4_01_4",
+    "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01void_01_4"
+  ],
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "operator()",
+          "compoundname_html": "apache::thrift::op::detail::Clear::operator()",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a9f02d3fb0a33f048b09f1e7a3fa07723",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "constexpr void",
+              "definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::operator()",
+              "argsstring_html": "(type::native_type&lt; Tag &gt; &amp;val) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "type::native_type&lt; <code>Tag</code> &gt; &amp;",
+                  "declname_html": "val"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "69",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "69",
+                "bodyend": "71"
+              },
+              "definition": {
+                "simple_html": "constexpr void operator()(type::native_type&lt;Tag&gt;&amp; val) const",
+                "simple_raw": "constexpr void operator()(type::native_type<Tag>& val) const",
+                "detailed_html": "inline constexpr void operator()(type::native_type&lt;Tag&gt;&amp; val) const",
+                "detailed_raw": "inline constexpr void operator()(type::native_type<Tag>& val) const",
+                "original_definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::operator()",
+                "original_argsstring_html": "(type::native_type&lt; Tag &gt; &amp;val) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Clear/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Clear/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear",
+              "compoundname_html": "apache::thrift::op::detail::Clear::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4_1a98c145f80c1dbc7a9de907121f96fcd2",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "constexpr void",
+              "definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
+              "argsstring_html": "(T &amp;val) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<code>T</code> &amp;",
+                  "declname_html": "val"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "373",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "373",
+                "bodyend": "376"
+              },
+              "definition": {
+                "simple_html": "constexpr void operator()(T&amp; val) const",
+                "simple_raw": "constexpr void operator()(T& val) const",
+                "detailed_html": "inline constexpr void operator()(T&amp; val) const",
+                "detailed_raw": "inline constexpr void operator()(T& val) const",
+                "original_definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
+                "original_argsstring_html": "(T &amp;val) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4",
+              "compoundname_html": "apache::thrift::op::detail::Clear::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01type_1_1if__id_3_01Id_01_4_00_01type8eba1f58d9d66bf19235ce32d66ddfbe_1abd69f9ee520db7a7e5c2e90560776098",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "constexpr void",
+              "definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; Id, type::if_id&lt; Id &gt;, type::if_not_thrift_type_tag&lt; Id &gt; &gt;::operator()",
+              "argsstring_html": "(T &amp;val) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "T &amp;",
+                  "declname_html": "val"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "90",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "90",
+                "bodyend": "92"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nconstexpr void operator()(T&amp; val) const",
+                "simple_raw": "template <typename T>\nconstexpr void operator()(T& val) const",
+                "detailed_html": "template &lt;typename T&gt;\ninline constexpr void operator()(T&amp; val) const",
+                "detailed_raw": "template <typename T>\ninline constexpr void operator()(T& val) const",
+                "original_definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; Id, type::if_id&lt; Id &gt;, type::if_not_thrift_type_tag&lt; Id &gt; &gt;::operator()",
+                "original_argsstring_html": "(T &amp;val) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01type_1_1if__id_3_01Id_01_4_00_01type8eba1f58d9d66bf19235ce32d66ddfbe/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01type_1_1if__id_3_01Id_01_4_00_01type8eba1f58d9d66bf19235ce32d66ddfbe/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01type_1_1if__id_3_01Id_01_4_00_01type8eba1f58d9d66bf19235ce32d66ddfbe",
+              "compoundname_html": "apache::thrift::op::detail::Clear::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01type_1_1adapted_3_01Adapter_00_01UTag_01_4_01_4_1aafe27774cabe98cbcf168a2082756bf0",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "constexpr void",
+              "definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; type::adapted&lt; Adapter, UTag &gt; &gt;::operator()",
+              "argsstring_html": "(type::native_type&lt; Tag &gt; &amp;value) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "type::native_type&lt; <code>Tag</code> &gt; &amp;",
+                  "declname_html": "value"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "263",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "263",
+                "bodyend": "265"
+              },
+              "definition": {
+                "simple_html": "constexpr void operator()(type::native_type&lt;Tag&gt;&amp; value) const",
+                "simple_raw": "constexpr void operator()(type::native_type<Tag>& value) const",
+                "detailed_html": "inline constexpr void operator()(type::native_type&lt;Tag&gt;&amp; value) const",
+                "detailed_raw": "inline constexpr void operator()(type::native_type<Tag>& value) const",
+                "original_definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; type::adapted&lt; Adapter, UTag &gt; &gt;::operator()",
+                "original_argsstring_html": "(type::native_type&lt; Tag &gt; &amp;value) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01type_1_1adapted_3_01Adapter_00_01UTag_01_4_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01type_1_1adapted_3_01Adapter_00_01UTag_01_4_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01type_1_1adapted_3_01Adapter_00_01UTag_01_4_01_4",
+              "compoundname_html": "apache::thrift::op::detail::Clear::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01void_01_4_1aa74b8cf6592d711dfac91c220769817a",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Id"
+                },
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "constexpr void",
+              "definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; void &gt;::operator()",
+              "argsstring_html": "(Id, T &amp;val) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Id"
+                },
+                {
+                  "type_html": "T &amp;",
+                  "declname_html": "val"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "97",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "97",
+                "bodyend": "99"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Id, typename T&gt;\nconstexpr void operator()(Id, T&amp; val) const",
+                "simple_raw": "template <typename Id, typename T>\nconstexpr void operator()(Id, T& val) const",
+                "detailed_html": "template &lt;typename Id, typename T&gt;\ninline constexpr void operator()(Id, T&amp; val) const",
+                "detailed_raw": "template <typename Id, typename T>\ninline constexpr void operator()(Id, T& val) const",
+                "original_definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; void &gt;::operator()",
+                "original_argsstring_html": "(Id, T &amp;val) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01void_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01void_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01void_01_4",
+              "compoundname_html": "apache::thrift::op::detail::Clear::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01void_01_4_1a39a0b6d1dd549540678b38d4231792f5",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "constexpr void",
+              "definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; void &gt;::operator()",
+              "argsstring_html": "(T &amp;val) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "T &amp;",
+                  "declname_html": "val"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "101",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "101",
+                "bodyend": "103"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nconstexpr void operator()(T&amp; val) const",
+                "simple_raw": "template <typename T>\nconstexpr void operator()(T& val) const",
+                "detailed_html": "template &lt;typename T&gt;\ninline constexpr void operator()(T&amp; val) const",
+                "detailed_raw": "template <typename T>\ninline constexpr void operator()(T& val) const",
+                "original_definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; void &gt;::operator()",
+                "original_argsstring_html": "(T &amp;val) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01void_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01void_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01void_01_4",
+              "compoundname_html": "apache::thrift::op::detail::Clear::operator()"
+            }
+          ],
+          "filepath": "f/struct/apache/thrift/op/detail/Clear/operator.call",
+          "minprot": "public",
+          "displayname_html": "operator()",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/operator.call",
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/operator.call"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "clear",
+          "compoundname_html": "apache::thrift::op::detail::Clear::clear",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a759b20770cd7551854017ac3f266854a",
+              "prot": "private",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+              "argsstring_html": "(T &amp;val, type::structured_c)",
+              "name_html": "clear",
+              "param": [
+                {
+                  "type_html": "T &amp;",
+                  "declname_html": "val"
+                },
+                {
+                  "type_html": "type::structured_c"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "75",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "75",
+                "bodyend": "77"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nstatic void clear(T&amp; val, type::structured_c)",
+                "simple_raw": "template <typename T>\nstatic void clear(T& val, type::structured_c)",
+                "detailed_html": "template &lt;typename T&gt;\nprivate inline static void clear(T&amp; val, type::structured_c)",
+                "detailed_raw": "template <typename T>\nprivate inline static void clear(T& val, type::structured_c)",
+                "original_definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+                "original_argsstring_html": "(T &amp;val, type::structured_c)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Clear/clear",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Clear/clear",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear",
+              "compoundname_html": "apache::thrift::op::detail::Clear::clear"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a7ee056846dfd4e828ca75449e28bd7fe",
+              "prot": "private",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+              "argsstring_html": "(T &amp;val, type::container_c)",
+              "name_html": "clear",
+              "param": [
+                {
+                  "type_html": "T &amp;",
+                  "declname_html": "val"
+                },
+                {
+                  "type_html": "type::container_c"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "79",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "79",
+                "bodyend": "81"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nstatic void clear(T&amp; val, type::container_c)",
+                "simple_raw": "template <typename T>\nstatic void clear(T& val, type::container_c)",
+                "detailed_html": "template &lt;typename T&gt;\nprivate inline static void clear(T&amp; val, type::container_c)",
+                "detailed_raw": "template <typename T>\nprivate inline static void clear(T& val, type::container_c)",
+                "original_definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+                "original_argsstring_html": "(T &amp;val, type::container_c)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Clear/clear",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Clear/clear",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear",
+              "compoundname_html": "apache::thrift::op::detail::Clear::clear"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a580ae9f4d32197cb62f9322700961a66",
+              "prot": "private",
+              "static": "yes",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "constexpr void",
+              "definition_html": "static constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+              "argsstring_html": "(T &amp;val, type::all_c)",
+              "name_html": "clear",
+              "param": [
+                {
+                  "type_html": "T &amp;",
+                  "declname_html": "val"
+                },
+                {
+                  "type_html": "type::all_c"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "line": "83",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
+                "bodystart": "83",
+                "bodyend": "85"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nstatic constexpr void clear(T&amp; val, type::all_c)",
+                "simple_raw": "template <typename T>\nstatic constexpr void clear(T& val, type::all_c)",
+                "detailed_html": "template &lt;typename T&gt;\nprivate inline static constexpr void clear(T&amp; val, type::all_c)",
+                "detailed_raw": "template <typename T>\nprivate inline static constexpr void clear(T& val, type::all_c)",
+                "original_definition_html": "static constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+                "original_argsstring_html": "(T &amp;val, type::all_c)"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/Clear/clear",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/Clear/clear",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear",
+              "compoundname_html": "apache::thrift::op::detail::Clear::clear"
+            }
+          ],
+          "filepath": "f/struct/apache/thrift/op/detail/Clear/clear",
+          "minprot": "private",
+          "displayname_html": "clear",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/clear",
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/Clear/clear"
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

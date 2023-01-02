@@ -1,0 +1,106 @@
+{
+  "kind": "overloadset",
+  "name_html": "ensure",
+  "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::ensure",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a6be3018971cc29ec55daa9509cf7c35c",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Id"
+        }
+      ],
+      "type_html": "decltype(auto)",
+      "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+      "argsstring_html": "()",
+      "name_html": "ensure",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "135",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "135",
+        "bodyend": "137"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) ensure()",
+        "simple_raw": "template <typename Id>\ndecltype(auto) ensure()",
+        "detailed_html": "template &lt;typename Id&gt;\ninline decltype(auto) ensure()",
+        "detailed_raw": "template <typename Id>\ninline decltype(auto) ensure()",
+        "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+        "original_argsstring_html": "()"
+      },
+      "description": {
+        "brief_html": "<p>Ensures the given field is set, and return the associated patch object. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
+      "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::ensure"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a75aed8ff324273bcbc8db35360a356f3",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Id"
+        },
+        {
+          "type_html": "typename U",
+          "defval_html": "F&lt;Id&gt;"
+        }
+      ],
+      "type_html": "decltype(auto)",
+      "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+      "argsstring_html": "(U &amp;&amp;defaultVal)",
+      "name_html": "ensure",
+      "param": [
+        {
+          "type_html": "U &amp;&amp;",
+          "declname_html": "defaultVal"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "140",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "140",
+        "bodyend": "145"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Id, typename U = F&lt;Id&gt;&gt;\ndecltype(auto) ensure(U&amp;&amp; defaultVal)",
+        "simple_raw": "template <typename Id, typename U = F<Id>>\ndecltype(auto) ensure(U&& defaultVal)",
+        "detailed_html": "template &lt;typename Id, typename U = F&lt;Id&gt;&gt;\ninline decltype(auto) ensure(U&amp;&amp; defaultVal)",
+        "detailed_raw": "template <typename Id, typename U = F<Id>>\ninline decltype(auto) ensure(U&& defaultVal)",
+        "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+        "original_argsstring_html": "(U &amp;&amp;defaultVal)"
+      },
+      "description": {
+        "brief_html": "<p>Same as <code><code>ensure()</code></code> method, except uses the provided default value. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
+      "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::ensure"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
+  "minprot": "public",
+  "displayname_html": "ensure",
+  "brief_html": "<p>Ensures the given field is set, and return the associated patch object. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/ensure"
+}

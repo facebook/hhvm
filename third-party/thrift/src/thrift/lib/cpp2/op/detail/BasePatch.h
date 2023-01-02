@@ -51,9 +51,9 @@ bool sameType(terse_field_ref<T> unn1, const U& unn2) {
   return unn1->getType() == unn2.getType();
 }
 
-// Base class for all patch types.
-// - Patch: The Thrift struct representation for the patch.
-// - Derived: The leaf type deriving from this class.
+/// Base class for all patch types.
+/// - Patch: The Thrift struct representation for the patch.
+/// - Derived: The leaf type deriving from this class.
 template <typename Patch, typename Derived>
 class BasePatch : public type::detail::EqWrap<Derived, Patch> {
   using Base = type::detail::EqWrap<Derived, Patch>;
@@ -61,28 +61,34 @@ class BasePatch : public type::detail::EqWrap<Derived, Patch> {
  public:
   using Base::Base;
 
+  /// Applies patches to a Thrift value.
   // Automatically dereference non-optional fields.
   template <typename U>
   void apply(field_ref<U> field) const {
     derived().apply(*field);
   }
+  /// Applies patches to a Thrift value.
   template <typename U>
   void apply(terse_field_ref<U> field) const {
     derived().apply(*field);
   }
+  /// Replaces the existing value.
   template <typename U>
   type::if_not_id<U> assign(field_ref<U> val) {
     derived().assign(std::forward<U>(*val));
   }
+  /// Replaces the existing value.
   template <typename U>
   type::if_not_id<U> assign(terse_field_ref<U> val) {
     derived().assign(std::forward<U>(*val));
   }
+  /// Same as `assign(...)` method.
   template <typename U>
   Derived& operator=(field_ref<U> field) {
     derived().assign(std::forward<U>(*field));
     return derived();
   }
+  /// Same as `assign(...)` method.
   template <typename U>
   Derived& operator=(terse_field_ref<U> field) {
     derived().assign(std::forward<U>(*field));
@@ -96,15 +102,17 @@ class BasePatch : public type::detail::EqWrap<Derived, Patch> {
   ~BasePatch() = default; // abstract base class
 };
 
-// Base class for assign patch types.
-//
-// Patch must have the following fields:
-//   [optional] T assign;
+/// Base class for assign patch types.
+///
+/// The `Patch` template parameter must be a Thrift struct with the following
+/// fields:
+/// * `optional T assign`
 template <typename Patch, typename Derived>
 class BaseAssignPatch : public BasePatch<Patch, Derived> {
   using Base = BasePatch<Patch, Derived>;
 
  public:
+  /// The type of patched value.
   using value_type =
       folly::remove_cvref_t<decltype(*std::declval<Patch>().assign())>;
   using Base::apply;
@@ -112,6 +120,7 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
   using Base::operator=;
   using Base::Base;
 
+  /// Creates a new patch that replaces the existing value.
   template <typename U = value_type>
   FOLLY_NODISCARD static Derived createAssign(U&& val) {
     Derived patch;
@@ -176,11 +185,12 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
   }
 };
 
-// Base class for clearable patch types.
-//
-// Patch must have the following fields:
-//   (optional) T assign;
-//   bool clear;
+/// Base class for clearable patch types.
+///
+/// The `Patch` template parameter must be a Thrift struct with the following
+/// fields:
+/// * `optional T assign`
+/// * `[terse] bool clear`
 template <typename Patch, typename Derived>
 class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
   using Base = BaseAssignPatch<Patch, Derived>;
@@ -191,6 +201,7 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
   using Base::operator=;
   using Base::apply;
 
+  /// Creates a new patch that clears the value.
   FOLLY_NODISCARD static Derived createClear() {
     Derived patch;
     patch.clear();
@@ -243,15 +254,16 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
     return false;
   }
 
+  /// Clears the value.
   void clear() { resetAnd().clear() = true; }
   FOLLY_NODISCARD T& clearAnd() { return (clear(), data_); }
 };
 
-// Base class for 'container' patch types.
-//
-// Patch must have the following fields:
-//   (optional) T assign;
-//   bool clear;
+/// Base class for 'container' patch types.
+///
+/// The `Patch` template parameter must be a Thrift struct with the following
+/// * `optional T assign`
+/// * `[terse] bool clear`
 template <typename Patch, typename Derived>
 class BaseContainerPatch : public BaseClearPatch<Patch, Derived> {
   using Base = BaseClearPatch<Patch, Derived>;
@@ -267,7 +279,7 @@ class BaseContainerPatch : public BaseClearPatch<Patch, Derived> {
   using Base::data_;
   ~BaseContainerPatch() = default; // Abstract base class.
 
-  // Returns true if assign was applied, and no more patchs should be applied.
+  /// Returns true if assign was applied, and no more patchs should be applied.
   bool applyAssignOrClear(T& val) const {
     if (applyAssign(val)) {
       return true;

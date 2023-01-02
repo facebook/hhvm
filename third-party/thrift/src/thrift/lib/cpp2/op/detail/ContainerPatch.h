@@ -51,11 +51,14 @@ void remove_all_values(C1& container, const C2& values) {
       container.end());
 }
 
-// Patch must have the following fields:
-//   optional list<T> assign;
-//   bool clear;
-//   list<T> append;
-//   list<T> prepend;
+/// Patch for a Thrift list.
+///
+/// The `Patch` template parameter must be a Thrift struct with the following
+/// fields:
+/// * `optional list<T> assign`
+/// * `terse bool clear`
+/// * `terse list<T> append`
+/// * `terse list<T> prepend`
 template <typename Patch>
 class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   using Base = BaseContainerPatch<Patch, ListPatch>;
@@ -68,6 +71,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   using Base::Base;
   using Base::operator=;
 
+  /// Creates a new patch with appended list.
   template <typename C = T>
   static ListPatch createAppend(C&& values) {
     ListPatch result;
@@ -75,6 +79,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     return result;
   }
 
+  /// Creates a new patch with prepended list.
   template <typename C = T>
   static ListPatch createPrepend(C&& values) {
     ListPatch result;
@@ -82,31 +87,37 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     return result;
   }
 
+  /// Appends a list.
   template <typename C = T>
   void append(C&& rhs) {
     auto& lhs = assignOr(*data_.append());
     lhs.insert(lhs.end(), rhs.begin(), rhs.end());
   }
+  /// Emplaces and appends a new element.
   template <typename... Args>
   void emplace_back(Args&&... args) {
     assignOr(*data_.append()).emplace_back(std::forward<Args>(args)...);
   }
+  /// Appends the given element value.
   template <typename U = typename T::value_type>
   void push_back(U&& val) {
     assignOr(*data_.append()).push_back(std::forward<U>(val));
   }
 
+  /// Prepends a list.
   template <typename C = T>
   void prepend(C&& lhs) {
     auto& rhs = assignOr(*data_.prepend());
     rhs.insert(rhs.begin(), lhs.begin(), lhs.end());
   }
+  /// Emplaces and prepends a new element.
   template <typename... Args>
   void emplace_front(Args&&... args) {
     // TODO(afuller): Switch prepend to a std::forward_list.
     auto& prepend = assignOr(*data_.prepend());
     prepend.emplace(prepend.begin(), std::forward<Args>(args)...);
   }
+  /// Prepends the given element value.
   template <typename U = typename T::value_type>
   void push_front(U&& val) {
     // TODO(afuller): Switch prepend to a std::forward_list.
@@ -114,6 +125,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     prepend.insert(prepend.begin(), std::forward<U>(val));
   }
 
+  /// Removes an element.
   template <typename U = typename T::value_type>
   void erase(U&& val) {
     if (hasAssign()) {
@@ -126,6 +138,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     data_.remove()->push_back(std::forward<U>(val));
   }
 
+  /// Removes all elements in the list.
   template <typename C = std::unordered_set<typename T::value_type>>
   void remove(C&& entries) {
     if (hasAssign()) {
@@ -136,6 +149,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
         data_.remove()->end(), entries.begin(), entries.end());
   }
 
+  /// Returns the patch that for the element in a given position.
   FOLLY_NODISCARD VP& patchAt(size_t pos) {
     if (*data_.clear()) {
       folly::throw_exception<bad_patch_access>();
@@ -161,6 +175,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     val.insert(val.end(), data_.append()->begin(), data_.append()->end());
   }
 
+  /// @copydoc AssignPatch::merge
   template <typename U>
   void merge(U&& next) {
     if (mergeAssignAndClear(std::forward<U>(next))) {
@@ -199,11 +214,14 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   using Base::mergeAssignAndClear;
 };
 
-// Patch must have the following fields:
-//   optional set<T> assign;
-//   bool clear;
-//   set<T> add;
-//   set<T> remove;
+/// Patch for a Thrift set.
+///
+/// The `Patch` template parameter must be a Thrift struct with the following
+/// fields:
+/// * `optional set<T> assign`
+/// * `terse bool clear`
+/// * `terse set<T> add`
+/// * `terse set<T> remove`
 template <typename Patch>
 class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
   using Base = BaseContainerPatch<Patch, SetPatch>;
@@ -214,6 +232,7 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
   using Base::Base;
   using Base::operator=;
 
+  /// Creates a new patch that adds keys.
   template <typename C = T>
   static SetPatch createAdd(C&& keys) {
     SetPatch result;
@@ -221,6 +240,7 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
     return result;
   }
 
+  /// Creates a new patch that removes keys.
   template <typename C = T>
   static SetPatch createRemove(C&& keys) {
     SetPatch result;
@@ -228,11 +248,13 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
     return result;
   }
 
+  /// Adds keys.
   template <typename C = T>
   void add(C&& keys) {
     erase_all(*data_.remove(), keys);
     assignOr(*data_.add()).insert(keys.begin(), keys.end());
   }
+  /// Emplaces the set.
   template <typename... Args>
   void emplace(Args&&... args) {
     if (data_.assign().has_value()) {
@@ -244,6 +266,7 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
       data_.remove()->erase(*result.first);
     }
   }
+  /// Adds a key.
   template <typename U = typename T::value_type>
   void insert(U&& val) {
     if (data_.assign().has_value()) {
@@ -254,6 +277,7 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
     data_.add()->insert(std::forward<U>(val));
   }
 
+  /// Removes keys.
   template <typename C = T>
   void remove(C&& keys) {
     if (data_.assign().has_value()) {
@@ -263,6 +287,7 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
     erase_all(*data_.add(), keys);
     data_.remove()->insert(keys.begin(), keys.end());
   }
+  /// Remove a key.
   template <typename U = typename T::value_type>
   void erase(U&& val) {
     assignOr(*data_.add()).erase(val);
@@ -278,6 +303,7 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
     val.insert(data_.add()->begin(), data_.add()->end());
   }
 
+  /// @copydoc AssignPatch::merge
   template <typename U>
   void merge(U&& next) {
     if (!mergeAssignAndClear(std::forward<U>(next))) {
@@ -293,10 +319,13 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
   using Base::mergeAssignAndClear;
 };
 
-// Patch must have the following fields:
-//   optional map<K, V> assign;
-//   bool clear;
-//   map<K, V> put;
+/// Patch for a Thrift map.
+///
+/// The `Patch` template parameter must be a Thrift struct with the following
+/// fields:
+/// * `optional map<K, V> assign`
+/// * `terse bool clear`
+/// * `terse map<K, V> put`
 template <typename Patch>
 class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   using Base = BaseContainerPatch<Patch, MapPatch>;
@@ -309,6 +338,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   using Base::Base;
   using Base::operator=;
 
+  /// Creates a patch that inserts entries. Ignore entries that already exists.
   template <typename C = T>
   static MapPatch createPut(C&& entries) {
     MapPatch result;
@@ -316,6 +346,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     return result;
   }
 
+  /// Inserts entries. Ignore entries that already exists.
   template <typename C = T>
   void put(C&& entries) {
     auto& field = assignOr(*data_.put());
@@ -328,6 +359,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
       patchPrior.erase(key);
     }
   }
+  /// Inserts entries. Override entries if exists.
   template <typename K, typename V>
   void insert_or_assign(K&& key, V&& value) {
     assignOr(*data_.put()).insert_or_assign(key, std::forward<V>(value));
@@ -336,6 +368,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     data_.patchPrior()->erase(key);
   }
 
+  /// Inserts entries. Override entries if exists.
   template <typename C = T>
   void add(C&& entries) {
     auto& field = assignOr(*data_.add());
@@ -345,6 +378,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     }
   }
 
+  /// Removes keys.
   template <typename C = std::unordered_set<typename T::key_type>>
   void remove(C&& keys) {
     auto& field = assignOr(*data_.add());
@@ -358,6 +392,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     }
   }
 
+  /// Removes a key.
   template <typename K = typename T::key_type>
   void erase(K&& key) {
     assignOr(*data_.add()).erase(key);
@@ -366,6 +401,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     data_.patch()->erase(key);
   }
 
+  /// Returns the patch that for the entry.
   template <typename K = typename T::key_type>
   FOLLY_NODISCARD VP& patchByKey(K&& key) {
     // TODO: Return dummy patch for cases when key is slotted for removal
@@ -386,6 +422,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     applyPatch(val, *data_.patch());
   }
 
+  /// @copydoc AssignPatch::merge
   template <typename U>
   void merge(U&& next) {
     if (mergeAssignAndClear(std::forward<U>(next))) {

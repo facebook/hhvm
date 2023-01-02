@@ -1,0 +1,80 @@
+{
+  "refid": "StructPatch_8h",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "StructPatch.h",
+  "includes": [
+    {
+      "local": "no",
+      "text_html": "utility"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/Traits.h"
+    },
+    {
+      "refid": "Get_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/Get.h"
+    },
+    {
+      "refid": "BasePatch_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/detail/BasePatch.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/Id.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/NativeType.h"
+    }
+  ],
+  "innerclass": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1FieldPatch",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::FieldPatch"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::BaseEnsurePatch"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::StructPatch"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::UnionPatch"
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op",
+      "text_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1_1detail",
+      "text_html": "apache::thrift::op::detail"
+    }
+  ],
+  "file_location": {
+    "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h"
+  },
+  "filepath": "file/thrift/lib/cpp2/op/detail/StructPatch.h",
+  "href": "/ref/cpp/thrift/lib/cpp2/op/detail/StructPatch.h",
+  "free_overloadgroups": []
+}

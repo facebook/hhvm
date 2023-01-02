@@ -1,0 +1,62 @@
+{
+  "kind": "overloadset",
+  "name_html": "add",
+  "compoundname_html": "apache::thrift::op::detail::MapPatch::add",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch_1aacc82b0e740a640d489f8f5ca4401a2c",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename C",
+          "defval_html": "T"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::add",
+      "argsstring_html": "(C &amp;&amp;entries)",
+      "name_html": "add",
+      "param": [
+        {
+          "type_html": "C &amp;&amp;",
+          "declname_html": "entries"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "line": "373",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "bodystart": "373",
+        "bodyend": "379"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename C = T&gt;\nvoid add(C&amp;&amp; entries)",
+        "simple_raw": "template <typename C = T>\nvoid add(C&& entries)",
+        "detailed_html": "template &lt;typename C = T&gt;\ninline void add(C&amp;&amp; entries)",
+        "detailed_raw": "template <typename C = T>\ninline void add(C&& entries)",
+        "original_definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::add",
+        "original_argsstring_html": "(C &amp;&amp;entries)"
+      },
+      "description": {
+        "brief_html": "<p>Inserts entries. Override entries if exists. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/MapPatch/add",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/add",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch",
+      "compoundname_html": "apache::thrift::op::detail::MapPatch::add"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/MapPatch/add",
+  "minprot": "public",
+  "displayname_html": "add",
+  "brief_html": "<p>Inserts entries. Override entries if exists. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add"
+}

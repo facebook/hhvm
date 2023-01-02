@@ -9,6 +9,7 @@
       "text_html": "folly/Traits.h"
     },
     {
+      "refid": "detail_2Clear_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/detail/Clear.h"
     }
@@ -44,7 +45,7 @@
           "defval_html": "void"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr detail::IsEmpty&lt; Tag &gt;",
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/IsEmpty\">detail::IsEmpty</a>&lt; Tag &gt;",
       "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::IsEmpty&lt;Tag&gt; apache::thrift::op::isEmpty",
       "argsstring_html": "",
       "name_html": "isEmpty",
@@ -71,7 +72,7 @@
           "type_html": "typename TagOrT"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr detail::GetDefault&lt; type::infer_tag&lt; TagOrT &gt; &gt;",
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/GetDefault\">detail::GetDefault</a>&lt; type::infer_tag&lt; TagOrT &gt; &gt;",
       "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::GetDefault&lt;type::infer_tag&lt;TagOrT&gt; &gt; apache::thrift::op::getDefault",
       "argsstring_html": "",
       "name_html": "getDefault",
@@ -98,7 +99,7 @@
           "type_html": "typename TagOrT"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr detail::GetIntrinsicDefault&lt; type::infer_tag&lt; TagOrT &gt; &gt;",
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/GetIntrinsicDefault\">detail::GetIntrinsicDefault</a>&lt; type::infer_tag&lt; TagOrT &gt; &gt;",
       "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::GetIntrinsicDefault&lt; type::infer_tag&lt;TagOrT&gt; &gt; apache::thrift::op::getIntrinsicDefault",
       "argsstring_html": "",
       "name_html": "getIntrinsicDefault",
@@ -130,7 +131,7 @@
           "defval_html": "void"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr detail::Clear&lt; TagOrId, PTag &gt;",
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Clear\">detail::Clear</a>&lt; TagOrId, PTag &gt;",
       "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::Clear&lt;TagOrId, PTag&gt; apache::thrift::op::clear",
       "argsstring_html": "",
       "name_html": "clear",
@@ -157,7 +158,7 @@
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "FOLLY_INLINE_VARIABLE constexpr detail::ClearField&lt; Tag &gt;",
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/ClearField\">detail::ClearField</a>&lt; Tag &gt;",
       "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::ClearField&lt;Tag&gt; apache::thrift::op::clear_field",
       "argsstring_html": "",
       "name_html": "clear_field",

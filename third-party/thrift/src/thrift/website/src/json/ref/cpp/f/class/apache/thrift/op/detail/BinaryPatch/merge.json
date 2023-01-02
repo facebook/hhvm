@@ -1,0 +1,61 @@
+{
+  "kind": "overloadset",
+  "name_html": "merge",
+  "compoundname_html": "apache::thrift::op::detail::BinaryPatch::merge",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BinaryPatch_1a754b489c24037c8a61ea5ac0e9e83c6a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename U"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BinaryPatch&lt; Patch &gt;::merge",
+      "argsstring_html": "(U &amp;&amp;next)",
+      "name_html": "merge",
+      "param": [
+        {
+          "type_html": "U &amp;&amp;",
+          "declname_html": "next"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "368",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "368",
+        "bodyend": "380"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename U&gt;\nvoid merge(U&amp;&amp; next)",
+        "simple_raw": "template <typename U>\nvoid merge(U&& next)",
+        "detailed_html": "template &lt;typename U&gt;\ninline void merge(U&amp;&amp; next)",
+        "detailed_raw": "template <typename U>\ninline void merge(U&& next)",
+        "original_definition_html": "void apache::thrift::op::detail::BinaryPatch&lt; Patch &gt;::merge",
+        "original_argsstring_html": "(U &amp;&amp;next)"
+      },
+      "description": {
+        "detailed_html": "<p>Merges another patch into the current patch. After the merge (<code>patch.merge(next)</code>), <code>patch.apply(value)</code> is equivalent to <code>next.apply(patch.apply(value))</code>. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BinaryPatch/merge",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BinaryPatch/merge",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BinaryPatch",
+      "compoundname_html": "apache::thrift::op::detail::BinaryPatch::merge"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/BinaryPatch/merge",
+  "minprot": "public",
+  "displayname_html": "merge",
+  "brief_html": "<p>Merges another patch into the current patch. After the merge (<code>patch.merge(next)</code>), <code>patch.apply(value)</code> is equivalent to <code>next.apply(patch.apply(value))</code>. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/merge",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/merge"
+}

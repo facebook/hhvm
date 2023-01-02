@@ -1,0 +1,66 @@
+{
+  "refid": "detail_2Get_8h",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "Get.h",
+  "includes": [
+    {
+      "refid": "FieldRef_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/FieldRef.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/Thrift.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/Tag.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/ThriftType.h"
+    }
+  ],
+  "innerclass": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Get",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::Get"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetOrdinalImpl",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::GetOrdinalImpl"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::GetValueOrNull"
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op",
+      "text_html": "apache::thrift::op"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1_1detail",
+      "text_html": "apache::thrift::op::detail"
+    }
+  ],
+  "file_location": {
+    "file": "fbcode/thrift/lib/cpp2/op/detail/Get.h"
+  },
+  "filepath": "file/thrift/lib/cpp2/op/detail/Get.h",
+  "href": "/ref/cpp/thrift/lib/cpp2/op/detail/Get.h",
+  "free_overloadgroups": []
+}

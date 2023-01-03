@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <deque>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <fmt/core.h>
@@ -108,6 +109,8 @@ class source_manager {
   // sources_ grows.
   std::deque<source_info> sources_;
 
+  std::unordered_map<std::string, source> file_source_map_;
+
   const source_info* get_source(uint_least32_t source_id) const {
     return source_id > 0 && source_id <= sources_.size()
         ? &sources_[source_id - 1]
@@ -116,14 +119,15 @@ class source_manager {
 
   friend class resolved_location;
 
-  source add_source(std::string file_name, std::vector<char> text);
+  source add_source(const std::string& file_name, std::vector<char> text);
+  source add_file(const std::string& file_name);
 
  public:
   // Adds a file source.
-  source add_file(std::string file_name);
+  source get_file(const std::string& file_name);
 
   // Adds a string source; file_name is used for source locations.
-  source add_string(std::string file_name, std::string src);
+  source add_virtual_file(const std::string& file_name, const std::string& src);
 
   // Returns the start location of a source containing the specified location.
   // It is a member function in case we add clang-like compression of locations.

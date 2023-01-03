@@ -45,7 +45,8 @@ using ::testing::UnorderedElementsAre;
 class StandardValidatorTest : public ::testing::Test {
  public:
   StandardValidatorTest()
-      : loc(source_mgr.add_string("/path/to/file.thrift", "\n\n\n\n").start) {}
+      : loc(source_mgr.add_virtual_file("/path/to/file.thrift", "\n\n\n\n")
+                .start) {}
 
  protected:
   std::vector<diagnostic> validate(

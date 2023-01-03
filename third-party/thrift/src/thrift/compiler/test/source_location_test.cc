@@ -21,13 +21,13 @@
 
 using namespace apache::thrift::compiler;
 
-TEST(SourceLocationTest, add_file) {
+TEST(SourceLocationTest, get_file) {
   auto sm = source_manager();
   auto text = std::string("test");
   auto file = folly::test::TemporaryFile();
   auto file_name = file.path().string();
   std::ofstream(file_name) << text;
-  auto source = sm.add_file(file_name);
+  auto source = sm.get_file(file_name);
   auto loc = resolved_location(source.start, sm);
   EXPECT_EQ(loc.file_name(), file_name);
   EXPECT_EQ(loc.line(), 1);
@@ -39,17 +39,17 @@ TEST(SourceLocationTest, report_file_name_on_error) {
   auto sm = source_manager();
   auto message = std::string();
   try {
-    sm.add_file("nonexistent");
+    sm.get_file("nonexistent");
   } catch (const std::runtime_error& e) {
     message = e.what();
   }
   EXPECT_THAT(message, testing::HasSubstr("nonexistent"));
 }
 
-TEST(SourceLocationTest, add_string) {
+TEST(SourceLocationTest, add_virtual_file) {
   auto sm = source_manager();
   auto text = std::string("test");
-  auto source = sm.add_string("path/to/file", text);
+  auto source = sm.add_virtual_file("path/to/file", text);
   auto loc = resolved_location(source.start, sm);
   EXPECT_STREQ(loc.file_name(), "path/to/file");
   EXPECT_EQ(loc.line(), 1);
@@ -59,7 +59,7 @@ TEST(SourceLocationTest, add_string) {
 
 TEST(SourceLocationTest, get_source_start) {
   auto sm = source_manager();
-  auto source = sm.add_string("path/to/file", "test");
+  auto source = sm.add_virtual_file("path/to/file", "test");
   auto loc = source.start + 2;
   EXPECT_NE(loc, source.start);
   EXPECT_EQ(sm.get_source_start(loc), source.start);
@@ -67,7 +67,7 @@ TEST(SourceLocationTest, get_source_start) {
 
 TEST(SourceLocationTest, get_text) {
   auto sm = source_manager();
-  auto source = sm.add_string("path/to/file", "test");
+  auto source = sm.add_virtual_file("path/to/file", "test");
   auto text = source.text.data();
   EXPECT_EQ(sm.get_text(source.start), text);
   EXPECT_EQ(sm.get_text(source.start + 2), text + 2);
@@ -75,16 +75,16 @@ TEST(SourceLocationTest, get_text) {
 
 TEST(SourceLocationTest, stable_file_name) {
   auto sm = source_manager();
-  auto source = sm.add_string("f1", "");
+  auto source = sm.add_virtual_file("f1", "");
   auto file_name = resolved_location(source.start, sm).file_name();
-  sm.add_string("f2", "");
+  sm.add_virtual_file("f2", "");
   // Check that the pointer to file name hasn't changed.
   EXPECT_EQ(file_name, resolved_location(source.start, sm).file_name());
 }
 
 TEST(SourceLocationTest, compare) {
   auto sm = source_manager();
-  auto source = sm.add_string("path/to/file", "test");
+  auto source = sm.add_virtual_file("path/to/file", "test");
   auto loc = source.start;
   EXPECT_TRUE(source.start == loc);
   EXPECT_FALSE(source.start != loc);
@@ -95,7 +95,7 @@ TEST(SourceLocationTest, compare) {
 
 TEST(SourceLocationTest, offset) {
   auto sm = source_manager();
-  auto source = sm.add_string("path/to/file", "test");
+  auto source = sm.add_virtual_file("path/to/file", "test");
   auto loc = source.start;
   EXPECT_EQ(loc.offset(), 0);
   loc = loc + 2;
@@ -105,7 +105,7 @@ TEST(SourceLocationTest, offset) {
 
 TEST(SourceLocationTest, multi_line) {
   auto sm = source_manager();
-  auto source = sm.add_string("path/to/file", "line1\nline2");
+  auto source = sm.add_virtual_file("path/to/file", "line1\nline2");
 
   auto loc = resolved_location(source.start, sm);
   EXPECT_STREQ(loc.file_name(), "path/to/file");
@@ -121,4 +121,17 @@ TEST(SourceLocationTest, multi_line) {
   EXPECT_STREQ(loc.file_name(), "path/to/file");
   EXPECT_EQ(loc.line(), 2);
   EXPECT_EQ(loc.column(), 1);
+}
+
+TEST(SourceLocationTest, get_cached_virtual_file) {
+  auto sm = source_manager();
+  auto text = std::string("test");
+  auto file_name = std::string("virtual_file");
+  sm.add_virtual_file(file_name, text);
+  auto source = sm.get_file(file_name);
+  auto loc = resolved_location(source.start, sm);
+  EXPECT_EQ(loc.file_name(), file_name);
+  EXPECT_EQ(loc.line(), 1);
+  EXPECT_EQ(loc.column(), 1);
+  EXPECT_EQ(fmt::string_view(text.c_str(), text.size() + 1), source.text);
 }

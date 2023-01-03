@@ -41,7 +41,8 @@ class ValidatorTest : public testing::Test {
 
   ValidatorTest()
       : diags(source_mgr, [this](diagnostic d) { errors.push_back(d); }),
-        loc(source_mgr.add_string("/path/to/file.thrift", "\n\n").start) {}
+        loc(source_mgr.add_virtual_file("/path/to/file.thrift", "\n\n").start) {
+  }
 };
 
 } // namespace

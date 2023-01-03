@@ -41,7 +41,7 @@ class DiagnosticsEngineTest : public ::testing::Test {
 
   DiagnosticsEngineTest()
       : diags(source_mgr, results),
-        src(source_mgr.add_string("path/to/file.thrift", "")) {}
+        src(source_mgr.add_virtual_file("path/to/file.thrift", "")) {}
 };
 
 TEST_F(DiagnosticsEngineTest, keep_debug) {

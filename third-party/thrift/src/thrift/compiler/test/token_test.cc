@@ -24,7 +24,7 @@ class TokenTest : public testing::Test {
   source_manager source_mgr;
   source_location loc;
 
-  TokenTest() : loc(source_mgr.add_string("test.thrift", "foo").start) {}
+  TokenTest() : loc(source_mgr.add_virtual_file("test.thrift", "foo").start) {}
 };
 
 TEST_F(TokenTest, to_tok) {

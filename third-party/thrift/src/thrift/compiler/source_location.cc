@@ -23,6 +23,7 @@
 #include <string.h>
 #include <algorithm>
 #include <stdexcept>
+#include <string>
 
 namespace apache {
 namespace thrift {
@@ -64,7 +65,7 @@ class file {
 } // namespace
 
 source source_manager::add_source(
-    std::string file_name, std::vector<char> text) {
+    const std::string& file_name, std::vector<char> text) {
   assert(text.back() == '\0');
   auto sv = fmt::string_view(text.data(), text.size());
   auto src = source_info{file_name, std::move(text), {}};
@@ -85,7 +86,7 @@ source source_manager::add_source(
   return {source_location(sources_.size(), 0), sv};
 }
 
-source source_manager::add_file(std::string file_name) {
+source source_manager::add_file(const std::string& file_name) {
   auto f = file(file_name.c_str(), "rb");
   char buffer[4096];
   auto text = std::vector<char>();
@@ -101,13 +102,29 @@ source source_manager::add_file(std::string file_name) {
     text.insert(text.end(), buffer, buffer + result.count);
   }
   text.push_back('\0');
-  return add_source(std::move(file_name), std::move(text));
+  return add_source(file_name, std::move(text));
 }
 
-source source_manager::add_string(std::string file_name, std::string src) {
+source source_manager::get_file(const std::string& file_name) {
+  if (auto source = file_source_map_.find(file_name);
+      source != file_source_map_.end()) {
+    return source->second;
+  }
+  auto source = add_file(file_name);
+  file_source_map_.emplace(file_name, source);
+  return source;
+}
+
+source source_manager::add_virtual_file(
+    const std::string& file_name, const std::string& src) {
+  if (file_source_map_.find(file_name) != file_source_map_.end()) {
+    throw std::runtime_error(std::string("File already added: ") + file_name);
+  }
   const char* start = src.c_str();
-  return add_source(
-      std::move(file_name), std::vector<char>(start, start + src.size() + 1));
+  auto source =
+      add_source(file_name, std::vector<char>(start, start + src.size() + 1));
+  file_source_map_.emplace(file_name, source);
+  return source;
 }
 
 const char* source_manager::get_text(source_location loc) const {

@@ -40,7 +40,7 @@ namespace {
 class ScopeValidatorTest : public ::testing::Test {
  public:
   ScopeValidatorTest()
-      : loc(source_mgr.add_string("path/to/file.thrift", "").start),
+      : loc(source_mgr.add_virtual_file("path/to/file.thrift", "").start),
         program{"path/to/file.thrift"} {
     program.set_name("MyProgram");
     scopeProgram.set_uri(kScopeProgramUri);

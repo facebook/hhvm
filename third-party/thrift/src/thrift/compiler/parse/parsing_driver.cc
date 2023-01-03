@@ -79,7 +79,7 @@ void parsing_driver::parse_file() {
 
   auto src = source();
   try {
-    src = source_mgr_.add_file(path);
+    src = source_mgr_.get_file(path);
   } catch (const std::runtime_error& e) {
     diags_.error(source_location(), "{}", e.what());
     end_parsing();
@@ -138,7 +138,7 @@ void parsing_driver::parse_file() {
 
   // Parse the program file
   try {
-    src = source_mgr_.add_file(path);
+    src = source_mgr_.get_file(path);
   } catch (const std::runtime_error& e) {
     diags_.error(source_location(), "{}", e.what());
     end_parsing();

@@ -464,7 +464,9 @@ void parsing_driver::set_fields(t_structured& tstruct, t_field_list&& fields) {
 }
 
 t_type_ref parsing_driver::new_type_ref(
-    const t_type& type, std::unique_ptr<t_annotations> annotations) {
+    const t_type& type,
+    std::unique_ptr<t_annotations> annotations,
+    const source_range& range) {
   if (annotations == nullptr || mode != parsing_mode::PROGRAM) {
     return type;
   }
@@ -490,7 +492,8 @@ t_type_ref parsing_driver::new_type_ref(
   return *add_unnamed_typedef(
       std::make_unique<t_typedef>(
           const_cast<t_program*>(type.program()), type.get_name(), type),
-      std::move(annotations));
+      std::move(annotations),
+      range);
 }
 
 t_type_ref parsing_driver::new_type_ref(
@@ -532,7 +535,7 @@ t_type_ref parsing_driver::new_type_ref(
     set_annotations(node, std::move(annotations));
   } else if (annotations != nullptr) { // Oh no!
     // TODO(afuller): Remove support for annotations on type references.
-    return new_type_ref(result.deref(), std::move(annotations));
+    return new_type_ref(result.deref(), std::move(annotations), range);
   }
 
   return result;
@@ -566,8 +569,10 @@ void parsing_driver::add_include(std::string name, const source_range& range) {
 
 const t_type* parsing_driver::add_unnamed_typedef(
     std::unique_ptr<t_typedef> node,
-    std::unique_ptr<t_annotations> annotations) {
+    std::unique_ptr<t_annotations> annotations,
+    const source_range& range) {
   const t_type* result(node.get());
+  node->set_src_range(range);
   set_annotations(node.get(), std::move(annotations));
   program->add_unnamed_typedef(std::move(node));
   return result;

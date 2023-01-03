@@ -117,8 +117,14 @@ const char* source_manager::get_text(source_location loc) const {
 
 resolved_location::resolved_location(
     source_location loc, const source_manager& sm) {
+  if (loc == source_location()) {
+    throw std::invalid_argument("empty source location");
+  }
   const source_manager::source_info* source = sm.get_source(loc.source_id_);
-  assert(source);
+  if (!source) {
+    throw std::invalid_argument("invalid source location");
+  }
+
   file_name_ = source->file_name.c_str();
   const std::vector<uint_least32_t>& line_offsets = source->line_offsets;
   auto it =

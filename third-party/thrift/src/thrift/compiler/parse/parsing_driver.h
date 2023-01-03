@@ -394,7 +394,9 @@ class parsing_driver : public parser_actions {
   // Creates a reference to a known type, potentally with additional
   // annotations.
   t_type_ref new_type_ref(
-      const t_type& type, std::unique_ptr<t_annotations> annotations);
+      const t_type& type,
+      std::unique_ptr<t_annotations> annotations,
+      const source_range& range = source_range());
   t_type_ref new_type_ref(t_type&& type, std::unique_ptr<t_annotations>) =
       delete;
 
@@ -471,7 +473,8 @@ class parsing_driver : public parser_actions {
   // that can annotatable.
   const t_type* add_unnamed_typedef(
       std::unique_ptr<t_typedef> node,
-      std::unique_ptr<t_annotations> annotations);
+      std::unique_ptr<t_annotations> annotations,
+      const source_range& range = source_range());
 
   // Automatic numbering for field ids.
   //

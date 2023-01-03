@@ -47,7 +47,7 @@ union ProtocolUnion {
   /** A custom protocol. */
   2: standard.Uri custom;
   /** An externally stored protocol. */
-  3: id.ProtocolId id;
+  3: id.ProtocolId id (py3.hidden);
 } (thrift.uri = "facebook.com/thrift/type/Protocol")
 
 /** A concrete Thrift type. */

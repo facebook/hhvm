@@ -48,14 +48,14 @@ struct AnyStruct {
    *
    * Must not be empty.
    */
-  1: type.Type type;
+  1: type.Type type (py3.hidden);
 
   /**
    * The protocol used to encode `data`.
    *
    * Must not be empty.
    */
-  2: type.Protocol protocol;
+  2: type.Protocol protocol (py3.hidden);
 
   /** The encoded data. */
   3: standard.ByteBuffer data;
@@ -68,10 +68,10 @@ struct AnyStruct {
  */
 struct SemiAnyStruct {
   /** The type stored in `data`, if known. */
-  1: type.Type type;
+  1: type.Type type (py3.hidden);
 
   /** The protocol used to encode `data`, if known. */
-  2: type.Protocol protocol;
+  2: type.Protocol protocol (py3.hidden);
 
   /** The encoded data. */
   3: standard.ByteBuffer data;

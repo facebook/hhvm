@@ -677,8 +677,12 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   // Run callbacks only if it's safe to do so, i.e., not when
   // there's a pending exception or we're unwinding from a C++ exception.
+  // It's not safe to run callbacks when we are in the middle of resolving a
+  // constant since we maintain a static array with sentinel bits to detect
+  // recursively defined constants which could be modified by a callback.
   if (RequestInfo::s_requestInfo->m_pendingException == nullptr
-      && (!unwind || phpException)) {
+      && (!unwind || phpException)
+      && ar->func()->name() != s_86cinit.get()) {
 
     // Memory Threhsold
     if (flags & MemThresholdFlag) {
@@ -775,17 +779,22 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
     }
   }
 
-  // Memory Threhsold
-  if (flags & MemThresholdFlag) {
-    DoMemoryThresholdCallback();
-  }
-  // Time Thresholds
-  if (flags & TimedOutFlag) {
-    RID().invokeUserTimeoutCallback();
-  }
+  // It's not safe to run callbacks when we are in the middle of resolving a
+  // constant since we maintain a static array with sentinel bits to detect
+  // recursively defined constants which could be modified by a callback.
+  if (ar->func()->name() != s_86cinit.get()) {
+    // Memory Threhsold
+    if (flags & MemThresholdFlag) {
+      DoMemoryThresholdCallback();
+    }
+    // Time Thresholds
+    if (flags & TimedOutFlag) {
+      RID().invokeUserTimeoutCallback();
+    }
 
-  if (flags & IntervalTimerFlag) {
-    IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
+    if (flags & IntervalTimerFlag) {
+      IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
+    }
   }
 
   onFunctionEnter(ar, funcType, flags, false);

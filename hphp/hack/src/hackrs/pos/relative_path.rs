@@ -67,6 +67,10 @@ impl RelativePath {
         buf.push(&OsStr::from_bytes(self.suffix.as_bytes()));
         buf
     }
+
+    pub fn suffix_buf(&self) -> PathBuf {
+        PathBuf::from(OsStr::from_bytes(self.suffix.as_bytes()))
+    }
 }
 
 impl arena_trait::TrivialDrop for RelativePath {}

@@ -586,19 +586,17 @@ let add_fine_dep_if_enabled env dependency =
       denv.droot_member
       dependency
 
-let make_depend_on_class env class_name =
-  let dep = Dep.Type class_name in
+let add_dependency_edge (env : Typing_env_types.env) dep : unit =
   Option.iter env.decl_env.droot ~f:(fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
-  add_fine_dep_if_enabled env dep;
-  ()
+  add_fine_dep_if_enabled env dep
+
+let make_depend_on_class env class_name =
+  add_dependency_edge env (Dep.Type class_name)
 
 let make_depend_on_constructor env class_name =
   make_depend_on_class env class_name;
-  let dep = Dep.Constructor class_name in
-  Option.iter env.decl_env.droot ~f:(fun root ->
-      Typing_deps.add_idep (get_deps_mode env) root dep);
-  add_fine_dep_if_enabled env dep;
+  add_dependency_edge env (Dep.Constructor class_name);
   ()
 
 let make_depend_on_class_def env x cd =
@@ -607,11 +605,7 @@ let make_depend_on_class_def env x cd =
   | _ -> make_depend_on_class env x
 
 let make_depend_on_module env module_name =
-  let dep = Dep.Module module_name in
-  Option.iter env.decl_env.droot ~f:(fun root ->
-      Typing_deps.add_idep (get_deps_mode env) root dep);
-  add_fine_dep_if_enabled env dep;
-  ()
+  add_dependency_edge env (Dep.Module module_name)
 
 let make_depend_on_module_def env x md =
   match md with
@@ -619,14 +613,8 @@ let make_depend_on_module_def env x md =
   | _ -> make_depend_on_module env x
 
 let make_depend_on_current_module env =
-  let f (_, mid) =
-    let dep = Dep.Module mid in
-    Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep);
-    add_fine_dep_if_enabled env dep;
-    ()
-  in
-  Option.iter ~f env.genv.current_module
+  Option.iter env.genv.current_module ~f:(fun (_, mid) ->
+      make_depend_on_module env mid)
 
 let env_with_method_droot_member env m ~static =
   let child =
@@ -734,10 +722,7 @@ let get_fun env x =
   match res with
   | Some fd when Pos_or_decl.is_hhi fd.fe_pos -> res
   | _ ->
-    let dep = Typing_deps.Dep.Fun x in
-    Option.iter env.decl_env.Decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep);
-    add_fine_dep_if_enabled env dep;
+    add_dependency_edge env (Typing_deps.Dep.Fun x);
     res
 
 let get_enum_constraint env x =
@@ -766,22 +751,16 @@ let is_enum_class env x =
 
 let get_typeconst env class_ mid =
   if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
-    let dep = Dep.Const (Cls.name class_, mid) in
     make_depend_on_class env (Cls.name class_);
-    Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep);
-    add_fine_dep_if_enabled env dep
+    add_dependency_edge env (Dep.Const (Cls.name class_, mid))
   end;
   Cls.get_typeconst class_ mid
 
 (* Used to access class constants. *)
 let get_const env class_ mid =
   if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
-    let dep = Dep.Const (Cls.name class_, mid) in
     make_depend_on_class env (Cls.name class_);
-    Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep);
-    add_fine_dep_if_enabled env dep
+    add_dependency_edge env (Dep.Const (Cls.name class_, mid))
   end;
   Cls.get_const class_ mid
 
@@ -803,10 +782,7 @@ let get_gconst env cst_name =
   match res with
   | Some cst when Pos_or_decl.is_hhi cst.cd_pos -> res
   | _ ->
-    let dep = Dep.GConst cst_name in
-    Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep);
-    add_fine_dep_if_enabled env dep;
+    add_dependency_edge env (Dep.GConst cst_name);
     res
 
 let add_member_dep ~is_method ~is_static env (class_ : Cls.t) mid class_elt_opt
@@ -819,9 +795,7 @@ let add_member_dep ~is_method ~is_static env (class_ : Cls.t) mid class_elt_opt
       | (false, true) -> Dep.SProp (cid, mid)
       | (false, false) -> Dep.Prop (cid, mid)
     in
-    Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep);
-    add_fine_dep_if_enabled env dep
+    add_dependency_edge env dep
   in
   if not (Pos_or_decl.is_hhi (Cls.pos class_)) then (
     make_depend_on_class env (Cls.name class_);

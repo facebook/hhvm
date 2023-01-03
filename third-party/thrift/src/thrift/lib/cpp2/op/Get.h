@@ -193,7 +193,7 @@ void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
 
 template <size_t... I, typename F>
 ord_result_t<F> find_by_ordinal_impl(F&& f, std::index_sequence<I...>) {
-  ord_result_t<F> result;
+  auto result = ord_result_t<F>();
   // TODO(afuller): Use a short circuting c++17 folding expression.
   for_each_ordinal_impl(
       [&](auto id) {

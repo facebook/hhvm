@@ -325,7 +325,6 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             Expr_::Id(id) if id.1 == math::INF => Ok(TypedValue::float(std::f64::INFINITY)),
             Expr_::Id(_) => Err(Error::UserDefinedConstant),
 
-            Expr_::Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, &x.2),
             Expr_::Collection(x) if x.0.name().eq("keyset") => {
                 keyset_expr_to_typed_value(emitter, x)
             }

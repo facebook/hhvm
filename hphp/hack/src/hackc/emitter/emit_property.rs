@@ -233,7 +233,10 @@ fn expr_requires_deep_init(ast::Expr(_, _, expr): &ast::Expr, force_class_init: 
         | Expr_::Int(_)
         | Expr_::Float(_)
         | Expr_::String(_) => false,
-        Expr_::Collection(e) if (e.0).1 == "keyset" || (e.0).1 == "dict" || (e.0).1 == "vec" => {
+        Expr_::ValCollection(e) if e.0.1 == ast::VcKind::Vec => {
+            (e.2).iter().any(expr_requires_deep_init_)
+        }
+        Expr_::Collection(e) if (e.0).1 == "keyset" || (e.0).1 == "dict" => {
             (e.2).iter().any(af_expr_requires_deep_init)
         }
         Expr_::Varray(e) => (e.1).iter().any(expr_requires_deep_init_),

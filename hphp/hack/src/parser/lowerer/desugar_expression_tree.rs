@@ -437,11 +437,10 @@ fn vec_literal(items: Vec<Expr>) -> Expr {
 }
 
 fn vec_literal_with_pos(pos: &Pos, items: Vec<Expr>) -> Expr {
-    let fields: Vec<_> = items.into_iter().map(ast::Afield::AFvalue).collect();
     Expr::new(
         (),
         pos.clone(),
-        Expr_::Collection(Box::new((make_id(pos.clone(), "vec"), None, fields))),
+        Expr_::ValCollection(Box::new(((pos.clone(), aast::VcKind::Vec), None, items))),
     )
 }
 

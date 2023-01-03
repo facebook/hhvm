@@ -1089,7 +1089,7 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
         "Set" => CollectionType::Set,
         "ImmSet" => CollectionType::ImmSet,
         "Pair" => CollectionType::Pair,
-        "vec" | "dict" | "keyset" => {
+        "dict" | "keyset" => {
             let instr = emit_collection(e, env, expr, fields, None)?;
             return Ok(emit_pos_then(pos, instr));
         }
@@ -1450,9 +1450,6 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     use ast::Expr_;
     match &expr.2 {
         Expr_::ValCollection(v) if v.0.1 == ast::VcKind::Vec => {
-            emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
-        }
-        Expr_::Collection(v) if (v.0).1 == "vec" => {
             emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
         }
         Expr_::Tuple(_) => {
@@ -3329,6 +3326,10 @@ fn emit_val_collection<'a, 'arena, 'decl>(
     let (kind, _, es) = e;
     let fields = mk_afvalues(es);
     let collection_typ = match kind.1 {
+        aast_defs::VcKind::Vec => {
+            let instr = emit_collection(emitter, env, expression, &fields, None)?;
+            return Ok(emit_pos_then(&kind.0, instr));
+        }
         aast_defs::VcKind::Vector => CollectionType::Vector,
         aast_defs::VcKind::ImmVector => CollectionType::ImmVector,
         aast_defs::VcKind::Set => CollectionType::Set,
@@ -5979,6 +5980,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         | Expr_::Varray(_)
         | Expr_::Darray(_)
         | Expr_::Collection(_)
+        | Expr_::ValCollection(_)
         | Expr_::Clone(_)
         | Expr_::Unop(_)
         | Expr_::As(_)

@@ -172,7 +172,7 @@ cdef __StructSpec get_reflection__TypeName():
         name="TypeName",
         kind=__StructType.UNION,
         annotations={
-        },
+            """rust.ord""": """1""",        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(

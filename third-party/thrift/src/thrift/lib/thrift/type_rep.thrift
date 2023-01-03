@@ -56,4 +56,4 @@ struct TypeStruct {
   1: standard.TypeName name;
   /** The type params, if appropriate. */
   2: list<TypeStruct> params;
-} (thrift.uri = "facebook.com/thrift/type/Type")
+} (thrift.uri = "facebook.com/thrift/type/Type", rust.ord)

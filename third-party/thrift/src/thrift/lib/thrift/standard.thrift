@@ -194,7 +194,7 @@ union TypeName {
   15: Void setType;
   /** `map<K, V>` definition */
   16: Void mapType;
-}
+} (rust.ord)
 
 /** The standard Thrift protocols. */
 enum StandardProtocol {

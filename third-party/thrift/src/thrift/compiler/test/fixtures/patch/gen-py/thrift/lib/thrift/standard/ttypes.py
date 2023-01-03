@@ -1382,6 +1382,7 @@ TypeName.thrift_spec = (
 )
 
 TypeName.thrift_struct_annotations = {
+  "rust.ord": "1",
 }
 TypeName.thrift_field_annotations = {
 }

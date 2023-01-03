@@ -59,7 +59,7 @@ struct AnyStruct {
 
   /** The encoded data. */
   3: standard.ByteBuffer data;
-} (thrift.uri = "facebook.com/thrift/type/Any")
+} (thrift.uri = "facebook.com/thrift/type/Any", rust.ord)
 
 /**
  * Like Any, except all fields are mutable and can be empty.

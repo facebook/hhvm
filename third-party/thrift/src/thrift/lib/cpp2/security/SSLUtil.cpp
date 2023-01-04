@@ -16,6 +16,7 @@
 
 #include <thrift/lib/cpp2/security/SSLUtil.h>
 
+#include <folly/experimental/io/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/ssl/BasicTransportCertificate.h>
 
 namespace apache {
@@ -39,25 +40,41 @@ class StopTLSSocket : public folly::AsyncSocket {
 };
 } // namespace
 
-folly::AsyncSocket::UniquePtr moveToPlaintext(
+folly::AsyncSocketTransport::UniquePtr moveToPlaintext(
     folly::AsyncTransportWrapper* transport) {
   // Grab certs from transport
   auto selfCert = folly::ssl::BasicTransportCertificate::create(
       transport->getSelfCertificate());
   auto peerCert = folly::ssl::BasicTransportCertificate::create(
       transport->getPeerCertificate());
-
   auto sock = transport->getUnderlyingTransport<folly::AsyncSocket>();
-  DCHECK(sock);
 
-  auto eb = sock->getEventBase();
-  auto fd = sock->detachNetworkSocket();
-  auto zcId = sock->getZeroCopyBufId();
+  folly::AsyncSocketTransport::UniquePtr plaintextTransport;
+#if __has_include(<liburing.h>)
+  if (!sock && transport->getUnderlyingTransport<folly::AsyncIoUringSocket>()) {
+    folly::AsyncTransport::UniquePtr newSocket{
+        folly::AsyncSocket::newSocket(transport->getEventBase())};
+    folly::AsyncIoUringSocket::UniquePtr io =
+        transport->tryExchangeUnderlyingTransport<folly::AsyncIoUringSocket>(
+            newSocket);
+    if (io) {
+      io->setReadCB(nullptr);
+      io->setApplicationProtocol(transport->getApplicationProtocol());
+      plaintextTransport = std::move(io);
+    }
+  }
+#endif
+  if (!plaintextTransport) {
+    DCHECK(sock);
+    auto eb = sock->getEventBase();
+    auto fd = sock->detachNetworkSocket();
+    auto zcId = sock->getZeroCopyBufId();
 
-  // create new socket make sure not to throw
-  auto stopTLSSocket = new StopTLSSocket(eb, fd, zcId);
-  stopTLSSocket->setApplicationProtocol(transport->getApplicationProtocol());
-  auto plaintextTransport = folly::AsyncSocket::UniquePtr(stopTLSSocket);
+    // create new socket make sure not to throw
+    auto stopTLSSocket = new StopTLSSocket(eb, fd, zcId);
+    stopTLSSocket->setApplicationProtocol(transport->getApplicationProtocol());
+    plaintextTransport = folly::AsyncSocketTransport::UniquePtr(stopTLSSocket);
+  }
 
   plaintextTransport->setSelfCertificate(std::move(selfCert));
   plaintextTransport->setPeerCertificate(std::move(peerCert));

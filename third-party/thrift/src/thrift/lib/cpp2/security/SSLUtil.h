@@ -25,7 +25,7 @@ namespace thrift {
  * underlying fd while trying to preserve as much information as possible. The
  * intended use case is to downgrade a secure transport to a plaintext one.
  */
-folly::AsyncSocket::UniquePtr moveToPlaintext(
+folly::AsyncSocketTransport::UniquePtr moveToPlaintext(
     folly::AsyncTransportWrapper* socket);
 } // namespace thrift
 } // namespace apache

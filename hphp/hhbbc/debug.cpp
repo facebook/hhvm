@@ -330,17 +330,17 @@ std::string format_bytes(size_t bytes) {
   return s;
 }
 
-std::string client_stats(const extern_worker::Client::Stats& stats) {
-  auto const usecs = [] (size_t t) {
-    auto s = prettyPrint(
-      double(t) / 1000000.0,
-      folly::PRETTY_TIME_HMS,
-      false
-    );
-    if (!s.empty() && s[s.size()-1] == ' ') s.resize(s.size()-1);
-    return s;
-  };
+std::string format_duration(std::chrono::microseconds usecs) {
+  auto s = prettyPrint(
+    double(usecs.count()) / 1000000.0,
+    folly::PRETTY_TIME_HMS,
+    false
+  );
+  if (!s.empty() && s[s.size()-1] == ' ') s.resize(s.size()-1);
+  return s;
+}
 
+std::string client_stats(const extern_worker::Client::Stats& stats) {
   auto const pct = [] (size_t a, size_t b) -> std::string {
     if (!b) return "--";
     return folly::sformat("{:.2f}%", double(a) / b * 100.0);
@@ -363,9 +363,11 @@ std::string client_stats(const extern_worker::Client::Stats& stats) {
     stats.execCacheHits.load(),
     pct(stats.execCacheHits.load(), execCalls),
     stats.execFallbacks.load(),
-    usecs(cpuUsecs),
+    format_duration(std::chrono::microseconds{cpuUsecs}),
     allocatedCores,
-    usecs(allocatedCores ? (cpuUsecs / allocatedCores) : 0),
+    format_duration(
+      std::chrono::microseconds{allocatedCores ? (cpuUsecs / allocatedCores) : 0}
+    ),
     format_bytes(stats.execMaxUsedMem.load()),
     format_bytes(stats.execReservedMem.load()),
     stats.blobs.load(),
@@ -375,9 +377,15 @@ std::string client_stats(const extern_worker::Client::Stats& stats) {
     stats.downloads.load(),
     format_bytes(stats.bytesDownloaded.load()),
     stats.throttles.load(),
-    usecs(execCalls ? (stats.execLatencyUsec.load() / execCalls) : 0),
-    usecs(storeCalls ? (stats.storeLatencyUsec.load() / storeCalls) : 0),
-    usecs(loadCalls ? (stats.loadLatencyUsec.load() / loadCalls) : 0)
+    format_duration(
+      std::chrono::microseconds{execCalls ? (stats.execLatencyUsec.load() / execCalls) : 0}
+    ),
+    format_duration(
+      std::chrono::microseconds{storeCalls ? (stats.storeLatencyUsec.load() / storeCalls) : 0}
+    ),
+    format_duration(
+      std::chrono::microseconds{loadCalls ? (stats.loadLatencyUsec.load() / loadCalls) : 0}
+    )
   );
 }
 
@@ -443,9 +451,9 @@ trace_time::~trace_time() {
 
   if (!Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) return;
   Trace::ftraceRelease(
-    "{}: {}: {}ms elapsed\n"
+    "{}: {}: {} elapsed\n"
     "  RSS: {}\n{}",
-    ts<clock>(end), what, elapsed.count(),
+    ts<clock>(end), what, format_duration(elapsed),
     format_bytes(afterRss),
     clientDiff ? client_stats(*clientDiff) : ""
   );

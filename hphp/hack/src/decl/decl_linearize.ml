@@ -455,75 +455,74 @@ and next_state
       ancestor_linearization env child_class_concrete ancestor
     in
     Sequence.Step.Skip (Ancestor { ancestor = name_and_lin; ancestors; synths })
-  | Ancestor { ancestor = (name, lin); ancestors; synths } ->
-    begin
-      match lin with
-      | [] -> Sequence.Step.Skip (Next_ancestor { ancestors; synths })
-      (* Lazy.Undefined occurs if we attempt to include a linearization within
-         itself. This will only happen when we have a class dependency cycle (and
-         only in some particular circumstances), so it will not arise in legal
-         programs. *)
-      | exception Lazy.Undefined ->
-        let next =
-          {
-            empty_mro_element with
-            mro_name = name;
-            mro_cyclic = Some (SSet.add env.class_stack name);
-          }
-        in
-        yield next (Next_ancestor { ancestors; synths })
-      | next :: rest ->
-        let skip_or_mark_trait_reuse was_emitted =
-          if was_emitted next then
-            None
+  | Ancestor { ancestor = (name, lin); ancestors; synths } -> begin
+    match lin with
+    | [] -> Sequence.Step.Skip (Next_ancestor { ancestors; synths })
+    (* Lazy.Undefined occurs if we attempt to include a linearization within
+       itself. This will only happen when we have a class dependency cycle (and
+       only in some particular circumstances), so it will not arise in legal
+       programs. *)
+    | exception Lazy.Undefined ->
+      let next =
+        {
+          empty_mro_element with
+          mro_name = name;
+          mro_cyclic = Some (SSet.add env.class_stack name);
+        }
+      in
+      yield next (Next_ancestor { ancestors; synths })
+    | next :: rest ->
+      let skip_or_mark_trait_reuse was_emitted =
+        if was_emitted next then
+          None
+        else
+          Some next
+      in
+      let (next, synths) =
+        match env.linearization_kind with
+        | Member_resolution ->
+          if is_set mro_via_req_extends next.mro_flags then
+            let synths =
+              match (next.mro_required_at, child_classish_kind) with
+              (* Always aggregate synthesized ancestors for traits and
+                 interfaces (necessary for typechecking) *)
+              | (_, Ast_defs.(Ctrait | Cinterface))
+              (* Otherwise, keep them only if they represent a requirement that
+                 we will need to validate later. *)
+              | (Some _, Ast_defs.(Cclass _ | Cenum | Cenum_class _)) ->
+                next :: synths
+              | (None, _) -> synths
+            in
+            (None, synths)
           else
-            Some next
-        in
-        let (next, synths) =
-          match env.linearization_kind with
-          | Member_resolution ->
-            if is_set mro_via_req_extends next.mro_flags then
-              let synths =
-                match (next.mro_required_at, child_classish_kind) with
-                (* Always aggregate synthesized ancestors for traits and
-                   interfaces (necessary for typechecking) *)
-                | (_, Ast_defs.(Ctrait | Cinterface))
-                (* Otherwise, keep them only if they represent a requirement that
-                   we will need to validate later. *)
-                | (Some _, Ast_defs.(Cclass _ | Cenum | Cenum_class _)) ->
-                  next :: synths
-                | (None, _) -> synths
-              in
-              (None, synths)
-            else
-              let next = skip_or_mark_trait_reuse was_emitted in
-              (next, synths)
-          | Ancestor_types ->
-            (* For ancestor types, we don't care about require-extends or
-               require-implements relationships, except for the fact that we want
-               StringishObject as an ancestor if we have some ancestor which requires
-               it. *)
-            let should_skip =
-              (is_set mro_via_req_extends next.mro_flags
-              || is_set mro_via_req_impl next.mro_flags)
-              && String.( <> ) next.mro_name SN.Classes.cStringish
-              && String.( <> ) next.mro_name SN.Classes.cStringishObject
-            in
-            let next =
-              if should_skip then
-                None
-              else
-                skip_or_mark_trait_reuse name_was_emitted
-            in
+            let next = skip_or_mark_trait_reuse was_emitted in
             (next, synths)
-        in
-        (match next with
-        | None ->
-          Sequence.Step.Skip
-            (Ancestor { ancestor = (name, rest); ancestors; synths })
-        | Some next ->
-          yield next (Ancestor { ancestor = (name, rest); ancestors; synths }))
-    end
+        | Ancestor_types ->
+          (* For ancestor types, we don't care about require-extends or
+             require-implements relationships, except for the fact that we want
+             StringishObject as an ancestor if we have some ancestor which requires
+             it. *)
+          let should_skip =
+            (is_set mro_via_req_extends next.mro_flags
+            || is_set mro_via_req_impl next.mro_flags)
+            && String.( <> ) next.mro_name SN.Classes.cStringish
+            && String.( <> ) next.mro_name SN.Classes.cStringishObject
+          in
+          let next =
+            if should_skip then
+              None
+            else
+              skip_or_mark_trait_reuse name_was_emitted
+          in
+          (next, synths)
+      in
+      (match next with
+      | None ->
+        Sequence.Step.Skip
+          (Ancestor { ancestor = (name, rest); ancestors; synths })
+      | Some next ->
+        yield next (Ancestor { ancestor = (name, rest); ancestors; synths }))
+  end
   | Next_ancestor { ancestors = []; synths } ->
     let synths = List.rev synths in
     Sequence.Step.Skip (Synthesized_elts { synths })

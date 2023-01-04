@@ -177,8 +177,8 @@ let sequence_visitor ~require_used used_vars =
       ~f:
         begin
           fun env1 env2 ->
-          check_unsequenced env1 env2;
-          merge env1 env2
+            check_unsequenced env1 env2;
+            merge env1 env2
         end
       ~init:tracking_env
   in

@@ -43,7 +43,7 @@ let rec keys_aux p top names_numbers acc =
       (number - 1)
       t
       (TSFlit_str (Pos_or_decl.of_raw_pos p, name)
-       :: (int_keys p top number [] @ acc))
+      :: (int_keys p top number [] @ acc))
 
 (*
  *  Any shape keys for our match type except 0. For re"Hel(\D)(?'o'\D)", this is

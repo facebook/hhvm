@@ -16,12 +16,11 @@ let mutate_type_hint tparam_mapping (hint : 'a A.type_hint) =
      hints. *)
   match hint with
   | (ann, Some (_, A.Happly ((pos, id), [])))
-  | (ann, Some (pos, A.Habstr (id, _))) ->
-    begin
-      match SMap.find_opt id tparam_mapping with
-      | Some hint_ -> (ann, Some (pos, hint_))
-      | None -> hint
-    end
+  | (ann, Some (pos, A.Habstr (id, _))) -> begin
+    match SMap.find_opt id tparam_mapping with
+    | Some hint_ -> (ann, Some (pos, hint_))
+    | None -> hint
+  end
   | hint -> hint
 
 let mutate_param tparam_mapping param =

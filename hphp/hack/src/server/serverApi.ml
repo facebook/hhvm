@@ -191,44 +191,41 @@ let make_remote_server_api
       Hh_logger.log "Loading naming table changes since baseline...";
       match naming_table with
       | None -> Error "Expected naming table base"
-      | Some naming_table ->
-        begin
-          match Naming_table.get_forward_naming_fallback_path naming_table with
-          | None ->
-            Error "Expected naming table base path to be set, but it was not"
-          | Some naming_table_base ->
-            (try
-               let t = Unix.gettimeofday () in
-               let changed_files =
-                 Naming_table.get_files_changed_since_baseline naming_table_diff
-               in
-               let t =
-                 Hh_logger.log_duration
-                   "Got files changed since naming table baseline"
-                   t
-               in
-               let t =
-                 clean_changed_files_state ctx naming_table changed_files ~t
-               in
-               Hh_logger.log "Prefetching naming dirty files...";
-               Vfs.prefetch changed_files;
-               let t =
-                 Hh_logger.log_duration "Prefetched naming dirty files" t
-               in
-               let (naming_table : Naming_table.t) =
-                 Naming_table.load_from_sqlite_with_changes_since_baseline
-                   ctx
-                   naming_table_diff
-                   naming_table_base
-               in
-               HackEventLogger.remote_worker_load_naming_end t;
-               let _t : float =
-                 Hh_logger.log_duration "Loaded naming table from SQLite" t
-               in
-               Ok (Some naming_table)
-             with
-            | e -> Error (Exn.to_string e))
-        end
+      | Some naming_table -> begin
+        match Naming_table.get_forward_naming_fallback_path naming_table with
+        | None ->
+          Error "Expected naming table base path to be set, but it was not"
+        | Some naming_table_base ->
+          (try
+             let t = Unix.gettimeofday () in
+             let changed_files =
+               Naming_table.get_files_changed_since_baseline naming_table_diff
+             in
+             let t =
+               Hh_logger.log_duration
+                 "Got files changed since naming table baseline"
+                 t
+             in
+             let t =
+               clean_changed_files_state ctx naming_table changed_files ~t
+             in
+             Hh_logger.log "Prefetching naming dirty files...";
+             Vfs.prefetch changed_files;
+             let t = Hh_logger.log_duration "Prefetched naming dirty files" t in
+             let (naming_table : Naming_table.t) =
+               Naming_table.load_from_sqlite_with_changes_since_baseline
+                 ctx
+                 naming_table_diff
+                 naming_table_base
+             in
+             HackEventLogger.remote_worker_load_naming_end t;
+             let _t : float =
+               Hh_logger.log_duration "Loaded naming table from SQLite" t
+             in
+             Ok (Some naming_table)
+           with
+          | e -> Error (Exn.to_string e))
+      end
 
     let build_naming_table () =
       Hh_logger.log "Building naming table";
@@ -311,27 +308,26 @@ let make_remote_server_api
         let err = Future.error_to_string err in
         Hh_logger.error "Downloading dep table failed: %s" err;
         Error err
-      | Ok download_result ->
-        begin
-          match download_result with
-          | Error (err, _telemetry) ->
-            Error (Saved_state_loader.debug_details_of_error err)
-          | Ok (main_artifacts, _telemetry) ->
-            let (_ : float) =
-              Hh_logger.log_duration
-                "Finished downloading dep table."
-                (Future.start_t naming_table_future)
-            in
-            let naming_table_path =
-              main_artifacts
-                .Saved_state_loader.Naming_and_dep_table_info
-                 .naming_sqlite_table_path
-            in
-            Hh_logger.log
-              "Downloaded naming table to %s"
-              (Path.to_string naming_table_path);
-            load_naming_and_dep_table main_artifacts
-        end
+      | Ok download_result -> begin
+        match download_result with
+        | Error (err, _telemetry) ->
+          Error (Saved_state_loader.debug_details_of_error err)
+        | Ok (main_artifacts, _telemetry) ->
+          let (_ : float) =
+            Hh_logger.log_duration
+              "Finished downloading dep table."
+              (Future.start_t naming_table_future)
+          in
+          let naming_table_path =
+            main_artifacts
+              .Saved_state_loader.Naming_and_dep_table_info
+               .naming_sqlite_table_path
+          in
+          Hh_logger.log
+            "Downloaded naming table to %s"
+            (Path.to_string naming_table_path);
+          load_naming_and_dep_table main_artifacts
+      end
 
     let remove_decls naming_table fast_parsed =
       Relative_path.Map.iter fast_parsed ~f:(fun fn _ ->
@@ -538,26 +534,25 @@ let make_remote_server_api
         let err = Future.error_to_string err in
         Hh_logger.error "Downloading shallow_decls saved state failed: %s" err;
         Error err
-      | Ok download_result ->
-        begin
-          match download_result with
-          | Error (err, _telemetry) ->
-            Error (Saved_state_loader.debug_details_of_error err)
-          | Ok (main_artifacts, _telemetry) ->
-            let (_ : float) =
-              Hh_logger.log_duration
-                "Finished downloading shallow_decls saved state."
-                (Future.start_t shallow_decls_future)
-            in
-            let shallow_decls_path =
-              main_artifacts
-                .Saved_state_loader.Shallow_decls_info.shallow_decls_path
-            in
-            Hh_logger.log
-              "Downloaded shallow_decls to %s"
-              (Path.to_string shallow_decls_path);
-            load_shallow_decls_saved_state main_artifacts
-        end
+      | Ok download_result -> begin
+        match download_result with
+        | Error (err, _telemetry) ->
+          Error (Saved_state_loader.debug_details_of_error err)
+        | Ok (main_artifacts, _telemetry) ->
+          let (_ : float) =
+            Hh_logger.log_duration
+              "Finished downloading shallow_decls saved state."
+              (Future.start_t shallow_decls_future)
+          in
+          let shallow_decls_path =
+            main_artifacts
+              .Saved_state_loader.Shallow_decls_info.shallow_decls_path
+          in
+          Hh_logger.log
+            "Downloaded shallow_decls to %s"
+            (Path.to_string shallow_decls_path);
+          load_shallow_decls_saved_state main_artifacts
+      end
 
     let unmarshal_decls_from_download_result
         ~(ctx : Provider_context.t)

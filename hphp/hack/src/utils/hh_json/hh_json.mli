@@ -23,7 +23,7 @@ exception Syntax_error of string
 
 (* A function conforming to `show`'s pretty printing signature;
     calls `json_to_multiline` internally
- *)
+*)
 val pp_json : Format.formatter -> json -> unit
 
 (** Calling this with [~pretty:true] is the same as calling [json_to_multiline] *)

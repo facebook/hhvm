@@ -114,8 +114,7 @@ and instantiate_ subst x =
       List.fold_left
         ~f:
           begin
-            fun subst t ->
-            SMap.remove (snd t.tp_name) subst
+            (fun subst t -> SMap.remove (snd t.tp_name) subst)
           end
         ~init:subst
         tparams

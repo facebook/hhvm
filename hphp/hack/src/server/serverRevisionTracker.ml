@@ -298,13 +298,13 @@ let check_blocking () =
       ~f:
         begin
           fun hg_rev ->
-          let current_t = Unix.gettimeofday () in
-          let elapsed_t = current_t -. start_t in
-          let timeout = max 0 (int_of_float (30.0 -. elapsed_t)) in
-          let future =
-            Caml.Hashtbl.find tracker_state.mergebase_queries hg_rev
-          in
-          check_query future ~timeout ~current_t
+            let current_t = Unix.gettimeofday () in
+            let elapsed_t = current_t -. start_t in
+            let timeout = max 0 (int_of_float (30.0 -. elapsed_t)) in
+            let future =
+              Caml.Hashtbl.find tracker_state.mergebase_queries hg_rev
+            in
+            check_query future ~timeout ~current_t
         end
       tracker_state.pending_queries;
     Queue.clear tracker_state.pending_queries;

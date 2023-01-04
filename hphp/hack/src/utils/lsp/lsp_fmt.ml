@@ -18,18 +18,17 @@ open Hh_json_helpers
 
 let parse_id (json : json) : lsp_id =
   match json with
-  | JSON_Number s ->
-    begin
-      try NumberId (int_of_string s) with
-      | Failure _ ->
-        raise
-          (Error.LspException
-             {
-               Error.code = Error.ParseError;
-               message = "float ids not allowed: " ^ s;
-               data = None;
-             })
-    end
+  | JSON_Number s -> begin
+    try NumberId (int_of_string s) with
+    | Failure _ ->
+      raise
+        (Error.LspException
+           {
+             Error.code = Error.ParseError;
+             message = "float ids not allowed: " ^ s;
+             data = None;
+           })
+  end
   | JSON_String s -> StringId s
   | _ ->
     raise
@@ -463,18 +462,17 @@ let parse_diagnostic (j : json option) : PublishDiagnostics.diagnostic =
     let parse_code = function
       | None -> NoCode
       | Some (JSON_String s) -> StringCode s
-      | Some (JSON_Number s) ->
-        begin
-          try IntCode (int_of_string s) with
-          | Failure _ ->
-            raise
-              (Error.LspException
-                 {
-                   Error.code = Error.ParseError;
-                   message = "Diagnostic code expected to be an int: " ^ s;
-                   data = None;
-                 })
-        end
+      | Some (JSON_Number s) -> begin
+        try IntCode (int_of_string s) with
+        | Failure _ ->
+          raise
+            (Error.LspException
+               {
+                 Error.code = Error.ParseError;
+                 message = "Diagnostic code expected to be an int: " ^ s;
+                 data = None;
+               })
+      end
       | _ ->
         raise
           (Error.LspException
@@ -574,7 +572,8 @@ let print_telemetryNotification
   (* LSP allows "any" for the format of telemetry notifications. It's up to us! *)
   JSON_Object
     (("type", int_ (MessageType.to_enum r.LogMessage.type_))
-     :: ("message", JSON_String r.LogMessage.message) :: extras)
+    :: ("message", JSON_String r.LogMessage.message)
+    :: extras)
 
 (************************************************************************)
 
@@ -1256,7 +1255,8 @@ let print_error (e : Error.t) : json =
   in
   let entries =
     ("code", int_ (Error.code_to_enum e.Error.code))
-    :: ("message", string_ e.Error.message) :: data
+    :: ("message", string_ e.Error.message)
+    :: data
   in
   JSON_Object entries
 
@@ -1336,12 +1336,11 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
     Some p.DidSave.textDocument.uri
   | NotificationMessage (DidChangeNotification p) ->
     Some p.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
-  | NotificationMessage (DidChangeWatchedFilesNotification p) ->
-    begin
-      match p.DidChangeWatchedFiles.changes with
-      | [] -> None
-      | { DidChangeWatchedFiles.uri; _ } :: _ -> Some uri
-    end
+  | NotificationMessage (DidChangeWatchedFilesNotification p) -> begin
+    match p.DidChangeWatchedFiles.changes with
+    | [] -> None
+    | { DidChangeWatchedFiles.uri; _ } :: _ -> Some uri
+  end
   | RequestMessage (_, HackTestStartServerRequestFB)
   | RequestMessage (_, HackTestStopServerRequestFB)
   | RequestMessage (_, HackTestShutdownServerlessRequestFB)

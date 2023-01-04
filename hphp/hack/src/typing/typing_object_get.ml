@@ -579,12 +579,11 @@ and obj_get_concrete_class
     let self_id = Option.value (Env.get_self_id env) ~default:"" in
     let ancestor_tyargs =
       match Cls.get_ancestor class_info self_id with
-      | Some self_class_type ->
-        begin
-          match get_node self_class_type with
-          | Tapply (_, tyargs) -> Some tyargs
-          | _ -> None
-        end
+      | Some self_class_type -> begin
+        match get_node self_class_type with
+        | Tapply (_, tyargs) -> Some tyargs
+        | _ -> None
+      end
       | None ->
         let all_reqs = Cls.all_ancestor_reqs class_info in
         let filtered =
@@ -599,33 +598,29 @@ and obj_get_concrete_class
 
     let (member_info, shadowed) =
       match ancestor_tyargs with
-      | Some tyargs ->
+      | Some tyargs -> begin
         (* We look up the current context to see if there is a field/method with
          * private visibility. If there is one, that one takes precedence *)
-        begin
-          match Env.get_self_class env with
-          | None -> (old_member_info, false)
-          | Some self_class ->
-            begin
-              match Env.get_member args.is_method env self_class id_str with
-              | Some ({ ce_visibility = Vprivate _; _ } as ce) ->
-                let ce =
-                  Decl_instantiate.(
-                    instantiate_ce
-                      (make_subst (Cls.tparams self_class) tyargs)
-                      ce)
-                in
-                (* if a trait T has a require class C constraint, and both T and C
-                 * define a private member with the same name, then the two members
-                 * are aliased, not shadowed.  In this case, self_class is the trait
-                 * and the ancestor is the required class.  We can set the `shadowed`
-                 * bit by checking if self_class is a class or trait, there is
-                 * no need to additionally check if the trait has a require class
-                 * attribute. *)
-                (Some ce, Ast_defs.is_c_class (Cls.kind self_class))
-              | _ -> (old_member_info, false)
-            end
+        match Env.get_self_class env with
+        | None -> (old_member_info, false)
+        | Some self_class -> begin
+          match Env.get_member args.is_method env self_class id_str with
+          | Some ({ ce_visibility = Vprivate _; _ } as ce) ->
+            let ce =
+              Decl_instantiate.(
+                instantiate_ce (make_subst (Cls.tparams self_class) tyargs) ce)
+            in
+            (* if a trait T has a require class C constraint, and both T and C
+             * define a private member with the same name, then the two members
+             * are aliased, not shadowed.  In this case, self_class is the trait
+             * and the ancestor is the required class.  We can set the `shadowed`
+             * bit by checking if self_class is a class or trait, there is
+             * no need to additionally check if the trait has a require class
+             * attribute. *)
+            (Some ce, Ast_defs.is_c_class (Cls.kind self_class))
+          | _ -> (old_member_info, false)
         end
+      end
       | None -> (old_member_info, false)
     in
     begin

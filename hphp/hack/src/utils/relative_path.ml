@@ -197,7 +197,7 @@ let create_detect_prefix s =
   create file_prefix s
 
 (* Strips the root and relativizes the file if possible, otherwise returns
-  original string *)
+   original string *)
 let strip_root_if_possible s =
   let prefix_s = path_of_prefix Root in
   let prefix_len = String.length prefix_s in

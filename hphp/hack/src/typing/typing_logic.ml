@@ -69,7 +69,7 @@ let valid = Conj []
 let invalid ~fail = Disj (fail, [])
 
 (* Is this proposition always true? (e.g. Conj [] but also Disj [Conj []; Disj (_, [])]
-* if not simplified
+   * if not simplified
 *)
 let rec is_valid p =
   match p with
@@ -78,7 +78,7 @@ let rec is_valid p =
   | IsSubtype _ -> false
 
 (* Is this proposition always false? e.g. Unsat _ but also Conj [Conj []; Disj (_, [])]
-* if not simplified
+   * if not simplified
 *)
 and is_unsat p =
   match p with

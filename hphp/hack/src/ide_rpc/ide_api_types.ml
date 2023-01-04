@@ -40,8 +40,9 @@ type text_edit = {
 
 type coverage_level =
   | Unchecked (* Completely unchecked code, i.e. Tanys *)
-  | Partial (* Partially checked code, e.g. array, Awaitable<_> with no
-                 concrete type parameters *)
+  | Partial
+    (* Partially checked code, e.g. array, Awaitable<_> with no
+         concrete type parameters *)
   | Checked
 [@@deriving ord]
 

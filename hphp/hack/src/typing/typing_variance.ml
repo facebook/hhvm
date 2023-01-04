@@ -37,10 +37,11 @@ type position_descr =
   | Rtype_parameter (* The declaration site of a type-parameter *)
   | Rfun_parameter
   | Rfun_return
-  | Rtype_argument of string (* The argument of a parametric class or
-                              * typedef:
-                              * A<T1, ..>, T1 is (Rtype_argument "A")
-                              *)
+  | Rtype_argument of string
+    (* The argument of a parametric class or
+     * typedef:
+     * A<T1, ..>, T1 is (Rtype_argument "A")
+     *)
   | Rconstraint_as
   | Rconstraint_eq
   | Rconstraint_super
@@ -119,8 +120,7 @@ let reason_stack_to_string variance reason_stack =
        reason_stack
        ~f:
          begin
-           fun (_, _, pvariance) acc ->
-           variance_to_sign pvariance ^ acc
+           (fun (_, _, pvariance) acc -> variance_to_sign pvariance ^ acc)
          end
        ~init:"")
 
@@ -164,9 +164,8 @@ let detailed_message variance pos stack =
   | [((p, _, _) as r)] -> [(p, reason_to_string ~sign:false r)]
   | _ ->
     (pos, reason_stack_to_string variance stack)
-    ::
-    List.map stack ~f:(fun ((p, _, _) as r) ->
-        (p, reason_to_string ~sign:true r))
+    :: List.map stack ~f:(fun ((p, _, _) as r) ->
+           (p, reason_to_string ~sign:true r))
 
 (*****************************************************************************)
 (* Converts an annotation (+/-) to a type. *)
@@ -677,10 +676,12 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
     iter2_shortest
       begin
         fun tparam_variance h ->
-        let pos = Ast_defs.get_pos h in
-        let reason = Rtype_argument (Utils.strip_ns @@ Ast_defs.get_id name) in
-        let variance = compose (pos, reason) variance tparam_variance in
-        hint env variance h
+          let pos = Ast_defs.get_pos h in
+          let reason =
+            Rtype_argument (Utils.strip_ns @@ Ast_defs.get_id name)
+          in
+          let variance = compose (pos, reason) variance tparam_variance in
+          hint env variance h
       end
       variancel
       hl

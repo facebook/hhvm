@@ -623,20 +623,19 @@ module Full = struct
     | Tdynamic -> (fuel, text "dynamic")
     | Tnonnull -> (fuel, text "nonnull")
     | Tvec_or_dict (x, y) -> list ~fuel "vec_or_dict<" k [x; y] ">"
-    | Toption ty ->
-      begin
-        match deref ty with
-        | (_, Tnonnull) -> (fuel, text "mixed")
-        | (r, Tunion tyl)
-          when TypecheckerOptions.like_type_hints env.genv.tcopt
-               && List.exists ~f:is_dynamic tyl ->
-          (* Unions with null become Toption, which leads to the awkward ?~...
-           * The Tunion case can better handle this *)
-          k ~fuel (mk (r, Tunion (mk (r, Tprim Nast.Tnull) :: tyl)))
-        | _ ->
-          let (fuel, d) = k ~fuel ty in
-          (fuel, Concat [text "?"; d])
-      end
+    | Toption ty -> begin
+      match deref ty with
+      | (_, Tnonnull) -> (fuel, text "mixed")
+      | (r, Tunion tyl)
+        when TypecheckerOptions.like_type_hints env.genv.tcopt
+             && List.exists ~f:is_dynamic tyl ->
+        (* Unions with null become Toption, which leads to the awkward ?~...
+         * The Tunion case can better handle this *)
+        k ~fuel (mk (r, Tunion (mk (r, Tprim Nast.Tnull) :: tyl)))
+      | _ ->
+        let (fuel, d) = k ~fuel ty in
+        (fuel, Concat [text "?"; d])
+    end
     | Tprim x -> (fuel, tprim x)
     | Tneg (Neg_prim x) -> (fuel, Concat [text "not "; tprim x])
     | Tneg (Neg_class c) -> (fuel, Concat [text "not "; to_doc (snd c)])
@@ -691,22 +690,20 @@ module Full = struct
         | _ -> class_doc
       in
       (fuel, class_doc)
-    | Tgeneric (s, []) when SN.Coeffects.is_generated_generic s ->
-      begin
-        match String.get s 2 with
-        | '[' ->
-          (* has the form T/[...] *)
-          (fuel, to_doc (String.sub s ~pos:3 ~len:(String.length s - 4)))
-        | '$' ->
-          (* Generic replacement type for parameter used for dependent context *)
-          begin
-            match get_constraints_on_tparam env s with
-            | [(_, Ast_defs.Constraint_as, ty)] ->
-              locl_ty ~fuel to_doc st (Loclenv env) ty
-            | _ -> (* this case shouldn't occur *) (fuel, to_doc s)
-          end
-        | _ -> (fuel, to_doc s)
+    | Tgeneric (s, []) when SN.Coeffects.is_generated_generic s -> begin
+      match String.get s 2 with
+      | '[' ->
+        (* has the form T/[...] *)
+        (fuel, to_doc (String.sub s ~pos:3 ~len:(String.length s - 4)))
+      | '$' -> begin
+        (* Generic replacement type for parameter used for dependent context *)
+        match get_constraints_on_tparam env s with
+        | [(_, Ast_defs.Constraint_as, ty)] ->
+          locl_ty ~fuel to_doc st (Loclenv env) ty
+        | _ -> (* this case shouldn't occur *) (fuel, to_doc s)
       end
+      | _ -> (fuel, to_doc s)
+    end
     | Tunapplied_alias s
     | Tnewtype (s, [], _)
     | Tgeneric (s, []) ->
@@ -902,12 +899,11 @@ module Full = struct
         let (fuel, capabilities) =
           match get_node t with
           | Tintersection [] -> (fuel, Nothing)
-          | Toption t ->
-            begin
-              match deref t with
-              | (_, Tnonnull) -> (fuel, Nothing)
-              | _ -> locl_ty ~fuel to_doc st penv t
-            end
+          | Toption t -> begin
+            match deref t with
+            | (_, Tnonnull) -> (fuel, Nothing)
+            | _ -> locl_ty ~fuel to_doc st penv t
+          end
           | _ -> locl_ty ~fuel to_doc st penv t
         in
         (fuel, Concat [text "["; capabilities; text "]:"])
@@ -1045,14 +1041,13 @@ module Full = struct
         match (definition_opt, occurrence.type_) with
         | (None, _) -> Nothing
         | (_, XhpLiteralAttr _) -> Nothing
-        | (Some def, _) ->
-          begin
-            match def.modifiers with
-            | [] -> Nothing
-            (* It looks weird if we line break after a single modifier. *)
-            | [m] -> print_mod m
-            | ms -> Concat (List.map ms ~f:print_mod) ^^ SplitWith Cost.Base
-          end)
+        | (Some def, _) -> begin
+          match def.modifiers with
+          | [] -> Nothing
+          (* It looks weird if we line break after a single modifier. *)
+          | [m] -> print_mod m
+          | ms -> Concat (List.map ms ~f:print_mod) ^^ SplitWith Cost.Base
+        end)
     in
     let (fuel, body_doc) =
       match (occurrence, get_node x) with
@@ -1362,12 +1357,11 @@ module Json = struct
       @@ kind p "path"
       @ [("type", obj @@ kind (get_pos ty) "expr")]
       @ as_type ty
-    | (p, Toption ty) ->
-      begin
-        match get_node ty with
-        | Tnonnull -> obj @@ kind p "mixed"
-        | _ -> obj @@ kind p "nullable" @ args [ty]
-      end
+    | (p, Toption ty) -> begin
+      match get_node ty with
+      | Tnonnull -> obj @@ kind p "mixed"
+      | _ -> obj @@ kind p "nullable" @ args [ty]
+    end
     | (p, Tprim tp) ->
       obj @@ kind p "primitive" @ name (Aast_defs.string_of_tprim tp)
     | (p, Tneg (Neg_prim tp)) ->
@@ -2374,12 +2368,11 @@ let coeffects env ty =
     | Tnonnull
     | Tdynamic ->
       raise (UndesugarableCoeffect ty)
-    | Toption ty' ->
-      begin
-        match deref ty' with
-        | (_, Tnonnull) -> (fuel, []) (* another special case of `mixed` *)
-        | _ -> raise (UndesugarableCoeffect ty)
-      end
+    | Toption ty' -> begin
+      match deref ty' with
+      | (_, Tnonnull) -> (fuel, []) (* another special case of `mixed` *)
+      | _ -> raise (UndesugarableCoeffect ty)
+    end
     | _ ->
       let (fuel, str) = to_string ~fuel ty in
       (fuel, [str])

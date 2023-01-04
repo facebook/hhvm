@@ -271,10 +271,9 @@ end
 
 (* Levenshtein distance algorithm.
 
-Based on the public domain implementation at
-https://bitbucket.org/camlspotter/ocaml_levenshtein/src/default/
-
- *)
+   Based on the public domain implementation at
+   https://bitbucket.org/camlspotter/ocaml_levenshtein/src/default/
+*)
 
 let levenshtein_distance ?(upper_bound = max_int) (xs : string) (ys : string) =
   let xs_len = String.length xs in

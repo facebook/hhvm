@@ -313,8 +313,7 @@ let decl_and_run_mode
       builtins
       ~f:
         begin
-          fun k src acc ->
-          Relative_path.Map.add acc ~key:k ~data:src
+          (fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src)
         end
       ~init:files_contents
   in

@@ -3534,7 +3534,7 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
                Full_fidelity_operator.precedence penv operator_t
              in
              if op_precedence = precedence then
-               flatten_expression left @ operator :: flatten_expression right
+               flatten_expression left @ (operator :: flatten_expression right)
              else
                [expr]
            | _ -> [expr]
@@ -3672,11 +3672,10 @@ and ignore_re = Str.regexp_string "hackfmt-ignore"
 and is_ignore_comment trivia =
   match Trivia.kind trivia with
   (* We don't format the node after a comment containing "hackfmt-ignore". *)
-  | TriviaKind.(DelimitedComment | SingleLineComment) ->
-    begin
-      try Str.search_forward ignore_re (Trivia.text trivia) 0 >= 0 with
-      | Caml.Not_found -> false
-    end
+  | TriviaKind.(DelimitedComment | SingleLineComment) -> begin
+    try Str.search_forward ignore_re (Trivia.text trivia) 0 >= 0 with
+    | Caml.Not_found -> false
+  end
   | _ -> false
 
 and leading_ignore_comment trivia_list =

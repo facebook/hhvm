@@ -5,47 +5,47 @@
 open Hh_prelude
 
 (**************************************************************
-HOW THIS ALL WORKS.
-GOAL 1: is to always be ready to read on stdin so we can timestamp
-accurately the moment that a request was delivered to us. If our
-stdin pipe gets so full that a client can't write requests to us,
-or if we're busy doing something else before we read on stdin,
-both things would result in incorrect timestamps.
-GOAL 2: when we process a message, then all subsequent messages that
-have already been presented to our stdin should already be in our own
-queue data-structure (rather than an OS pipe buffer) in case any
-of the messages involved cancellation.
-GOAL 3: we're in ocaml, so our threading possibilties are limited,
-and unfortunately our caller has cpu-blocking chunks of code.
+  HOW THIS ALL WORKS.
+  GOAL 1: is to always be ready to read on stdin so we can timestamp
+  accurately the moment that a request was delivered to us. If our
+  stdin pipe gets so full that a client can't write requests to us,
+  or if we're busy doing something else before we read on stdin,
+  both things would result in incorrect timestamps.
+  GOAL 2: when we process a message, then all subsequent messages that
+  have already been presented to our stdin should already be in our own
+  queue data-structure (rather than an OS pipe buffer) in case any
+  of the messages involved cancellation.
+  GOAL 3: we're in ocaml, so our threading possibilties are limited,
+  and unfortunately our caller has cpu-blocking chunks of code.
 
-We kick off single background process called "daemon", running a loop
-in [internal_run_daemon]. It will take in messages from stdin,
-queue them up in its queue `let messages_to_send = Queue.create ()`,
-and write them over a pipe to the main (calling) process.
-See type [daemon_next_action] how it choses what to do.
+  We kick off single background process called "daemon", running a loop
+  in [internal_run_daemon]. It will take in messages from stdin,
+  queue them up in its queue `let messages_to_send = Queue.create ()`,
+  and write them over a pipe to the main (calling) process.
+  See type [daemon_next_action] how it choses what to do.
 
-Callers of this library will invoke an Lwt API [get_message].
-This maintains its own queue [queue.messages] of items that it has
-so far received over the pipe from the daemon. When a caller invokes
-[get_message] then we block if necessary until at least one message
-has come over the pipe into the queue, but we also slurp up any further
-messages that have come over the pipe as well. This way, if the client
-calls [find_already_queued_message] then they have a better chance of
-success.
+  Callers of this library will invoke an Lwt API [get_message].
+  This maintains its own queue [queue.messages] of items that it has
+  so far received over the pipe from the daemon. When a caller invokes
+  [get_message] then we block if necessary until at least one message
+  has come over the pipe into the queue, but we also slurp up any further
+  messages that have come over the pipe as well. This way, if the client
+  calls [find_already_queued_message] then they have a better chance of
+  success.
 
-CARE!!! Jsonrpc is vulnerable to incomplete requests and malformed
-Content-length headers...
-The way it works around lack of threading in ocaml is with the
-assumption that if any data is available on stdin then a complete
-jsonrpc request can be read from stdin. If this is violated e.g.
-if the Content-length header is one byte short, then Jsonrpc will
-read a json string that lacks the final }, and will report this as
-a recoverable error (malformed json). Next, Jsonrpc will see that
-there is more data available on stdin, namely that final }, and so
-will block until a header+body has been read on stdin -- but nothing
-further will come beyond that }, so it blocks indefinitely.
-The only solution is to take care that Content-length is exact!
-***************************************************************)
+  CARE!!! Jsonrpc is vulnerable to incomplete requests and malformed
+  Content-length headers...
+  The way it works around lack of threading in ocaml is with the
+  assumption that if any data is available on stdin then a complete
+  jsonrpc request can be read from stdin. If this is violated e.g.
+  if the Content-length header is one byte short, then Jsonrpc will
+  read a json string that lacks the final }, and will report this as
+  a recoverable error (malformed json). Next, Jsonrpc will see that
+  there is more data available on stdin, namely that final }, and so
+  will block until a header+body has been read on stdin -- but nothing
+  further will come beyond that }, so it blocks indefinitely.
+  The only solution is to take care that Content-length is exact!
+  ***************************************************************)
 
 type writer = Hh_json.json -> unit
 

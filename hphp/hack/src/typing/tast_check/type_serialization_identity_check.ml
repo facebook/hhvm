@@ -11,8 +11,8 @@ open Typing_defs
 
 (* Replace unserialized information from the type with dummy information.
 
-For example, we don't currently serialize the arity of function types, so update
-the input type to set it to a default arity value. *)
+   For example, we don't currently serialize the arity of function types, so update
+   the input type to set it to a default arity value. *)
 let rec strip_ty ty =
   let (reason, ty) = deref ty in
   let strip_tyl tyl = List.map tyl ~f:strip_ty in

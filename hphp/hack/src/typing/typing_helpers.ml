@@ -131,7 +131,7 @@ let with_timeout env fun_name (do_ : env -> 'b) : 'b option =
       ~do_:(fun _ -> Some (do_ env))
 
 (* If the localized types of the return type is a tyvar we force it to be covariant.
-  The same goes for parameter types, but this time we force them to be contravariant
+   The same goes for parameter types, but this time we force them to be contravariant
 *)
 let set_tyvars_variance_in_callable env return_ty param_tys =
   Env.log_env_change "set_tyvars_variance_in_callable" env

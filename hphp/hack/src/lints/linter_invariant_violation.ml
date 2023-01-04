@@ -18,13 +18,12 @@ class condition_visitor =
       | Nast.String _ -> CKString
       | Nast.True -> CKLiteral true
       | Nast.False -> CKLiteral false
-      | Nast.Unop (Ast_defs.Unot, e') ->
-        begin
-          match parent#on_expr acc e' with
-          | CKLiteral v -> CKUnaryNot v
-          | CKUnaryNot v -> CKUnaryNot (not v)
-          | e -> e
-        end
+      | Nast.Unop (Ast_defs.Unot, e') -> begin
+        match parent#on_expr acc e' with
+        | CKLiteral v -> CKUnaryNot v
+        | CKUnaryNot v -> CKUnaryNot (not v)
+        | e -> e
+      end
       | _ -> CKUnknown
   end
 

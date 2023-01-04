@@ -71,7 +71,7 @@ end = struct
     and auxs ~k = function
       | [] -> k []
       | next :: rest ->
-        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ x :: xs))
+        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ (x :: xs)))
     in
     aux ~k:Fn.id t
 
@@ -85,7 +85,7 @@ end = struct
     and auxs ~k = function
       | [] -> k []
       | next :: rest ->
-        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ x :: xs))
+        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ (x :: xs)))
     in
     aux ~k:Fn.id t
 
@@ -198,17 +198,16 @@ module Common = struct
 
   let snot_found_suggestion orig similar kind =
     match similar with
-    | (`instance, pos, v) ->
-      begin
-        match kind with
-        | `static_method ->
-          Render.suggestion_message ~modifier:"instance method " orig v pos
-        | `class_constant ->
-          Render.suggestion_message ~modifier:"instance property " orig v pos
-        | `class_variable
-        | `class_typeconst ->
-          Render.suggestion_message orig v pos
-      end
+    | (`instance, pos, v) -> begin
+      match kind with
+      | `static_method ->
+        Render.suggestion_message ~modifier:"instance method " orig v pos
+      | `class_constant ->
+        Render.suggestion_message ~modifier:"instance property " orig v pos
+      | `class_variable
+      | `class_typeconst ->
+        Render.suggestion_message orig v pos
+    end
     | (`static, pos, v) -> Render.suggestion_message orig v pos
 
   let smember_not_found pos kind member_name class_name class_pos hint =
@@ -381,7 +380,7 @@ module Primary = struct
       let reasons =
         lazy
           ((ty_pos, "Not " ^ Lazy.force ty_name)
-           :: Common.reasons_of_trail trail)
+          :: Common.reasons_of_trail trail)
       and claim =
         lazy (pos, "A shape field name must be an `int` or `string`")
       in
@@ -1384,16 +1383,16 @@ module Primary = struct
       and reason =
         lazy
           ((Pos_or_decl.of_raw_pos with_value_pos, "Returning a value here.")
-           ::
-           Option.value_map
-             without_value_pos_opt
-             ~default:
-               [
-                 ( Pos_or_decl.of_raw_pos pos,
-                   "This function does not always return a value" );
-               ]
-             ~f:(fun p ->
-               [(Pos_or_decl.of_raw_pos p, "Returning without a value here")]))
+          :: Option.value_map
+               without_value_pos_opt
+               ~default:
+                 [
+                   ( Pos_or_decl.of_raw_pos pos,
+                     "This function does not always return a value" );
+                 ]
+               ~f:(fun p ->
+                 [(Pos_or_decl.of_raw_pos p, "Returning without a value here")])
+          )
       in
       (Error_code.ReturnsWithAndWithoutValue, claim, reason, [])
 
@@ -3532,9 +3531,8 @@ module Primary = struct
             Printf.sprintf
               "%d distinct use types were determined: please add type hints to lambda parameters."
               (List.length uses) )
-          ::
-          List.map uses ~f:(fun (pos, ty) ->
-              (pos, "This use has type " ^ Markdown_lite.md_codify ty)))
+          :: List.map uses ~f:(fun (pos, ty) ->
+                 (pos, "This use has type " ^ Markdown_lite.md_codify ty)))
     in
     (Error_code.AmbiguousLambda, claim, reason, [])
 
@@ -4420,7 +4418,8 @@ module Primary = struct
       Lazy.(
         trace1 >>= fun trace1 ->
         trace2 >>= fun trace2 ->
-        return ((method_pos, "Trait method is defined here") :: trace1 @ trace2))
+        return
+          (((method_pos, "Trait method is defined here") :: trace1) @ trace2))
     in
     (Error_code.DiamondTraitMethod, claim, reason, [])
 
@@ -4461,7 +4460,7 @@ module Primary = struct
         trace1 >>= fun trace1 ->
         trace2 >>= fun trace2 ->
         return
-          ((property_pos, "Trait property is defined here") :: trace1 @ trace2))
+          (((property_pos, "Trait property is defined here") :: trace1) @ trace2))
     in
     (Error_code.DiamondTraitProperty, claim, reason, [])
 
@@ -6276,7 +6275,7 @@ end = struct
     and auxs ~k = function
       | [] -> k []
       | next :: rest ->
-        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ x :: xs))
+        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ (x :: xs)))
     in
     aux ~k:Fn.id t
 

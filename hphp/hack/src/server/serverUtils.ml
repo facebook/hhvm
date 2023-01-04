@@ -188,12 +188,11 @@ let make_next
   let rec concat_next_files l () =
     match l with
     | [] -> []
-    | hd :: tl ->
-      begin
-        match hd () with
-        | [] -> concat_next_files tl ()
-        | x -> x
-      end
+    | hd :: tl -> begin
+      match hd () with
+      | [] -> concat_next_files tl ()
+      | x -> x
+    end
   in
   let next_files_extra =
     List.map

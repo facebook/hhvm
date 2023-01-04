@@ -80,9 +80,9 @@ let test_init_common ?(hhi_files = []) () =
   ()
 
 (* Hhi files are loaded during server setup. If given a list of string + contents, we add them
-to the test disk and add them to disk_needs_parsing. After one server run loop, they will be loaded.
-This isn't exactly the same as how initialization does it, but the purpose is not to test the hhi
-files, but to test incremental mode behavior with Hhi files present.
+   to the test disk and add them to disk_needs_parsing. After one server run loop, they will be loaded.
+   This isn't exactly the same as how initialization does it, but the purpose is not to test the hhi
+   files, but to test incremental mode behavior with Hhi files present.
 *)
 let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
     =

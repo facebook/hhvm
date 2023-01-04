@@ -654,13 +654,14 @@ module WithToken (Token : TokenType) = struct
 
     let is_separable_prefix node =
       match syntax node with
-      | Token t ->
+      | Token t -> begin
         TokenKind.(
-          (match Token.kind t with
+          match Token.kind t with
           | PlusPlus
           | MinusMinus ->
             false
-          | _ -> true))
+          | _ -> true)
+      end
       | _ -> true
 
     let is_specific_token kind node =
@@ -670,17 +671,15 @@ module WithToken (Token : TokenType) = struct
 
     let is_namespace_prefix node =
       match syntax node with
-      | QualifiedName e ->
-        begin
-          match List.last (syntax_node_to_list e.qualified_name_parts) with
-          | None -> false
-          | Some p ->
-            begin
-              match syntax p with
-              | ListItem p -> not (is_missing p.list_separator)
-              | _ -> false
-            end
+      | QualifiedName e -> begin
+        match List.last (syntax_node_to_list e.qualified_name_parts) with
+        | None -> false
+        | Some p -> begin
+          match syntax p with
+          | ListItem p -> not (is_missing p.list_separator)
+          | _ -> false
         end
+      end
       | _ -> false
 
     let has_leading_trivia kind token =
@@ -7894,12 +7893,11 @@ module WithToken (Token : TokenType) = struct
       let rec aux acc nodes =
         match nodes with
         | [] -> acc
-        | h :: t ->
-          begin
-            match syntax h with
-            | Token token -> aux (token :: acc) t
-            | _ -> aux (aux acc (children h)) t
-          end
+        | h :: t -> begin
+          match syntax h with
+          | Token token -> aux (token :: acc) t
+          | _ -> aux (aux acc (children h)) t
+        end
       in
       List.rev (aux [] [node])
 

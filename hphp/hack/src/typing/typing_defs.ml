@@ -514,14 +514,13 @@ let rec is_denotable ty =
   | Tprim _
   | Tnewtype _ ->
     true
-  | Tunion [ty; ty'] ->
-    begin
-      match (get_node ty, get_node ty') with
-      | (Tprim Aast.(Tfloat | Tstring), Tprim Aast.Tint)
-      | (Tprim Aast.Tint, Tprim Aast.(Tfloat | Tstring)) ->
-        true
-      | _ -> false
-    end
+  | Tunion [ty; ty'] -> begin
+    match (get_node ty, get_node ty') with
+    | (Tprim Aast.(Tfloat | Tstring), Tprim Aast.Tint)
+    | (Tprim Aast.Tint, Tprim Aast.(Tfloat | Tstring)) ->
+      true
+    | _ -> false
+  end
   | Tclass (_, _, ts)
   | Ttuple ts ->
     List.for_all ~f:is_denotable ts
@@ -614,12 +613,11 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tany _
   | Terr ->
     0
-  | Toption t ->
-    begin
-      match get_node t with
-      | Tnonnull -> 1
-      | _ -> 4
-    end
+  | Toption t -> begin
+    match get_node t with
+    | Tnonnull -> 1
+    | _ -> 4
+  end
   | Tnonnull -> 2
   | Tdynamic -> 3
   | Tprim _ -> 5
@@ -662,18 +660,16 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     match (ty_1, ty_2) with
     (* Only in Declared Phase *)
     | (Tthis, Tthis) -> 0
-    | (Tapply (id1, tyl1), Tapply (id2, tyl2)) ->
-      begin
-        match String.compare (snd id1) (snd id2) with
-        | 0 -> tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
-        | n -> n
-      end
-    | (Trefinement (ty1, r1), Trefinement (ty2, r2)) ->
-      begin
-        match ty_compare ty1 ty2 with
-        | 0 -> class_refinement_compare r1 r2
-        | n -> n
-      end
+    | (Tapply (id1, tyl1), Tapply (id2, tyl2)) -> begin
+      match String.compare (snd id1) (snd id2) with
+      | 0 -> tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
+      | n -> n
+    end
+    | (Trefinement (ty1, r1), Trefinement (ty2, r2)) -> begin
+      match ty_compare ty1 ty2 with
+      | 0 -> class_refinement_compare r1 r2
+      | n -> n
+    end
     | (Tmixed, Tmixed) -> 0
     | (Tlike ty1, Tlike ty2) -> ty_compare ty1 ty2
     | ((Tthis | Tapply _ | Tmixed | Tlike _), _)
@@ -682,71 +678,63 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     (* Both or in Localized Phase *)
     | (Tprim ty1, Tprim ty2) -> Aast_defs.compare_tprim ty1 ty2
     | (Toption ty, Toption ty2) -> ty_compare ty ty2
-    | (Tvec_or_dict (tk, tv), Tvec_or_dict (tk2, tv2)) ->
-      begin
-        match ty_compare tk tk2 with
-        | 0 -> ty_compare tv tv2
-        | n -> n
-      end
+    | (Tvec_or_dict (tk, tv), Tvec_or_dict (tk2, tv2)) -> begin
+      match ty_compare tk tk2 with
+      | 0 -> ty_compare tv tv2
+      | n -> n
+    end
     | (Tfun fty, Tfun fty2) -> tfun_compare fty fty2
     | (Tunion tyl1, Tunion tyl2)
     | (Tintersection tyl1, Tintersection tyl2)
     | (Ttuple tyl1, Ttuple tyl2) ->
       tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
-    | (Tgeneric (n1, args1), Tgeneric (n2, args2)) ->
-      begin
-        match String.compare n1 n2 with
-        | 0 -> tyl_compare ~sort:false ~normalize_lists args1 args2
-        | n -> n
-      end
-    | (Tnewtype (id, tyl, cstr1), Tnewtype (id2, tyl2, cstr2)) ->
-      begin
-        match String.compare id id2 with
-        | 0 ->
-          (match tyl_compare ~sort:false tyl tyl2 with
-          | 0 -> ty_compare cstr1 cstr2
-          | n -> n)
-        | n -> n
-      end
-    | (Tdependent (d1, cstr1), Tdependent (d2, cstr2)) ->
-      begin
-        match compare_dependent_type d1 d2 with
+    | (Tgeneric (n1, args1), Tgeneric (n2, args2)) -> begin
+      match String.compare n1 n2 with
+      | 0 -> tyl_compare ~sort:false ~normalize_lists args1 args2
+      | n -> n
+    end
+    | (Tnewtype (id, tyl, cstr1), Tnewtype (id2, tyl2, cstr2)) -> begin
+      match String.compare id id2 with
+      | 0 ->
+        (match tyl_compare ~sort:false tyl tyl2 with
         | 0 -> ty_compare cstr1 cstr2
-        | n -> n
-      end
+        | n -> n)
+      | n -> n
+    end
+    | (Tdependent (d1, cstr1), Tdependent (d2, cstr2)) -> begin
+      match compare_dependent_type d1 d2 with
+      | 0 -> ty_compare cstr1 cstr2
+      | n -> n
+    end
     (* An instance of a class or interface, ty list are the arguments *)
-    | (Tclass (id, exact, tyl), Tclass (id2, exact2, tyl2)) ->
-      begin
-        match String.compare (snd id) (snd id2) with
-        | 0 ->
-          begin
-            match tyl_compare ~sort:false tyl tyl2 with
-            | 0 -> exact_compare exact exact2
-            | n -> n
-          end
+    | (Tclass (id, exact, tyl), Tclass (id2, exact2, tyl2)) -> begin
+      match String.compare (snd id) (snd id2) with
+      | 0 -> begin
+        match tyl_compare ~sort:false tyl tyl2 with
+        | 0 -> exact_compare exact exact2
         | n -> n
       end
-    | (Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2)) ->
-      begin
-        match compare_shape_kind shape_kind1 shape_kind2 with
-        | 0 ->
-          List.compare
-            (fun (k1, v1) (k2, v2) ->
-              match TShapeField.compare k1 k2 with
-              | 0 -> shape_field_type_compare v1 v2
-              | n -> n)
-            (TShapeMap.elements fields1)
-            (TShapeMap.elements fields2)
-        | n -> n
-      end
+      | n -> n
+    end
+    | (Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2)) -> begin
+      match compare_shape_kind shape_kind1 shape_kind2 with
+      | 0 ->
+        List.compare
+          (fun (k1, v1) (k2, v2) ->
+            match TShapeField.compare k1 k2 with
+            | 0 -> shape_field_type_compare v1 v2
+            | n -> n)
+          (TShapeMap.elements fields1)
+          (TShapeMap.elements fields2)
+      | n -> n
+    end
     | (Tvar v1, Tvar v2) -> compare v1 v2
     | (Tunapplied_alias n1, Tunapplied_alias n2) -> String.compare n1 n2
-    | (Taccess (ty1, id1), Taccess (ty2, id2)) ->
-      begin
-        match ty_compare ty1 ty2 with
-        | 0 -> String.compare (snd id1) (snd id2)
-        | n -> n
-      end
+    | (Taccess (ty1, id1), Taccess (ty2, id2)) -> begin
+      match ty_compare ty1 ty2 with
+      | 0 -> String.compare (snd id1) (snd id2)
+      | n -> n
+    end
     | (Tneg neg1, Tneg neg2) -> compare_neg_type neg1 neg2
     | (Tnonnull, Tnonnull) -> 0
     | (Tdynamic, Tdynamic) -> 0
@@ -797,24 +785,19 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       tp2
     in
     match String.compare (snd name1) (snd name2) with
-    | 0 ->
-      begin
-        match tparams_compare tparams1 tparams2 with
-        | 0 ->
-          begin
-            match constraints_compare constraints1 constraints2 with
-            | 0 ->
-              begin
-                match
-                  user_attributes_compare user_attributes1 user_attributes2
-                with
-                | 0 -> Aast_defs.compare_reify_kind reified1 reified2
-                | n -> n
-              end
-            | n -> n
-          end
+    | 0 -> begin
+      match tparams_compare tparams1 tparams2 with
+      | 0 -> begin
+        match constraints_compare constraints1 constraints2 with
+        | 0 -> begin
+          match user_attributes_compare user_attributes1 user_attributes2 with
+          | 0 -> Aast_defs.compare_reify_kind reified1 reified2
+          | n -> n
+        end
         | n -> n
       end
+      | n -> n
+    end
     | n -> n
   and tparams_compare : type a. a ty tparam list -> a ty tparam list -> int =
    (fun tpl1 tpl2 -> List.compare tparam_compare tpl1 tpl2)
@@ -839,12 +822,11 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       int =
    fun (ty1a, ck1, ty1b) (ty2a, ck2, ty2b) ->
     match Ast_defs.compare_constraint_kind ck1 ck2 with
-    | 0 ->
-      begin
-        match ty_compare ty1a ty2a with
-        | 0 -> ty_compare ty1b ty2b
-        | n -> n
-      end
+    | 0 -> begin
+      match ty_compare ty1a ty2a with
+      | 0 -> ty_compare ty1b ty2b
+      | n -> n
+    end
     | n -> n
   and where_constraints_compare :
       type a b.
@@ -878,38 +860,32 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       fty2
     in
     match possibly_enforced_ty_compare ret1 ret2 with
-    | 0 ->
-      begin
-        match ft_params_compare params1 params2 with
-        | 0 ->
-          begin
-            match tparams_compare tparams1 tparams2 with
+    | 0 -> begin
+      match ft_params_compare params1 params2 with
+      | 0 -> begin
+        match tparams_compare tparams1 tparams2 with
+        | 0 -> begin
+          match
+            where_constraints_compare where_constraints1 where_constraints2
+          with
+          | 0 -> begin
+            match Int.compare flags1 flags2 with
             | 0 ->
+              let { capability = capability1 } = implicit_params1 in
+              let { capability = capability2 } = implicit_params2 in
               begin
-                match
-                  where_constraints_compare
-                    where_constraints1
-                    where_constraints2
-                with
-                | 0 ->
-                  begin
-                    match Int.compare flags1 flags2 with
-                    | 0 ->
-                      let { capability = capability1 } = implicit_params1 in
-                      let { capability = capability2 } = implicit_params2 in
-                      begin
-                        match capability_compare capability1 capability2 with
-                        | 0 -> compare_ifc_fun_decl ifc_decl1 ifc_decl2
-                        | n -> n
-                      end
-                    | n -> n
-                  end
+                match capability_compare capability1 capability2 with
+                | 0 -> compare_ifc_fun_decl ifc_decl1 ifc_decl2
                 | n -> n
               end
             | n -> n
           end
+          | n -> n
+        end
         | n -> n
       end
+      | n -> n
+    end
     | n -> n
   and capability_compare : type a. a ty capability -> a ty capability -> int =
    fun cap1 cap2 ->
@@ -971,12 +947,11 @@ and type_refinement_compare :
   match (a, b) with
   | (TRexact _, TRloose _) -> -1
   | (TRloose _, TRexact _) -> 1
-  | (TRloose b1, TRloose b2) ->
-    begin
-      match tyl_compare ~sort:true b1.tr_lower b2.tr_lower with
-      | 0 -> tyl_compare ~sort:true b1.tr_upper b2.tr_upper
-      | n -> n
-    end
+  | (TRloose b1, TRloose b2) -> begin
+    match tyl_compare ~sort:true b1.tr_lower b2.tr_lower with
+    | 0 -> tyl_compare ~sort:true b1.tr_upper b2.tr_upper
+    | n -> n
+  end
   | (TRexact ty1, TRexact ty2) -> ty_compare ty1 ty2
 
 and class_refinement_compare :

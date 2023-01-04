@@ -107,12 +107,11 @@ let ft_redundant_tparams env tparams ty =
 
 let check_redundant_generics_class_method env (_method_name, method_) =
   match method_.ce_type with
-  | (lazy (ty as ft)) ->
-    begin
-      match get_node ty with
-      | Tfun { ft_tparams; _ } -> ft_redundant_tparams env ft_tparams ft
-      | _ -> assert false
-    end
+  | (lazy (ty as ft)) -> begin
+    match get_node ty with
+    | Tfun { ft_tparams; _ } -> ft_redundant_tparams env ft_tparams ft
+    | _ -> assert false
+  end
 
 let check_redundant_generics_fun env ft =
   ft_redundant_tparams env ft.ft_tparams (mk (Reason.Rnone, Tfun ft))
@@ -132,12 +131,11 @@ let handler =
 
     method! at_fun_ env f =
       match Decl_provider.get_fun (Tast_env.get_ctx env) (snd f.f_name) with
-      | Some { fe_type; _ } ->
-        begin
-          match get_node fe_type with
-          | Tfun ft -> check_redundant_generics_fun env ft
-          | _ -> ()
-        end
+      | Some { fe_type; _ } -> begin
+        match get_node fe_type with
+        | Tfun ft -> check_redundant_generics_fun env ft
+        | _ -> ()
+      end
       | _ -> ()
 
     method! at_class_ env c =

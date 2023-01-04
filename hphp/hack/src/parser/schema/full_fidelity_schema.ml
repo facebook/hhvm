@@ -8,13 +8,13 @@
  *)
 
 (* If you make changes to the schema that cause it to serialize / deserialize
-differently, please update this version number *)
+   differently, please update this version number *)
 let full_fidelity_schema_version_number = "2022-09-29-0000"
 
 (* TODO: Consider basing the version number on an auto-generated
-hash of a file rather than relying on people remembering to update it. *)
+   hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
-and use that standard. *)
+   and use that standard. *)
 
 include Operator_schema_definition
 include Token_schema_definition
@@ -34,16 +34,15 @@ let schema_map =
        aggregates = [Expression; Name];
        fields = [];
      }
-     ::
-     {
-       kind_name = "error";
-       type_name = "error";
-       func_name = "error";
-       description = "error";
-       prefix = "error";
-       aggregates = [];
-       fields = [];
-     }
+     :: {
+          kind_name = "error";
+          type_name = "error";
+          func_name = "error";
+          description = "error";
+          prefix = "error";
+          aggregates = [];
+          fields = [];
+        }
      :: schema
 
 type trivia_node = {

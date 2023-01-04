@@ -184,7 +184,7 @@ and neg_type =
 
    With this definition, the field 'a' may be unprovided in a shape. In this
    case, the field 'a' would have sf_optional set to true.
-   *)
+*)
 and 'phase shape_field_type = {
   sft_optional: bool;
   sft_ty: 'phase ty;

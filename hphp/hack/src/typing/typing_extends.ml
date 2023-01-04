@@ -707,93 +707,92 @@ let maybe_poison_ancestors
       let p = Pos.to_absolute parent_pos in
       let s = Printf.sprintf "!,%s,%d" (Pos.filename p) (Pos.line p) in
       Typing_log.log_pessimise_return env child_pos (Some s)
-    | (Enforced, Unenforced) ->
-      begin
-        match get_node parent_return_ty with
-        | Tmixed -> ()
-        | _ ->
-          let enforced_declared_ty =
-            Typing_partial_enforcement.get_enforced_type
-              env
-              (Some declared_class)
-              declared_return_ty
+    | (Enforced, Unenforced) -> begin
+      match get_node parent_return_ty with
+      | Tmixed -> ()
+      | _ ->
+        let enforced_declared_ty =
+          Typing_partial_enforcement.get_enforced_type
+            env
+            (Some declared_class)
+            declared_return_ty
+        in
+        let tmp_env =
+          let self_ty =
+            Typing_make_type.class_type
+              Reason.Rnone
+              origin
+              (List.map (Cls.tparams declared_class) ~f:(fun tp ->
+                   Typing_make_type.generic Reason.Rnone (snd tp.tp_name)))
           in
-          let tmp_env =
-            let self_ty =
-              Typing_make_type.class_type
-                Reason.Rnone
-                origin
-                (List.map (Cls.tparams declared_class) ~f:(fun tp ->
-                     Typing_make_type.generic Reason.Rnone (snd tp.tp_name)))
-            in
-            Env.env_with_tpenv
-              env
-              (Type_parameter_env.add_upper_bound
-                 Type_parameter_env.empty
-                 Naming_special_names.Typehints.this
-                 self_ty)
+          Env.env_with_tpenv
+            env
+            (Type_parameter_env.add_upper_bound
+               Type_parameter_env.empty
+               Naming_special_names.Typehints.this
+               self_ty)
+        in
+        let child_pos =
+          Pos_or_decl.unsafe_to_raw_pos (get_pos ft_child.ft_ret.et_type)
+        in
+        let enforced_parent_ty =
+          Typing_partial_enforcement.get_enforced_type
+            env
+            (Some parent_class)
+            parent_return_ty
+        in
+        (* We need that the enforced child type is a subtype of the enforced parent type *)
+        let sub1 =
+          Typing_phase.is_sub_type_decl
+            ~coerce:(Some Typing_logic.CoerceToDynamic)
+            tmp_env
+            enforced_declared_ty
+            enforced_parent_ty
+        in
+        (* But also the original child type should be a subtype of the enforced parent type *)
+        let sub2 =
+          Typing_phase.is_sub_type_decl
+            ~coerce:(Some Typing_logic.CoerceToDynamic)
+            tmp_env
+            declared_return_ty
+            enforced_parent_ty
+        in
+        if sub1 && sub2 then
+          let ty_str =
+            Typing_print.full_decl (Env.get_tcopt env) enforced_parent_ty
           in
-          let child_pos =
-            Pos_or_decl.unsafe_to_raw_pos (get_pos ft_child.ft_ret.et_type)
+          (* Hack to remove "\\" if XHP type is rendered as "\\:X" *)
+          (* TODO: fix Typing_print so that it renders XHP correctly *)
+          let ty_str =
+            let re = Str.regexp "\\\\:" in
+            Str.global_replace re ":" ty_str
           in
-          let enforced_parent_ty =
-            Typing_partial_enforcement.get_enforced_type
-              env
-              (Some parent_class)
-              parent_return_ty
-          in
-          (* We need that the enforced child type is a subtype of the enforced parent type *)
-          let sub1 =
-            Typing_phase.is_sub_type_decl
-              ~coerce:(Some Typing_logic.CoerceToDynamic)
-              tmp_env
-              enforced_declared_ty
-              enforced_parent_ty
-          in
-          (* But also the original child type should be a subtype of the enforced parent type *)
-          let sub2 =
-            Typing_phase.is_sub_type_decl
-              ~coerce:(Some Typing_logic.CoerceToDynamic)
-              tmp_env
-              declared_return_ty
-              enforced_parent_ty
-          in
-          if sub1 && sub2 then
-            let ty_str =
-              Typing_print.full_decl (Env.get_tcopt env) enforced_parent_ty
-            in
-            (* Hack to remove "\\" if XHP type is rendered as "\\:X" *)
-            (* TODO: fix Typing_print so that it renders XHP correctly *)
-            let ty_str =
-              let re = Str.regexp "\\\\:" in
-              Str.global_replace re ":" ty_str
-            in
-            Typing_log.log_pessimise_return env child_pos (Some ty_str)
-          else
-            Cls.all_ancestor_names child_class
-            |> List.map ~f:(Env.get_class env)
-            |> List.filter_opt
-            |> List.iter ~f:(fun cls ->
-                   MemberKind.(
-                     match member_kind with
-                     | Static_method -> Cls.get_smethod cls member_name
-                     | Method -> Cls.get_method cls member_name
-                     | _ -> None)
-                   |> Option.iter ~f:(fun elt ->
-                          let (lazy fty) = elt.ce_type in
-                          match get_node fty with
-                          | Tfun { ft_ret; _ } ->
-                            let pos =
-                              Pos_or_decl.unsafe_to_raw_pos
-                                (get_pos ft_ret.et_type)
-                            in
-                            (* The ^ denotes poisoning *)
-                            Typing_log.log_pessimise_poisoned_return
-                              env
-                              pos
-                              (Cls.name child_class ^ "::" ^ member_name)
-                          | _ -> ()))
-      end
+          Typing_log.log_pessimise_return env child_pos (Some ty_str)
+        else
+          Cls.all_ancestor_names child_class
+          |> List.map ~f:(Env.get_class env)
+          |> List.filter_opt
+          |> List.iter ~f:(fun cls ->
+                 MemberKind.(
+                   match member_kind with
+                   | Static_method -> Cls.get_smethod cls member_name
+                   | Method -> Cls.get_method cls member_name
+                   | _ -> None)
+                 |> Option.iter ~f:(fun elt ->
+                        let (lazy fty) = elt.ce_type in
+                        match get_node fty with
+                        | Tfun { ft_ret; _ } ->
+                          let pos =
+                            Pos_or_decl.unsafe_to_raw_pos
+                              (get_pos ft_ret.et_type)
+                          in
+                          (* The ^ denotes poisoning *)
+                          Typing_log.log_pessimise_poisoned_return
+                            env
+                            pos
+                            (Cls.name child_class ^ "::" ^ member_name)
+                        | _ -> ()))
+    end
     | _ -> ()
 
 (* Check that overriding is correct *)
@@ -1181,38 +1180,37 @@ let check_inherited_member_is_dynamically_callable
   then
     match Cls.kind parent_class with
     | Ast_defs.Cclass _
-    | Ast_defs.Ctrait ->
-      begin
-        match member_kind with
-        | MemberKind.Method ->
-          if not (Typing_defs.get_ce_support_dynamic_type parent_class_elt) then
-            (* since the attribute is missing run the inter check *)
-            let (lazy (ty : decl_ty)) = parent_class_elt.ce_type in
-            (match get_node ty with
-            | Tfun fun_ty ->
-              if
-                not
-                  (Typing_dynamic.sound_dynamic_interface_check_from_fun_ty
-                     ~this_class:(Some parent_class)
-                     env
-                     fun_ty)
-              then
-                Errors.method_is_not_dynamically_callable
-                  inheriting_class_pos
-                  member_name
-                  (Cls.name inheriting_class)
-                  false
-                  (Some
-                     ( Lazy.force parent_class_elt.ce_pos,
-                       parent_class_elt.ce_origin ))
-                  None
-            | _ -> ())
-        | MemberKind.Static_method
-        | MemberKind.Static_property
-        | MemberKind.Property
-        | MemberKind.Constructor _ ->
-          ()
-      end
+    | Ast_defs.Ctrait -> begin
+      match member_kind with
+      | MemberKind.Method ->
+        if not (Typing_defs.get_ce_support_dynamic_type parent_class_elt) then
+          (* since the attribute is missing run the inter check *)
+          let (lazy (ty : decl_ty)) = parent_class_elt.ce_type in
+          (match get_node ty with
+          | Tfun fun_ty ->
+            if
+              not
+                (Typing_dynamic.sound_dynamic_interface_check_from_fun_ty
+                   ~this_class:(Some parent_class)
+                   env
+                   fun_ty)
+            then
+              Errors.method_is_not_dynamically_callable
+                inheriting_class_pos
+                member_name
+                (Cls.name inheriting_class)
+                false
+                (Some
+                   ( Lazy.force parent_class_elt.ce_pos,
+                     parent_class_elt.ce_origin ))
+                None
+          | _ -> ())
+      | MemberKind.Static_method
+      | MemberKind.Static_property
+      | MemberKind.Property
+      | MemberKind.Constructor _ ->
+        ()
+    end
     | Ast_defs.Cinterface
     | Ast_defs.Cenum_class _
     | Ast_defs.Cenum ->
@@ -1633,43 +1631,38 @@ let tconst_subsumption
             atc_as_constraint = p_as_opt;
             atc_super_constraint = p_super_opt;
             _;
-          } ->
-        begin
-          match child_typeconst.ttc_kind with
-          | TCAbstract
-              {
-                atc_as_constraint = c_as_opt;
-                atc_super_constraint = c_super_opt;
-                _;
-              } ->
-            (* TODO(T88552052) this transformation can be done with mixed and nothing *)
-            let c_as_opt = Some (Option.value c_as_opt ~default) in
-            let c_super_opt = Some (Option.value c_super_opt ~default) in
+          } -> begin
+        match child_typeconst.ttc_kind with
+        | TCAbstract
+            {
+              atc_as_constraint = c_as_opt;
+              atc_super_constraint = c_super_opt;
+              _;
+            } ->
+          (* TODO(T88552052) this transformation can be done with mixed and nothing *)
+          let c_as_opt = Some (Option.value c_as_opt ~default) in
+          let c_super_opt = Some (Option.value c_super_opt ~default) in
 
-            let (env, e1) =
-              check_cstrs Reason.URsubsume_tconst_cstr env c_as_opt p_as_opt
-            in
-            let (env, e2) =
-              check_cstrs
-                Reason.URsubsume_tconst_cstr
-                env
-                p_super_opt
-                c_super_opt
-            in
-            let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-            Option.iter ~f:Errors.add_typing_error ty_err_opt;
-            env
-          | TCConcrete { tc_type = c_t } ->
-            let (env, e1) =
-              check_cstrs Reason.URtypeconst_cstr env (Some c_t) p_as_opt
-            in
-            let (env, e2) =
-              check_cstrs Reason.URtypeconst_cstr env p_super_opt (Some c_t)
-            in
-            let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-            Option.iter ~f:Errors.add_typing_error ty_err_opt;
-            env
-        end
+          let (env, e1) =
+            check_cstrs Reason.URsubsume_tconst_cstr env c_as_opt p_as_opt
+          in
+          let (env, e2) =
+            check_cstrs Reason.URsubsume_tconst_cstr env p_super_opt c_super_opt
+          in
+          let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          env
+        | TCConcrete { tc_type = c_t } ->
+          let (env, e1) =
+            check_cstrs Reason.URtypeconst_cstr env (Some c_t) p_as_opt
+          in
+          let (env, e2) =
+            check_cstrs Reason.URtypeconst_cstr env p_super_opt (Some c_t)
+          in
+          let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          env
+      end
       | TCConcrete _ ->
         begin
           match child_typeconst.ttc_kind with
@@ -2021,7 +2014,7 @@ let check_trait_diamonds
                     (member_name, class_elt)
                     ~first_using_trait:prev_parent
                     ~second_using_trait:parent)
-               :: err)
+              :: err)
         in
         let elts =
           ParentClassEltSet.remove elts (default_parent_class_elt ())
@@ -2581,23 +2574,23 @@ let check_concrete_has_no_abstract_members (class_ : Nast.class_) =
 (*****************************************************************************)
 
 (* [parents] also contains traits.
-  Here's a simple example showing why we need to check overriding traits:
+   Here's a simple example showing why we need to check overriding traits:
 
-    trait T {
-      public function foo(): void {}
-      public function bar(): void {
-        $this->foo();
-      }
-    }
+     trait T {
+       public function foo(): void {}
+       public function bar(): void {
+         $this->foo();
+       }
+     }
 
-    class A {
-      use T;
-      public function foo(int $x): void {}
-    }
+     class A {
+       use T;
+       public function foo(int $x): void {}
+     }
 
-    Overriding foo this way is unsound due to bar using foo,
-    so A::foo needs to be a subtype of T::foo.
-  *)
+     Overriding foo this way is unsound due to bar using foo,
+     so A::foo needs to be a subtype of T::foo.
+*)
 let check_implements_extends_uses
     env
     ~implements

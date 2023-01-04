@@ -36,8 +36,8 @@ let with_ide_cache f =
     ~f:
       begin
         fun () ->
-        activate ();
-        f ()
+          activate ();
+          f ()
       end
     ~finally:deactivate
 

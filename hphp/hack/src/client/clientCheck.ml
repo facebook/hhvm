@@ -780,20 +780,19 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let%lwt (items, telemetry) = rpc args Rpc.RAGE in
       json_to_string (JSON_Array (List.map items ~f:make_item)) |> print_endline;
       Lwt.return (Exit_status.No_error, telemetry)
-    | MODE_LINT_STDIN filename ->
-      begin
-        match Sys_utils.realpath filename with
-        | None ->
-          prerr_endlinef "Could not find file '%s'" filename;
-          Lwt.return (Exit_status.Input_error, Telemetry.create ())
-        | Some filename ->
-          let contents = Sys_utils.read_stdin_to_string () in
-          let%lwt (results, telemetry) =
-            rpc args @@ Rpc.LINT_STDIN { ServerCommandTypes.filename; contents }
-          in
-          ClientLint.go results args.output_json args.error_format;
-          Lwt.return (Exit_status.No_error, telemetry)
-      end
+    | MODE_LINT_STDIN filename -> begin
+      match Sys_utils.realpath filename with
+      | None ->
+        prerr_endlinef "Could not find file '%s'" filename;
+        Lwt.return (Exit_status.Input_error, Telemetry.create ())
+      | Some filename ->
+        let contents = Sys_utils.read_stdin_to_string () in
+        let%lwt (results, telemetry) =
+          rpc args @@ Rpc.LINT_STDIN { ServerCommandTypes.filename; contents }
+        in
+        ClientLint.go results args.output_json args.error_format;
+        Lwt.return (Exit_status.No_error, telemetry)
+    end
     | MODE_LINT_ALL code ->
       let%lwt (results, telemetry) = rpc args @@ Rpc.LINT_ALL code in
       ClientLint.go results args.output_json args.error_format;

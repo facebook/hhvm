@@ -500,10 +500,11 @@ module CustomGraph = struct
       Hashtbl.fold
         begin
           fun ({ idependent; idependency } as edge) () s ->
-          if not (hh_custom_dep_graph_has_edge mode idependent idependency) then
-            DepEdgeSet.add edge s
-          else
-            s
+            if not (hh_custom_dep_graph_has_edge mode idependent idependency)
+            then
+              DepEdgeSet.add edge s
+            else
+              s
         end
         discovered_deps_batch
         s
@@ -517,7 +518,7 @@ module CustomGraph = struct
     DepEdgeSet.iter
       begin
         fun { idependent; idependency } ->
-        register_discovered_dep_edge idependent idependency
+          register_discovered_dep_edge idependent idependency
       end
       s
 
@@ -691,27 +692,27 @@ end = struct
     Hashtbl.iter
       begin
         fun CustomGraph.{ idependent; idependency } () ->
-        if
-          not
-            (CustomGraph.hh_custom_dep_graph_has_edge
-               mode
-               idependent
-               idependency)
-        then begin
-          (* To be kept in sync with typing_deps.rs::hh_custom_dep_graph_save_delta! *)
+          if
+            not
+              (CustomGraph.hh_custom_dep_graph_has_edge
+                 mode
+                 idependent
+                 idependency)
+          then begin
+            (* To be kept in sync with typing_deps.rs::hh_custom_dep_graph_save_delta! *)
 
-          (* Write dependency. *)
-          for i = 0 to 6 do
-            Out_channel.output_byte handle (idependency lsr (i * 8))
-          done;
-          (* Set a tag bit to indicate this is a dependency *)
-          Out_channel.output_byte handle ((idependency lsr 56) + 128);
+            (* Write dependency. *)
+            for i = 0 to 6 do
+              Out_channel.output_byte handle (idependency lsr (i * 8))
+            done;
+            (* Set a tag bit to indicate this is a dependency *)
+            Out_channel.output_byte handle ((idependency lsr 56) + 128);
 
-          (* Write dependent. *)
-          for i = 0 to 7 do
-            Out_channel.output_byte handle (idependent lsr (i * 8))
-          done
-        end
+            (* Write dependent. *)
+            for i = 0 to 7 do
+              Out_channel.output_byte handle (idependent lsr (i * 8))
+            done
+          end
       end
       discovered_deps_batch;
     if flush then Out_channel.flush handle;
@@ -759,7 +760,7 @@ end = struct
       Hashtbl.fold
         begin
           fun CustomGraph.{ idependent; idependency } () acc ->
-          (idependency, idependent) :: acc
+            (idependency, idependent) :: acc
         end
         discovered_deps_batch
         []
@@ -806,8 +807,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       consts
       ~f:
         begin
-          fun acc (_, const_id, _) ->
-          Dep.make (Dep.GConst const_id) :: acc
+          (fun acc (_, const_id, _) -> Dep.make (Dep.GConst const_id) :: acc)
         end
       ~init:[]
   in
@@ -816,8 +816,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       funs
       ~f:
         begin
-          fun acc (_, fun_id, _) ->
-          Dep.make (Dep.Fun fun_id) :: acc
+          (fun acc (_, fun_id, _) -> Dep.make (Dep.Fun fun_id) :: acc)
         end
       ~init:defs
   in
@@ -826,8 +825,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       classes
       ~f:
         begin
-          fun acc (_, class_id, _) ->
-          Dep.make (Dep.Type class_id) :: acc
+          (fun acc (_, class_id, _) -> Dep.make (Dep.Type class_id) :: acc)
         end
       ~init:defs
   in
@@ -836,8 +834,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       typedefs
       ~f:
         begin
-          fun acc (_, type_id, _) ->
-          Dep.make (Dep.Type type_id) :: acc
+          (fun acc (_, type_id, _) -> Dep.make (Dep.Type type_id) :: acc)
         end
       ~init:defs
   in
@@ -846,8 +843,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       modules
       ~f:
         begin
-          fun acc (_, type_id, _) ->
-          Dep.make (Dep.Module type_id) :: acc
+          (fun acc (_, type_id, _) -> Dep.make (Dep.Module type_id) :: acc)
         end
       ~init:defs
   in

@@ -63,7 +63,7 @@ let make
     ?(disable_legacy_attribute_syntax = default.disable_legacy_attribute_syntax)
     ?((* DANGER: if you leak the root tree into OCaml, it's on you to ensure that
          * it's eventually disposed to avoid memory leak. *)
-    leak_rust_tree = default.leak_rust_tree)
+      leak_rust_tree = default.leak_rust_tree)
     ?(enable_xhp_class_modifier = default.enable_xhp_class_modifier)
     ?(disable_xhp_element_mangling = default.disable_xhp_element_mangling)
     ?(disable_xhp_children_declarations =

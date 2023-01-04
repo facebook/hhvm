@@ -9,7 +9,7 @@
 
 (* Abstracts over the particular shared memory implementation used for decl
    information.
- *)
+*)
 
 type class_members = {
   m_properties: Typing_defs.decl_ty SMap.t;

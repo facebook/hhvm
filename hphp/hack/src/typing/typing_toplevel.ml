@@ -28,18 +28,17 @@ module SN = Naming_special_names
 module Profile = Typing_toplevel_profile
 
 (* The two following functions enable us to retrieve the function (or class)
-  header from the shared mem. Note that they only return a non None value if
-  global inference is on *)
+   header from the shared mem. Note that they only return a non None value if
+   global inference is on *)
 let get_decl_function_header env function_id =
   let is_global_inference_on = TCO.global_inference (Env.get_tcopt env) in
   if is_global_inference_on then
     match Decl_provider.get_fun (Env.get_ctx env) function_id with
-    | Some { fe_type; _ } ->
-      begin
-        match get_node fe_type with
-        | Tfun fun_type -> Some fun_type
-        | _ -> None
-      end
+    | Some { fe_type; _ } -> begin
+      match get_node fe_type with
+      | Tfun fun_type -> Some fun_type
+      | _ -> None
+    end
     | _ -> None
   else
     None
@@ -319,20 +318,18 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
     (* Sometimes typing will just return `None` but that should only be the case
      * if an error had already been registered e.g. in naming
      *)
-    | Fun f ->
-      begin
-        match fun_def ctx f with
-        | Some (f, env) -> Some (Aast.Fun f, [env])
-        | None -> None
-      end
+    | Fun f -> begin
+      match fun_def ctx f with
+      | Some (f, env) -> Some (Aast.Fun f, [env])
+      | None -> None
+    end
     | Constant gc -> Some (Aast.Constant (gconst_def ctx gc), [])
     | Typedef td -> Some (Aast.Typedef (Typing_typedef.typedef_def ctx td), [])
-    | Class c ->
-      begin
-        match class_def ctx c with
-        | Some (c, envs) -> Some (Aast.Class c, envs)
-        | None -> None
-      end
+    | Class c -> begin
+      match class_def ctx c with
+      | Some (c, envs) -> Some (Aast.Class c, envs)
+      | None -> None
+    end
     (* We don't typecheck top level statements:
      * https://docs.hhvm.com/hack/unsupported/top-level
      * so just create the minimal env for us to construct a Stmt.

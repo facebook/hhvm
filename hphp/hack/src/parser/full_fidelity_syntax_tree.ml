@@ -46,16 +46,15 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       let rec aux errors acc =
         match errors with
         | [] -> acc
-        | h1 :: t1 ->
-          begin
-            match t1 with
-            | [] -> h1 :: acc
-            | h2 :: t2 ->
-              if equals h1 h2 then
-                aux (h1 :: t2) acc
-              else
-                aux t1 (h1 :: acc)
-          end
+        | h1 :: t1 -> begin
+          match t1 with
+          | [] -> h1 :: acc
+          | h2 :: t2 ->
+            if equals h1 h2 then
+              aux (h1 :: t2) acc
+            else
+              aux t1 (h1 :: acc)
+        end
       in
       let result = aux errors [] in
       List.rev result

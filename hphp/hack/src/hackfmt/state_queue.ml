@@ -29,16 +29,15 @@ let find_overlap t state =
     else
       match t.__queue.(i) with
       | None -> failwith "Unexpected null index when finding overlap"
-      | Some e ->
-        begin
-          match Solve_state.compare_overlap state e with
-          | Some s ->
-            t.__queue.(i) <- Some s;
-            __bubble_down t.__queue t.size t.__queue.(i) i;
-            __bubble_up t.__queue i;
-            true
-          | None -> aux (i + 1)
-        end
+      | Some e -> begin
+        match Solve_state.compare_overlap state e with
+        | Some s ->
+          t.__queue.(i) <- Some s;
+          __bubble_down t.__queue t.size t.__queue.(i) i;
+          __bubble_up t.__queue i;
+          true
+        | None -> aux (i + 1)
+      end
   in
   aux 0
 

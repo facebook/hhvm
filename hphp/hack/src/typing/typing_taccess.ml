@@ -408,60 +408,57 @@ let rec expand ctx env root =
     let name = Printf.sprintf "<cls#%s>" name in
     ((env, ty_err_opt), update_class_name env ctx.id name res)
   | Tclass (cid, Nonexact cr, targs)
-    when Class_refinement.has_type_ref ctx.id cr ->
-    begin
-      match Class_refinement.get_type_ref ctx.id cr with
-      | Some (TRexact ty) -> ((env, None), Exact ty)
-      | Some (TRloose { tr_lower; tr_upper }) ->
-        let alt_root = mk (get_reason root, Tclass (cid, nonexact, targs)) in
-        let ((env, ty_err_opt), result) = expand ctx env alt_root in
-        (match result with
-        | Exact _
-        | Missing _ ->
-          ((env, ty_err_opt), result)
-        | Abstract abstr ->
-          (* Flag an error if the root is not a concrete class type. *)
-          let ty_err_opt' =
-            match ctx.root_kind with
-            | ConcreteClass -> None
-            | GenericType ->
-              let pos = Reason.to_pos (get_reason root) in
-              Option.map ctx.ety_env.on_error ~f:(fun on_error ->
-                  Typing_error.apply_reasons
-                    ~on_error
-                    (Typing_error.Secondary.Inexact_tconst_access (pos, ctx.id)))
-          in
-          let ty_err_opt = Option.first_some ty_err_opt' ty_err_opt in
-          let add_bounds tyset bnds =
-            List.fold bnds ~init:tyset ~f:(fun tyset t -> TySet.add t tyset)
-          in
-          let abstr =
-            {
-              abstr with
-              lower_bounds = add_bounds abstr.lower_bounds tr_lower;
-              upper_bounds = add_bounds abstr.upper_bounds tr_upper;
-            }
-          in
-          ((env, ty_err_opt), Abstract abstr))
-      | None -> (* unreachable *) ((env, None), Missing None)
-    end
-  | Tclass (cls, _, _) ->
-    begin
-      match Env.get_class env (snd cls) with
-      | None -> ((env, None), Missing None)
-      | Some ci ->
-        (* Hack: `self` in a trait is mistakenly replaced by the trait instead
-           of the class using the trait, so if a trait is the root, it is
-           likely because originally there was `self::T` written.
-           TODO(T54081153): fix `self` in traits and clean this up *)
-        let allow_abstract =
-          Ast_defs.is_c_trait (Decl_provider.Class.kind ci)
-          || ctx.allow_abstract
+    when Class_refinement.has_type_ref ctx.id cr -> begin
+    match Class_refinement.get_type_ref ctx.id cr with
+    | Some (TRexact ty) -> ((env, None), Exact ty)
+    | Some (TRloose { tr_lower; tr_upper }) ->
+      let alt_root = mk (get_reason root, Tclass (cid, nonexact, targs)) in
+      let ((env, ty_err_opt), result) = expand ctx env alt_root in
+      (match result with
+      | Exact _
+      | Missing _ ->
+        ((env, ty_err_opt), result)
+      | Abstract abstr ->
+        (* Flag an error if the root is not a concrete class type. *)
+        let ty_err_opt' =
+          match ctx.root_kind with
+          | ConcreteClass -> None
+          | GenericType ->
+            let pos = Reason.to_pos (get_reason root) in
+            Option.map ctx.ety_env.on_error ~f:(fun on_error ->
+                Typing_error.apply_reasons
+                  ~on_error
+                  (Typing_error.Secondary.Inexact_tconst_access (pos, ctx.id)))
         in
+        let ty_err_opt = Option.first_some ty_err_opt' ty_err_opt in
+        let add_bounds tyset bnds =
+          List.fold bnds ~init:tyset ~f:(fun tyset t -> TySet.add t tyset)
+        in
+        let abstr =
+          {
+            abstr with
+            lower_bounds = add_bounds abstr.lower_bounds tr_lower;
+            upper_bounds = add_bounds abstr.upper_bounds tr_upper;
+          }
+        in
+        ((env, ty_err_opt), Abstract abstr))
+    | None -> (* unreachable *) ((env, None), Missing None)
+  end
+  | Tclass (cls, _, _) -> begin
+    match Env.get_class env (snd cls) with
+    | None -> ((env, None), Missing None)
+    | Some ci ->
+      (* Hack: `self` in a trait is mistakenly replaced by the trait instead
+         of the class using the trait, so if a trait is the root, it is
+         likely because originally there was `self::T` written.
+         TODO(T54081153): fix `self` in traits and clean this up *)
+      let allow_abstract =
+        Ast_defs.is_c_trait (Decl_provider.Class.kind ci) || ctx.allow_abstract
+      in
 
-        let ctx = { ctx with allow_abstract } in
-        create_root_from_type_constant ctx env root cls ci
-    end
+      let ctx = { ctx with allow_abstract } in
+      create_root_from_type_constant ctx env root cls ci
+  end
   | Tgeneric (s, tyargs) ->
     let ctx =
       let root_kind =
@@ -640,8 +637,7 @@ let referenced_typeconsts env ety_env (root, ids) =
                   ( Typing_env.get_class env class_name >>= fun class_ ->
                     Typing_env.get_typeconst env class_ tconst
                     >>= fun typeconst ->
-                    Some
-                      ((typeconst.Typing_defs.ttc_origin, tconst, pos) :: acc)
+                    Some ((typeconst.Typing_defs.ttc_origin, tconst, pos) :: acc)
                   )
               | _ -> acc)
         in

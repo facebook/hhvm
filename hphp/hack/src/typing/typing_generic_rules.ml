@@ -99,9 +99,9 @@ let union_errs env errs =
       (env, Error (ty_actual, ty_expect)))
   @@ fold_errs errs
 
-(*  Here we have a function returns the updated environment, a local type
-    and results indicating type errors for both and index expression and
-    the rhs expression of an assignment *)
+(* Here we have a function returns the updated environment, a local type
+   and results indicating type errors for both and index expression and
+   the rhs expression of an assignment *)
 let apply_rules_with_array_index_value_ty_mismatches
     ?(ignore_type_structure = false) env ty f =
   let rec iter ~is_nonnull env ty =
@@ -210,8 +210,8 @@ let apply_rules_with_index_value_ty_mismatches ?ignore_type_structure env ty f =
   in
   (env, (ty, idx_ty_mismatch, val_ty_mismatch))
 
-(*  Here we have a function returns the updated environment, a local type
-    and a result indicating type errors for the rhs of an assignment *)
+(* Here we have a function returns the updated environment, a local type
+   and a result indicating type errors for the rhs of an assignment *)
 let apply_rules_with_ty_mismatch ?ignore_type_structure env ty f =
   let g env ty =
     let (env, (ty, ty_mismatch)) = f env ty in

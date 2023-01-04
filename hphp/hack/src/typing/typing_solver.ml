@@ -451,11 +451,11 @@ let try_bind_to_equal_bound ~freshen env r var =
     (Env.log_env_change "bind_to_equal_bound" old_env env, ty_err_opt)
 
 (* Always solve a type variable.
-We are here because we eagerly solve a type variable to see
-whether certain operations are allowed on the type (e.g. a  method call).
-Therefore, we always force to the lower bounds (even contravariant variables),
-because it produces a "more specific" type, which is more likely to support
-the operation which we eagerly solved for in the first place.
+   We are here because we eagerly solve a type variable to see
+   whether certain operations are allowed on the type (e.g. a  method call).
+   Therefore, we always force to the lower bounds (even contravariant variables),
+   because it produces a "more specific" type, which is more likely to support
+   the operation which we eagerly solved for in the first place.
 *)
 let rec always_solve_tyvar_down ~freshen env r var =
   (* If there is a type that is both a lower and upper bound, force to that type *)
@@ -684,35 +684,34 @@ let expand_type_and_solve
   in
   let (env', ety) = Env.expand_type env' ety in
   match (!vars_solved_to_nothing, get_node ety) with
-  | (_ :: _, Tunion []) ->
-    begin
-      match default with
-      | Some default_ty ->
-        let res =
-          Typing_utils.sub_type env ety default_ty
-          @@ Some (Typing_error.Reasons_callback.unify_error_at p)
-        in
-        (res, default_ty)
-      | None ->
-        let env =
-          List.fold !vars_solved_to_nothing ~init:env ~f:(fun env (r, v) ->
-              let ty_err =
-                Typing_error.(
-                  primary
-                  @@ Primary.Unknown_type
-                       {
-                         expected = description_of_expected;
-                         pos = p;
-                         reason = lazy (Reason.to_string "It is unknown" r);
-                       })
-              in
-              ty_errs := ty_err :: !ty_errs;
-              Env.set_tyvar_eager_solve_fail env v)
-        in
-        let ty_err_opt = Typing_error.multiple_opt !ty_errs in
-        ( (env, ty_err_opt),
-          TUtils.terr env (Reason.Rsolve_fail (Pos_or_decl.of_raw_pos p)) )
-    end
+  | (_ :: _, Tunion []) -> begin
+    match default with
+    | Some default_ty ->
+      let res =
+        Typing_utils.sub_type env ety default_ty
+        @@ Some (Typing_error.Reasons_callback.unify_error_at p)
+      in
+      (res, default_ty)
+    | None ->
+      let env =
+        List.fold !vars_solved_to_nothing ~init:env ~f:(fun env (r, v) ->
+            let ty_err =
+              Typing_error.(
+                primary
+                @@ Primary.Unknown_type
+                     {
+                       expected = description_of_expected;
+                       pos = p;
+                       reason = lazy (Reason.to_string "It is unknown" r);
+                     })
+            in
+            ty_errs := ty_err :: !ty_errs;
+            Env.set_tyvar_eager_solve_fail env v)
+      in
+      let ty_err_opt = Typing_error.multiple_opt !ty_errs in
+      ( (env, ty_err_opt),
+        TUtils.terr env (Reason.Rsolve_fail (Pos_or_decl.of_raw_pos p)) )
+  end
   | _ ->
     let ty_err_opt = Typing_error.multiple_opt !ty_errs in
     ((env', ty_err_opt), ety)

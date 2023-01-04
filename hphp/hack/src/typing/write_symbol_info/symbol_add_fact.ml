@@ -38,7 +38,7 @@ let container_decl decl_pred name progress =
   Fact_acc.add_fact decl_pred json progress
 
 (* Helper function for adding facts for container parents, given
-a context, a list of declarations, a predicate type, and progress state *)
+   a context, a list of declarations, a predicate type, and progress state *)
 let parent_decls ctx decls pred prog =
   List.fold decls ~init:([], prog) ~f:(fun (decl_refs, prog) decl ->
       let name = Util.strip_tparams (Util.get_type_from_hint ctx decl) in

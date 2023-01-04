@@ -75,19 +75,18 @@ let make_eager_class_decl decl =
 let make_eager_class_type ctx class_name declare_folded_class =
   match Decl_store.((get ()).get_class class_name) with
   | Some decl -> Some (make_eager_class_decl decl)
-  | None ->
-    begin
-      match Naming_provider.get_type_kind ctx class_name with
-      | None -> None
-      | Some Naming_types.TTypedef -> None
-      | Some Naming_types.TClass ->
-        Deferred_decl.raise_if_should_defer ();
-        (* declare_folded_class_in_file actual reads from Decl_heap.Classes.get
-         * like what we do above, which makes our test redundant but cleaner.
-         * It also writes into Decl_heap.Classes and other Decl_heaps. *)
-        let (decl, _) = declare_folded_class ctx class_name in
-        Some (make_eager_class_decl decl)
-    end
+  | None -> begin
+    match Naming_provider.get_type_kind ctx class_name with
+    | None -> None
+    | Some Naming_types.TTypedef -> None
+    | Some Naming_types.TClass ->
+      Deferred_decl.raise_if_should_defer ();
+      (* declare_folded_class_in_file actual reads from Decl_heap.Classes.get
+       * like what we do above, which makes our test redundant but cleaner.
+       * It also writes into Decl_heap.Classes and other Decl_heaps. *)
+      let (decl, _) = declare_folded_class ctx class_name in
+      Some (make_eager_class_decl decl)
+  end
 
 let get (ctx : Provider_context.t) (class_name : string) declare_folded_class :
     class_t option =
@@ -111,16 +110,15 @@ module ApiShallow = struct
   let abstract (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Abstract @@ fun () ->
     match t with
-    | Lazy (sc, _lc) ->
-      begin
-        match sc.sc_kind with
-        | Ast_defs.Cclass k -> Ast_defs.is_abstract k
-        | Ast_defs.Cenum_class k -> Ast_defs.is_abstract k
-        | Ast_defs.Cinterface
-        | Ast_defs.Ctrait
-        | Ast_defs.Cenum ->
-          true
-      end
+    | Lazy (sc, _lc) -> begin
+      match sc.sc_kind with
+      | Ast_defs.Cclass k -> Ast_defs.is_abstract k
+      | Ast_defs.Cenum_class k -> Ast_defs.is_abstract k
+      | Ast_defs.Cinterface
+      | Ast_defs.Ctrait
+      | Ast_defs.Cenum ->
+        true
+    end
     | Eager (c, _) -> c.Decl_defs.dc_abstract
 
   let final (decl, t, _ctx) =

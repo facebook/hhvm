@@ -158,17 +158,16 @@ let handlers =
       };
     S.get_state =
       begin
-        fun ctx fn ->
-        Ast_provider.get_ast ~full:true ctx fn
+        (fun ctx fn -> Ast_provider.get_ast ~full:true ctx fn)
       end;
     S.map_result =
       begin
         fun ctx ast refs ->
-        let ast = Some ast in
-        Results.elements refs
-        |> List.map ~f:(ServerSymbolDefinition.go ctx ast)
-        |> List.sort ~compare
-        |> remove_duplicates_except_none ~compare
+          let ast = Some ast in
+          Results.elements refs
+          |> List.map ~f:(ServerSymbolDefinition.go ctx ast)
+          |> List.sort ~compare
+          |> remove_duplicates_except_none ~compare
       end;
   }
 

@@ -256,24 +256,23 @@ let read_connection_type_from_channel (ic : Timeout.in_channel) :
 
 let read_connection_type (client : client) : connection_type =
   match client with
-  | Non_persistent_client client ->
-    begin
-      try
-        say_hello client.oc;
-        client.tracker <-
-          Connection_tracker.(track client.tracker ~key:Server_sent_hello);
-        let connection_type : connection_type =
-          read_connection_type_from_channel client.ic
-        in
-        client.tracker <-
-          Connection_tracker.(
-            track client.tracker ~key:Server_got_connection_type);
-        connection_type
-      with
-      | Sys_error "Connection reset by peer"
-      | Unix.Unix_error (Unix.EPIPE, "write", _) ->
-        raise Client_went_away
-    end
+  | Non_persistent_client client -> begin
+    try
+      say_hello client.oc;
+      client.tracker <-
+        Connection_tracker.(track client.tracker ~key:Server_sent_hello);
+      let connection_type : connection_type =
+        read_connection_type_from_channel client.ic
+      in
+      client.tracker <-
+        Connection_tracker.(
+          track client.tracker ~key:Server_got_connection_type);
+      connection_type
+    with
+    | Sys_error "Connection reset by peer"
+    | Unix.Unix_error (Unix.EPIPE, "write", _) ->
+      raise Client_went_away
+  end
   | Persistent_client _ ->
     (* Every client starts as Non_persistent_client, and after we read its
      * desired connection type, can be turned into Persistent_client

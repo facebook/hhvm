@@ -33,14 +33,14 @@ module ClassDiff = struct
     SMap.fold
       begin
         fun x ty1 diff ->
-        let ty2 = SMap.find_opt x s2 in
-        match ty2 with
-        | Some ty2 ->
-          if Poly.( = ) ty1 ty2 then
-            diff
-          else
-            SSet.add x diff
-        | None -> SSet.add x diff
+          let ty2 = SMap.find_opt x s2 in
+          match ty2 with
+          | Some ty2 ->
+            if Poly.( = ) ty1 ty2 then
+              diff
+            else
+              SSet.add x diff
+          | None -> SSet.add x diff
       end
       s1
       SSet.empty
@@ -137,31 +137,31 @@ module ClassEltDiff = struct
     SMap.merge
       begin
         fun name elt1 elt2 ->
-        let key = (cid, name) in
-        let match1 =
-          match elt1 with
-          | Some elt -> String.equal elt.elt_origin cid
-          | _ -> false
-        in
-        let match2 =
-          match elt2 with
-          | Some elt -> String.equal elt.elt_origin cid
-          | _ -> false
-        in
-        if match1 || match2 then
-          match (EltHeap.get_old key, EltHeap.get key) with
-          | (None, _)
-          | (_, None) ->
-            Some ()
-          | (Some x1, Some x2) ->
-            let ty1 = normalize x1 in
-            let ty2 = normalize x2 in
-            if Poly.( = ) ty1 ty2 then
-              None
-            else
+          let key = (cid, name) in
+          let match1 =
+            match elt1 with
+            | Some elt -> String.equal elt.elt_origin cid
+            | _ -> false
+          in
+          let match2 =
+            match elt2 with
+            | Some elt -> String.equal elt.elt_origin cid
+            | _ -> false
+          in
+          if match1 || match2 then
+            match (EltHeap.get_old key, EltHeap.get key) with
+            | (None, _)
+            | (_, None) ->
               Some ()
-        else
-          None
+            | (Some x1, Some x2) ->
+              let ty1 = normalize x1 in
+              let ty2 = normalize x2 in
+              if Poly.( = ) ty1 ty2 then
+                None
+              else
+                Some ()
+          else
+            None
       end
       elts1
       elts2

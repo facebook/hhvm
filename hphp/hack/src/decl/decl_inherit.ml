@@ -306,29 +306,29 @@ let add_inherited env c inherited acc =
       SMap.merge
         begin
           fun _ old_subst_opt new_subst_opt ->
-          match (old_subst_opt, new_subst_opt) with
-          | (None, None) -> None
-          | (Some s, None)
-          | (None, Some s) ->
-            Some s
-          (* If the old subst_context came via require extends, then we want to use
-           * the substitutions from the actual extends instead. e.g.,
-           *
-           * class Base<+T> {}
-           * trait MyTrait { require extends Base<mixed>; }
-           * class Child extends Base<int> { use MyTrait; }
-           *
-           * Here the subst_context (MyTrait/[T -> mixed]) should be overridden by
-           * (Child/[T -> int]), because it's the actual extension of class Base.
-           *)
-          | (Some old_subst, Some new_subst) ->
-            if
-              (not new_subst.sc_from_req_extends)
-              || old_subst.sc_from_req_extends
-            then
-              Some new_subst
-            else
-              Some old_subst
+            match (old_subst_opt, new_subst_opt) with
+            | (None, None) -> None
+            | (Some s, None)
+            | (None, Some s) ->
+              Some s
+            (* If the old subst_context came via require extends, then we want to use
+             * the substitutions from the actual extends instead. e.g.,
+             *
+             * class Base<+T> {}
+             * trait MyTrait { require extends Base<mixed>; }
+             * class Child extends Base<int> { use MyTrait; }
+             *
+             * Here the subst_context (MyTrait/[T -> mixed]) should be overridden by
+             * (Child/[T -> int]), because it's the actual extension of class Base.
+             *)
+            | (Some old_subst, Some new_subst) ->
+              if
+                (not new_subst.sc_from_req_extends)
+                || old_subst.sc_from_req_extends
+              then
+                Some new_subst
+              else
+                Some old_subst
         end
         acc.ih_substs
         inherited.ih_substs;
@@ -355,8 +355,7 @@ let mark_as_synthesized inh =
     ih_substs =
       SMap.map
         begin
-          fun sc ->
-          { sc with sc_from_req_extends = true }
+          (fun sc -> { sc with sc_from_req_extends = true })
         end
         inh.ih_substs;
     ih_cstr = (Option.map (fst inh.ih_cstr) ~f:mark_elt, snd inh.ih_cstr);
@@ -516,10 +515,10 @@ let inherit_hack_xhp_attrs_only class_type members =
     SMap.fold
       begin
         fun name prop acc ->
-        if Option.is_some (get_elt_xhp_attr prop) then
-          SMap.add name prop acc
-        else
-          acc
+          if Option.is_some (get_elt_xhp_attr prop) then
+            SMap.add name prop acc
+          else
+            acc
       end
       class_type.dc_props
       SMap.empty

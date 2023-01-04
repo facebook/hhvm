@@ -8,7 +8,7 @@ val write_constraints :
   constraints_dir:string -> worker:int -> T.ConstraintEntry.t -> unit
 
 (* Flush the channel used to write constraints.
-Only needed if you need to read constraints right away. *)
+   Only needed if you need to read constraints right away. *)
 val flush : unit -> unit
 
 (**

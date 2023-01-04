@@ -15,10 +15,10 @@ module TUtils = Typing_utils
 module MakeType = Typing_make_type
 
 (* If an expression e is of type `opt_ty_maybe`, then this function
-returns the type of `await e`.
+   returns the type of `await e`.
 
-There is the special case that
-  e : ?Awaitable<T> |- await e : ?T
+   There is the special case that
+     e : ?Awaitable<T> |- await e : ?T
 *)
 let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
   let r = Reason.Rwitness p in

@@ -46,36 +46,35 @@ let lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id =
   let localize env decl_ty = Typing_utils.localize ~ety_env env decl_ty in
   match Env.get_class env (snd cls_id) with
   | None -> (env, Error (make_missing_err ~on_error cls_id type_id))
-  | Some cls ->
-    begin
-      match Env.get_typeconst env cls (snd type_id) with
-      | None -> (env, Error (make_missing_err ~on_error cls_id type_id))
-      | Some { ttc_kind = TCConcrete tcc; _ } ->
-        let ((env, err_opt), lty) = localize env tcc.tc_type in
-        ( env,
-          (match err_opt with
-          | Some _ -> Error err_opt
-          | None -> Exact lty) )
-      | Some { ttc_kind = TCAbstract tca; ttc_name = name; _ } ->
-        let ((env, err_opt_1), lty_as) =
-          match tca.atc_as_constraint with
-          | Some decl_ty ->
-            let ((env, err_opt), lty) = localize env decl_ty in
-            ((env, err_opt), Some lty)
-          | None -> ((env, None), None)
-        in
-        let ((env, err_opt_2), lty_super) =
-          match tca.atc_super_constraint with
-          | Some decl_ty ->
-            let ((env, err_opt), lty) = localize env decl_ty in
-            ((env, err_opt), Some lty)
-          | None -> ((env, None), None)
-        in
-        ( env,
-          (match Option.first_some err_opt_1 err_opt_2 with
-          | Some _ as err_opt -> Error err_opt
-          | None -> Abstract { name; lower = lty_super; upper = lty_as }) )
-    end
+  | Some cls -> begin
+    match Env.get_typeconst env cls (snd type_id) with
+    | None -> (env, Error (make_missing_err ~on_error cls_id type_id))
+    | Some { ttc_kind = TCConcrete tcc; _ } ->
+      let ((env, err_opt), lty) = localize env tcc.tc_type in
+      ( env,
+        (match err_opt with
+        | Some _ -> Error err_opt
+        | None -> Exact lty) )
+    | Some { ttc_kind = TCAbstract tca; ttc_name = name; _ } ->
+      let ((env, err_opt_1), lty_as) =
+        match tca.atc_as_constraint with
+        | Some decl_ty ->
+          let ((env, err_opt), lty) = localize env decl_ty in
+          ((env, err_opt), Some lty)
+        | None -> ((env, None), None)
+      in
+      let ((env, err_opt_2), lty_super) =
+        match tca.atc_super_constraint with
+        | Some decl_ty ->
+          let ((env, err_opt), lty) = localize env decl_ty in
+          ((env, err_opt), Some lty)
+        | None -> ((env, None), None)
+      in
+      ( env,
+        (match Option.first_some err_opt_1 err_opt_2 with
+        | Some _ as err_opt -> Error err_opt
+        | None -> Abstract { name; lower = lty_super; upper = lty_as }) )
+  end
 
 let lookup_class_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
   let ulist = Typing_utils.union_list ~approx_cancel_neg:false in
@@ -88,20 +87,19 @@ let lookup_class_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
   in
   let (env, refined_type_member) =
     match exact with
-    | Nonexact cr ->
-      begin
-        match Class_refinement.get_type_ref type_id cr with
-        | Some (TRexact ty) -> (env, Exact ty)
-        | Some (TRloose { tr_lower; tr_upper }) ->
-          let (env, lower) = combine ~f:ulist env tr_lower in
-          let (env, upper) = combine ~f:ilist env tr_upper in
-          (* FIXME(refinements): The position is pointing at
-           * the class when we would like to point in the
-           * refinement. *)
-          let name = (fst cls_id, snd type_id) in
-          (env, Abstract { name; lower; upper })
-        | None -> (env, Error None)
-      end
+    | Nonexact cr -> begin
+      match Class_refinement.get_type_ref type_id cr with
+      | Some (TRexact ty) -> (env, Exact ty)
+      | Some (TRloose { tr_lower; tr_upper }) ->
+        let (env, lower) = combine ~f:ulist env tr_lower in
+        let (env, upper) = combine ~f:ilist env tr_upper in
+        (* FIXME(refinements): The position is pointing at
+         * the class when we would like to point in the
+         * refinement. *)
+        let name = (fst cls_id, snd type_id) in
+        (env, Abstract { name; lower; upper })
+      | None -> (env, Error None)
+    end
     | _ -> (env, Error None)
   in
   match refined_type_member with

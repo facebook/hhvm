@@ -62,14 +62,13 @@ let declare_folded_class (ctx : Provider_context.t) (name : type_key) :
 let lookup_or_populate_class_cache class_name populate =
   match Cache.get class_name with
   | Some _ as result -> result
-  | None ->
-    begin
-      match populate class_name with
-      | None -> None
-      | Some v as result ->
-        Cache.add class_name v;
-        result
-    end
+  | None -> begin
+    match populate class_name with
+    | None -> None
+    | Some v as result ->
+      Cache.add class_name v;
+      result
+  end
 
 let get_class
     ?(tracing_info : Decl_counters.tracing_info option)
@@ -94,38 +93,35 @@ let get_class
        derivation of the decl_class_type that lives in shmem.
      DECL BACKEND - the class_t is cached in the worker-local 'Cache' heap *)
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis ->
-    begin
-      match
-        lookup_or_populate_class_cache class_name (fun class_name ->
-            Decl_store.((get ()).get_class class_name)
-            |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
-      with
-      | None -> None
-      | Some v -> Some (counter, v, Some ctx)
-    end
-  | Provider_backend.Pessimised_shared_memory _ ->
+  | Provider_backend.Analysis -> begin
+    match
+      lookup_or_populate_class_cache class_name (fun class_name ->
+          Decl_store.((get ()).get_class class_name)
+          |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
+    with
+    | None -> None
+    | Some v -> Some (counter, v, Some ctx)
+  end
+  | Provider_backend.Pessimised_shared_memory _ -> begin
     (* No pessimisation needs to be done here directly. All pessimisation is
      * done on the shallow classes within [Shallow_classes_provider] that the
      * [Typing_classes_heap.Api.t] returned here is constructed from
      * Crucially, we do not use the [Cache] here, which would contain
      * outdated member types once we update its members during
      * pessimisation. *)
-    begin
-      match Typing_classes_heap.get ctx class_name declare_folded_class with
-      | None -> None
-      | Some v -> Some (counter, v, Some ctx)
-    end
+    match Typing_classes_heap.get ctx class_name declare_folded_class with
+    | None -> None
+    | Some v -> Some (counter, v, Some ctx)
+  end
   | Provider_backend.Shared_memory
-  | Provider_backend.Decl_service _ ->
-    begin
-      match
-        lookup_or_populate_class_cache class_name (fun class_name ->
-            Typing_classes_heap.get ctx class_name declare_folded_class)
-      with
-      | None -> None
-      | Some v -> Some (counter, v, Some ctx)
-    end
+  | Provider_backend.Decl_service _ -> begin
+    match
+      lookup_or_populate_class_cache class_name (fun class_name ->
+          Typing_classes_heap.get ctx class_name declare_folded_class)
+    with
+    | None -> None
+    | Some v -> Some (counter, v, Some ctx)
+  end
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     let open Option.Monad_infix in
     Typing_classes_heap.get_class_with_cache
@@ -134,16 +130,15 @@ let get_class
       decl_cache
       declare_folded_class
     >>| fun cls -> (counter, cls, Some ctx)
-  | Provider_backend.Rust_provider_backend backend ->
-    begin
-      match
-        lookup_or_populate_class_cache class_name (fun class_name ->
-            Rust_provider_backend.Decl.get_folded_class backend class_name
-            |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
-      with
-      | None -> None
-      | Some v -> Some (counter, v, Some ctx)
-    end
+  | Provider_backend.Rust_provider_backend backend -> begin
+    match
+      lookup_or_populate_class_cache class_name (fun class_name ->
+          Rust_provider_backend.Decl.get_folded_class backend class_name
+          |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
+    with
+    | None -> None
+    | Some v -> Some (counter, v, Some ctx)
+  end
 
 let maybe_pessimise_fun_decl ctx fun_decl =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then

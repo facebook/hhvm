@@ -524,24 +524,22 @@ module Revision_tracker = struct
 
   let make_report server_state t =
     match !t with
-    | Initializing (init_settings, future) ->
-      begin
-        match check_init_future future with
-        | Some global_rev ->
-          let env = active_env init_settings global_rev in
-          let () = t := Tracking env in
-          process server_state env
-        | None -> Informant_sig.Move_along
-      end
-    | Reinitializing (env, future) ->
-      begin
-        match check_init_future future with
-        | Some global_rev ->
-          let env = reinitialized_env env global_rev in
-          let () = t := Tracking env in
-          process server_state env
-        | None -> Informant_sig.Move_along
-      end
+    | Initializing (init_settings, future) -> begin
+      match check_init_future future with
+      | Some global_rev ->
+        let env = active_env init_settings global_rev in
+        let () = t := Tracking env in
+        process server_state env
+      | None -> Informant_sig.Move_along
+    end
+    | Reinitializing (env, future) -> begin
+      match check_init_future future with
+      | Some global_rev ->
+        let env = reinitialized_env env global_rev in
+        let () = t := Tracking env in
+        process server_state env
+      | None -> Informant_sig.Move_along
+    end
     | Tracking env -> process server_state env
 end
 

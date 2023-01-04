@@ -4,10 +4,10 @@ https://jbuilder.readthedocs.io/en/latest/configurator.html *)
 module C = Configurator.V1
 
 (* cmake should have prepared some information for us in the env:
-  HACK_EXTRA_INCLUDE_PATHS
-  HACK_EXTRA_LIB_PATHS
-  HACK_EXTRA_NATIVE_LIBRARIES
-  HACK_EXTRA_LINK_OPTS
+   HACK_EXTRA_INCLUDE_PATHS
+   HACK_EXTRA_LIB_PATHS
+   HACK_EXTRA_NATIVE_LIBRARIES
+   HACK_EXTRA_LINK_OPTS
 *)
 let query_env s =
   match Sys.getenv s with

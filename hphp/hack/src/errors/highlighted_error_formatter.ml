@@ -19,40 +19,40 @@ type marked_message = {
 }
 
 (* A position_group is a record composed of a position (we'll call
-   the aggregate_position) and a list of marked_message. Each
-   marked_message contains a position, and all of these positions are
-   closed enough together to be printed in one coalesced code context.
+    the aggregate_position) and a list of marked_message. Each
+    marked_message contains a position, and all of these positions are
+    closed enough together to be printed in one coalesced code context.
 
-   For example, say we have the following code:
-      1 | <?hh
-      2 |
-      3 | function f(): dict<int,
-      4 |   int>
-      5 | {
-      6 |   return "hello";
-      7 | }
-      8 |
+    For example, say we have the following code:
+       1 | <?hh
+       2 |
+       3 | function f(): dict<int,
+       4 |   int>
+       5 | {
+       6 |   return "hello";
+       7 | }
+       8 |
 
-   We would be given three individual positions (one corresponding to line 2
-   and two corresponding to lines 6), i.e.
+    We would be given three individual positions (one corresponding to line 2
+    and two corresponding to lines 6), i.e.
 
-      Typing[4110] Invalid return type [1]
-      -> Expected dict<int, int> [2]
-      -> But got string [1]
+       Typing[4110] Invalid return type [1]
+       -> Expected dict<int, int> [2]
+       -> But got string [1]
 
-   They are close enough together so that code only needs to be printed once
-   for all of them since their context overlaps. Thus the position_group would
-   be composed of a list of the three individual aforementioned positions, as
-   well as the aggregate_position whose first line is 1 and last line 7, and
-   the final output would look like this.
+    They are close enough together so that code only needs to be printed once
+    for all of them since their context overlaps. Thus the position_group would
+    be composed of a list of the three individual aforementioned positions, as
+    well as the aggregate_position whose first line is 1 and last line 7, and
+    the final output would look like this.
 
-      1 | <?hh
-      2 |
-  [2] 3 | function f(): dict<int,
-  [2] 4 |   int>
-      5 | {
-  [1] 6 |   return "hello";
-      7 | }
+       1 | <?hh
+       2 |
+   [2] 3 | function f(): dict<int,
+   [2] 4 |   int>
+       5 | {
+   [1] 6 |   return "hello";
+       7 | }
 *)
 type position_group = {
   aggregate_position: Pos.absolute;

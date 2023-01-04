@@ -363,12 +363,12 @@ let exit_ok () = exit 0
 let exit_fail () = exit 1
 
 (* The following connection exceptions inform the main LSP event loop how to
-respond to an exception: was the exception a connection-related exception
-(one of these) or did it arise during other logic (not one of these)? Can
-we report the exception to the LSP client? Can we continue handling
-further LSP messages or must we quit? If we quit, can we do so immediately
-or must we delay?  --  Separately, they also help us marshal callstacks
-across daemon- and process-boundaries. *)
+   respond to an exception: was the exception a connection-related exception
+   (one of these) or did it arise during other logic (not one of these)? Can
+   we report the exception to the LSP client? Can we continue handling
+   further LSP messages or must we quit? If we quit, can we do so immediately
+   or must we delay?  --  Separately, they also help us marshal callstacks
+   across daemon- and process-boundaries. *)
 
 exception
   Client_fatal_connection_exception of Marshal_tools.remote_exception_data
@@ -774,13 +774,12 @@ let get_next_event
   let can_use_client =
     match (ide_service, !initialize_params_ref) with
     | (Some ide_service, Some { Initialize.initializationOptions; _ })
-      when initializationOptions.Initialize.delayUntilDoneInit ->
-      begin
-        match ClientIdeService.get_status !ide_service with
-        | ClientIdeService.Status.(Initializing | Processing_files _ | Rpc _) ->
-          false
-        | ClientIdeService.Status.(Ready | Stopped _) -> true
-      end
+      when initializationOptions.Initialize.delayUntilDoneInit -> begin
+      match ClientIdeService.get_status !ide_service with
+      | ClientIdeService.Status.(Initializing | Processing_files _ | Rpc _) ->
+        false
+      | ClientIdeService.Status.(Ready | Stopped _) -> true
+    end
     | _ -> true
   in
   let client = Option.some_if can_use_client client in
@@ -793,28 +792,27 @@ let get_next_event
   let from_client (client : Jsonrpc.t) : event Lwt.t =
     let%lwt message = Jsonrpc.get_message client in
     match message with
-    | `Message { Jsonrpc.json; timestamp } ->
-      begin
-        try
-          let message = Lsp_fmt.parse_lsp json get_outstanding_request_exn in
-          let rnd = Random_id.short_string () in
-          let tracking_id =
-            match message with
-            | RequestMessage (id, _) -> rnd ^ "." ^ Lsp_fmt.id_to_string id
-            | _ -> rnd
-          in
-          Lwt.return (Client_message ({ tracking_id; timestamp }, message))
-        with
-        | e ->
-          let e = Exception.wrap e in
-          let edata =
-            {
-              Marshal_tools.stack = Exception.get_backtrace_string e;
-              message = Exception.get_ctor_string e;
-            }
-          in
-          raise (Client_recoverable_connection_exception edata)
-      end
+    | `Message { Jsonrpc.json; timestamp } -> begin
+      try
+        let message = Lsp_fmt.parse_lsp json get_outstanding_request_exn in
+        let rnd = Random_id.short_string () in
+        let tracking_id =
+          match message with
+          | RequestMessage (id, _) -> rnd ^ "." ^ Lsp_fmt.id_to_string id
+          | _ -> rnd
+        in
+        Lwt.return (Client_message ({ tracking_id; timestamp }, message))
+      with
+      | e ->
+        let e = Exception.wrap e in
+        let edata =
+          {
+            Marshal_tools.stack = Exception.get_backtrace_string e;
+            message = Exception.get_ctor_string e;
+          }
+        in
+        raise (Client_recoverable_connection_exception edata)
+    end
     | `Fatal_exception edata -> raise (Client_fatal_connection_exception edata)
     | `Recoverable_exception edata ->
       raise (Client_recoverable_connection_exception edata)
@@ -1274,14 +1272,13 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
 let rec connect ~(env : env) (state : state) : state Lwt.t =
   begin
     match state with
-    | In_init { In_init_env.conn; _ } ->
-      begin
-        try
-          Timeout.shutdown_connection conn.ic;
-          Timeout.close_in_noerr conn.ic
-        with
-        | _ -> ()
-      end
+    | In_init { In_init_env.conn; _ } -> begin
+      try
+        Timeout.shutdown_connection conn.ic;
+        Timeout.close_in_noerr conn.ic
+      with
+      | _ -> ()
+    end
     | Pre_init
     | Lost_server _ ->
       ()

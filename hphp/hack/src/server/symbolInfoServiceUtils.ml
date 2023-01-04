@@ -47,9 +47,9 @@ let format_result raw_result =
       ~f:
         begin
           fun acc bucket ->
-          let (result1, result2) = acc in
-          let (part1, part2) = bucket in
-          (List.rev_append part1 result1, List.rev_append part2 result2)
+            let (result1, result2) = acc in
+            let (part1, part2) = bucket in
+            (List.rev_append part1 result1, List.rev_append part2 result2)
         end
       ~init:([], [])
   in

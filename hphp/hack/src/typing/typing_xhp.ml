@@ -76,16 +76,15 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
         | _ -> non_xhp
       in
       (env, xhp, non_xhp)
-  | Tgeneric ("this", []) ->
+  | Tgeneric ("this", []) -> begin
     (* This is unsound, but we want to do best-effort checking
      * of attribute spreads even on XHP classes not marked `final`. We should
      * implement <<__ConsistentAttributes>> as a way to make this hacky
      * inference sound and check it before doing this conversion. *)
-    begin
-      match Env.get_self_ty env with
-      | None -> (env, [], [])
-      | Some ty -> walk_and_gather_xhp_ ~env ~pos ty
-    end
+    match Env.get_self_ty env with
+    | None -> (env, [], [])
+    | Some ty -> walk_and_gather_xhp_ ~env ~pos ty
+  end
   | Tgeneric _
   | Tdependent _
   | Tnewtype _ ->
@@ -93,13 +92,12 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
       TUtils.get_concrete_supertypes ~abstract_enum:true env cty
     in
     walk_list_and_gather_xhp env pos tyl
-  | Tclass ((_, c), _, tyl) ->
+  | Tclass ((_, c), _, tyl) -> begin
     (* Here's where we actually check the declaration *)
-    begin
-      match Env.get_class env c with
-      | Some class_ when Cls.is_xhp class_ -> (env, [(cty, tyl, class_)], [])
-      | _ -> (env, [], [cty])
-    end
+    match Env.get_class env c with
+    | Some class_ when Cls.is_xhp class_ -> (env, [(cty, tyl, class_)], [])
+    | _ -> (env, [], [cty])
+  end
   | Tnonnull
   | Tvec_or_dict _
   | Toption _
@@ -151,9 +149,9 @@ and get_spread_attributes env pos onto_xhp cty =
       ~f:
         begin
           fun env (k, ce) ->
-          let (lazy ty) = ce.ce_type in
-          let (env, ty) = Phase.localize ~ety_env env ty in
-          (env, ((pos, k), (pos, ty)))
+            let (lazy ty) = ce.ce_type in
+            let (env, ty) = Phase.localize ~ety_env env ty in
+            (env, ((pos, k), (pos, ty)))
         end
       env
       attrs

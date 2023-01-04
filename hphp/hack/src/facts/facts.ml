@@ -195,9 +195,9 @@ let type_facts_to_json name tf =
   in
   let members =
     ("name", J.JSON_String name)
-    ::
-    ("kindOf", J.JSON_String (type_kind_to_string tf.kind))
-    :: ("flags", J.JSON_Number (string_of_int tf.flags)) :: members
+    :: ("kindOf", J.JSON_String (type_kind_to_string tf.kind))
+    :: ("flags", J.JSON_Number (string_of_int tf.flags))
+    :: members
   in
   J.JSON_Object members
 

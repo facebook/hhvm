@@ -54,12 +54,11 @@ let rec check_expr env ((_, _, e) : Tast.expr) =
     begin
       match get_node cty with
       | Tclass ((_, c), _, _) -> check_prop env c pid None
-      | Tdependent (_, bound) ->
-        begin
-          match get_node bound with
-          | Tclass ((_, c), _, _) -> check_prop env c pid None
-          | _ -> ()
-        end
+      | Tdependent (_, bound) -> begin
+        match get_node bound with
+        | Tclass ((_, c), _, _) -> check_prop env c pid None
+        | _ -> ()
+      end
       | Tgeneric (name, targs) ->
         let upper_bounds = Env.get_upper_bounds env name targs in
         let check_class bound =

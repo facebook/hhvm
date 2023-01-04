@@ -232,16 +232,15 @@ let rec search_node ~(env : env) ~(pattern : pattern) ~(node : Syntax.t) :
     let syntax_list =
       Syntax.(
         match node.syntax with
-        | SyntaxList syntax_list ->
-          begin
-            match max_length with
-            | None -> Some syntax_list
-            | Some max_length ->
-              if List.length syntax_list <= max_length then
-                Some syntax_list
-              else
-                None
-          end
+        | SyntaxList syntax_list -> begin
+          match max_length with
+          | None -> Some syntax_list
+          | Some max_length ->
+            if List.length syntax_list <= max_length then
+              Some syntax_list
+            else
+              None
+        end
         | _ -> None)
     in
     begin

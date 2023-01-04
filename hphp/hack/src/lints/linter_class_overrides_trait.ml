@@ -76,7 +76,7 @@ let names_and_pos_defined_by_class_ class_ =
    It does not include traits with requirements.
 
    trait X { require implements I; } // false
- *)
+*)
 let trait_implements_interfaces ctx (trait : Cls.t) : bool =
   let is_interface name : bool =
     match Decl_provider.get_class ctx name with

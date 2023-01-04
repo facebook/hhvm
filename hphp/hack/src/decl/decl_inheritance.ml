@@ -287,14 +287,14 @@ let make_consts_cache class_name lin =
     ~merge:
       begin
         fun ~earlier ~later ->
-        if String.equal earlier.cc_origin class_name then
-          earlier
-        else if earlier.cc_abstract = CCConcrete then
-          earlier
-        else if later.cc_abstract = CCConcrete then
-          later
-        else
-          earlier
+          if String.equal earlier.cc_origin class_name then
+            earlier
+          else if earlier.cc_abstract = CCConcrete then
+            earlier
+          else if later.cc_abstract = CCConcrete then
+            later
+          else
+            earlier
       end
 
 (** Given a linearization filtered for const lookup, return a [Sequence.t]
@@ -329,67 +329,67 @@ let make_typeconst_cache class_name lin =
     ~merge:
       begin
         fun ~earlier:descendant_tc ~later:ancestor_tc ->
-        match (descendant_tc.ttc_kind, ancestor_tc.ttc_kind) with
-        (* This covers the following case:
-         *
-         * interface I1 { abstract const type T; }
-         * interface I2 { const type T = int; }
-         *
-         * class C implements I2, I1 {}
-         *
-         * Then C::T == I2::T since I2::T is not abstract.
-         *)
-        | (TCAbstract _, TCConcrete _) -> ancestor_tc
-        (* NB: The following comment (written in D1825740) claims that this arm is
-           necessary to cover the example it describes. But this example does not
-           exercise this arm--the interface appears earlier in the linearization
-           than the abstract class, so the descendant typeconst is the concrete
-           one. Furthermore, returning [descendant_tc] rather than [ancestor_tc]
-           from this arm does not cause any of our typecheck tests to fail.
+          match (descendant_tc.ttc_kind, ancestor_tc.ttc_kind) with
+          (* This covers the following case:
+           *
+           * interface I1 { abstract const type T; }
+           * interface I2 { const type T = int; }
+           *
+           * class C implements I2, I1 {}
+           *
+           * Then C::T == I2::T since I2::T is not abstract.
+           *)
+          | (TCAbstract _, TCConcrete _) -> ancestor_tc
+          (* NB: The following comment (written in D1825740) claims that this arm is
+             necessary to cover the example it describes. But this example does not
+             exercise this arm--the interface appears earlier in the linearization
+             than the abstract class, so the descendant typeconst is the concrete
+             one. Furthermore, returning [descendant_tc] rather than [ancestor_tc]
+             from this arm does not cause any of our typecheck tests to fail.
 
-           I have left it to avoid possibly introducing a subtle behavioral change
-           compared to eager decl. We are planning to remove partially-abstract
-           type constants in any case, so this arm will be removed soon.
-        *)
-        (* This covers the following case
-         *
-         * interface I {
-         *   abstract const type T as arraykey;
-         * }
-         *
-         * abstract class A {
-         *   abstract const type T as arraykey = string;
-         * }
-         *
-         * final class C extends A implements I {}
-         *
-         * C::T must come from A, not I, as A provides the default that will synthesize
-         * into a concrete type constant in C.
-         *)
-        | ( TCAbstract { atc_default = None; _ },
-            TCAbstract { atc_default = Some _; _ } ) ->
-          ancestor_tc
-        (* When a type constant is declared in multiple parents we need to make a
-         * subtle choice of what type we inherit. For example, in:
-         *
-         * interface I1 { abstract const type t as Container<int>; }
-         * interface I2 { abstract const type t as KeyedContainer<int, int>; }
-         * abstract class C implements I1, I2 {}
-         *
-         * Depending on the order the interfaces are declared, we may report an
-         * error. Since this could be confusing there is special logic in
-         * Typing_extends that checks for this potentially ambiguous situation
-         * and requires the user to explicitly declare T in C.
-         *)
-        | (TCAbstract _, TCAbstract _)
-        | (TCConcrete _, TCAbstract _) ->
-          descendant_tc
-        | (TCConcrete _, TCConcrete _) ->
-          if descendant_tc.ttc_concretized && not ancestor_tc.ttc_concretized
-          then
+             I have left it to avoid possibly introducing a subtle behavioral change
+             compared to eager decl. We are planning to remove partially-abstract
+             type constants in any case, so this arm will be removed soon.
+          *)
+          (* This covers the following case
+           *
+           * interface I {
+           *   abstract const type T as arraykey;
+           * }
+           *
+           * abstract class A {
+           *   abstract const type T as arraykey = string;
+           * }
+           *
+           * final class C extends A implements I {}
+           *
+           * C::T must come from A, not I, as A provides the default that will synthesize
+           * into a concrete type constant in C.
+           *)
+          | ( TCAbstract { atc_default = None; _ },
+              TCAbstract { atc_default = Some _; _ } ) ->
             ancestor_tc
-          else
+          (* When a type constant is declared in multiple parents we need to make a
+           * subtle choice of what type we inherit. For example, in:
+           *
+           * interface I1 { abstract const type t as Container<int>; }
+           * interface I2 { abstract const type t as KeyedContainer<int, int>; }
+           * abstract class C implements I1, I2 {}
+           *
+           * Depending on the order the interfaces are declared, we may report an
+           * error. Since this could be confusing there is special logic in
+           * Typing_extends that checks for this potentially ambiguous situation
+           * and requires the user to explicitly declare T in C.
+           *)
+          | (TCAbstract _, TCAbstract _)
+          | (TCConcrete _, TCAbstract _) ->
             descendant_tc
+          | (TCConcrete _, TCConcrete _) ->
+            if descendant_tc.ttc_concretized && not ancestor_tc.ttc_concretized
+            then
+              ancestor_tc
+            else
+              descendant_tc
       end
 
 let make_typeconst_enforceability_cache lin =

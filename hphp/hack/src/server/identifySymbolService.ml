@@ -125,7 +125,7 @@ let process_arg_names recv (args : Tast.expr list) : Result_set.t =
 
        greet_user("John Doe");
                 //^ Hover shows: Parameter: $name
- *)
+*)
 let process_callee_arg_names
     enclosing_class
     (recv : Tast.expr)
@@ -139,7 +139,7 @@ let process_callee_arg_names
 
        new User("John Doe");
               //^ Hover shows: Parameter: $name
- *)
+*)
 let process_constructor_arg_names
     enclosing_class
     (parent_class_hint : Aast.hint option)
@@ -362,36 +362,35 @@ let visitor =
             | Aast_defs.Dict -> "dict"
           in
           process_class_id (pos, "\\HH\\" ^ type_name)
-        | Aast.EnumClassLabel (enum_name, label_name) ->
-          begin
-            match enum_name with
-            | None ->
-              let (ety, _, _) = expr in
-              let ty = Typing_defs_core.get_node ety in
-              (match ty with
-              | Tnewtype (_, [ty_enum_class; _], _) ->
-                (match get_node ty_enum_class with
-                | Tclass ((_, enum_class_name), _, _)
-                | Tgeneric (enum_class_name, _) ->
-                  Result_set.singleton
-                    {
-                      name = Utils.strip_ns enum_class_name ^ "#" ^ label_name;
-                      type_ = EnumClassLabel (enum_class_name, label_name);
-                      is_declaration = false;
-                      pos;
-                    }
-                | _ -> self#zero)
-              | _ -> self#zero)
-            | Some ((_, enum_name) as enum_id) ->
-              process_class_id enum_id
-              + Result_set.singleton
+        | Aast.EnumClassLabel (enum_name, label_name) -> begin
+          match enum_name with
+          | None ->
+            let (ety, _, _) = expr in
+            let ty = Typing_defs_core.get_node ety in
+            (match ty with
+            | Tnewtype (_, [ty_enum_class; _], _) ->
+              (match get_node ty_enum_class with
+              | Tclass ((_, enum_class_name), _, _)
+              | Tgeneric (enum_class_name, _) ->
+                Result_set.singleton
                   {
-                    name = Utils.strip_ns enum_name ^ "#" ^ label_name;
-                    type_ = EnumClassLabel (enum_name, label_name);
+                    name = Utils.strip_ns enum_class_name ^ "#" ^ label_name;
+                    type_ = EnumClassLabel (enum_class_name, label_name);
                     is_declaration = false;
                     pos;
                   }
-          end
+              | _ -> self#zero)
+            | _ -> self#zero)
+          | Some ((_, enum_name) as enum_id) ->
+            process_class_id enum_id
+            + Result_set.singleton
+                {
+                  name = Utils.strip_ns enum_name ^ "#" ^ label_name;
+                  type_ = EnumClassLabel (enum_name, label_name);
+                  is_declaration = false;
+                  pos;
+                }
+        end
         | _ -> self#zero
       in
       acc + super#on_expr env expr

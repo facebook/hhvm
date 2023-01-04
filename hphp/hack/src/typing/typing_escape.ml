@@ -126,7 +126,7 @@ type refresh_env = {
 
 (* refresh_ functions will return [Elim ...] when they eliminated a rigid
    type variable from their result. [Unchanged] is returned when nothing
-   has changed in the data to refresh.  *)
+   has changed in the data to refresh. *)
 type changed =
   | Elim of Pos_or_decl.t * string
   | Unchanged
@@ -244,36 +244,34 @@ and refresh_type renv v ty_orig =
   | (_, Tvar v) ->
     let renv = { renv with tvars = IMap.add v renv.on_error renv.tvars } in
     (renv, ty_orig, Unchanged)
-  | (r, Tgeneric (name, _ (* TODO(T70068435) assumes no args *))) ->
+  | (r, Tgeneric (name, _ (* TODO(T70068435) assumes no args *))) -> begin
     (* look if the Tgeneric has to go away and kill it using its
        bounds if the variance of the current occurrence permits it *)
-    begin
-      match renv.remove (Rtv_tparam name) with
-      | None -> (renv, ty_orig, Unchanged)
-      | Some _ when is_bogus_taccess name && not renv.elim_bogus_taccess ->
-        (renv, ty_orig, Unchanged)
-      | Some { pos; lower_bounds = lbs; upper_bounds = ubs } ->
-        let rtv_pos =
-          if Pos_or_decl.(equal pos none) then
-            Reason.to_pos r
-          else
-            pos
-        in
-        eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
-    end
-  | (r, Tdependent ((DTexpr id as dt), ty1)) ->
-    begin
-      match renv.remove (Rtv_dependent id) with
-      | None ->
-        let (renv, ty1, ch1) = refresh_type renv v ty1 in
-        (renv, mk (r, Tdependent (dt, ty1)), ch1)
-      | Some _ ->
-        let lbs = TySet.empty in
-        let ubs = TySet.singleton ty1 in
-        let rtv_pos = Reason.to_pos r in
-        let name = DependentKind.to_string dt in
-        eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
-    end
+    match renv.remove (Rtv_tparam name) with
+    | None -> (renv, ty_orig, Unchanged)
+    | Some _ when is_bogus_taccess name && not renv.elim_bogus_taccess ->
+      (renv, ty_orig, Unchanged)
+    | Some { pos; lower_bounds = lbs; upper_bounds = ubs } ->
+      let rtv_pos =
+        if Pos_or_decl.(equal pos none) then
+          Reason.to_pos r
+        else
+          pos
+      in
+      eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
+  end
+  | (r, Tdependent ((DTexpr id as dt), ty1)) -> begin
+    match renv.remove (Rtv_dependent id) with
+    | None ->
+      let (renv, ty1, ch1) = refresh_type renv v ty1 in
+      (renv, mk (r, Tdependent (dt, ty1)), ch1)
+    | Some _ ->
+      let lbs = TySet.empty in
+      let ubs = TySet.singleton ty1 in
+      let rtv_pos = Reason.to_pos r in
+      let name = DependentKind.to_string dt in
+      eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
+  end
   | (r, Tunion l) ->
     let (renv, l, changed) = refresh_types renv v l in
     begin

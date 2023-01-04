@@ -61,8 +61,8 @@ let rec mkdir_p = function
       ~f:
         begin
           fun () ->
-          try Unix.mkdir d 0o777 with
-          | Unix.Unix_error (Unix.EEXIST, _, _) -> ()
+            try Unix.mkdir d 0o777 with
+            | Unix.Unix_error (Unix.EEXIST, _, _) -> ()
         end
       ~finally:(fun () -> ignore (Unix.umask old_mask))
   | d when Sys.is_directory d -> ()
@@ -114,8 +114,8 @@ let rec chmod ~(recursive : bool) (path : string) (mode : int) : unit =
         ~f:
           begin
             fun name ->
-            let name = Filename.concat path name in
-            chmod ~recursive name mode
+              let name = Filename.concat path name in
+              chmod ~recursive name mode
           end
         (Array.to_list contents)
   | _ -> Unix.chmod path mode
@@ -133,8 +133,8 @@ let rec readpath (path : string) : string list =
       ~f:
         begin
           fun acc name ->
-          let name = Filename.concat path name in
-          List.rev_append acc (readpath name)
+            let name = Filename.concat path name in
+            List.rev_append acc (readpath name)
         end
       (Array.to_list contents)
   | S_REG -> [path]
@@ -165,8 +165,8 @@ let rec treesize path : int =
         ~f:
           begin
             fun acc name ->
-            let name = Filename.concat path name in
-            acc + treesize name
+              let name = Filename.concat path name in
+              acc + treesize name
           end
         (Array.to_list contents)
   | S_REG -> size

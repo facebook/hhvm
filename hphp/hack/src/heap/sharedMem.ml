@@ -65,7 +65,7 @@ let empty_config =
   }
 
 (* Allocated in C only.
-  NOTE: If you change the order, update hh_shared.c!  *)
+   NOTE: If you change the order, update hh_shared.c! *)
 type internal_handle = private {
   h_fd: Unix.file_descr;
   h_global_size: int;
@@ -922,8 +922,7 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
   let get_batch xs =
     KeySet.fold
       begin
-        fun key acc ->
-        KeyMap.add key (get key) acc
+        (fun key acc -> KeyMap.add key (get key) acc)
       end
       xs
       KeyMap.empty
@@ -931,8 +930,7 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
   let get_old_batch xs =
     KeySet.fold
       begin
-        fun key acc ->
-        KeyMap.add key (get_old key) acc
+        (fun key acc -> KeyMap.add key (get_old key) acc)
       end
       xs
       KeyMap.empty
@@ -975,12 +973,12 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
     KeySet.iter
       begin
         fun key ->
-        if mem key then
-          oldify key
-        else
-          (* this is weird, semantics of `oldify x` and `oldify_batch {x}` are
-             different for some mysterious reason *)
-          remove_old key
+          if mem key then
+            oldify key
+          else
+            (* this is weird, semantics of `oldify x` and `oldify_batch {x}` are
+               different for some mysterious reason *)
+            remove_old key
       end
       xs
 
@@ -988,12 +986,12 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
     KeySet.iter
       begin
         fun key ->
-        if mem_old key then
-          revive key
-        else
-          (* this is weird, semantics of `revive x` and `revive {x}` are
-               different for some mysterious reason *)
-          remove key
+          if mem_old key then
+            revive key
+          else
+            (* this is weird, semantics of `revive x` and `revive {x}` are
+                 different for some mysterious reason *)
+            remove key
       end
       xs
 
@@ -1037,8 +1035,7 @@ module FreqCache (Key : Key) (Value : Value) (Capacity : Capacity) :
       let l = ref [] in
       Hashtbl.iter
         begin
-          fun key (freq, v) ->
-          l := (key, !freq, v) :: !l
+          (fun key (freq, v) -> l := (key, !freq, v) :: !l)
         end
         cache;
       Hashtbl.clear cache;
@@ -1267,8 +1264,7 @@ end = struct
   let get_batch keys =
     KeySet.fold
       begin
-        fun key acc ->
-        KeyMap.add key (get key) acc
+        (fun key acc -> KeyMap.add key (get key) acc)
       end
       keys
       KeyMap.empty
@@ -1296,8 +1292,7 @@ end = struct
   let () =
     invalidate_local_caches_callback_list :=
       begin
-        fun () ->
-        Cache.clear ()
+        (fun () -> Cache.clear ())
       end
       :: !invalidate_local_caches_callback_list
 

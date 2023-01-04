@@ -222,32 +222,30 @@ let retype_magic_func
     | ([{ fp_type = { et_type; _ }; _ }], [(_, (_, _, Null))])
       when is_some (get_possibly_like_format_string_type_arg et_type) ->
       (env, None)
-    | ([({ fp_type = { et_type; _ }; _ } as fp)], (_, arg) :: _) ->
-      begin
-        match get_possibly_like_format_string_type_arg et_type with
-        | Some type_arg ->
-          (match const_string_of env arg with
-          | (env, Right str) ->
-            let (_, pos, _) = arg in
-            let (env, argl) = parse_printf_string env str pos type_arg in
-            ( env,
-              Some
-                ({
-                   fp with
-                   fp_type =
-                     {
-                       et_type = mk (get_reason et_type, Tprim Tstring);
-                       et_enforced = Unenforced;
-                     };
-                 }
-                 :: argl) )
-          | (env, Left pos) ->
-            Errors.add_typing_error
-              Typing_error.(
-                primary @@ Primary.Expected_literal_format_string pos);
-            (env, None))
-        | None -> (env, None)
-      end
+    | ([({ fp_type = { et_type; _ }; _ } as fp)], (_, arg) :: _) -> begin
+      match get_possibly_like_format_string_type_arg et_type with
+      | Some type_arg ->
+        (match const_string_of env arg with
+        | (env, Right str) ->
+          let (_, pos, _) = arg in
+          let (env, argl) = parse_printf_string env str pos type_arg in
+          ( env,
+            Some
+              ({
+                 fp with
+                 fp_type =
+                   {
+                     et_type = mk (get_reason et_type, Tprim Tstring);
+                     et_enforced = Unenforced;
+                   };
+               }
+              :: argl) )
+        | (env, Left pos) ->
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Expected_literal_format_string pos);
+          (env, None))
+      | None -> (env, None)
+    end
     | (param :: params, _ :: args) ->
       (match f env params args with
       | (env, None) -> (env, None)

@@ -188,22 +188,21 @@ let on_expr_ (env, expr_, err_acc) =
             @@ Naming_error.Too_few_arguments fn_expr_pos
           in
           (Error fn_expr_pos, args_err :: err_acc)
-        | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] ->
-          begin
-            match (e1, e2) with
-            | Aast.((_, pc, String cl), (_, pm, String meth)) ->
-              (Ok (Aast.Method_caller ((pc, cl), (pm, meth))), err_acc)
-            | Aast.
-                ( (_, _, Class_const ((_, _, CI cl), (_, mem))),
-                  (_, pm, String meth) )
-              when String.equal mem SN.Members.mClass ->
-              (Ok (Aast.Method_caller (cl, (pm, meth))), err_acc)
-            | ((_, p, _), _) ->
-              let meth_err =
-                Naming_phase_error.naming @@ Naming_error.Illegal_meth_caller p
-              in
-              (Error p, meth_err :: err_acc)
-          end
+        | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] -> begin
+          match (e1, e2) with
+          | Aast.((_, pc, String cl), (_, pm, String meth)) ->
+            (Ok (Aast.Method_caller ((pc, cl), (pm, meth))), err_acc)
+          | Aast.
+              ( (_, _, Class_const ((_, _, CI cl), (_, mem))),
+                (_, pm, String meth) )
+            when String.equal mem SN.Members.mClass ->
+            (Ok (Aast.Method_caller (cl, (pm, meth))), err_acc)
+          | ((_, p, _), _) ->
+            let meth_err =
+              Naming_phase_error.naming @@ Naming_error.Illegal_meth_caller p
+            in
+            (Error p, meth_err :: err_acc)
+        end
         | [(Ast_defs.Pinout _, _); _]
         | [_; (Ast_defs.Pinout _, _)] ->
           let meth_err =
@@ -244,84 +243,83 @@ let on_expr_ (env, expr_, err_acc) =
             @@ Naming_error.Too_few_arguments fn_expr_pos
           in
           (Error fn_expr_pos, args_err :: err_acc)
-        | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] ->
-          begin
-            match (e1, e2) with
-            | Aast.((_, pc, String cl), (_, pm, String meth)) ->
-              let cid = Aast.CI (pc, cl) in
-              (Ok (Aast.Smethod_id (((), pc, cid), (pm, meth))), err_acc)
-            | Aast.((_, _, Id (pc, const)), (_, pm, String meth))
-              when String.equal const SN.PseudoConsts.g__CLASS__ ->
-              (* All of these that use current_cls aren't quite correct
-               * inside a trait, as the class should be the using class.
-               * It's sufficient for typechecking purposes (we require
-               * subclass to be compatible with the trait member/method
-               * declarations).
-               *)
-              (match Env.current_class env with
-              | Some (cid, _, true) ->
-                let cid = Aast.CI (pc, snd cid) in
-                ( Ok Aast.(Smethod_id (((), fn_expr_pos, cid), (pm, meth))),
-                  err_acc )
-              | Some (cid, kind, false) ->
-                let is_trait = Ast_defs.is_c_trait kind in
-                let class_name = snd cid in
-                let non_final_err =
-                  Naming_phase_error.naming
-                  @@ Naming_error.Class_meth_non_final_CLASS
-                       { pos = fn_expr_pos; is_trait; class_name }
-                in
-                (Error fn_expr_pos, non_final_err :: err_acc)
-              | None ->
-                let meth_err =
-                  Naming_phase_error.naming
-                  @@ Naming_error.Illegal_class_meth fn_expr_pos
-                in
-                (Error fn_expr_pos, meth_err :: err_acc))
-            | Aast.
-                ( (_, _, Class_const ((_, pc, CI cl), (_, mem))),
-                  (_, pm, String meth) )
-              when String.equal mem SN.Members.mClass ->
-              let cid = Aast.CI cl in
-              (Ok (Aast.Smethod_id (((), pc, cid), (pm, meth))), err_acc)
-            | Aast.
-                ( (_, p, Class_const ((_, pc, CIself), (_, mem))),
-                  (_, pm, String meth) )
-              when String.equal mem SN.Members.mClass ->
-              (match Env.current_class env with
-              | Some (_cid, _, true) ->
-                (Ok Aast.(Smethod_id (((), pc, CIself), (pm, meth))), err_acc)
-              | Some (cid, _, false) ->
-                let class_name = snd cid in
-                let non_final_err =
-                  Naming_phase_error.naming
-                  @@ Naming_error.Class_meth_non_final_self
-                       { pos = p; class_name }
-                in
-                (Error p, non_final_err :: err_acc)
-              | None ->
-                let meth_err =
-                  Naming_phase_error.naming @@ Naming_error.Illegal_class_meth p
-                in
-                (Error p, meth_err :: err_acc))
-            | Aast.
-                ( (_, p, Class_const ((_, pc, CIstatic), (_, mem))),
-                  (_, pm, String meth) )
-              when String.equal mem SN.Members.mClass ->
-              (match Env.current_class env with
-              | Some (_cid, _, _) ->
-                (Ok Aast.(Smethod_id (((), pc, CIstatic), (pm, meth))), err_acc)
-              | None ->
-                let meth_err =
-                  Naming_phase_error.naming @@ Naming_error.Illegal_class_meth p
-                in
-                (Error p, meth_err :: err_acc))
-            | ((_, p, _), _) ->
+        | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] -> begin
+          match (e1, e2) with
+          | Aast.((_, pc, String cl), (_, pm, String meth)) ->
+            let cid = Aast.CI (pc, cl) in
+            (Ok (Aast.Smethod_id (((), pc, cid), (pm, meth))), err_acc)
+          | Aast.((_, _, Id (pc, const)), (_, pm, String meth))
+            when String.equal const SN.PseudoConsts.g__CLASS__ ->
+            (* All of these that use current_cls aren't quite correct
+             * inside a trait, as the class should be the using class.
+             * It's sufficient for typechecking purposes (we require
+             * subclass to be compatible with the trait member/method
+             * declarations).
+             *)
+            (match Env.current_class env with
+            | Some (cid, _, true) ->
+              let cid = Aast.CI (pc, snd cid) in
+              ( Ok Aast.(Smethod_id (((), fn_expr_pos, cid), (pm, meth))),
+                err_acc )
+            | Some (cid, kind, false) ->
+              let is_trait = Ast_defs.is_c_trait kind in
+              let class_name = snd cid in
+              let non_final_err =
+                Naming_phase_error.naming
+                @@ Naming_error.Class_meth_non_final_CLASS
+                     { pos = fn_expr_pos; is_trait; class_name }
+              in
+              (Error fn_expr_pos, non_final_err :: err_acc)
+            | None ->
+              let meth_err =
+                Naming_phase_error.naming
+                @@ Naming_error.Illegal_class_meth fn_expr_pos
+              in
+              (Error fn_expr_pos, meth_err :: err_acc))
+          | Aast.
+              ( (_, _, Class_const ((_, pc, CI cl), (_, mem))),
+                (_, pm, String meth) )
+            when String.equal mem SN.Members.mClass ->
+            let cid = Aast.CI cl in
+            (Ok (Aast.Smethod_id (((), pc, cid), (pm, meth))), err_acc)
+          | Aast.
+              ( (_, p, Class_const ((_, pc, CIself), (_, mem))),
+                (_, pm, String meth) )
+            when String.equal mem SN.Members.mClass ->
+            (match Env.current_class env with
+            | Some (_cid, _, true) ->
+              (Ok Aast.(Smethod_id (((), pc, CIself), (pm, meth))), err_acc)
+            | Some (cid, _, false) ->
+              let class_name = snd cid in
+              let non_final_err =
+                Naming_phase_error.naming
+                @@ Naming_error.Class_meth_non_final_self
+                     { pos = p; class_name }
+              in
+              (Error p, non_final_err :: err_acc)
+            | None ->
               let meth_err =
                 Naming_phase_error.naming @@ Naming_error.Illegal_class_meth p
               in
-              (Error p, meth_err :: err_acc)
-          end
+              (Error p, meth_err :: err_acc))
+          | Aast.
+              ( (_, p, Class_const ((_, pc, CIstatic), (_, mem))),
+                (_, pm, String meth) )
+            when String.equal mem SN.Members.mClass ->
+            (match Env.current_class env with
+            | Some (_cid, _, _) ->
+              (Ok Aast.(Smethod_id (((), pc, CIstatic), (pm, meth))), err_acc)
+            | None ->
+              let meth_err =
+                Naming_phase_error.naming @@ Naming_error.Illegal_class_meth p
+              in
+              (Error p, meth_err :: err_acc))
+          | ((_, p, _), _) ->
+            let meth_err =
+              Naming_phase_error.naming @@ Naming_error.Illegal_class_meth p
+            in
+            (Error p, meth_err :: err_acc)
+        end
         | [(Ast_defs.Pinout _, _); _]
         | [_; (Ast_defs.Pinout _, _)] ->
           let meth_err =

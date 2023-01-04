@@ -61,16 +61,17 @@ let lookup_props env class_name props =
   SSet.fold
     begin
       fun name map ->
-      let ty_opt =
-        if String.equal name parent_init_prop then
-          Some (Typing_make_type.nonnull Typing_reason.Rnone)
-        else
-          Typing_env.get_class env class_name
-          |> Option.bind ~f:(fun cls ->
-                 Typing_env.get_member false env cls name)
-          |> Option.bind ~f:(fun ce -> Some (Lazy.force ce.Typing_defs.ce_type))
-      in
-      SMap.add name ty_opt map
+        let ty_opt =
+          if String.equal name parent_init_prop then
+            Some (Typing_make_type.nonnull Typing_reason.Rnone)
+          else
+            Typing_env.get_class env class_name
+            |> Option.bind ~f:(fun cls ->
+                   Typing_env.get_member false env cls name)
+            |> Option.bind ~f:(fun ce ->
+                   Some (Lazy.force ce.Typing_defs.ce_type))
+        in
+        SMap.add name ty_opt map
     end
     props
     SMap.empty
@@ -139,7 +140,7 @@ let parent_props_set_during_cstr env (c : Shallow_decl_defs.shallow_class) :
    interested in is, which class members do they initialize?
    But we don't want to recompute it every time it is called.
    So we memoize the result: hence the type method status.
- *)
+*)
 module Env = struct
   type method_status =
     (* We already computed this method *)
@@ -486,9 +487,9 @@ and check_all_init pos env acc =
   SMap.iter
     begin
       fun prop_name _ ->
-      if not (S.mem prop_name acc) then
-        Errors.add_nast_check_error
-        @@ Nast_check_error.Call_before_init { pos; prop_name }
+        if not (S.mem prop_name acc) then
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Call_before_init { pos; prop_name }
     end
     env.props
 
@@ -649,8 +650,7 @@ and expr_ env acc p e =
     List.fold_left
       ~f:
         begin
-          fun acc (_, v) ->
-          expr acc v
+          (fun acc (_, v) -> expr acc v)
         end
       ~init:acc
       fdm

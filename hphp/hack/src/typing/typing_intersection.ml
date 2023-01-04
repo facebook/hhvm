@@ -98,7 +98,7 @@ let recompose_atomic env r tyl =
 
 (* Destructure an intersection into a list of its sub-types,
    decending into sub-intersections.
-   *)
+*)
 let destruct_inter_list env tyl =
   let orr r_opt r = Some (Option.value r_opt ~default:r) in
   let rec dest_inter env ty tyl tyl_res r_inter =

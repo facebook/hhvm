@@ -36,12 +36,11 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tdynamic -> "dynamic"
   | Tgeneric (s, []) -> s
   | Tgeneric (s, targs) -> Utils.strip_ns s ^ "<" ^ print_tyl_exn targs ^ ">"
-  | Toption ty ->
-    begin
-      match get_node ty with
-      | Tnonnull -> "mixed"
-      | _ -> "?" ^ print_ty_exn ty
-    end
+  | Toption ty -> begin
+    match get_node ty with
+    | Tnonnull -> "mixed"
+    | _ -> "?" ^ print_ty_exn ty
+  end
   | Tfun ft ->
     let params = List.map ft.ft_params ~f:print_fun_param_exn in
     let params =

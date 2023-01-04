@@ -85,8 +85,7 @@ let handler =
           env
           lhs_ty
           hint_ty
-          ~always_nonnull:
-            Lints_errors.redundant_nonnull_assertion
+          ~always_nonnull:Lints_errors.redundant_nonnull_assertion
             (* D21997525: $x as null is not particularly interesting or common,
              * so we don't warn against it. Only $x is null seems useful.
              *)

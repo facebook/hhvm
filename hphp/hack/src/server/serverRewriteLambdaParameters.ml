@@ -102,33 +102,31 @@ let get_patches ctx file =
                   pos = Pos.to_absolute pos;
                   text = Printf.sprintf "(%s %s)" type_str (text node);
                 }
-          | ListItem { list_item; _ } ->
-            begin
-              match syntax list_item with
-              | ParameterDeclaration _ ->
-                get_first_suggested_type_as_string file type_map list_item
-                >>= fun type_str ->
-                position file list_item >>| fun pos ->
-                ServerRefactorTypes.Insert
-                  ServerRefactorTypes.
-                    { pos = Pos.to_absolute pos; text = type_str ^ " " }
-              | _ -> None
-            end
+          | ListItem { list_item; _ } -> begin
+            match syntax list_item with
+            | ParameterDeclaration _ ->
+              get_first_suggested_type_as_string file type_map list_item
+              >>= fun type_str ->
+              position file list_item >>| fun pos ->
+              ServerRefactorTypes.Insert
+                ServerRefactorTypes.
+                  { pos = Pos.to_absolute pos; text = type_str ^ " " }
+            | _ -> None
+          end
           | _ -> None)
       in
       Option.to_list patch
     in
     match syntax node with
-    | LambdaExpression { lambda_signature; _ } ->
-      begin
-        match syntax lambda_signature with
-        | Token _ -> get_lambda_parameter_patches lambda_signature
-        | LambdaSignature { lambda_parameters; _ } ->
-          List.concat_map
-            (syntax_node_to_list lambda_parameters)
-            ~f:get_lambda_parameter_patches
-        | _ -> []
-      end
+    | LambdaExpression { lambda_signature; _ } -> begin
+      match syntax lambda_signature with
+      | Token _ -> get_lambda_parameter_patches lambda_signature
+      | LambdaSignature { lambda_parameters; _ } ->
+        List.concat_map
+          (syntax_node_to_list lambda_parameters)
+          ~f:get_lambda_parameter_patches
+      | _ -> []
+    end
     | _ -> []
   in
   let (patches, _) =

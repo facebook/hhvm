@@ -73,29 +73,28 @@ module Client_actual = struct
     | Settled -> Some Responses.Settled
     | Mid_update reader
     | Unknown reader
-      when Buffered_line_reader.is_readable reader ->
-      begin
-        try
-          let msg = Buffered_line_reader.get_next_line reader in
-          let msg = Responses.of_string msg in
-          let response =
-            match msg with
-            | Responses.Unknown -> Responses.Unknown
-            | Responses.Mid_update ->
-              instance.state := Mid_update reader;
-              Responses.Mid_update
-            | Responses.Settled ->
-              instance.state := Settled;
-              ignore_unix_error Unix.close @@ Buffered_line_reader.get_fd reader;
-              Responses.Settled
-          in
-          Some response
-        with
-        | Unix.Unix_error (Unix.EPIPE, _, _)
-        | End_of_file ->
-          instance.state := Failed;
-          None
-      end
+      when Buffered_line_reader.is_readable reader -> begin
+      try
+        let msg = Buffered_line_reader.get_next_line reader in
+        let msg = Responses.of_string msg in
+        let response =
+          match msg with
+          | Responses.Unknown -> Responses.Unknown
+          | Responses.Mid_update ->
+            instance.state := Mid_update reader;
+            Responses.Mid_update
+          | Responses.Settled ->
+            instance.state := Settled;
+            ignore_unix_error Unix.close @@ Buffered_line_reader.get_fd reader;
+            Responses.Settled
+        in
+        Some response
+      with
+      | Unix.Unix_error (Unix.EPIPE, _, _)
+      | End_of_file ->
+        instance.state := Failed;
+        None
+    end
     | Mid_update _ -> Some Responses.Mid_update
     | Unknown _ -> Some Responses.Unknown
 

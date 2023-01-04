@@ -66,12 +66,11 @@ and aast_contexts_to_decl_capability env ctxs default_pos :
     let reason = Reason.Rhint (Decl_env.make_decl_pos env pos) in
     let dty =
       match dtys with
-      | [dty] ->
-        begin
-          match get_node dty with
-          | Tgeneric _ -> dty
-          | _ -> mk (reason, Tintersection dtys)
-        end
+      | [dty] -> begin
+        match get_node dty with
+        | Tgeneric _ -> dty
+        | _ -> mk (reason, Tintersection dtys)
+      end
       | _ -> mk (reason, Tintersection dtys)
     in
     (pos, CapTy dty)
@@ -149,8 +148,7 @@ and hint_ p env = function
           make_fp_flags
             ~mode:kind
             ~accept_disposable:false
-            ~has_default:
-              false
+            ~has_default:false
               (* Currently do not support external and cancall on parameters of function parameters *)
             ~ifc_external:false
             ~ifc_can_call:false

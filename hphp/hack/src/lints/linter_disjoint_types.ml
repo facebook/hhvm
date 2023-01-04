@@ -44,26 +44,24 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, p, Call ((_, _, Id (_, name)), (_ :: _ as tal), _, _)) ->
-        begin
-          match Decl_provider.get_fun (Tast_env.get_ctx env) name with
-          | Some { fe_type; _ } ->
-            begin
-              match get_node fe_type with
-              | Tfun { ft_tparams = tpl; _ } ->
-                if List.exists tpl ~f:has_non_disjoint_attr then
-                  let (pairs, _) = List.zip_with_remainder tpl tal in
-                  let tyl =
-                    List.filter_map pairs ~f:(fun (tp, (ty, _)) ->
-                        if has_non_disjoint_attr tp then
-                          Some ty
-                        else
-                          None)
-                  in
-                  check_non_disjoint_tyl env p name tyl
-              | _ -> ()
-            end
+      | (_, p, Call ((_, _, Id (_, name)), (_ :: _ as tal), _, _)) -> begin
+        match Decl_provider.get_fun (Tast_env.get_ctx env) name with
+        | Some { fe_type; _ } -> begin
+          match get_node fe_type with
+          | Tfun { ft_tparams = tpl; _ } ->
+            if List.exists tpl ~f:has_non_disjoint_attr then
+              let (pairs, _) = List.zip_with_remainder tpl tal in
+              let tyl =
+                List.filter_map pairs ~f:(fun (tp, (ty, _)) ->
+                    if has_non_disjoint_attr tp then
+                      Some ty
+                    else
+                      None)
+              in
+              check_non_disjoint_tyl env p name tyl
           | _ -> ()
         end
+        | _ -> ()
+      end
       | _ -> ()
   end

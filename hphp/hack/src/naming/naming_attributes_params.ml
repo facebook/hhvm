@@ -15,15 +15,14 @@ let deprecated ~kind (_, name) attrs =
   let attr = Naming_attributes.find SN.UserAttributes.uaDeprecated attrs in
   let open Aast in
   match attr with
-  | Some { ua_name = _; ua_params = msg :: _ } ->
-    begin
-      match Nast_eval.static_string msg with
-      | Ok msg ->
-        let name = Utils.strip_ns name in
-        let deprecated_prefix =
-          Printf.sprintf "The %s %s is deprecated: " kind name
-        in
-        Some (deprecated_prefix ^ msg)
-      | Error _ -> None
-    end
+  | Some { ua_name = _; ua_params = msg :: _ } -> begin
+    match Nast_eval.static_string msg with
+    | Ok msg ->
+      let name = Utils.strip_ns name in
+      let deprecated_prefix =
+        Printf.sprintf "The %s %s is deprecated: " kind name
+      in
+      Some (deprecated_prefix ^ msg)
+    | Error _ -> None
+  end
   | _ -> None

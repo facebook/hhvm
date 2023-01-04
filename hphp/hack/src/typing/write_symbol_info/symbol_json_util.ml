@@ -33,7 +33,7 @@ let get_type_from_hint_strip_ns ctx h =
   Typing_print.full_strip_ns_decl ~msg:false env (Decl_hint.hint decl_env h)
 
 (* Replace any codepoints that are not valid UTF-8 with
-the unrepresentable character. *)
+   the unrepresentable character. *)
 let check_utf8 str =
   let b = Buffer.create (String.length str) in
   let replace_malformed () _index = function

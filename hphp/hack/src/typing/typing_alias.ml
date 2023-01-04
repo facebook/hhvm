@@ -104,7 +104,7 @@ end = struct
             ~f:
               begin
                 fun acc e ->
-                this#on_expr acc ((), p, Binop (Ast_defs.Eq None, e, x2))
+                  this#on_expr acc ((), p, Binop (Ast_defs.Eq None, e, x2))
               end
             ~init:acc
             el
@@ -116,8 +116,7 @@ end = struct
           (local_to_string e1)
           ~f:
             begin
-              fun s ->
-              Dep.expr s acc e2
+              (fun s -> Dep.expr s acc e2)
             end
           ~default:acc
 
@@ -149,8 +148,8 @@ end = struct
     SMap.fold
       begin
         fun k _ (visited, current_max) ->
-        let (visited, n) = key aliases visited k in
-        (visited, max n current_max)
+          let (visited, n) = key aliases visited k in
+          (visited, max n current_max)
       end
       aliases
       (SMap.empty, 0)

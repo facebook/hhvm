@@ -343,15 +343,15 @@ let derive_dynamic_accesses adjacency_table dynamic_accesses =
 
 (* The following program roughly summarises the solver in Datalog.
 
-  Variables with single letters E and F and their variants with primes all
-  range over entities.
+   Variables with single letters E and F and their variants with primes all
+   range over entities.
 
-  Comma (,) is used for conjunction semi-colon (;) is used for disjunction.
-  Comma has higher precedence (binds tighter) than semi-colon.
+   Comma (,) is used for conjunction semi-colon (;) is used for disjunction.
+   Comma has higher precedence (binds tighter) than semi-colon.
 
-  p :- q1, ..., qn
+   p :- q1, ..., qn
 
-  means if q1 to qn holds, so does p.
+   means if q1 to qn holds, so does p.
 *)
 let deduce (constraints : constraint_ list) : constraint_ list =
   let {
@@ -619,7 +619,7 @@ let equiv
        (List.filter_map ~f:only_intra_constr any_constr_list_2))
 
 (* TODO(T140419180): could infer more shapes by not assuming
-`Has_dynamic_key` when an entity flows into a `mixed` param. *)
+   `Has_dynamic_key` when an entity flows into a `mixed` param. *)
 let widen = List.map ~f:(fun ent -> Has_dynamic_key ent)
 
 let subsets (ent1 : entity_) (ent2 : entity_) : constraint_ =

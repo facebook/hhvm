@@ -8,9 +8,9 @@
  *)
 
 (* Naming conventions in this file:
-  - tco_<feature/flag/setting> - type checker option
-  - po_<feature/flag/setting> - parser option
-  - so_<feature/flag/setting> - server option
+   - tco_<feature/flag/setting> - type checker option
+   - po_<feature/flag/setting> - parser option
+   - so_<feature/flag/setting> - server option
 *)
 
 type t = {

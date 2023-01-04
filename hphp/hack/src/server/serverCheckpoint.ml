@@ -20,8 +20,7 @@ let process_updates updates =
           updates
           ~f:
             begin
-              fun path acc ->
-              Relative_path.Set.add acc path
+              (fun path acc -> Relative_path.Set.add acc path)
             end
           ~init:cur_set)
 

@@ -43,7 +43,8 @@ module GlobalAccessCheck = Error_codes.GlobalAccessCheck
 (* Recognize common patterns for global access (only writes for now). *)
 type global_access_pattern =
   | Singleton (* Write to a global variable whose value is null *)
-  | Caching (* Write to a global collection when the element is null or does not exist *)
+  | Caching
+    (* Write to a global collection when the element is null or does not exist *)
   | CounterIncrement (* Increase a global variable by 1 or -1 *)
   | WriteEmptyOrNull (* Assign null or empty string to a global variable *)
   | WriteLiteral (* Assign a literal to a global variable *)
@@ -364,19 +365,19 @@ let check_super_global_method expr env external_fun_name =
   | _ -> false
 
 (* The context maintains:
-  (1) A hash table from local variables to the corresponding data sources.
-  For any local variable, if its data sources contain GlobalReference(s), then
-  it is potentially a reference to global variable. Notice that a local variable
-  may refers to multiple global variables, for example:
-  "if (condition) { $a = Foo::$bar; } else { $a = memoized_func(); }"
-  after the above code, $a has a reference to either Foo::$bar or memoized_func,
-  thus var_data_src_tbl is like {"a" => {GlobalReference of "Foo::$bar",
-  GlobalReference of "\memoized_func"}}.
-  (2) A set of global variables whose values are null, which can be used to
-  identify singletons. For example, consider the following program:
-  "if (Foo::$bar is null) { Foo::$bar = new Bar(); }"
-  inside the true branch, null_global_var_set is {"Foo::$bar"}, and
-  the assignment to Foo::$bar shall be identified as a singleton. *)
+   (1) A hash table from local variables to the corresponding data sources.
+   For any local variable, if its data sources contain GlobalReference(s), then
+   it is potentially a reference to global variable. Notice that a local variable
+   may refers to multiple global variables, for example:
+   "if (condition) { $a = Foo::$bar; } else { $a = memoized_func(); }"
+   after the above code, $a has a reference to either Foo::$bar or memoized_func,
+   thus var_data_src_tbl is like {"a" => {GlobalReference of "Foo::$bar",
+   GlobalReference of "\memoized_func"}}.
+   (2) A set of global variables whose values are null, which can be used to
+   identify singletons. For example, consider the following program:
+   "if (Foo::$bar is null) { Foo::$bar = new Bar(); }"
+   inside the true branch, null_global_var_set is {"Foo::$bar"}, and
+   the assignment to Foo::$bar shall be identified as a singleton. *)
 type ctx = {
   var_data_src_tbl: (string, DataSourceSet.t) Hashtbl.t ref;
   null_global_var_set: SSet.t ref;
@@ -401,7 +402,7 @@ let add_var_data_srcs_to_tbl tbl var srcs =
 let replace_var_data_srcs_in_tbl tbl var srcs = Hashtbl.replace tbl var srcs
 
 (* Given two hash tables of type (string, DataSourceSet.t) Hashtbl.t, merge the second
-  table into the first one. *)
+   table into the first one. *)
 let merge_var_data_srcs_tbls tbl1 tbl2 =
   Hashtbl.iter (add_var_data_srcs_to_tbl tbl1) tbl2
 
@@ -483,7 +484,7 @@ let get_static_prop_elts env class_id get =
   | CGexpr _ -> []
 
 (* Check if an expression is directly from a static variable or not,
-  e.g. it returns true for Foo::$bar or (Foo::$bar)->prop. *)
+   e.g. it returns true for Foo::$bar or (Foo::$bar)->prop. *)
 let rec is_expr_static env (_, _, te) =
   match te with
   | Class_get (class_id, expr, Is_prop) ->
@@ -495,10 +496,10 @@ let rec is_expr_static env (_, _, te) =
   | _ -> false
 
 (* Print out global variables, e.g. Foo::$bar => "Foo::$bar", self::$bar => "Foo::$bar",
-  static::$bar => "this::$bar", memoized_func => "\memoized_func", $baz->memoized_method
-  => "Baz->memoized_method", Baz::memoized_method => "Baz::memoized_method",
-  $this->memoized_method => "this->memoized_method".
-  Notice that this does not handle arbitrary expressions. *)
+   static::$bar => "this::$bar", memoized_func => "\memoized_func", $baz->memoized_method
+   => "Baz->memoized_method", Baz::memoized_method => "Baz::memoized_method",
+   $this->memoized_method => "this->memoized_method".
+   Notice that this does not handle arbitrary expressions. *)
 let rec print_global_expr env expr =
   match expr with
   | Call ((_, _, caller_expr), _, _, _) ->
@@ -556,9 +557,9 @@ let is_value_collection_ty env ty =
   || Typing_utils.is_sub_type env ty shape
 
 (* Check if the variable type does NOT has a reference to any object:
-  if so, then it is OK to write to this variable.
-  Copied from is_safe_mut_ty in readonly_check.ml.
-  To do: check if any change is needed for the global write checker. *)
+   if so, then it is OK to write to this variable.
+   Copied from is_safe_mut_ty in readonly_check.ml.
+   To do: check if any change is needed for the global write checker. *)
 let rec has_no_object_ref_ty env (seen : SSet.t) ty =
   let open Typing_defs_core in
   let (env, ty) = Tast_env.expand_type env ty in
@@ -810,7 +811,7 @@ let get_global_vars_from_expr ?(include_immutable = true) env ctx expr =
          SSet.empty)
 
 (* Given an expression that appears on LHS of an assignment,
-  this method gets the set of variables whose value may be assigned. *)
+   this method gets the set of variables whose value may be assigned. *)
 let rec get_vars_in_expr vars (_, _, te) =
   match te with
   | Lvar (_, id) -> vars := SSet.add (Local_id.to_string id) !vars
@@ -821,7 +822,7 @@ let rec get_vars_in_expr vars (_, _, te) =
   | _ -> ()
 
 (* Suppose te is on LHS of an assignment, check if we can write to global variables
-  by accessing either directly static variables or an object's properties. *)
+   by accessing either directly static variables or an object's properties. *)
 let rec has_global_write_access (_, _, te) =
   match te with
   | Class_get (_, _, Is_prop)

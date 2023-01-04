@@ -531,18 +531,17 @@ let rec get_base_type ?(expand_supportdyn = true) env ty =
       MakeType.supportdyn r ty
   (* If we have an expression dependent type and it only has one super
      type, we can treat it similarly to AKdependent _, Some ty *)
-  | Tgeneric (n, targs) when DependentKind.is_generic_dep_ty n ->
-    begin
-      match TySet.elements (Env.get_upper_bounds env n targs) with
-      | ty2 :: _ when ty_equal ty ty2 -> ty
-      (* If it's exactly equal, then the base ty is just this one *)
-      | ty :: _ ->
-        if TySet.mem ty (Env.get_lower_bounds env n targs) then
-          ty
-        else
-          get_base_type env ty
-      | [] -> ty
-    end
+  | Tgeneric (n, targs) when DependentKind.is_generic_dep_ty n -> begin
+    match TySet.elements (Env.get_upper_bounds env n targs) with
+    | ty2 :: _ when ty_equal ty ty2 -> ty
+    (* If it's exactly equal, then the base ty is just this one *)
+    | ty :: _ ->
+      if TySet.mem ty (Env.get_lower_bounds env n targs) then
+        ty
+      else
+        get_base_type env ty
+    | [] -> ty
+  end
   | Tnewtype (cid, _, bound_ty)
     when is_prim Aast.Tarraykey bound_ty && Env.is_enum env cid ->
     ty

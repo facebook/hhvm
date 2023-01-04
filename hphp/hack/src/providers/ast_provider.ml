@@ -135,8 +135,8 @@ let compute_source_text ~(entry : Provider_context.entry) :
     source_text
 
 (* Note that some callers may not actually need the AST errors. This could be
-improved with a method similar to the TAST-and-errors generation, where the TAST
-errors are not generated unless necessary. *)
+   improved with a method similar to the TAST-and-errors generation, where the TAST
+   errors are not generated unless necessary. *)
 let compute_parser_return_and_ast_errors
     ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
     Parser_return.t * Errors.t =
@@ -227,25 +227,24 @@ let get_ast_with_error ?(full = false) ctx path =
   | ( _,
       ( Provider_backend.Rust_provider_backend _
       | Provider_backend.Shared_memory
-      | Provider_backend.Pessimised_shared_memory _ ) ) ->
+      | Provider_backend.Pessimised_shared_memory _ ) ) -> begin
     (* Note that we might be looking up the shared ParserHeap directly, *)
     (* or maybe into a local-change-stack due to quarantine. *)
-    begin
-      match (ParserHeap.get path, full) with
-      | (None, true)
-      | (Some (_, Decl), true) ->
-        (* If we need full, and parser-heap can't provide it, then we *)
-        (* don't want to write a full decl into the parser heap. *)
-        get_from_local_cache ~full ctx path
-      | (None, false) ->
-        (* This is the case where we will write into the parser heap. *)
-        let (err, ast) = get_from_local_cache ~full ctx path in
-        if Errors.is_empty err then ParserHeap.add path (ast, Decl);
-        (err, ast)
-      | (Some (ast, _), _) ->
-        (* It's in the parser-heap! hurrah! *)
-        (Errors.empty, ast)
-    end
+    match (ParserHeap.get path, full) with
+    | (None, true)
+    | (Some (_, Decl), true) ->
+      (* If we need full, and parser-heap can't provide it, then we *)
+      (* don't want to write a full decl into the parser heap. *)
+      get_from_local_cache ~full ctx path
+    | (None, false) ->
+      (* This is the case where we will write into the parser heap. *)
+      let (err, ast) = get_from_local_cache ~full ctx path in
+      if Errors.is_empty err then ParserHeap.add path (ast, Decl);
+      (err, ast)
+    | (Some (ast, _), _) ->
+      (* It's in the parser-heap! hurrah! *)
+      (Errors.empty, ast)
+  end
   | (_, Provider_backend.Analysis) ->
     (* Zoncolan has its own caching layers and does not make use of Hack's *)
     parse_from_disk_no_caching ~apply_file_filter:false
@@ -274,12 +273,11 @@ let get_def
     List.fold_left defs ~init:acc ~f:(fun acc def ->
         match def with
         | Aast.Namespace (_, defs) -> get acc defs
-        | _ ->
-          begin
-            match node_getter def with
-            | Some (node, name) when name_matcher name -> Some node
-            | _ -> acc
-          end)
+        | _ -> begin
+          match node_getter def with
+          | Some (node, name) when name_matcher name -> Some node
+          | _ -> acc
+        end)
   in
   get None defs
 

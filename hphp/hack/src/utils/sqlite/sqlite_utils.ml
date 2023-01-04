@@ -78,13 +78,12 @@ let to_int64 (value : Sqlite3.Data.t) : int64 =
 (* Convert a sqlite data value to an ocaml int, or raise an exception *)
 let to_int_exn (value : Sqlite3.Data.t) : int =
   match value with
-  | Sqlite3.Data.INT i ->
-    begin
-      match Int64.to_int i with
-      | Some num -> num
-      | None ->
-        raise (Invalid_argument "Attempt to coerce sqlite value to ocaml int")
-    end
+  | Sqlite3.Data.INT i -> begin
+    match Int64.to_int i with
+    | Some num -> num
+    | None ->
+      raise (Invalid_argument "Attempt to coerce sqlite value to ocaml int")
+  end
   | _ -> raise (Invalid_argument "Attempt to coerce sqlite value to ocaml int")
 
 (* Convert a sqlite data value to an ocaml int, and ignore errors *)

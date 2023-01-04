@@ -559,7 +559,7 @@ let static_prop_decl_lazy
            sp))
 
 (* each concrete type constant T = <sometype> implicitly defines a
-class constant with the same name which is TypeStructure<sometype> *)
+   class constant with the same name which is TypeStructure<sometype> *)
 let typeconst_structure
     (c : Shallow_decl_defs.shallow_class)
     (stc : Shallow_decl_defs.shallow_typeconst) : Typing_defs.class_const =
@@ -1032,18 +1032,18 @@ and class_decl
   SMap.iter
     begin
       fun x _ ->
-      Typing_deps.add_idep
-        (Provider_context.get_deps_mode ctx)
-        (Dep.Type cls_name)
-        (Dep.Type x);
-      if
-        TypecheckerOptions.record_fine_grained_dependencies
-        @@ Provider_context.get_tcopt ctx
-      then
-        Typing_pessimisation_deps.add_coarse_dep
+        Typing_deps.add_idep
           (Provider_context.get_deps_mode ctx)
           (Dep.Type cls_name)
-          (Dep.Type x)
+          (Dep.Type x);
+        if
+          TypecheckerOptions.record_fine_grained_dependencies
+          @@ Provider_context.get_tcopt ctx
+        then
+          Typing_pessimisation_deps.add_coarse_dep
+            (Provider_context.get_deps_mode ctx)
+            (Dep.Type cls_name)
+            (Dep.Type x)
     end
     impl;
   (tc, member_heaps_values)

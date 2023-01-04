@@ -23,12 +23,11 @@ let go_common
   | Some (env, ty) ->
     let rec handle_type acc ty =
       match get_node ty with
-      | Tclass ((_, str), _, _) ->
-        begin
-          match Naming_global.GEnv.type_pos ctx str with
-          | None -> acc
-          | Some pos -> (pos, str) :: acc
-        end
+      | Tclass ((_, str), _, _) -> begin
+        match Naming_global.GEnv.type_pos ctx str with
+        | None -> acc
+        | Some pos -> (pos, str) :: acc
+      end
       | Toption ty' -> handle_type acc ty'
       | Tunion ty_lst ->
         List.fold ty_lst ~init:acc ~f:(fun a y -> handle_type a y)

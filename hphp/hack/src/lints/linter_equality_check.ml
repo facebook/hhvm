@@ -30,25 +30,23 @@ let rec make_concrete env ty =
     let (env, tyl) = Env.get_concrete_supertypes ~abstract_enum:true env ty in
     begin
       match tyl with
-      | [] ->
+      | [] -> begin
         (* FIXME: When we have a type parameter with no upper bounds, it may be
            because of T30081797. Until that issue is fixed, just ignore generics
            that have no known upper bounds in the TAST. *)
-        begin
-          match get_node ty with
-          | Tgeneric _ -> (env, mk (Reason.Rnone, Typing_defs.make_tany ()))
-          | _ -> (env, ty)
-        end
+        match get_node ty with
+        | Tgeneric _ -> (env, mk (Reason.Rnone, Typing_defs.make_tany ()))
+        | _ -> (env, ty)
+      end
       | tyl -> make_concrete env (MakeType.union (get_reason ty) tyl)
     end
-  | Tunion tyl ->
-    begin
-      match tyl with
-      | [] -> (env, mk (Reason.Rnone, Typing_defs.make_tany ()))
-      | tyl ->
-        let (env, tyl) = List.map_env env tyl ~f:make_concrete in
-        Env.union_list env (get_reason ty) tyl
-    end
+  | Tunion tyl -> begin
+    match tyl with
+    | [] -> (env, mk (Reason.Rnone, Typing_defs.make_tany ()))
+    | tyl ->
+      let (env, tyl) = List.map_env env tyl ~f:make_concrete in
+      Env.union_list env (get_reason ty) tyl
+  end
   | _ -> (env, ty)
 
 let enum_base_type env cid =
@@ -242,14 +240,13 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, p, Binop (((Diff2 | Eqeqeq) as bop), e1, e2)) ->
-        begin
-          match (e1, e2) with
-          | ((_, _, Null), e)
-          | (e, (_, _, Null)) ->
-            ensure_valid_null_check ~nonnull:(equal_bop bop Diff2) env p e
-          | _ -> ensure_valid_equality_check env p bop e1 e2
-        end
+      | (_, p, Binop (((Diff2 | Eqeqeq) as bop), e1, e2)) -> begin
+        match (e1, e2) with
+        | ((_, _, Null), e)
+        | (e, (_, _, Null)) ->
+          ensure_valid_null_check ~nonnull:(equal_bop bop Diff2) env p e
+        | _ -> ensure_valid_equality_check env p bop e1 e2
+      end
       | (_, p, Call ((_, _, Id (_, id)), [(tv1, _); (tv2, _)], _, _))
         when String.equal id SN.HH.contains ->
         ensure_valid_contains_check env p tv1 tv2

@@ -17,18 +17,17 @@ let value_exn (telemetry : Telemetry.t) (path : string) : Hh_json.json =
   let rec drill (json : Hh_json.json) (accessors : string list) : Hh_json.json =
     match accessors with
     | [] -> failwith "empty path provided"
-    | [key] ->
-      begin
-        match Hh_json_helpers.Jget.val_opt (Some json) key with
-        | None ->
-          failwith
-            (Printf.sprintf
-               "%s not found: %s in %s"
-               key
-               path
-               (telemetry_to_multiline telemetry))
-        | Some v -> v
-      end
+    | [key] -> begin
+      match Hh_json_helpers.Jget.val_opt (Some json) key with
+      | None ->
+        failwith
+          (Printf.sprintf
+             "%s not found: %s in %s"
+             key
+             path
+             (telemetry_to_multiline telemetry))
+      | Some v -> v
+    end
     | key :: rest ->
       let obj = Hh_json_helpers.Jget.obj_opt (Some json) key in
       (match obj with

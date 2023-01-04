@@ -426,7 +426,7 @@ let process_one_workitem
 
   let progress =
     {
-      completed = fn :: check_fns @ progress.completed;
+      completed = (fn :: check_fns) @ progress.completed;
       remaining = fns;
       deferred = List.concat [deferred; progress.deferred];
     }
@@ -664,12 +664,11 @@ let merge
       ~init:0
       ~f:(fun acc workitem ->
         match Hash_set.Poly.strict_remove workitems_in_progress workitem with
-        | Ok () ->
-          begin
-            match workitem with
-            | Check _ -> acc + 1
-            | _ -> acc
-          end
+        | Ok () -> begin
+          match workitem with
+          | Check _ -> acc + 1
+          | _ -> acc
+        end
         | _ -> acc)
       progress.completed
   in
@@ -1093,10 +1092,10 @@ module TestMocking = struct
 end
 
 module Mocking =
-(val if Injector_config.use_test_stubbing then
-       (module TestMocking : Mocking_sig)
-     else
-       (module NoMocking : Mocking_sig))
+  (val if Injector_config.use_test_stubbing then
+         (module TestMocking : Mocking_sig)
+       else
+         (module NoMocking : Mocking_sig))
 
 let should_process_sequentially
     (opts : TypecheckerOptions.t) (workitems : workitem BigList.t) : bool =

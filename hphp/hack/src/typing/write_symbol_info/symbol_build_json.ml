@@ -138,10 +138,10 @@ let build_call_arguments_json arguments =
   let argument_json span arg_opt =
     JSON_Object
       (("span", span)
-       ::
-       (match arg_opt with
-       | Some json_obj -> [("argument", json_obj)]
-       | None -> []))
+      ::
+      (match arg_opt with
+      | Some json_obj -> [("argument", json_obj)]
+      | None -> []))
   in
   let f (json_fields, last_start) (arg_opt, pos) =
     let (start, _) = Pos.info_raw pos in
@@ -394,7 +394,7 @@ let build_hint_xrefs_json sym_pos =
   JSON_Array xrefs
 
 (* These are functions for building JSON to reference some
-existing fact. *)
+   existing fact. *)
 
 let build_class_const_decl_json_ref fact_id =
   JSON_Object [("classConst", build_id_json fact_id)]

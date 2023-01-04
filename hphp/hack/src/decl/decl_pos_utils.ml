@@ -277,7 +277,7 @@ struct
         SMap.map
           begin
             fun ({ sc_subst; _ } as sc) ->
-            { sc with sc_subst = SMap.map ty sc_subst }
+              { sc with sc_subst = SMap.map ty sc_subst }
           end
           dc.dc_substs;
       dc_consts = SMap.map class_const dc.dc_consts;

@@ -24,14 +24,13 @@ let parent_init_prop = "parent::" ^ SN.Members.__construct
  * initialized, we add a phony class variable. *)
 let add_parent_construct env c props parent_ty =
   match get_node parent_ty with
-  | Tapply ((_, parent), _) ->
-    begin
-      match Env.get_class_dep env parent with
-      | Some class_ when Cls.need_init class_ && Option.is_some c.sc_constructor
-        ->
-        SSet.add parent_init_prop props
-      | _ -> props
-    end
+  | Tapply ((_, parent), _) -> begin
+    match Env.get_class_dep env parent with
+    | Some class_ when Cls.need_init class_ && Option.is_some c.sc_constructor
+      ->
+      SSet.add parent_init_prop props
+    | _ -> props
+  end
   | _ -> props
 
 let parent env c acc =
@@ -63,10 +62,10 @@ let own_props c props =
     ~f:
       begin
         fun acc sp ->
-        if prop_may_need_init sp then
-          SSet.add (snd sp.sp_name) acc
-        else
-          acc
+          if prop_may_need_init sp then
+            SSet.add (snd sp.sp_name) acc
+          else
+            acc
       end
     ~init:props
 
@@ -76,10 +75,10 @@ let init_not_required_props c props =
     ~f:
       begin
         fun acc sp ->
-        if prop_may_need_init sp then
-          acc
-        else
-          SSet.add (snd sp.sp_name) acc
+          if prop_may_need_init sp then
+            acc
+          else
+            SSet.add (snd sp.sp_name) acc
       end
     ~init:props
 
@@ -105,36 +104,37 @@ and trait_props env c props =
     ~f:
       begin
         fun acc ty ->
-        match get_node ty with
-        | Tapply ((_, trait), _) ->
-          let cls = Env.get_class_dep env trait in
-          let shallow_class =
-            Shallow_classes_provider.get (Env.get_ctx env) trait
-          in
-          (match (cls, shallow_class) with
-          | (Some cls, Some sc) ->
-            let cstr = Cls.construct cls in
-            let (_, members) = class_ env sc in
-            (* If our current class defines its own constructor, completely ignore
-             * the fact that the trait may have had one defined and merge in all of
-             * its members.
-             * If the curr. class does not have its own constructor, only fold in
-             * the trait members if it would not have had its own constructor when
-             * defining `dc_deferred_init_members`. See logic in `class_` for
-             * Ast_defs.Cabstract to see where this deviated for traits.
-             *)
-            begin
-              match fst cstr with
-              | None -> SSet.union members acc
-              | Some cstr
-                when String.( <> ) cstr.ce_origin trait || get_ce_abstract cstr
-                ->
-                SSet.union members acc
-              | _ when Option.is_some c.sc_constructor -> SSet.union members acc
-              | _ -> acc
-            end
-          | _ -> acc)
-        | _ -> acc
+          match get_node ty with
+          | Tapply ((_, trait), _) ->
+            let cls = Env.get_class_dep env trait in
+            let shallow_class =
+              Shallow_classes_provider.get (Env.get_ctx env) trait
+            in
+            (match (cls, shallow_class) with
+            | (Some cls, Some sc) ->
+              let cstr = Cls.construct cls in
+              let (_, members) = class_ env sc in
+              (* If our current class defines its own constructor, completely ignore
+               * the fact that the trait may have had one defined and merge in all of
+               * its members.
+               * If the curr. class does not have its own constructor, only fold in
+               * the trait members if it would not have had its own constructor when
+               * defining `dc_deferred_init_members`. See logic in `class_` for
+               * Ast_defs.Cabstract to see where this deviated for traits.
+               *)
+              begin
+                match fst cstr with
+                | None -> SSet.union members acc
+                | Some cstr
+                  when String.( <> ) cstr.ce_origin trait
+                       || get_ce_abstract cstr ->
+                  SSet.union members acc
+                | _ when Option.is_some c.sc_constructor ->
+                  SSet.union members acc
+                | _ -> acc
+              end
+            | _ -> acc)
+          | _ -> acc
       end
     ~init:props
 

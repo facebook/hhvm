@@ -2187,7 +2187,7 @@ end = struct
       | [] -> k []
       | (ns, next) :: rest ->
         auxs rest ~k:(fun rest' ->
-            aux next ~k:(fun next' -> k @@ (ns, next') :: rest'))
+            aux next ~k:(fun next' -> k @@ ((ns, next') :: rest')))
     in
     aux ~k:Fn.id @@ List.map ~f:(fun dep -> (namespace_of dep, dep)) deps
 end

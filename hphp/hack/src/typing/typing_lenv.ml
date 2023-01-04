@@ -83,7 +83,7 @@ let restore_and_merge_conts_from env fromlocals conts =
   Env.env_with_locals env local_types
 
 (* Merge all continuations in the provided list and update the 'next'
-* continuation with the result. *)
+   * continuation with the result. *)
 let update_next_from_conts env cont_list =
   let local_types = get_all_locals env in
   let (env, local_types) =
@@ -92,7 +92,7 @@ let update_next_from_conts env cont_list =
   Env.env_with_locals env local_types
 
 (* After this call, the provided continuation will be the union of itself and
-* the next continuation *)
+   * the next continuation *)
 let save_and_merge_next_in_cont env cont =
   let local_types = get_all_locals env in
   let (env, local_types) =

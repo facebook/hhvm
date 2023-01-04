@@ -226,12 +226,11 @@ let prepare_auto_namespace_map config =
     ~f:convert_auto_namespace_to_map
 
 let extract_log_level = function
-  | (log_key, Hh_json.JSON_Number log_level) ->
-    begin
-      match int_of_string_opt log_level with
-      | Some log_level -> (log_key, log_level)
-      | None -> failwith "non-integer log level value"
-    end
+  | (log_key, Hh_json.JSON_Number log_level) -> begin
+    match int_of_string_opt log_level with
+    | Some log_level -> (log_key, log_level)
+    | None -> failwith "non-integer log level value"
+  end
   | _ -> failwith "non-integer log level value"
 
 let convert_log_levels_to_map map =

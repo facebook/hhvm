@@ -7,11 +7,11 @@
  *)
 
 (* This elaboration pass will:
-  - pessimise return types; and
-  - add `SupportDyn` attributes to classes; and
-  - add upper bounds to type parameters.
+   - pessimise return types; and
+   - add `SupportDyn` attributes to classes; and
+   - add upper bounds to type parameters.
 
-  It is intended for use when the `--everything-sdt` typechecker option is set
+   It is intended for use when the `--everything-sdt` typechecker option is set
 *)
 
 val top_down_pass :

@@ -141,12 +141,11 @@ let rec truthiness env ty =
   | Tprim Tvoid -> Always_falsy
   | Tprim Tnoreturn -> Unknown
   | Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) -> Possibly_falsy
-  | Tunion tyl ->
-    begin
-      match List.map tyl ~f:(truthiness env) with
-      | [] -> Unknown
-      | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
-    end
+  | Tunion tyl -> begin
+    match List.map tyl ~f:(truthiness env) with
+    | [] -> Unknown
+    | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
+  end
   | Tintersection tyl ->
     List.map tyl ~f:(truthiness env)
     |> List.fold ~init:Possibly_falsy ~f:intersect_truthiness

@@ -825,8 +825,8 @@ module Visitor_DEPRECATED = struct
           ~f:
             begin
               fun acc (_, e) ->
-              let acc = this#on_expr acc e in
-              acc
+                let acc = this#on_expr acc e in
+                acc
             end
           ~init:acc
           sm

@@ -11,7 +11,6 @@ open Hh_prelude
 open Aast
 open Typing_defs
 open Typing_reified_check (* validator *)
-
 module Env = Tast_env
 module SN = Naming_special_names
 module UA = SN.UserAttributes
@@ -26,18 +25,17 @@ let valid_newable_hint env (tp_pos, tp_name) (pos, hint) =
   let err_opt =
     let open Typing_error.Primary in
     match hint with
-    | Aast.Happly ((p, h), _) ->
-      begin
-        match Env.get_class_or_typedef env h with
-        | Some (Env.ClassResult cls) ->
-          if not Ast_defs.(is_c_normal (Cls.kind cls)) then
-            Some (Invalid_newable_type_argument { tp_pos; tp_name; pos = p })
-          else
-            None
-        | _ ->
-          (* This case should never happen *)
+    | Aast.Happly ((p, h), _) -> begin
+      match Env.get_class_or_typedef env h with
+      | Some (Env.ClassResult cls) ->
+        if not Ast_defs.(is_c_normal (Cls.kind cls)) then
           Some (Invalid_newable_type_argument { tp_pos; tp_name; pos = p })
-      end
+        else
+          None
+      | _ ->
+        (* This case should never happen *)
+        Some (Invalid_newable_type_argument { tp_pos; tp_name; pos = p })
+    end
     | Aast.Habstr (name, []) ->
       if not @@ Env.get_newable env name then
         Some (Invalid_newable_type_argument { tp_pos; tp_name; pos })
@@ -189,13 +187,12 @@ let handler =
                 @@ Primary.Expr_tree.Reified_static_method_in_expr_tree pos)
           | _ -> ()
         end
-      | (fun_ty, pos, FunctionPointer (_, targs)) ->
-        begin
-          match get_ft_tparams fun_ty with
-          | Some (ft_tparams, _) ->
-            verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
-          | None -> ()
-        end
+      | (fun_ty, pos, FunctionPointer (_, targs)) -> begin
+        match get_ft_tparams fun_ty with
+        | Some (ft_tparams, _) ->
+          verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
+        | None -> ()
+      end
       | (_, pos, Call ((fun_ty, _, _), targs, _, _)) ->
         let (env, efun_ty) = Env.expand_type env fun_ty in
         (match get_ft_tparams efun_ty with
@@ -254,15 +251,14 @@ let handler =
         let (env, ty) = Env.expand_type env ty in
         begin
           match get_node ty with
-          | Tclass ((_, cid), _, _) ->
-            begin
-              match Env.get_class env cid with
-              | Some cls ->
-                let tparams = Cls.tparams cls in
-                let class_pos = Cls.pos cls in
-                verify_call_targs env pos class_pos tparams targs
-              | _ -> ()
-            end
+          | Tclass ((_, cid), _, _) -> begin
+            match Env.get_class env cid with
+            | Some cls ->
+              let tparams = Cls.tparams cls in
+              let class_pos = Cls.pos cls in
+              verify_call_targs env pos class_pos tparams targs
+            | _ -> ()
+          end
           | _ -> ()
         end
       | _ -> ()
@@ -292,19 +288,17 @@ let handler =
 
     method! at_class_ env { c_name = (pos, name); _ } =
       match Env.get_class env name with
-      | Some cls ->
-        begin
-          match Cls.construct cls with
-          | (_, Typing_defs.ConsistentConstruct) ->
-            if
-              List.exists
-                ~f:(fun t -> not (equal_reify_kind t.tp_reified Erased))
-                (Cls.tparams cls)
-            then
-              Errors.add_typing_error
-                Typing_error.(
-                  primary @@ Primary.Consistent_construct_reified pos)
-          | _ -> ()
-        end
+      | Some cls -> begin
+        match Cls.construct cls with
+        | (_, Typing_defs.ConsistentConstruct) ->
+          if
+            List.exists
+              ~f:(fun t -> not (equal_reify_kind t.tp_reified Erased))
+              (Cls.tparams cls)
+          then
+            Errors.add_typing_error
+              Typing_error.(primary @@ Primary.Consistent_construct_reified pos)
+        | _ -> ()
+      end
       | None -> ()
   end

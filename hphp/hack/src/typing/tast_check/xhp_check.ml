@@ -38,14 +38,13 @@ let handler =
       match child with
       | ChildName (p, name)
         when (not @@ Naming_special_names.XHP.is_reserved name)
-             && (not @@ Naming_special_names.XHP.is_xhp_category name) ->
-        begin
-          match Env.get_class env name with
-          | Some _ -> ()
-          | None ->
-            Errors.add_naming_error
-            @@ Naming_error.Unbound_name
-                 { pos = p; name; kind = Name_context.ClassContext }
-        end
+             && (not @@ Naming_special_names.XHP.is_xhp_category name) -> begin
+        match Env.get_class env name with
+        | Some _ -> ()
+        | None ->
+          Errors.add_naming_error
+          @@ Naming_error.Unbound_name
+               { pos = p; name; kind = Name_context.ClassContext }
+      end
       | _ -> ()
   end

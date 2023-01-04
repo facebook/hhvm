@@ -87,8 +87,8 @@ let print_error_list
       ~f:
         begin
           fun s ->
-          Out_channel.output_string oc s;
-          Out_channel.output_string oc "\n"
+            Out_channel.output_string oc s;
+            Out_channel.output_string oc "\n"
         end
       sl);
   Option.iter stale_msg ~f:(fun msg -> Out_channel.output_string oc msg);

@@ -33,72 +33,67 @@ let without_markup_suffix node =
 (* replace `namespace Foo;` with `namespace Foo { ... }` *)
 let normalize_namespace_body node =
   match Syntax.syntax node with
-  | Syntax.Script s ->
-    begin
-      match Syntax.syntax s.script_declarations with
-      | Syntax.SyntaxList declarations ->
-        begin
-          match
-            List.find_mapi declarations ~f:(fun i f ->
-                match Syntax.syntax f with
-                | Syntax.NamespaceDeclaration ns ->
-                  begin
-                    match Syntax.syntax ns.namespace_body with
-                    | Syntax.NamespaceEmptyBody _ ->
-                      let inner =
-                        List.drop declarations (i + 1)
-                        |> Syntax.make_list SourceText.empty 0
-                      in
-                      let open_brace =
-                        Token.create TokenKind.LeftBrace "{" [] []
-                        |> Syntax.make_token
-                      in
-                      let close_brace =
-                        Token.create TokenKind.RightBrace "}" [] []
-                        |> Syntax.make_token
-                      in
-                      let body =
-                        Syntax.make_namespace_body open_brace inner close_brace
-                      in
-                      let ns =
-                        Syntax.make_namespace_declaration
-                          ns.namespace_header
-                          body
-                      in
-                      let pre = List.take declarations i in
-                      Some
-                        (Syntax.make_script
-                           (Syntax.make_list SourceText.empty 0 (pre @ [ns])))
-                    | _ -> Some node
-                  end
-                | _ -> None)
-          with
-          | Some replacement -> replacement
-          | None ->
-            (* no namespace statement; add a namespace { ... }: if there are
-             * any namespace declarations in the concatenated file, all
-             * statements must be in namespace blocks *)
-            let open_brace =
-              Token.create TokenKind.LeftBrace "{" [] [] |> Syntax.make_token
-            in
-            let close_brace =
-              Token.create TokenKind.RightBrace "}" [] [] |> Syntax.make_token
-            in
-            let ns =
-              Syntax.make_namespace_declaration
-                (Syntax.make_namespace_declaration_header
-                   (Syntax.make_token
-                      (Token.create TokenKind.Namespace "namespace" [] []))
-                   (Syntax.make_missing SourceText.empty 0))
-                (Syntax.make_namespace_body
-                   open_brace
-                   (Syntax.make_list SourceText.empty 0 declarations)
-                   close_brace)
-            in
-            Syntax.make_script (Syntax.make_list SourceText.empty 0 [ns])
-        end
-      | _ -> node
+  | Syntax.Script s -> begin
+    match Syntax.syntax s.script_declarations with
+    | Syntax.SyntaxList declarations -> begin
+      match
+        List.find_mapi declarations ~f:(fun i f ->
+            match Syntax.syntax f with
+            | Syntax.NamespaceDeclaration ns -> begin
+              match Syntax.syntax ns.namespace_body with
+              | Syntax.NamespaceEmptyBody _ ->
+                let inner =
+                  List.drop declarations (i + 1)
+                  |> Syntax.make_list SourceText.empty 0
+                in
+                let open_brace =
+                  Token.create TokenKind.LeftBrace "{" [] []
+                  |> Syntax.make_token
+                in
+                let close_brace =
+                  Token.create TokenKind.RightBrace "}" [] []
+                  |> Syntax.make_token
+                in
+                let body =
+                  Syntax.make_namespace_body open_brace inner close_brace
+                in
+                let ns =
+                  Syntax.make_namespace_declaration ns.namespace_header body
+                in
+                let pre = List.take declarations i in
+                Some
+                  (Syntax.make_script
+                     (Syntax.make_list SourceText.empty 0 (pre @ [ns])))
+              | _ -> Some node
+            end
+            | _ -> None)
+      with
+      | Some replacement -> replacement
+      | None ->
+        (* no namespace statement; add a namespace { ... }: if there are
+         * any namespace declarations in the concatenated file, all
+         * statements must be in namespace blocks *)
+        let open_brace =
+          Token.create TokenKind.LeftBrace "{" [] [] |> Syntax.make_token
+        in
+        let close_brace =
+          Token.create TokenKind.RightBrace "}" [] [] |> Syntax.make_token
+        in
+        let ns =
+          Syntax.make_namespace_declaration
+            (Syntax.make_namespace_declaration_header
+               (Syntax.make_token
+                  (Token.create TokenKind.Namespace "namespace" [] []))
+               (Syntax.make_missing SourceText.empty 0))
+            (Syntax.make_namespace_body
+               open_brace
+               (Syntax.make_list SourceText.empty 0 declarations)
+               close_brace)
+        in
+        Syntax.make_script (Syntax.make_list SourceText.empty 0 [ns])
     end
+    | _ -> node
+  end
   | _ -> node
 
 (* Apply any necessary AST transformations, then return the source code *)

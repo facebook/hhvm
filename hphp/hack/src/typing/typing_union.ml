@@ -109,12 +109,11 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
     | ((_, ty), (Tunion [], _))
       when are_ty_param ->
       Some ty
-    | _ when ty_equal ety1 ety2 ->
-      begin
-        match get_node ty1 with
-        | Tvar _ -> Some ty1
-        | _ -> Some ty2
-      end
+    | _ when ty_equal ety1 ety2 -> begin
+      match get_node ty1 with
+      | Tvar _ -> Some ty1
+      | _ -> Some ty2
+    end
     | _ -> None
   in
   (env, ty)
@@ -441,7 +440,7 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
    then to union tyl1 and tyl2, we can remove the not int and not string conjuncts
    from tyl2 because they union to mixed with elements of tyl1. Thus we end up with
    a result [bool; int; string], [float; dynamic]
-  *)
+*)
 and try_special_union_of_intersection ~approx_cancel_neg env tyl1 tyl2 r :
     Typing_env_types.env * locl_ty list * locl_ty list =
   (* Assume that inter_ty is an intersection type and look for a pairs of a conjunct in
@@ -717,12 +716,11 @@ let normalize_union env ?on_tyvar tyl :
 let rec is_minimal env ty =
   match get_node ty with
   | Tclass (_, Exact, []) -> true
-  | Tclass ((_, name), _, []) ->
-    begin
-      match Env.get_class env name with
-      | Some cd -> Cls.final cd
-      | None -> false
-    end
+  | Tclass ((_, name), _, []) -> begin
+    match Env.get_class env name with
+    | Some cd -> Cls.final cd
+    | None -> false
+  end
   | Tnewtype (name, [ty], _)
     when String.equal name Naming_special_names.Classes.cClassname ->
     is_minimal env ty
@@ -757,7 +755,7 @@ let union_list_2_by_2 ~approx_cancel_neg env r tyl =
             in
             (match union_opt with
             | None -> union_ty_w_tyl env ty tyl (ty' :: tyl_acc)
-            | Some union -> (env, tyl @ union :: tyl_acc))
+            | Some union -> (env, tyl @ (union :: tyl_acc)))
         in
         union_ty_w_tyl env ty res_tyl [])
   in

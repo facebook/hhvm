@@ -38,17 +38,16 @@ let nice_kill env =
   Hh_logger.log "[%s] ClientStop.nice_kill" (Connection_tracker.log_id tracker);
   try
     match MonitorConnection.connect_and_shut_down ~tracker env.root with
-    | Ok shutdown_result ->
-      begin
-        match shutdown_result with
-        | ServerMonitorUtils.SHUTDOWN_VERIFIED ->
-          Printf.eprintf "Successfully killed server for %s\n%!" root_s
-        | ServerMonitorUtils.SHUTDOWN_UNVERIFIED ->
-          Printf.eprintf
-            "Failed to kill server nicely for %s (Shutdown not verified)\n%!"
-            root_s;
-          raise FailedToKill
-      end
+    | Ok shutdown_result -> begin
+      match shutdown_result with
+      | ServerMonitorUtils.SHUTDOWN_VERIFIED ->
+        Printf.eprintf "Successfully killed server for %s\n%!" root_s
+      | ServerMonitorUtils.SHUTDOWN_UNVERIFIED ->
+        Printf.eprintf
+          "Failed to kill server nicely for %s (Shutdown not verified)\n%!"
+          root_s;
+        raise FailedToKill
+    end
     | Error (ServerMonitorUtils.Build_id_mismatched _) ->
       Printf.eprintf "Successfully killed server for %s\n%!" root_s
     | Error

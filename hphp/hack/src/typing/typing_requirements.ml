@@ -72,15 +72,15 @@ let check_require_class env class_pos tc (trait_pos, req_ty) =
       env
 
 (* HHVM enformcement rejects conflicting require class and require extends
-   constraints on the same class, eg:
+    constraints on the same class, eg:
 
-  trait T1 { require extends C; }
-  trait T2 { require class C; }
-  trait T { use T1, T2; }
+   trait T1 { require extends C; }
+   trait T2 { require class C; }
+   trait T { use T1, T2; }
 
-  The check below, only run on traits, detects and rejects such cases,
-  ensuring that Hack does not accept code on which HHVM enforcement
-  raises an error.
+   The check below, only run on traits, detects and rejects such cases,
+   ensuring that Hack does not accept code on which HHVM enforcement
+   raises an error.
 *)
 
 let get_require_class_name_pos ty =

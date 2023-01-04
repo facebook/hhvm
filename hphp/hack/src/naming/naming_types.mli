@@ -28,7 +28,7 @@ val name_kind_to_enum : name_kind -> int
 val name_kind_of_enum : int -> name_kind option
 
 (* The types in this file duplicate what's in FileInfo.name_type, but with more structure.
-It'd be nice to unify them. *)
+   It'd be nice to unify them. *)
 
 val name_kind_to_name_type : name_kind -> FileInfo.name_type
 

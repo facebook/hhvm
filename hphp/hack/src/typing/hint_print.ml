@@ -463,13 +463,12 @@ and pp_expr_ ppf = function
       ppf
       (targs_opt, (fst, snd))
   | Aast.Hole (expr, _, _, _) -> pp_expr ppf expr
-  | Aast.EnumClassLabel (opt_sid, name) ->
-    begin
-      match opt_sid with
-      | None -> Fmt.(prefix dbl_hash string) ppf name
-      | Some (_, class_name) ->
-        Fmt.(pair ~sep:dbl_hash Fmt.string string) ppf (class_name, name)
-    end
+  | Aast.EnumClassLabel (opt_sid, name) -> begin
+    match opt_sid with
+    | None -> Fmt.(prefix dbl_hash string) ppf name
+    | Some (_, class_name) ->
+      Fmt.(pair ~sep:dbl_hash Fmt.string string) ppf (class_name, name)
+  end
   | Aast.Efun _
   | Aast.Lfun _
   | Aast.Xml _

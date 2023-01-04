@@ -33,21 +33,21 @@ val hint_to_string_and_symbols :
 val get_context_from_hint : Provider_context.t -> Aast.hint -> string
 
 (* Values pulled from source code may have quotation marks;
-strip these when present, eg: "\"FOO\"" => "FOO" *)
+   strip these when present, eg: "\"FOO\"" => "FOO" *)
 val strip_nested_quotes : string -> string
 
 (* Convert ContainerName<TParam> to ContainerName *)
 val strip_tparams : string -> string
 
 (* Split name or subnamespace from its parent namespace, and return
-either Some (parent, name), or None if the name has no parent namespace.
-The trailing slash is removed from the parent. *)
+   either Some (parent, name), or None if the name has no parent namespace.
+   The trailing slash is removed from the parent. *)
 val split_name : string -> (string * string) option
 
 (* hack to pretty-print an expression. Get the representation from
-  the source file, in lack of a better solution. This assumes that the
-   expr comes from the the source text parameter. Should be replaced
-   by proper pretty-printing functions. *)
+   the source file, in lack of a better solution. This assumes that the
+    expr comes from the the source text parameter. Should be replaced
+    by proper pretty-printing functions. *)
 val ast_expr_to_json :
   Full_fidelity_source_text.t -> ('a, 'b) Aast.expr -> Hh_json.json
 

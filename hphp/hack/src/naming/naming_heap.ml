@@ -37,19 +37,17 @@ let get_and_cache
   | (None, Some fallback_get_func) ->
     (match check_block_func key with
     | Some Blocked -> None
-    | None ->
-      begin
-        match fallback_get_func key with
-        | Some res ->
-          begin
-            match map_result res with
-            | Some pos ->
-              cache_func key pos;
-              Some pos
-            | None -> None
-          end
+    | None -> begin
+      match fallback_get_func key with
+      | Some res -> begin
+        match map_result res with
+        | Some pos ->
+          cache_func key pos;
+          Some pos
         | None -> None
-      end)
+      end
+      | None -> None
+    end)
 
 module type ReverseNamingTable = sig
   type pos
@@ -72,8 +70,8 @@ module type ReverseNamingTable = sig
 end
 
 (* The Types module records both class names and typedefs since they live in the
-* same namespace. That is, one cannot both define a class Foo and a typedef Foo
-* (or FOO or fOo, due to case insensitivity). *)
+   * same namespace. That is, one cannot both define a class Foo and a typedef Foo
+   * (or FOO or fOo, due to case insensitivity). *)
 module Types = struct
   type pos = FileInfo.pos * Naming_types.kind_of_type
 
@@ -157,28 +155,26 @@ module Types = struct
     let map_result (path, entry_type) =
       let path_str = Relative_path.S.to_string path in
       match entry_type with
-      | Naming_types.TClass ->
-        begin
-          match Ast_provider.find_iclass_in_file ctx path id with
-          | Some cls -> Some (snd cls.Aast.c_name)
-          | None ->
-            Hh_logger.log
-              "Failed to get canonical name for %s in file %s"
-              id
-              path_str;
-            None
-        end
-      | Naming_types.TTypedef ->
-        begin
-          match Ast_provider.find_itypedef_in_file ctx path id with
-          | Some typedef -> Some (snd typedef.Aast.t_name)
-          | None ->
-            Hh_logger.log
-              "Failed to get canonical name for %s in file %s"
-              id
-              path_str;
-            None
-        end
+      | Naming_types.TClass -> begin
+        match Ast_provider.find_iclass_in_file ctx path id with
+        | Some cls -> Some (snd cls.Aast.c_name)
+        | None ->
+          Hh_logger.log
+            "Failed to get canonical name for %s in file %s"
+            id
+            path_str;
+          None
+      end
+      | Naming_types.TTypedef -> begin
+        match Ast_provider.find_itypedef_in_file ctx path id with
+        | Some typedef -> Some (snd typedef.Aast.t_name)
+        | None ->
+          Hh_logger.log
+            "Failed to get canonical name for %s in file %s"
+            id
+            path_str;
+          None
+      end
     in
     let db_path_opt =
       Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)

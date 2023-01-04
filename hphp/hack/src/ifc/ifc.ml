@@ -57,9 +57,9 @@ let rec policy_occurrences pty =
     in
     on_list
       ((pol f_self, emp, pol f_pc)
-       ::
-       policy_occurrences f_ret
-       :: policy_occurrences f_exn :: List.map ~f:swap_policy_occurrences f_args)
+      :: policy_occurrences f_ret
+      :: policy_occurrences f_exn
+      :: List.map ~f:swap_policy_occurrences f_args)
   | Tcow_array { a_key; a_value; a_length; _ } ->
     on_list
       [
@@ -87,11 +87,10 @@ let rec subtype ~pos t1 t2 acc =
   let err msg = raise (SubtypeFailure (msg, t1, t2)) in
   let rec first_ok ~f msg = function
     | [] -> err msg
-    | x :: l ->
-      begin
-        try f x with
-        | SubtypeFailure (msg, _, _) -> first_ok ~f msg l
-      end
+    | x :: l -> begin
+      try f x with
+      | SubtypeFailure (msg, _, _) -> first_ok ~f msg l
+    end
   in
   match (t1, t2) with
   | (Tnull p1, Tnull p2)
@@ -176,13 +175,12 @@ let rec subtype ~pos t1 t2 acc =
     in
     let preprocess kind = function
       (* A missing field of an open shape becomes an optional field of type mixed *)
-      | None ->
-        begin
-          match kind with
-          | Open_shape sft_ty ->
-            Some { sft_optional = true; sft_policy = pbot; sft_ty }
-          | Closed_shape -> None
-        end
+      | None -> begin
+        match kind with
+        | Open_shape sft_ty ->
+          Some { sft_optional = true; sft_policy = pbot; sft_ty }
+        | Closed_shape -> None
+      end
       (* If a field is optional with type nothing, consider it missing.
           Since it has type nothing, it can never be assigned and therefore
           we do not need to consider its policy *)
@@ -314,12 +312,11 @@ let refine renv tyori pos ltyref =
       (* only store bounds that apply to the refined type and
          are from the origin type *)
       match pref with
-      | Pfree_var (var, s) when Scope.equal s ref_scope ->
-        begin
-          match pori with
-          | Pfree_var (_, s) when Scope.equal s ref_scope -> vmap
-          | _ -> SMap.add var pori vmap
-        end
+      | Pfree_var (var, s) when Scope.equal s ref_scope -> begin
+        match pori with
+        | Pfree_var (_, s) when Scope.equal s ref_scope -> vmap
+        | _ -> SMap.add var pori vmap
+      end
       | _ -> vmap
     in
     match acc with
@@ -869,7 +866,7 @@ let overwrite_nth_pty tuple_pty ix_exp pty =
   let ix = int_of_exp ix_exp in
   match tuple_pty with
   | Ttuple ptys ->
-    let ptys = List.take ptys ix @ pty :: List.drop ptys (ix + 1) in
+    let ptys = List.take ptys ix @ (pty :: List.drop ptys (ix + 1)) in
     Ttuple ptys
   | _ -> fail "policy type overwrite expected a tuple"
 
@@ -879,7 +876,7 @@ let overwrite_nth_pty tuple_pty ix_exp pty =
      $x->p[4][] = "hi";
 
    does not mutate an array cell, but the property p of
-   the object $x instead.  *)
+   the object $x instead. *)
 let rec assign
     ?(use_pc = true) ~expr ~pos renv env ((lhs_ty, _, lhs_expr_) as lhs) rhs_pty
     =
@@ -945,34 +942,33 @@ let rec assign
           arry.a_key
           arry.a_value
           arry.a_length
-      | Tshape { sh_kind; sh_fields } ->
-        begin
-          match Option.(ix_opt >>= shape_field_name renv) with
-          | Some key ->
-            (* The key can only be a literal (int, string) or class const, so
-               it is always public *)
-            let p = Env.new_policy_var renv "field" in
-            let pc = Env.get_lpc env |> PSet.elements in
-            let env =
-              Env.acc env @@ L.(pc <* [p] && add_dependencies pc rhs_pty) ~pos
-            in
-            let sh_fields =
-              Typing_defs.TShapeMap.add
-                key
-                { sft_optional = false; sft_policy = p; sft_ty = rhs_pty }
-                sh_fields
-            in
-            let tshape = Tshape { sh_kind; sh_fields } in
-            let env = Env.acc env (subtype ~pos tshape new_arry_pty) in
-            (env, false)
-          | None ->
-            Errors.add_typing_error
-              Typing_error.(
-                ifc
-                @@ Primary.Ifc.Unknown_information_flow
-                     { pos; what = "shape key" });
-            (env, true)
-        end
+      | Tshape { sh_kind; sh_fields } -> begin
+        match Option.(ix_opt >>= shape_field_name renv) with
+        | Some key ->
+          (* The key can only be a literal (int, string) or class const, so
+             it is always public *)
+          let p = Env.new_policy_var renv "field" in
+          let pc = Env.get_lpc env |> PSet.elements in
+          let env =
+            Env.acc env @@ L.(pc <* [p] && add_dependencies pc rhs_pty) ~pos
+          in
+          let sh_fields =
+            Typing_defs.TShapeMap.add
+              key
+              { sft_optional = false; sft_policy = p; sft_ty = rhs_pty }
+              sh_fields
+          in
+          let tshape = Tshape { sh_kind; sh_fields } in
+          let env = Env.acc env (subtype ~pos tshape new_arry_pty) in
+          (env, false)
+        | None ->
+          Errors.add_typing_error
+            Typing_error.(
+              ifc
+              @@ Primary.Ifc.Unknown_information_flow
+                   { pos; what = "shape key" });
+          (env, true)
+      end
       | Ttuple _ ->
         let ix =
           match ix_opt with
@@ -1215,45 +1211,44 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
       join_policies ~pos ~prefix:"cmp" renv env (PSet.elements deps)
     in
     (env, Tprim cmp_policy)
-  | A.Unop (op, e) ->
-    begin
-      match op with
-      (* Operators that mutate *)
-      | Ast_defs.Uincr
-      | Ast_defs.Udecr
-      | Ast_defs.Upincr
-      | Ast_defs.Updecr ->
-        (* register constraints that'd be generated if
-           e = e +/- 1 were being analyzed *)
-        let (env, tye) = expr env e in
-        let env = assign ~expr ~pos renv env e tye in
-        (env, tye)
-      (* Prim operators that don't mutate *)
-      | Ast_defs.Unot ->
-        let (env, tye) = expr env e in
-        (* use object_policy to account for both booleans
-           and null checks *)
-        let (env, not_policy) =
-          join_policies
-            ~prefix:"not"
-            ~pos
-            renv
-            env
-            (PSet.elements (object_policy tye))
-        in
-        (env, Tprim not_policy)
-      | Ast_defs.Utild
-      | Ast_defs.Uplus
-      | Ast_defs.Uminus ->
-        expr env e
-      | Ast_defs.Usilence ->
-        Errors.add_typing_error
-          Typing_error.(
-            ifc
-            @@ Primary.Ifc.Unknown_information_flow
-                 { pos; what = "silence (@) operator" });
-        expr env e
-    end
+  | A.Unop (op, e) -> begin
+    match op with
+    (* Operators that mutate *)
+    | Ast_defs.Uincr
+    | Ast_defs.Udecr
+    | Ast_defs.Upincr
+    | Ast_defs.Updecr ->
+      (* register constraints that'd be generated if
+         e = e +/- 1 were being analyzed *)
+      let (env, tye) = expr env e in
+      let env = assign ~expr ~pos renv env e tye in
+      (env, tye)
+    (* Prim operators that don't mutate *)
+    | Ast_defs.Unot ->
+      let (env, tye) = expr env e in
+      (* use object_policy to account for both booleans
+         and null checks *)
+      let (env, not_policy) =
+        join_policies
+          ~prefix:"not"
+          ~pos
+          renv
+          env
+          (PSet.elements (object_policy tye))
+      in
+      (env, Tprim not_policy)
+    | Ast_defs.Utild
+    | Ast_defs.Uplus
+    | Ast_defs.Uminus ->
+      expr env e
+    | Ast_defs.Usilence ->
+      Errors.add_typing_error
+        Typing_error.(
+          ifc
+          @@ Primary.Ifc.Unknown_information_flow
+               { pos; what = "silence (@) operator" });
+      expr env e
+  end
   | A.Lvar (_pos, lid) -> refresh_local_type ~pos renv env lid ety
   | A.Obj_get (obj, (_, _, A.Id (_, property)), _, _) ->
     let (env, obj_ptype) = expr env obj in

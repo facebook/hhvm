@@ -421,26 +421,25 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       |> FileOutline.outline env.popt )
   | IDE_IDLE -> ({ env with ide_idle = true }, ())
   | RAGE -> (env, ServerRage.go genv env)
-  | CST_SEARCH { sort_results; input; files_to_search } ->
-    begin
-      try
-        (env, CstSearchService.go genv env ~sort_results ~files_to_search input)
-      with
-      | MultiThreadedCall.Coalesced_failures failures ->
-        let failures =
-          failures
-          |> List.map ~f:WorkerController.failure_to_string
-          |> String.concat ~sep:"\n"
-        in
-        ( env,
-          Error
-            (Printf.sprintf
-               "Worker failures - check the logs for more details:\n%s\n"
-               failures) )
-      | exn ->
-        let e = Exception.wrap exn in
-        (env, Error (Exception.to_string e))
-    end
+  | CST_SEARCH { sort_results; input; files_to_search } -> begin
+    try
+      (env, CstSearchService.go genv env ~sort_results ~files_to_search input)
+    with
+    | MultiThreadedCall.Coalesced_failures failures ->
+      let failures =
+        failures
+        |> List.map ~f:WorkerController.failure_to_string
+        |> String.concat ~sep:"\n"
+      in
+      ( env,
+        Error
+          (Printf.sprintf
+             "Worker failures - check the logs for more details:\n%s\n"
+             failures) )
+    | exn ->
+      let e = Exception.wrap exn in
+      (env, Error (Exception.to_string e))
+  end
   | NO_PRECHECKED_FILES -> (ServerPrecheckedFiles.expand_all env, ())
   | GEN_PREFETCH_DIR dir ->
     (* TODO(bobren) remove dir entirely from saved state job invocation *)

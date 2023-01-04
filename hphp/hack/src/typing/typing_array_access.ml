@@ -113,42 +113,40 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
     let ty = MakeType.keyed_container r index_ty element_ty in
     ((env, None), Some ty)
   (* For tuples, we just freshen the element types *)
-  | (r, Ttuple tyl) ->
+  | (r, Ttuple tyl) -> begin
     (* requires integer literal *)
-    begin
-      match index_expr with
-      (* Should freshen type variables *)
-      | (_, _, Int _) ->
-        let (env, params) =
-          List.map_env env tyl ~f:(fun env _ty ->
-              Env.fresh_type_invariant env expr_pos)
-        in
-        ((env, None), Some (MakeType.tuple r params))
-      | _ -> ((env, None), None)
-    end
+    match index_expr with
+    (* Should freshen type variables *)
+    | (_, _, Int _) ->
+      let (env, params) =
+        List.map_env env tyl ~f:(fun env _ty ->
+            Env.fresh_type_invariant env expr_pos)
+      in
+      ((env, None), Some (MakeType.tuple r params))
+    | _ -> ((env, None), None)
+  end
   (* Whatever the lower bound, construct an open, singleton shape type. *)
-  | (r, Tshape (_, fdm)) ->
-    begin
-      match TUtils.shape_field_name env index_expr with
-      | None -> ((env, None), None)
-      | Some field ->
-        let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
-        (match TShapeMap.find_opt field fdm with
-        (* If field is in the lower bound but is optional, then no upper bound makes sense
-         * unless this is a null-coalesce access *)
-        | Some { sft_optional = true; _ } when not lhs_of_null_coalesce ->
-          ((env, None), None)
-        | _ ->
-          let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
-          let upper_fdm =
-            TShapeMap.add
-              field
-              { sft_optional = lhs_of_null_coalesce; sft_ty = element_ty }
-              TShapeMap.empty
-          in
-          let upper_shape_ty = mk (r, Tshape (Open_shape, upper_fdm)) in
-          ((env, None), Some upper_shape_ty))
-    end
+  | (r, Tshape (_, fdm)) -> begin
+    match TUtils.shape_field_name env index_expr with
+    | None -> ((env, None), None)
+    | Some field ->
+      let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
+      (match TShapeMap.find_opt field fdm with
+      (* If field is in the lower bound but is optional, then no upper bound makes sense
+       * unless this is a null-coalesce access *)
+      | Some { sft_optional = true; _ } when not lhs_of_null_coalesce ->
+        ((env, None), None)
+      | _ ->
+        let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
+        let upper_fdm =
+          TShapeMap.add
+            field
+            { sft_optional = lhs_of_null_coalesce; sft_ty = element_ty }
+            TShapeMap.empty
+        in
+        let upper_shape_ty = mk (r, Tshape (Open_shape, upper_fdm)) in
+        ((env, None), Some upper_shape_ty))
+  end
   | _ -> ((env, None), None)
 
 (* Check that an index to a map-like collection passes the basic test of
@@ -752,47 +750,46 @@ let rec array_get
               ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
           in
           (env, (ty, err_res_arr, err_res_idx))
-      | Tnewtype (ts, [ty], bound) ->
-        begin
-          match deref bound with
-          | (r, Tshape (shape_kind, fields))
-            when String.equal ts SN.FB.cTypeStructure ->
-            let (env, fields) =
-              Typing_structure.transform_shapemap env array_pos ty fields
-            in
-            let ty = mk (r, Tshape (shape_kind, fields)) in
-            let (env, (ty, err_opt_arr, err_opt_idx)) =
-              array_get
-                ~array_pos
-                ~expr_pos
-                ~lhs_of_null_coalesce
-                is_lvalue
-                env
-                ty
-                e2
-                ty2
-            in
-            let err_res_idx =
-              Option.value_map
-                err_opt_idx
-                ~default:(Ok ty2)
-                ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
-            in
-            let err_res_arr =
-              Option.value_map
-                err_opt_arr
-                ~default:dflt_arr_res
-                ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
-            in
-            (env, (ty, err_res_arr, err_res_idx))
-          | _ ->
-            let (env, ty1) = error_array env expr_pos ty1 in
-            let ty_nothing = Typing_make_type.nothing Reason.none in
-            let ty_keyedcontainer =
-              Typing_make_type.(keyed_container Reason.none ty2 ty_nothing)
-            in
-            (env, (ty1, Error (ty1, ty_keyedcontainer), Ok ty2))
-        end
+      | Tnewtype (ts, [ty], bound) -> begin
+        match deref bound with
+        | (r, Tshape (shape_kind, fields))
+          when String.equal ts SN.FB.cTypeStructure ->
+          let (env, fields) =
+            Typing_structure.transform_shapemap env array_pos ty fields
+          in
+          let ty = mk (r, Tshape (shape_kind, fields)) in
+          let (env, (ty, err_opt_arr, err_opt_idx)) =
+            array_get
+              ~array_pos
+              ~expr_pos
+              ~lhs_of_null_coalesce
+              is_lvalue
+              env
+              ty
+              e2
+              ty2
+          in
+          let err_res_idx =
+            Option.value_map
+              err_opt_idx
+              ~default:(Ok ty2)
+              ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+          in
+          let err_res_arr =
+            Option.value_map
+              err_opt_arr
+              ~default:dflt_arr_res
+              ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+          in
+          (env, (ty, err_res_arr, err_res_idx))
+        | _ ->
+          let (env, ty1) = error_array env expr_pos ty1 in
+          let ty_nothing = Typing_make_type.nothing Reason.none in
+          let ty_keyedcontainer =
+            Typing_make_type.(keyed_container Reason.none ty2 ty_nothing)
+          in
+          (env, (ty1, Error (ty1, ty_keyedcontainer), Ok ty2))
+      end
       | Tunapplied_alias _ ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Tnonnull
@@ -1021,19 +1018,18 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
   match deref ty with
   (* dynamic is valid for assign array get *)
   | (_, Tdynamic) -> ((env, None), Some ty)
-  | (r, Ttuple tyl) ->
+  | (r, Ttuple tyl) -> begin
     (* requires integer literal *)
-    begin
-      match index_expr with
-      (* Should freshen type variables *)
-      | (_, _, Int _) ->
-        let (env, params) =
-          List.map_env env tyl ~f:(fun env _ty ->
-              Env.fresh_type_invariant env expr_pos)
-        in
-        ((env, None), Some (mk (r, Ttuple params)))
-      | _ -> ((env, None), None)
-    end
+    match index_expr with
+    (* Should freshen type variables *)
+    | (_, _, Int _) ->
+      let (env, params) =
+        List.map_env env tyl ~f:(fun env _ty ->
+            Env.fresh_type_invariant env expr_pos)
+      in
+      ((env, None), Some (mk (r, Ttuple params)))
+    | _ -> ((env, None), None)
+  end
   | _ -> ((env, None), None)
 
 (* Used for typing an assignment e1[key] = e2
@@ -1377,7 +1373,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
                   (env, ty2)
               in
               ( env,
-                ( MakeType.tuple r (tyl' @ pess_ty2 :: tyl''),
+                ( MakeType.tuple r (tyl' @ (pess_ty2 :: tyl'')),
                   Ok ety1,
                   Ok tkey,
                   Ok ty2 ) )
@@ -1385,27 +1381,23 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           | _ ->
             fail (Error (tkey, MakeType.int Reason.none)) Reason.URtuple_access
         end
-      | Tshape (shape_kind, fdm) ->
-        begin
-          match TUtils.shape_field_name env key with
-          | None -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
-          | Some field ->
-            let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
-            let (env, pess_ty2) =
-              if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-                pessimised_tup_assign expr_pos env ty2
-              else
-                (env, ty2)
-            in
-            let fdm' =
-              TShapeMap.add
-                field
-                { sft_optional = false; sft_ty = pess_ty2 }
-                fdm
-            in
-            let ty = mk (r, Tshape (shape_kind, fdm')) in
-            (env, (ty, Ok ty, Ok tkey, Ok ty2))
-        end
+      | Tshape (shape_kind, fdm) -> begin
+        match TUtils.shape_field_name env key with
+        | None -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
+        | Some field ->
+          let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
+          let (env, pess_ty2) =
+            if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+              pessimised_tup_assign expr_pos env ty2
+            else
+              (env, ty2)
+          in
+          let fdm' =
+            TShapeMap.add field { sft_optional = false; sft_ty = pess_ty2 } fdm
+          in
+          let ty = mk (r, Tshape (shape_kind, fdm')) in
+          (env, (ty, Ok ty, Ok tkey, Ok ty2))
+      end
       | Tunapplied_alias _ ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Toption _

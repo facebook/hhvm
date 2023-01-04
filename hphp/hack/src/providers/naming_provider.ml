@@ -649,43 +649,40 @@ let resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t =
 let get_module_full_pos ctx (pos, name) =
   match pos with
   | FileInfo.Full p -> Some p
-  | FileInfo.File ((FileInfo.Module as name_type), fn) ->
-    begin
-      match Provider_context.get_backend ctx with
-      | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
-      | _ ->
-        Ast_provider.find_module_in_file ctx fn name
-        |> Option.map ~f:(fun md -> fst md.Aast.md_name)
-    end
+  | FileInfo.File ((FileInfo.Module as name_type), fn) -> begin
+    match Provider_context.get_backend ctx with
+    | Provider_backend.Decl_service { decl; _ } ->
+      Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
+    | _ ->
+      Ast_provider.find_module_in_file ctx fn name
+      |> Option.map ~f:(fun md -> fst md.Aast.md_name)
+  end
   | FileInfo.(File ((Fun | Class | Typedef | Const), _fn)) -> None
 
 let get_const_full_pos ctx (pos, name) =
   match pos with
   | FileInfo.Full p -> Some p
-  | FileInfo.File ((FileInfo.Const as name_type), fn) ->
-    begin
-      match Provider_context.get_backend ctx with
-      | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
-      | _ ->
-        Ast_provider.find_gconst_in_file ctx fn name
-        |> Option.map ~f:(fun ast -> fst ast.Aast.cst_name)
-    end
+  | FileInfo.File ((FileInfo.Const as name_type), fn) -> begin
+    match Provider_context.get_backend ctx with
+    | Provider_backend.Decl_service { decl; _ } ->
+      Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
+    | _ ->
+      Ast_provider.find_gconst_in_file ctx fn name
+      |> Option.map ~f:(fun ast -> fst ast.Aast.cst_name)
+  end
   | FileInfo.(File ((Fun | Class | Typedef | Module), _fn)) -> None
 
 let get_fun_full_pos ctx (pos, name) =
   match pos with
   | FileInfo.Full p -> Some p
-  | FileInfo.File ((FileInfo.Fun as name_type), fn) ->
-    begin
-      match Provider_context.get_backend ctx with
-      | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
-      | _ ->
-        Ast_provider.find_fun_in_file ctx fn name
-        |> Option.map ~f:(fun fd -> fst fd.Aast.fd_fun.Aast.f_name)
-    end
+  | FileInfo.File ((FileInfo.Fun as name_type), fn) -> begin
+    match Provider_context.get_backend ctx with
+    | Provider_backend.Decl_service { decl; _ } ->
+      Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
+    | _ ->
+      Ast_provider.find_fun_in_file ctx fn name
+      |> Option.map ~f:(fun fd -> fst fd.Aast.fd_fun.Aast.f_name)
+  end
   | FileInfo.(File ((Class | Typedef | Const | Module), _fn)) -> None
 
 let get_type_full_pos ctx (pos, name) =

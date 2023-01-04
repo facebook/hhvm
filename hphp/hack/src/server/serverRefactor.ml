@@ -435,17 +435,16 @@ let upcast_visitor =
       let acc =
         let (_ty, pos, expr_) = expr in
         match expr_ with
-        | Aast.Upcast (e, _hint) ->
-          begin
-            match e with
-            | (_, _, Aast.FunctionPointer (Aast.FP_id (_, id), _)) ->
-              self#check_id id pos
-            | (_, _, Aast.New ((_, _, Aast.CI (_, id)), _, _, _, _)) ->
-              self#check_id id pos
-            | (_, _, Aast.Class_const ((_, _, Aast.CI (_, id)), _)) ->
-              self#check_id id pos
-            | _ -> self#zero
-          end
+        | Aast.Upcast (e, _hint) -> begin
+          match e with
+          | (_, _, Aast.FunctionPointer (Aast.FP_id (_, id), _)) ->
+            self#check_id id pos
+          | (_, _, Aast.New ((_, _, Aast.CI (_, id)), _, _, _, _)) ->
+            self#check_id id pos
+          | (_, _, Aast.Class_const ((_, _, Aast.CI (_, id)), _)) ->
+            self#check_id id pos
+          | _ -> self#zero
+        end
         | _ -> self#zero
       in
       self#plus acc (super#on_expr env expr)
@@ -563,11 +562,11 @@ let go ctx action genv env =
              ~f:
                begin
                  fun acc x ->
-                 let replacement =
-                   { pos = Pos.to_absolute (snd x); text = new_name }
-                 in
-                 let patch = Replace replacement in
-                 patch :: acc
+                   let replacement =
+                     { pos = Pos.to_absolute (snd x); text = new_name }
+                   in
+                   let patch = Replace replacement in
+                   patch :: acc
                end
              ~init:[]
          in

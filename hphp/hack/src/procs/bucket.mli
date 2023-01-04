@@ -34,7 +34,7 @@ val calculate_bucket_size :
   num_jobs:int -> num_workers:int -> max_size:int -> int
 
 (* Makes a bucket out of a list, without regard for number of workers or the
-   size of the list.  *)
+   size of the list. *)
 val of_list : 'a list -> 'a list bucket
 
 val make :

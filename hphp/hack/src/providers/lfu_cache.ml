@@ -72,7 +72,7 @@ module Cache (Entry : Entry) = struct
             RevIMap.add
               !frequency
               ((key, value)
-               :: (RevIMap.find_opt !frequency m |> Option.value ~default:[]))
+              :: (RevIMap.find_opt !frequency m |> Option.value ~default:[]))
               m)
           entries
           ~init:RevIMap.empty

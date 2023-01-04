@@ -95,7 +95,7 @@ let mk_param_decl_info
 
 let mk_callable_decl_infos ~context_id env params ret =
   let param_infos = List.map ~f:(mk_param_decl_info ~context_id) params in
-  List.filter_opt @@ mk_ret_decl_info ~context_id env ret :: param_infos
+  List.filter_opt @@ (mk_ret_decl_info ~context_id env ret :: param_infos)
 
 let mk_expr_info_internal ~context_id ~indicator pos ty exp =
   let common_info = mk_common_info ~context_id ~indicator pos in

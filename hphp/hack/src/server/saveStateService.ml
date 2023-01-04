@@ -28,7 +28,7 @@ let save_contents (output_filename : string) (contents : 'a) : unit =
   Stdlib.close_out chan
 
 (* If the contents doesn't contain the value of the expected type, the result
-  is undefined behavior. We may crash, or we may continue with a bogus value. *)
+   is undefined behavior. We may crash, or we may continue with a bogus value. *)
 let load_contents_unsafe (input_filename : string) : 'a =
   let ic = Stdlib.open_in_bin input_filename in
   let contents = Marshal.from_channel ic in

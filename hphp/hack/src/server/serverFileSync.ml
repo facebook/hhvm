@@ -170,22 +170,18 @@ let get_unsaved_changes env =
     ~init:Relative_path.Map.empty
     ~f:(fun path acc ->
       match File_provider.get path with
-      | Some (File_provider.Ide ide_contents) ->
-        begin
-          match get_file_content_from_disk path with
-          | Some disk_contents
-            when not (String.equal ide_contents disk_contents) ->
-            Relative_path.Map.add
-              acc
-              ~key:path
-              ~data:(ide_contents, disk_contents)
-          | Some _ -> acc
-          | None ->
-            (* If one creates a new file, then there will not be corresponding
-               * disk contents, and we should consider there to be unsaved changes in
-               * the editor. *)
-            Relative_path.Map.add acc ~key:path ~data:(ide_contents, "")
-        end
+      | Some (File_provider.Ide ide_contents) -> begin
+        match get_file_content_from_disk path with
+        | Some disk_contents when not (String.equal ide_contents disk_contents)
+          ->
+          Relative_path.Map.add acc ~key:path ~data:(ide_contents, disk_contents)
+        | Some _ -> acc
+        | None ->
+          (* If one creates a new file, then there will not be corresponding
+             * disk contents, and we should consider there to be unsaved changes in
+             * the editor. *)
+          Relative_path.Map.add acc ~key:path ~data:(ide_contents, "")
+      end
       | _ -> acc)
 
 let has_unsaved_changes env =

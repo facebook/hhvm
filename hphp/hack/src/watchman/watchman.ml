@@ -293,10 +293,11 @@ end = struct
           ~on_timeout:
             begin
               fun (_ : Timeout.timings) ->
-              let () =
-                Hh_logger.log "Regular_watchman_process.blocking_read timed out"
-              in
-              raise Read_payload_too_long
+                let () =
+                  Hh_logger.log
+                    "Regular_watchman_process.blocking_read timed out"
+                in
+                raise Read_payload_too_long
             end
       in
       Some (sanitize_watchman_response ~debug_logging output)
@@ -622,7 +623,8 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
        * is a file now, might it become a directory later? I'm not aware of aterm which will watch for either a file or a directory, so let's add two terms *)
       Some
         (J.strlist ["dirname"; relative_path]
-         :: J.strlist ["name"; relative_path] :: terms)
+        :: J.strlist ["name"; relative_path]
+        :: terms)
 
   let re_init
       ?prior_clockspec

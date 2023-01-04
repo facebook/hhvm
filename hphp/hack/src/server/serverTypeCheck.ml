@@ -96,12 +96,12 @@ let add_old_decls old_naming_table defs_per_file =
     ~f:
       begin
         fun filename info_names acc ->
-        match Naming_table.get_file_info old_naming_table filename with
-        | None -> acc
-        | Some old_info ->
-          let old_info_names = FileInfo.simplify old_info in
-          let info_names = FileInfo.merge_names old_info_names info_names in
-          Relative_path.Map.add acc ~key:filename ~data:info_names
+          match Naming_table.get_file_info old_naming_table filename with
+          | None -> acc
+          | Some old_info ->
+            let old_info_names = FileInfo.simplify old_info in
+            let info_names = FileInfo.merge_names old_info_names info_names in
+            Relative_path.Map.add acc ~key:filename ~data:info_names
       end
     ~init:defs_per_file
 
@@ -141,14 +141,14 @@ let remove_decls env defs_per_file_parsed =
 let get_files_with_stale_errors
     ~(* Set of files that were reparsed (so their ASTs and positions
       * in them could have changed. *)
-    reparsed
+     reparsed
     ~(* A subset of files which errors we want to update, or None if we want
       * to update entire error list. *)
-    filter
+     filter
     ~(* Consider errors only coming from those phases *)
-    phases
+     phases
     ~(* Current global error list *)
-    errors
+     errors
     ~ctx =
   let fold =
     match filter with
@@ -655,8 +655,7 @@ functor
         defs_per_file
         ~f:
           begin
-            fun _ names1 names2 ->
-            FileInfo.merge_names names1 names2
+            (fun _ names1 names2 -> FileInfo.merge_names names1 names2)
           end
         ~init:FileInfo.empty_names
 
@@ -666,9 +665,9 @@ functor
         ~f:
           begin
             fun path acc ->
-            match Naming_table.get_file_info env.naming_table path with
-            | None -> acc
-            | Some names -> FileInfo.(merge_names (simplify names) acc)
+              match Naming_table.get_file_info env.naming_table path with
+              | None -> acc
+              | Some names -> FileInfo.(merge_names (simplify names) acc)
           end
         ~init:FileInfo.empty_names
 

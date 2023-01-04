@@ -179,12 +179,11 @@ let go ctx ast result =
     Decl_provider.get_class ctx c_name >>= fun class_ ->
     Cls.get_typeconst class_ typeconst_name >>= fun m ->
     get_member_def ctx (Typeconst, m.ttc_origin, typeconst_name)
-  | SO.LocalVar ->
-    begin
-      match ast with
-      | None -> None
-      | Some ast -> get_local_var_def ast result.SO.name result.SO.pos
-    end
+  | SO.LocalVar -> begin
+    match ast with
+    | None -> None
+    | Some ast -> get_local_var_def ast result.SO.name result.SO.pos
+  end
   | SO.TypeVar ->
     (match ast with
     | None -> None

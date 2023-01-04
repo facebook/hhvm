@@ -79,17 +79,16 @@ let check_deprecated_static attrs =
   let attr = Naming_attributes.find SN.UserAttributes.uaDeprecated attrs in
   match attr with
   | Some { ua_name = _; ua_params = [msg] }
-  | Some { ua_name = _; ua_params = [msg; _] } ->
-    begin
-      match Nast_eval.static_string msg with
-      | Error p ->
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Attribute_param_type
-                 { pos = p; x = "static string literal" })
-      | _ -> ()
-    end
+  | Some { ua_name = _; ua_params = [msg; _] } -> begin
+    match Nast_eval.static_string msg with
+    | Error p ->
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Attribute_param_type
+               { pos = p; x = "static string literal" })
+    | _ -> ()
+  end
   | _ -> ()
 
 let check_ifc_enabled tcopt attrs =

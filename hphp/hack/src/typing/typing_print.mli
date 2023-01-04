@@ -114,8 +114,8 @@ val coeffects : env -> Typing_defs.locl_ty -> string
 val to_json : env -> Typing_defs.locl_ty -> Hh_json.json
 
 (* Attempt to deserialize a previously-serialized type back into a type we can
-manipulate. Note that this function accesses the global state in
-`Decl_provider` to verify that certain type names exist. *)
+   manipulate. Note that this function accesses the global state in
+   `Decl_provider` to verify that certain type names exist. *)
 val json_to_locl_ty :
   ?keytrace:Hh_json.Access.keytrace ->
   Provider_context.t ->

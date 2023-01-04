@@ -41,7 +41,7 @@ let on_expr_ (env, expr_, err_acc) =
       in
       let vc_kind = Nast.get_vc_kind cname in
 
-      let err = List.filter_map ~f:Fn.id @@ targ_err_opt :: fields_err_opts in
+      let err = List.filter_map ~f:Fn.id @@ (targ_err_opt :: fields_err_opts) in
       Ok (Aast.ValCollection ((pos, vc_kind), targ_opt, exprs), err)
     | Aast.Collection ((pos, cname), c_targ_opt, afields)
       when Nast.is_kvc_kind cname ->
@@ -56,7 +56,7 @@ let on_expr_ (env, expr_, err_acc) =
         List.unzip @@ List.map ~f:(afield_key_value cname) afields
       in
       let kvc_kind = Nast.get_kvc_kind cname in
-      let err = List.filter_map ~f:Fn.id @@ targ_err_opt :: fields_err_opts in
+      let err = List.filter_map ~f:Fn.id @@ (targ_err_opt :: fields_err_opts) in
       Ok (Aast.KeyValCollection ((pos, kvc_kind), targs_opt, fields), err)
     | Aast.Collection ((pos, cname), _, [])
       when String.equal SN.Collections.cPair cname ->

@@ -723,8 +723,7 @@ let unwrap_holes ((_, _, e_) as e : Tast.expr) : Tast.expr =
    completions for field names in shape literals.
 
    takes_shape(shape('x' => 123, '|'));
-
- *)
+*)
 let autocomplete_shape_literal_in_call
     env
     (ft : Typing_defs.locl_fun_type)

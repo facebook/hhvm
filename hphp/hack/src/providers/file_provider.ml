@@ -59,18 +59,16 @@ let get_unsafe fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Pessimised_shared_memory _
-  | Provider_backend.Shared_memory ->
-    begin
-      match get fn with
-      | Some contents -> contents
-      | None -> failwith ("File not found: " ^ Relative_path.to_absolute fn)
-    end
-  | Provider_backend.Rust_provider_backend backend ->
-    begin
-      match Rust_provider_backend.File.get backend fn with
-      | Some contents -> contents
-      | None -> failwith ("File not found: " ^ Relative_path.to_absolute fn)
-    end
+  | Provider_backend.Shared_memory -> begin
+    match get fn with
+    | Some contents -> contents
+    | None -> failwith ("File not found: " ^ Relative_path.to_absolute fn)
+  end
+  | Provider_backend.Rust_provider_backend backend -> begin
+    match Rust_provider_backend.File.get backend fn with
+    | Some contents -> contents
+    | None -> failwith ("File not found: " ^ Relative_path.to_absolute fn)
+  end
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
@@ -105,18 +103,16 @@ let get_ide_contents_unsafe fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Pessimised_shared_memory _
-  | Provider_backend.Shared_memory ->
-    begin
-      match FileHeap.get fn with
-      | Some (Ide f) -> f
-      | _ -> failwith ("IDE file not found: " ^ Relative_path.to_absolute fn)
-    end
-  | Provider_backend.Rust_provider_backend backend ->
-    begin
-      match Rust_provider_backend.File.get backend fn with
-      | Some (Ide f) -> f
-      | _ -> failwith ("IDE file not found: " ^ Relative_path.to_absolute fn)
-    end
+  | Provider_backend.Shared_memory -> begin
+    match FileHeap.get fn with
+    | Some (Ide f) -> f
+    | _ -> failwith ("IDE file not found: " ^ Relative_path.to_absolute fn)
+  end
+  | Provider_backend.Rust_provider_backend backend -> begin
+    match Rust_provider_backend.File.get backend fn with
+    | Some (Ide f) -> f
+    | _ -> failwith ("IDE file not found: " ^ Relative_path.to_absolute fn)
+  end
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith

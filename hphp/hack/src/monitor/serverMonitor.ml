@@ -177,9 +177,9 @@ struct
       setup_handler_for_signals
         begin
           fun _ ->
-          Hh_logger.log "Got an exit signal. Killing server and exiting.";
-          SC.kill_server ~violently:false process;
-          Exit.exit Exit_status.Interrupted
+            Hh_logger.log "Got an exit signal. Killing server and exiting.";
+            SC.kill_server ~violently:false process;
+            Exit.exit Exit_status.Interrupted
         end
         [Sys.sigint; Sys.sigquit; Sys.sigterm; Sys.sighup]
     with
@@ -610,18 +610,18 @@ struct
         ~f:
           begin
             fun env_accumulator (tracker, handoff_options, client_fd) ->
-            try
-              client_prehandoff
-                ~tracker
-                ~is_purgatory_client:true
+              try
+                client_prehandoff
+                  ~tracker
+                  ~is_purgatory_client:true
+                  env_accumulator
+                  handoff_options
+                  client_fd
+              with
+              | Unix.Unix_error (Unix.EPIPE, _, _)
+              | Unix.Unix_error (Unix.EBADF, _, _) ->
+                log "Purgatory client disconnected. Dropping." ~tracker;
                 env_accumulator
-                handoff_options
-                client_fd
-            with
-            | Unix.Unix_error (Unix.EPIPE, _, _)
-            | Unix.Unix_error (Unix.EBADF, _, _) ->
-              log "Purgatory client disconnected. Dropping." ~tracker;
-              env_accumulator
             (* @nzthomas TODO, is this an error? *)
           end
         ~init:(Ok env)

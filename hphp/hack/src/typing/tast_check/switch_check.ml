@@ -141,13 +141,11 @@ let check_enum_exhaustiveness pos tc kind (caselist, dfl) coming_from_unresolved
 let apply_if_enum_or_enum_class
     env ~(default : 'a) ~(f : kind -> Env.env -> string -> 'a) name args =
   let check_ec kind = function
-    | [enum; _interface] ->
-      begin
-        match get_node enum with
-        | Tclass ((_, cid), _, _) when Env.is_enum_class env cid ->
-          f kind env cid
-        | _ -> default
-      end
+    | [enum; _interface] -> begin
+      match get_node enum with
+      | Tclass ((_, cid), _, _) when Env.is_enum_class env cid -> f kind env cid
+      | _ -> default
+    end
     | _ -> default
   in
   if Env.is_enum env name then

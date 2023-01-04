@@ -18,12 +18,11 @@ module SN = Naming_special_names
 let shapes_key_exists env shape field_name =
   let check pos shape_kind fields =
     match TShapeMap.find_opt field_name fields with
-    | None ->
-      begin
-        match shape_kind with
-        | Closed_shape -> `DoesNotExist (pos, `Undefined)
-        | Open_shape -> `Unknown
-      end
+    | None -> begin
+      match shape_kind with
+      | Closed_shape -> `DoesNotExist (pos, `Undefined)
+      | Open_shape -> `Unknown
+    end
     | Some { sft_optional; sft_ty } ->
       if not sft_optional then
         `DoesExist (get_pos sft_ty)

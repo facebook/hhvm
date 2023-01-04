@@ -26,18 +26,17 @@ module SN = Naming_special_names
 module Profile = Typing_toplevel_profile
 
 (* The following function enables us to retrieve the class header from the
-  shared mem. Note that it only returns a non None value if
-  global inference is on *)
+   shared mem. Note that it only returns a non None value if
+   global inference is on *)
 let get_decl_method_header tcopt cls method_id ~is_static =
   let is_global_inference_on = TCO.global_inference tcopt in
   if is_global_inference_on then
     match Cls.get_any_method ~is_static cls method_id with
-    | Some { ce_type = (lazy ty); _ } ->
-      begin
-        match get_node ty with
-        | Tfun fun_type -> Some fun_type
-        | _ -> None
-      end
+    | Some { ce_type = (lazy ty); _ } -> begin
+      match get_node ty with
+      | Tfun fun_type -> Some fun_type
+      | _ -> None
+    end
     | _ -> None
   else
     None
@@ -494,13 +493,12 @@ let check_parents_sealed env child_def child_type =
   in
   let parents = parents @ child_def.c_implements @ child_def.c_uses in
   List.iter parents ~f:(function
-      | (_, Happly ((_, name), _)) ->
-        begin
-          match Env.get_class_dep env name with
-          | Some parent_type ->
-            check_parent_sealed (fst child_def.c_name, child_type) parent_type
-          | None -> ()
-        end
+      | (_, Happly ((_, name), _)) -> begin
+        match Env.get_class_dep env name with
+        | Some parent_type ->
+          check_parent_sealed (fst child_def.c_name, child_type) parent_type
+        | None -> ()
+      end
       | _ -> ())
 
 (* Reject multiple instantiations of the same generic interface
@@ -1247,36 +1245,35 @@ let check_generic_class_with_SupportDynamicType env c parents =
           in
           let (env, ty_err_opt2) =
             match get_node lty with
-            | Tclass ((_, name), _, _) ->
-              begin
-                match Env.get_class env name with
-                | Some c when Cls.get_support_dynamic_type c ->
-                  let env_with_assumptions =
-                    Typing_subtype.add_constraint
-                      env
-                      Ast_defs.Constraint_as
-                      lty
-                      dynamic_ty
-                    @@ Some (Typing_error.Reasons_callback.unify_error_at pc)
-                  in
-                  begin
-                    match Env.get_self_ty env with
-                    | Some self_ty ->
-                      TUtils.supports_dynamic env_with_assumptions self_ty
-                      @@ Some
-                           (Typing_error.Reasons_callback
-                            .bad_conditional_support_dynamic
-                              pc
-                              ~child:c_name
-                              ~parent:name
-                              ~ty_name:
-                                (lazy (Typing_print.full_strip_ns_decl env ty))
-                              ~self_ty_name:
-                                (lazy (Typing_print.full_strip_ns env self_ty)))
-                    | _ -> (env, None)
-                  end
-                | _ -> (env, None)
-              end
+            | Tclass ((_, name), _, _) -> begin
+              match Env.get_class env name with
+              | Some c when Cls.get_support_dynamic_type c ->
+                let env_with_assumptions =
+                  Typing_subtype.add_constraint
+                    env
+                    Ast_defs.Constraint_as
+                    lty
+                    dynamic_ty
+                  @@ Some (Typing_error.Reasons_callback.unify_error_at pc)
+                in
+                begin
+                  match Env.get_self_ty env with
+                  | Some self_ty ->
+                    TUtils.supports_dynamic env_with_assumptions self_ty
+                    @@ Some
+                         (Typing_error.Reasons_callback
+                          .bad_conditional_support_dynamic
+                            pc
+                            ~child:c_name
+                            ~parent:name
+                            ~ty_name:
+                              (lazy (Typing_print.full_strip_ns_decl env ty))
+                            ~self_ty_name:
+                              (lazy (Typing_print.full_strip_ns env self_ty)))
+                  | _ -> (env, None)
+                end
+              | _ -> (env, None)
+            end
             | _ -> (env, None)
           in
           let ty_errs =
@@ -1332,22 +1329,21 @@ let check_SupportDynamicType env c =
     | Ast_defs.Ctrait ->
       List.iter parent_names ~f:(fun name ->
           match Env.get_class_dep env name with
-          | Some parent_type ->
-            begin
-              match Cls.kind parent_type with
-              | Ast_defs.Cclass _
-              | Ast_defs.Cinterface ->
-                (* ensure that we implement dynamic if we are a subclass/subinterface of a class/interface
-                 * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
-                if
-                  Cls.get_support_dynamic_type parent_type
-                  && not support_dynamic_type
-                then
-                  error_parent_support_dynamic_type
-                    parent_type
-                    support_dynamic_type
-              | Ast_defs.(Cenum | Cenum_class _ | Ctrait) -> ()
-            end
+          | Some parent_type -> begin
+            match Cls.kind parent_type with
+            | Ast_defs.Cclass _
+            | Ast_defs.Cinterface ->
+              (* ensure that we implement dynamic if we are a subclass/subinterface of a class/interface
+               * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
+              if
+                Cls.get_support_dynamic_type parent_type
+                && not support_dynamic_type
+              then
+                error_parent_support_dynamic_type
+                  parent_type
+                  support_dynamic_type
+            | Ast_defs.(Cenum | Cenum_class _ | Ctrait) -> ()
+          end
           | None -> ())
 
 (** Check proper usage of the __Override attribute. *)
@@ -1679,7 +1675,7 @@ let check_class_members env c tc =
     match typed_constructor with
     | None -> (typed_static_methods @ typed_methods, [])
     | Some (m, global_inference_env) ->
-      (m :: typed_static_methods @ typed_methods, [global_inference_env])
+      ((m :: typed_static_methods) @ typed_methods, [global_inference_env])
   in
   let typed_members =
     ( typed_consts,

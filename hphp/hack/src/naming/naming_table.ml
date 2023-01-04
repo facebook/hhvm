@@ -142,16 +142,16 @@ open Hh_prelude
 *)
 
 (* Changes since baseline can be None if there was no baseline to begin with.
-  The scenario where we apply changes since baseline instead of relying on
-  the packaged local changes in the LOCAL_CHANGES table is this:
-    1) Load the naming table baseline (may include local changes if it was
-      incrementally updated at some point - not currently done in practice,
-      but possible and likely to happen in the future)
-    2) Load the changes since baseline that include naming changes processed
-      at another time (perhaps, on another host)
-  In the scenario where the naming table is saved to SQLite from an Unbacked
-  naming table, there is no baseline to speak of
-  *)
+   The scenario where we apply changes since baseline instead of relying on
+   the packaged local changes in the LOCAL_CHANGES table is this:
+     1) Load the naming table baseline (may include local changes if it was
+       incrementally updated at some point - not currently done in practice,
+       but possible and likely to happen in the future)
+     2) Load the changes since baseline that include naming changes processed
+       at another time (perhaps, on another host)
+   In the scenario where the naming table is saved to SQLite from an Unbacked
+   naming table, there is no baseline to speak of
+*)
 type changes_since_baseline = Naming_sqlite.local_changes option
 
 type t =
@@ -185,13 +185,13 @@ let filter a ~f =
               ~f:
                 begin
                   fun path fi acc ->
-                  if f path fi then
-                    acc
-                  else
-                    Relative_path.Map.add
+                    if f path fi then
                       acc
-                      ~key:path
-                      ~data:Naming_sqlite.Deleted
+                    else
+                      Relative_path.Map.add
+                        acc
+                        ~key:path
+                        ~data:Naming_sqlite.Deleted
                 end
               ~file_deltas;
         },

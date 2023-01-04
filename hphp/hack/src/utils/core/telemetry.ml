@@ -225,25 +225,21 @@ let diff ~(all : bool) ?(suffix_keys = true) (telemetry : t) ~(prev : t) : t =
     | (JSON_Number val_c, JSON_Number val_p) when String.equal val_c val_p ->
       acc_if all (key, JSON_Number val_c) acc
     | (JSON_Null, JSON_Null) -> acc_if all (key, JSON_Null) acc
-    | (JSON_Number c, JSON_Number p) ->
+    | (JSON_Number c, JSON_Number p) -> begin
       (* JSON_Numbers are strings - maybe ints, maybe floats, maybe we
          can't parse them or they're outside ocaml maximum range *)
-      begin
+      try
+        let (c, p) = (int_of_string c, int_of_string p) in
+        (key ^ diff_suffix, int_ (c - p)) :: acc_if all (key, int_ c) acc
+      with
+      | _ -> begin
         try
-          let (c, p) = (int_of_string c, int_of_string p) in
-          (key ^ diff_suffix, int_ (c - p)) :: acc_if all (key, int_ c) acc
+          let (c, p) = (float_of_string c, float_of_string p) in
+          (key ^ diff_suffix, float_ (c -. p)) :: acc_if all (key, float_ c) acc
         with
-        | _ ->
-          begin
-            try
-              let (c, p) = (float_of_string c, float_of_string p) in
-              (key ^ diff_suffix, float_ (c -. p))
-              :: acc_if all (key, float_ c) acc
-            with
-            | _ ->
-              (key, JSON_Number c) :: (key ^ prev_suffix, JSON_Number p) :: acc
-          end
+        | _ -> (key, JSON_Number c) :: (key ^ prev_suffix, JSON_Number p) :: acc
       end
+    end
     | (_, _) -> (key, val_c) :: (key ^ prev_suffix, val_p) :: acc
   in
 

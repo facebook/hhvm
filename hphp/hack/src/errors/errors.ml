@@ -185,7 +185,7 @@ let (error_map : error files_t ref) = ref Relative_path.Map.empty
 let accumulate_errors = ref false
 
 (* Are we in the middle of folding a decl? ("lazy" means it happens on-demand
-during the course of the typecheck, rather than all upfront). *)
+   during the course of the typecheck, rather than all upfront). *)
 let in_lazy_decl = ref false
 
 let (is_hh_fixme : (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
@@ -212,15 +212,15 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
       ~f:
         begin
           fun () ->
-          let result = f1 () in
-          (result, !error_map)
+            let result = f1 () in
+            (result, !error_map)
         end
       ~finally:
         begin
           fun () ->
-          error_map := error_map_copy;
-          accumulate_errors := accumulate_errors_copy;
-          is_hh_fixme := is_hh_fixme_copy
+            error_map := error_map_copy;
+            accumulate_errors := accumulate_errors_copy;
+            is_hh_fixme := is_hh_fixme_copy
         end
   in
   match get_last errors with
@@ -252,15 +252,15 @@ let try_with_result_pure ~fail f g =
       ~f:
         begin
           fun () ->
-          let result = f () in
-          (result, !error_map)
+            let result = f () in
+            (result, !error_map)
         end
       ~finally:
         begin
           fun () ->
-          error_map := error_map_copy;
-          accumulate_errors := accumulate_errors_copy;
-          is_hh_fixme := is_hh_fixme_copy
+            error_map := error_map_copy;
+            accumulate_errors := accumulate_errors_copy;
+            is_hh_fixme := is_hh_fixme_copy
         end
   in
   match get_last errors with
@@ -281,15 +281,15 @@ let do_ ?(apply_fixmes = true) ?(drop_fixmed = true) f =
       ~f:
         begin
           fun () ->
-          let result = f () in
-          (result, !error_map)
+            let result = f () in
+            (result, !error_map)
         end
       ~finally:
         begin
           fun () ->
-          error_map := error_map_copy;
-          accumulate_errors := accumulate_errors_copy;
-          is_hh_fixme := is_hh_fixme_copy
+            error_map := error_map_copy;
+            accumulate_errors := accumulate_errors_copy;
+            is_hh_fixme := is_hh_fixme_copy
         end
   in
   let out_errors = files_t_map ~f:List.rev out_errors in
@@ -834,8 +834,7 @@ let incremental_update ~old ~new_ ~rechecked phase =
     Relative_path.Set.fold
       ~f:
         begin
-          fun path acc ->
-          g path acc
+          (fun path acc -> g path acc)
         end
       ~init
       rechecked
@@ -1029,7 +1028,7 @@ let ambiguous_inheritance
   apply_error_from_reasons_callback
     on_error
     ~code
-    ~reasons:(lazy (claim_as_reason claim :: reasons @ [(pos, message)]))
+    ~reasons:(lazy ((claim_as_reason claim :: reasons) @ [(pos, message)]))
 
 (** TODO: Remove use of `User_error.t` representation for nested error  *)
 let function_is_not_dynamically_callable function_name error =

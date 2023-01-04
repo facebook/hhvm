@@ -32,10 +32,9 @@ let rec fold3 ~f ~init xs ys zs =
   List.Or_unequal_lengths.(
     match (xs, ys, zs) with
     | ([], [], []) -> Ok init
-    | (x :: xs, y :: ys, z :: zs) ->
-      begin
-        match fold3 ~f ~init xs ys zs with
-        | Ok acc -> Ok (f acc x y z)
-        | err -> err
-      end
+    | (x :: xs, y :: ys, z :: zs) -> begin
+      match fold3 ~f ~init xs ys zs with
+      | Ok acc -> Ok (f acc x y z)
+      | err -> err
+    end
     | _ -> Unequal_lengths)

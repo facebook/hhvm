@@ -120,14 +120,14 @@ let make_genv options config local_config workers =
             ~f:
               begin
                 fun acc changes ->
-                match on_changes changes with
-                | Notifier_unavailable
-                | Notifier_state_enter _
-                | Notifier_state_leave _ ->
-                  acc
-                | Notifier_synchronous_changes changes
-                | Notifier_async_changes changes ->
-                  SSet.union acc changes
+                  match on_changes changes with
+                  | Notifier_unavailable
+                  | Notifier_state_enter _
+                  | Notifier_state_leave _ ->
+                    acc
+                  | Notifier_synchronous_changes changes
+                  | Notifier_async_changes changes ->
+                    SSet.union acc changes
               end
             ~init:SSet.empty
         in

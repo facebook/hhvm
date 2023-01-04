@@ -25,80 +25,75 @@ let rec get_enforced_type env class_def_opt ty =
   let default () = MakeType.mixed Reason.Rnone in
   match get_node ty with
   (* An enum type is enforced at its underlying type *)
-  | Tapply ((_, name), _) when Env.is_enum env name ->
-    begin
-      match Env.get_class env name with
+  | Tapply ((_, name), _) when Env.is_enum env name -> begin
+    match Env.get_class env name with
+    | None -> default ()
+    | Some tc ->
+      (match Cls.enum_type tc with
       | None -> default ()
-      | Some tc ->
-        (match Cls.enum_type tc with
+      | Some e -> get_enforced_type env None e.te_base)
+  end
+  | Tapply ((_pos, name), tyargs) -> begin
+    match Env.get_class_or_typedef env name with
+    | Some (Env.ClassResult _class_info) ->
+      (* Non-generic types are fully enforced *)
+      if List.is_empty tyargs then
+        ty
+      (* Generic types are not enforced at their type arguments *)
+      else
+        default ()
+    | Some (Env.TypedefResult typedef_info) ->
+      (* Enforcement "sees through" type aliases and newtype, but does not instantiate generic arguments *)
+      (* The same is true of newtypes *)
+      get_enforced_type env None typedef_info.td_type
+    | None -> default ()
+  end
+  | Tgeneric (name, []) -> begin
+    match class_def_opt with
+    | None -> default ()
+    | Some cd ->
+      let tparams = Cls.tparams cd in
+      begin
+        match
+          List.find tparams ~f:(fun tp -> String.equal (snd tp.tp_name) name)
+        with
         | None -> default ()
-        | Some e -> get_enforced_type env None e.te_base)
-    end
-  | Tapply ((_pos, name), tyargs) ->
-    begin
-      match Env.get_class_or_typedef env name with
-      | Some (Env.ClassResult _class_info) ->
-        (* Non-generic types are fully enforced *)
-        if List.is_empty tyargs then
-          ty
-        (* Generic types are not enforced at their type arguments *)
-        else
-          default ()
-      | Some (Env.TypedefResult typedef_info) ->
-        (* Enforcement "sees through" type aliases and newtype, but does not instantiate generic arguments *)
-        (* The same is true of newtypes *)
-        get_enforced_type env None typedef_info.td_type
-      | None -> default ()
-    end
-  | Tgeneric (name, []) ->
-    begin
-      match class_def_opt with
-      | None -> default ()
-      | Some cd ->
-        let tparams = Cls.tparams cd in
-        begin
-          match
-            List.find tparams ~f:(fun tp -> String.equal (snd tp.tp_name) name)
-          with
-          | None -> default ()
-          | Some tp ->
-            let bounds =
-              List.filter_map tp.tp_constraints ~f:(fun (cstr, ty) ->
-                  match cstr with
-                  | Ast_defs.Constraint_as
-                  | Ast_defs.Constraint_eq ->
-                    (* Do not follow bounds that are themselves generic parameters
-                     * as HHVM doesn't enforce these *)
-                    begin
-                      match get_node ty with
-                      | Tgeneric _ -> None
-                      | _ -> Some (get_enforced_type env class_def_opt ty)
-                    end
-                  | Ast_defs.Constraint_super -> None)
-            in
-            begin
-              match bounds with
-              | [] -> default ()
-              | [t] -> t
-              | ts -> MakeType.intersection Reason.Rnone ts
-            end
-        end
-    end
+        | Some tp ->
+          let bounds =
+            List.filter_map tp.tp_constraints ~f:(fun (cstr, ty) ->
+                match cstr with
+                | Ast_defs.Constraint_as
+                | Ast_defs.Constraint_eq -> begin
+                  (* Do not follow bounds that are themselves generic parameters
+                   * as HHVM doesn't enforce these *)
+                  match get_node ty with
+                  | Tgeneric _ -> None
+                  | _ -> Some (get_enforced_type env class_def_opt ty)
+                end
+                | Ast_defs.Constraint_super -> None)
+          in
+          begin
+            match bounds with
+            | [] -> default ()
+            | [t] -> t
+            | ts -> MakeType.intersection Reason.Rnone ts
+          end
+      end
     (* This is enforced but only at its class, which we can't express
      * in Hack types. So we use the enclosing class as an approximation.
      *)
-  | Tthis ->
-    begin
-      match class_def_opt with
-      | None -> default ()
-      | Some cd ->
-        mk
-          ( Reason.Rnone,
-            Tapply
-              ( (Cls.pos cd, Cls.name cd),
-                List.map (Cls.tparams cd) ~f:(fun _ -> mk (Reason.Rnone, Terr))
-              ) )
-    end
+  end
+  | Tthis -> begin
+    match class_def_opt with
+    | None -> default ()
+    | Some cd ->
+      mk
+        ( Reason.Rnone,
+          Tapply
+            ( (Cls.pos cd, Cls.name cd),
+              List.map (Cls.tparams cd) ~f:(fun _ -> mk (Reason.Rnone, Terr)) )
+        )
+  end
   | Toption t ->
     let ety = get_enforced_type env class_def_opt t in
     MakeType.nullable_decl Reason.Rnone ety

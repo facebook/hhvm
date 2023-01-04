@@ -54,7 +54,7 @@ let send_progress ?(include_in_logs = true) fmt =
   Printf.ksprintf f fmt
 
 (* The message will look roughly like this:
-  <operation> <done_count>/<total_count> <unit> <percent done> <extra>*)
+   <operation> <done_count>/<total_count> <unit> <percent done> <extra>*)
 let make_percentage_progress_message
     ~(operation : string)
     ~(done_count : int)

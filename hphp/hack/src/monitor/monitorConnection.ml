@@ -332,8 +332,8 @@ let connect_and_shut_down ~tracker root =
     ~do_:
       begin
         fun _ ->
-        wait_on_server_restart ic;
-        Ok ServerMonitorUtils.SHUTDOWN_VERIFIED
+          wait_on_server_restart ic;
+          Ok ServerMonitorUtils.SHUTDOWN_VERIFIED
       end
 
 let connect_once

@@ -205,21 +205,20 @@ and hint_ ~in_signature env p h_ =
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
     [Typing_error.(wellformedness @@ Primary.Wellformedness.Tuple_syntax p)]
-  | Happly ((_, x), hl) as h ->
-    begin
-      match Env.get_class_or_typedef env.tenv x with
-      | None -> []
-      | Some (Env.TypedefResult _) ->
-        let (_ : Typing_env_types.env) =
-          check_happly env.typedef_tparams env.tenv (p, h)
-        in
-        hints env hl
-      | Some (Env.ClassResult _) ->
-        let (_ : Typing_env_types.env) =
-          check_happly env.typedef_tparams env.tenv (p, h)
-        in
-        hints env hl
-    end
+  | Happly ((_, x), hl) as h -> begin
+    match Env.get_class_or_typedef env.tenv x with
+    | None -> []
+    | Some (Env.TypedefResult _) ->
+      let (_ : Typing_env_types.env) =
+        check_happly env.typedef_tparams env.tenv (p, h)
+      in
+      hints env hl
+    | Some (Env.ClassResult _) ->
+      let (_ : Typing_env_types.env) =
+        check_happly env.typedef_tparams env.tenv (p, h)
+      in
+      hints env hl
+  end
   | Hrefinement (hr, _) as h ->
     check_hrefinement env.typedef_tparams env.tenv (p, h);
     hint env hr

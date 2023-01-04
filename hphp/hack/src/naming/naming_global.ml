@@ -245,13 +245,13 @@ module Env = struct
       let pc = Option.value_exn (Naming_provider.get_fun_pos ctx canonical) in
       begin
         if
-        should_report_duplicate
-          ctx
-          fi
-          current_file_symbols_acc
-          ~id
-          ~canonical_id:(pc, canonical, None)
-       then
+          should_report_duplicate
+            ctx
+            fi
+            current_file_symbols_acc
+            ~id
+            ~canonical_id:(pc, canonical, None)
+        then
           let (pos, name) = GEnv.get_fun_full_pos ctx (p, name) in
           let (prev_pos, prev_name) =
             GEnv.get_fun_full_pos ctx (pc, canonical)
@@ -283,13 +283,13 @@ module Env = struct
         in
         begin
           if
-          should_report_duplicate
-            ctx
-            fi
-            current_file_symbols_acc
-            ~id
-            ~canonical_id:(pc, canonical, None)
-         then
+            should_report_duplicate
+              ctx
+              fi
+              current_file_symbols_acc
+              ~id
+              ~canonical_id:(pc, canonical, None)
+          then
             let (pos, name) = GEnv.get_type_full_pos ctx (p, name) in
             let (prev_pos, prev_name) =
               GEnv.get_type_full_pos ctx (pc, canonical)
@@ -314,13 +314,13 @@ module Env = struct
     | Some pc ->
       begin
         if
-        should_report_duplicate
-          ctx
-          fi
-          current_file_symbols_acc
-          ~id
-          ~canonical_id:(pc, name, None)
-       then
+          should_report_duplicate
+            ctx
+            fi
+            current_file_symbols_acc
+            ~id
+            ~canonical_id:(pc, name, None)
+        then
           let (pos, name) = GEnv.get_const_full_pos ctx (p, name) in
           let (prev_pos, name) = GEnv.get_const_full_pos ctx (pc, name) in
           Errors.add_naming_error
@@ -350,13 +350,13 @@ module Env = struct
     | Some pc ->
       begin
         if
-        should_report_duplicate
-          ctx
-          fi
-          current_file_symbols_acc
-          ~id
-          ~canonical_id:(pc, name, None)
-       then
+          should_report_duplicate
+            ctx
+            fi
+            current_file_symbols_acc
+            ~id
+            ~canonical_id:(pc, name, None)
+        then
           let (pos, name) = GEnv.get_module_full_pos ctx (p, name) in
           let (prev_pos, name) = GEnv.get_module_full_pos ctx (pc, name) in
           Errors.add_naming_error
@@ -463,11 +463,11 @@ let add_files_to_rename failed defl defs_in_env =
     ~f:
       begin
         fun failed (_, def, _) ->
-        match defs_in_env def with
-        | None -> failed
-        | Some previous_definition_position ->
-          let filename = Pos.filename previous_definition_position in
-          Relative_path.Set.add failed filename
+          match defs_in_env def with
+          | None -> failed
+          | Some previous_definition_position ->
+            let filename = Pos.filename previous_definition_position in
+            Relative_path.Set.add failed filename
       end
     ~init:failed
     defl

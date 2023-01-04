@@ -97,7 +97,7 @@ let compare_types_and_get_fanout
   ({ changed; to_redecl; to_recheck }, old_types_missing)
 
 (* Given a set of global constants, compare the old and the new decl and
-  deduce what must be rechecked accordingly. *)
+   deduce what must be rechecked accordingly. *)
 let compare_gconsts_and_get_fanout
     ctx old_gconsts { changed; to_redecl; to_recheck } gconsts =
   let ((rc, rdd, rdc), old_gconsts_missing) =
@@ -109,7 +109,7 @@ let compare_gconsts_and_get_fanout
   ({ changed; to_redecl; to_recheck }, old_gconsts_missing)
 
 (* Given a set of modules, compare the old and the new decl and
-  deduce what must be rechecked accordingly. *)
+   deduce what must be rechecked accordingly. *)
 let compare_modules_and_get_fanout
     ctx old_modules { changed; to_redecl; to_recheck } modules =
   let ((rc, rdd, rdc), old_modules_missing) =

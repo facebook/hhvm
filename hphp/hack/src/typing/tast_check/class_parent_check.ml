@@ -14,22 +14,21 @@ module Cls = Decl_provider.Class
 
 let check_is_class env ~require_class_check (p, h) =
   match h with
-  | Aast.Happly ((_, name), _) ->
-    begin
-      match Env.get_class env name with
-      | None -> ()
-      | Some cls ->
-        let kind = Cls.kind cls in
-        let name = Cls.name cls in
-        if Ast_defs.is_c_class kind then (
-          if Cls.final cls && not require_class_check then
-            Errors.add_nast_check_error
-            @@ Nast_check_error.Requires_final_class { pos = p; name }
-        ) else
+  | Aast.Happly ((_, name), _) -> begin
+    match Env.get_class env name with
+    | None -> ()
+    | Some cls ->
+      let kind = Cls.kind cls in
+      let name = Cls.name cls in
+      if Ast_defs.is_c_class kind then (
+        if Cls.final cls && not require_class_check then
           Errors.add_nast_check_error
-          @@ Nast_check_error.Requires_non_class
-               { pos = p; name; kind = Ast_defs.string_of_classish_kind kind }
-    end
+          @@ Nast_check_error.Requires_final_class { pos = p; name }
+      ) else
+        Errors.add_nast_check_error
+        @@ Nast_check_error.Requires_non_class
+             { pos = p; name; kind = Ast_defs.string_of_classish_kind kind }
+  end
   | Aast.Habstr (name, _) ->
     Errors.add_nast_check_error
     @@ Nast_check_error.Requires_non_class { pos = p; name; kind = "a generic" }
@@ -40,16 +39,15 @@ let check_is_class env ~require_class_check (p, h) =
 
 let check_is_interface (env, error_verb) (p, h) =
   match h with
-  | Aast.Happly ((_, name), _) ->
-    begin
-      match Env.get_class env name with
-      | None -> ()
-      | Some cls when Ast_defs.is_c_interface (Cls.kind cls) -> ()
-      | Some cls ->
-        Errors.add_nast_check_error
-        @@ Nast_check_error.Non_interface
-             { pos = p; name = Cls.name cls; verb = error_verb }
-    end
+  | Aast.Happly ((_, name), _) -> begin
+    match Env.get_class env name with
+    | None -> ()
+    | Some cls when Ast_defs.is_c_interface (Cls.kind cls) -> ()
+    | Some cls ->
+      Errors.add_nast_check_error
+      @@ Nast_check_error.Non_interface
+           { pos = p; name = Cls.name cls; verb = error_verb }
+  end
   | Aast.Habstr _ ->
     Errors.add_nast_check_error
     @@ Nast_check_error.Non_interface

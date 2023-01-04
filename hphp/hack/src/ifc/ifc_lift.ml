@@ -102,13 +102,13 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
         a_length = get_policy ~prefix:"len" lump renv;
       }
   | T.Tclass ((_, name), _, targs) when String.equal name Decl.awaitable_id ->
-    begin
-      match targs with
-      (* NOTE: Strip Awaitable out of the type since it has no affect on
-         information flow *)
-      | [inner_ty] -> ty inner_ty
-      | _ -> fail "Awaitable needs one type parameter"
-    end
+  begin
+    match targs with
+    (* NOTE: Strip Awaitable out of the type since it has no affect on
+       information flow *)
+    | [inner_ty] -> ty inner_ty
+    | _ -> fail "Awaitable needs one type parameter"
+  end
   | T.Tclass ((_, name), _, _) -> class_ty ?lump renv name
   | T.Tvar id -> ty (expand_var renv id)
   | T.Tfun fun_ty ->

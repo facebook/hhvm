@@ -16,6 +16,7 @@ if-then-else = k-r
 indicate-nested-or-patterns = unsafe-no
 leading-nested-match-parens = true
 parens-tuple-patterns = always
+module-item-spacing = sparse
 sequence-blank-line = preserve-one
 sequence-style = terminator
 space-around-lists = false

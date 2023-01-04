@@ -888,19 +888,17 @@ let fold
    * properly (again, given our input sorting restraints). *)
   let rec consume_sorted_changes path fi (sorted_changes, acc) =
     match sorted_changes with
-    | hd :: tl when Relative_path.compare (fst hd) path < 0 ->
-      begin
-        match snd hd with
-        | Modified local_fi ->
-          consume_sorted_changes path fi (tl, f (fst hd) local_fi acc)
-        | Deleted -> consume_sorted_changes path fi (tl, acc)
-      end
-    | hd :: tl when Relative_path.equal (fst hd) path ->
-      begin
-        match snd hd with
-        | Modified fi -> (tl, f path fi acc)
-        | Deleted -> (tl, acc)
-      end
+    | hd :: tl when Relative_path.compare (fst hd) path < 0 -> begin
+      match snd hd with
+      | Modified local_fi ->
+        consume_sorted_changes path fi (tl, f (fst hd) local_fi acc)
+      | Deleted -> consume_sorted_changes path fi (tl, acc)
+    end
+    | hd :: tl when Relative_path.equal (fst hd) path -> begin
+      match snd hd with
+      | Modified fi -> (tl, f path fi acc)
+      | Deleted -> (tl, acc)
+    end
     | _ -> (sorted_changes, f path fi acc)
   in
   let (_db, stmt_cache) = get_db_and_stmt_cache db_path in
@@ -915,9 +913,9 @@ let fold
       ~f:
         begin
           fun acc (path, delta) ->
-          match delta with
-          | Modified fi -> f path fi acc
-          | Deleted -> (* This probably shouldn't happen? *) acc
+            match delta with
+            | Modified fi -> f path fi acc
+            | Deleted -> (* This probably shouldn't happen? *) acc
         end
       ~init:acc
       remaining_changes
@@ -935,7 +933,7 @@ let get_file_info (db_path : db_path) path =
   FileInfoTable.get_file_info db stmt_cache path
 
 (* Same as `get_db_and_stmt_cache` but with logging for when opening the
-database fails. *)
+   database fails. *)
 let sqlite_exn_wrapped_get_db_and_stmt_cache db_path name =
   try get_db_and_stmt_cache db_path with
   | Sqlite3.Error _ as exn ->

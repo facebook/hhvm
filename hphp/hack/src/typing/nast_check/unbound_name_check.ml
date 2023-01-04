@@ -53,15 +53,14 @@ let handle_unbound_name env (pos, name) kind =
 let has_canon_name env get_name get_pos (pos, name) =
   match get_name env.ctx name with
   | None -> false
-  | Some suggest_name ->
-    begin
-      match get_pos env.ctx suggest_name with
-      | None -> false
-      | Some suggest_pos ->
-        Errors.add_naming_error
-        @@ Naming_error.Did_you_mean { pos; name; suggest_pos; suggest_name };
-        true
-    end
+  | Some suggest_name -> begin
+    match get_pos env.ctx suggest_name with
+    | None -> false
+    | Some suggest_pos ->
+      Errors.add_naming_error
+      @@ Naming_error.Did_you_mean { pos; name; suggest_pos; suggest_name };
+      true
+  end
 
 let check_fun_name env ((_, name) as id) =
   if Naming_special_names.SpecialFunctions.is_special_function name then
@@ -122,32 +121,31 @@ let check_type_name
               @@ Primary.Generic_at_runtime { pos; prefix = "Soft reified" })
         | Aast.Reified -> ()
       end
-    | None ->
-      begin
-        match Naming_provider.get_type_kind env.ctx name with
-        | Some Naming_types.TTypedef when not allow_typedef ->
-          let def_pos =
-            Naming_provider.get_type_pos env.ctx name |> Option.value_exn
-          in
-          let (decl_pos, _) =
-            Naming_global.GEnv.get_type_full_pos env.ctx (def_pos, name)
-          in
-          Errors.add_naming_error
-          @@ Naming_error.Unexpected_typedef
-               { pos; decl_pos; expected_kind = kind }
-        | Some _ -> ()
-        | None ->
-          if
-            has_canon_name
-              env
-              Naming_provider.get_type_canon_name
-              Naming_global.GEnv.type_pos
-              id
-          then
-            ()
-          else
-            handle_unbound_name env id kind
-      end
+    | None -> begin
+      match Naming_provider.get_type_kind env.ctx name with
+      | Some Naming_types.TTypedef when not allow_typedef ->
+        let def_pos =
+          Naming_provider.get_type_pos env.ctx name |> Option.value_exn
+        in
+        let (decl_pos, _) =
+          Naming_global.GEnv.get_type_full_pos env.ctx (def_pos, name)
+        in
+        Errors.add_naming_error
+        @@ Naming_error.Unexpected_typedef
+             { pos; decl_pos; expected_kind = kind }
+      | Some _ -> ()
+      | None ->
+        if
+          has_canon_name
+            env
+            Naming_provider.get_type_canon_name
+            Naming_global.GEnv.type_pos
+            id
+        then
+          ()
+        else
+          handle_unbound_name env id kind
+    end
 
 let check_type_hint
     ?(kind = Name_context.TypeNamespace)

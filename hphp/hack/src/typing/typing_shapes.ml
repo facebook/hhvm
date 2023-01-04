@@ -23,18 +23,16 @@ module MakeType = Typing_make_type
 
 let widen_for_refine_shape ~expr_pos field_name env ty =
   match deref ty with
-  | (r, Tshape (shape_kind, fields)) ->
-    begin
-      match TShapeMap.find_opt field_name fields with
-      | None ->
-        let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
-        let sft = { sft_optional = true; sft_ty = element_ty } in
-        ( (env, None),
-          Some
-            (mk (r, Tshape (shape_kind, TShapeMap.add field_name sft fields)))
-        )
-      | Some _ -> ((env, None), Some ty)
-    end
+  | (r, Tshape (shape_kind, fields)) -> begin
+    match TShapeMap.find_opt field_name fields with
+    | None ->
+      let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
+      let sft = { sft_optional = true; sft_ty = element_ty } in
+      ( (env, None),
+        Some (mk (r, Tshape (shape_kind, TShapeMap.add field_name sft fields)))
+      )
+    | Some _ -> ((env, None), Some ty)
+  end
   | _ -> ((env, None), None)
 
 let refine_shape field_name pos env shape =
@@ -373,25 +371,23 @@ let to_collection env shape_ty res return_type =
                   (env, MakeType.int (Reason.Rwitness_from_decl p))
                 | Typing_defs.TSFlit_str (p, _) ->
                   (env, MakeType.string (Reason.Rwitness_from_decl p))
-                | Typing_defs.TSFclass_const ((p, cid), (_, mid)) ->
-                  begin
-                    match Env.get_class env cid with
-                    | Some class_ ->
-                      begin
-                        match Env.get_const env class_ mid with
-                        | Some const ->
-                          let ((env, ty_err_opt), lty) =
-                            Typing_phase.localize_no_subst
-                              env
-                              ~ignore_errors:true
-                              const.cc_type
-                          in
-                          Option.iter ~f:Errors.add_typing_error ty_err_opt;
-                          (env, lty)
-                        | None -> (env, TUtils.mk_tany_ env p)
-                      end
+                | Typing_defs.TSFclass_const ((p, cid), (_, mid)) -> begin
+                  match Env.get_class env cid with
+                  | Some class_ -> begin
+                    match Env.get_const env class_ mid with
+                    | Some const ->
+                      let ((env, ty_err_opt), lty) =
+                        Typing_phase.localize_no_subst
+                          env
+                          ~ignore_errors:true
+                          const.cc_type
+                      in
+                      Option.iter ~f:Errors.add_typing_error ty_err_opt;
+                      (env, lty)
                     | None -> (env, TUtils.mk_tany_ env p)
-                  end)
+                  end
+                  | None -> (env, TUtils.mk_tany_ env p)
+                end)
           in
           let (env, key) = Typing_union.union_list env r keys in
           let values = TShapeMap.values fdm in
@@ -472,46 +468,45 @@ let check_shape_keys_validity env keys =
              @@ Primary.Shape.Invalid_shape_field_name
                   { pos = key_pos; is_empty = true }));
       (env, key_pos, None)
-    | Ast_defs.SFclass_const ((_p, cls), (p, y)) ->
-      begin
-        match Env.get_class env cls with
-        | None -> (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
-        | Some cd ->
-          (match Env.get_const env cd y with
-          | None ->
-            Errors.add_typing_error
-            @@ Typing_object_get.smember_not_found
-                 p
-                 ~is_const:true
-                 ~is_method:false
-                 ~is_function_pointer:false
-                 cd
-                 y
-                 Typing_error.Callback.unify_error;
-            (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
-          | Some { cc_type; _ } ->
-            let ((env, ty_err_opt), ty) =
-              Typing_phase.localize_no_subst ~ignore_errors:true env cc_type
-            in
-            Option.iter ~f:Errors.add_typing_error ty_err_opt;
-            let r = Reason.Rwitness key_pos in
-            let (env, e2) =
-              Type.sub_type key_pos Reason.URnone env ty (MakeType.arraykey r)
-              @@ Typing_error.(
-                   Callback.always
-                     Primary.(
-                       Shape
-                         (Shape.Invalid_shape_field_type
-                            {
-                              pos = key_pos;
-                              ty_pos = get_pos ty;
-                              ty_name = lazy (Typing_print.error env ty);
-                              trail = [];
-                            })))
-            in
-            Option.iter ~f:Errors.add_typing_error e2;
-            (env, key_pos, Some (cls, ty)))
-      end
+    | Ast_defs.SFclass_const ((_p, cls), (p, y)) -> begin
+      match Env.get_class env cls with
+      | None -> (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
+      | Some cd ->
+        (match Env.get_const env cd y with
+        | None ->
+          Errors.add_typing_error
+          @@ Typing_object_get.smember_not_found
+               p
+               ~is_const:true
+               ~is_method:false
+               ~is_function_pointer:false
+               cd
+               y
+               Typing_error.Callback.unify_error;
+          (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
+        | Some { cc_type; _ } ->
+          let ((env, ty_err_opt), ty) =
+            Typing_phase.localize_no_subst ~ignore_errors:true env cc_type
+          in
+          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          let r = Reason.Rwitness key_pos in
+          let (env, e2) =
+            Type.sub_type key_pos Reason.URnone env ty (MakeType.arraykey r)
+            @@ Typing_error.(
+                 Callback.always
+                   Primary.(
+                     Shape
+                       (Shape.Invalid_shape_field_type
+                          {
+                            pos = key_pos;
+                            ty_pos = get_pos ty;
+                            ty_name = lazy (Typing_print.error env ty);
+                            trail = [];
+                          })))
+          in
+          Option.iter ~f:Errors.add_typing_error e2;
+          (env, key_pos, Some (cls, ty)))
+    end
   in
   let check_field witness_pos witness_info env key =
     let (env, key_pos, key_info) = get_field_info env key in

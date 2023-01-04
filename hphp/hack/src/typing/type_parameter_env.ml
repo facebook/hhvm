@@ -196,13 +196,13 @@ let add_lower_bound_ tpenv name ty =
     add ~def_pos name tpinfo tpenv
 
 (* Add a single new upper bound [ty] to generic parameter [name].
-  * If the optional [intersect] operation is supplied, then use this to avoid
-  * adding redundant bounds by merging the type with existing bounds. This makes
-  * sense because a conjunction of upper bounds
-  *   (T <: t1) /\ ... /\ (T <: tn)
-  * is equivalent to a single upper bound
-  *   T <: (t1 & ... & tn)
-  *)
+   * If the optional [intersect] operation is supplied, then use this to avoid
+   * adding redundant bounds by merging the type with existing bounds. This makes
+   * sense because a conjunction of upper bounds
+   *   (T <: t1) /\ ... /\ (T <: tn)
+   * is equivalent to a single upper bound
+   *   T <: (t1 & ... & tn)
+*)
 let add_upper_bound ?intersect env_tpenv name ty =
   let tpenv =
     match deref ty with

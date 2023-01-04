@@ -17,29 +17,26 @@ module Cls = Decl_provider.Class
  * Nast is fully processed (by the caller of this code) *)
 let get_fun ctx name =
   match Decl_provider.get_fun ctx name with
-  | Some { fe_type; _ } ->
-    begin
-      match get_node fe_type with
-      | Tfun ft -> Some ft
-      | _ -> None
-    end
+  | Some { fe_type; _ } -> begin
+    match get_node fe_type with
+    | Tfun ft -> Some ft
+    | _ -> None
+  end
   | _ -> None
 
 let get_static_meth
     (ctx : Provider_context.t) (cls_name : string) (meth_name : string) =
   match Decl_provider.get_class ctx cls_name with
   | None -> None
-  | Some cls ->
-    begin
-      match Cls.get_smethod cls meth_name with
-      | None -> None
-      | Some { Typing_defs.ce_type = (lazy ty); _ } ->
-        begin
-          match get_node ty with
-          | Tfun fty -> Some fty
-          | _ -> None
-        end
+  | Some cls -> begin
+    match Cls.get_smethod cls meth_name with
+    | None -> None
+    | Some { Typing_defs.ce_type = (lazy ty); _ } -> begin
+      match get_node ty with
+      | Tfun fty -> Some fty
+      | _ -> None
     end
+  end
 
 let funopt_is_noreturn = function
   | Some { ft_ret = { et_type; _ }; _ } -> is_prim Tnoreturn et_type

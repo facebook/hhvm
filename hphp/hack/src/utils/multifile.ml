@@ -112,7 +112,8 @@ let print_files_as_multifile files =
   else
     Relative_path.Map.fold files ~init:[] ~f:(fun fn content acc ->
         content
-        :: Printf.sprintf "//// %s" (Relative_path.to_absolute fn) :: acc)
+        :: Printf.sprintf "//// %s" (Relative_path.to_absolute fn)
+        :: acc)
     |> List.rev
     |> String.concat ~sep:"\n"
     |> Out_channel.output_string stdout

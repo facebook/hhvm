@@ -16,20 +16,19 @@ let get_all_ancestors ctx class_name =
     | [] -> cinfos
     | class_name :: classes when SSet.mem class_name seen_classes ->
       helper classes cinfos seen_classes
-    | class_name :: classes ->
-      begin
-        match Decl_provider.get_class ctx class_name with
-        | None -> helper classes cinfos seen_classes
-        | Some class_info ->
-          let ancestors =
-            Cls.all_ancestor_names class_info
-            |> List.fold ~init:classes ~f:(fun acc cid -> cid :: acc)
-          in
-          helper
-            ancestors
-            (class_info :: cinfos)
-            (SSet.add class_name seen_classes)
-      end
+    | class_name :: classes -> begin
+      match Decl_provider.get_class ctx class_name with
+      | None -> helper classes cinfos seen_classes
+      | Some class_info ->
+        let ancestors =
+          Cls.all_ancestor_names class_info
+          |> List.fold ~init:classes ~f:(fun acc cid -> cid :: acc)
+        in
+        helper
+          ancestors
+          (class_info :: cinfos)
+          (SSet.add class_name seen_classes)
+    end
   in
   helper [class_name] [] SSet.empty
 
@@ -81,19 +80,17 @@ let fallback ctx class_name member_name =
       seen_interfaces ancestors_to_check =
     match ancestors_to_check with
     | [] -> seen_interfaces
-    | ancestor :: ancestors ->
-      begin
-        match get_docblock_for_member ctx ancestor member_name with
-        | None ->
-          all_interfaces_or_first_class_docblock seen_interfaces ancestors
-        | Some docblock ->
-          (match Cls.kind ancestor with
-          | Ast_defs.Cclass _ -> [(Cls.name ancestor, docblock)]
-          | Ast_defs.(Ctrait | Cinterface | Cenum | Cenum_class _) ->
-            all_interfaces_or_first_class_docblock
-              ((Cls.name ancestor, docblock) :: seen_interfaces)
-              ancestors)
-      end
+    | ancestor :: ancestors -> begin
+      match get_docblock_for_member ctx ancestor member_name with
+      | None -> all_interfaces_or_first_class_docblock seen_interfaces ancestors
+      | Some docblock ->
+        (match Cls.kind ancestor with
+        | Ast_defs.Cclass _ -> [(Cls.name ancestor, docblock)]
+        | Ast_defs.(Ctrait | Cinterface | Cenum | Cenum_class _) ->
+          all_interfaces_or_first_class_docblock
+            ((Cls.name ancestor, docblock) :: seen_interfaces)
+            ancestors)
+    end
   in
   get_all_ancestors ctx class_name
   |> all_interfaces_or_first_class_docblock []

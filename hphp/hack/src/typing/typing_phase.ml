@@ -242,22 +242,21 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         arg
     in
     localize ~ety_env env decl_ty
-  | Tapply (((_p, cid) as cls), argl) ->
-    begin
-      match Env.get_class_or_typedef env cid with
-      | Some (Env.ClassResult class_info) ->
-        localize_class_instantiation ~ety_env env r cls argl (Some class_info)
-      | Some (Env.TypedefResult typedef_info) ->
-        localize_typedef_instantiation
-          ~ety_env
-          env
-          r
-          (get_reason dty)
-          cid
-          argl
-          (Some typedef_info)
-      | None -> localize_class_instantiation ~ety_env env r cls argl None
-    end
+  | Tapply (((_p, cid) as cls), argl) -> begin
+    match Env.get_class_or_typedef env cid with
+    | Some (Env.ClassResult class_info) ->
+      localize_class_instantiation ~ety_env env r cls argl (Some class_info)
+    | Some (Env.TypedefResult typedef_info) ->
+      localize_typedef_instantiation
+        ~ety_env
+        env
+        r
+        (get_reason dty)
+        cid
+        argl
+        (Some typedef_info)
+    | None -> localize_class_instantiation ~ety_env env r cls argl None
+  end
   | Ttuple tyl ->
     let (env, tyl) =
       List.map_env_ty_err_opt
@@ -624,7 +623,7 @@ and localize_typedef_instantiation
 
 (* Localize a type with the given expected kind, which
    may either indicate a higher-kinded or fully applied type.
- *)
+*)
 and localize_with_kind
     ~ety_env env (dty : decl_ty) (expected_kind : KindDefs.Simple.kind) =
   let (r, dty_) = deref dty in
@@ -635,49 +634,47 @@ and localize_with_kind
     localize ~ety_env env dty
   else
     match dty_ with
-    | Tapply (((_pos, name) as id), []) ->
-      begin
-        match Env.get_class_or_typedef env name with
-        | Some (Env.ClassResult class_info) ->
-          let tparams = Cls.tparams class_info in
-          let classish_kind =
-            KindDefs.Simple.type_with_params_to_simple_kind tparams
-          in
-          if Kinding.Simple.is_subkind env ~sub:classish_kind ~sup:expected_kind
-          then
-            ((env, None), mk (r, Tclass (id, nonexact, [])))
-          else
-            ((env, None), mk (Reason.none, Terr))
-        | Some (Env.TypedefResult typedef) ->
-          if Typing_env.is_typedef_visible env ~name typedef then
-            ((env, None), mk (r, Tunapplied_alias name))
-          else
-            (* The bound is unused until the newtype is fully applied, thus supplying dummy Tany *)
-            ( (env, None),
-              mk (r, Tnewtype (name, [], mk (Reason.none, make_tany ()))) )
-        | None ->
-          (* We are expected to localize a higher-kinded type, but are given an unknown class name.
-                Not much we can do. *)
+    | Tapply (((_pos, name) as id), []) -> begin
+      match Env.get_class_or_typedef env name with
+      | Some (Env.ClassResult class_info) ->
+        let tparams = Cls.tparams class_info in
+        let classish_kind =
+          KindDefs.Simple.type_with_params_to_simple_kind tparams
+        in
+        if Kinding.Simple.is_subkind env ~sub:classish_kind ~sup:expected_kind
+        then
+          ((env, None), mk (r, Tclass (id, nonexact, [])))
+        else
           ((env, None), mk (Reason.none, Terr))
-      end
-    | Tgeneric (name, []) ->
-      begin
-        match Env.get_pos_and_kind_of_generic env name with
-        | Some (_, gen_kind) ->
-          if
-            Kinding.Simple.is_subkind
-              env
-              ~sub:(KindDefs.Simple.from_full_kind gen_kind)
-              ~sup:expected_kind
-          then
-            ((env, None), mk (r, Tgeneric (name, [])))
-          else
-            ((env, None), mk (Reason.none, Terr))
-        | None ->
-          (* FIXME: Ideally, we would like to fail here, but sometimes we see type
-             parameters without an entry in the environment. *)
+      | Some (Env.TypedefResult typedef) ->
+        if Typing_env.is_typedef_visible env ~name typedef then
+          ((env, None), mk (r, Tunapplied_alias name))
+        else
+          (* The bound is unused until the newtype is fully applied, thus supplying dummy Tany *)
+          ( (env, None),
+            mk (r, Tnewtype (name, [], mk (Reason.none, make_tany ()))) )
+      | None ->
+        (* We are expected to localize a higher-kinded type, but are given an unknown class name.
+              Not much we can do. *)
+        ((env, None), mk (Reason.none, Terr))
+    end
+    | Tgeneric (name, []) -> begin
+      match Env.get_pos_and_kind_of_generic env name with
+      | Some (_, gen_kind) ->
+        if
+          Kinding.Simple.is_subkind
+            env
+            ~sub:(KindDefs.Simple.from_full_kind gen_kind)
+            ~sup:expected_kind
+        then
           ((env, None), mk (r, Tgeneric (name, [])))
-      end
+        else
+          ((env, None), mk (Reason.none, Terr))
+      | None ->
+        (* FIXME: Ideally, we would like to fail here, but sometimes we see type
+           parameters without an entry in the environment. *)
+        ((env, None), mk (r, Tgeneric (name, [])))
+    end
     | Tgeneric (_, _targs)
     | Tapply (_, _targs) ->
       ((env, None), mk (Reason.none, Terr))

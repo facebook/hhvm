@@ -31,39 +31,37 @@ let enum_kind name ~is_enum_class enum inner_ty ~get_ancestor =
   match enum with
   | None ->
     (match get_ancestor SN.FB.cEnum with
-    | Some enum ->
-      begin
-        match get_node enum with
-        | Tapply ((_, enum), [ty_exp]) when String.equal enum SN.FB.cEnum ->
-          Some
-            {
-              base = ty_exp;
-              type_ = ty_exp;
-              constraint_ = None;
-              interface = None;
-            }
-        | Tapply ((_, enum_class), _) when String.equal enum_class SN.FB.cEnum
-          ->
-          let ty_exp =
-            (* The fallback if the class does not declare TInner (i.e. it is
-             * abstract) is to use this::TInner
-             *)
-            match inner_ty with
-            | None ->
-              let this = Typing_defs_core.mk (get_reason enum, Tthis) in
-              Typing_defs_core.mk
-                (get_reason enum, Taccess (this, (get_pos enum, SN.FB.tInner)))
-            | Some ty -> ty
-          in
-          Some
-            {
-              base = ty_exp;
-              type_ = ty_exp;
-              constraint_ = None;
-              interface = None;
-            }
-        | _ -> None
-      end
+    | Some enum -> begin
+      match get_node enum with
+      | Tapply ((_, enum), [ty_exp]) when String.equal enum SN.FB.cEnum ->
+        Some
+          {
+            base = ty_exp;
+            type_ = ty_exp;
+            constraint_ = None;
+            interface = None;
+          }
+      | Tapply ((_, enum_class), _) when String.equal enum_class SN.FB.cEnum ->
+        let ty_exp =
+          (* The fallback if the class does not declare TInner (i.e. it is
+           * abstract) is to use this::TInner
+           *)
+          match inner_ty with
+          | None ->
+            let this = Typing_defs_core.mk (get_reason enum, Tthis) in
+            Typing_defs_core.mk
+              (get_reason enum, Taccess (this, (get_pos enum, SN.FB.tInner)))
+          | Some ty -> ty
+        in
+        Some
+          {
+            base = ty_exp;
+            type_ = ty_exp;
+            constraint_ = None;
+            interface = None;
+          }
+      | _ -> None
+    end
     | _ -> None)
   | Some enum ->
     let reason = get_reason enum.te_base in

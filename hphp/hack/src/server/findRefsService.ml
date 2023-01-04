@@ -131,22 +131,21 @@ let find_child_classes ctx target_class_name naming_table files =
 let get_origin_class_name ctx class_name member =
   let origin =
     match member with
-    | Method method_name ->
-      begin
-        match Decl_provider.get_class ctx class_name with
-        | Some class_ ->
-          let get_origin_class meth =
-            match meth with
-            | Some meth -> Some meth.ce_origin
-            | None -> None
-          in
-          let origin = get_origin_class (Cls.get_method class_ method_name) in
-          if Option.is_some origin then
-            origin
-          else
-            get_origin_class (Cls.get_smethod class_ method_name)
-        | None -> None
-      end
+    | Method method_name -> begin
+      match Decl_provider.get_class ctx class_name with
+      | Some class_ ->
+        let get_origin_class meth =
+          match meth with
+          | Some meth -> Some meth.ce_origin
+          | None -> None
+        in
+        let origin = get_origin_class (Cls.get_method class_ method_name) in
+        if Option.is_some origin then
+          origin
+        else
+          get_origin_class (Cls.get_smethod class_ method_name)
+      | None -> None
+    end
     | Property _
     | Class_const _
     | Typeconst _ ->
@@ -176,14 +175,14 @@ let get_deps_set ctx classes =
     ~f:
       begin
         fun class_name acc ->
-        match Naming_provider.get_type_path ctx class_name with
-        | None -> acc
-        | Some fn ->
-          let dep = Typing_deps.Dep.Type class_name in
-          let ideps = Typing_deps.get_ideps deps_mode dep in
-          let files = Naming_provider.get_files ctx ideps in
-          let files = Relative_path.Set.add files fn in
-          Relative_path.Set.union files acc
+          match Naming_provider.get_type_path ctx class_name with
+          | None -> acc
+          | Some fn ->
+            let dep = Typing_deps.Dep.Type class_name in
+            let ideps = Typing_deps.get_ideps deps_mode dep in
+            let files = Naming_provider.get_files ctx ideps in
+            let files = Relative_path.Set.add files fn in
+            Relative_path.Set.union files acc
       end
     ~init:Relative_path.Set.empty
 
@@ -388,12 +387,11 @@ let get_definitions ctx action =
        | Naming_types.TTypedef ->
          Decl_provider.get_typedef ctx class_name >>= fun type_ ->
          Some [(class_name, type_.td_pos)])
-  | IFunction fun_name ->
-    begin
-      match Decl_provider.get_fun ctx fun_name with
-      | Some { fe_pos; _ } -> [(fun_name, fe_pos)]
-      | _ -> []
-    end
+  | IFunction fun_name -> begin
+    match Decl_provider.get_fun ctx fun_name with
+    | Some { fe_pos; _ } -> [(fun_name, fe_pos)]
+    | _ -> []
+  end
   | IGConst _
   | IMember (Subclasses_of _, _)
   | IMember (_, (Property _ | Typeconst _)) ->

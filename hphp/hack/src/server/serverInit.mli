@@ -27,7 +27,7 @@ type init_approach =
   | Write_symbol_info_with_state of load_state_approach
 
 (* Saves the state that is used by init below and returns the number of
-  edges added to the saved state dependency table. *)
+   edges added to the saved state dependency table. *)
 val save_state :
   ServerEnv.genv ->
   ServerEnv.env ->

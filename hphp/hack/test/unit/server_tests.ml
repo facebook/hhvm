@@ -77,8 +77,8 @@ let test_deferred_decl_should_defer () =
   true
 
 (* In this test, we wish to establish that we enable deferring type checking
-  for files that have undeclared dependencies, UNLESS we've already deferred
-  those files a certain number of times. *)
+   for files that have undeclared dependencies, UNLESS we've already deferred
+   those files a certain number of times. *)
 let test_process_file_deferring () =
   let { Common_setup.ctx; foo_path; _ } =
     Common_setup.setup ~sqlite:false tcopt_with_defer ~xhp_as:`Namespaces

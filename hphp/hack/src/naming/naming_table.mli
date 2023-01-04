@@ -79,31 +79,31 @@ val create : FileInfo.t Relative_path.Map.t -> t
 val load_from_sqlite : Provider_context.t -> string -> t
 
 (* This function is intended for applying naming changes relative
-  to the source code version on which the naming table was first created.
-  For the additional naming changes to be compatible with a SQLite-backed
-  naming table originally created on source code version X, they must be
-  snapshotted by loading a naming table originally created on X and,
-  at a later time, calling `save_changes_since_baseline`.
-  The scenario where this can be useful is thus:
-  1) In process A
-    - load a SQLite-backed naming table for source code version N
-    - user makes changes, resulting in source code version N + 1
-    - save changes since baseline as C1
-  2) In process B
-    - load the naming table for N + C1
-    - do some work
-  3) In process A
-    - user makes changes, resulting in source code version N + 2
-    - save changes since baseline as C2
-  4) In process B
-    - load the naming table for N + C2
-    - do some work
-  This avoids having to send the naming table version N to process B more than
-  once. After B gets naming table N, it only needs the changes C1 and C2 to
-  restore the state as process A sees it.
-  This is more relevant if A and B are not on the same host, and the cost
-  of sending the naming table is not negligible.
-  *)
+   to the source code version on which the naming table was first created.
+   For the additional naming changes to be compatible with a SQLite-backed
+   naming table originally created on source code version X, they must be
+   snapshotted by loading a naming table originally created on X and,
+   at a later time, calling `save_changes_since_baseline`.
+   The scenario where this can be useful is thus:
+   1) In process A
+     - load a SQLite-backed naming table for source code version N
+     - user makes changes, resulting in source code version N + 1
+     - save changes since baseline as C1
+   2) In process B
+     - load the naming table for N + C1
+     - do some work
+   3) In process A
+     - user makes changes, resulting in source code version N + 2
+     - save changes since baseline as C2
+   4) In process B
+     - load the naming table for N + C2
+     - do some work
+   This avoids having to send the naming table version N to process B more than
+   once. After B gets naming table N, it only needs the changes C1 and C2 to
+   restore the state as process A sees it.
+   This is more relevant if A and B are not on the same host, and the cost
+   of sending the naming table is not negligible.
+*)
 val load_from_sqlite_with_changes_since_baseline :
   Provider_context.t -> changes_since_baseline -> string -> t
 

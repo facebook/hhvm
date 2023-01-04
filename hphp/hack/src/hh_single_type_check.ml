@@ -1529,8 +1529,7 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
         builtins
         ~f:
           begin
-            fun k _ acc ->
-            Relative_path.Map.remove acc k
+            (fun k _ acc -> Relative_path.Map.remove acc k)
           end
         ~init:files_info
     in
@@ -1546,7 +1545,7 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
         ~f:
           begin
             fun _ names1 names2 ->
-            FileInfo.(merge_names (simplify names1) names2)
+              FileInfo.(merge_names (simplify names1) names2)
           end
         ~init:FileInfo.empty_names
     in
@@ -2074,7 +2073,7 @@ let handle_mode
           ~compare:
             begin
               fun x y ->
-              Pos.compare (Lints_core.get_pos x) (Lints_core.get_pos y)
+                Pos.compare (Lints_core.get_pos x) (Lints_core.get_pos y)
             end
           lint_errors
       in
@@ -2097,7 +2096,7 @@ let handle_mode
         ~compare:
           begin
             fun x y ->
-            Pos.compare (Lints_core.get_pos x) (Lints_core.get_pos y)
+              Pos.compare (Lints_core.get_pos x) (Lints_core.get_pos y)
           end
         json_errors
     in
@@ -2617,8 +2616,7 @@ let handle_mode
         builtins
         ~f:
           begin
-            fun k _ acc ->
-            Relative_path.Map.remove acc k
+            (fun k _ acc -> Relative_path.Map.remove acc k)
           end
         ~init:files_info
     in
@@ -2884,8 +2882,7 @@ let decl_and_run_mode
       builtins
       ~f:
         begin
-          fun k src acc ->
-          Relative_path.Map.add acc ~key:k ~data:src
+          (fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src)
         end
       ~init:files_contents
   in

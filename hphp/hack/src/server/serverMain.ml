@@ -494,29 +494,28 @@ let main_loop_command_handler client_kind client result =
   match result with
   | ServerUtils.Done env -> env
   | ServerUtils.Needs_full_recheck { env; finish_command_handling; reason } ->
-    begin
-      match client_kind with
-      | `Non_persistent ->
-        (* We should not accept any new clients until this is cleared *)
-        assert (
-          Option.is_none
-            env.nonpersistent_client_pending_command_needs_full_check);
-        {
-          env with
-          nonpersistent_client_pending_command_needs_full_check =
-            Some (finish_command_handling, reason, client);
-        }
-      | `Persistent ->
-        (* Persistent client will not send any further commands until previous one
-         * is handled. *)
-        assert (
-          Option.is_none env.persistent_client_pending_command_needs_full_check);
-        {
-          env with
-          persistent_client_pending_command_needs_full_check =
-            Some (finish_command_handling, reason);
-        }
-    end
+  begin
+    match client_kind with
+    | `Non_persistent ->
+      (* We should not accept any new clients until this is cleared *)
+      assert (
+        Option.is_none env.nonpersistent_client_pending_command_needs_full_check);
+      {
+        env with
+        nonpersistent_client_pending_command_needs_full_check =
+          Some (finish_command_handling, reason, client);
+      }
+    | `Persistent ->
+      (* Persistent client will not send any further commands until previous one
+       * is handled. *)
+      assert (
+        Option.is_none env.persistent_client_pending_command_needs_full_check);
+      {
+        env with
+        persistent_client_pending_command_needs_full_check =
+          Some (finish_command_handling, reason);
+      }
+  end
   | ServerUtils.Needs_writes
       {
         env;
@@ -734,46 +733,44 @@ let serve_one_iteration genv env client_provider =
     | ClientProvider.Not_selecting_hg_updating ->
       env
     | ClientProvider.Select_new { ClientProvider.client; m2s_sequence_number }
-      ->
-      begin
-        try
-          Hh_logger.log
-            "Serving new client obtained from monitor handoff #%d"
-            m2s_sequence_number;
-          (* client here is the new client (not the existing persistent client)
-           * whose request we're going to handle. *)
-          ClientProvider.track
+      -> begin
+      try
+        Hh_logger.log
+          "Serving new client obtained from monitor handoff #%d"
+          m2s_sequence_number;
+        (* client here is the new client (not the existing persistent client)
+         * whose request we're going to handle. *)
+        ClientProvider.track
+          client
+          ~key:Connection_tracker.Server_start_recheck
+          ~time:t_start_recheck;
+        ClientProvider.track
+          client
+          ~key:Connection_tracker.Server_done_recheck
+          ~time:t_done_recheck;
+        ClientProvider.track
+          client
+          ~key:Connection_tracker.Server_sent_diagnostics
+          ~time:t_sent_diagnostics;
+        let env =
+          Client_command_handler.handle_client_command_or_persistent_connection
+            genv
+            env
             client
-            ~key:Connection_tracker.Server_start_recheck
-            ~time:t_start_recheck;
-          ClientProvider.track
-            client
-            ~key:Connection_tracker.Server_done_recheck
-            ~time:t_done_recheck;
-          ClientProvider.track
-            client
-            ~key:Connection_tracker.Server_sent_diagnostics
-            ~time:t_sent_diagnostics;
-          let env =
-            Client_command_handler
-            .handle_client_command_or_persistent_connection
-              genv
-              env
-              client
-              `Non_persistent
-            |> main_loop_command_handler `Non_persistent client
-          in
-          HackEventLogger.handled_connection t_start_recheck;
-          env
-        with
-        | exn ->
-          let e = Exception.wrap exn in
-          HackEventLogger.handle_connection_exception "outer" e;
-          Hh_logger.log
-            "HANDLE_CONNECTION_EXCEPTION(outer) [ignoring request] %s"
-            (Exception.to_string e);
-          env
-      end
+            `Non_persistent
+          |> main_loop_command_handler `Non_persistent client
+        in
+        HackEventLogger.handled_connection t_start_recheck;
+        env
+      with
+      | exn ->
+        let e = Exception.wrap exn in
+        HackEventLogger.handle_connection_exception "outer" e;
+        Hh_logger.log
+          "HANDLE_CONNECTION_EXCEPTION(outer) [ignoring request] %s"
+          (Exception.to_string e);
+        env
+    end
   in
   let env =
     match Ide_info_store.get_client () with
@@ -1179,23 +1176,22 @@ let program_init genv env =
       (env, "fresh", None, None, None)
     | ServerInit.Parse_only_init -> (env, "parse-only", None, None, None)
     | ServerInit.Write_symbol_info_with_state _
-    | ServerInit.Saved_state_init _ ->
-      begin
-        match init_result with
-        | ServerInit.Load_state_succeeded saved_state_delta ->
-          let init_type =
-            match
-              Naming_table.get_forward_naming_fallback_path env.naming_table
-            with
-            | None -> "state_load_blob"
-            | Some _ -> "state_load_sqlite"
-          in
-          (env, init_type, None, None, saved_state_delta)
-        | ServerInit.Load_state_failed (err, telemetry) ->
-          (env, "state_load_failed", Some err, Some telemetry, None)
-        | ServerInit.Load_state_declined reason ->
-          (env, "state_load_declined", Some reason, None, None)
-      end
+    | ServerInit.Saved_state_init _ -> begin
+      match init_result with
+      | ServerInit.Load_state_succeeded saved_state_delta ->
+        let init_type =
+          match
+            Naming_table.get_forward_naming_fallback_path env.naming_table
+          with
+          | None -> "state_load_blob"
+          | Some _ -> "state_load_sqlite"
+        in
+        (env, init_type, None, None, saved_state_delta)
+      | ServerInit.Load_state_failed (err, telemetry) ->
+        (env, "state_load_failed", Some err, Some telemetry, None)
+      | ServerInit.Load_state_declined reason ->
+        (env, "state_load_declined", Some reason, None, None)
+    end
   in
   let env =
     {

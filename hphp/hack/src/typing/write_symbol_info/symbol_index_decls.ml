@@ -179,7 +179,7 @@ let process_enum_decl ctx path source_text enm (all_decls, progress) =
       Add_fact.enum_defn ctx source_text enm enum_id enum_data enumerators prog
     in
     let prog = process_doc_comment enm.c_doc_comment path enum_decl_ref prog in
-    (all_decls @ enum_decl_ref :: decl_refs, prog)
+    (all_decls @ (enum_decl_ref :: decl_refs), prog)
 
 let process_func_decl ctx path source_text fd (all_decls, progress) =
   let elem = fd.fd_fun in

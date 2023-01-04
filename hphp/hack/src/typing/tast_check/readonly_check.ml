@@ -38,9 +38,9 @@ let rty_to_str = function
 let pp_rty fmt rty = Format.fprintf fmt "%s" (rty_to_str rty)
 
 (* Returns true if rty_sub is a subtype of rty_sup.
-TODO: Later, we'll have to consider the regular type as well, for example
-we could allow readonly int as equivalent to an int for devX purposes.
-This would require TIC to handle correctly, though. *)
+   TODO: Later, we'll have to consider the regular type as well, for example
+   we could allow readonly int as equivalent to an int for devX purposes.
+   This would require TIC to handle correctly, though. *)
 let subtype_rty rty_sub rty_sup =
   match (rty_sub, rty_sup) with
   | (Readonly, Mut) -> false
@@ -314,36 +314,35 @@ let rec assign env lval rval =
   match lval with
   (* List assignment *)
   | (_, _, List exprs) -> List.iter exprs ~f:(fun lval -> assign env lval rval)
-  | (_, _, Array_get (array, _)) ->
-    begin
-      match (ty_expr env array, ty_expr env rval) with
-      | (Readonly, _) when is_value_collection_ty env (Tast.get_type array) ->
-        (* In the case of (expr)[0] = rvalue, where expr is a value collection like vec,
-           we need to check assignment recursively because ($x->prop)[0] is only valid if $x is mutable and prop is readonly. *)
-        (match array with
-        | (_, _, Array_get _)
-        | (_, _, Obj_get _) ->
-          assign env array rval
-        | _ -> ())
-      | (Mut, Readonly) ->
-        Errors.add_typing_error
-          Typing_error.(
-            readonly
-            @@ Primary.Readonly.Readonly_mismatch
-                 {
-                   pos = Tast.get_position lval;
-                   what = `collection_mod;
-                   pos_sub = Tast.get_position rval |> Pos_or_decl.of_raw_pos;
-                   pos_super = Tast.get_position array |> Pos_or_decl.of_raw_pos;
-                 })
-      | (Readonly, _) ->
-        Errors.add_typing_error
-          Typing_error.(
-            readonly
-            @@ Primary.Readonly.Readonly_modified
-                 { pos = Tast.get_position array; reason_opt = None })
-      | (Mut, Mut) -> ()
-    end
+  | (_, _, Array_get (array, _)) -> begin
+    match (ty_expr env array, ty_expr env rval) with
+    | (Readonly, _) when is_value_collection_ty env (Tast.get_type array) ->
+      (* In the case of (expr)[0] = rvalue, where expr is a value collection like vec,
+         we need to check assignment recursively because ($x->prop)[0] is only valid if $x is mutable and prop is readonly. *)
+      (match array with
+      | (_, _, Array_get _)
+      | (_, _, Obj_get _) ->
+        assign env array rval
+      | _ -> ())
+    | (Mut, Readonly) ->
+      Errors.add_typing_error
+        Typing_error.(
+          readonly
+          @@ Primary.Readonly.Readonly_mismatch
+               {
+                 pos = Tast.get_position lval;
+                 what = `collection_mod;
+                 pos_sub = Tast.get_position rval |> Pos_or_decl.of_raw_pos;
+                 pos_super = Tast.get_position array |> Pos_or_decl.of_raw_pos;
+               })
+    | (Readonly, _) ->
+      Errors.add_typing_error
+        Typing_error.(
+          readonly
+          @@ Primary.Readonly.Readonly_modified
+               { pos = Tast.get_position array; reason_opt = None })
+    | (Mut, Mut) -> ()
+  end
   | (_, _, Class_get (id, expr, Is_prop)) ->
     (match ty_expr env rval with
     | Readonly ->

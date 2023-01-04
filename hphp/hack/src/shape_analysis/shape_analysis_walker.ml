@@ -31,7 +31,7 @@ let join ~pos ~origin (env : env) (left : entity_) (right : entity_) :
 
    Currently, local mode is enabled only when we the shape analysis logger is
    enabled.
-   *)
+*)
 let when_local_mode mode ~default f =
   match mode with
   | Local -> f ()
@@ -322,8 +322,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
              ~pos
              ~origin:__LINE__
              ~certainty:Definite
-             ~variety:
-               [Has; Needs]
+             ~variety:[Has; Needs]
                (*TODO(T136668856): consider only generating a `Needs` constraint here, and propagating `Needs` forward *)
              ~base_ty
              (ix, ty))
@@ -346,35 +345,34 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let env = assign pos __LINE__ env e1 entity_rhs ty_rhs in
     (env, None)
   | A.Call ((_, _, A.Id (_, idx)), _targs, args, _unpacked)
-    when String.equal idx SN.FB.idx ->
+    when String.equal idx SN.FB.idx -> begin
     (* Currently treating idx expressions with and without default value in the same way.
        Essentially following the case for A.Array_get after extracting the right data. *)
-    begin
-      match args with
-      | [(_, ((base_ty, _, _) as base)); (_, ix)]
-      | [(_, ((base_ty, _, _) as base)); (_, ix); _] ->
-        let (env, entity_exp) = expr_ env base in
-        let (env, _entity_ix) = expr_ env ix in
-        let env =
-          Option.fold
-            ~init:env
-            ~f:
-              (add_key_constraint
-                 ~pos
-                 ~origin:__LINE__
-                 ~certainty:Maybe
-                 ~variety:[Has; Needs]
-                 ~base_ty
-                 (ix, ty))
-            entity_exp
-        in
-        (env, None)
-      | _ ->
-        let env =
-          not_yet_supported env pos ("idx expression: " ^ Utils.expr_name e)
-        in
-        (env, None)
-    end
+    match args with
+    | [(_, ((base_ty, _, _) as base)); (_, ix)]
+    | [(_, ((base_ty, _, _) as base)); (_, ix); _] ->
+      let (env, entity_exp) = expr_ env base in
+      let (env, _entity_ix) = expr_ env ix in
+      let env =
+        Option.fold
+          ~init:env
+          ~f:
+            (add_key_constraint
+               ~pos
+               ~origin:__LINE__
+               ~certainty:Maybe
+               ~variety:[Has; Needs]
+               ~base_ty
+               (ix, ty))
+          entity_exp
+      in
+      (env, None)
+    | _ ->
+      let env =
+        not_yet_supported env pos ("idx expression: " ^ Utils.expr_name e)
+      in
+      (env, None)
+  end
   | A.New (class_id, targs, args, unpacked, _instantiation) ->
     (* What is new object creation but a call to a static method call to a
        class constructor? *)
@@ -421,47 +419,45 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       in
       let (env, arg_entity) =
         match param_kind with
-        | Ast_defs.Pinout _ ->
+        | Ast_defs.Pinout _ -> begin
           (* When we have an inout parameter, we sever the connection between
              what goes into the parameter and what comes out.
 
              Once again in local mode, we do not know what happened to the
              dictionary, so we assume it was dynamically accessed. *)
-          begin
-            match arg with
-            | (_, _, A.Lvar (_, lid)) ->
-              let arg_entity_ = Env.fresh_var () in
-              let arg_entity = Some arg_entity_ in
-              let env = Env.set_local env lid arg_entity in
-              let env = dynamic_when_local ~origin:__LINE__ env arg_entity_ in
-              (env, arg_entity)
-            | (_, pos, _) ->
-              let env = not_yet_supported env pos "inout argument" in
-              (env, arg_entity)
-          end
+          match arg with
+          | (_, _, A.Lvar (_, lid)) ->
+            let arg_entity_ = Env.fresh_var () in
+            let arg_entity = Some arg_entity_ in
+            let env = Env.set_local env lid arg_entity in
+            let env = dynamic_when_local ~origin:__LINE__ env arg_entity_ in
+            (env, arg_entity)
+          | (_, pos, _) ->
+            let env = not_yet_supported env pos "inout argument" in
+            (env, arg_entity)
+        end
         | Ast_defs.Pnormal -> (env, arg_entity)
       in
       match arg_entity with
-      | Some arg_entity_ ->
-        begin
-          match base with
-          | (_, _, A.Id (_, f_id)) when String.equal f_id SN.Hips.inspect ->
-            let constraint_ = decorate ~origin:__LINE__ @@ Marks (Debug, pos) in
-            let env = Env.add_constraint env constraint_ in
-            let constraint_ =
-              decorate ~origin:__LINE__ @@ Subsets (arg_entity_, Literal pos)
-            in
-            let env = Env.add_constraint env constraint_ in
-            env
-          | (_, _, A.Id (_, f_id)) ->
-            (* TODO: inout parameters need special treatment inter-procedurally *)
-            let inter_constraint_ =
-              decorate ~origin:__LINE__
-              @@ HT.ArgLike (((pos, f_id), HT.Index arg_idx), arg_entity_)
-            in
-            Env.add_inter_constraint env inter_constraint_
-          | _ -> env
-        end
+      | Some arg_entity_ -> begin
+        match base with
+        | (_, _, A.Id (_, f_id)) when String.equal f_id SN.Hips.inspect ->
+          let constraint_ = decorate ~origin:__LINE__ @@ Marks (Debug, pos) in
+          let env = Env.add_constraint env constraint_ in
+          let constraint_ =
+            decorate ~origin:__LINE__ @@ Subsets (arg_entity_, Literal pos)
+          in
+          let env = Env.add_constraint env constraint_ in
+          env
+        | (_, _, A.Id (_, f_id)) ->
+          (* TODO: inout parameters need special treatment inter-procedurally *)
+          let inter_constraint_ =
+            decorate ~origin:__LINE__
+            @@ HT.ArgLike (((pos, f_id), HT.Index arg_idx), arg_entity_)
+          in
+          Env.add_inter_constraint env inter_constraint_
+        | _ -> env
+      end
       | None -> env
     in
     (* Handle the bast of the call *)

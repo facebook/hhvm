@@ -53,16 +53,14 @@ let rec const_expr_err in_mode acc (_, pos, expr_) =
       ((Ast_defs.Uplus | Ast_defs.Uminus | Ast_defs.Utild | Ast_defs.Unot), e)
     ->
     const_expr_err in_mode acc e
-  | Aast.Binop (op, e1, e2) ->
+  | Aast.Binop (op, e1, e2) -> begin
     (* Only assignment is invalid *)
-    begin
-      match op with
-      | Ast_defs.Eq _ ->
-        (Err.naming @@ Naming_error.Illegal_constant pos) :: acc
-      | _ ->
-        let acc = const_expr_err in_mode acc e1 in
-        const_expr_err in_mode acc e2
-    end
+    match op with
+    | Ast_defs.Eq _ -> (Err.naming @@ Naming_error.Illegal_constant pos) :: acc
+    | _ ->
+      let acc = const_expr_err in_mode acc e1 in
+      const_expr_err in_mode acc e2
+  end
   | Aast.Eif (e1, e2_opt, e3) ->
     let acc = const_expr_err in_mode acc e1 in
     let acc = const_expr_err in_mode acc e3 in

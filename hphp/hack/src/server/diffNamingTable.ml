@@ -72,16 +72,12 @@ let calculate_diff naming_table1 naming_table2 errors1 errors2 =
       ~f:(fun path fileinfo1 acc ->
         match Naming_table.get_file_info naming_table2 path with
         | None -> { acc with removed_files = path :: acc.removed_files }
-        | Some fileinfo2 ->
-          begin
-            match FileInfo.diff fileinfo1 fileinfo2 with
-            | None -> acc
-            | Some file_diff ->
-              {
-                acc with
-                changed_files = (path, file_diff) :: acc.changed_files;
-              }
-          end)
+        | Some fileinfo2 -> begin
+          match FileInfo.diff fileinfo1 fileinfo2 with
+          | None -> acc
+          | Some file_diff ->
+            { acc with changed_files = (path, file_diff) :: acc.changed_files }
+        end)
   in
   let diff =
     Naming_table.fold naming_table2 ~init:diff ~f:(fun path _ acc ->

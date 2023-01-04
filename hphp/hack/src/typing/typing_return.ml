@@ -239,16 +239,14 @@ let make_return_type
     | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))
       when String.equal class_name Naming_special_names.Classes.cAwaitable ->
       localize ~wrap:true env inner_ty
-    | (Ast_defs.FAsync, (r_like, Tlike ty_like)) ->
-      begin
-        match get_node ty_like with
-        | Tapply ((_, class_name), [inner_ty])
-          when String.equal class_name Naming_special_names.Classes.cAwaitable
-          ->
-          let ty = mk (r_like, Tlike inner_ty) in
-          localize ~wrap:true env ty
-        | _ -> localize ~wrap:false env ty
-      end
+    | (Ast_defs.FAsync, (r_like, Tlike ty_like)) -> begin
+      match get_node ty_like with
+      | Tapply ((_, class_name), [inner_ty])
+        when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+        let ty = mk (r_like, Tlike inner_ty) in
+        localize ~wrap:true env ty
+      | _ -> localize ~wrap:false env ty
+    end
     | _ -> localize ~wrap:false env ty)
 
 let make_return_type

@@ -417,19 +417,18 @@ let get_type env r v =
       ISet.fold (fun v' env -> add env v' (mk (r, Tvar v))) aliases env
     in
     match get_solving_info_opt env v with
-    | Some (TVIType ty) ->
-      begin
-        match deref ty with
-        | (r, Tvar v') ->
-          if ISet.mem v aliases then
-            raise
-            @@ InconsistentTypeVarState
-                 "Two type variables are aliasing each other!";
-          get r v' (ISet.add v aliases)
-        | _ ->
-          let env = shorten_paths () in
-          (env, ty)
-      end
+    | Some (TVIType ty) -> begin
+      match deref ty with
+      | (r, Tvar v') ->
+        if ISet.mem v aliases then
+          raise
+          @@ InconsistentTypeVarState
+               "Two type variables are aliasing each other!";
+        get r v' (ISet.add v aliases)
+      | _ ->
+        let env = shorten_paths () in
+        (env, ty)
+    end
     | None
     | Some (TVIConstraints _) ->
       let env = shorten_paths () in
@@ -1184,12 +1183,11 @@ let get_nongraph_subtype_prop env = env.subtype_prop
 
 let is_alias_for_another_var env v =
   match get_solving_info_opt env v with
-  | Some (TVIType ty) ->
-    begin
-      match get_node ty with
-      | Tvar v' when Int.( <> ) v v' -> true
-      | _ -> false
-    end
+  | Some (TVIType ty) -> begin
+    match get_node ty with
+    | Tvar v' when Int.( <> ) v v' -> true
+    | _ -> false
+  end
   | _ -> false
 
 (** Some ty vars in the map will carry no additional information, e.g.

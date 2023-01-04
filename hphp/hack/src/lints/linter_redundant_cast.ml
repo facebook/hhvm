@@ -23,18 +23,17 @@ let handler =
         let (env, expr_ty) = Tast_env.expand_type env expr_ty in
         begin
           match (T.get_node expr_ty, snd hint) with
-          | (T.Tprim expr_prim, A.Hprim hint_prim) ->
-            begin
-              match (expr_prim, hint_prim) with
-              | (A.Tint, A.Tint)
-              | (A.Tstring, A.Tstring)
-              | (A.Tbool, A.Tbool)
-              | (A.Tfloat, A.Tfloat) ->
-                let typing_env = Tast_env.tast_env_as_typing_env env in
-                let cast = "(" ^ Typing_print.full typing_env expr_ty ^ ")" in
-                Lints_errors.redundant_cast cast pos expr_pos
-              | _ -> ()
-            end
+          | (T.Tprim expr_prim, A.Hprim hint_prim) -> begin
+            match (expr_prim, hint_prim) with
+            | (A.Tint, A.Tint)
+            | (A.Tstring, A.Tstring)
+            | (A.Tbool, A.Tbool)
+            | (A.Tfloat, A.Tfloat) ->
+              let typing_env = Tast_env.tast_env_as_typing_env env in
+              let cast = "(" ^ Typing_print.full typing_env expr_ty ^ ")" in
+              Lints_errors.redundant_cast cast pos expr_pos
+            | _ -> ()
+          end
           | _ -> ()
         end
       | _ -> ()

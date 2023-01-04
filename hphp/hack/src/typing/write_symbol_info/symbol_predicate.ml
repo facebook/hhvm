@@ -162,14 +162,14 @@ let to_string = function
     "gencode." ^ gencode_to_string x ^ "." ^ Hh_glean_version.gencode_version
 
 (* Containers in inheritance relationships which share the four member
-types (excludes enum) *)
+   types (excludes enum) *)
 type parent_container_type =
   | ClassContainer
   | InterfaceContainer
   | TraitContainer
 
 (* Get the container name and predicate type for a given parent
-container kind. *)
+   container kind. *)
 let parent_decl_predicate parent_container_type =
   match parent_container_type with
   | ClassContainer -> ("class_", Hack ClassDeclaration)

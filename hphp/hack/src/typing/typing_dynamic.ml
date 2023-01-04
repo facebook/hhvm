@@ -64,8 +64,8 @@ let check_property_sound_for_dynamic_read ~on_error env classname id ty =
     None
 
 (* The optional ty should be (if not None) the localisation of the decl_ty.
-   This lets us avoid re-localising the decl type when the caller has already
-  localised it *)
+    This lets us avoid re-localising the decl type when the caller has already
+   localised it *)
 let check_property_sound_for_dynamic_write
     ~this_class ~on_error env classname id decl_ty ty =
   let te_check = Typing_enforceability.is_enforceable ~this_class env decl_ty in
@@ -241,36 +241,33 @@ let rec try_push_like env ty =
         Some (mk (r, Tshape (kind, fields)))
       else
         None )
-  | (r, Tnewtype (n, tyl, bound)) ->
-    begin
-      match Env.get_typedef env n with
-      | None -> (env, None)
-      | Some td ->
-        let (changed, tyl) = push_like_tyargs env tyl td.td_tparams in
-        ( env,
-          if changed then
-            Some (mk (r, Tnewtype (n, tyl, bound)))
-          else
-            None )
-    end
-  | (r, Tclass ((p, n), exact, tyl)) ->
-    begin
-      match Env.get_class env n with
-      | None -> (env, None)
-      | Some cd ->
-        let (changed, tyl) = push_like_tyargs env tyl (Cls.tparams cd) in
-        ( env,
-          if changed then
-            Some (mk (r, Tclass ((p, n), exact, tyl)))
-          else
-            None )
-    end
-  | (r, Toption ty) ->
-    begin
-      match try_push_like env ty with
-      | (env, Some ty) -> (env, Some (mk (r, Toption ty)))
-      | (env, None) -> (env, None)
-    end
+  | (r, Tnewtype (n, tyl, bound)) -> begin
+    match Env.get_typedef env n with
+    | None -> (env, None)
+    | Some td ->
+      let (changed, tyl) = push_like_tyargs env tyl td.td_tparams in
+      ( env,
+        if changed then
+          Some (mk (r, Tnewtype (n, tyl, bound)))
+        else
+          None )
+  end
+  | (r, Tclass ((p, n), exact, tyl)) -> begin
+    match Env.get_class env n with
+    | None -> (env, None)
+    | Some cd ->
+      let (changed, tyl) = push_like_tyargs env tyl (Cls.tparams cd) in
+      ( env,
+        if changed then
+          Some (mk (r, Tclass ((p, n), exact, tyl)))
+        else
+          None )
+  end
+  | (r, Toption ty) -> begin
+    match try_push_like env ty with
+    | (env, Some ty) -> (env, Some (mk (r, Toption ty)))
+    | (env, None) -> (env, None)
+  end
   | (r, Tvec_or_dict (tk, tv)) ->
     let (changed, tyl) = List.map_env false [tk; tv] ~f:(make_like env) in
     if changed then

@@ -178,23 +178,24 @@ let multi_threaded_call
         ~f:
           begin
             fun (acc, failures) h ->
-            try
-              let res = WorkerController.get_result h in
-              (* Results for handles from other calls are cached by get_result
-               * and will be retrieved later, so we ignore them here *)
-              let acc =
-                if is_current h then
-                  let worker_id =
-                    WorkerController.get_worker h |> WorkerController.worker_id
-                  in
-                  merge (worker_id, res) acc
-                else
-                  acc
-              in
-              (acc, failures)
-            with
-            | WorkerController.Worker_failed (_, failure) ->
-              (acc, failure :: failures)
+              try
+                let res = WorkerController.get_result h in
+                (* Results for handles from other calls are cached by get_result
+                 * and will be retrieved later, so we ignore them here *)
+                let acc =
+                  if is_current h then
+                    let worker_id =
+                      WorkerController.get_worker h
+                      |> WorkerController.worker_id
+                    in
+                    merge (worker_id, res) acc
+                  else
+                    acc
+                in
+                (acc, failures)
+              with
+              | WorkerController.Worker_failed (_, failure) ->
+                (acc, failure :: failures)
           end
         ~init:(acc, [])
         readys

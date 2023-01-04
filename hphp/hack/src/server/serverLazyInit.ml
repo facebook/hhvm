@@ -574,19 +574,22 @@ let get_old_and_new_defs_in_files
     ~f:
       begin
         fun path acc ->
-        let new_defs_in_file =
-          Relative_path.Map.find_opt new_defs_per_file path
-        in
-        let old_defs_in_file =
-          Naming_table.get_file_info old_naming_table path
-          |> Option.map ~f:FileInfo.simplify
-        in
-        let all_defs =
-          Option.merge old_defs_in_file new_defs_in_file ~f:FileInfo.merge_names
-        in
-        match all_defs with
-        | Some all_defs -> Relative_path.Map.add acc ~key:path ~data:all_defs
-        | None -> acc
+          let new_defs_in_file =
+            Relative_path.Map.find_opt new_defs_per_file path
+          in
+          let old_defs_in_file =
+            Naming_table.get_file_info old_naming_table path
+            |> Option.map ~f:FileInfo.simplify
+          in
+          let all_defs =
+            Option.merge
+              old_defs_in_file
+              new_defs_in_file
+              ~f:FileInfo.merge_names
+          in
+          match all_defs with
+          | Some all_defs -> Relative_path.Map.add acc ~key:path ~data:all_defs
+          | None -> acc
       end
     ~init:Relative_path.Map.empty
 
@@ -751,10 +754,10 @@ let type_check_dirty
       ~f:
         begin
           fun k v acc ->
-          if Relative_path.Set.mem files k then
-            FileInfo.merge_names v acc
-          else
-            acc
+            if Relative_path.Set.mem files k then
+              FileInfo.merge_names v acc
+            else
+              acc
         end
       ~init:FileInfo.empty_names
   in

@@ -76,14 +76,13 @@ let is_private_visible_for_class env x self_id cid class_ =
   | CI (_, called_ci) ->
     (match is_private_visible env x self_id with
     | None -> None
-    | Some _ ->
-      begin
-        match Env.get_class env called_ci with
-        | Some cls when Ast_defs.is_c_trait (Cls.kind cls) ->
-          Some
-            "You cannot access private members using the trait's name (did you mean to use self::?)"
-        | _ -> Some "You cannot access this member"
-      end)
+    | Some _ -> begin
+      match Env.get_class env called_ci with
+      | Some cls when Ast_defs.is_c_trait (Cls.kind cls) ->
+        Some
+          "You cannot access private members using the trait's name (did you mean to use self::?)"
+      | _ -> Some "You cannot access this member"
+    end)
   | CIexpr _ ->
     if Cls.final class_ then
       None

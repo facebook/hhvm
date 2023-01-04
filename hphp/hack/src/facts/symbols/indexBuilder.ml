@@ -250,7 +250,7 @@ let go (ctxt : index_builder_context) (workers : MultiWorker.worker list option)
         Sys_utils.collect_paths
           begin
             fun filename ->
-            Str.string_match (Str.regexp "[./a-zA-Z0-9_]+.json") filename 0
+              Str.string_match (Str.regexp "[./a-zA-Z0-9_]+.json") filename 0
           end
           repo_name
     in

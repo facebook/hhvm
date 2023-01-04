@@ -278,7 +278,7 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) =
       ~f:
         begin
           fun r ->
-          AutocompleteTypes.(Printf.printf "%s %s\n" r.res_name r.res_ty)
+            AutocompleteTypes.(Printf.printf "%s %s\n" r.res_name r.res_ty)
         end
       result.Utils.With_complete_flag.value
 
@@ -356,8 +356,7 @@ let decl_and_run_mode
       builtins
       ~f:
         begin
-          fun k src acc ->
-          Relative_path.Map.add acc ~key:k ~data:src
+          (fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src)
         end
       ~init:files_contents
   in

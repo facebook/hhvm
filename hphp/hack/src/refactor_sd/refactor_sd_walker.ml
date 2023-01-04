@@ -125,39 +125,35 @@ let rec expr_
     let (env, _) = expr_ upcasted_info env e1 in
     let (env, _) = expr_ upcasted_info env e2 in
     (env, None)
-  | A.KeyValCollection ((_, kvc_kind), _, field_list) ->
-    begin
-      match kvc_kind with
-      | A.Dict ->
-        let var = Env.fresh_var () in
-        let handle_init (env : env) ((_e_key, e_val) : T.expr * T.expr) =
-          let (env, entity_rhs) = expr_ upcasted_info env e_val in
-          match entity_rhs with
-          | Some entity_rhs_ ->
-            Env.add_constraint env (Subset (entity_rhs_, var))
-          | _ -> env
-        in
-        let env = List.fold ~init:env ~f:handle_init field_list in
-        (env, Some var)
-      | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
-    end
-  | A.ValCollection ((_, vc_kind), _, expr_list) ->
-    begin
-      match vc_kind with
-      | A.Vector
-      | A.Vec ->
-        let var = Env.fresh_var () in
-        let handle_init (env : env) (e_inner : T.expr) =
-          let (env, entity_rhs) = expr_ upcasted_info env e_inner in
-          match entity_rhs with
-          | Some entity_rhs_ ->
-            Env.add_constraint env (Subset (entity_rhs_, var))
-          | _ -> env
-        in
-        let env = List.fold ~init:env ~f:handle_init expr_list in
-        (env, Some var)
-      | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
-    end
+  | A.KeyValCollection ((_, kvc_kind), _, field_list) -> begin
+    match kvc_kind with
+    | A.Dict ->
+      let var = Env.fresh_var () in
+      let handle_init (env : env) ((_e_key, e_val) : T.expr * T.expr) =
+        let (env, entity_rhs) = expr_ upcasted_info env e_val in
+        match entity_rhs with
+        | Some entity_rhs_ -> Env.add_constraint env (Subset (entity_rhs_, var))
+        | _ -> env
+      in
+      let env = List.fold ~init:env ~f:handle_init field_list in
+      (env, Some var)
+    | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
+  end
+  | A.ValCollection ((_, vc_kind), _, expr_list) -> begin
+    match vc_kind with
+    | A.Vector
+    | A.Vec ->
+      let var = Env.fresh_var () in
+      let handle_init (env : env) (e_inner : T.expr) =
+        let (env, entity_rhs) = expr_ upcasted_info env e_inner in
+        match entity_rhs with
+        | Some entity_rhs_ -> Env.add_constraint env (Subset (entity_rhs_, var))
+        | _ -> env
+      in
+      let env = List.fold ~init:env ~f:handle_init expr_list in
+      (env, Some var)
+    | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
+  end
   | A.Array_get (((_, _, A.Lvar (_, _lid)) as base), Some ix) ->
     let (env, entity_exp) = expr_ upcasted_info env base in
     let (env, _entity_ix) = expr_ upcasted_info env ix in

@@ -127,13 +127,12 @@ let make
     let info = process.Process_types.info in
     let res =
       match Process.read_and_wait_pid ~timeout process with
-      | Ok { Process_types.stdout; _ } ->
-        begin
-          try Ok (transformer stdout) with
-          | e ->
-            let e = Exception.wrap e in
-            Error (info, Transformer_raised e)
-        end
+      | Ok { Process_types.stdout; _ } -> begin
+        try Ok (transformer stdout) with
+        | e ->
+          let e = Exception.wrap e in
+          Error (info, Transformer_raised e)
+      end
       | Error (Process_types.Abnormal_exit { status; stderr; _ }) ->
         Error (info, Process_failure { status; stderr })
       | Error (Process_types.Timed_out { stdout; stderr }) ->

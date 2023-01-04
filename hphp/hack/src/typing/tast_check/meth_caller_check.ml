@@ -22,22 +22,21 @@ let check_parameters =
   in
   let rec check pos ft =
     match get_node ft with
-    | Tfun ftype ->
-      begin
-        match get_illegal_parameter ftype with
-        | Some fparam ->
-          let convention =
-            match get_fp_mode fparam with
-            | FPinout -> "`inout`"
-            | FPnormal -> "normal"
-          in
-          Errors.add_typing_error
-            Typing_error.(
-              primary
-              @@ Primary.Invalid_meth_caller_calling_convention
-                   { pos; decl_pos = fparam.fp_pos; convention })
-        | None -> ()
-      end
+    | Tfun ftype -> begin
+      match get_illegal_parameter ftype with
+      | Some fparam ->
+        let convention =
+          match get_fp_mode fparam with
+          | FPinout -> "`inout`"
+          | FPnormal -> "normal"
+        in
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Invalid_meth_caller_calling_convention
+                 { pos; decl_pos = fparam.fp_pos; convention })
+      | None -> ()
+    end
     | Tnewtype (name, [ty], _)
       when String.equal Naming_special_names.Classes.cSupportDyn name ->
       check pos ty

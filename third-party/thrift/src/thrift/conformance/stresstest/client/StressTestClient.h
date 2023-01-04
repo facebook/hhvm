@@ -47,7 +47,7 @@ class StressTestClient {
 
   folly::coro::Task<void> co_ping();
 
-  folly::coro::Task<void> co_echo(const std::string& x);
+  folly::coro::Task<std::string> co_echo(const std::string& x);
 
   folly::coro::Task<void> co_requestResponseEb(const BasicRequest& req);
 

@@ -7706,7 +7706,9 @@ and class_get_inner
   | (_, Tclass ((_, c), _, paraml)) ->
     let class_ = Env.get_class env c in
     (match class_ with
-    | None -> (env, (Typing_utils.mk_tany env p, []), dflt_rval_err)
+    | None ->
+      let (env, ty) = Env.fresh_type_error env p in
+      (env, (ty, []), dflt_rval_err)
     | Some class_ ->
       (* TODO akenn: Should we move this to the class_get original call? *)
       let (env, this_ty) = ExprDepTy.make env ~cid:cid_ this_ty in
@@ -8106,36 +8108,36 @@ and class_expr
           in
           Option.iter ~f:Errors.add_typing_error ty_err_opt;
           make_result env [] Aast.CIparent parent_ty)
-      | _ ->
-        let parent =
-          match Env.get_parent_ty env with
-          | None ->
-            Errors.add_typing_error
-              Typing_error.(primary @@ Primary.Parent_undefined p);
-            mk (Reason.none, Typing_defs.make_tany ())
-          | Some parent -> parent
-        in
+      | _ -> begin
+        match Env.get_parent_ty env with
+        | None ->
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Parent_undefined p);
+          let (env, ty) = Env.fresh_type_error env p in
+          make_result env [] Aast.CIparent ty
+        | Some parent ->
+          let ((env, ty_err_opt), parent) =
+            Phase.localize_no_subst env ~ignore_errors:true parent
+          in
+          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          (* parent is still technically the same object. *)
+          make_result env [] Aast.CIparent parent
+      end)
+    | None -> begin
+      match Env.get_parent_ty env with
+      | None ->
+        Errors.add_typing_error
+          Typing_error.(primary @@ Primary.Parent_undefined p);
+        let (env, ty) = Env.fresh_type_error env p in
+        make_result env [] Aast.CIparent ty
+      | Some parent ->
         let ((env, ty_err_opt), parent) =
           Phase.localize_no_subst env ~ignore_errors:true parent
         in
         Option.iter ~f:Errors.add_typing_error ty_err_opt;
         (* parent is still technically the same object. *)
-        make_result env [] Aast.CIparent parent)
-    | None ->
-      let parent =
-        match Env.get_parent_ty env with
-        | None ->
-          Errors.add_typing_error
-            Typing_error.(primary @@ Primary.Parent_undefined p);
-          mk (Reason.none, Typing_defs.make_tany ())
-        | Some parent -> parent
-      in
-      let ((env, ty_err_opt), parent) =
-        Phase.localize_no_subst env ~ignore_errors:true parent
-      in
-      Option.iter ~f:Errors.add_typing_error ty_err_opt;
-      (* parent is still technically the same object. *)
-      make_result env [] Aast.CIparent parent)
+        make_result env [] Aast.CIparent parent
+    end)
   | CIstatic ->
     let this =
       if Option.is_some (Env.next_cont_opt env) then
@@ -8145,13 +8147,13 @@ and class_expr
     in
     make_result env [] Aast.CIstatic this
   | CIself ->
-    let ty =
+    let (env, ty) =
       match Env.get_self_class_type env with
-      | Some (c, _, tyl) -> mk (Reason.Rwitness p, Tclass (c, exact, tyl))
+      | Some (c, _, tyl) -> (env, mk (Reason.Rwitness p, Tclass (c, exact, tyl)))
       | None ->
         (* Naming phase has already checked and replaced CIself with CI if outside a class *)
         Errors.internal_error p "Unexpected CIself";
-        Typing_utils.mk_tany env p
+        Env.fresh_type_error env p
     in
     make_result env [] Aast.CIself ty
   | CI ((p, id) as c) -> begin

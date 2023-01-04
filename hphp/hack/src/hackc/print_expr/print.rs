@@ -76,6 +76,15 @@ where
     print_expr(ctx, w, env, v)
 }
 
+fn print_field(
+    ctx: &Context<'_>,
+    w: &mut dyn Write,
+    env: &ExprEnv<'_, '_>,
+    field: &ast::Field,
+) -> Result<()> {
+    print_key_value(ctx, w, env, &field.0, &field.1)
+}
+
 fn print_afield(
     ctx: &Context<'_>,
     w: &mut dyn Write,
@@ -340,13 +349,6 @@ fn print_expr(
         Expr_::Null => w.write_all(b"NULL"),
         Expr_::True => w.write_all(b"true"),
         Expr_::False => w.write_all(b"false"),
-        // For arrays and collections, we are making a conscious decision to not
-        // match HHMV has HHVM's emitter has inconsistencies in the pretty printer
-        // https://fburl.com/tzom2qoe
-        Expr_::Collection(c) if (c.0).1 == "dict" => {
-            w.write_all((c.0).1.as_bytes())?;
-            write::square(w, |w| print_afields(ctx, w, env, &c.2))
-        }
         Expr_::ValCollection(vc) if matches!(vc.0.1, ast::VcKind::Vec) => {
             write::wrap_by_(w, "vec[", "]", |w| {
                 write::concat_by(w, ", ", &vc.2, |w, e| print_expr(ctx, w, env, e))
@@ -355,6 +357,11 @@ fn print_expr(
         Expr_::ValCollection(vc) if matches!(vc.0.1, ast::VcKind::Keyset) => {
             write::wrap_by_(w, "keyset[", "]", |w| {
                 write::concat_by(w, ", ", &vc.2, |w, e| print_expr(ctx, w, env, e))
+            })
+        }
+        Expr_::KeyValCollection(kvc) if matches!(kvc.0.1, ast::KvcKind::Dict) => {
+            write::wrap_by_(w, "dict[", "]", |w| {
+                write::concat_by(w, ", ", &kvc.2, |w, f| print_field(ctx, w, env, f))
             })
         }
         Expr_::Collection(c) => {

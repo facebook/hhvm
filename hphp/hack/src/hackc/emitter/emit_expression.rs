@@ -1089,10 +1089,6 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
         "Set" => CollectionType::Set,
         "ImmSet" => CollectionType::ImmSet,
         "Pair" => CollectionType::Pair,
-        "dict" => {
-            let instr = emit_collection(e, env, expr, fields, None)?;
-            return Ok(emit_pos_then(pos, instr));
-        }
         _ => {
             return Err(Error::unrecoverable(format!(
                 "collection: {} does not exist",
@@ -1460,7 +1456,6 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 Instruct::Opcode(Opcode::NewKeysetArray(v))
             })
         }
-        Expr_::Collection(v) if (v.0).1 == "dict" => emit_dict(e),
         Expr_::KeyValCollection(v) if v.0.1 == ast::KvcKind::Dict => emit_dict(e),
         Expr_::Collection(v) if string_utils::strip_ns(&(v.0).1) == "Set" => {
             emit_collection_helper(e, CollectionType::Set)
@@ -3304,9 +3299,12 @@ fn emit_keyval_collection_expr<'a, 'arena, 'decl>(
             .map(|ast::Field(e1, e2)| (e1.clone(), e2.clone())),
     );
     let collection_typ = match kind.1 {
+        aast_defs::KvcKind::Dict => {
+            let instr = emit_collection(emitter, env, expression, &fields, None)?;
+            return Ok(emit_pos_then(&kind.0, instr));
+        }
         aast_defs::KvcKind::Map => CollectionType::Map,
         aast_defs::KvcKind::ImmMap => CollectionType::ImmMap,
-        _ => return emit_collection(emitter, env, expression, &fields, None),
     };
     emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
 }
@@ -5974,6 +5972,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         | Expr_::Varray(_)
         | Expr_::Darray(_)
         | Expr_::Collection(_)
+        | Expr_::KeyValCollection(_)
         | Expr_::ValCollection(_)
         | Expr_::Clone(_)
         | Expr_::Unop(_)

@@ -1088,6 +1088,13 @@ fn p_afield<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Afield> {
     }
 }
 
+fn p_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Field, Error> {
+    match &node.children {
+        ElementInitializer(c) => Ok(ast::Field(p_expr(&c.key, env)?, p_expr(&c.value, env)?)),
+        _ => missing_syntax("key-value collection element", node, env),
+    }
+}
+
 // We lower readonly lambda declarations as making the inner lambda have readonly_this.
 fn process_readonly_expr(mut e: ast::Expr) -> Expr_ {
     match &mut e {
@@ -1554,7 +1561,29 @@ fn p_expr_impl<'a>(
         EmbeddedBracedExpression(c) => p_expr_recurse(location, &c.expression, env, Some(pos)),
         ParenthesizedExpression(c) => p_expr_recurse(location, &c.expression, env, None),
         DictionaryIntrinsicExpression(c) => {
-            p_intri_expr(node, &c.keyword, &c.explicit_type, &c.members, env)
+            let ty_args = expand_type_args(&c.explicit_type, env)?;
+            let hints = if ty_args.len() == 2 {
+                let mut tys = ty_args.into_iter();
+                Some((
+                    ast::Targ((), tys.next().unwrap()),
+                    ast::Targ((), tys.next().unwrap()),
+                ))
+            } else if ty_args.is_empty() {
+                None
+            } else {
+                raise_parsing_error(
+                    &c.explicit_type,
+                    env,
+                    "`dict` takes exactly two type arguments",
+                );
+                None
+            };
+
+            Ok(Expr_::mk_key_val_collection(
+                (p_pos(&c.keyword, env), aast::KvcKind::Dict),
+                hints,
+                could_map(&c.members, env, p_field)?,
+            ))
         }
         KeysetIntrinsicExpression(c) => {
             let mut ty_args = expand_type_args(&c.explicit_type, env)?;
@@ -2426,16 +2455,6 @@ fn mk_lvar<'a>(name: S<'a>, env: &mut Env<'a>) -> Result<Expr_> {
 
 fn mk_id_expr(name: ast::Sid) -> ast::Expr {
     ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
-}
-
-fn p_intri_expr<'a>(node: S<'a>, kw: S<'a>, ty: S<'a>, v: S<'a>, e: &mut Env<'a>) -> Result<Expr_> {
-    let hints = expand_type_args(ty, e)?;
-    let hints = check_intrinsic_type_arg_varity(node, e, hints);
-    Ok(Expr_::mk_collection(
-        pos_name(kw, e)?,
-        hints,
-        could_map(v, e, p_afield)?,
-    ))
 }
 
 fn p_special_call<'a>(recv: S<'a>, args: S<'a>, e: &mut Env<'a>) -> Result<Expr_> {

@@ -236,7 +236,9 @@ fn expr_requires_deep_init(ast::Expr(_, _, expr): &ast::Expr, force_class_init: 
         Expr_::ValCollection(e) if e.0.1 == ast::VcKind::Vec || e.0.1 == ast::VcKind::Keyset => {
             (e.2).iter().any(expr_requires_deep_init_)
         }
-        Expr_::Collection(e) if (e.0).1 == "dict" => (e.2).iter().any(af_expr_requires_deep_init),
+        Expr_::KeyValCollection(e) if e.0.1 == ast::KvcKind::Dict => (e.2)
+            .iter()
+            .any(|f| expr_requires_deep_init_(&f.0) || expr_requires_deep_init_(&f.1)),
         Expr_::Varray(e) => (e.1).iter().any(expr_requires_deep_init_),
         Expr_::Darray(e) => (e.1).iter().any(expr_pair_requires_deep_init),
         Expr_::Id(e) if e.1 == pseudo_consts::G__FILE__ || e.1 == pseudo_consts::G__DIR__ => false,
@@ -252,15 +254,6 @@ fn expr_requires_deep_init(ast::Expr(_, _, expr): &ast::Expr, force_class_init: 
         },
         Expr_::Upcast(e) => expr_requires_deep_init_(&e.0),
         _ => true,
-    }
-}
-
-fn af_expr_requires_deep_init(af: &ast::Afield) -> bool {
-    match af {
-        ast::Afield::AFvalue(e) => expr_requires_deep_init_(e),
-        ast::Afield::AFkvalue(e1, e2) => {
-            expr_requires_deep_init_(e1) || expr_requires_deep_init_(e2)
-        }
     }
 }
 

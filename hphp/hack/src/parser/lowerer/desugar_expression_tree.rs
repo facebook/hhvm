@@ -447,12 +447,12 @@ fn vec_literal_with_pos(pos: &Pos, items: Vec<Expr>) -> Expr {
 fn dict_literal(pos: &Pos, key_value_pairs: Vec<(Expr, Expr)>) -> Expr {
     let fields = key_value_pairs
         .into_iter()
-        .map(|(k, v)| ast::Afield::AFkvalue(k, v))
+        .map(|(k, v)| aast::Field(k, v))
         .collect();
     Expr::new(
         (),
         pos.clone(),
-        Expr_::Collection(Box::new((make_id(pos.clone(), "dict"), None, fields))),
+        Expr_::KeyValCollection(Box::new(((pos.clone(), aast::KvcKind::Dict), None, fields))),
     )
 }
 

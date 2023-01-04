@@ -19,6 +19,7 @@
 #include <fizz/extensions/tokenbinding/TokenBindingContext.h>
 #include <fizz/extensions/tokenbinding/TokenBindingServerExtension.h>
 #include <fizz/server/AsyncFizzServer.h>
+#include <folly/experimental/io/AsyncIoUringSocket.h>
 #include <wangle/acceptor/AcceptorHandshakeManager.h>
 #include <wangle/acceptor/PeekingAcceptorHandshakeHelper.h>
 
@@ -212,7 +213,8 @@ class FizzHandshakeOptions {
 class FizzAcceptorHandshakeHelper
     : public wangle::AcceptorHandshakeHelper,
       public fizz::server::AsyncFizzServer::HandshakeCallback,
-      public folly::AsyncSSLSocket::HandshakeCB {
+      public folly::AsyncSSLSocket::HandshakeCB,
+      public folly::AsyncDetachFdCallback {
  public:
   FizzAcceptorHandshakeHelper(
       std::shared_ptr<const fizz::server::FizzServerContext> context,
@@ -260,9 +262,6 @@ class FizzAcceptorHandshakeHelper
       const std::shared_ptr<const fizz::server::FizzServerContext>& fizzContext,
       const std::shared_ptr<fizz::ServerExtensions>& extensions,
       fizz::AsyncFizzBase::TransportOptions options);
-  folly::AsyncSSLSocket::UniquePtr createSSLSocket(
-      const std::shared_ptr<folly::SSLContext>& sslContext,
-      folly::AsyncTransport::UniquePtr transport);
 
   // AsyncFizzServer::HandshakeCallback API
   void fizzHandshakeSuccess(
@@ -279,6 +278,12 @@ class FizzAcceptorHandshakeHelper
       folly::AsyncSSLSocket* sock,
       const folly::AsyncSocketException& ex) noexcept override;
 
+  // AsyncIoUringSocket::AsyncDetachFdCallback
+  void fdDetached(
+      folly::NetworkSocket ns,
+      std::unique_ptr<folly::IOBuf> unread) noexcept override;
+  void fdDetachFail(const folly::AsyncSocketException& ex) noexcept override;
+
   std::shared_ptr<const fizz::server::FizzServerContext> context_;
   std::shared_ptr<folly::SSLContext> sslContext_;
   std::shared_ptr<fizz::extensions::TokenBindingContext> tokenBindingContext_;
@@ -293,6 +298,8 @@ class FizzAcceptorHandshakeHelper
   wangle::SSLErrorEnum sslError_{wangle::SSLErrorEnum::NO_ERROR};
   FizzLoggingCallback* loggingCallback_;
   bool handshakeRecordAlignedReads_{false};
+
+  std::unique_ptr<folly::IOBuf> clientHello_;
   bool preferIoUringSocket_{false};
   fizz::AsyncFizzBase::TransportOptions transportOptions_;
 };

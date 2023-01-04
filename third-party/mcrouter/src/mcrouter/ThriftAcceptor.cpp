@@ -65,7 +65,8 @@ std::shared_ptr<wangle::Acceptor> ThriftAcceptorFactory::newAcceptor(
       }
 
       // Ensure socket has same options that would be applied in AsyncMcServer
-      auto* asyncSocket = socket->getUnderlyingTransport<folly::AsyncSocket>();
+      auto* asyncSocket =
+          socket->getUnderlyingTransport<folly::AsyncSocketTransport>();
       asyncSocket->setNoDelay(true);
       asyncSocket->setSendTimeout(0);
       apache::thrift::Cpp2Worker::onNewConnection(

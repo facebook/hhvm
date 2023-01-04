@@ -71,7 +71,7 @@ class PeekingAcceptorHandshakeHelperTest : public Test {
   }
 
   void TearDown() override {
-    // Normally this would be destoryed by the AcceptorHandshakeManager.
+    // Normally this would be destroyed by the AcceptorHandshakeManager.
     helper_->destroy();
   }
 

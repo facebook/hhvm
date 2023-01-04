@@ -148,14 +148,31 @@ void FizzAcceptorHandshakeHelper::fizzHandshakeError(
       transport_.get(), std::move(handshakeException), sslError_);
 }
 
-folly::AsyncSSLSocket::UniquePtr FizzAcceptorHandshakeHelper::createSSLSocket(
-    const std::shared_ptr<folly::SSLContext>& context,
-    folly::AsyncTransport::UniquePtr transport) {
-  auto socket = transport->getUnderlyingTransport<folly::AsyncSocket>();
-  auto sslSocket = folly::AsyncSSLSocket::UniquePtr(
-      new folly::AsyncSSLSocket(context, CHECK_NOTNULL(socket)));
-  transport.reset();
-  return sslSocket;
+// AsyncIoUringSocket::AsyncDetachFdCallback
+void FizzAcceptorHandshakeHelper::fdDetached(
+    folly::NetworkSocket ns,
+    std::unique_ptr<folly::IOBuf> unread) noexcept {
+  if (!clientHello_) {
+    clientHello_ = std::move(unread);
+  } else if (unread) {
+    clientHello_->appendToChain(std::move(unread));
+  }
+
+  sslSocket_ = folly::AsyncSSLSocket::UniquePtr(
+      new folly::AsyncSSLSocket(sslContext_, transport_->getEventBase(), ns));
+  transport_.reset();
+
+  sslSocket_->setPreReceivedData(std::move(clientHello_));
+  sslSocket_->enableClientHelloParsing();
+  sslSocket_->forceCacheAddrOnFailure(true);
+  sslSocket_->sslAccept(this);
+}
+
+void FizzAcceptorHandshakeHelper::fdDetachFail(
+    const folly::AsyncSocketException& ex) noexcept {
+  fizzHandshakeError(
+      transport_.get(),
+      folly::make_exception_wrapper<folly::AsyncSocketException>(ex));
 }
 
 void FizzAcceptorHandshakeHelper::fizzHandshakeAttemptFallback(
@@ -164,7 +181,17 @@ void FizzAcceptorHandshakeHelper::fizzHandshakeAttemptFallback(
   if (loggingCallback_) {
     loggingCallback_->logFizzHandshakeFallback(*transport_, tinfo_);
   }
-  sslSocket_ = createSSLSocket(sslContext_, std::move(transport_));
+
+  folly::AsyncSocket* socket =
+      transport_->getUnderlyingTransport<folly::AsyncSocket>();
+  if (!socket &&
+      folly::AsyncIoUringSocketFactory::asyncDetachFd(*transport_, this)) {
+    clientHello_ = std::move(clientHello);
+    return;
+  }
+  sslSocket_ = folly::AsyncSSLSocket::UniquePtr(
+      new folly::AsyncSSLSocket(sslContext_, CHECK_NOTNULL(socket)));
+  transport_.reset();
 
   sslSocket_->setPreReceivedData(std::move(clientHello));
   sslSocket_->enableClientHelloParsing();

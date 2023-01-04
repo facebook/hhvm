@@ -205,6 +205,7 @@ const StaticString
   s_KeyedByIC("KeyedByIC"),
   s_MakeICInaccessible("MakeICInaccessible"),
   s_SoftMakeICInaccessible("SoftMakeICInaccessible"),
+  s_Uncategorized("Uncategorized"),
   s_SoftInternal("__SoftInternal");
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
@@ -289,6 +290,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
           } else if (elem.m_data.pstr->same(s_SoftMakeICInaccessible.get())) {
             assertx(tv.m_data.parr->size() <= 2);
             icType = Func::MemoizeICType::SoftMakeICInaccessible;
+          } else if (elem.m_data.pstr->same(s_Uncategorized.get())) {
+            assertx(tv.m_data.parr->size() == 1);
+            icType = Func::MemoizeICType::NoIC; // explicitly so
           } else {
             assertx(false && "invalid string");
           }

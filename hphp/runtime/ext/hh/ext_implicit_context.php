@@ -193,6 +193,7 @@ enum class MemoizeOption: string {
   string KeyedByIC = 'KeyedByIC';
   string MakeICInaccessible = 'MakeICInaccessible';
   string SoftMakeICInaccessible = 'SoftMakeICInaccessible';
+  string Uncategorized = 'Uncategorized';
 }
 
 } // namespace HH
@@ -277,4 +278,3 @@ namespace HH\Coeffects {
   }
 
 } // namespace HH\Coeffects
-

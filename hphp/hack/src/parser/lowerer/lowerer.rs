@@ -3574,6 +3574,19 @@ fn has_any_context(haystack: Option<&ast::Contexts>, needles: Vec<&str>) -> bool
     }
 }
 
+fn contexts_cannot_access_ic(haystack: Option<&ast::Contexts>) -> bool {
+    if let Some(ast::Contexts(_, ref context_hints)) = haystack {
+        return context_hints.iter().all(|hint| match &*hint.1 {
+            ast::Hint_::Happly(ast::Id(_, id), _) => {
+                sn::coeffects::is_any_without_implicit_policy_or_unsafe(id)
+            }
+            _ => false,
+        });
+    } else {
+        false // no context list -> implicit [defaults]
+    }
+}
+
 // For polymorphic context with form `ctx $f`
 // require that `(function (ts)[_]: t) $f` exists
 // rewrite as `(function (ts)[ctx $f]: t) $f`
@@ -4273,7 +4286,7 @@ fn memoized_attribute_arg_to_string<'a>(
     match &node.children {
         EnumClassLabelExpression(c) => {
             let ast::Id(p, id) = pos_name(&c.expression, env)?;
-            if id == "KeyedByIC" || id == "MakeICInaccessible" || id == "SoftMakeICInaccessible" {
+            if sn::memoize_option::is_valid(&id) {
                 Ok(Some(ast::Expr((), p, ast::Expr_::String(id.into()))))
             } else {
                 Ok(None)
@@ -5419,7 +5432,7 @@ fn check_effect_memoized<'a>(
     // #KeyedByIC can only be used on functions with defaults or zoned*
     if let Some(u) = user_attributes
         .iter()
-        .find(|u| is_memoize_attribute_with_flavor(u, Some("KeyedByIC")))
+        .find(|u| is_memoize_attribute_with_flavor(u, Some(sn::memoize_option::KEYED_BY_IC)))
     {
         if !has_any_policied_or_defaults_context(contexts) {
             raise_parsing_error_pos(
@@ -5431,8 +5444,11 @@ fn check_effect_memoized<'a>(
     }
     // #(Soft)?MakeICInaccessible can only be used on functions with defaults
     if let Some(u) = user_attributes.iter().find(|u| {
-        is_memoize_attribute_with_flavor(u, Some("MakeICInaccessible"))
-            || is_memoize_attribute_with_flavor(u, Some("SoftMakeICInaccessible"))
+        is_memoize_attribute_with_flavor(u, Some(sn::memoize_option::MAKE_IC_INACCESSSIBLE))
+            || is_memoize_attribute_with_flavor(
+                u,
+                Some(sn::memoize_option::SOFT_MAKE_IC_INACCESSSIBLE),
+            )
     }) {
         if !has_any_context(
             contexts,
@@ -5446,6 +5462,20 @@ fn check_effect_memoized<'a>(
                 &u.name.0,
                 env,
                 &syntax_error::memoize_make_ic_inaccessible_without_defaults(kind),
+            )
+        }
+    }
+    // functions whose contexts prevent getting the IC (effectively <= [leak_safe, globals])
+    // cannot pass a memoize argument
+    if contexts_cannot_access_ic(contexts) {
+        if let Some(u) = user_attributes
+            .iter()
+            .find(|u| sn::user_attributes::is_memoized(&u.name.1) && !u.params.is_empty())
+        {
+            raise_parsing_error_pos(
+                &u.name.0,
+                env,
+                &syntax_error::memoize_category_without_implicit_policy_capability(kind),
             )
         }
     }

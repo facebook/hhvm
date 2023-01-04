@@ -1020,6 +1020,13 @@ pub fn memoize_make_ic_inaccessible_without_defaults(kind: &str) -> Error {
     ))
 }
 
+pub fn memoize_category_without_implicit_policy_capability(kind: &str) -> Error {
+    Cow::Owned(format!(
+        "{}s that can neither directly nor indirectly call a function requiring [zoned] do not need to and cannot pass arguments to __Memoize or __MemoizeLSB",
+        kind
+    ))
+}
+
 pub fn memoize_too_many_arguments(attr: &String) -> Error {
     Cow::Owned(format!("The attribute {} takes at most one argument", attr))
 }

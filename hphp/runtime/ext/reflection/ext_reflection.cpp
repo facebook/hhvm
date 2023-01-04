@@ -929,7 +929,8 @@ const StaticString
   s_systemlib_create_opaque_value("__SystemLib\\create_opaque_value"),
   s_KeyedByIC("KeyedByIC"),
   s_MakeICInaccessible("MakeICInaccessible"),
-  s_SoftMakeICInaccessible("SoftMakeICInaccessible");
+  s_SoftMakeICInaccessible("SoftMakeICInaccessible"),
+  s_Uncategorized("Uncategorized");
 
 ALWAYS_INLINE
 static Array get_function_user_attributes(const Func* func) {
@@ -940,7 +941,6 @@ static Array get_function_user_attributes(const Func* func) {
     auto const attrName = StrNR(it->first).asString();
     // __Memoize and LSB attributes may contain EnumClassLabels
     if (func->isMemoizeWrapper() &&
-        func->memoizeICType() != Func::MemoizeICType::NoIC &&
         (attrName.get()->isame(s_Memoize.get()) ||
          attrName.get()->isame(s_MemoizeLSB.get()))) {
       assertx(tvIsVec(it->second));
@@ -953,7 +953,8 @@ static Array get_function_user_attributes(const Func* func) {
           auto const sd = tv.m_data.pstr;
           if (sd->same(s_KeyedByIC.get()) ||
               sd->same(s_MakeICInaccessible.get()) ||
-              sd->same(s_SoftMakeICInaccessible.get())) {
+              sd->same(s_SoftMakeICInaccessible.get()) ||
+              sd->same(s_Uncategorized.get())) {
             auto const func = Func::load(s_systemlib_create_opaque_value.get());
             assertx(func);
             VecInit v(2);

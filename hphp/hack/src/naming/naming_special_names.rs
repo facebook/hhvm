@@ -397,6 +397,34 @@ pub mod user_attributes {
     }
 }
 
+pub mod memoize_option {
+    use hash::HashSet;
+    use lazy_static::lazy_static;
+
+    pub const KEYED_BY_IC: &str = "KeyedByIC";
+
+    pub const MAKE_IC_INACCESSSIBLE: &str = "MakeICInaccessible";
+
+    pub const SOFT_MAKE_IC_INACCESSSIBLE: &str = "SoftMakeICInaccessible";
+
+    pub const UNCATEGORIZED: &str = "Uncategorized";
+
+    pub static _ALL: &[&str] = &[
+        KEYED_BY_IC,
+        MAKE_IC_INACCESSSIBLE,
+        SOFT_MAKE_IC_INACCESSSIBLE,
+        UNCATEGORIZED,
+    ];
+
+    lazy_static! {
+        static ref VALID_SET: HashSet<&'static str> = _ALL.iter().copied().collect();
+    }
+
+    pub fn is_valid(x: &str) -> bool {
+        VALID_SET.contains(x)
+    }
+}
+
 pub mod attribute_kinds {
     use hash::HashMap;
     use lazy_static::lazy_static;
@@ -906,6 +934,17 @@ pub mod coeffects {
                     .collect();
         }
         ZONED_SET.contains(x)
+    }
+
+    // context does not provide the capability to fetch the IC even indirectly
+    pub fn is_any_without_implicit_policy_or_unsafe(x: &str) -> bool {
+        lazy_static! {
+            static ref LEAK_SAFE_GLOBALS_SET: HashSet<&'static str> =
+                vec![LEAK_SAFE, GLOBALS, READ_GLOBALS, WRITE_PROPS]
+                    .into_iter()
+                    .collect();
+        }
+        LEAK_SAFE_GLOBALS_SET.contains(x)
     }
 
     #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone, Serialize)]

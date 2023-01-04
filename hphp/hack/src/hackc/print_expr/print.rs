@@ -343,12 +343,17 @@ fn print_expr(
         // For arrays and collections, we are making a conscious decision to not
         // match HHMV has HHVM's emitter has inconsistencies in the pretty printer
         // https://fburl.com/tzom2qoe
-        Expr_::Collection(c) if (c.0).1 == "dict" || (c.0).1 == "keyset" => {
+        Expr_::Collection(c) if (c.0).1 == "dict" => {
             w.write_all((c.0).1.as_bytes())?;
             write::square(w, |w| print_afields(ctx, w, env, &c.2))
         }
         Expr_::ValCollection(vc) if matches!(vc.0.1, ast::VcKind::Vec) => {
             write::wrap_by_(w, "vec[", "]", |w| {
+                write::concat_by(w, ", ", &vc.2, |w, e| print_expr(ctx, w, env, e))
+            })
+        }
+        Expr_::ValCollection(vc) if matches!(vc.0.1, ast::VcKind::Keyset) => {
+            write::wrap_by_(w, "keyset[", "]", |w| {
                 write::concat_by(w, ", ", &vc.2, |w, e| print_expr(ctx, w, env, e))
             })
         }

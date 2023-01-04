@@ -1089,7 +1089,7 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
         "Set" => CollectionType::Set,
         "ImmSet" => CollectionType::ImmSet,
         "Pair" => CollectionType::Pair,
-        "dict" | "keyset" => {
+        "dict" => {
             let instr = emit_collection(e, env, expr, fields, None)?;
             return Ok(emit_pos_then(pos, instr));
         }
@@ -1456,11 +1456,6 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
             emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
         }
         Expr_::ValCollection(v) if v.0.1 == ast::VcKind::Keyset => {
-            emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcode::NewKeysetArray(v))
-            })
-        }
-        Expr_::Collection(v) if (v.0).1 == "keyset" => {
             emit_value_only_collection(e, env, pos, fields, |v| {
                 Instruct::Opcode(Opcode::NewKeysetArray(v))
             })
@@ -3326,7 +3321,7 @@ fn emit_val_collection<'a, 'arena, 'decl>(
     let (kind, _, es) = e;
     let fields = mk_afvalues(es);
     let collection_typ = match kind.1 {
-        aast_defs::VcKind::Vec => {
+        aast_defs::VcKind::Vec | aast_defs::VcKind::Keyset => {
             let instr = emit_collection(emitter, env, expression, &fields, None)?;
             return Ok(emit_pos_then(&kind.0, instr));
         }
@@ -3334,7 +3329,6 @@ fn emit_val_collection<'a, 'arena, 'decl>(
         aast_defs::VcKind::ImmVector => CollectionType::ImmVector,
         aast_defs::VcKind::Set => CollectionType::Set,
         aast_defs::VcKind::ImmSet => CollectionType::ImmSet,
-        _ => return emit_collection(emitter, env, expression, &fields, None),
     };
     emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
 }

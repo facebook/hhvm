@@ -233,12 +233,10 @@ fn expr_requires_deep_init(ast::Expr(_, _, expr): &ast::Expr, force_class_init: 
         | Expr_::Int(_)
         | Expr_::Float(_)
         | Expr_::String(_) => false,
-        Expr_::ValCollection(e) if e.0.1 == ast::VcKind::Vec => {
+        Expr_::ValCollection(e) if e.0.1 == ast::VcKind::Vec || e.0.1 == ast::VcKind::Keyset => {
             (e.2).iter().any(expr_requires_deep_init_)
         }
-        Expr_::Collection(e) if (e.0).1 == "keyset" || (e.0).1 == "dict" => {
-            (e.2).iter().any(af_expr_requires_deep_init)
-        }
+        Expr_::Collection(e) if (e.0).1 == "dict" => (e.2).iter().any(af_expr_requires_deep_init),
         Expr_::Varray(e) => (e.1).iter().any(expr_requires_deep_init_),
         Expr_::Darray(e) => (e.1).iter().any(expr_pair_requires_deep_init),
         Expr_::Id(e) if e.1 == pseudo_consts::G__FILE__ || e.1 == pseudo_consts::G__DIR__ => false,

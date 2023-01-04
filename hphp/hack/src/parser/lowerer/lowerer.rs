@@ -1557,7 +1557,25 @@ fn p_expr_impl<'a>(
             p_intri_expr(node, &c.keyword, &c.explicit_type, &c.members, env)
         }
         KeysetIntrinsicExpression(c) => {
-            p_intri_expr(node, &c.keyword, &c.explicit_type, &c.members, env)
+            let mut ty_args = expand_type_args(&c.explicit_type, env)?;
+            let hint = if ty_args.len() == 1 {
+                Some(ast::Targ((), ty_args.pop().unwrap()))
+            } else if ty_args.is_empty() {
+                None
+            } else {
+                raise_parsing_error(
+                    &c.explicit_type,
+                    env,
+                    "`keyset` takes exactly one type argument",
+                );
+                None
+            };
+
+            Ok(Expr_::mk_val_collection(
+                (p_pos(&c.keyword, env), aast::VcKind::Keyset),
+                hint,
+                could_map(&c.members, env, p_expr)?,
+            ))
         }
         VectorIntrinsicExpression(c) => {
             let mut ty_args = expand_type_args(&c.explicit_type, env)?;

@@ -102,3 +102,12 @@ struct Typedefs {
 
 @thrift.GenerateRuntimeSchema
 typedef TD TDTD
+
+@scope.Structured
+struct Annot {
+  1: i32 val;
+}
+
+@thrift.GenerateRuntimeSchema
+@Annot{val = 42}
+struct Annotated {} (annot_with_val = 2023, annot_without_val)

@@ -49,6 +49,7 @@ void add_definition(
   if (!node.uri().empty()) {
     definition->add_map(val("uri"), val(node.uri()));
   }
+
   const auto& structured = node.structured_annotations();
   if (!structured.empty()) {
     auto annots = val();
@@ -93,7 +94,19 @@ void add_definition(
 
     definition->add_map(val("annotations"), std::move(annots));
   }
-  // TODO: annotations
+
+  const auto& unstructured = node.annotations();
+  if (!unstructured.empty()) {
+    auto annots = val();
+    annots->set_map();
+
+    for (const auto& pair : unstructured) {
+      annots->add_map(val(pair.first), val(pair.second.value));
+    }
+
+    definition->add_map(val("unstructuredAnnotations"), std::move(annots));
+  }
+
   schema.add_map(val("attrs"), std::move(definition));
 }
 

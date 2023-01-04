@@ -375,3 +375,22 @@ TEST(SchemaTest, Typedef) {
       apache::thrift::type::TypeName::Type::typedefType);
   EXPECT_EQ(schemaTD.attrs()->get_name(), "TDTD");
 }
+
+TEST(SchemaTest, Annotations) {
+  facebook::thrift::type::Struct schema = schema_constants::schemaAnnotated();
+  bool found = false;
+  for (auto id : *schema.annotations()) {
+    const auto& annot =
+        schema_constants::getValue(id)
+            .as<apache::thrift::type::struct_t<
+                facebook::thrift::type::StructuredAnnotation>>();
+    if (*annot.name() == "Annot") {
+      found = true;
+      EXPECT_EQ(annot.fields()->at("val").as_i64(), 42);
+    }
+  }
+  EXPECT_TRUE(found);
+
+  EXPECT_EQ(schema.unstructuredAnnotations()->at("annot_with_val"), "2023");
+  EXPECT_EQ(schema.unstructuredAnnotations()->at("annot_without_val"), "1");
+}

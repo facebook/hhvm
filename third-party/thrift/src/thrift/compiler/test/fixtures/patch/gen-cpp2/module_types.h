@@ -979,11 +979,7 @@ class MyData final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::i32_t>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1209,10 +1205,7 @@ class InnerUnion final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::binary_t>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1483,12 +1476,7 @@ class MyUnion final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::i32_t,
-                                                         ::apache::thrift::type::union_t<::test::fixtures::patch::InnerUnion>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1907,9 +1895,7 @@ class LateDefStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -2074,39 +2060,7 @@ class MyStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::byte_t,
-                                                         ::apache::thrift::type::i16_t,
-                                                         ::apache::thrift::type::i32_t,
-                                                         ::apache::thrift::type::i64_t,
-                                                         ::apache::thrift::type::float_t,
-                                                         ::apache::thrift::type::double_t,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>,
-                                                         ::apache::thrift::type::enum_t<::test::fixtures::patch::MyEnum>,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::MyData>,
-                                                         ::apache::thrift::type::union_t<::test::fixtures::patch::MyUnion>,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStruct>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::byte_t,
-                                                         ::apache::thrift::type::i16_t,
-                                                         ::apache::thrift::type::i32_t,
-                                                         ::apache::thrift::type::i64_t,
-                                                         ::apache::thrift::type::float_t,
-                                                         ::apache::thrift::type::double_t,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>,
-                                                         ::apache::thrift::type::enum_t<::test::fixtures::patch::MyEnum>,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::MyData>,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStruct>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::set<::apache::thrift::type::string_t>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -3984,10 +3938,7 @@ class Recursive final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::struct_t<::test::fixtures::patch::Recursive>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4149,10 +4100,7 @@ class Bar final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4304,10 +4252,7 @@ class Loop final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::Bar>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4471,11 +4416,7 @@ class MyDataFieldPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4688,14 +4629,7 @@ class MyDataPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::MyData>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataFieldPatchStruct>>,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::MyData>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataFieldPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -5061,10 +4995,7 @@ class InnerUnionFieldPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::BinaryPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BinaryPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -5229,14 +5160,7 @@ class InnerUnionPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::union_t<::test::fixtures::patch::InnerUnion>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::InnerUnionFieldPatchStruct>>,
-                                                         ::apache::thrift::type::union_t<::test::fixtures::patch::InnerUnion>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::InnerUnionFieldPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -5606,12 +5530,7 @@ class MyUnionFieldPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::UnionPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::InnerUnionPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -5872,14 +5791,7 @@ class MyUnionPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::union_t<::test::fixtures::patch::MyUnion>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyUnionFieldPatchStruct>>,
-                                                         ::apache::thrift::type::union_t<::test::fixtures::patch::MyUnion>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyUnionFieldPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -6247,11 +6159,7 @@ class MyStructField10PatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::enum_t<::test::fixtures::patch::MyEnum>,
-                                                         ::apache::thrift::type::bool_t>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -6485,11 +6393,7 @@ class MyStructField23PatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::enum_t<::test::fixtures::patch::MyEnum>,
-                                                         ::apache::thrift::type::bool_t>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -6731,15 +6635,7 @@ class MyStructField26PatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I16PatchStruct>>>>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::i16_t>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -7196,13 +7092,7 @@ class MyStructField27PatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::set<::apache::thrift::type::string_t>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::set<::apache::thrift::type::string_t>,
-                                                         ::apache::thrift::type::set<::apache::thrift::type::string_t>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -7551,16 +7441,7 @@ class MyStructField28PatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>>,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::string_t>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -8079,16 +7960,7 @@ class MyStructField29Patch1Struct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_map<::std::string, ::apache::thrift::op::I32Patch>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_map<::std::string, ::apache::thrift::op::I32Patch>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>>,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -8605,15 +8477,7 @@ class MyStructField29PatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField29Patch1Struct>>>>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -9076,16 +8940,7 @@ class MyStructField30Patch1Struct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_map<::std::string, ::apache::thrift::op::I32Patch>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_map<::std::string, ::apache::thrift::op::I32Patch>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>>,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -9604,16 +9459,7 @@ class MyStructField30PatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_map<::std::string, ::test::fixtures::patch::MyStructField30Patch1>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField30Patch1Struct>>>>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_map<::std::string, ::test::fixtures::patch::MyStructField30Patch1>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField30Patch1Struct>>>>,
-                                                         ::apache::thrift::type::cpp_type<::std::unordered_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -10118,9 +9964,7 @@ class LateDefStructFieldPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -10237,14 +10081,7 @@ class LateDefStructPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStruct>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructFieldPatchStruct>>,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStruct>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructFieldPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -10668,39 +10505,7 @@ class MyStructFieldPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField30PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField29PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField28PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField27PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField26PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField23PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::BinaryPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BinaryPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::DoublePatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::FloatPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I16PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BytePatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::UnionPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyUnionPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField10PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::BinaryPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BinaryPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::DoublePatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::FloatPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I16PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BytePatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -12257,14 +12062,7 @@ class MyStructPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStruct>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldPatchStruct>>,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStruct>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -12632,11 +12430,7 @@ class RecursiveField1PatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::struct_t<::test::fixtures::patch::Recursive>>,
-                                                         ::apache::thrift::type::bool_t>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -12861,10 +12655,7 @@ class RecursiveFieldPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveField1PatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -13029,14 +12820,7 @@ class RecursivePatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::Recursive>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveFieldPatchStruct>>,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::Recursive>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveFieldPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -13404,11 +13188,7 @@ class LoopPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>,
-                                                         ::apache::thrift::type::bool_t>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -13623,10 +13403,7 @@ class BarFieldPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LoopPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -13791,14 +13568,7 @@ class BarPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::Bar>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarFieldPatchStruct>>,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::Bar>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarFieldPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -14164,10 +13934,7 @@ class LoopFieldPatchStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarPatchStruct>>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 

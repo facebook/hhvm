@@ -589,19 +589,7 @@ class YourStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::i64_t,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::enum_t<::cpp2::YourEnum>,
-                                                         ::apache::thrift::type::cpp_type<std::deque<std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>,
-                                                         ::apache::thrift::type::adapted<::StaticCast, ::apache::thrift::type::union_t<::cpp2::detail::YourUnion>>,
-                                                         ::apache::thrift::type::cpp_type<::cpp2::MyId, ::apache::thrift::type::i16_t>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 

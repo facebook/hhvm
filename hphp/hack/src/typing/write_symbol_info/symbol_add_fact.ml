@@ -679,14 +679,20 @@ let method_occ receiver_class name progress =
     (JSON_Object json)
     progress
 
-let file_call ~path pos ~call_args progress =
+let file_call ~path pos ~callee_xref ~call_args progress =
+  let xref =
+    match callee_xref with
+    | None -> []
+    | Some callee_xref -> [("callee_xref", callee_xref)]
+  in
   let json =
     JSON_Object
-      [
-        ("file", Build_json.build_file_json_nested path);
-        ("callee_span", Build_json.build_bytespan_json pos);
-        ("call_args", JSON_Array call_args);
-      ]
+      ([
+         ("file", Build_json.build_file_json_nested path);
+         ("callee_span", Build_json.build_bytespan_json pos);
+         ("call_args", JSON_Array call_args);
+       ]
+      @ xref)
   in
   Fact_acc.add_fact Predicate.(Hack FileCall) json progress
 

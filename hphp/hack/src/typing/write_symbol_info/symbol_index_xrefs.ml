@@ -20,7 +20,7 @@ let call_handler ~path progress_ref (pos_map : XRefs.pos_map) =
   object (_self)
     inherit Tast_visitor.handler_base
 
-    method! at_Call _env (_, callee_pos, _) _targs args _unpack_arg =
+    method! at_Call _env (_, callee_pos, callee_exp) _targs args _unpack_arg =
       let f (_, (_, arg_pos, exp)) =
         let exp_json =
           match exp with
@@ -40,8 +40,21 @@ let call_handler ~path progress_ref (pos_map : XRefs.pos_map) =
       let call_args =
         Symbol_build_json.build_call_arguments_json (List.map args ~f)
       in
+      let callee_xref =
+        match callee_exp with
+        | Aast.Id (id_pos, _)
+        | Aast.Class_const (_, (id_pos, _))
+        | Aast.(Obj_get (_, (_, _, Id (id_pos, _)), _, _)) ->
+          XRefs.PosMap.find_opt id_pos pos_map
+        | _ -> None
+      in
       let (_fact_id, prog) =
-        Add_fact.file_call ~path callee_pos ~call_args !progress_ref
+        Add_fact.file_call
+          ~path
+          callee_pos
+          ~callee_xref
+          ~call_args
+          !progress_ref
       in
       progress_ref := prog
   end

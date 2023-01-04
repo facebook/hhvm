@@ -152,6 +152,7 @@ class TLSSLStats : public ProxygenSSLStats {
   BaseStats::TLTimeseries tlsVersion_1_0_;
   BaseStats::TLTimeseries tlsVersion_1_1_;
   BaseStats::TLTimeseries tlsVersion_1_2_;
+  BaseStats::TLTimeseries tlsVersion_1_3_;
   BaseStats::TLTimeseries tlsInsecureConnection;
 
   // PskTypes counters

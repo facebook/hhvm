@@ -71,6 +71,7 @@ TLSSLStats::TLSSLStats(const std::string& prefix)
       tlsVersion_1_0_(prefix + "_tls_v1_0", SUM),
       tlsVersion_1_1_(prefix + "_tls_v1_1", SUM),
       tlsVersion_1_2_(prefix + "_tls_v1_2", SUM),
+      tlsVersion_1_3_(prefix + "_tls_v1_3", SUM),
       tlsInsecureConnection(prefix + "_tls_insecure_connection", SUM),
       fizzPskTypeNotSupported_(prefix + "_fizz_psktype_not_supported", SUM),
       fizzPskTypeNotAttempted_(prefix + "_fizz_psktype_not_attempted", SUM),
@@ -247,7 +248,7 @@ void TLSSLStats::recordTLSVersion(fizz::ProtocolVersion tlsVersion) noexcept {
     case fizz::ProtocolVersion::tls_1_3_26:
     case fizz::ProtocolVersion::tls_1_3_26_fb:
     case fizz::ProtocolVersion::tls_1_3_28:
-      // (SLB|tunnel).fizz_handshake_successes.sum.60 is an equivalent counter
+      tlsVersion_1_3_.add(1);
       return;
   }
   tlsUnknown_.add(1);

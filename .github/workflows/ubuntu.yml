@@ -13,7 +13,7 @@ concurrency:
   # for the same pull request, which share the same `github.ref`, otherwise the
   # run ID is used to identify the concurrency group, which is a no-op because
   # the run ID is always unique for each trigged event.
-  group: ${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  group: ubuntu-ci-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: true
 
 # OUT needs to be global. Ideally it would be local to the job so we could

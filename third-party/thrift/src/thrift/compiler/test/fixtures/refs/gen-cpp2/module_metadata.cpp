@@ -303,32 +303,6 @@ StructMetadata<::cpp2::StructWithBox>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::cpp2::StructWithNonOptionalBox>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.StructWithNonOptionalBox", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithNonOptionalBox = res.first->second;
-  module_StructWithNonOptionalBox.name() = "module.StructWithNonOptionalBox";
-  module_StructWithNonOptionalBox.is_union() = false;
-  static const auto* const
-  module_StructWithNonOptionalBox_fields = new std::array<EncodedThriftField, 3>{{
-    {1, "a", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "b", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{}},
-    {3, "c", false, std::make_unique<Struct<::cpp2::StructWithRef>>("module.StructWithRef"), std::vector<ThriftConstStruct>{}},
-  }};
-  for (const auto& f : *module_StructWithNonOptionalBox_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
-    module_StructWithNonOptionalBox.fields()->push_back(std::move(field));
-  }
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithInternBox>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.StructWithInternBox", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

@@ -2066,31 +2066,6 @@ _readField_opt_boxed_field:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           4,
-          5,
-          apache::thrift::protocol::T_I32))) {
-    goto _loop;
-  }
-_readField_boxed_field:
-  {
-    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::std::int32_t, StructWithFieldAdapter>>>();
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::std::int32_t, StructWithFieldAdapter>>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, ::my::Adapter1::toThrift(field), _readState);
-      },
-      [&](auto&) {})(*ptr);
-    if (!hasInplaceToThrift) {
-      ::std::int32_t tvalue;
-      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, tvalue, _readState);
-      *ptr = ::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 5>(::std::move(tvalue), *this);
-    }
-    this->__fbthrift_field_boxed_field = std::move(ptr);
-    
-  }
-
-  if (UNLIKELY(!_readState.advanceToNextField(
-          iprot,
-          5,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -2143,14 +2118,6 @@ _loop:
         goto _skip;
       }
     }
-    case 5:
-    {
-      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
-        goto _readField_boxed_field;
-      } else {
-        goto _skip;
-      }
-    }
     default:
     {
 _skip:
@@ -2184,12 +2151,6 @@ uint32_t StructWithFieldAdapter::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("opt_boxed_field", apache::thrift::protocol::T_I32, 4);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter1>(*prot_, *this->__fbthrift_field_opt_boxed_field, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_opt_boxed_field));});
   }
-  {
-    xfer += prot_->serializedFieldSize("boxed_field", apache::thrift::protocol::T_I32, 5);
-    if (this->__fbthrift_field_boxed_field) {
-      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter1>(*prot_, *this->__fbthrift_field_boxed_field, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_boxed_field));});
-    }
-  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -2215,12 +2176,6 @@ uint32_t StructWithFieldAdapter::serializedSizeZC(Protocol_ const* prot_) const 
   if (this->__fbthrift_field_opt_boxed_field) {
     xfer += prot_->serializedFieldSize("opt_boxed_field", apache::thrift::protocol::T_I32, 4);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter1>(*prot_, *this->__fbthrift_field_opt_boxed_field, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_opt_boxed_field));});
-  }
-  {
-    xfer += prot_->serializedFieldSize("boxed_field", apache::thrift::protocol::T_I32, 5);
-    if (this->__fbthrift_field_boxed_field) {
-      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter1>(*prot_, *this->__fbthrift_field_boxed_field, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_boxed_field));});
-    }
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2264,15 +2219,6 @@ uint32_t StructWithFieldAdapter::write(Protocol_* prot_) const {
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
-  }
-  {
-    constexpr int16_t kPrevFieldId = 4;
-    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 5, kPrevFieldId>(*prot_, "boxed_field", previousFieldHasValue);
-    previousFieldHasValue = true;
-    if (this->__fbthrift_field_boxed_field) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::write(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_boxed_field));
-    }
-    xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

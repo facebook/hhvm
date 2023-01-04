@@ -158,9 +158,6 @@ void reset_field<::facebook::thrift::test::StructWithFieldAdapter>(
     case 3:
       obj.opt_boxed_field_ref().copy_from(default_inst<::facebook::thrift::test::StructWithFieldAdapter>().opt_boxed_field_ref());
       return;
-    case 4:
-      obj.boxed_field_ref().copy_from(default_inst<::facebook::thrift::test::StructWithFieldAdapter>().boxed_field_ref());
-      return;
   }
 }
 

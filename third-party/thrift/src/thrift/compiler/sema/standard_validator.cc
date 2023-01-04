@@ -458,8 +458,7 @@ void validate_boxed_field_attributes(
   if (box) {
     ctx.check(
         dynamic_cast<const t_union*>(ctx.parent()) ||
-            node.qualifier() == t_field_qualifier::optional ||
-            node.has_annotation("cpp.box"),
+            node.qualifier() == t_field_qualifier::optional,
         "The `thrift.box` annotation can only be used with optional fields. "
         "Make sure `{}` is optional.",
         node.name());

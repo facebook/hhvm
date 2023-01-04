@@ -29,7 +29,6 @@
 #include <folly/portability/GTest.h>
 
 using apache::thrift::bad_field_access;
-using apache::thrift::boxed_field_ref;
 using apache::thrift::field_ref;
 using apache::thrift::intern_boxed_field_ref;
 using apache::thrift::optional_boxed_field_ref;
@@ -218,30 +217,6 @@ class TestStructBoxedValuePtr {
 
   auto opt_nested() & {
     return optional_boxed_field_ref<boxed_value_ptr<Nested>&>{nested_};
-  }
-
-  auto name() & {
-    return boxed_field_ref<boxed_value_ptr<std::string>&>{name_default_};
-  }
-  auto name() && {
-    return boxed_field_ref<boxed_value_ptr<std::string>&&>{
-        std::move(name_default_)};
-  }
-  auto name() const& {
-    return boxed_field_ref<const boxed_value_ptr<std::string>&>{name_default_};
-  }
-  auto name() const&& {
-    return boxed_field_ref<const boxed_value_ptr<std::string>&&>{
-        std::move(name_default_)};
-  }
-
-  auto int_assign() {
-    return boxed_field_ref<boxed_value_ptr<IntAssignable>&>{
-        int_assign_default_};
-  }
-
-  auto int_val() {
-    return boxed_field_ref<boxed_value_ptr<int>&>{int_val_default_};
   }
 
  private:
@@ -1034,60 +1009,11 @@ TEST(terse_field_ref_test, conversions) {
   test_conversions<TerseFieldRefConversionChecker>();
 }
 
-TEST(boxed_field_ref_test, access_default_value) {
-  auto s = TestStructBoxedValuePtr();
-  EXPECT_EQ(s.name(), "default");
-  EXPECT_EQ(s.int_val(), 0);
-}
-
 template <template <typename> class FieldRef>
 void check_is_assignable_boxed() {
   using IntAssignableRef = FieldRef<boxed_value_ptr<IntAssignable>&>;
   static_assert(std::is_assignable<IntAssignableRef, int>::value, "");
   static_assert(!std::is_assignable<IntAssignableRef, std::string>::value, "");
-}
-
-TEST(boxed_field_ref_test, is_assignable) {
-  check_is_assignable_boxed<optional_boxed_field_ref>();
-  check_is_assignable_boxed<boxed_field_ref>();
-}
-
-TEST(boxed_field_ref_test, assign) {
-  auto s = TestStructBoxedValuePtr();
-  EXPECT_EQ(s.name(), "default");
-  s.name() = "foo";
-  EXPECT_EQ(s.name(), "foo");
-}
-
-TEST(boxed_field_ref_test, copy_from) {
-  auto s = TestStructBoxedValuePtr();
-  auto s2 = TestStructBoxedValuePtr();
-  s2.name() = "foo";
-  s.name().copy_from(s2.name());
-  EXPECT_EQ(*s.name(), "foo");
-}
-
-TEST(boxed_field_ref_test, access) {
-  auto s = TestStructBoxedValuePtr();
-  EXPECT_EQ(*s.name(), "default");
-  EXPECT_EQ(s.name().value(), "default");
-}
-
-TEST(boxed_field_ref_test, assign_forwards) {
-  auto s = TestStructBoxedValuePtr();
-  EXPECT_EQ(s.int_assign()->value, 0);
-  s.int_assign() = 42;
-  EXPECT_EQ(s.int_assign()->value, 42);
-}
-
-TEST(boxed_field_ref_test, emplace) {
-  TestStructBoxedValuePtr s;
-  s.name().emplace({'f', 'o', 'o'});
-  EXPECT_EQ(s.name(), "foo");
-  s.name().emplace({'b', 'a', 'r'});
-  EXPECT_EQ(s.name(), "bar");
-  s.name().emplace({'b', 'a', 'z'}, std::allocator<char>());
-  EXPECT_EQ(s.name(), "baz");
 }
 
 const ThriftStruct* getInternDefaultAddress() {

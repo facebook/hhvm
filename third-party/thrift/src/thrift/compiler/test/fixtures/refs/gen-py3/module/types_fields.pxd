@@ -166,19 +166,6 @@ cdef class __StructWithBox_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *
 
 
-ctypedef void (*__StructWithNonOptionalBox_FieldsSetterFunc)(__StructWithNonOptionalBox_FieldsSetter, object) except *
-
-cdef class __StructWithNonOptionalBox_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cStructWithNonOptionalBox* _struct_cpp_obj
-    cdef cumap[__cstring_view, __StructWithNonOptionalBox_FieldsSetterFunc] _setters
-
-    @staticmethod
-    cdef __StructWithNonOptionalBox_FieldsSetter _fbthrift_create(_module_types.cStructWithNonOptionalBox* struct_cpp_obj)
-    cdef void _set_field_0(self, _fbthrift_value) except *
-    cdef void _set_field_1(self, _fbthrift_value) except *
-    cdef void _set_field_2(self, _fbthrift_value) except *
-
-
 ctypedef void (*__StructWithInternBox_FieldsSetterFunc)(__StructWithInternBox_FieldsSetter, object) except *
 
 cdef class __StructWithInternBox_FieldsSetter(__StructFieldsSetter):

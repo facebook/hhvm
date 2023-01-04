@@ -34,8 +34,6 @@ cdef __StructSpec get_reflection__StructWithRef()
 
 cdef __StructSpec get_reflection__StructWithBox()
 
-cdef __StructSpec get_reflection__StructWithNonOptionalBox()
-
 cdef __StructSpec get_reflection__StructWithInternBox()
 
 cdef __StructSpec get_reflection__AdaptedStructWithInternBox()

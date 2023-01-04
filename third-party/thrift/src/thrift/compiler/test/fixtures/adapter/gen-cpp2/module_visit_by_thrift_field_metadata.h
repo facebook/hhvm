@@ -146,8 +146,6 @@ struct VisitByFieldId<::facebook::thrift::test::StructWithFieldAdapter> {
       return f(2, static_cast<T&&>(t).opt_shared_field_ref());
     case 4:
       return f(3, static_cast<T&&>(t).opt_boxed_field_ref());
-    case 5:
-      return f(4, static_cast<T&&>(t).boxed_field_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::StructWithFieldAdapter");
     }

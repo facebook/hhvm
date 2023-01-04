@@ -23,7 +23,6 @@ namespace cpp2 {
   ::apache::thrift::detail::md::StructMetadata<Empty>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithRef>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithBox>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<StructWithNonOptionalBox>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithInternBox>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AdaptedStructWithInternBox>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithRefTypeUnique>::gen(metadata);

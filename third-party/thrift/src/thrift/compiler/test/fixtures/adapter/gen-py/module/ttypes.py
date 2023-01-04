@@ -1408,7 +1408,6 @@ class StructWithFieldAdapter:
    - shared_field
    - opt_shared_field
    - opt_boxed_field
-   - boxed_field
   """
 
   thrift_spec = None
@@ -1451,11 +1450,6 @@ class StructWithFieldAdapter:
           self.opt_boxed_field = iprot.readI32()
         else:
           iprot.skip(ftype)
-      elif fid == 5:
-        if ftype == TType.I32:
-          self.boxed_field = iprot.readI32()
-        else:
-          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1484,10 +1478,6 @@ class StructWithFieldAdapter:
     if self.opt_boxed_field != None:
       oprot.writeFieldBegin('opt_boxed_field', TType.I32, 4)
       oprot.writeI32(self.opt_boxed_field)
-      oprot.writeFieldEnd()
-    if self.boxed_field != None:
-      oprot.writeFieldBegin('boxed_field', TType.I32, 5)
-      oprot.writeI32(self.boxed_field)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -1520,10 +1510,6 @@ class StructWithFieldAdapter:
       self.opt_boxed_field = json_obj['opt_boxed_field']
       if self.opt_boxed_field > 0x7fffffff or self.opt_boxed_field < -0x80000000:
         raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-    if 'boxed_field' in json_obj and json_obj['boxed_field'] is not None:
-      self.boxed_field = json_obj['boxed_field']
-      if self.boxed_field > 0x7fffffff or self.boxed_field < -0x80000000:
-        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
 
   def __repr__(self):
     L = []
@@ -1544,10 +1530,6 @@ class StructWithFieldAdapter:
       value = pprint.pformat(self.opt_boxed_field, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    opt_boxed_field=%s' % (value))
-    if self.boxed_field is not None:
-      value = pprint.pformat(self.boxed_field, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    boxed_field=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -1565,7 +1547,6 @@ class StructWithFieldAdapter:
       'shared_field',
       'opt_shared_field',
       'opt_boxed_field',
-      'boxed_field',
     )
 
   # Override the __hash__ function for Python3 - t10434117
@@ -5375,23 +5356,18 @@ StructWithFieldAdapter.thrift_spec = (
   (2, TType.I32, 'shared_field', None, None, 2, ), # 2
   (3, TType.I32, 'opt_shared_field', None, None, 1, ), # 3
   (4, TType.I32, 'opt_boxed_field', None, None, 1, ), # 4
-  (5, TType.I32, 'boxed_field', None, None, 2, ), # 5
 )
 
 StructWithFieldAdapter.thrift_struct_annotations = {
 }
 StructWithFieldAdapter.thrift_field_annotations = {
-  5: {
-    "cpp.box": "1",
-  },
 }
 
-def StructWithFieldAdapter__init__(self, field=None, shared_field=None, opt_shared_field=None, opt_boxed_field=None, boxed_field=None,):
+def StructWithFieldAdapter__init__(self, field=None, shared_field=None, opt_shared_field=None, opt_boxed_field=None,):
   self.field = field
   self.shared_field = shared_field
   self.opt_shared_field = opt_shared_field
   self.opt_boxed_field = opt_boxed_field
-  self.boxed_field = boxed_field
 
 StructWithFieldAdapter.__init__ = StructWithFieldAdapter__init__
 
@@ -5400,7 +5376,6 @@ def StructWithFieldAdapter__setstate__(self, state):
   state.setdefault('shared_field', None)
   state.setdefault('opt_shared_field', None)
   state.setdefault('opt_boxed_field', None)
-  state.setdefault('boxed_field', None)
   self.__dict__ = state
 
 StructWithFieldAdapter.__getstate__ = lambda self: self.__dict__.copy()

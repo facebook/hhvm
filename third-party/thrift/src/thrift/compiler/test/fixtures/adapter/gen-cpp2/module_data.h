@@ -165,7 +165,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::detail::Independ
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter> {
-  static constexpr const std::size_t fields_size = 5;
+  static constexpr const std::size_t fields_size = 4;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

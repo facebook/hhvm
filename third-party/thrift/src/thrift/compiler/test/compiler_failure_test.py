@@ -1537,6 +1537,7 @@ class CompilerFailureTest(unittest.TestCase):
             err,
             textwrap.dedent(
                 "[WARNING:foo.thrift:4] cpp.box and thrift.box are deprecated. Please use @thrift.Box annotation instead in `field`.\n"
+                "[ERROR:foo.thrift:4] The `thrift.box` annotation can only be used with optional fields. Make sure `field` is optional.\n"
                 "[ERROR:foo.thrift:5] The `thrift.box` annotation can only be used with optional fields. Make sure `field2` is optional.\n"
             ),
         )

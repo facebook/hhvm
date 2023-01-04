@@ -167,8 +167,6 @@ struct StructWithFieldAdapter {
   @cpp.Adapter{name = "::my::Adapter1"}
   @thrift.Box
   4: optional i32 opt_boxed_field;
-  @cpp.Adapter{name = "::my::Adapter1"}
-  5: i32 boxed_field (cpp.box);
 }
 
 struct TerseAdaptedFields {

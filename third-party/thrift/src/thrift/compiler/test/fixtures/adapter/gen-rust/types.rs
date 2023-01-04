@@ -148,7 +148,6 @@ pub struct StructWithFieldAdapter {
     pub shared_field: ::std::primitive::i32,
     pub opt_shared_field: ::std::option::Option<::std::primitive::i32>,
     pub opt_boxed_field: ::std::option::Option<::std::boxed::Box<::std::primitive::i32>>,
-    pub boxed_field: ::std::primitive::i32,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -1387,7 +1386,6 @@ impl ::std::default::Default for self::StructWithFieldAdapter {
             shared_field: ::std::default::Default::default(),
             opt_shared_field: ::std::option::Option::None,
             opt_boxed_field: ::std::option::Option::None,
-            boxed_field: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -1401,7 +1399,6 @@ impl ::std::fmt::Debug for self::StructWithFieldAdapter {
             .field("shared_field", &self.shared_field)
             .field("opt_shared_field", &self.opt_shared_field)
             .field("opt_boxed_field", &self.opt_boxed_field)
-            .field("boxed_field", &self.boxed_field)
             .finish()
     }
 }
@@ -1441,9 +1438,6 @@ where
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
-        p.write_field_begin("boxed_field", ::fbthrift::TType::I32, 5);
-        ::fbthrift::Serialize::write(&self.boxed_field, p);
-        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -1455,7 +1449,6 @@ where
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
-            ::fbthrift::Field::new("boxed_field", ::fbthrift::TType::I32, 5),
             ::fbthrift::Field::new("field", ::fbthrift::TType::I32, 1),
             ::fbthrift::Field::new("opt_boxed_field", ::fbthrift::TType::I32, 4),
             ::fbthrift::Field::new("opt_shared_field", ::fbthrift::TType::I32, 3),
@@ -1465,7 +1458,6 @@ where
         let mut field_shared_field = ::std::option::Option::None;
         let mut field_opt_shared_field = ::std::option::Option::None;
         let mut field_opt_boxed_field = ::std::option::Option::None;
-        let mut field_boxed_field = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -1475,7 +1467,6 @@ where
                 (::fbthrift::TType::I32, 2) => field_shared_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::I32, 3) => field_opt_shared_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::I32, 4) => field_opt_boxed_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 5) => field_boxed_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1486,7 +1477,6 @@ where
             shared_field: field_shared_field.unwrap_or_default(),
             opt_shared_field: field_opt_shared_field,
             opt_boxed_field: field_opt_boxed_field,
-            boxed_field: field_boxed_field.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }

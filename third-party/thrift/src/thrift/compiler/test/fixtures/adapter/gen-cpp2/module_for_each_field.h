@@ -90,7 +90,6 @@ struct ForEachField<::facebook::thrift::test::StructWithFieldAdapter> {
     f(1, static_cast<T&&>(t).shared_field_ref()...);
     f(2, static_cast<T&&>(t).opt_shared_field_ref()...);
     f(3, static_cast<T&&>(t).opt_boxed_field_ref()...);
-    f(4, static_cast<T&&>(t).boxed_field_ref()...);
   }
 };
 

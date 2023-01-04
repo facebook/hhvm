@@ -41,7 +41,6 @@ void create_reference_default_test(ThriftStruct& obj) {
   EXPECT_NE(nullptr, obj.req_shared_field_ref());
   EXPECT_NE(nullptr, obj.def_shared_const_field_ref());
   EXPECT_NE(nullptr, obj.req_shared_const_field_ref());
-  EXPECT_TRUE(obj.box_field());
 
   // Check that optional fields are absent from a default-constructed object.
   EXPECT_EQ(nullptr, obj.opt_field_ref());
@@ -68,7 +67,6 @@ void create_reference_clear_test(CppType value) {
   obj.req_shared_const_field_ref() = std::make_shared<CppType>(value);
   obj.opt_shared_const_field_ref() = std::make_shared<CppType>(value);
   obj.opt_box_field_ref() = value;
-  obj.box_field() = value;
 
   EXPECT_EQ(*obj.def_field_ref(), value);
   EXPECT_EQ(*obj.req_field_ref(), value);
@@ -83,7 +81,6 @@ void create_reference_clear_test(CppType value) {
   EXPECT_EQ(*obj.req_shared_const_field_ref(), value);
   EXPECT_EQ(*obj.opt_shared_const_field_ref(), value);
   EXPECT_EQ(*obj.opt_box_field_ref(), value);
-  EXPECT_EQ(*obj.box_field(), value);
 
   apache::thrift::clear(obj);
 
@@ -97,7 +94,6 @@ void create_adapted_reference_default_test(ThriftStruct& obj) {
   EXPECT_NE(nullptr, obj.req_shared_field_ref());
   EXPECT_NE(nullptr, obj.def_shared_const_field_ref());
   EXPECT_NE(nullptr, obj.req_shared_const_field_ref());
-  EXPECT_TRUE(obj.box_field());
 
   // Check that optional fields are absent from a default-constructed object.
   EXPECT_EQ(nullptr, obj.opt_shared_field_ref());
@@ -226,7 +222,6 @@ TEST(References, type_adapter_ref_struct_fields_clear) {
   obj.req_shared_const_field_ref() =
       std::make_shared<Wrapper<std::string>>(wrapper);
   obj.opt_box_field() = Wrapper<std::string>{wrapper};
-  obj.box_field() = Wrapper<std::string>{wrapper};
 
   EXPECT_EQ(obj.def_shared_field_ref()->value, "1");
   EXPECT_EQ(obj.req_shared_field_ref()->value, "1");
@@ -235,7 +230,6 @@ TEST(References, type_adapter_ref_struct_fields_clear) {
   EXPECT_EQ(obj.req_shared_const_field_ref()->value, "1");
   EXPECT_EQ(obj.opt_shared_const_field_ref()->value, "1");
   EXPECT_EQ(obj.opt_box_field()->value, "1");
-  EXPECT_EQ(obj.box_field()->value, "1");
 
   apache::thrift::clear(obj);
 
@@ -254,7 +248,6 @@ TEST(References, field_adapter_ref_struct_fields_clear) {
   // EXPECT_EQ(obj.req_shared_const_field_ref()->meta, &*obj.meta());
   EXPECT_FALSE(obj.opt_shared_const_field_ref());
   EXPECT_FALSE(obj.opt_box_field());
-  EXPECT_TRUE(obj.box_field());
 
   obj.def_shared_field_ref() = std::make_shared<
       AdaptedWithContext<std::string, FieldAdapterRefStruct, 1>>("1");
@@ -270,8 +263,6 @@ TEST(References, field_adapter_ref_struct_fields_clear) {
       AdaptedWithContext<std::string, FieldAdapterRefStruct, 6>>("1");
   obj.opt_box_field() =
       AdaptedWithContext<std::string, FieldAdapterRefStruct, 7>{"1"};
-  obj.box_field() =
-      AdaptedWithContext<std::string, FieldAdapterRefStruct, 9>{"1"};
 
   EXPECT_EQ(obj.def_shared_field_ref()->value, "1");
   EXPECT_EQ(obj.req_shared_field_ref()->value, "1");
@@ -280,7 +271,6 @@ TEST(References, field_adapter_ref_struct_fields_clear) {
   EXPECT_EQ(obj.req_shared_const_field_ref()->value, "1");
   EXPECT_EQ(obj.opt_shared_const_field_ref()->value, "1");
   EXPECT_EQ(obj.opt_box_field()->value, "1");
-  EXPECT_EQ(obj.box_field()->value, "1");
 
   apache::thrift::clear(obj);
 
@@ -559,7 +549,6 @@ TEST(References, StructAdapterRefStruct) {
   obj.req_shared_const_field_ref() =
       std::make_shared<DirectlyAdaptedStruct>(wrapper);
   obj.opt_box_field() = DirectlyAdaptedStruct{wrapper};
-  obj.box_field() = DirectlyAdaptedStruct{wrapper};
 
   EXPECT_EQ(obj.def_shared_field_ref()->value.data(), 1);
   EXPECT_EQ(obj.req_shared_field_ref()->value.data(), 1);
@@ -568,7 +557,6 @@ TEST(References, StructAdapterRefStruct) {
   EXPECT_EQ(obj.req_shared_const_field_ref()->value.data(), 1);
   EXPECT_EQ(obj.opt_shared_const_field_ref()->value.data(), 1);
   EXPECT_EQ(obj.opt_box_field()->value.data(), 1);
-  EXPECT_EQ(obj.box_field()->value.data(), 1);
 
   auto objs = CompactSerializer::serialize<std::string>(obj);
   StructAdapterRefStruct objd;
@@ -581,7 +569,6 @@ TEST(References, StructAdapterRefStruct) {
   EXPECT_EQ(objd.req_shared_const_field_ref()->value.data(), 1);
   EXPECT_EQ(objd.opt_shared_const_field_ref()->value.data(), 1);
   EXPECT_EQ(objd.opt_box_field()->value.data(), 1);
-  EXPECT_EQ(objd.box_field()->value.data(), 1);
 }
 
 TEST(References, DoubleAdaptedRefStruct) {
@@ -605,7 +592,6 @@ TEST(References, DoubleAdaptedRefStruct) {
   obj.req_shared_const_field_ref() =
       std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
   obj.opt_box_field() = wrapper;
-  obj.box_field() = wrapper;
 
   EXPECT_EQ(obj.def_shared_field_ref()->value.value.data(), 1);
   EXPECT_EQ(obj.req_shared_field_ref()->value.value.data(), 1);
@@ -614,7 +600,6 @@ TEST(References, DoubleAdaptedRefStruct) {
   EXPECT_EQ(obj.req_shared_const_field_ref()->value.value.data(), 1);
   EXPECT_EQ(obj.opt_shared_const_field_ref()->value.value.data(), 1);
   EXPECT_EQ(obj.opt_box_field()->value.value.data(), 1);
-  EXPECT_EQ(obj.box_field()->value.value.data(), 1);
 
   auto objs = CompactSerializer::serialize<std::string>(obj);
   DoubleAdaptedRefStruct objd;
@@ -627,7 +612,6 @@ TEST(References, DoubleAdaptedRefStruct) {
   EXPECT_EQ(objd.req_shared_const_field_ref()->value.value.data(), 1);
   EXPECT_EQ(objd.opt_shared_const_field_ref()->value.value.data(), 1);
   EXPECT_EQ(objd.opt_box_field()->value.value.data(), 1);
-  EXPECT_EQ(objd.box_field()->value.value.data(), 1);
 }
 
 } // namespace cpp2

@@ -308,32 +308,6 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::StructWit
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithNonOptionalBox>::fields_names = {{
-  "a",
-  "b",
-  "c",
-}};
-THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::cpp2::StructWithNonOptionalBox>::fields_ids = {{
-  1,
-  2,
-  3,
-}};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithNonOptionalBox>::fields_types = {{
-  TType::T_STRING,
-  TType::T_LIST,
-  TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithNonOptionalBox>::storage_names = {{
-  "__fbthrift_field_a",
-  "__fbthrift_field_b",
-  "__fbthrift_field_c",
-}};
-THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::StructWithNonOptionalBox>::isset_indexes = {{
-  -1,
-  -1,
-  -1,
-}};
-
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::StructWithInternBox>::fields_names = {{
   "field1",
   "field2",

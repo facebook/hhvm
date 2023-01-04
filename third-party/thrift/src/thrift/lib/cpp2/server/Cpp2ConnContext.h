@@ -572,6 +572,12 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
 
   int64_t getInteractionId() { return interactionId_; }
 
+  void setFrameworkMetadata(folly::IOBuf frameworkMetadata) {
+    frameworkMetadata_ = std::move(frameworkMetadata);
+  }
+
+  folly::IOBuf& getFrameworkMetadata() { return frameworkMetadata_; }
+
   void setInteractionCreate(InteractionCreate interactionCreate) {
     interactionCreate_ = std::move(interactionCreate);
   }
@@ -617,6 +623,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   TilePtr tile_;
   concurrency::ThreadManager::ExecutionScope executionScope_{
       concurrency::PRIORITY::NORMAL};
+  folly::IOBuf frameworkMetadata_;
 };
 
 } // namespace thrift

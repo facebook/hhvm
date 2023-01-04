@@ -151,7 +151,6 @@ cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_types_
         __terse_field_ref[cMyData] structVal_ref "structVal_ref" ()
         __terse_field_ref[cMyUnion] unionVal_ref "unionVal_ref" ()
         __terse_field_ref[cLateDefStruct] lateStructVal_ref "lateStructVal_ref" ()
-        __terse_field_ref[_apache_thrift_type_standard_types.cDurationStruct] durationVal_ref "durationVal_ref" ()
         __optional_field_ref[cbool] optBoolVal_ref "optBoolVal_ref" ()
         __optional_field_ref[cint8_t] optByteVal_ref "optByteVal_ref" ()
         __optional_field_ref[cint16_t] optI16Val_ref "optI16Val_ref" ()
@@ -291,7 +290,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline object structVal_impl(self)
     cdef inline object unionVal_impl(self)
     cdef inline object lateStructVal_impl(self)
-    cdef inline object durationVal_impl(self)
     cdef inline object optBoolVal_impl(self)
     cdef inline object optByteVal_impl(self)
     cdef inline object optI16Val_impl(self)
@@ -314,7 +312,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef MyData __fbthrift_cached_structVal
     cdef MyUnion __fbthrift_cached_unionVal
     cdef LateDefStruct __fbthrift_cached_lateStructVal
-    cdef _apache_thrift_type_standard_types.DurationStruct __fbthrift_cached_durationVal
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_optBinaryVal
     cdef object __fbthrift_cached_optEnumVal
     cdef MyData __fbthrift_cached_optStructVal

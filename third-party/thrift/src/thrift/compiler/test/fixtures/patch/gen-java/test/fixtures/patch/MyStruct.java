@@ -38,24 +38,23 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         @com.facebook.swift.codec.ThriftField(value=-11, name="structVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyData structVal,
         @com.facebook.swift.codec.ThriftField(value=-12, name="unionVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyUnion unionVal,
         @com.facebook.swift.codec.ThriftField(value=-13, name="lateStructVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.LateDefStruct lateStructVal,
-        @com.facebook.swift.codec.ThriftField(value=-14, name="durationVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.standard_type.DurationStruct durationVal,
-        @com.facebook.swift.codec.ThriftField(value=-15, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Boolean optBoolVal,
-        @com.facebook.swift.codec.ThriftField(value=-16, name="optByteVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Byte optByteVal,
-        @com.facebook.swift.codec.ThriftField(value=-17, name="optI16Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Short optI16Val,
-        @com.facebook.swift.codec.ThriftField(value=-18, name="optI32Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Integer optI32Val,
-        @com.facebook.swift.codec.ThriftField(value=-19, name="optI64Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Long optI64Val,
-        @com.facebook.swift.codec.ThriftField(value=-20, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Float optFloatVal,
-        @com.facebook.swift.codec.ThriftField(value=-21, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Double optDoubleVal,
-        @com.facebook.swift.codec.ThriftField(value=-22, name="optStringVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final String optStringVal,
-        @com.facebook.swift.codec.ThriftField(value=-23, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final byte[] optBinaryVal,
-        @com.facebook.swift.codec.ThriftField(value=-24, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyEnum optEnumVal,
-        @com.facebook.swift.codec.ThriftField(value=-25, name="optStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyData optStructVal,
-        @com.facebook.swift.codec.ThriftField(value=-26, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.LateDefStruct optLateStructVal,
-        @com.facebook.swift.codec.ThriftField(value=-27, name="optListVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final List<Short> optListVal,
-        @com.facebook.swift.codec.ThriftField(value=-28, name="optSetVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Set<String> optSetVal,
-        @com.facebook.swift.codec.ThriftField(value=-29, name="optMapVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Map<String, String> optMapVal,
-        @com.facebook.swift.codec.ThriftField(value=-30, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE) final List<Map<String, Integer>> listMap,
-        @com.facebook.swift.codec.ThriftField(value=-31, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE) final Map<String, Map<String, Integer>> mapMap
+        @com.facebook.swift.codec.ThriftField(value=-14, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Boolean optBoolVal,
+        @com.facebook.swift.codec.ThriftField(value=-15, name="optByteVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Byte optByteVal,
+        @com.facebook.swift.codec.ThriftField(value=-16, name="optI16Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Short optI16Val,
+        @com.facebook.swift.codec.ThriftField(value=-17, name="optI32Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Integer optI32Val,
+        @com.facebook.swift.codec.ThriftField(value=-18, name="optI64Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Long optI64Val,
+        @com.facebook.swift.codec.ThriftField(value=-19, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Float optFloatVal,
+        @com.facebook.swift.codec.ThriftField(value=-20, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Double optDoubleVal,
+        @com.facebook.swift.codec.ThriftField(value=-21, name="optStringVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final String optStringVal,
+        @com.facebook.swift.codec.ThriftField(value=-22, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final byte[] optBinaryVal,
+        @com.facebook.swift.codec.ThriftField(value=-23, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyEnum optEnumVal,
+        @com.facebook.swift.codec.ThriftField(value=-24, name="optStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyData optStructVal,
+        @com.facebook.swift.codec.ThriftField(value=-25, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.LateDefStruct optLateStructVal,
+        @com.facebook.swift.codec.ThriftField(value=-26, name="optListVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final List<Short> optListVal,
+        @com.facebook.swift.codec.ThriftField(value=-27, name="optSetVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Set<String> optSetVal,
+        @com.facebook.swift.codec.ThriftField(value=-28, name="optMapVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Map<String, String> optMapVal,
+        @com.facebook.swift.codec.ThriftField(value=-29, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE) final List<Map<String, Integer>> listMap,
+        @com.facebook.swift.codec.ThriftField(value=-30, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE) final Map<String, Map<String, Integer>> mapMap
     ) {
         this.boolVal = boolVal;
         this.byteVal = byteVal;
@@ -70,7 +69,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         this.structVal = structVal;
         this.unionVal = unionVal;
         this.lateStructVal = lateStructVal;
-        this.durationVal = durationVal;
         this.optBoolVal = optBoolVal;
         this.optByteVal = optByteVal;
         this.optI16Val = optI16Val;
@@ -105,7 +103,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       this.structVal = test.fixtures.patch.MyData.defaultInstance();
       this.unionVal = test.fixtures.patch.MyUnion.defaultInstance();
       this.lateStructVal = test.fixtures.patch.LateDefStruct.defaultInstance();
-      this.durationVal = com.facebook.thrift.standard_type.DurationStruct.defaultInstance();
       this.optBoolVal = null;
       this.optByteVal = null;
       this.optI16Val = null;
@@ -140,7 +137,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         private test.fixtures.patch.MyData structVal = test.fixtures.patch.MyData.defaultInstance();
         private test.fixtures.patch.MyUnion unionVal = test.fixtures.patch.MyUnion.defaultInstance();
         private test.fixtures.patch.LateDefStruct lateStructVal = test.fixtures.patch.LateDefStruct.defaultInstance();
-        private com.facebook.thrift.standard_type.DurationStruct durationVal = com.facebook.thrift.standard_type.DurationStruct.defaultInstance();
         private Boolean optBoolVal = null;
         private Byte optByteVal = null;
         private Short optI16Val = null;
@@ -263,15 +259,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public test.fixtures.patch.LateDefStruct getLateStructVal() { return lateStructVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-14, name="durationVal", isLegacyId=true, requiredness=Requiredness.TERSE)
-        public Builder setDurationVal(com.facebook.thrift.standard_type.DurationStruct durationVal) {
-            this.durationVal = durationVal;
-            return this;
-        }
-    
-        public com.facebook.thrift.standard_type.DurationStruct getDurationVal() { return durationVal; }
-    
-            @com.facebook.swift.codec.ThriftField(value=-15, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-14, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptBoolVal(Boolean optBoolVal) {
             this.optBoolVal = optBoolVal;
             return this;
@@ -279,7 +267,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public Boolean isOptBoolVal() { return optBoolVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-16, name="optByteVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-15, name="optByteVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptByteVal(Byte optByteVal) {
             this.optByteVal = optByteVal;
             return this;
@@ -287,7 +275,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public Byte getOptByteVal() { return optByteVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-17, name="optI16Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-16, name="optI16Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptI16Val(Short optI16Val) {
             this.optI16Val = optI16Val;
             return this;
@@ -295,7 +283,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public Short getOptI16Val() { return optI16Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=-18, name="optI32Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-17, name="optI32Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptI32Val(Integer optI32Val) {
             this.optI32Val = optI32Val;
             return this;
@@ -303,7 +291,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public Integer getOptI32Val() { return optI32Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=-19, name="optI64Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-18, name="optI64Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptI64Val(Long optI64Val) {
             this.optI64Val = optI64Val;
             return this;
@@ -311,7 +299,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public Long getOptI64Val() { return optI64Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=-20, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-19, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptFloatVal(Float optFloatVal) {
             this.optFloatVal = optFloatVal;
             return this;
@@ -319,7 +307,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public Float getOptFloatVal() { return optFloatVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-21, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-20, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptDoubleVal(Double optDoubleVal) {
             this.optDoubleVal = optDoubleVal;
             return this;
@@ -327,7 +315,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public Double getOptDoubleVal() { return optDoubleVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-22, name="optStringVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-21, name="optStringVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptStringVal(String optStringVal) {
             this.optStringVal = optStringVal;
             return this;
@@ -335,7 +323,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public String getOptStringVal() { return optStringVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-23, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-22, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptBinaryVal(byte[] optBinaryVal) {
             this.optBinaryVal = optBinaryVal;
             return this;
@@ -343,7 +331,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public byte[] getOptBinaryVal() { return optBinaryVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-24, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-23, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptEnumVal(test.fixtures.patch.MyEnum optEnumVal) {
             this.optEnumVal = optEnumVal;
             return this;
@@ -351,7 +339,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public test.fixtures.patch.MyEnum getOptEnumVal() { return optEnumVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-25, name="optStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-24, name="optStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptStructVal(test.fixtures.patch.MyData optStructVal) {
             this.optStructVal = optStructVal;
             return this;
@@ -359,7 +347,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public test.fixtures.patch.MyData getOptStructVal() { return optStructVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-26, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-25, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptLateStructVal(test.fixtures.patch.LateDefStruct optLateStructVal) {
             this.optLateStructVal = optLateStructVal;
             return this;
@@ -367,7 +355,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public test.fixtures.patch.LateDefStruct getOptLateStructVal() { return optLateStructVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-27, name="optListVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-26, name="optListVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptListVal(List<Short> optListVal) {
             this.optListVal = optListVal;
             return this;
@@ -375,7 +363,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public List<Short> getOptListVal() { return optListVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-28, name="optSetVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-27, name="optSetVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptSetVal(Set<String> optSetVal) {
             this.optSetVal = optSetVal;
             return this;
@@ -383,7 +371,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public Set<String> getOptSetVal() { return optSetVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-29, name="optMapVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+            @com.facebook.swift.codec.ThriftField(value=-28, name="optMapVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
         public Builder setOptMapVal(Map<String, String> optMapVal) {
             this.optMapVal = optMapVal;
             return this;
@@ -391,7 +379,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public Map<String, String> getOptMapVal() { return optMapVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-30, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-29, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE)
         public Builder setListMap(List<Map<String, Integer>> listMap) {
             this.listMap = listMap;
             return this;
@@ -399,7 +387,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public List<Map<String, Integer>> getListMap() { return listMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=-31, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-30, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE)
         public Builder setMapMap(Map<String, Map<String, Integer>> mapMap) {
             this.mapMap = mapMap;
             return this;
@@ -422,7 +410,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             this.structVal = other.structVal;
             this.unionVal = other.unionVal;
             this.lateStructVal = other.lateStructVal;
-            this.durationVal = other.durationVal;
             this.optBoolVal = other.optBoolVal;
             this.optByteVal = other.optByteVal;
             this.optI16Val = other.optI16Val;
@@ -458,7 +445,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
                 this.structVal,
                 this.unionVal,
                 this.lateStructVal,
-                this.durationVal,
                 this.optBoolVal,
                 this.optByteVal,
                 this.optI16Val,
@@ -524,60 +510,57 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         private final test.fixtures.patch.LateDefStruct lateStructVal;
     public static final int _LATESTRUCTVAL = -13;
     private static final TField LATE_STRUCT_VAL_FIELD_DESC = new TField("lateStructVal", TType.STRUCT, (short)-13);
-        private final com.facebook.thrift.standard_type.DurationStruct durationVal;
-    public static final int _DURATIONVAL = -14;
-    private static final TField DURATION_VAL_FIELD_DESC = new TField("durationVal", TType.STRUCT, (short)-14);
         private final Boolean optBoolVal;
-    public static final int _OPTBOOLVAL = -15;
-    private static final TField OPT_BOOL_VAL_FIELD_DESC = new TField("optBoolVal", TType.BOOL, (short)-15);
+    public static final int _OPTBOOLVAL = -14;
+    private static final TField OPT_BOOL_VAL_FIELD_DESC = new TField("optBoolVal", TType.BOOL, (short)-14);
         private final Byte optByteVal;
-    public static final int _OPTBYTEVAL = -16;
-    private static final TField OPT_BYTE_VAL_FIELD_DESC = new TField("optByteVal", TType.BYTE, (short)-16);
+    public static final int _OPTBYTEVAL = -15;
+    private static final TField OPT_BYTE_VAL_FIELD_DESC = new TField("optByteVal", TType.BYTE, (short)-15);
         private final Short optI16Val;
-    public static final int _OPTI16VAL = -17;
-    private static final TField OPT_I16_VAL_FIELD_DESC = new TField("optI16Val", TType.I16, (short)-17);
+    public static final int _OPTI16VAL = -16;
+    private static final TField OPT_I16_VAL_FIELD_DESC = new TField("optI16Val", TType.I16, (short)-16);
         private final Integer optI32Val;
-    public static final int _OPTI32VAL = -18;
-    private static final TField OPT_I32_VAL_FIELD_DESC = new TField("optI32Val", TType.I32, (short)-18);
+    public static final int _OPTI32VAL = -17;
+    private static final TField OPT_I32_VAL_FIELD_DESC = new TField("optI32Val", TType.I32, (short)-17);
         private final Long optI64Val;
-    public static final int _OPTI64VAL = -19;
-    private static final TField OPT_I64_VAL_FIELD_DESC = new TField("optI64Val", TType.I64, (short)-19);
+    public static final int _OPTI64VAL = -18;
+    private static final TField OPT_I64_VAL_FIELD_DESC = new TField("optI64Val", TType.I64, (short)-18);
         private final Float optFloatVal;
-    public static final int _OPTFLOATVAL = -20;
-    private static final TField OPT_FLOAT_VAL_FIELD_DESC = new TField("optFloatVal", TType.FLOAT, (short)-20);
+    public static final int _OPTFLOATVAL = -19;
+    private static final TField OPT_FLOAT_VAL_FIELD_DESC = new TField("optFloatVal", TType.FLOAT, (short)-19);
         private final Double optDoubleVal;
-    public static final int _OPTDOUBLEVAL = -21;
-    private static final TField OPT_DOUBLE_VAL_FIELD_DESC = new TField("optDoubleVal", TType.DOUBLE, (short)-21);
+    public static final int _OPTDOUBLEVAL = -20;
+    private static final TField OPT_DOUBLE_VAL_FIELD_DESC = new TField("optDoubleVal", TType.DOUBLE, (short)-20);
         private final String optStringVal;
-    public static final int _OPTSTRINGVAL = -22;
-    private static final TField OPT_STRING_VAL_FIELD_DESC = new TField("optStringVal", TType.STRING, (short)-22);
+    public static final int _OPTSTRINGVAL = -21;
+    private static final TField OPT_STRING_VAL_FIELD_DESC = new TField("optStringVal", TType.STRING, (short)-21);
         private final byte[] optBinaryVal;
-    public static final int _OPTBINARYVAL = -23;
-    private static final TField OPT_BINARY_VAL_FIELD_DESC = new TField("optBinaryVal", TType.STRING, (short)-23);
+    public static final int _OPTBINARYVAL = -22;
+    private static final TField OPT_BINARY_VAL_FIELD_DESC = new TField("optBinaryVal", TType.STRING, (short)-22);
         private final test.fixtures.patch.MyEnum optEnumVal;
-    public static final int _OPTENUMVAL = -24;
-    private static final TField OPT_ENUM_VAL_FIELD_DESC = new TField("optEnumVal", TType.I32, (short)-24);
+    public static final int _OPTENUMVAL = -23;
+    private static final TField OPT_ENUM_VAL_FIELD_DESC = new TField("optEnumVal", TType.I32, (short)-23);
         private final test.fixtures.patch.MyData optStructVal;
-    public static final int _OPTSTRUCTVAL = -25;
-    private static final TField OPT_STRUCT_VAL_FIELD_DESC = new TField("optStructVal", TType.STRUCT, (short)-25);
+    public static final int _OPTSTRUCTVAL = -24;
+    private static final TField OPT_STRUCT_VAL_FIELD_DESC = new TField("optStructVal", TType.STRUCT, (short)-24);
         private final test.fixtures.patch.LateDefStruct optLateStructVal;
-    public static final int _OPTLATESTRUCTVAL = -26;
-    private static final TField OPT_LATE_STRUCT_VAL_FIELD_DESC = new TField("optLateStructVal", TType.STRUCT, (short)-26);
+    public static final int _OPTLATESTRUCTVAL = -25;
+    private static final TField OPT_LATE_STRUCT_VAL_FIELD_DESC = new TField("optLateStructVal", TType.STRUCT, (short)-25);
         private final List<Short> optListVal;
-    public static final int _OPTLISTVAL = -27;
-    private static final TField OPT_LIST_VAL_FIELD_DESC = new TField("optListVal", TType.LIST, (short)-27);
+    public static final int _OPTLISTVAL = -26;
+    private static final TField OPT_LIST_VAL_FIELD_DESC = new TField("optListVal", TType.LIST, (short)-26);
         private final Set<String> optSetVal;
-    public static final int _OPTSETVAL = -28;
-    private static final TField OPT_SET_VAL_FIELD_DESC = new TField("optSetVal", TType.SET, (short)-28);
+    public static final int _OPTSETVAL = -27;
+    private static final TField OPT_SET_VAL_FIELD_DESC = new TField("optSetVal", TType.SET, (short)-27);
         private final Map<String, String> optMapVal;
-    public static final int _OPTMAPVAL = -29;
-    private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.MAP, (short)-29);
+    public static final int _OPTMAPVAL = -28;
+    private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.MAP, (short)-28);
         private final List<Map<String, Integer>> listMap;
-    public static final int _LISTMAP = -30;
-    private static final TField LIST_MAP_FIELD_DESC = new TField("listMap", TType.LIST, (short)-30);
+    public static final int _LISTMAP = -29;
+    private static final TField LIST_MAP_FIELD_DESC = new TField("listMap", TType.LIST, (short)-29);
         private final Map<String, Map<String, Integer>> mapMap;
-    public static final int _MAPMAP = -31;
-    private static final TField MAP_MAP_FIELD_DESC = new TField("mapMap", TType.MAP, (short)-31);
+    public static final int _MAPMAP = -30;
+    private static final TField MAP_MAP_FIELD_DESC = new TField("mapMap", TType.MAP, (short)-30);
     static {
       NAMES_TO_IDS.put("boolVal", -1);
       THRIFT_NAMES_TO_IDS.put("boolVal", -1);
@@ -618,60 +601,57 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       NAMES_TO_IDS.put("lateStructVal", -13);
       THRIFT_NAMES_TO_IDS.put("lateStructVal", -13);
       FIELD_METADATA.put(-13, LATE_STRUCT_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("durationVal", -14);
-      THRIFT_NAMES_TO_IDS.put("durationVal", -14);
-      FIELD_METADATA.put(-14, DURATION_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optBoolVal", -15);
-      THRIFT_NAMES_TO_IDS.put("optBoolVal", -15);
-      FIELD_METADATA.put(-15, OPT_BOOL_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optByteVal", -16);
-      THRIFT_NAMES_TO_IDS.put("optByteVal", -16);
-      FIELD_METADATA.put(-16, OPT_BYTE_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optI16Val", -17);
-      THRIFT_NAMES_TO_IDS.put("optI16Val", -17);
-      FIELD_METADATA.put(-17, OPT_I16_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optI32Val", -18);
-      THRIFT_NAMES_TO_IDS.put("optI32Val", -18);
-      FIELD_METADATA.put(-18, OPT_I32_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optI64Val", -19);
-      THRIFT_NAMES_TO_IDS.put("optI64Val", -19);
-      FIELD_METADATA.put(-19, OPT_I64_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optFloatVal", -20);
-      THRIFT_NAMES_TO_IDS.put("optFloatVal", -20);
-      FIELD_METADATA.put(-20, OPT_FLOAT_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optDoubleVal", -21);
-      THRIFT_NAMES_TO_IDS.put("optDoubleVal", -21);
-      FIELD_METADATA.put(-21, OPT_DOUBLE_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optStringVal", -22);
-      THRIFT_NAMES_TO_IDS.put("optStringVal", -22);
-      FIELD_METADATA.put(-22, OPT_STRING_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optBinaryVal", -23);
-      THRIFT_NAMES_TO_IDS.put("optBinaryVal", -23);
-      FIELD_METADATA.put(-23, OPT_BINARY_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optEnumVal", -24);
-      THRIFT_NAMES_TO_IDS.put("optEnumVal", -24);
-      FIELD_METADATA.put(-24, OPT_ENUM_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optStructVal", -25);
-      THRIFT_NAMES_TO_IDS.put("optStructVal", -25);
-      FIELD_METADATA.put(-25, OPT_STRUCT_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optLateStructVal", -26);
-      THRIFT_NAMES_TO_IDS.put("optLateStructVal", -26);
-      FIELD_METADATA.put(-26, OPT_LATE_STRUCT_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optListVal", -27);
-      THRIFT_NAMES_TO_IDS.put("optListVal", -27);
-      FIELD_METADATA.put(-27, OPT_LIST_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optSetVal", -28);
-      THRIFT_NAMES_TO_IDS.put("optSetVal", -28);
-      FIELD_METADATA.put(-28, OPT_SET_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("optMapVal", -29);
-      THRIFT_NAMES_TO_IDS.put("optMapVal", -29);
-      FIELD_METADATA.put(-29, OPT_MAP_VAL_FIELD_DESC);
-      NAMES_TO_IDS.put("listMap", -30);
-      THRIFT_NAMES_TO_IDS.put("listMap", -30);
-      FIELD_METADATA.put(-30, LIST_MAP_FIELD_DESC);
-      NAMES_TO_IDS.put("mapMap", -31);
-      THRIFT_NAMES_TO_IDS.put("mapMap", -31);
-      FIELD_METADATA.put(-31, MAP_MAP_FIELD_DESC);
+      NAMES_TO_IDS.put("optBoolVal", -14);
+      THRIFT_NAMES_TO_IDS.put("optBoolVal", -14);
+      FIELD_METADATA.put(-14, OPT_BOOL_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optByteVal", -15);
+      THRIFT_NAMES_TO_IDS.put("optByteVal", -15);
+      FIELD_METADATA.put(-15, OPT_BYTE_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optI16Val", -16);
+      THRIFT_NAMES_TO_IDS.put("optI16Val", -16);
+      FIELD_METADATA.put(-16, OPT_I16_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optI32Val", -17);
+      THRIFT_NAMES_TO_IDS.put("optI32Val", -17);
+      FIELD_METADATA.put(-17, OPT_I32_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optI64Val", -18);
+      THRIFT_NAMES_TO_IDS.put("optI64Val", -18);
+      FIELD_METADATA.put(-18, OPT_I64_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optFloatVal", -19);
+      THRIFT_NAMES_TO_IDS.put("optFloatVal", -19);
+      FIELD_METADATA.put(-19, OPT_FLOAT_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optDoubleVal", -20);
+      THRIFT_NAMES_TO_IDS.put("optDoubleVal", -20);
+      FIELD_METADATA.put(-20, OPT_DOUBLE_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optStringVal", -21);
+      THRIFT_NAMES_TO_IDS.put("optStringVal", -21);
+      FIELD_METADATA.put(-21, OPT_STRING_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optBinaryVal", -22);
+      THRIFT_NAMES_TO_IDS.put("optBinaryVal", -22);
+      FIELD_METADATA.put(-22, OPT_BINARY_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optEnumVal", -23);
+      THRIFT_NAMES_TO_IDS.put("optEnumVal", -23);
+      FIELD_METADATA.put(-23, OPT_ENUM_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optStructVal", -24);
+      THRIFT_NAMES_TO_IDS.put("optStructVal", -24);
+      FIELD_METADATA.put(-24, OPT_STRUCT_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optLateStructVal", -25);
+      THRIFT_NAMES_TO_IDS.put("optLateStructVal", -25);
+      FIELD_METADATA.put(-25, OPT_LATE_STRUCT_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optListVal", -26);
+      THRIFT_NAMES_TO_IDS.put("optListVal", -26);
+      FIELD_METADATA.put(-26, OPT_LIST_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optSetVal", -27);
+      THRIFT_NAMES_TO_IDS.put("optSetVal", -27);
+      FIELD_METADATA.put(-27, OPT_SET_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("optMapVal", -28);
+      THRIFT_NAMES_TO_IDS.put("optMapVal", -28);
+      FIELD_METADATA.put(-28, OPT_MAP_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("listMap", -29);
+      THRIFT_NAMES_TO_IDS.put("listMap", -29);
+      FIELD_METADATA.put(-29, LIST_MAP_FIELD_DESC);
+      NAMES_TO_IDS.put("mapMap", -30);
+      THRIFT_NAMES_TO_IDS.put("mapMap", -30);
+      FIELD_METADATA.put(-30, MAP_MAP_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
         new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStruct"), 
         MyStruct.class, MyStruct::read0));
@@ -743,92 +723,87 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-14, name="durationVal", isLegacyId=true, requiredness=Requiredness.TERSE)
-    public com.facebook.thrift.standard_type.DurationStruct getDurationVal() { return durationVal; }
-    
-    
-    @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-15, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-14, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public Boolean isOptBoolVal() { return optBoolVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-16, name="optByteVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-15, name="optByteVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public Byte getOptByteVal() { return optByteVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-17, name="optI16Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-16, name="optI16Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public Short getOptI16Val() { return optI16Val; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-18, name="optI32Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-17, name="optI32Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public Integer getOptI32Val() { return optI32Val; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-19, name="optI64Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-18, name="optI64Val", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public Long getOptI64Val() { return optI64Val; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-20, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-19, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public Float getOptFloatVal() { return optFloatVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-21, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-20, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public Double getOptDoubleVal() { return optDoubleVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-22, name="optStringVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-21, name="optStringVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public String getOptStringVal() { return optStringVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-23, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-22, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public byte[] getOptBinaryVal() { return optBinaryVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-24, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-23, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public test.fixtures.patch.MyEnum getOptEnumVal() { return optEnumVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-25, name="optStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-24, name="optStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public test.fixtures.patch.MyData getOptStructVal() { return optStructVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-26, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-25, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public test.fixtures.patch.LateDefStruct getOptLateStructVal() { return optLateStructVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-27, name="optListVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-26, name="optListVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public List<Short> getOptListVal() { return optListVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-28, name="optSetVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-27, name="optSetVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public Set<String> getOptSetVal() { return optSetVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-29, name="optMapVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
+    @com.facebook.swift.codec.ThriftField(value=-28, name="optMapVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public Map<String, String> getOptMapVal() { return optMapVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-30, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-29, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE)
     public List<Map<String, Integer>> getListMap() { return listMap; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-31, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-30, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE)
     public Map<String, Map<String, Integer>> getMapMap() { return mapMap; }
     
     @java.lang.Override
@@ -847,7 +822,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         helper.add("structVal", structVal);
         helper.add("unionVal", unionVal);
         helper.add("lateStructVal", lateStructVal);
-        helper.add("durationVal", durationVal);
         helper.add("optBoolVal", optBoolVal);
         helper.add("optByteVal", optByteVal);
         helper.add("optI16Val", optI16Val);
@@ -893,7 +867,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             Objects.equals(structVal, other.structVal) &&
             Objects.equals(unionVal, other.unionVal) &&
             Objects.equals(lateStructVal, other.lateStructVal) &&
-            Objects.equals(durationVal, other.durationVal) &&
             Objects.equals(optBoolVal, other.optBoolVal) &&
             Objects.equals(optByteVal, other.optByteVal) &&
             Objects.equals(optI16Val, other.optI16Val) &&
@@ -930,7 +903,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             structVal,
             unionVal,
             lateStructVal,
-            durationVal,
             optBoolVal,
             optByteVal,
             optI16Val,
@@ -1064,14 +1036,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
           if (__field.type == TType.STRUCT) {
             test.fixtures.patch.LateDefStruct lateStructVal = test.fixtures.patch.LateDefStruct.read0(oprot);
             builder.setLateStructVal(lateStructVal);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _DURATIONVAL:
-          if (__field.type == TType.STRUCT) {
-            com.facebook.thrift.standard_type.DurationStruct durationVal = com.facebook.thrift.standard_type.DurationStruct.read0(oprot);
-            builder.setDurationVal(durationVal);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -1395,16 +1359,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeFieldBegin(LATE_STRUCT_VAL_FIELD_DESC);
         pos = p.mark();
         this.lateStructVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(durationVal, "durationVal must not be null");
-      structStart = p.mark();
-        oprot.writeFieldBegin(DURATION_VAL_FIELD_DESC);
-        pos = p.mark();
-        this.durationVal.write0(oprot);
         if (p.mark() - pos > p.getEmptyStructSize()) {
           p.writeFieldEnd();    
         } else {

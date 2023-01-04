@@ -95,7 +95,7 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyUnion> {
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyStruct> {
-  static constexpr const std::size_t fields_size = 31;
+  static constexpr const std::size_t fields_size = 30;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -274,7 +274,7 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField10Pa
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField24PatchStruct> {
+template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct> {
   static constexpr const std::size_t fields_size = 2;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
@@ -289,7 +289,7 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField24Pa
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct> {
+template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField26PatchStruct> {
   static constexpr const std::size_t fields_size = 6;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
@@ -304,7 +304,7 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField27Pa
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct> {
+template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField27PatchStruct> {
   static constexpr const std::size_t fields_size = 4;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
@@ -319,7 +319,37 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField28Pa
   static const std::array<int, fields_size> isset_indexes;
 };
 
+template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField28PatchStruct> {
+  static constexpr const std::size_t fields_size = 7;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
 template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField29PatchStruct> {
+  static constexpr const std::size_t fields_size = 6;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
+template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField29Patch1Struct> {
   static constexpr const std::size_t fields_size = 7;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
@@ -335,7 +365,7 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField29Pa
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField30PatchStruct> {
-  static constexpr const std::size_t fields_size = 6;
+  static constexpr const std::size_t fields_size = 7;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -364,38 +394,8 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField30Pa
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField31PatchStruct> {
-  static constexpr const std::size_t fields_size = 7;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
-  static const std::array<int16_t, fields_size> fields_ids;
-  static const std::array<protocol::TType, fields_size> fields_types;
-
- private:
-  // The following fields describe internal storage metadata, and are private to
-  // prevent user logic from accessing them, but they can be inspected by
-  // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
-  // -1 if the field has no isset.
-  static const std::array<int, fields_size> isset_indexes;
-};
-
-template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField31Patch1Struct> {
-  static constexpr const std::size_t fields_size = 7;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
-  static const std::array<int16_t, fields_size> fields_ids;
-  static const std::array<protocol::TType, fields_size> fields_types;
-
- private:
-  // The following fields describe internal storage metadata, and are private to
-  // prevent user logic from accessing them, but they can be inspected by
-  // debuggers.
-  static const std::array<folly::StringPiece, fields_size> storage_names;
-  // -1 if the field has no isset.
-  static const std::array<int, fields_size> isset_indexes;
-};
-
 template <> struct TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct> {
-  static constexpr const std::size_t fields_size = 31;
+  static constexpr const std::size_t fields_size = 30;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

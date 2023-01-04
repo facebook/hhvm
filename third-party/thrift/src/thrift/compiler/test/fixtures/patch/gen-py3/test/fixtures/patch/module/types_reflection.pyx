@@ -298,18 +298,6 @@ cdef __StructSpec get_reflection__MyStruct():
     spec.add_field(
         __FieldSpec._fbthrift_create(
             id=-14,
-            name="durationVal",
-            type=_apache_thrift_type_standard_types.DurationStruct,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=-15,
             name="optBoolVal",
             type=bool,
             kind=__NumberType.NOT_A_NUMBER,
@@ -321,7 +309,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-16,
+            id=-15,
             name="optByteVal",
             type=int,
             kind=__NumberType.BYTE,
@@ -333,7 +321,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-17,
+            id=-16,
             name="optI16Val",
             type=int,
             kind=__NumberType.I16,
@@ -345,7 +333,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-18,
+            id=-17,
             name="optI32Val",
             type=int,
             kind=__NumberType.I32,
@@ -357,7 +345,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-19,
+            id=-18,
             name="optI64Val",
             type=int,
             kind=__NumberType.I64,
@@ -369,7 +357,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-20,
+            id=-19,
             name="optFloatVal",
             type=float,
             kind=__NumberType.FLOAT,
@@ -381,7 +369,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-21,
+            id=-20,
             name="optDoubleVal",
             type=float,
             kind=__NumberType.DOUBLE,
@@ -393,7 +381,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-22,
+            id=-21,
             name="optStringVal",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
@@ -405,7 +393,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-23,
+            id=-22,
             name="optBinaryVal",
             type=_fbthrift_iobuf.IOBuf,
             kind=__NumberType.NOT_A_NUMBER,
@@ -417,7 +405,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-24,
+            id=-23,
             name="optEnumVal",
             type=_test_fixtures_patch_module_types.MyEnum,
             kind=__NumberType.NOT_A_NUMBER,
@@ -429,7 +417,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-25,
+            id=-24,
             name="optStructVal",
             type=_test_fixtures_patch_module_types.MyData,
             kind=__NumberType.NOT_A_NUMBER,
@@ -441,7 +429,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-26,
+            id=-25,
             name="optLateStructVal",
             type=_test_fixtures_patch_module_types.LateDefStruct,
             kind=__NumberType.NOT_A_NUMBER,
@@ -453,7 +441,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-27,
+            id=-26,
             name="optListVal",
             type=_test_fixtures_patch_module_types.List__i16,
             kind=__NumberType.NOT_A_NUMBER,
@@ -465,7 +453,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-28,
+            id=-27,
             name="optSetVal",
             type=_test_fixtures_patch_module_types.Set__string,
             kind=__NumberType.NOT_A_NUMBER,
@@ -477,7 +465,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-29,
+            id=-28,
             name="optMapVal",
             type=_test_fixtures_patch_module_types.Map__string_string,
             kind=__NumberType.NOT_A_NUMBER,
@@ -489,7 +477,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-30,
+            id=-29,
             name="listMap",
             type=_test_fixtures_patch_module_types.List__Map__string_i32,
             kind=__NumberType.NOT_A_NUMBER,
@@ -501,7 +489,7 @@ cdef __StructSpec get_reflection__MyStruct():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=-31,
+            id=-30,
             name="mapMap",
             type=_test_fixtures_patch_module_types.Map__string_Map__string_i32,
             kind=__NumberType.NOT_A_NUMBER,

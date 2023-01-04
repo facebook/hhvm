@@ -45,30 +45,3 @@ cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_t
 cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
 
-
-ctypedef void (*__DurationStruct_FieldsSetterFunc)(__DurationStruct_FieldsSetter, object) except *
-
-cdef class __DurationStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _apache_thrift_type_standard_types.cDurationStruct* _struct_cpp_obj
-    cdef cumap[__cstring_view, __DurationStruct_FieldsSetterFunc] _setters
-
-    @staticmethod
-    cdef __DurationStruct_FieldsSetter _fbthrift_create(_apache_thrift_type_standard_types.cDurationStruct* struct_cpp_obj)
-    cdef void _set_field_0(self, _fbthrift_value) except *
-    cdef void _set_field_1(self, _fbthrift_value) except *
-
-
-ctypedef void (*__UriStruct_FieldsSetterFunc)(__UriStruct_FieldsSetter, object) except *
-
-cdef class __UriStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _apache_thrift_type_standard_types.cUriStruct* _struct_cpp_obj
-    cdef cumap[__cstring_view, __UriStruct_FieldsSetterFunc] _setters
-
-    @staticmethod
-    cdef __UriStruct_FieldsSetter _fbthrift_create(_apache_thrift_type_standard_types.cUriStruct* struct_cpp_obj)
-    cdef void _set_field_0(self, _fbthrift_value) except *
-    cdef void _set_field_1(self, _fbthrift_value) except *
-    cdef void _set_field_2(self, _fbthrift_value) except *
-    cdef void _set_field_3(self, _fbthrift_value) except *
-    cdef void _set_field_4(self, _fbthrift_value) except *
-

@@ -20,17 +20,17 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.MoreObjects.ToStringHelper;
 
 @SwiftGenerated
-@com.facebook.swift.codec.ThriftStruct(value="MyStructField29Patch", builder=MyStructField29Patch.Builder.class)
-public final class MyStructField29Patch implements com.facebook.thrift.payload.ThriftSerializable {
+@com.facebook.swift.codec.ThriftStruct(value="MyStructField26Patch", builder=MyStructField26Patch.Builder.class)
+public final class MyStructField26Patch implements com.facebook.thrift.payload.ThriftSerializable {
 
     @ThriftConstructor
-    public MyStructField29Patch(
-        @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final List<Map<String, Integer>> assign,
+    public MyStructField26Patch(
+        @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final List<Short> assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE) final boolean clear,
-        @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.NONE) final Map<Integer, test.fixtures.patch.MyStructField29Patch1> patch,
-        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE) final List<Map<String, Integer>> remove,
-        @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.NONE) final List<Map<String, Integer>> prepend,
-        @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.NONE) final List<Map<String, Integer>> append
+        @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.NONE) final Map<Integer, com.facebook.thrift.op.I16Patch> patch,
+        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE) final List<Short> remove,
+        @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.NONE) final List<Short> prepend,
+        @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.NONE) final List<Short> append
     ) {
         this.assign = assign;
         this.clear = clear;
@@ -41,7 +41,7 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
     }
     
     @ThriftConstructor
-    protected MyStructField29Patch() {
+    protected MyStructField26Patch() {
       this.assign = null;
       this.clear = false;
       this.patch = null;
@@ -52,20 +52,20 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
     
     public static class Builder {
     
-        private List<Map<String, Integer>> assign = null;
+        private List<Short> assign = null;
         private boolean clear = false;
-        private Map<Integer, test.fixtures.patch.MyStructField29Patch1> patch = null;
-        private List<Map<String, Integer>> remove = null;
-        private List<Map<String, Integer>> prepend = null;
-        private List<Map<String, Integer>> append = null;
+        private Map<Integer, com.facebook.thrift.op.I16Patch> patch = null;
+        private List<Short> remove = null;
+        private List<Short> prepend = null;
+        private List<Short> append = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
-        public Builder setAssign(List<Map<String, Integer>> assign) {
+        public Builder setAssign(List<Short> assign) {
             this.assign = assign;
             return this;
         }
     
-        public List<Map<String, Integer>> getAssign() { return assign; }
+        public List<Short> getAssign() { return assign; }
     
             @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
         public Builder setClear(boolean clear) {
@@ -76,39 +76,39 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
         public boolean isClear() { return clear; }
     
             @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.NONE)
-        public Builder setPatch(Map<Integer, test.fixtures.patch.MyStructField29Patch1> patch) {
+        public Builder setPatch(Map<Integer, com.facebook.thrift.op.I16Patch> patch) {
             this.patch = patch;
             return this;
         }
     
-        public Map<Integer, test.fixtures.patch.MyStructField29Patch1> getPatch() { return patch; }
+        public Map<Integer, com.facebook.thrift.op.I16Patch> getPatch() { return patch; }
     
             @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE)
-        public Builder setRemove(List<Map<String, Integer>> remove) {
+        public Builder setRemove(List<Short> remove) {
             this.remove = remove;
             return this;
         }
     
-        public List<Map<String, Integer>> getRemove() { return remove; }
+        public List<Short> getRemove() { return remove; }
     
             @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.NONE)
-        public Builder setPrepend(List<Map<String, Integer>> prepend) {
+        public Builder setPrepend(List<Short> prepend) {
             this.prepend = prepend;
             return this;
         }
     
-        public List<Map<String, Integer>> getPrepend() { return prepend; }
+        public List<Short> getPrepend() { return prepend; }
     
             @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.NONE)
-        public Builder setAppend(List<Map<String, Integer>> append) {
+        public Builder setAppend(List<Short> append) {
             this.append = append;
             return this;
         }
     
-        public List<Map<String, Integer>> getAppend() { return append; }
+        public List<Short> getAppend() { return append; }
     
         public Builder() { }
-        public Builder(MyStructField29Patch other) {
+        public Builder(MyStructField26Patch other) {
             this.assign = other.assign;
             this.clear = other.clear;
             this.patch = other.patch;
@@ -118,8 +118,8 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
         }
     
         @ThriftConstructor
-        public MyStructField29Patch build() {
-            MyStructField29Patch result = new MyStructField29Patch (
+        public MyStructField26Patch build() {
+            MyStructField26Patch result = new MyStructField26Patch (
                 this.assign,
                 this.clear,
                 this.patch,
@@ -134,23 +134,23 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
-    private static final TStruct STRUCT_DESC = new TStruct("MyStructField29Patch");
-    private final List<Map<String, Integer>> assign;
+    private static final TStruct STRUCT_DESC = new TStruct("MyStructField26Patch");
+    private final List<Short> assign;
     public static final int _ASSIGN = 1;
     private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.LIST, (short)1);
         private final boolean clear;
     public static final int _CLEAR = 2;
     private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
-        private final Map<Integer, test.fixtures.patch.MyStructField29Patch1> patch;
+        private final Map<Integer, com.facebook.thrift.op.I16Patch> patch;
     public static final int _PATCH = 3;
     private static final TField PATCH_FIELD_DESC = new TField("patch", TType.MAP, (short)3);
-        private final List<Map<String, Integer>> remove;
+        private final List<Short> remove;
     public static final int _REMOVE = 7;
     private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.LIST, (short)7);
-        private final List<Map<String, Integer>> prepend;
+        private final List<Short> prepend;
     public static final int _PREPEND = 8;
     private static final TField PREPEND_FIELD_DESC = new TField("prepend", TType.LIST, (short)8);
-        private final List<Map<String, Integer>> append;
+        private final List<Short> append;
     public static final int _APPEND = 9;
     private static final TField APPEND_FIELD_DESC = new TField("append", TType.LIST, (short)9);
     static {
@@ -173,13 +173,13 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
       THRIFT_NAMES_TO_IDS.put("append", 9);
       FIELD_METADATA.put(9, APPEND_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructField29Patch"), 
-        MyStructField29Patch.class, MyStructField29Patch::read0));
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructField26Patch"), 
+        MyStructField26Patch.class, MyStructField26Patch::read0));
     }
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
-    public List<Map<String, Integer>> getAssign() { return assign; }
+    public List<Short> getAssign() { return assign; }
     
     
     
@@ -189,22 +189,22 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.NONE)
-    public Map<Integer, test.fixtures.patch.MyStructField29Patch1> getPatch() { return patch; }
+    public Map<Integer, com.facebook.thrift.op.I16Patch> getPatch() { return patch; }
     
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE)
-    public List<Map<String, Integer>> getRemove() { return remove; }
+    public List<Short> getRemove() { return remove; }
     
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.NONE)
-    public List<Map<String, Integer>> getPrepend() { return prepend; }
+    public List<Short> getPrepend() { return prepend; }
     
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.NONE)
-    public List<Map<String, Integer>> getAppend() { return append; }
+    public List<Short> getAppend() { return append; }
     
     @java.lang.Override
     public String toString() {
@@ -227,7 +227,7 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
             return false;
         }
     
-        MyStructField29Patch other = (MyStructField29Patch)o;
+        MyStructField26Patch other = (MyStructField26Patch)o;
     
         return
             Objects.equals(assign, other.assign) &&
@@ -252,45 +252,27 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
     }
     
     
-    public static com.facebook.thrift.payload.Reader<MyStructField29Patch> asReader() {
-      return MyStructField29Patch::read0;
+    public static com.facebook.thrift.payload.Reader<MyStructField26Patch> asReader() {
+      return MyStructField26Patch::read0;
     }
     
-    public static MyStructField29Patch read0(TProtocol oprot) throws TException {
+    public static MyStructField26Patch read0(TProtocol oprot) throws TException {
       TField __field;
-      oprot.readStructBegin(MyStructField29Patch.NAMES_TO_IDS, MyStructField29Patch.THRIFT_NAMES_TO_IDS, MyStructField29Patch.FIELD_METADATA);
-      MyStructField29Patch.Builder builder = new MyStructField29Patch.Builder();
+      oprot.readStructBegin(MyStructField26Patch.NAMES_TO_IDS, MyStructField26Patch.THRIFT_NAMES_TO_IDS, MyStructField26Patch.FIELD_METADATA);
+      MyStructField26Patch.Builder builder = new MyStructField26Patch.Builder();
       while (true) {
         __field = oprot.readFieldBegin();
         if (__field.type == TType.STOP) { break; }
         switch (__field.id) {
         case _ASSIGN:
           if (__field.type == TType.LIST) {
-            List<Map<String, Integer>> assign;
+            List<Short> assign;
             {
             TList _list = oprot.readListBegin();
-            assign = new ArrayList<Map<String, Integer>>(Math.max(0, _list.size));
+            assign = new ArrayList<Short>(Math.max(0, _list.size));
             for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
                 
-                Map<String, Integer> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<String, Integer>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                String _key2 = oprot.readString();
-                                
-                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
+                short _value1 = oprot.readI16();
                 assign.add(_value1);
             }
             oprot.readListEnd();
@@ -310,14 +292,14 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
           break;
         case _PATCH:
           if (__field.type == TType.MAP) {
-            Map<Integer, test.fixtures.patch.MyStructField29Patch1> patch;
+            Map<Integer, com.facebook.thrift.op.I16Patch> patch;
             {
             TMap _map = oprot.readMapBegin();
-            patch = new HashMap<Integer, test.fixtures.patch.MyStructField29Patch1>(Math.max(0, _map.size));
+            patch = new HashMap<Integer, com.facebook.thrift.op.I16Patch>(Math.max(0, _map.size));
             for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
                 
                 int _key1 = oprot.readI32();
-                test.fixtures.patch.MyStructField29Patch1 _value1 = test.fixtures.patch.MyStructField29Patch1.read0(oprot);
+                com.facebook.thrift.op.I16Patch _value1 = com.facebook.thrift.op.I16Patch.read0(oprot);
                 patch.put(_key1, _value1);
             }
             }
@@ -329,31 +311,13 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
           break;
         case _REMOVE:
           if (__field.type == TType.LIST) {
-            List<Map<String, Integer>> remove;
+            List<Short> remove;
             {
             TList _list = oprot.readListBegin();
-            remove = new ArrayList<Map<String, Integer>>(Math.max(0, _list.size));
+            remove = new ArrayList<Short>(Math.max(0, _list.size));
             for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
                 
-                Map<String, Integer> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<String, Integer>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                String _key2 = oprot.readString();
-                                
-                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
+                short _value1 = oprot.readI16();
                 remove.add(_value1);
             }
             oprot.readListEnd();
@@ -365,31 +329,13 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
           break;
         case _PREPEND:
           if (__field.type == TType.LIST) {
-            List<Map<String, Integer>> prepend;
+            List<Short> prepend;
             {
             TList _list = oprot.readListBegin();
-            prepend = new ArrayList<Map<String, Integer>>(Math.max(0, _list.size));
+            prepend = new ArrayList<Short>(Math.max(0, _list.size));
             for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
                 
-                Map<String, Integer> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<String, Integer>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                String _key2 = oprot.readString();
-                                
-                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
+                short _value1 = oprot.readI16();
                 prepend.add(_value1);
             }
             oprot.readListEnd();
@@ -401,31 +347,13 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
           break;
         case _APPEND:
           if (__field.type == TType.LIST) {
-            List<Map<String, Integer>> append;
+            List<Short> append;
             {
             TList _list = oprot.readListBegin();
-            append = new ArrayList<Map<String, Integer>>(Math.max(0, _list.size));
+            append = new ArrayList<Short>(Math.max(0, _list.size));
             for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
                 
-                Map<String, Integer> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<String, Integer>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                String _key2 = oprot.readString();
-                                
-                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
+                short _value1 = oprot.readI16();
                 append.add(_value1);
             }
             oprot.readListEnd();
@@ -449,15 +377,10 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
       oprot.writeStructBegin(STRUCT_DESC);
       if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-        List<Map<String, Integer>> _iter0 = assign;
-        oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
-        for (Map<String, Integer> _iter1 : _iter0) {
-          oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter1.size()));
-        for (Map.Entry<String, Integer> _iter2 : _iter1.entrySet()) {
-          oprot.writeString(_iter2.getKey());
-          oprot.writeI32(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
+        List<Short> _iter0 = assign;
+        oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
+        for (short _iter1 : _iter0) {
+          oprot.writeI16(_iter1);
         }
         oprot.writeListEnd();
         oprot.writeFieldEnd();
@@ -467,9 +390,9 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
       oprot.writeFieldEnd();
       if (patch != null) {
         oprot.writeFieldBegin(PATCH_FIELD_DESC);
-        Map<Integer, test.fixtures.patch.MyStructField29Patch1> _iter0 = patch;
+        Map<Integer, com.facebook.thrift.op.I16Patch> _iter0 = patch;
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, _iter0.size()));
-        for (Map.Entry<Integer, test.fixtures.patch.MyStructField29Patch1> _iter1 : _iter0.entrySet()) {
+        for (Map.Entry<Integer, com.facebook.thrift.op.I16Patch> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
           _iter1.getValue().write0(oprot);
         }
@@ -478,45 +401,30 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
       }
       if (remove != null) {
         oprot.writeFieldBegin(REMOVE_FIELD_DESC);
-        List<Map<String, Integer>> _iter0 = remove;
-        oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
-        for (Map<String, Integer> _iter1 : _iter0) {
-          oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter1.size()));
-        for (Map.Entry<String, Integer> _iter2 : _iter1.entrySet()) {
-          oprot.writeString(_iter2.getKey());
-          oprot.writeI32(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
+        List<Short> _iter0 = remove;
+        oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
+        for (short _iter1 : _iter0) {
+          oprot.writeI16(_iter1);
         }
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (prepend != null) {
         oprot.writeFieldBegin(PREPEND_FIELD_DESC);
-        List<Map<String, Integer>> _iter0 = prepend;
-        oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
-        for (Map<String, Integer> _iter1 : _iter0) {
-          oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter1.size()));
-        for (Map.Entry<String, Integer> _iter2 : _iter1.entrySet()) {
-          oprot.writeString(_iter2.getKey());
-          oprot.writeI32(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
+        List<Short> _iter0 = prepend;
+        oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
+        for (short _iter1 : _iter0) {
+          oprot.writeI16(_iter1);
         }
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (append != null) {
         oprot.writeFieldBegin(APPEND_FIELD_DESC);
-        List<Map<String, Integer>> _iter0 = append;
-        oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
-        for (Map<String, Integer> _iter1 : _iter0) {
-          oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter1.size()));
-        for (Map.Entry<String, Integer> _iter2 : _iter1.entrySet()) {
-          oprot.writeString(_iter2.getKey());
-          oprot.writeI32(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
+        List<Short> _iter0 = append;
+        oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
+        for (short _iter1 : _iter0) {
+          oprot.writeI16(_iter1);
         }
         oprot.writeListEnd();
         oprot.writeFieldEnd();
@@ -525,11 +433,11 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
       oprot.writeStructEnd();
     }
     
-    private static class _MyStructField29PatchLazy {
-        private static final MyStructField29Patch _DEFAULT = new MyStructField29Patch.Builder().build();
+    private static class _MyStructField26PatchLazy {
+        private static final MyStructField26Patch _DEFAULT = new MyStructField26Patch.Builder().build();
     }
     
-    public static MyStructField29Patch defaultInstance() {
-        return  _MyStructField29PatchLazy._DEFAULT;
+    public static MyStructField26Patch defaultInstance() {
+        return  _MyStructField26PatchLazy._DEFAULT;
     }
 }

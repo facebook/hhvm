@@ -4,6 +4,8 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
+package test.fixtures.patch;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -21,49 +23,41 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
-/**
- * A patch for a Duration value.
- */
 @SuppressWarnings({ "unused", "serial" })
-public class DurationPatch implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("DurationPatch");
-  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.STRUCT, (short)1);
+public class MyStructField23Patch implements TBase, java.io.Serializable, Cloneable {
+  private static final TStruct STRUCT_DESC = new TStruct("MyStructField23Patch");
+  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.I32, (short)1);
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
-  private static final TField ADD_FIELD_DESC = new TField("add", TType.STRUCT, (short)8);
 
   /**
    * Assigns to a (set) value.
    * 
-   * If set, all other patch operations are ignored.
+   * If set, all other operations are ignored.
    * 
-   * Note: Only modifies set field values.
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * @see MyEnum
    */
-  public final DurationStruct assign;
+  public final MyEnum assign;
   /**
-   * Clear any set value.
+   * Clears a value. Applies first.
    */
   public final Boolean clear;
-  /**
-   * Add to a given value.
-   */
-  public final DurationStruct add;
   public static final int ASSIGN = 1;
   public static final int CLEAR = 2;
-  public static final int ADD = 8;
 
-  public DurationPatch(
-      DurationStruct assign,
-      Boolean clear,
-      DurationStruct add) {
+  public MyStructField23Patch(
+      MyEnum assign,
+      Boolean clear) {
     this.assign = assign;
     this.clear = clear;
-    this.add = add;
   }
 
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public DurationPatch(DurationPatch other) {
+  public MyStructField23Patch(MyStructField23Patch other) {
     if (other.isSetAssign()) {
       this.assign = TBaseHelper.deepCopy(other.assign);
     } else {
@@ -74,25 +68,23 @@ public class DurationPatch implements TBase, java.io.Serializable, Cloneable {
     } else {
       this.clear = null;
     }
-    if (other.isSetAdd()) {
-      this.add = TBaseHelper.deepCopy(other.add);
-    } else {
-      this.add = null;
-    }
   }
 
-  public DurationPatch deepCopy() {
-    return new DurationPatch(this);
+  public MyStructField23Patch deepCopy() {
+    return new MyStructField23Patch(this);
   }
 
   /**
    * Assigns to a (set) value.
    * 
-   * If set, all other patch operations are ignored.
+   * If set, all other operations are ignored.
    * 
-   * Note: Only modifies set field values.
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * @see MyEnum
    */
-  public DurationStruct getAssign() {
+  public MyEnum getAssign() {
     return this.assign;
   }
 
@@ -102,7 +94,7 @@ public class DurationPatch implements TBase, java.io.Serializable, Cloneable {
   }
 
   /**
-   * Clear any set value.
+   * Clears a value. Applies first.
    */
   public Boolean isClear() {
     return this.clear;
@@ -113,40 +105,26 @@ public class DurationPatch implements TBase, java.io.Serializable, Cloneable {
     return this.clear != null;
   }
 
-  /**
-   * Add to a given value.
-   */
-  public DurationStruct getAdd() {
-    return this.add;
-  }
-
-  // Returns true if field add is set (has been assigned a value) and false otherwise
-  public boolean isSetAdd() {
-    return this.add != null;
-  }
-
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof DurationPatch))
+    if (!(_that instanceof MyStructField23Patch))
       return false;
-    DurationPatch that = (DurationPatch)_that;
+    MyStructField23Patch that = (MyStructField23Patch)_that;
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.isSetClear(), that.isSetClear(), this.clear, that.clear)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetAdd(), that.isSetAdd(), this.add, that.add)) { return false; }
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, clear, add});
+    return Arrays.deepHashCode(new Object[] {assign, clear});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -154,10 +132,9 @@ public class DurationPatch implements TBase, java.io.Serializable, Cloneable {
     throw new TException("unimplemented in android immutable structure");
   }
 
-  public static DurationPatch deserialize(TProtocol iprot) throws TException {
-    DurationStruct tmp_assign = null;
+  public static MyStructField23Patch deserialize(TProtocol iprot) throws TException {
+    MyEnum tmp_assign = null;
     Boolean tmp_clear = null;
-    DurationStruct tmp_add = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -169,8 +146,8 @@ public class DurationPatch implements TBase, java.io.Serializable, Cloneable {
       switch (__field.id)
       {
         case ASSIGN:
-          if (__field.type == TType.STRUCT) {
-            tmp_assign = DurationStruct.deserialize(iprot);
+          if (__field.type == TType.I32) {
+            tmp_assign = MyEnum.findByValue(iprot.readI32());
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -178,13 +155,6 @@ public class DurationPatch implements TBase, java.io.Serializable, Cloneable {
         case CLEAR:
           if (__field.type == TType.BOOL) {
             tmp_clear = iprot.readBool();
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case ADD:
-          if (__field.type == TType.STRUCT) {
-            tmp_add = DurationStruct.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -197,11 +167,10 @@ public class DurationPatch implements TBase, java.io.Serializable, Cloneable {
     }
     iprot.readStructEnd();
 
-    DurationPatch _that;
-    _that = new DurationPatch(
+    MyStructField23Patch _that;
+    _that = new MyStructField23Patch(
       tmp_assign
       ,tmp_clear
-      ,tmp_add
     );
     _that.validate();
     return _that;
@@ -214,18 +183,13 @@ public class DurationPatch implements TBase, java.io.Serializable, Cloneable {
     if (this.assign != null) {
       if (isSetAssign()) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-        this.assign.write(oprot);
+        oprot.writeI32(this.assign == null ? 0 : this.assign.getValue());
         oprot.writeFieldEnd();
       }
     }
     if (this.clear != null) {
       oprot.writeFieldBegin(CLEAR_FIELD_DESC);
       oprot.writeBool(this.clear);
-      oprot.writeFieldEnd();
-    }
-    if (this.add != null) {
-      oprot.writeFieldBegin(ADD_FIELD_DESC);
-      this.add.write(oprot);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();

@@ -48,7 +48,6 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public object structVal
     cdef public object unionVal
     cdef public object lateStructVal
-    cdef public object durationVal
     cdef public pbool optBoolVal
     cdef public pint optByteVal
     cdef public pint optI16Val

@@ -46,7 +46,6 @@ struct MyStruct {
   StructPatchTestInclude.MyData structVal;
   StructPatchTestInclude.MyUnion unionVal;
   LateDefStruct lateStructVal;
-  standard.DurationStruct durationVal;
 
   optional bool optBoolVal;
   optional byte optByteVal;

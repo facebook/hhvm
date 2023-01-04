@@ -22,24 +22,25 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/op/Create.h>
-#include <thrift/lib/thrift/gen-cpp2/standard_types.h>
+#include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 #include <thrift/test/gen-cpp2/get_value_or_null_types.h>
 
 namespace apache::thrift::op {
 namespace {
 // TODO(afuller): Use shared test structs instead, e.g. testset
+using facebook::thrift::type::DecodedUri;
 using test::FieldRefNotOptionalStruct;
 using test::FieldRefOptionalStruct;
 using test::SmartPointerStruct;
 using test::UnionStruct;
 
 TEST(GetTest, GetField) {
-  type::UriStruct actual;
-  using Tag = type::struct_t<type::UriStruct>;
+  DecodedUri actual;
+  using Tag = type::struct_t<DecodedUri>;
   actual.scheme() = "foo";
   EXPECT_EQ(*(op::get<>(type::ordinal<1>{}, actual)), "foo");
   EXPECT_EQ(*(op::get<ident::scheme>(actual)), "foo");
-  EXPECT_EQ(*(op::get<type::field_id<1>, type::UriStruct>(actual)), "foo");
+  EXPECT_EQ(*(op::get<type::field_id<1>, DecodedUri>(actual)), "foo");
   EXPECT_EQ(*(op::get<type::field_id<1>, Tag>(actual)), "foo");
 }
 
@@ -52,8 +53,8 @@ FieldId findIdByName(const std::string& name) {
 }
 
 TEST(GetTest, FindByOrdinal) {
-  EXPECT_EQ(findIdByName<type::UriStruct>("unknown"), FieldId{});
-  EXPECT_EQ(findIdByName<type::UriStruct>("scheme"), FieldId{1});
+  EXPECT_EQ(findIdByName<DecodedUri>("unknown"), FieldId{});
+  EXPECT_EQ(findIdByName<DecodedUri>("scheme"), FieldId{1});
 }
 
 template <typename Id, typename T>

@@ -20,11 +20,11 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.MoreObjects.ToStringHelper;
 
 @SwiftGenerated
-@com.facebook.swift.codec.ThriftStruct(value="MyStructField24Patch", builder=MyStructField24Patch.Builder.class)
-public final class MyStructField24Patch implements com.facebook.thrift.payload.ThriftSerializable {
+@com.facebook.swift.codec.ThriftStruct(value="MyStructField23Patch", builder=MyStructField23Patch.Builder.class)
+public final class MyStructField23Patch implements com.facebook.thrift.payload.ThriftSerializable {
 
     @ThriftConstructor
-    public MyStructField24Patch(
+    public MyStructField23Patch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyEnum assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE) final boolean clear
     ) {
@@ -33,7 +33,7 @@ public final class MyStructField24Patch implements com.facebook.thrift.payload.T
     }
     
     @ThriftConstructor
-    protected MyStructField24Patch() {
+    protected MyStructField23Patch() {
       this.assign = null;
       this.clear = false;
     }
@@ -60,14 +60,14 @@ public final class MyStructField24Patch implements com.facebook.thrift.payload.T
         public boolean isClear() { return clear; }
     
         public Builder() { }
-        public Builder(MyStructField24Patch other) {
+        public Builder(MyStructField23Patch other) {
             this.assign = other.assign;
             this.clear = other.clear;
         }
     
         @ThriftConstructor
-        public MyStructField24Patch build() {
-            MyStructField24Patch result = new MyStructField24Patch (
+        public MyStructField23Patch build() {
+            MyStructField23Patch result = new MyStructField23Patch (
                 this.assign,
                 this.clear
             );
@@ -78,7 +78,7 @@ public final class MyStructField24Patch implements com.facebook.thrift.payload.T
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
-    private static final TStruct STRUCT_DESC = new TStruct("MyStructField24Patch");
+    private static final TStruct STRUCT_DESC = new TStruct("MyStructField23Patch");
     private final test.fixtures.patch.MyEnum assign;
     public static final int _ASSIGN = 1;
     private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.I32, (short)1);
@@ -93,8 +93,8 @@ public final class MyStructField24Patch implements com.facebook.thrift.payload.T
       THRIFT_NAMES_TO_IDS.put("clear", 2);
       FIELD_METADATA.put(2, CLEAR_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructField24Patch"), 
-        MyStructField24Patch.class, MyStructField24Patch::read0));
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructField23Patch"), 
+        MyStructField23Patch.class, MyStructField23Patch::read0));
     }
     
     @Nullable
@@ -123,7 +123,7 @@ public final class MyStructField24Patch implements com.facebook.thrift.payload.T
             return false;
         }
     
-        MyStructField24Patch other = (MyStructField24Patch)o;
+        MyStructField23Patch other = (MyStructField23Patch)o;
     
         return
             Objects.equals(assign, other.assign) &&
@@ -140,14 +140,14 @@ public final class MyStructField24Patch implements com.facebook.thrift.payload.T
     }
     
     
-    public static com.facebook.thrift.payload.Reader<MyStructField24Patch> asReader() {
-      return MyStructField24Patch::read0;
+    public static com.facebook.thrift.payload.Reader<MyStructField23Patch> asReader() {
+      return MyStructField23Patch::read0;
     }
     
-    public static MyStructField24Patch read0(TProtocol oprot) throws TException {
+    public static MyStructField23Patch read0(TProtocol oprot) throws TException {
       TField __field;
-      oprot.readStructBegin(MyStructField24Patch.NAMES_TO_IDS, MyStructField24Patch.THRIFT_NAMES_TO_IDS, MyStructField24Patch.FIELD_METADATA);
-      MyStructField24Patch.Builder builder = new MyStructField24Patch.Builder();
+      oprot.readStructBegin(MyStructField23Patch.NAMES_TO_IDS, MyStructField23Patch.THRIFT_NAMES_TO_IDS, MyStructField23Patch.FIELD_METADATA);
+      MyStructField23Patch.Builder builder = new MyStructField23Patch.Builder();
       while (true) {
         __field = oprot.readFieldBegin();
         if (__field.type == TType.STOP) { break; }
@@ -192,11 +192,11 @@ public final class MyStructField24Patch implements com.facebook.thrift.payload.T
       oprot.writeStructEnd();
     }
     
-    private static class _MyStructField24PatchLazy {
-        private static final MyStructField24Patch _DEFAULT = new MyStructField24Patch.Builder().build();
+    private static class _MyStructField23PatchLazy {
+        private static final MyStructField23Patch _DEFAULT = new MyStructField23Patch.Builder().build();
     }
     
-    public static MyStructField24Patch defaultInstance() {
-        return  _MyStructField24PatchLazy._DEFAULT;
+    public static MyStructField23Patch defaultInstance() {
+        return  _MyStructField23PatchLazy._DEFAULT;
     }
 }

@@ -191,8 +191,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     lateStructVal: Final[LateDefStruct] = ...
 
-    durationVal: Final[_apache_thrift_type_standard_types.DurationStruct] = ...
-
     optBoolVal: Final[_typing.Optional[bool]] = ...
 
     optByteVal: Final[_typing.Optional[int]] = ...
@@ -242,7 +240,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         structVal: _typing.Optional[MyData]=None,
         unionVal: _typing.Optional[MyUnion]=None,
         lateStructVal: _typing.Optional[LateDefStruct]=None,
-        durationVal: _typing.Optional[_apache_thrift_type_standard_types.DurationStruct]=None,
         optBoolVal: _typing.Optional[bool]=None,
         optByteVal: _typing.Optional[int]=None,
         optI16Val: _typing.Optional[int]=None,
@@ -277,7 +274,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         structVal: _typing.Union[MyData, '__NotSet', None]=NOTSET,
         unionVal: _typing.Union[MyUnion, '__NotSet', None]=NOTSET,
         lateStructVal: _typing.Union[LateDefStruct, '__NotSet', None]=NOTSET,
-        durationVal: _typing.Union[_apache_thrift_type_standard_types.DurationStruct, '__NotSet', None]=NOTSET,
         optBoolVal: _typing.Union[bool, '__NotSet', None]=NOTSET,
         optByteVal: _typing.Union[int, '__NotSet', None]=NOTSET,
         optI16Val: _typing.Union[int, '__NotSet', None]=NOTSET,

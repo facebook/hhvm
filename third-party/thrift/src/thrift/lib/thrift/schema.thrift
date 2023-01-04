@@ -74,8 +74,31 @@ typedef list<id.DefinitionId> DefinitionIds
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef list<id.ProgramId> IncludeIds
 
+/**
+ * A decoded URI.
+ *
+ *   {scheme}://{domain}/{path}?{query}#{fragment}
+ */
+@thrift.Experimental
+struct DecodedUri {
+  /** The scheme, if present. */
+  1: string scheme;
+
+  /** The domain, for example "meta.com" -> ["meta", "com"] */
+  2: list<string> domain;
+
+  /** The path, for example "path/to/file" -> ["path", "to", "file"] */
+  4: list<string> path;
+
+  /** The query args. */
+  5: map<string, string> query;
+
+  /** The fragment, if present. */
+  6: string fragment;
+}
+
 /** A list of parsed packages, accessible via a `PackageId`. */
-typedef list<standard.UriStruct> PackageList
+typedef list<DecodedUri> PackageList
 
 /**
  * The (pre)release state for a given definition/feature.

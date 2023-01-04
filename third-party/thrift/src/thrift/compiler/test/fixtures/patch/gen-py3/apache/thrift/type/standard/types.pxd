@@ -87,35 +87,6 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_metadata.h" namespace "apa
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
 cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" namespace "::apache::thrift::type":
-
-    cdef cppclass cDurationStruct "::apache::thrift::type::DurationStruct":
-        cDurationStruct() except +
-        cDurationStruct(const cDurationStruct&) except +
-        bint operator==(cDurationStruct&)
-        bint operator!=(cDurationStruct&)
-        bint operator<(cDurationStruct&)
-        bint operator>(cDurationStruct&)
-        bint operator<=(cDurationStruct&)
-        bint operator>=(cDurationStruct&)
-        __field_ref[cint64_t] seconds_ref "seconds_ref" ()
-        __field_ref[cint32_t] nanos_ref "nanos_ref" ()
-
-
-    cdef cppclass cUriStruct "::apache::thrift::type::UriStruct":
-        cUriStruct() except +
-        cUriStruct(const cUriStruct&) except +
-        bint operator==(cUriStruct&)
-        bint operator!=(cUriStruct&)
-        bint operator<(cUriStruct&)
-        bint operator>(cUriStruct&)
-        bint operator<=(cUriStruct&)
-        bint operator>=(cUriStruct&)
-        __field_ref[string] scheme_ref "scheme_ref" ()
-        __field_ref[vector[string]] domain_ref "domain_ref" ()
-        __field_ref[vector[string]] path_ref "path_ref" ()
-        __field_ref[cmap[string,string]] query_ref "query_ref" ()
-        __field_ref[string] fragment_ref "fragment_ref" ()
-
     cdef enum cTypeUri__type "::apache::thrift::type::TypeUri::Type":
         cTypeUri__type___EMPTY__ "::apache::thrift::type::TypeUri::Type::__EMPTY__",
         cTypeUri__type_uri "::apache::thrift::type::TypeUri::Type::uri",
@@ -202,34 +173,6 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" n
         cVoid& set_mapType "set_mapType" (const cVoid&)
 
 
-
-
-cdef class DurationStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cDurationStruct] _cpp_obj
-    cdef _fbthrift_types_fields.__DurationStruct_FieldsSetter _fields_setter
-    cdef inline object seconds_impl(self)
-    cdef inline object nanos_impl(self)
-
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[cDurationStruct])
-
-
-
-cdef class UriStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cUriStruct] _cpp_obj
-    cdef _fbthrift_types_fields.__UriStruct_FieldsSetter _fields_setter
-    cdef inline object scheme_impl(self)
-    cdef inline object domain_impl(self)
-    cdef inline object path_impl(self)
-    cdef inline object query_impl(self)
-    cdef inline object fragment_impl(self)
-    cdef List__string __fbthrift_cached_domain
-    cdef List__string __fbthrift_cached_path
-    cdef Map__string_string __fbthrift_cached_query
-
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[cUriStruct])
-
 cdef class __TypeUriType(thrift.py3.types.CompiledEnum):
     pass
 
@@ -289,19 +232,5 @@ cdef class TypeName(thrift.py3.types.Union):
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cTypeName])
 
-
-cdef class List__string(thrift.py3.types.List):
-    cdef shared_ptr[vector[string]] _cpp_obj
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[string]])
-    @staticmethod
-    cdef shared_ptr[vector[string]] _make_instance(object items) except *
-
-cdef class Map__string_string(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[string,string]] _cpp_obj
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[string,string]])
-    @staticmethod
-    cdef shared_ptr[cmap[string,string]] _make_instance(object items) except *
 
 

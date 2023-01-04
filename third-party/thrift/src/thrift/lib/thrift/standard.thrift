@@ -34,15 +34,14 @@ namespace py.asyncio apache_thrift_asyncio.standard
 namespace go thrift.lib.thrift.standard
 namespace py thrift.lib.thrift.standard
 
-// TODO(afuller): Allow 'void' type for union fields.
 enum Void {
-  NoValue = 0 (cpp.name = "NoValueVoid"),
+  Unused = 0,
 }
 
 /**
- * Typedef for binary data which can be represented as a string of 8-bit bytes
+ * Typedef for binary data which can be represented as a string of 8-bit bytes.
  *
- * Each language can map this type into a customized memory efficient object
+ * Each language can map this type into a customized memory efficient object.
  */
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
@@ -51,54 +50,16 @@ enum Void {
 typedef binary (cpp.type = "folly::fbstring") ByteString
 
 /**
- * Typedef for binary data
+ * Typedef for binary data.
  *
  * Each language can map this type into a customized memory efficient object
- * May be used for zero-copy slice of data
+ * May be used for zero-copy slice of data.
  */
-// TODO(afuller): Consider switching to std::unique_ptr<folly::IOBuf> for c++,
-// to make moves cheaper (benchmark to see if this is better).
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
-typedef binary (cpp2.type = "folly::IOBuf") ByteBuffer
-
-/**
- * A fixed-length span of time, represented as a signed count of seconds and
- * nanoseconds (nanos).
- *
- * Considered 'normal', when `nanos` is in the range 0 to 999'999'999
- * inclusive, or `seconds` is 0 and `nanos` is in the range -999'999'999 to
- * 999'999'999 inclusive.
- */
-struct DurationStruct {
-  /** The count of seconds. */
-  1: i64 seconds;
-  /** The count of nanoseconds. */
-  // TODO(afuller): Fix to not require a default for terse fields.
-  2: i32 nanos = 0;
-} (thrift.uri = "facebook.com/thrift/type/Duration")
-
-/**
- * The string form of a universally unique identifier (UUID).
- *
- * For example: "6ba7b810-9dad-11d1-80b4-00c04fd430c8". Use `standard.Uuid` for
- * a more compact representation.
- *
- * Considered 'normal', if not all zeros **and** 'urn:uuid:', {', '}' and
- * capital hex letters are not present.
- *
- * See rfc4122
- */
-@thrift.Experimental // TODO(afuller): Adapt.
-typedef string UuidString
-
-/**
- * A slash('/')-delimitated path.
- */
-@thrift.Experimental // TODO(afuller): Adapt.
-typedef string Path
+typedef binary (cpp.type = "folly::IOBuf") ByteBuffer
 
 /**
  * A (scheme-less) URI.
@@ -110,34 +71,6 @@ typedef string Path
 // TODO(afuller): Add definition for 'normal' based on unicode + uri specs.
 @thrift.Experimental // TODO(afuller): Adapt.
 typedef string Uri (thrift.uri = "")
-
-/**
- * A decoded URI.
- *
- *   {scheme}://{domain}/{path}?{query}#{fragment}
- *
- * @see Uri For the encoded version.
- */
-// TODO(afuller): Add adapters and native classes, e.g. BasicUri, Uri,
-// and UriView, which use std::basic_string, std::string, std::string_view
-// respectively.
-@thrift.Experimental // TODO(afuller): Adapt.
-struct UriStruct {
-  /** The scheme, if present. */
-  1: string scheme;
-
-  /** The domain, for example "meta.com" -> ["meta", "com"] */
-  2: list<string> domain;
-
-  /** The path, for example "path/to/file" -> ["path", "to", "file"] */
-  4: list<string> path;
-
-  /** The query args. */
-  5: map<string, string> query;
-
-  /** The fragment, if present. */
-  6: string fragment;
-} (thrift.uri = "facebook.com/thrift/type/Uri")
 
 /** The uri of an IDL defined type. */
 union TypeUri {

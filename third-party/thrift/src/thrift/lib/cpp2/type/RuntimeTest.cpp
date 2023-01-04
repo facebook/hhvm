@@ -32,7 +32,9 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/Tag.h>
-#include <thrift/lib/thrift/gen-cpp2/standard_types.h>
+#include <thrift/lib/thrift/gen-cpp2/schema_types.h>
+
+using facebook::thrift::type::DecodedUri;
 
 namespace apache::thrift::type {
 namespace {
@@ -258,9 +260,9 @@ TEST(RuntimeTest, DynMap) {
 }
 
 TEST(RuntimeTest, DynStruct) {
-  Value obj = Value::create<type::UriStruct>();
+  Value obj = Value::create<DecodedUri>();
   obj["scheme"] = "http";
-  type::UriStruct& data = obj.as<type::UriStruct>();
+  DecodedUri& data = obj.as<DecodedUri>();
   EXPECT_EQ(data.scheme(), "http");
   data.scheme() = "ftp";
   EXPECT_EQ(obj["scheme"], "ftp");
@@ -294,7 +296,7 @@ TEST(RuntimeTest, MapAdd) {
 
 // TODO(afuller): Add test for ensuring an optional field.
 TEST(RuntimeTest, Struct) {
-  type::UriStruct actual;
+  DecodedUri actual;
   auto ref = Ref::to(actual);
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 5);

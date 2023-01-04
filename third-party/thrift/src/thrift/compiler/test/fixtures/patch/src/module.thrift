@@ -60,7 +60,6 @@ struct MyStruct {
   MyData structVal;
   MyUnion unionVal;
   LateDefStruct lateStructVal;
-  standard.DurationStruct durationVal;
 
   optional bool optBoolVal;
   optional byte optByteVal;

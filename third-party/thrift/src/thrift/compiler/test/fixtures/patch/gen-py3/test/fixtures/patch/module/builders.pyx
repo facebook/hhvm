@@ -42,7 +42,6 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "structVal", self.structVal
         yield "unionVal", self.unionVal
         yield "lateStructVal", self.lateStructVal
-        yield "durationVal", self.durationVal
         yield "optBoolVal", self.optBoolVal
         yield "optByteVal", self.optByteVal
         yield "optI16Val", self.optI16Val

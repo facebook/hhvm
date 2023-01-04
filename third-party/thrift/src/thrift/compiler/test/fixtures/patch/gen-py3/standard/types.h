@@ -62,61 +62,6 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::apache::thrift::type::DurationStruct>(
-    ::apache::thrift::type::DurationStruct& obj, uint16_t index) {
-  switch (index) {
-    case 0:
-      obj.seconds_ref().copy_from(default_inst<::apache::thrift::type::DurationStruct>().seconds_ref());
-      return;
-    case 1:
-      obj.nanos_ref().copy_from(default_inst<::apache::thrift::type::DurationStruct>().nanos_ref());
-      return;
-  }
-}
-
-template<>
-void reset_field<::apache::thrift::type::UriStruct>(
-    ::apache::thrift::type::UriStruct& obj, uint16_t index) {
-  switch (index) {
-    case 0:
-      obj.scheme_ref().copy_from(default_inst<::apache::thrift::type::UriStruct>().scheme_ref());
-      return;
-    case 1:
-      obj.domain_ref().copy_from(default_inst<::apache::thrift::type::UriStruct>().domain_ref());
-      return;
-    case 2:
-      obj.path_ref().copy_from(default_inst<::apache::thrift::type::UriStruct>().path_ref());
-      return;
-    case 3:
-      obj.query_ref().copy_from(default_inst<::apache::thrift::type::UriStruct>().query_ref());
-      return;
-    case 4:
-      obj.fragment_ref().copy_from(default_inst<::apache::thrift::type::UriStruct>().fragment_ref());
-      return;
-  }
-}
-
-template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::apache::thrift::type::DurationStruct>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::apache::thrift::type::UriStruct>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::type::TypeUri>::namesmap() {
   static const folly::Indestructible<NamesMap> map {

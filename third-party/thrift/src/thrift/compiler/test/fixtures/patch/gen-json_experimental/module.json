@@ -197,83 +197,73 @@
   "name" : "LateDefStruct"
 }
                   },
-          "durationVal" : {
-            "name" : "durationVal",
-            "key" : -14,
-            "lineno" : 63,
-            "type" : {
-  "type" : "struct",
-  "name" : "DurationStruct",
-  "path" : "thrift/lib/thrift/standard.thrift"
-}
-                  },
           "optBoolVal" : {
             "name" : "optBoolVal",
-            "key" : -15,
-            "lineno" : 65,
+            "key" : -14,
+            "lineno" : 64,
             "required" : "optional",
             "type" : "bool"
                   },
           "optByteVal" : {
             "name" : "optByteVal",
-            "key" : -16,
-            "lineno" : 66,
+            "key" : -15,
+            "lineno" : 65,
             "required" : "optional",
             "type" : "byte"
                   },
           "optI16Val" : {
             "name" : "optI16Val",
-            "key" : -17,
-            "lineno" : 67,
+            "key" : -16,
+            "lineno" : 66,
             "required" : "optional",
             "type" : "i16"
                   },
           "optI32Val" : {
             "name" : "optI32Val",
-            "key" : -18,
-            "lineno" : 68,
+            "key" : -17,
+            "lineno" : 67,
             "required" : "optional",
             "type" : "i32"
                   },
           "optI64Val" : {
             "name" : "optI64Val",
-            "key" : -19,
-            "lineno" : 69,
+            "key" : -18,
+            "lineno" : 68,
             "required" : "optional",
             "type" : "i64"
                   },
           "optFloatVal" : {
             "name" : "optFloatVal",
-            "key" : -20,
-            "lineno" : 70,
+            "key" : -19,
+            "lineno" : 69,
             "required" : "optional",
             "type" : "float"
                   },
           "optDoubleVal" : {
             "name" : "optDoubleVal",
-            "key" : -21,
-            "lineno" : 71,
+            "key" : -20,
+            "lineno" : 70,
             "required" : "optional",
             "type" : "double"
                   },
           "optStringVal" : {
             "name" : "optStringVal",
-            "key" : -22,
-            "lineno" : 72,
+            "key" : -21,
+            "lineno" : 71,
             "required" : "optional",
             "type" : "string"
                   },
           "optBinaryVal" : {
             "name" : "optBinaryVal",
-            "key" : -23,
-            "lineno" : 73,
+            "key" : -22,
+            "lineno" : 72,
             "required" : "optional",
             "type" : "binary"
                   },
           "optEnumVal" : {
             "name" : "optEnumVal",
-            "key" : -24,
-            "lineno" : 74,
+            "key" : -23,
+            "lineno" : 73,
             "required" : "optional",
             "type" : {
   "type" : "enum",
@@ -282,8 +272,8 @@
                   },
           "optStructVal" : {
             "name" : "optStructVal",
-            "key" : -25,
-            "lineno" : 75,
+            "key" : -24,
+            "lineno" : 74,
             "required" : "optional",
             "type" : {
   "type" : "struct",
@@ -292,8 +282,8 @@
                   },
           "optLateStructVal" : {
             "name" : "optLateStructVal",
-            "key" : -26,
-            "lineno" : 76,
+            "key" : -25,
+            "lineno" : 75,
             "required" : "optional",
             "type" : {
   "type" : "struct",
@@ -302,8 +292,8 @@
                   },
           "optListVal" : {
             "name" : "optListVal",
-            "key" : -27,
-            "lineno" : 78,
+            "key" : -26,
+            "lineno" : 77,
             "required" : "optional",
             "type" : {
   "type" : "list",
@@ -312,8 +302,8 @@
                   },
           "optSetVal" : {
             "name" : "optSetVal",
-            "key" : -28,
-            "lineno" : 79,
+            "key" : -27,
+            "lineno" : 78,
             "required" : "optional",
             "type" : {
   "type" : "set",
@@ -322,8 +312,8 @@
                   },
           "optMapVal" : {
             "name" : "optMapVal",
-            "key" : -29,
-            "lineno" : 80,
+            "key" : -28,
+            "lineno" : 79,
             "required" : "optional",
             "type" : {
   "type" : "map",
@@ -333,8 +323,8 @@
                   },
           "listMap" : {
             "name" : "listMap",
-            "key" : -30,
-            "lineno" : 82,
+            "key" : -29,
+            "lineno" : 81,
             "type" : {
   "type" : "list",
   "inner_type" : {
@@ -346,8 +336,8 @@
                   },
           "mapMap" : {
             "name" : "mapMap",
-            "key" : -31,
-            "lineno" : 83,
+            "key" : -30,
+            "lineno" : 82,
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -367,7 +357,7 @@
         "name" : "LateDefStruct",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 87
+        "lineno" : 86
       },
       "Recursive" : {
         "name" : "Recursive",
@@ -375,7 +365,7 @@
           "nodes" : {
             "name" : "nodes",
             "key" : -1,
-            "lineno" : 90,
+            "lineno" : 89,
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -399,7 +389,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 89
+        "lineno" : 88
       },
       "Bar" : {
         "name" : "Bar",
@@ -407,7 +397,7 @@
           "loop" : {
             "name" : "loop",
             "key" : -1,
-            "lineno" : 95,
+            "lineno" : 94,
             "type" : {
   "type" : "struct",
   "name" : "Loop"
@@ -416,7 +406,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 94
+        "lineno" : 93
       },
       "Loop" : {
         "name" : "Loop",
@@ -434,7 +424,7 @@
           "bar" : {
             "name" : "bar",
             "key" : -1,
-            "lineno" : 100,
+            "lineno" : 99,
             "type" : {
   "type" : "struct",
   "name" : "Bar"
@@ -454,7 +444,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 98
+        "lineno" : 97
       },
       "MyDataFieldPatch" : {
         "name" : "MyDataFieldPatch",
@@ -822,8 +812,8 @@
         "is_union" : false,
         "lineno" : 22
       },
-      "MyStructField24Patch" : {
-        "name" : "MyStructField24Patch",
+      "MyStructField23Patch" : {
+        "name" : "MyStructField23Patch",
         "structured_annotations": {
           "cpp.Adapter" : {
         "type" : {
@@ -831,7 +821,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter", "underlyingName": "MyStructField24PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter", "underlyingName": "MyStructField23PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -859,8 +849,8 @@
         "is_union" : false,
         "lineno" : 22
       },
-      "MyStructField27Patch" : {
-        "name" : "MyStructField27Patch",
+      "MyStructField26Patch" : {
+        "name" : "MyStructField26Patch",
         "structured_annotations": {
           "cpp.Adapter" : {
         "type" : {
@@ -868,7 +858,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter", "underlyingName": "MyStructField27PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter", "underlyingName": "MyStructField26PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -945,8 +935,8 @@
         "is_union" : false,
         "lineno" : 22
       },
-      "MyStructField28Patch" : {
-        "name" : "MyStructField28Patch",
+      "MyStructField27Patch" : {
+        "name" : "MyStructField27Patch",
         "structured_annotations": {
           "cpp.Adapter" : {
         "type" : {
@@ -954,7 +944,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::SetPatchAdapter", "underlyingName": "MyStructField28PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::SetPatchAdapter", "underlyingName": "MyStructField27PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1004,8 +994,8 @@
         "is_union" : false,
         "lineno" : 22
       },
-      "MyStructField29Patch" : {
-        "name" : "MyStructField29Patch",
+      "MyStructField28Patch" : {
+        "name" : "MyStructField28Patch",
         "structured_annotations": {
           "cpp.Adapter" : {
         "type" : {
@@ -1013,7 +1003,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter", "underlyingName": "MyStructField29PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter", "underlyingName": "MyStructField28PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1109,8 +1099,8 @@
         "is_union" : false,
         "lineno" : 22
       },
-      "MyStructField30Patch" : {
-        "name" : "MyStructField30Patch",
+      "MyStructField29Patch" : {
+        "name" : "MyStructField29Patch",
         "structured_annotations": {
           "cpp.Adapter" : {
         "type" : {
@@ -1118,7 +1108,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter", "underlyingName": "MyStructField30PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter", "underlyingName": "MyStructField29PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1156,7 +1146,7 @@
   "key_type" : "i32",
   "value_type" : {
   "type" : "struct",
-  "name" : "MyStructField30Patch1"
+  "name" : "MyStructField29Patch1"
 }
 }
                   },
@@ -1199,6 +1189,226 @@
             "type" : {
   "type" : "list",
   "inner_type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "i32"
+}
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "MyStructField29Patch1" : {
+        "name" : "MyStructField29Patch1",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter", "underlyingName": "MyStructField29Patch1Struct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "i32"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  },
+          "patchPrior" : {
+            "name" : "patchPrior",
+            "docstring" : "Patches any previously set values. Applies second.\n",
+            "key" : 3,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
+  "type" : "struct",
+  "name" : "I32Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
+}
+}
+                  },
+          "add" : {
+            "name" : "add",
+            "docstring" : "Add the given values, if the keys are not already present. Applies forth.\n",
+            "key" : 5,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "i32"
+}
+                  },
+          "patch" : {
+            "name" : "patch",
+            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
+            "key" : 6,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
+  "type" : "struct",
+  "name" : "I32Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
+}
+}
+                  },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "set",
+  "inner_type" : "string"
+}
+                  },
+          "put" : {
+            "name" : "put",
+            "docstring" : "Adds or replaces the given key/value pairs. Applies fifth.\n",
+            "key" : 9,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "i32"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "MyStructField30Patch" : {
+        "name" : "MyStructField30Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter", "underlyingName": "MyStructField30PatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "i32"
+}
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  },
+          "patchPrior" : {
+            "name" : "patchPrior",
+            "docstring" : "Patches any previously set values. Applies second.\n",
+            "key" : 3,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
+  "type" : "struct",
+  "name" : "MyStructField30Patch1"
+}
+}
+                  },
+          "add" : {
+            "name" : "add",
+            "docstring" : "Add the given values, if the keys are not already present. Applies forth.\n",
+            "key" : 5,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "i32"
+}
+}
+                  },
+          "patch" : {
+            "name" : "patch",
+            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
+            "key" : 6,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
+  "type" : "struct",
+  "name" : "MyStructField30Patch1"
+}
+}
+                  },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "set",
+  "inner_type" : "string"
+}
+                  },
+          "put" : {
+            "name" : "put",
+            "docstring" : "Adds or replaces the given key/value pairs. Applies fifth.\n",
+            "key" : 9,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
   "type" : "map",
   "key_type" : "string",
   "value_type" : "i32"
@@ -1315,226 +1525,6 @@
         "is_union" : false,
         "lineno" : 22
       },
-      "MyStructField31Patch" : {
-        "name" : "MyStructField31Patch",
-        "structured_annotations": {
-          "cpp.Adapter" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Adapter",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter", "underlyingName": "MyStructField31PatchStruct", "extraNamespace": ""}
-      }
-        },
-        "fields" : {
-          "assign" : {
-            "name" : "assign",
-            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
-            "key" : 1,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
-}
-}
-                  },
-          "clear" : {
-            "name" : "clear",
-            "docstring" : "Clears a value. Applies first.\n",
-            "key" : 2,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : "bool"
-                  },
-          "patchPrior" : {
-            "name" : "patchPrior",
-            "docstring" : "Patches any previously set values. Applies second.\n",
-            "key" : 3,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
-  "type" : "struct",
-  "name" : "MyStructField31Patch1"
-}
-}
-                  },
-          "add" : {
-            "name" : "add",
-            "docstring" : "Add the given values, if the keys are not already present. Applies forth.\n",
-            "key" : 5,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
-}
-}
-                  },
-          "patch" : {
-            "name" : "patch",
-            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
-            "key" : 6,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
-  "type" : "struct",
-  "name" : "MyStructField31Patch1"
-}
-}
-                  },
-          "remove" : {
-            "name" : "remove",
-            "docstring" : "Removes entries, if present. Applies third.\n",
-            "key" : 7,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "set",
-  "inner_type" : "string"
-}
-                  },
-          "put" : {
-            "name" : "put",
-            "docstring" : "Adds or replaces the given key/value pairs. Applies fifth.\n",
-            "key" : 9,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
-}
-}
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 22
-      },
-      "MyStructField31Patch1" : {
-        "name" : "MyStructField31Patch1",
-        "structured_annotations": {
-          "cpp.Adapter" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Adapter",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter", "underlyingName": "MyStructField31Patch1Struct", "extraNamespace": ""}
-      }
-        },
-        "fields" : {
-          "assign" : {
-            "name" : "assign",
-            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
-            "key" : 1,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
-}
-                  },
-          "clear" : {
-            "name" : "clear",
-            "docstring" : "Clears a value. Applies first.\n",
-            "key" : 2,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : "bool"
-                  },
-          "patchPrior" : {
-            "name" : "patchPrior",
-            "docstring" : "Patches any previously set values. Applies second.\n",
-            "key" : 3,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
-  "type" : "struct",
-  "name" : "I32Patch",
-  "path" : "thrift/lib/thrift/patch.thrift"
-}
-}
-                  },
-          "add" : {
-            "name" : "add",
-            "docstring" : "Add the given values, if the keys are not already present. Applies forth.\n",
-            "key" : 5,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
-}
-                  },
-          "patch" : {
-            "name" : "patch",
-            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
-            "key" : 6,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
-  "type" : "struct",
-  "name" : "I32Patch",
-  "path" : "thrift/lib/thrift/patch.thrift"
-}
-}
-                  },
-          "remove" : {
-            "name" : "remove",
-            "docstring" : "Removes entries, if present. Applies third.\n",
-            "key" : 7,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "set",
-  "inner_type" : "string"
-}
-                  },
-          "put" : {
-            "name" : "put",
-            "docstring" : "Adds or replaces the given key/value pairs. Applies fifth.\n",
-            "key" : 9,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
-}
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 22
-      },
       "MyStructFieldPatch" : {
         "name" : "MyStructFieldPatch",
         "structured_annotations": {
@@ -1550,16 +1540,6 @@
         "fields" : {
           "mapMap" : {
             "name" : "mapMap",
-            "key" : -31,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStructField31Patch"
-}
-                  },
-          "listMap" : {
-            "name" : "listMap",
             "key" : -30,
             "lineno" : 22,
             "required" : "opt-in-req-out",
@@ -1568,8 +1548,8 @@
   "name" : "MyStructField30Patch"
 }
                   },
-          "optMapVal" : {
-            "name" : "optMapVal",
+          "listMap" : {
+            "name" : "listMap",
             "key" : -29,
             "lineno" : 22,
             "required" : "opt-in-req-out",
@@ -1578,8 +1558,8 @@
   "name" : "MyStructField29Patch"
 }
                   },
-          "optSetVal" : {
-            "name" : "optSetVal",
+          "optMapVal" : {
+            "name" : "optMapVal",
             "key" : -28,
             "lineno" : 22,
             "required" : "opt-in-req-out",
@@ -1588,8 +1568,8 @@
   "name" : "MyStructField28Patch"
 }
                   },
-          "optListVal" : {
-            "name" : "optListVal",
+          "optSetVal" : {
+            "name" : "optSetVal",
             "key" : -27,
             "lineno" : 22,
             "required" : "opt-in-req-out",
@@ -1598,9 +1578,19 @@
   "name" : "MyStructField27Patch"
 }
                   },
+          "optListVal" : {
+            "name" : "optListVal",
+            "key" : -26,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyStructField26Patch"
+}
+                  },
           "optLateStructVal" : {
             "name" : "optLateStructVal",
-            "key" : -26,
+            "key" : -25,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
@@ -1610,7 +1600,7 @@
                   },
           "optStructVal" : {
             "name" : "optStructVal",
-            "key" : -25,
+            "key" : -24,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
@@ -1620,17 +1610,17 @@
                   },
           "optEnumVal" : {
             "name" : "optEnumVal",
-            "key" : -24,
+            "key" : -23,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "MyStructField24Patch"
+  "name" : "MyStructField23Patch"
 }
                   },
           "optBinaryVal" : {
             "name" : "optBinaryVal",
-            "key" : -23,
+            "key" : -22,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
@@ -1641,7 +1631,7 @@
                   },
           "optStringVal" : {
             "name" : "optStringVal",
-            "key" : -22,
+            "key" : -21,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
@@ -1652,7 +1642,7 @@
                   },
           "optDoubleVal" : {
             "name" : "optDoubleVal",
-            "key" : -21,
+            "key" : -20,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
@@ -1663,7 +1653,7 @@
                   },
           "optFloatVal" : {
             "name" : "optFloatVal",
-            "key" : -20,
+            "key" : -19,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
@@ -1674,7 +1664,7 @@
                   },
           "optI64Val" : {
             "name" : "optI64Val",
-            "key" : -19,
+            "key" : -18,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
@@ -1685,7 +1675,7 @@
                   },
           "optI32Val" : {
             "name" : "optI32Val",
-            "key" : -18,
+            "key" : -17,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
@@ -1696,7 +1686,7 @@
                   },
           "optI16Val" : {
             "name" : "optI16Val",
-            "key" : -17,
+            "key" : -16,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
@@ -1707,7 +1697,7 @@
                   },
           "optByteVal" : {
             "name" : "optByteVal",
-            "key" : -16,
+            "key" : -15,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
@@ -1718,23 +1708,12 @@
                   },
           "optBoolVal" : {
             "name" : "optBoolVal",
-            "key" : -15,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "BoolPatch",
-  "path" : "thrift/lib/thrift/patch.thrift"
-}
-                  },
-          "durationVal" : {
-            "name" : "durationVal",
             "key" : -14,
             "lineno" : 22,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "DurationPatch",
+  "name" : "BoolPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
@@ -2055,7 +2034,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
             "key" : 1,
-            "lineno" : 90,
+            "lineno" : 89,
             "required" : "optional",
             "type" : {
   "type" : "map",
@@ -2070,14 +2049,14 @@
             "name" : "clear",
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
-            "lineno" : 90,
+            "lineno" : 89,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 90
+        "lineno" : 89
       },
       "RecursiveFieldPatch" : {
         "name" : "RecursiveFieldPatch",

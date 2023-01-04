@@ -107,57 +107,54 @@ void reset_field<::test::fixtures::patch::MyStruct>(
       obj.lateStructVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().lateStructVal_ref());
       return;
     case 13:
-      obj.durationVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().durationVal_ref());
-      return;
-    case 14:
       obj.optBoolVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optBoolVal_ref());
       return;
-    case 15:
+    case 14:
       obj.optByteVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optByteVal_ref());
       return;
-    case 16:
+    case 15:
       obj.optI16Val_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optI16Val_ref());
       return;
-    case 17:
+    case 16:
       obj.optI32Val_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optI32Val_ref());
       return;
-    case 18:
+    case 17:
       obj.optI64Val_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optI64Val_ref());
       return;
-    case 19:
+    case 18:
       obj.optFloatVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optFloatVal_ref());
       return;
-    case 20:
+    case 19:
       obj.optDoubleVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optDoubleVal_ref());
       return;
-    case 21:
+    case 20:
       obj.optStringVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optStringVal_ref());
       return;
-    case 22:
+    case 21:
       obj.optBinaryVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optBinaryVal_ref());
       return;
-    case 23:
+    case 22:
       obj.optEnumVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optEnumVal_ref());
       return;
-    case 24:
+    case 23:
       obj.optStructVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optStructVal_ref());
       return;
-    case 25:
+    case 24:
       obj.optLateStructVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optLateStructVal_ref());
       return;
-    case 26:
+    case 25:
       obj.optListVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optListVal_ref());
       return;
-    case 27:
+    case 26:
       obj.optSetVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optSetVal_ref());
       return;
-    case 28:
+    case 27:
       obj.optMapVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optMapVal_ref());
       return;
-    case 29:
+    case 28:
       obj.listMap_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().listMap_ref());
       return;
-    case 30:
+    case 29:
       obj.mapMap_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().mapMap_ref());
       return;
   }

@@ -20,5 +20,5 @@ import thrift.annotation.thrift.ttypes
 import thrift.annotation.java.ttypes
 
 
-from .ttypes import UTF8STRINGS, Void, StandardProtocol, DurationStruct, UriStruct, TypeUri, TypeName, ByteString, ByteBuffer, UuidString, Path, Uri
+from .ttypes import UTF8STRINGS, Void, StandardProtocol, TypeUri, TypeName, ByteString, ByteBuffer, Uri
 

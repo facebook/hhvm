@@ -20,11 +20,11 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.MoreObjects.ToStringHelper;
 
 @SwiftGenerated
-@com.facebook.swift.codec.ThriftStruct(value="MyStructField31Patch1", builder=MyStructField31Patch1.Builder.class)
-public final class MyStructField31Patch1 implements com.facebook.thrift.payload.ThriftSerializable {
+@com.facebook.swift.codec.ThriftStruct(value="MyStructField29Patch1", builder=MyStructField29Patch1.Builder.class)
+public final class MyStructField29Patch1 implements com.facebook.thrift.payload.ThriftSerializable {
 
     @ThriftConstructor
-    public MyStructField31Patch1(
+    public MyStructField29Patch1(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final Map<String, Integer> assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE) final boolean clear,
         @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.NONE) final Map<String, com.facebook.thrift.op.I32Patch> patchPrior,
@@ -43,7 +43,7 @@ public final class MyStructField31Patch1 implements com.facebook.thrift.payload.
     }
     
     @ThriftConstructor
-    protected MyStructField31Patch1() {
+    protected MyStructField29Patch1() {
       this.assign = null;
       this.clear = false;
       this.patchPrior = null;
@@ -120,7 +120,7 @@ public final class MyStructField31Patch1 implements com.facebook.thrift.payload.
         public Map<String, Integer> getPut() { return put; }
     
         public Builder() { }
-        public Builder(MyStructField31Patch1 other) {
+        public Builder(MyStructField29Patch1 other) {
             this.assign = other.assign;
             this.clear = other.clear;
             this.patchPrior = other.patchPrior;
@@ -131,8 +131,8 @@ public final class MyStructField31Patch1 implements com.facebook.thrift.payload.
         }
     
         @ThriftConstructor
-        public MyStructField31Patch1 build() {
-            MyStructField31Patch1 result = new MyStructField31Patch1 (
+        public MyStructField29Patch1 build() {
+            MyStructField29Patch1 result = new MyStructField29Patch1 (
                 this.assign,
                 this.clear,
                 this.patchPrior,
@@ -148,7 +148,7 @@ public final class MyStructField31Patch1 implements com.facebook.thrift.payload.
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
-    private static final TStruct STRUCT_DESC = new TStruct("MyStructField31Patch1");
+    private static final TStruct STRUCT_DESC = new TStruct("MyStructField29Patch1");
     private final Map<String, Integer> assign;
     public static final int _ASSIGN = 1;
     private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.MAP, (short)1);
@@ -193,8 +193,8 @@ public final class MyStructField31Patch1 implements com.facebook.thrift.payload.
       THRIFT_NAMES_TO_IDS.put("put", 9);
       FIELD_METADATA.put(9, PUT_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructField31Patch1"), 
-        MyStructField31Patch1.class, MyStructField31Patch1::read0));
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructField29Patch1"), 
+        MyStructField29Patch1.class, MyStructField29Patch1::read0));
     }
     
     @Nullable
@@ -253,7 +253,7 @@ public final class MyStructField31Patch1 implements com.facebook.thrift.payload.
             return false;
         }
     
-        MyStructField31Patch1 other = (MyStructField31Patch1)o;
+        MyStructField29Patch1 other = (MyStructField29Patch1)o;
     
         return
             Objects.equals(assign, other.assign) &&
@@ -280,14 +280,14 @@ public final class MyStructField31Patch1 implements com.facebook.thrift.payload.
     }
     
     
-    public static com.facebook.thrift.payload.Reader<MyStructField31Patch1> asReader() {
-      return MyStructField31Patch1::read0;
+    public static com.facebook.thrift.payload.Reader<MyStructField29Patch1> asReader() {
+      return MyStructField29Patch1::read0;
     }
     
-    public static MyStructField31Patch1 read0(TProtocol oprot) throws TException {
+    public static MyStructField29Patch1 read0(TProtocol oprot) throws TException {
       TField __field;
-      oprot.readStructBegin(MyStructField31Patch1.NAMES_TO_IDS, MyStructField31Patch1.THRIFT_NAMES_TO_IDS, MyStructField31Patch1.FIELD_METADATA);
-      MyStructField31Patch1.Builder builder = new MyStructField31Patch1.Builder();
+      oprot.readStructBegin(MyStructField29Patch1.NAMES_TO_IDS, MyStructField29Patch1.THRIFT_NAMES_TO_IDS, MyStructField29Patch1.FIELD_METADATA);
+      MyStructField29Patch1.Builder builder = new MyStructField29Patch1.Builder();
       while (true) {
         __field = oprot.readFieldBegin();
         if (__field.type == TType.STOP) { break; }
@@ -497,11 +497,11 @@ public final class MyStructField31Patch1 implements com.facebook.thrift.payload.
       oprot.writeStructEnd();
     }
     
-    private static class _MyStructField31Patch1Lazy {
-        private static final MyStructField31Patch1 _DEFAULT = new MyStructField31Patch1.Builder().build();
+    private static class _MyStructField29Patch1Lazy {
+        private static final MyStructField29Patch1 _DEFAULT = new MyStructField29Patch1.Builder().build();
     }
     
-    public static MyStructField31Patch1 defaultInstance() {
-        return  _MyStructField31Patch1Lazy._DEFAULT;
+    public static MyStructField29Patch1 defaultInstance() {
+        return  _MyStructField29Patch1Lazy._DEFAULT;
     }
 }

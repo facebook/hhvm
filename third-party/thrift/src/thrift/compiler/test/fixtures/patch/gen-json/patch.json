@@ -17,7 +17,7 @@
   },
   "enumerations" : {
     "PatchOp" : {
-      "lineno" : 284,
+      "lineno" : 261,
       "constants" : {
         "Assign" : 1,
         "Clear" : 2,
@@ -32,11 +32,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 284,
+          "line" : 261,
           "column" : 1
         },
         "end" : {
-          "line" : 355,
+          "line" : 332,
           "column" : 2
         }
       }
@@ -664,68 +664,6 @@
         "end" : {
           "line" : 252,
           "column" : 2
-        }
-      }
-    },
-    "DurationPatch" : {
-      "lineno" : 255,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-        "assign" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "standard.DurationStruct",
-          "required" : false,
-          "source_range" : {
-            "begin" : {
-              "line" : 267,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 267,
-              "column" : 46
-            }
-          }
-        },
-        "clear" : {
-          "type_enum" : "BOOL",
-          "spec_args" : null,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 270,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 270,
-              "column" : 17
-            }
-          }
-        },
-        "add" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "standard.DurationStruct",
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 273,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 274,
-              "column" : 34
-            }
-          }
-        }
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 255,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 275,
-          "column" : 58
         }
       }
     }

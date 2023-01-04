@@ -97,7 +97,6 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_27(self, _fbthrift_value) except *
     cdef void _set_field_28(self, _fbthrift_value) except *
     cdef void _set_field_29(self, _fbthrift_value) except *
-    cdef void _set_field_30(self, _fbthrift_value) except *
 
 
 ctypedef void (*__LateDefStruct_FieldsSetterFunc)(__LateDefStruct_FieldsSetter, object) except *

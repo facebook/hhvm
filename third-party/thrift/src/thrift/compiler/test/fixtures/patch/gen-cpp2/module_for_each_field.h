@@ -57,24 +57,23 @@ struct ForEachField<::test::fixtures::patch::MyStruct> {
     f(10, static_cast<T&&>(t).structVal_ref()...);
     f(11, static_cast<T&&>(t).unionVal_ref()...);
     f(12, static_cast<T&&>(t).lateStructVal_ref()...);
-    f(13, static_cast<T&&>(t).durationVal_ref()...);
-    f(14, static_cast<T&&>(t).optBoolVal_ref()...);
-    f(15, static_cast<T&&>(t).optByteVal_ref()...);
-    f(16, static_cast<T&&>(t).optI16Val_ref()...);
-    f(17, static_cast<T&&>(t).optI32Val_ref()...);
-    f(18, static_cast<T&&>(t).optI64Val_ref()...);
-    f(19, static_cast<T&&>(t).optFloatVal_ref()...);
-    f(20, static_cast<T&&>(t).optDoubleVal_ref()...);
-    f(21, static_cast<T&&>(t).optStringVal_ref()...);
-    f(22, static_cast<T&&>(t).optBinaryVal_ref()...);
-    f(23, static_cast<T&&>(t).optEnumVal_ref()...);
-    f(24, static_cast<T&&>(t).optStructVal_ref()...);
-    f(25, static_cast<T&&>(t).optLateStructVal_ref()...);
-    f(26, static_cast<T&&>(t).optListVal_ref()...);
-    f(27, static_cast<T&&>(t).optSetVal_ref()...);
-    f(28, static_cast<T&&>(t).optMapVal_ref()...);
-    f(29, static_cast<T&&>(t).listMap_ref()...);
-    f(30, static_cast<T&&>(t).mapMap_ref()...);
+    f(13, static_cast<T&&>(t).optBoolVal_ref()...);
+    f(14, static_cast<T&&>(t).optByteVal_ref()...);
+    f(15, static_cast<T&&>(t).optI16Val_ref()...);
+    f(16, static_cast<T&&>(t).optI32Val_ref()...);
+    f(17, static_cast<T&&>(t).optI64Val_ref()...);
+    f(18, static_cast<T&&>(t).optFloatVal_ref()...);
+    f(19, static_cast<T&&>(t).optDoubleVal_ref()...);
+    f(20, static_cast<T&&>(t).optStringVal_ref()...);
+    f(21, static_cast<T&&>(t).optBinaryVal_ref()...);
+    f(22, static_cast<T&&>(t).optEnumVal_ref()...);
+    f(23, static_cast<T&&>(t).optStructVal_ref()...);
+    f(24, static_cast<T&&>(t).optLateStructVal_ref()...);
+    f(25, static_cast<T&&>(t).optListVal_ref()...);
+    f(26, static_cast<T&&>(t).optSetVal_ref()...);
+    f(27, static_cast<T&&>(t).optMapVal_ref()...);
+    f(28, static_cast<T&&>(t).listMap_ref()...);
+    f(29, static_cast<T&&>(t).mapMap_ref()...);
   }
 };
 
@@ -182,7 +181,7 @@ struct ForEachField<::test::fixtures::patch::MyStructField10PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::MyStructField24PatchStruct> {
+struct ForEachField<::test::fixtures::patch::MyStructField23PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -191,7 +190,7 @@ struct ForEachField<::test::fixtures::patch::MyStructField24PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::MyStructField27PatchStruct> {
+struct ForEachField<::test::fixtures::patch::MyStructField26PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -204,7 +203,7 @@ struct ForEachField<::test::fixtures::patch::MyStructField27PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::MyStructField28PatchStruct> {
+struct ForEachField<::test::fixtures::patch::MyStructField27PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -215,7 +214,34 @@ struct ForEachField<::test::fixtures::patch::MyStructField28PatchStruct> {
 };
 
 template <>
+struct ForEachField<::test::fixtures::patch::MyStructField28PatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).assign_ref()...);
+    f(1, static_cast<T&&>(t).clear_ref()...);
+    f(2, static_cast<T&&>(t).patchPrior_ref()...);
+    f(3, static_cast<T&&>(t).add_ref()...);
+    f(4, static_cast<T&&>(t).patch_ref()...);
+    f(5, static_cast<T&&>(t).remove_ref()...);
+    f(6, static_cast<T&&>(t).put_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::test::fixtures::patch::MyStructField29PatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).assign_ref()...);
+    f(1, static_cast<T&&>(t).clear_ref()...);
+    f(2, static_cast<T&&>(t).patch_ref()...);
+    f(3, static_cast<T&&>(t).remove_ref()...);
+    f(4, static_cast<T&&>(t).prepend_ref()...);
+    f(5, static_cast<T&&>(t).append_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::patch::MyStructField29Patch1Struct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -234,43 +260,16 @@ struct ForEachField<::test::fixtures::patch::MyStructField30PatchStruct> {
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
     f(1, static_cast<T&&>(t).clear_ref()...);
-    f(2, static_cast<T&&>(t).patch_ref()...);
-    f(3, static_cast<T&&>(t).remove_ref()...);
-    f(4, static_cast<T&&>(t).prepend_ref()...);
-    f(5, static_cast<T&&>(t).append_ref()...);
+    f(2, static_cast<T&&>(t).patchPrior_ref()...);
+    f(3, static_cast<T&&>(t).add_ref()...);
+    f(4, static_cast<T&&>(t).patch_ref()...);
+    f(5, static_cast<T&&>(t).remove_ref()...);
+    f(6, static_cast<T&&>(t).put_ref()...);
   }
 };
 
 template <>
 struct ForEachField<::test::fixtures::patch::MyStructField30Patch1Struct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).assign_ref()...);
-    f(1, static_cast<T&&>(t).clear_ref()...);
-    f(2, static_cast<T&&>(t).patchPrior_ref()...);
-    f(3, static_cast<T&&>(t).add_ref()...);
-    f(4, static_cast<T&&>(t).patch_ref()...);
-    f(5, static_cast<T&&>(t).remove_ref()...);
-    f(6, static_cast<T&&>(t).put_ref()...);
-  }
-};
-
-template <>
-struct ForEachField<::test::fixtures::patch::MyStructField31PatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).assign_ref()...);
-    f(1, static_cast<T&&>(t).clear_ref()...);
-    f(2, static_cast<T&&>(t).patchPrior_ref()...);
-    f(3, static_cast<T&&>(t).add_ref()...);
-    f(4, static_cast<T&&>(t).patch_ref()...);
-    f(5, static_cast<T&&>(t).remove_ref()...);
-    f(6, static_cast<T&&>(t).put_ref()...);
-  }
-};
-
-template <>
-struct ForEachField<::test::fixtures::patch::MyStructField31Patch1Struct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -304,20 +303,19 @@ struct ForEachField<::test::fixtures::patch::MyStructFieldPatchStruct> {
     f(14, static_cast<T&&>(t).optI16Val_ref()...);
     f(15, static_cast<T&&>(t).optByteVal_ref()...);
     f(16, static_cast<T&&>(t).optBoolVal_ref()...);
-    f(17, static_cast<T&&>(t).durationVal_ref()...);
-    f(18, static_cast<T&&>(t).lateStructVal_ref()...);
-    f(19, static_cast<T&&>(t).unionVal_ref()...);
-    f(20, static_cast<T&&>(t).structVal_ref()...);
-    f(21, static_cast<T&&>(t).enumVal_ref()...);
-    f(22, static_cast<T&&>(t).binaryVal_ref()...);
-    f(23, static_cast<T&&>(t).stringVal_ref()...);
-    f(24, static_cast<T&&>(t).doubleVal_ref()...);
-    f(25, static_cast<T&&>(t).floatVal_ref()...);
-    f(26, static_cast<T&&>(t).i64Val_ref()...);
-    f(27, static_cast<T&&>(t).i32Val_ref()...);
-    f(28, static_cast<T&&>(t).i16Val_ref()...);
-    f(29, static_cast<T&&>(t).byteVal_ref()...);
-    f(30, static_cast<T&&>(t).boolVal_ref()...);
+    f(17, static_cast<T&&>(t).lateStructVal_ref()...);
+    f(18, static_cast<T&&>(t).unionVal_ref()...);
+    f(19, static_cast<T&&>(t).structVal_ref()...);
+    f(20, static_cast<T&&>(t).enumVal_ref()...);
+    f(21, static_cast<T&&>(t).binaryVal_ref()...);
+    f(22, static_cast<T&&>(t).stringVal_ref()...);
+    f(23, static_cast<T&&>(t).doubleVal_ref()...);
+    f(24, static_cast<T&&>(t).floatVal_ref()...);
+    f(25, static_cast<T&&>(t).i64Val_ref()...);
+    f(26, static_cast<T&&>(t).i32Val_ref()...);
+    f(27, static_cast<T&&>(t).i16Val_ref()...);
+    f(28, static_cast<T&&>(t).byteVal_ref()...);
+    f(29, static_cast<T&&>(t).boolVal_ref()...);
   }
 };
 

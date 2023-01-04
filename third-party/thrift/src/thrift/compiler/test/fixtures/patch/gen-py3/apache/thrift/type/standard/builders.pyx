@@ -4,23 +4,6 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
-cdef class DurationStruct_Builder(thrift.py3.builder.StructBuilder):
-    _struct_type = _apache_thrift_type_standard_types.DurationStruct
-
-    def __iter__(self):
-        yield "seconds", self.seconds
-        yield "nanos", self.nanos
-
-cdef class UriStruct_Builder(thrift.py3.builder.StructBuilder):
-    _struct_type = _apache_thrift_type_standard_types.UriStruct
-
-    def __iter__(self):
-        yield "scheme", self.scheme
-        yield "domain", self.domain
-        yield "path", self.path
-        yield "query", self.query
-        yield "fragment", self.fragment
-
 cdef class TypeUri_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _apache_thrift_type_standard_types.TypeUri
 

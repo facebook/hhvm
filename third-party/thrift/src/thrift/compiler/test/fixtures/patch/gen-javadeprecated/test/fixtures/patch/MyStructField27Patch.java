@@ -26,12 +26,10 @@ import com.facebook.thrift.protocol.*;
 @SuppressWarnings({ "unused", "serial" })
 public class MyStructField27Patch implements TBase, java.io.Serializable, Cloneable, Comparable<MyStructField27Patch> {
   private static final TStruct STRUCT_DESC = new TStruct("MyStructField27Patch");
-  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.LIST, (short)1);
+  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.SET, (short)1);
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
-  private static final TField PATCH_FIELD_DESC = new TField("patch", TType.MAP, (short)3);
-  private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.LIST, (short)7);
-  private static final TField PREPEND_FIELD_DESC = new TField("prepend", TType.LIST, (short)8);
-  private static final TField APPEND_FIELD_DESC = new TField("append", TType.LIST, (short)9);
+  private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.SET, (short)7);
+  private static final TField ADD_FIELD_DESC = new TField("add", TType.SET, (short)8);
 
   /**
    * Assigns to a (set) value.
@@ -41,33 +39,23 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
    * Note: Optional and union fields must be set before assigned.
    * 
    */
-  public List<Short> assign;
+  public Set<String> assign;
   /**
    * Clears a value. Applies first.
    */
   public boolean clear;
   /**
-   * Patches list values by index. Applies second.
-   */
-  public Map<Integer,com.facebook.thrift.op.I16Patch> patch;
-  /**
    * Removes entries, if present. Applies third.
    */
-  public List<Short> remove;
+  public Set<String> remove;
   /**
-   * Prepends to the front of a given list.
+   * Adds entries, if not already present. Applies fourth.
    */
-  public List<Short> prepend;
-  /**
-   * Appends to the back of a given list.
-   */
-  public List<Short> append;
+  public Set<String> add;
   public static final int ASSIGN = 1;
   public static final int CLEAR = 2;
-  public static final int PATCH = 3;
   public static final int REMOVE = 7;
-  public static final int PREPEND = 8;
-  public static final int APPEND = 9;
+  public static final int ADD = 8;
 
   // isset id assignments
   private static final int __CLEAR_ISSET_ID = 0;
@@ -78,23 +66,16 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
     tmpMetaDataMap.put(ASSIGN, new FieldMetaData("assign", TFieldRequirementType.OPTIONAL, 
-        new ListMetaData(TType.LIST, 
-            new FieldValueMetaData(TType.I16))));
+        new SetMetaData(TType.SET, 
+            new FieldValueMetaData(TType.STRING))));
     tmpMetaDataMap.put(CLEAR, new FieldMetaData("clear", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.BOOL)));
-    tmpMetaDataMap.put(PATCH, new FieldMetaData("patch", TFieldRequirementType.DEFAULT, 
-        new MapMetaData(TType.MAP, 
-            new FieldValueMetaData(TType.I32), 
-            new StructMetaData(TType.STRUCT, com.facebook.thrift.op.I16Patch.class))));
     tmpMetaDataMap.put(REMOVE, new FieldMetaData("remove", TFieldRequirementType.DEFAULT, 
-        new ListMetaData(TType.LIST, 
-            new FieldValueMetaData(TType.I16))));
-    tmpMetaDataMap.put(PREPEND, new FieldMetaData("prepend", TFieldRequirementType.DEFAULT, 
-        new ListMetaData(TType.LIST, 
-            new FieldValueMetaData(TType.I16))));
-    tmpMetaDataMap.put(APPEND, new FieldMetaData("append", TFieldRequirementType.DEFAULT, 
-        new ListMetaData(TType.LIST, 
-            new FieldValueMetaData(TType.I16))));
+        new SetMetaData(TType.SET, 
+            new FieldValueMetaData(TType.STRING))));
+    tmpMetaDataMap.put(ADD, new FieldMetaData("add", TFieldRequirementType.DEFAULT, 
+        new SetMetaData(TType.SET, 
+            new FieldValueMetaData(TType.STRING))));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -107,50 +88,40 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
 
   public MyStructField27Patch(
       boolean clear,
-      Map<Integer,com.facebook.thrift.op.I16Patch> patch,
-      List<Short> remove,
-      List<Short> prepend,
-      List<Short> append) {
+      Set<String> remove,
+      Set<String> add) {
     this();
     this.clear = clear;
     setClearIsSet(true);
-    this.patch = patch;
     this.remove = remove;
-    this.prepend = prepend;
-    this.append = append;
+    this.add = add;
   }
 
   public MyStructField27Patch(
-      List<Short> assign,
+      Set<String> assign,
       boolean clear,
-      Map<Integer,com.facebook.thrift.op.I16Patch> patch,
-      List<Short> remove,
-      List<Short> prepend,
-      List<Short> append) {
+      Set<String> remove,
+      Set<String> add) {
     this();
     this.assign = assign;
     this.clear = clear;
     setClearIsSet(true);
-    this.patch = patch;
     this.remove = remove;
-    this.prepend = prepend;
-    this.append = append;
+    this.add = add;
   }
 
   public static class Builder {
-    private List<Short> assign;
+    private Set<String> assign;
     private boolean clear;
-    private Map<Integer,com.facebook.thrift.op.I16Patch> patch;
-    private List<Short> remove;
-    private List<Short> prepend;
-    private List<Short> append;
+    private Set<String> remove;
+    private Set<String> add;
 
     BitSet __optional_isset = new BitSet(1);
 
     public Builder() {
     }
 
-    public Builder setAssign(final List<Short> assign) {
+    public Builder setAssign(final Set<String> assign) {
       this.assign = assign;
       return this;
     }
@@ -161,23 +132,13 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
       return this;
     }
 
-    public Builder setPatch(final Map<Integer,com.facebook.thrift.op.I16Patch> patch) {
-      this.patch = patch;
-      return this;
-    }
-
-    public Builder setRemove(final List<Short> remove) {
+    public Builder setRemove(final Set<String> remove) {
       this.remove = remove;
       return this;
     }
 
-    public Builder setPrepend(final List<Short> prepend) {
-      this.prepend = prepend;
-      return this;
-    }
-
-    public Builder setAppend(final List<Short> append) {
-      this.append = append;
+    public Builder setAdd(final Set<String> add) {
+      this.add = add;
       return this;
     }
 
@@ -187,10 +148,8 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
       if (__optional_isset.get(__CLEAR_ISSET_ID)) {
         result.setClear(this.clear);
       }
-      result.setPatch(this.patch);
       result.setRemove(this.remove);
-      result.setPrepend(this.prepend);
-      result.setAppend(this.append);
+      result.setAdd(this.add);
       return result;
     }
   }
@@ -209,17 +168,11 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
       this.assign = TBaseHelper.deepCopy(other.assign);
     }
     this.clear = TBaseHelper.deepCopy(other.clear);
-    if (other.isSetPatch()) {
-      this.patch = TBaseHelper.deepCopy(other.patch);
-    }
     if (other.isSetRemove()) {
       this.remove = TBaseHelper.deepCopy(other.remove);
     }
-    if (other.isSetPrepend()) {
-      this.prepend = TBaseHelper.deepCopy(other.prepend);
-    }
-    if (other.isSetAppend()) {
-      this.append = TBaseHelper.deepCopy(other.append);
+    if (other.isSetAdd()) {
+      this.add = TBaseHelper.deepCopy(other.add);
     }
   }
 
@@ -235,7 +188,7 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
    * Note: Optional and union fields must be set before assigned.
    * 
    */
-  public List<Short> getAssign() {
+  public Set<String> getAssign() {
     return this.assign;
   }
 
@@ -247,7 +200,7 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
    * Note: Optional and union fields must be set before assigned.
    * 
    */
-  public MyStructField27Patch setAssign(List<Short> assign) {
+  public MyStructField27Patch setAssign(Set<String> assign) {
     this.assign = assign;
     return this;
   }
@@ -297,46 +250,16 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
   }
 
   /**
-   * Patches list values by index. Applies second.
-   */
-  public Map<Integer,com.facebook.thrift.op.I16Patch> getPatch() {
-    return this.patch;
-  }
-
-  /**
-   * Patches list values by index. Applies second.
-   */
-  public MyStructField27Patch setPatch(Map<Integer,com.facebook.thrift.op.I16Patch> patch) {
-    this.patch = patch;
-    return this;
-  }
-
-  public void unsetPatch() {
-    this.patch = null;
-  }
-
-  // Returns true if field patch is set (has been assigned a value) and false otherwise
-  public boolean isSetPatch() {
-    return this.patch != null;
-  }
-
-  public void setPatchIsSet(boolean __value) {
-    if (!__value) {
-      this.patch = null;
-    }
-  }
-
-  /**
    * Removes entries, if present. Applies third.
    */
-  public List<Short> getRemove() {
+  public Set<String> getRemove() {
     return this.remove;
   }
 
   /**
    * Removes entries, if present. Applies third.
    */
-  public MyStructField27Patch setRemove(List<Short> remove) {
+  public MyStructField27Patch setRemove(Set<String> remove) {
     this.remove = remove;
     return this;
   }
@@ -357,62 +280,32 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
   }
 
   /**
-   * Prepends to the front of a given list.
+   * Adds entries, if not already present. Applies fourth.
    */
-  public List<Short> getPrepend() {
-    return this.prepend;
+  public Set<String> getAdd() {
+    return this.add;
   }
 
   /**
-   * Prepends to the front of a given list.
+   * Adds entries, if not already present. Applies fourth.
    */
-  public MyStructField27Patch setPrepend(List<Short> prepend) {
-    this.prepend = prepend;
+  public MyStructField27Patch setAdd(Set<String> add) {
+    this.add = add;
     return this;
   }
 
-  public void unsetPrepend() {
-    this.prepend = null;
+  public void unsetAdd() {
+    this.add = null;
   }
 
-  // Returns true if field prepend is set (has been assigned a value) and false otherwise
-  public boolean isSetPrepend() {
-    return this.prepend != null;
+  // Returns true if field add is set (has been assigned a value) and false otherwise
+  public boolean isSetAdd() {
+    return this.add != null;
   }
 
-  public void setPrependIsSet(boolean __value) {
+  public void setAddIsSet(boolean __value) {
     if (!__value) {
-      this.prepend = null;
-    }
-  }
-
-  /**
-   * Appends to the back of a given list.
-   */
-  public List<Short> getAppend() {
-    return this.append;
-  }
-
-  /**
-   * Appends to the back of a given list.
-   */
-  public MyStructField27Patch setAppend(List<Short> append) {
-    this.append = append;
-    return this;
-  }
-
-  public void unsetAppend() {
-    this.append = null;
-  }
-
-  // Returns true if field append is set (has been assigned a value) and false otherwise
-  public boolean isSetAppend() {
-    return this.append != null;
-  }
-
-  public void setAppendIsSet(boolean __value) {
-    if (!__value) {
-      this.append = null;
+      this.add = null;
     }
   }
 
@@ -423,7 +316,7 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
       if (__value == null) {
         unsetAssign();
       } else {
-        setAssign((List<Short>)__value);
+        setAssign((Set<String>)__value);
       }
       break;
 
@@ -435,35 +328,19 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
       }
       break;
 
-    case PATCH:
-      if (__value == null) {
-        unsetPatch();
-      } else {
-        setPatch((Map<Integer,com.facebook.thrift.op.I16Patch>)__value);
-      }
-      break;
-
     case REMOVE:
       if (__value == null) {
         unsetRemove();
       } else {
-        setRemove((List<Short>)__value);
+        setRemove((Set<String>)__value);
       }
       break;
 
-    case PREPEND:
+    case ADD:
       if (__value == null) {
-        unsetPrepend();
+        unsetAdd();
       } else {
-        setPrepend((List<Short>)__value);
-      }
-      break;
-
-    case APPEND:
-      if (__value == null) {
-        unsetAppend();
-      } else {
-        setAppend((List<Short>)__value);
+        setAdd((Set<String>)__value);
       }
       break;
 
@@ -480,17 +357,11 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
     case CLEAR:
       return new Boolean(isClear());
 
-    case PATCH:
-      return getPatch();
-
     case REMOVE:
       return getRemove();
 
-    case PREPEND:
-      return getPrepend();
-
-    case APPEND:
-      return getAppend();
+    case ADD:
+      return getAdd();
 
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
@@ -511,20 +382,16 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
 
     if (!TBaseHelper.equalsNobinary(this.clear, that.clear)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetPatch(), that.isSetPatch(), this.patch, that.patch)) { return false; }
-
     if (!TBaseHelper.equalsNobinary(this.isSetRemove(), that.isSetRemove(), this.remove, that.remove)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetPrepend(), that.isSetPrepend(), this.prepend, that.prepend)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetAppend(), that.isSetAppend(), this.append, that.append)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetAdd(), that.isSetAdd(), this.add, that.add)) { return false; }
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, clear, patch, remove, prepend, append});
+    return Arrays.deepHashCode(new Object[] {assign, clear, remove, add});
   }
 
   @Override
@@ -555,14 +422,6 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
     if (lastComparison != 0) { 
       return lastComparison;
     }
-    lastComparison = Boolean.valueOf(isSetPatch()).compareTo(other.isSetPatch());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    lastComparison = TBaseHelper.compareTo(patch, other.patch);
-    if (lastComparison != 0) { 
-      return lastComparison;
-    }
     lastComparison = Boolean.valueOf(isSetRemove()).compareTo(other.isSetRemove());
     if (lastComparison != 0) {
       return lastComparison;
@@ -571,19 +430,11 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
     if (lastComparison != 0) { 
       return lastComparison;
     }
-    lastComparison = Boolean.valueOf(isSetPrepend()).compareTo(other.isSetPrepend());
+    lastComparison = Boolean.valueOf(isSetAdd()).compareTo(other.isSetAdd());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    lastComparison = TBaseHelper.compareTo(prepend, other.prepend);
-    if (lastComparison != 0) { 
-      return lastComparison;
-    }
-    lastComparison = Boolean.valueOf(isSetAppend()).compareTo(other.isSetAppend());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    lastComparison = TBaseHelper.compareTo(append, other.append);
+    lastComparison = TBaseHelper.compareTo(add, other.add);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -602,19 +453,19 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
       switch (__field.id)
       {
         case ASSIGN:
-          if (__field.type == TType.LIST) {
+          if (__field.type == TType.SET) {
             {
-              TList _list37 = iprot.readListBegin();
-              this.assign = new ArrayList<Short>(Math.max(0, _list37.size));
-              for (int _i38 = 0; 
-                   (_list37.size < 0) ? iprot.peekList() : (_i38 < _list37.size); 
-                   ++_i38)
+              TSet _set58 = iprot.readSetBegin();
+              this.assign = new HashSet<String>(Math.max(0, 2*_set58.size));
+              for (int _i59 = 0; 
+                   (_set58.size < 0) ? iprot.peekSet() : (_i59 < _set58.size); 
+                   ++_i59)
               {
-                short _elem39;
-                _elem39 = iprot.readI16();
-                this.assign.add(_elem39);
+                String _elem60;
+                _elem60 = iprot.readString();
+                this.assign.add(_elem60);
               }
-              iprot.readListEnd();
+              iprot.readSetEnd();
             }
           } else {
             TProtocolUtil.skip(iprot, __field.type);
@@ -628,80 +479,39 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case PATCH:
-          if (__field.type == TType.MAP) {
-            {
-              TMap _map40 = iprot.readMapBegin();
-              this.patch = new HashMap<Integer,com.facebook.thrift.op.I16Patch>(Math.max(0, 2*_map40.size));
-              for (int _i41 = 0; 
-                   (_map40.size < 0) ? iprot.peekMap() : (_i41 < _map40.size); 
-                   ++_i41)
-              {
-                int _key42;
-                com.facebook.thrift.op.I16Patch _val43;
-                _key42 = iprot.readI32();
-                _val43 = new com.facebook.thrift.op.I16Patch();
-                _val43.read(iprot);
-                this.patch.put(_key42, _val43);
-              }
-              iprot.readMapEnd();
-            }
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
         case REMOVE:
-          if (__field.type == TType.LIST) {
+          if (__field.type == TType.SET) {
             {
-              TList _list44 = iprot.readListBegin();
-              this.remove = new ArrayList<Short>(Math.max(0, _list44.size));
-              for (int _i45 = 0; 
-                   (_list44.size < 0) ? iprot.peekList() : (_i45 < _list44.size); 
-                   ++_i45)
+              TSet _set61 = iprot.readSetBegin();
+              this.remove = new HashSet<String>(Math.max(0, 2*_set61.size));
+              for (int _i62 = 0; 
+                   (_set61.size < 0) ? iprot.peekSet() : (_i62 < _set61.size); 
+                   ++_i62)
               {
-                short _elem46;
-                _elem46 = iprot.readI16();
-                this.remove.add(_elem46);
+                String _elem63;
+                _elem63 = iprot.readString();
+                this.remove.add(_elem63);
               }
-              iprot.readListEnd();
+              iprot.readSetEnd();
             }
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case PREPEND:
-          if (__field.type == TType.LIST) {
+        case ADD:
+          if (__field.type == TType.SET) {
             {
-              TList _list47 = iprot.readListBegin();
-              this.prepend = new ArrayList<Short>(Math.max(0, _list47.size));
-              for (int _i48 = 0; 
-                   (_list47.size < 0) ? iprot.peekList() : (_i48 < _list47.size); 
-                   ++_i48)
+              TSet _set64 = iprot.readSetBegin();
+              this.add = new HashSet<String>(Math.max(0, 2*_set64.size));
+              for (int _i65 = 0; 
+                   (_set64.size < 0) ? iprot.peekSet() : (_i65 < _set64.size); 
+                   ++_i65)
               {
-                short _elem49;
-                _elem49 = iprot.readI16();
-                this.prepend.add(_elem49);
+                String _elem66;
+                _elem66 = iprot.readString();
+                this.add.add(_elem66);
               }
-              iprot.readListEnd();
-            }
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case APPEND:
-          if (__field.type == TType.LIST) {
-            {
-              TList _list50 = iprot.readListBegin();
-              this.append = new ArrayList<Short>(Math.max(0, _list50.size));
-              for (int _i51 = 0; 
-                   (_list50.size < 0) ? iprot.peekList() : (_i51 < _list50.size); 
-                   ++_i51)
-              {
-                short _elem52;
-                _elem52 = iprot.readI16();
-                this.append.add(_elem52);
-              }
-              iprot.readListEnd();
+              iprot.readSetEnd();
             }
           } else {
             TProtocolUtil.skip(iprot, __field.type);
@@ -728,11 +538,11 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
       if (isSetAssign()) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         {
-          oprot.writeListBegin(new TList(TType.I16, this.assign.size()));
-          for (short _iter53 : this.assign)          {
-            oprot.writeI16(_iter53);
+          oprot.writeSetBegin(new TSet(TType.STRING, this.assign.size()));
+          for (String _iter67 : this.assign)          {
+            oprot.writeString(_iter67);
           }
-          oprot.writeListEnd();
+          oprot.writeSetEnd();
         }
         oprot.writeFieldEnd();
       }
@@ -740,48 +550,25 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
     oprot.writeFieldBegin(CLEAR_FIELD_DESC);
     oprot.writeBool(this.clear);
     oprot.writeFieldEnd();
-    if (this.patch != null) {
-      oprot.writeFieldBegin(PATCH_FIELD_DESC);
-      {
-        oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, this.patch.size()));
-        for (Map.Entry<Integer, com.facebook.thrift.op.I16Patch> _iter54 : this.patch.entrySet())        {
-          oprot.writeI32(_iter54.getKey());
-          _iter54.getValue().write(oprot);
-        }
-        oprot.writeMapEnd();
-      }
-      oprot.writeFieldEnd();
-    }
     if (this.remove != null) {
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
-        oprot.writeListBegin(new TList(TType.I16, this.remove.size()));
-        for (short _iter55 : this.remove)        {
-          oprot.writeI16(_iter55);
+        oprot.writeSetBegin(new TSet(TType.STRING, this.remove.size()));
+        for (String _iter68 : this.remove)        {
+          oprot.writeString(_iter68);
         }
-        oprot.writeListEnd();
+        oprot.writeSetEnd();
       }
       oprot.writeFieldEnd();
     }
-    if (this.prepend != null) {
-      oprot.writeFieldBegin(PREPEND_FIELD_DESC);
+    if (this.add != null) {
+      oprot.writeFieldBegin(ADD_FIELD_DESC);
       {
-        oprot.writeListBegin(new TList(TType.I16, this.prepend.size()));
-        for (short _iter56 : this.prepend)        {
-          oprot.writeI16(_iter56);
+        oprot.writeSetBegin(new TSet(TType.STRING, this.add.size()));
+        for (String _iter69 : this.add)        {
+          oprot.writeString(_iter69);
         }
-        oprot.writeListEnd();
-      }
-      oprot.writeFieldEnd();
-    }
-    if (this.append != null) {
-      oprot.writeFieldBegin(APPEND_FIELD_DESC);
-      {
-        oprot.writeListBegin(new TList(TType.I16, this.append.size()));
-        for (short _iter57 : this.append)        {
-          oprot.writeI16(_iter57);
-        }
-        oprot.writeListEnd();
+        oprot.writeSetEnd();
       }
       oprot.writeFieldEnd();
     }
@@ -827,17 +614,6 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
     first = false;
     if (!first) sb.append("," + newLine);
     sb.append(indentStr);
-    sb.append("patch");
-    sb.append(space);
-    sb.append(":").append(space);
-    if (this.getPatch() == null) {
-      sb.append("null");
-    } else {
-      sb.append(TBaseHelper.toString(this.getPatch(), indent + 1, prettyPrint));
-    }
-    first = false;
-    if (!first) sb.append("," + newLine);
-    sb.append(indentStr);
     sb.append("remove");
     sb.append(space);
     sb.append(":").append(space);
@@ -849,24 +625,13 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
     first = false;
     if (!first) sb.append("," + newLine);
     sb.append(indentStr);
-    sb.append("prepend");
+    sb.append("add");
     sb.append(space);
     sb.append(":").append(space);
-    if (this.getPrepend() == null) {
+    if (this.getAdd() == null) {
       sb.append("null");
     } else {
-      sb.append(TBaseHelper.toString(this.getPrepend(), indent + 1, prettyPrint));
-    }
-    first = false;
-    if (!first) sb.append("," + newLine);
-    sb.append(indentStr);
-    sb.append("append");
-    sb.append(space);
-    sb.append(":").append(space);
-    if (this.getAppend() == null) {
-      sb.append("null");
-    } else {
-      sb.append(TBaseHelper.toString(this.getAppend(), indent + 1, prettyPrint));
+      sb.append(TBaseHelper.toString(this.getAdd(), indent + 1, prettyPrint));
     }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));

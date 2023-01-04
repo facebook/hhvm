@@ -15,7 +15,6 @@ module Reason = Typing_reason
 module Env = Typing_env
 module Inter = Typing_intersection
 module ITySet = Internal_type_set
-module Union = Typing_union
 module TL = Typing_logic
 module TUtils = Typing_utils
 module Utils = Typing_solver_utils
@@ -361,16 +360,6 @@ let ty_equal_shallow env ty1 ty2 =
       equal_dependent_type dep1 dep2
     | _ -> false
 
-let union_any_if_any_in_lower_bounds env ty lower_bounds =
-  let r = Reason.none in
-  let any = LoclType (mk (r, Typing_defs.make_tany ())) in
-  let (env, ty) =
-    match ITySet.find_opt any lower_bounds with
-    | Some (LoclType any) -> Union.union env ty any
-    | _ -> (env, ty)
-  in
-  (env, ty)
-
 let try_bind_to_equal_bound ~freshen env r var =
   if Env.tyvar_is_solved_or_skip_global env var then
     (env, None)
@@ -387,13 +376,9 @@ let try_bind_to_equal_bound ~freshen env r var =
     let lower_bounds = expand_all (Env.get_tyvar_lower_bounds env var) in
     let upper_bounds = expand_all (Env.get_tyvar_upper_bounds env var) in
     let equal_bounds = ITySet.inter lower_bounds upper_bounds in
-    let any = LoclType (mk (Reason.none, Typing_defs.make_tany ())) in
-    let equal_bounds = equal_bounds |> ITySet.remove any in
     let (env, ty_err_opt) =
       match ITySet.choose_opt equal_bounds with
-      | Some (LoclType ty) ->
-        let (env, ty) = union_any_if_any_in_lower_bounds env ty lower_bounds in
-        bind env var ty
+      | Some (LoclType ty) -> bind env var ty
       | Some (ConstraintType _)
       | None ->
         if not freshen then
@@ -436,9 +421,6 @@ let try_bind_to_equal_bound ~freshen env r var =
             in
             let (env, ty_sup_err_opt) =
               Typing_utils.sub_type env var_ty ty on_error
-            in
-            let (env, ty) =
-              union_any_if_any_in_lower_bounds env ty lower_bounds
             in
             let (env, bind_err_opt) = bind env var ty in
             let ty_err_opt =

@@ -510,13 +510,13 @@ let get_tpenv_tparams env =
               parameters = _;
             }
           acc ->
-      let folder ty acc =
-        let (_env, ty) = expand_type env ty in
-        match get_node ty with
-        | Tgeneric _ -> acc
-        | _ -> get_tparams_in_ty_and_acc env acc ty
-      in
-      TySet.fold folder lower_bounds @@ TySet.fold folder upper_bounds acc
+        let folder ty acc =
+          let (_env, ty) = expand_type env ty in
+          match get_node ty with
+          | Tgeneric _ -> acc
+          | _ -> get_tparams_in_ty_and_acc env acc ty
+        in
+        TySet.fold folder lower_bounds @@ TySet.fold folder upper_bounds acc
     end
     (get_tpenv env)
     SSet.empty
@@ -967,12 +967,11 @@ let get_self_ty env = Option.map env.genv.self ~f:snd
 
 let get_self_class_type env =
   match get_self_ty env with
-  | Some self ->
-    begin
-      match get_node self with
-      | Tclass (id, exact, tys) -> Some (id, exact, tys)
-      | _ -> None
-    end
+  | Some self -> begin
+    match get_node self with
+    | Tclass (id, exact, tys) -> Some (id, exact, tys)
+    | _ -> None
+  end
   | None -> None
 
 let get_self_id env = Option.map env.genv.self ~f:fst
@@ -1201,20 +1200,19 @@ let set_local_expr_id env x new_eid =
   let per_cont_env = env.lenv.per_cont_env in
   match LEnvC.get_cont_option C.Next per_cont_env with
   | None -> env
-  | Some next_cont ->
-    begin
-      match LID.Map.find_opt x next_cont.LEnvC.local_types with
-      | Some (type_, pos, eid)
-        when not (Typing_local_types.equal_expression_id eid new_eid) ->
-        if Ident.is_immutable eid then
-          Errors.add_typing_error
-            Typing_error.(primary @@ Primary.Immutable_local pos);
-        let local = (type_, pos, new_eid) in
-        let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
-        let env = { env with lenv = { env.lenv with per_cont_env } } in
-        env
-      | _ -> env
-    end
+  | Some next_cont -> begin
+    match LID.Map.find_opt x next_cont.LEnvC.local_types with
+    | Some (type_, pos, eid)
+      when not (Typing_local_types.equal_expression_id eid new_eid) ->
+      if Ident.is_immutable eid then
+        Errors.add_typing_error
+          Typing_error.(primary @@ Primary.Immutable_local pos);
+      let local = (type_, pos, new_eid) in
+      let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
+      let env = { env with lenv = { env.lenv with per_cont_env } } in
+      env
+    | _ -> env
+  end
 
 let get_local_expr_id env x =
   match next_cont_opt env with

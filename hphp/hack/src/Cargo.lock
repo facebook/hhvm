@@ -2156,7 +2156,6 @@ dependencies = [
  "derive_more",
  "file_info",
  "hh_hash",
- "nohash-hasher",
  "relative_path",
  "rusqlite",
  "serde",

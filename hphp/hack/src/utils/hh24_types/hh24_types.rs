@@ -32,8 +32,6 @@ macro_rules! u64_hash_wrapper_impls {
             }
         }
 
-        impl nohash_hasher::IsEnabled for $name {}
-
         impl rusqlite::ToSql for $name {
             fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
                 Ok(rusqlite::types::ToSqlOutput::from(self.0 as i64))

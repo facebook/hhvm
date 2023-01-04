@@ -20,6 +20,9 @@
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0<%#struct:fields%>,<%field:key%><%/struct:fields%>};
+  using __fbthrift_reflection_type_tags = folly::tag_t<<%#struct:fields%>
+    <%field:type_tag%><%^last?%>,<%/last?%><%/struct:fields%>
+  >;
 
   <%#struct:thrift_uri%>
   static constexpr std::size_t __fbthrift_field_size_v = <%struct:fields_size%>;

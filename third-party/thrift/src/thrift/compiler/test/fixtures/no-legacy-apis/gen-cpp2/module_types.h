@@ -126,6 +126,10 @@ class MyStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::string_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
@@ -332,6 +336,10 @@ class MyUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::enum_t<::test::fixtures::basic::MyEnum>,
+    ::apache::thrift::type::struct_t<::test::fixtures::basic::MyStruct>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 

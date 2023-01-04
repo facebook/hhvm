@@ -589,6 +589,9 @@ class decorated_struct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -766,6 +769,16 @@ class ContainerStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,12,2,3,4,5,6,7,8};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::cpp_type<std::list<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>,
+    ::apache::thrift::type::cpp_type<std::deque<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>,
+    ::apache::thrift::type::cpp_type<folly::fbvector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>,
+    ::apache::thrift::type::cpp_type<folly::small_vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>,
+    ::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>,
+    ::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::int32_t, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>>,
+    ::apache::thrift::type::cpp_type<std::unordered_map<::std::int32_t, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 8;
 
@@ -1332,6 +1345,9 @@ class CppTypeStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::cpp_type<std::list<int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -1496,6 +1512,9 @@ class VirtualStruct  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -1666,6 +1685,10 @@ class MyStructWithForwardRefEnum final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::enum_t<::apache::thrift::fixtures::types::MyForwardRefEnum>,
+    ::apache::thrift::type::enum_t<::apache::thrift::fixtures::types::MyForwardRefEnum>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
@@ -1892,6 +1915,10 @@ class TrivialNumeric final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::bool_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
@@ -2119,6 +2146,10 @@ class TrivialNestedWithDefault final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::TrivialNumeric>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
@@ -2345,6 +2376,10 @@ class ComplexString final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
@@ -2573,6 +2608,10 @@ class ComplexNestedWithDefault final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::ComplexString>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
@@ -2806,6 +2845,13 @@ class MinPadding final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::i16_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::byte_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 5;
 
@@ -3210,6 +3256,13 @@ class MinPaddingWithCustomType final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::byte_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 5;
 
@@ -3599,6 +3652,8 @@ class MyDataItem final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
@@ -3705,6 +3760,12 @@ class MyStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::MyDataItem>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 4;
 
@@ -4047,6 +4108,9 @@ class Renamed final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -4215,6 +4279,10 @@ class AnnotatedTypes final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::binary_t,
+    ::apache::thrift::type::list<::apache::thrift::type::cpp_type<std::unordered_map<::std::int32_t, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>>>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
@@ -4442,6 +4510,9 @@ class ForwardUsageStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::ForwardUsageRoot>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -4594,6 +4665,10 @@ class ForwardUsageRoot final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::ForwardUsageStruct>,
+    ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::ForwardUsageByRef>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
@@ -4805,6 +4880,9 @@ class ForwardUsageByRef final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::ForwardUsageRoot>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -4956,6 +5034,9 @@ class IncompleteMap final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::IncompleteMapDep>>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -5120,6 +5201,8 @@ class IncompleteMapDep final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
@@ -5225,6 +5308,8 @@ class CompleteMapDep final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
@@ -5331,6 +5416,9 @@ class CompleteMap final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::cpp_type<std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::CompleteMapDep>>>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -5496,6 +5584,9 @@ class IncompleteList final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::cpp_type<::std::list<::apache::thrift::fixtures::types::IncompleteListDep>, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::IncompleteListDep>>>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -5660,6 +5751,8 @@ class IncompleteListDep final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
@@ -5765,6 +5858,8 @@ class CompleteListDep final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
@@ -5871,6 +5966,9 @@ class CompleteList final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::cpp_type<folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::CompleteListDep>>>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -6036,6 +6134,9 @@ class AdaptedList final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::list<::apache::thrift::type::adapted<IdentityAdapter<detail::AdaptedListDep>, ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::detail::AdaptedListDep>>>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -6202,6 +6303,9 @@ class AdaptedListDep final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::AdaptedList>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -6368,6 +6472,9 @@ class DependentAdaptedListDep final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i16_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -6524,6 +6631,9 @@ class DependentAdaptedList final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::list<::apache::thrift::type::adapted<IdentityAdapter<detail::DependentAdaptedListDep>, ::apache::thrift::type::struct_t<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>>>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -6695,6 +6805,15 @@ class AllocatorAware final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 7;
 
@@ -7228,6 +7347,9 @@ class AllocatorAware2 final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -7416,6 +7538,11 @@ class TypedefStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::cpp_type<std::uint32_t, ::apache::thrift::type::i32_t>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 3;
 
@@ -7700,6 +7827,9 @@ class StructWithDoubleUnderscores final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 

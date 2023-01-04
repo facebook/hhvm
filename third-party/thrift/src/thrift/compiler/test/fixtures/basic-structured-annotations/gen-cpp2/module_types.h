@@ -200,6 +200,10 @@ class structured_annotation_inline final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::string_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
@@ -430,6 +434,9 @@ class structured_annotation_with_default final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -601,6 +608,9 @@ class structured_annotation_forward final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -770,6 +780,11 @@ class structured_annotation_recursive final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::struct_t<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>,
+    ::apache::thrift::type::struct_t<::test::fixtures::basic-structured-annotations::structured_annotation_forward>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 3;
 
@@ -1044,6 +1059,10 @@ class structured_annotation_nested final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::struct_t<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
@@ -1274,6 +1293,12 @@ class MyStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::i64_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 4;
 
@@ -1625,6 +1650,9 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
@@ -1809,6 +1837,10 @@ class MyUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::i64_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 

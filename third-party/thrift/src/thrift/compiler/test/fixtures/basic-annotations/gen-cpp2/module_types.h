@@ -184,6 +184,9 @@ class MyStructNestedAnnotation final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t
+  >;
 
 
   void __fbthrift_clear();
@@ -314,6 +317,8 @@ class YourUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
 
 
   void __fbthrift_clear();
@@ -465,6 +470,8 @@ class FOLLY_EXPORT YourException : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
 
 
   void __fbthrift_clear();
@@ -563,6 +570,18 @@ class YourStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,2,1,3,4,5,6,7,8,9,10};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::enum_t<::cpp2::YourEnum>,
+    ::apache::thrift::type::cpp_type<std::deque<std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>,
+    ::apache::thrift::type::adapted<::StaticCast, ::apache::thrift::type::union_t<::cpp2::detail::YourUnion>>,
+    ::apache::thrift::type::cpp_type<::cpp2::MyId, ::apache::thrift::type::i16_t>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 10;
 
@@ -1275,6 +1294,10 @@ class SecretStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::string_t
+  >;
 
 
   void __fbthrift_clear();

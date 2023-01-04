@@ -677,6 +677,12 @@ class MyStructFloatFieldThrowExp final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::float_t
+  >;
 
 
   void __fbthrift_clear();
@@ -967,6 +973,10 @@ class MyStructMapFloatThrowExp final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::float_t>>>
+  >;
 
 
   void __fbthrift_clear();
@@ -1143,6 +1153,8 @@ class MyDataItem final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
 
 
   void __fbthrift_clear();
@@ -1242,6 +1254,36 @@ class MyStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::struct_t<::cpp2::MyDataItem>,
+    ::apache::thrift::type::enum_t<::cpp2::MyEnum>,
+    ::apache::thrift::type::bool_t,
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::i16_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::list<::apache::thrift::type::double_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::i64_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::string_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::bool_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::byte_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::struct_t<::cpp2::MyStruct>>,
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::bool_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::bool_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::struct_t<::cpp2::MyStruct>>,
+    ::apache::thrift::type::set<::apache::thrift::type::i64_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::string_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::byte_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::list<::apache::thrift::type::i32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>
+  >;
 
 
   void __fbthrift_clear();
@@ -2760,6 +2802,10 @@ class SimpleStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::string_t
+  >;
 
 
   void __fbthrift_clear();
@@ -2961,6 +3007,26 @@ class ComplexNestedStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::i32_t>>,
+    ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::enum_t<::cpp2::MyEnum>>>>>,
+    ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::struct_t<::cpp2::MyStruct>>>,
+    ::apache::thrift::type::set<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::i64_t>>>,
+    ::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::i64_t>>>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::struct_t<::cpp2::MyStruct>>>>,
+    ::apache::thrift::type::map<::apache::thrift::type::struct_t<::cpp2::MyStruct>, ::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i32_t>>,
+    ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::cpp2::MyStruct>>>>,
+    ::apache::thrift::type::map<::apache::thrift::type::set<::apache::thrift::type::i32_t>, ::apache::thrift::type::i64_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::list<::apache::thrift::type::string_t>, ::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>>,
+    ::apache::thrift::type::map<::apache::thrift::type::set<::apache::thrift::type::list<::apache::thrift::type::i32_t>>, ::apache::thrift::type::map<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::string_t>>, ::apache::thrift::type::string_t>>,
+    ::apache::thrift::type::map<::apache::thrift::type::map<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>, ::apache::thrift::type::string_t>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::cpp2::MyStruct>>>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::set<::apache::thrift::type::bool_t>>,
+    ::apache::thrift::type::map<::apache::thrift::type::set<::apache::thrift::type::bool_t>, ::apache::thrift::type::enum_t<::cpp2::MyEnum>>,
+    ::apache::thrift::type::map<::apache::thrift::type::list<::apache::thrift::type::i32_t>, ::apache::thrift::type::set<::apache::thrift::type::map<::apache::thrift::type::double_t, ::apache::thrift::type::string_t>>>
+  >;
 
 
   void __fbthrift_clear();
@@ -3960,6 +4026,14 @@ class MyUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::enum_t<::cpp2::MyEnum>,
+    ::apache::thrift::type::struct_t<::cpp2::MyStruct>,
+    ::apache::thrift::type::struct_t<::cpp2::MyDataItem>,
+    ::apache::thrift::type::struct_t<::cpp2::ComplexNestedStruct>,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::i32_t
+  >;
 
 
   void __fbthrift_clear();
@@ -4561,6 +4635,30 @@ class defaultStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::binary_t,
+    ::apache::thrift::type::binary_t,
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::enum_t<::cpp2::MyEnum>>,
+    ::apache::thrift::type::set<::apache::thrift::type::string_t>,
+    ::apache::thrift::type::struct_t<::cpp2::SimpleStruct>,
+    ::apache::thrift::type::list<::apache::thrift::type::struct_t<::cpp2::SimpleStruct>>,
+    ::apache::thrift::type::union_t<::cpp2::MyUnion>,
+    ::apache::thrift::type::list<::apache::thrift::type::union_t<::cpp2::MyUnion>>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::struct_t<::cpp2::SimpleStruct>>>,
+    ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::enum_t<::cpp2::MyEnum>>>
+  >;
 
 
   void __fbthrift_clear();
@@ -5788,6 +5886,17 @@ class MyStructTypeDef final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::double_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::double_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::double_t>>>
+  >;
 
 
   void __fbthrift_clear();
@@ -6340,6 +6449,12 @@ class MyUnionFloatFieldThrowExp final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::enum_t<::cpp2::MyEnum>,
+    ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::float_t>>,
+    ::apache::thrift::type::struct_t<::cpp2::MyDataItem>,
+    ::apache::thrift::type::struct_t<::cpp2::ComplexNestedStruct>
+  >;
 
 
   void __fbthrift_clear();
@@ -6793,6 +6908,12 @@ class TypeRemapped final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i64_t>>,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::binary_t
+  >;
 
 
   void __fbthrift_clear();
@@ -7077,6 +7198,8 @@ class FOLLY_EXPORT emptyXcep : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
 
 
   void __fbthrift_clear();
@@ -7162,6 +7285,10 @@ class FOLLY_EXPORT reqXcep : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::i32_t
+  >;
 
 
   void __fbthrift_clear();
@@ -7356,6 +7483,10 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::i32_t
+  >;
 
 
   void __fbthrift_clear();
@@ -7562,6 +7693,14 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::list<::apache::thrift::type::string_t>,
+    ::apache::thrift::type::enum_t<::cpp2::MyEnum>,
+    ::apache::thrift::type::union_t<::cpp2::MyUnion>,
+    ::apache::thrift::type::struct_t<::cpp2::MyStruct>,
+    ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>
+  >;
 
 
   void __fbthrift_clear();

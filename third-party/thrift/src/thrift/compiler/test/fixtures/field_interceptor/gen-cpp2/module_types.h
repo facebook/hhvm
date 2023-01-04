@@ -87,6 +87,14 @@ class InterceptedFields final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 6;
 

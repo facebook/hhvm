@@ -60,6 +60,9 @@ class B final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t
+  >;
 
 
   void __fbthrift_clear();
@@ -192,6 +195,9 @@ class A final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::cpp_type<std::unordered_map<::std::int32_t, ::apache::thrift::test::B>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::struct_t<::apache::thrift::test::B>>>
+  >;
 
 
   void __fbthrift_clear();

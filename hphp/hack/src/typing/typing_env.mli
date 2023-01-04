@@ -69,6 +69,10 @@ val fresh_type_reason :
     it won't be solved automatically at the end of the scope *)
 val fresh_type_invariant : env -> Pos.t -> env * locl_ty
 
+(** Generate a fresh type variable to stand for an unknown type in the
+    case of type errors. *)
+val fresh_type_error : env -> Pos.t -> env * locl_ty
+
 (** What type variables are fresh in the current scope? *)
 val get_current_tyvars : env -> Ident.t list
 

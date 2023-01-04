@@ -363,8 +363,10 @@ let rec type_of_result ~ignore_errors ctx env root res =
       else
         None
     in
-    let reason = make_reason env ctx.id root Reason.Rnone in
-    ((env, ty_err_opt), Typing_utils.terr env reason)
+    let (env, ty) =
+      Env.fresh_type_error env (Pos_or_decl.unsafe_to_raw_pos (get_pos root))
+    in
+    ((env, ty_err_opt), ty)
 
 let update_class_name env id new_name = function
   | (Exact _ | Missing _) as res -> res
@@ -393,194 +395,196 @@ let rec expand ctx env root =
     Option.map ctx.ety_env.on_error ~f:(fun on_error ->
         Typing_error.apply_reasons ~on_error reason)
   in
+  if Typing_utils.is_tyvar_error env root then
+    ((env, None), Missing None)
+  else
+    match get_node root with
+    | Tany _ -> ((env, None), Exact root)
+    | Tnewtype (name, _, ty) ->
+      let ctx =
+        let base = Some (Option.value ctx.base ~default:root) in
+        let allow_abstract = true in
+        { ctx with base; allow_abstract }
+      in
+      let ((env, ty_err_opt), res) = expand ctx env ty in
+      let name = Printf.sprintf "<cls#%s>" name in
+      ((env, ty_err_opt), update_class_name env ctx.id name res)
+    | Tclass (cid, Nonexact cr, targs)
+      when Class_refinement.has_type_ref ctx.id cr -> begin
+      match Class_refinement.get_type_ref ctx.id cr with
+      | Some (TRexact ty) -> ((env, None), Exact ty)
+      | Some (TRloose { tr_lower; tr_upper }) ->
+        let alt_root = mk (get_reason root, Tclass (cid, nonexact, targs)) in
+        let ((env, ty_err_opt), result) = expand ctx env alt_root in
+        (match result with
+        | Exact _
+        | Missing _ ->
+          ((env, ty_err_opt), result)
+        | Abstract abstr ->
+          (* Flag an error if the root is not a concrete class type. *)
+          let ty_err_opt' =
+            match ctx.root_kind with
+            | ConcreteClass -> None
+            | GenericType ->
+              let pos = Reason.to_pos (get_reason root) in
+              Option.map ctx.ety_env.on_error ~f:(fun on_error ->
+                  Typing_error.apply_reasons
+                    ~on_error
+                    (Typing_error.Secondary.Inexact_tconst_access (pos, ctx.id)))
+          in
+          let ty_err_opt = Option.first_some ty_err_opt' ty_err_opt in
+          let add_bounds tyset bnds =
+            List.fold bnds ~init:tyset ~f:(fun tyset t -> TySet.add t tyset)
+          in
+          let abstr =
+            {
+              abstr with
+              lower_bounds = add_bounds abstr.lower_bounds tr_lower;
+              upper_bounds = add_bounds abstr.upper_bounds tr_upper;
+            }
+          in
+          ((env, ty_err_opt), Abstract abstr))
+      | None -> (* unreachable *) ((env, None), Missing None)
+    end
+    | Tclass (cls, _, _) -> begin
+      match Env.get_class env (snd cls) with
+      | None -> ((env, None), Missing None)
+      | Some ci ->
+        (* Hack: `self` in a trait is mistakenly replaced by the trait instead
+           of the class using the trait, so if a trait is the root, it is
+           likely because originally there was `self::T` written.
+           TODO(T54081153): fix `self` in traits and clean this up *)
+        let allow_abstract =
+          Ast_defs.is_c_trait (Decl_provider.Class.kind ci)
+          || ctx.allow_abstract
+        in
 
-  match get_node root with
-  | Tany _
-  | Terr ->
-    ((env, None), Exact root)
-  | Tnewtype (name, _, ty) ->
-    let ctx =
-      let base = Some (Option.value ctx.base ~default:root) in
-      let allow_abstract = true in
-      { ctx with base; allow_abstract }
-    in
-    let ((env, ty_err_opt), res) = expand ctx env ty in
-    let name = Printf.sprintf "<cls#%s>" name in
-    ((env, ty_err_opt), update_class_name env ctx.id name res)
-  | Tclass (cid, Nonexact cr, targs)
-    when Class_refinement.has_type_ref ctx.id cr -> begin
-    match Class_refinement.get_type_ref ctx.id cr with
-    | Some (TRexact ty) -> ((env, None), Exact ty)
-    | Some (TRloose { tr_lower; tr_upper }) ->
-      let alt_root = mk (get_reason root, Tclass (cid, nonexact, targs)) in
-      let ((env, ty_err_opt), result) = expand ctx env alt_root in
-      (match result with
-      | Exact _
-      | Missing _ ->
-        ((env, ty_err_opt), result)
-      | Abstract abstr ->
-        (* Flag an error if the root is not a concrete class type. *)
-        let ty_err_opt' =
-          match ctx.root_kind with
-          | ConcreteClass -> None
-          | GenericType ->
-            let pos = Reason.to_pos (get_reason root) in
-            Option.map ctx.ety_env.on_error ~f:(fun on_error ->
-                Typing_error.apply_reasons
-                  ~on_error
-                  (Typing_error.Secondary.Inexact_tconst_access (pos, ctx.id)))
+        let ctx = { ctx with allow_abstract } in
+        create_root_from_type_constant ctx env root cls ci
+    end
+    | Tgeneric (s, tyargs) ->
+      let ctx =
+        let root_kind =
+          let this_name = Naming_special_names.SpecialIdents.this in
+          (* The `this` type stands for a concrete class. *)
+          if String.equal s this_name then
+            ConcreteClass
+          else
+            ctx.root_kind
         in
-        let ty_err_opt = Option.first_some ty_err_opt' ty_err_opt in
-        let add_bounds tyset bnds =
-          List.fold bnds ~init:tyset ~f:(fun tyset t -> TySet.add t tyset)
-        in
-        let abstr =
-          {
-            abstr with
-            lower_bounds = add_bounds abstr.lower_bounds tr_lower;
-            upper_bounds = add_bounds abstr.upper_bounds tr_upper;
-          }
-        in
-        ((env, ty_err_opt), Abstract abstr))
-    | None -> (* unreachable *) ((env, None), Missing None)
-  end
-  | Tclass (cls, _, _) -> begin
-    match Env.get_class env (snd cls) with
-    | None -> ((env, None), Missing None)
-    | Some ci ->
-      (* Hack: `self` in a trait is mistakenly replaced by the trait instead
-         of the class using the trait, so if a trait is the root, it is
-         likely because originally there was `self::T` written.
-         TODO(T54081153): fix `self` in traits and clean this up *)
-      let allow_abstract =
-        Ast_defs.is_c_trait (Decl_provider.Class.kind ci) || ctx.allow_abstract
+        let generics_seen = TySet.add root ctx.generics_seen in
+        let base = Some (Option.value ctx.base ~default:root) in
+        let allow_abstract = true in
+        let abstract_as_tyvar_at_pos = None in
+        {
+          ctx with
+          generics_seen;
+          base;
+          allow_abstract;
+          abstract_as_tyvar_at_pos;
+          root_kind;
+        }
       in
 
-      let ctx = { ctx with allow_abstract } in
-      create_root_from_type_constant ctx env root cls ci
-  end
-  | Tgeneric (s, tyargs) ->
-    let ctx =
-      let root_kind =
-        let this_name = Naming_special_names.SpecialIdents.this in
-        (* The `this` type stands for a concrete class. *)
-        if String.equal s this_name then
-          ConcreteClass
-        else
-          ctx.root_kind
+      (* Ignore seen bounds to avoid infinite loops *)
+      let upper_bounds =
+        let ub = Env.get_upper_bounds env s tyargs in
+        TySet.filter
+          (fun ty ->
+            (* Also ignore ~T if we've seen T *)
+            not
+              (TySet.mem (Typing_utils.strip_dynamic env ty) ctx.generics_seen))
+          ub
+        |> TySet.elements
       in
-      let generics_seen = TySet.add root ctx.generics_seen in
-      let base = Some (Option.value ctx.base ~default:root) in
-      let allow_abstract = true in
-      let abstract_as_tyvar_at_pos = None in
-      {
-        ctx with
-        generics_seen;
-        base;
-        allow_abstract;
-        abstract_as_tyvar_at_pos;
-        root_kind;
-      }
-    in
-
-    (* Ignore seen bounds to avoid infinite loops *)
-    let upper_bounds =
-      let ub = Env.get_upper_bounds env s tyargs in
-      TySet.filter
-        (fun ty ->
-          (* Also ignore ~T if we've seen T *)
-          not (TySet.mem (Typing_utils.strip_dynamic env ty) ctx.generics_seen))
-        ub
-      |> TySet.elements
-    in
-    (* TODO: should we be taking the intersection of the errors? *)
-    let ((env, ty_err_opt), resl) =
-      List.map_env_ty_err_opt
-        env
-        upper_bounds
-        ~f:(expand ctx)
-        ~combine_ty_errs:Typing_error.multiple_opt
-    in
-    let res = intersect_results err resl in
-    ((env, ty_err_opt), update_class_name env ctx.id s res)
-  | Tdependent (dep_ty, ty) ->
-    let ctx =
-      let root_kind = ConcreteClass in
-      let base = Some (Option.value ctx.base ~default:root) in
-      let allow_abstract = true in
-      let abstract_as_tyvar_at_pos = None in
-      { ctx with base; allow_abstract; abstract_as_tyvar_at_pos; root_kind }
-    in
-    let ((env, ty_err_opt), res) = expand ctx env ty in
-    ( (env, ty_err_opt),
-      update_class_name env ctx.id (DependentKind.to_string dep_ty) res )
-  | Tintersection tyl ->
-    (* Terrible hack (compatible with previous behaviour) that first attempts to project off the
-     * non-type-variable conjunects. If this doesn't succeed, then try the type variable
-     * conjunects, which will cause type-const constraints to be added to the type variables.
-     *)
-    let (tyl_vars, tyl_nonvars) =
-      List.partition_tf tyl ~f:(fun t ->
-          let (_env, t) = Env.expand_type env t in
-          is_tyvar t)
-    in
-    (* TODO: should we be taking the intersection of the errors? *)
-    let ((env, e1), resl) =
-      List.map_env_ty_err_opt
-        env
-        tyl_nonvars
-        ~f:(expand ctx)
-        ~combine_ty_errs:Typing_error.multiple_opt
-    in
-    let result = intersect_results err resl in
-    (match result with
-    | Missing _ ->
       (* TODO: should we be taking the intersection of the errors? *)
-      let ((env, e2), resl) =
+      let ((env, ty_err_opt), resl) =
         List.map_env_ty_err_opt
           env
-          tyl_vars
+          upper_bounds
           ~f:(expand ctx)
           ~combine_ty_errs:Typing_error.multiple_opt
       in
-      (* TODO: should we be taking the intersection of the errors? *)
-      let ty_err_opt =
-        Option.merge e1 e2 ~f:(fun e1 e2 -> Typing_error.multiple [e1; e2])
+      let res = intersect_results err resl in
+      ((env, ty_err_opt), update_class_name env ctx.id s res)
+    | Tdependent (dep_ty, ty) ->
+      let ctx =
+        let root_kind = ConcreteClass in
+        let base = Some (Option.value ctx.base ~default:root) in
+        let allow_abstract = true in
+        let abstract_as_tyvar_at_pos = None in
+        { ctx with base; allow_abstract; abstract_as_tyvar_at_pos; root_kind }
       in
-      ((env, ty_err_opt), intersect_results err resl)
-    | _ -> ((env, e1), result))
-  | Tunion tyl ->
-    let ((env, ty_err_opt), resl) =
-      List.map_env_ty_err_opt
-        env
-        tyl
-        ~f:(expand ctx)
-        ~combine_ty_errs:Typing_error.union_opt
-    in
-    let result = union_results err resl in
-    ((env, ty_err_opt), result)
-  | Tvar n ->
-    let (env, ty) =
-      Typing_subtype_tconst.get_tyvar_type_const
-        env
-        n
-        ctx.id
-        ~on_error:ctx.ety_env.on_error
-    in
-    (env, Exact ty)
-  | Tunapplied_alias _ ->
-    Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-  | Taccess _
-  | Tnonnull
-  | Tprim _
-  | Tshape _
-  | Ttuple _
-  | Tvec_or_dict _
-  | Tfun _
-  | Tdynamic
-  | Toption _
-  | Tneg _ ->
-    ((env, None), Missing err)
+      let ((env, ty_err_opt), res) = expand ctx env ty in
+      ( (env, ty_err_opt),
+        update_class_name env ctx.id (DependentKind.to_string dep_ty) res )
+    | Tintersection tyl ->
+      (* Terrible hack (compatible with previous behaviour) that first attempts to project off the
+       * non-type-variable conjunects. If this doesn't succeed, then try the type variable
+       * conjunects, which will cause type-const constraints to be added to the type variables.
+       *)
+      let (tyl_vars, tyl_nonvars) =
+        List.partition_tf tyl ~f:(fun t ->
+            let (_env, t) = Env.expand_type env t in
+            is_tyvar t)
+      in
+      (* TODO: should we be taking the intersection of the errors? *)
+      let ((env, e1), resl) =
+        List.map_env_ty_err_opt
+          env
+          tyl_nonvars
+          ~f:(expand ctx)
+          ~combine_ty_errs:Typing_error.multiple_opt
+      in
+      let result = intersect_results err resl in
+      (match result with
+      | Missing _ ->
+        (* TODO: should we be taking the intersection of the errors? *)
+        let ((env, e2), resl) =
+          List.map_env_ty_err_opt
+            env
+            tyl_vars
+            ~f:(expand ctx)
+            ~combine_ty_errs:Typing_error.multiple_opt
+        in
+        (* TODO: should we be taking the intersection of the errors? *)
+        let ty_err_opt =
+          Option.merge e1 e2 ~f:(fun e1 e2 -> Typing_error.multiple [e1; e2])
+        in
+        ((env, ty_err_opt), intersect_results err resl)
+      | _ -> ((env, e1), result))
+    | Tunion tyl ->
+      let ((env, ty_err_opt), resl) =
+        List.map_env_ty_err_opt
+          env
+          tyl
+          ~f:(expand ctx)
+          ~combine_ty_errs:Typing_error.union_opt
+      in
+      let result = union_results err resl in
+      ((env, ty_err_opt), result)
+    | Tvar n ->
+      let (env, ty) =
+        Typing_subtype_tconst.get_tyvar_type_const
+          env
+          n
+          ctx.id
+          ~on_error:ctx.ety_env.on_error
+      in
+      (env, Exact ty)
+    | Tunapplied_alias _ ->
+      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
+    | Taccess _
+    | Tnonnull
+    | Tprim _
+    | Tshape _
+    | Ttuple _
+    | Tvec_or_dict _
+    | Tfun _
+    | Tdynamic
+    | Toption _
+    | Tneg _ ->
+      ((env, None), Missing err)
 
 (** Expands a type constant access like A::T to its definition. *)
 let expand_with_env

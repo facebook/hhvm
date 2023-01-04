@@ -25,7 +25,6 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tprim p -> Aast_defs.string_of_tprim p
   | Tunion [] when allow_nothing -> "nothing"
   | Tany _
-  | Terr
   | Tvar _
   | Tdependent _
   | Tunion _

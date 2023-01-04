@@ -23,11 +23,11 @@ File "test_pattern.php", line 35, characters 5-26:
 File "test_pattern.php", line 37, characters 5-36:
 [Test::test_method_call]{Foo::$bar}(int)<WriteNonSensitive> A global variable is possibly written via reference. (Other[11002])
 File "test_pattern.php", line 38, characters 5-30:
-[Test::test_method_call]{Foo::$bar}(_)<WriteNonSensitive> A global variable is possibly written via reference. (Other[11002])
+[Test::test_method_call]{Foo::$bar}(nothing)<WriteNonSensitive> A global variable is possibly written via reference. (Other[11002])
 File "test_pattern.php", line 39, characters 5-64:
-[Test::test_method_call]{Foo::$bar}(_)<WriteNonSensitive> A global variable is possibly written via reference. (Other[11002])
+[Test::test_method_call]{Foo::$bar}(nothing)<WriteNonSensitive> A global variable is possibly written via reference. (Other[11002])
 File "test_pattern.php", line 40, characters 5-32:
-[Test::test_method_call]{Foo::$static_prop}((int & _))<WriteGlobalToGlobal,WriteNonSensitive> A global variable is definitely written. (Other[11001])
+[Test::test_method_call]{Foo::$static_prop}(nothing)<WriteGlobalToGlobal,WriteNonSensitive> A global variable is definitely written. (Other[11001])
 File "test_pattern.php", line 42, characters 5-56:
 [Test::test_method_call]{Foo::$bar}(int)<WriteGlobalToGlobal,WriteNonSensitive> A global variable is possibly written via reference. (Other[11002])
 File "test_pattern.php", line 42, characters 40-56:

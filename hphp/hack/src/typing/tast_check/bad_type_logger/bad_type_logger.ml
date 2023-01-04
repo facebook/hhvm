@@ -23,8 +23,6 @@ let extract_bad_type_indicator ty =
       inherit [bad_type_indicator] Type_visitor.locl_type_visitor
 
       method! on_tany indicator _ = { indicator with has_tany = true }
-
-      method! on_terr indicator _ = { indicator with has_terr = true }
     end
   in
   let init_indicator = { has_tany = false; has_terr = false } in

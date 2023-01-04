@@ -52,7 +52,10 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
             @@ Primary.Cyclic_typedef
                  { pos = initial_taccess_pos; decl_pos = pos }))
     in
-    ((env, ty_err_opt), (ety_env, MakeType.err r))
+    let (env, ty) =
+      Env.fresh_type_error env (Pos_or_decl.unsafe_to_raw_pos pos)
+    in
+    ((env, ty_err_opt), (ety_env, ty))
   | None ->
     let should_expand =
       force_expand

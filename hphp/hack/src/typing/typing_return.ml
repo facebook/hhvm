@@ -61,7 +61,7 @@ let make_info ret_pos fun_kind attributes env return_type =
 let make_wrapped_fresh_type env p r id =
   let class_ = Env.get_class env id in
   match class_ with
-  | None -> Env.fresh_type env p (* Shouldn't happen *)
+  | None -> Env.fresh_type_error env p (* Shouldn't happen *)
   | Some class_ ->
     let ((env, _), ty, _tal) =
       Typing_phase.localize_targs_and_check_constraints

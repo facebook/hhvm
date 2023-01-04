@@ -20,9 +20,7 @@ let check_types env (_, p, te) =
       let rec iter ty1 =
         let (_, ety1) = Env.expand_type env ty1 in
         match get_node ety1 with
-        | Tany _
-        | Terr ->
-          true
+        | Tany _ -> true
         | Tvec_or_dict _
         | Ttuple _
         | Tshape _

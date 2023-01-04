@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Typing_defs
-module MakeType = Typing_make_type
 
 (* Eliminate residue of type inference:
  *   1. Tvars are replaced (deep) by the expanded type
@@ -54,7 +53,6 @@ let expand_ty ?var_hook ?pos env ty =
             Errors.add_typing_error
               Typing_error.(primary @@ Primary.Unresolved_tyvar pos);
           mk (p, Tvar v))
-      | (p, Terr) -> MakeType.err p
       (* TODO(T36532263) see if that needs updating *)
       | (_, Taccess _) -> ety
       | (_, Tunapplied_alias _) -> ety

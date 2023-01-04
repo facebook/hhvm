@@ -64,8 +64,7 @@ module Locl_Inst = struct
       let ty1 = instantiate subst ty1 in
       let ty2 = instantiate subst ty2 in
       Tvec_or_dict (ty1, ty2)
-    | (Tvar _ | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _ | Tneg _) as x ->
-      x
+    | (Tvar _ | Tdynamic | Tnonnull | Tany _ | Tprim _ | Tneg _) as x -> x
     | Ttuple tyl ->
       let tyl = List.map tyl ~f:(instantiate subst) in
       Ttuple tyl
@@ -357,7 +356,6 @@ module Simple = struct
         kinds
     in
     match ty_ with
-    | Terr
     | Tany _
     | Tvar _
     (* Tvar must not be higher-kinded yet *)
@@ -509,9 +507,7 @@ module Simple = struct
                pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos;
                count = List.length targs;
              }
-      | Terr
-      | Tany _ ->
-        ()
+      | Tany _ -> ()
       | _ -> kind_error (Simple.fully_applied_type ())
 
   (* Export the version that doesn't expose allow_missing_targs *)

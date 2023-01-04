@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0c90c9594f51adbb6b1cf937aeffa792>>
+// @generated SignedSource<<43bb4e5ce2acebde33a06a09d0c1b4de>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -338,6 +338,9 @@ pub enum T_<'a> {
     #[rust_to_ocaml(name = "Rtype_variable_generics")]
     #[rust_to_ocaml(inline_tuple)]
     RtypeVariableGenerics(&'a (&'a pos::Pos<'a>, &'a str, &'a str)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Rtype_variable_error")]
+    RtypeVariableError(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rglobal_type_variable_generics")]
     #[rust_to_ocaml(inline_tuple)]

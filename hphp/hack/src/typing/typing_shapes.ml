@@ -470,7 +470,9 @@ let check_shape_keys_validity env keys =
       (env, key_pos, None)
     | Ast_defs.SFclass_const ((_p, cls), (p, y)) -> begin
       match Env.get_class env cls with
-      | None -> (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
+      | None ->
+        let (env, ty) = Env.fresh_type_error env p in
+        (env, key_pos, Some (cls, ty))
       | Some cd ->
         (match Env.get_const env cd y with
         | None ->
@@ -483,7 +485,9 @@ let check_shape_keys_validity env keys =
                cd
                y
                Typing_error.Callback.unify_error;
-          (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
+          let (env, ty) = Env.fresh_type_error env p in
+
+          (env, key_pos, Some (cls, ty))
         | Some { cc_type; _ } ->
           let ((env, ty_err_opt), ty) =
             Typing_phase.localize_no_subst ~ignore_errors:true env cc_type
@@ -530,7 +534,10 @@ let check_shape_keys_validity env keys =
         List.filter_map
           ~f:Fn.id
           [
-            (if String.( <> ) cls1 cls2 then
+            (if TUtils.is_tyvar_error env ty1 || TUtils.is_tyvar_error env ty2
+            then
+              None
+            else if String.( <> ) cls1 cls2 then
               Some
                 (shape
                    (Primary.Shape.Shape_field_class_mismatch
@@ -542,23 +549,27 @@ let check_shape_keys_validity env keys =
                       }))
             else
               None);
-            (let (ty1_sub_ty2, e1) = Typing_solver.is_sub_type env ty1 ty2
-             and (ty2_sub_ty1, e2) = Typing_solver.is_sub_type env ty2 ty1 in
-             let e3 =
-               if not (ty1_sub_ty2 && ty2_sub_ty1) then
-                 Some
-                   (shape
-                      (Primary.Shape.Shape_field_type_mismatch
-                         {
-                           pos = key_pos;
-                           witness_pos;
-                           ty_name = lazy (Typing_print.error env ty2);
-                           witness_ty_name = lazy (Typing_print.error env ty1);
-                         }))
-               else
-                 None
-             in
-             Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3]);
+            (if TUtils.is_tyvar_error env ty1 || TUtils.is_tyvar_error env ty2
+            then
+              None
+            else
+              let (ty1_sub_ty2, e1) = Typing_solver.is_sub_type env ty1 ty2
+              and (ty2_sub_ty1, e2) = Typing_solver.is_sub_type env ty2 ty1 in
+              let e3 =
+                if not (ty1_sub_ty2 && ty2_sub_ty1) then
+                  Some
+                    (shape
+                       (Primary.Shape.Shape_field_type_mismatch
+                          {
+                            pos = key_pos;
+                            witness_pos;
+                            ty_name = lazy (Typing_print.error env ty2);
+                            witness_ty_name = lazy (Typing_print.error env ty1);
+                          }))
+                else
+                  None
+              in
+              Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3]);
           ]
     in
     let ty_err_opt = Typing_error.multiple_opt ty_errs in

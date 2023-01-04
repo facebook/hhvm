@@ -226,7 +226,6 @@ and _ ty_ =
   | Tlike : decl_ty -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_
-  | Terr
   | Tnonnull
   (* A dynamic type is a special type which sometimes behaves as if it were a
    * top type; roughly speaking, where a specific value of a particular type is

@@ -201,7 +201,7 @@ let err_if_var_in_ty_pure env var ty =
                      with_blank_tyvars (fun () -> full_rec env var ty));
              })
     in
-    (MakeType.err (get_reason ty), Some ty_err)
+    (MakeType.union (get_reason ty) [], Some ty_err)
   else
     (ty, None)
 

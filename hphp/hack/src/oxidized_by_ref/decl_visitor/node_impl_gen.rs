@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cca49472b346e3ba3a67be82a7d3395e>>
+// @generated SignedSource<<3bfa6279c7d39dabdf16bd9d50f252da>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -955,6 +955,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RimplicitUpperBound(ref __binding_0) => __binding_0.accept(v),
             T_::RtypeVariable(ref __binding_0) => __binding_0.accept(v),
             T_::RtypeVariableGenerics(ref __binding_0) => __binding_0.accept(v),
+            T_::RtypeVariableError(ref __binding_0) => __binding_0.accept(v),
             T_::RglobalTypeVariableGenerics(ref __binding_0) => __binding_0.accept(v),
             T_::RsolveFail(ref __binding_0) => __binding_0.accept(v),
             T_::RcstrOnGenerics(ref __binding_0) => __binding_0.accept(v),
@@ -1097,7 +1098,6 @@ impl<'a> Node<'a> for Ty_<'a> {
             Ty_::Tmixed => {}
             Ty_::Tlike(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tany(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Terr => {}
             Ty_::Tnonnull => {}
             Ty_::Tdynamic => {}
             Ty_::Toption(ref __binding_0) => __binding_0.accept(v),

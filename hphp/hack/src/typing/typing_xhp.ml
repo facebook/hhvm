@@ -56,7 +56,6 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   match get_node cty with
   | Tany _
-  | Terr
   | Tdynamic ->
     (env, [], [])
   | Tunion tyl ->

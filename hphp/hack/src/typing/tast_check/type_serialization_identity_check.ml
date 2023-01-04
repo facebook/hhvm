@@ -23,8 +23,7 @@ let rec strip_ty ty =
     match ty with
     | Tany _
     | Tnonnull
-    | Tdynamic
-    | Terr ->
+    | Tdynamic ->
       ty
     | Tprim _ -> ty
     | Tvar _ -> ty

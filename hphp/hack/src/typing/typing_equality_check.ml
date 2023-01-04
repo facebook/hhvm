@@ -138,10 +138,10 @@ let rec assert_nontrivial p bop env ty1 ty2 =
     | ((_, Toption ty1), (_, Tprim _)) -> assert_nontrivial p bop env ty1 ty2
     | ((_, Tprim _), (_, Toption ty2)) -> assert_nontrivial p bop env ty1 ty2
     | ( ( _,
-          ( Terr | Tany _ | Tnonnull | Tvec_or_dict _ | Tprim _ | Toption _
-          | Tdynamic | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _
-          | Tclass _ | Ttuple _ | Tunion _ | Tintersection _ | Tshape _
-          | Taccess _ | Tunapplied_alias _ | Tneg _ ) ),
+          ( Tany _ | Tnonnull | Tvec_or_dict _ | Tprim _ | Toption _ | Tdynamic
+          | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _
+          | Ttuple _ | Tunion _ | Tintersection _ | Tshape _ | Taccess _
+          | Tunapplied_alias _ | Tneg _ ) ),
         _ ) ->
       ())
 

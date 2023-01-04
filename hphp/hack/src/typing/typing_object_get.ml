@@ -116,8 +116,6 @@ let fold_mismatches mismatches =
 let fold_mismatch_opts opt_errs =
   Option.(map ~f:fold_mismatches @@ all opt_errs)
 
-let err_witness env p = TUtils.terr env (Reason.Rwitness p)
-
 let smember_not_found
     pos ~is_const ~is_method ~is_function_pointer class_ member_name on_error =
   let kind =
@@ -342,7 +340,7 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
         make_nullable_member_type ~is_method env id_pos pos tyarg
       in
       (env, MakeType.supportdyn r ty)
-    | (_, (Terr | Tdynamic | Tany _)) -> (env, ty)
+    | (_, (Tdynamic | Tany _)) -> (env, ty)
     | (_, Tunion []) -> (env, MakeType.null (Reason.Rnullsafe_op pos))
     | _ ->
       (* Shouldn't happen *)
@@ -404,7 +402,6 @@ let rec this_appears_covariantly ~contra env ty =
     this_appears_covariantly_params tparams tyl
   | Tmixed
   | Tany _
-  | Terr
   | Tnonnull
   | Tdynamic
   | Tprim _
@@ -460,9 +457,7 @@ let rec obj_get_concrete_ty
     in
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
     (env, err_opt, (ty, []), dflt_lval_mismatch, dflt_rval_mismatch)
-  | (_, Tany _)
-  | (_, Terr) ->
-    default None
+  | (_, Tany _) -> default None
   | (r, Tnonnull) ->
     let ty_reasons =
       match r with
@@ -1119,9 +1114,10 @@ and nullable_obj_get
         in
         (MakeType.nothing Reason.none, ty_err)
     in
+    let (env, ty) = Env.fresh_type_error env id_pos in
     ( env,
       Some ty_err,
-      (TUtils.terr env (get_reason ety1), []),
+      (ty, []),
       Error (ety1, ty_expect),
       Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty )
 
@@ -1244,11 +1240,8 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
       in
       let ty_nothing = MakeType.nothing Reason.none in
       let lval_mismatch = Error (receiver_ty, ty_nothing) in
-      ( env,
-        ty_err_opt,
-        (err_witness env id_pos, []),
-        lval_mismatch,
-        dflt_rval_mismatch )
+      let (env, ty) = Env.fresh_type_error env id_pos in
+      (env, ty_err_opt, (ty, []), lval_mismatch, dflt_rval_mismatch)
     | (env, tyl) ->
       let (env, ty) = Typing_intersection.intersect_list env r tyl in
       let (env, ty) =
@@ -1264,28 +1257,33 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
     nullable_obj_get ~read_context ty
   (* We are trying to access a member through a value of unknown type *)
   | (r, Tvar _) ->
-    let ty_err =
-      Typing_error.(
-        primary
-        @@ Primary.Unknown_object_member
-             {
-               elt =
-                 (if args.is_method then
-                   `meth
-                 else
-                   `prop);
-               member_name = id_str;
-               pos = id_pos;
-               reason = lazy (Reason.to_string "It is unknown" r);
-             })
+    let ty_err_opt =
+      if Typing_utils.is_tyvar_error env ety1 then
+        None
+      else
+        Some
+          Typing_error.(
+            primary
+            @@ Primary.Unknown_object_member
+                 {
+                   elt =
+                     (if args.is_method then
+                       `meth
+                     else
+                       `prop);
+                   member_name = id_str;
+                   pos = id_pos;
+                   reason = lazy (Reason.to_string "It is unknown" r);
+                 })
     in
     let ty_err_opt =
-      Option.merge expand_ty_err_opt (Some ty_err) ~f:Typing_error.both
+      Option.merge expand_ty_err_opt ty_err_opt ~f:Typing_error.both
     in
     let ty_nothing = MakeType.nothing Reason.none in
+    let (env, ty) = Env.fresh_type_error env id_pos in
     ( env,
       ty_err_opt,
-      (TUtils.terr env r, []),
+      (ty, []),
       Error (receiver_ty, ty_nothing),
       dflt_rval_mismatch )
   | (_, _) ->

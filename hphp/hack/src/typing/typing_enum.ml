@@ -74,14 +74,18 @@ let member_type env member_ce =
     | _ -> default_result
 
 let enum_check_const ty_exp env cc t =
-  let p = fst cc.cc_id in
-  Typing_ops.sub_type
-    p
-    Reason.URenum
-    env
-    t
-    ty_exp
-    Typing_error.Callback.constant_does_not_match_enum_type
+  if Typing_utils.is_tyvar_error env ty_exp || Typing_utils.is_tyvar_error env t
+  then
+    (env, None)
+  else
+    let p = fst cc.cc_id in
+    Typing_ops.sub_type
+      p
+      Reason.URenum
+      env
+      t
+      ty_exp
+      Typing_error.Callback.constant_does_not_match_enum_type
 
 (* Check that the `as` bound or the underlying type of an enum is a subtype of
  * arraykey. For enum class, check that it is a denotable closed type:
@@ -98,6 +102,8 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     MakeType.arraykey (Reason.Rimplicit_upper_bound (pos, "arraykey"))
   in
   let rec is_valid_base lty =
+    Typing_utils.is_tyvar_error env lty
+    ||
     match get_node lty with
     | Tprim _
     | Tnonnull ->
@@ -111,7 +117,6 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     | Tshape (_, shapemap) ->
       TShapeMap.for_all (fun _name sfty -> is_valid_base sfty.sft_ty) shapemap
     | Tany _
-    | Terr
     | Tdynamic
     | Tfun _
     | Tvar _

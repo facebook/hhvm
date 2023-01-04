@@ -35,9 +35,8 @@ let handler =
              || Tast_env.is_sub_type_for_union
                   env
                   ty
-                  (mk (Reason.none, Typing_defs.make_tany ()))
-             || Tast_env.is_sub_type_for_union env ty (MakeType.err Reason.none)
-        ->
+                  (mk (Reason.none, Typing_defs.make_tany ())) ->
+        (* TODO akenn: do we need to detect error tyvar too? *)
         ()
       | (_, _, Obj_get (_, (_, pos, Lvar (lvar_pos, lvar_lid)), _, _)) ->
         let lvar_name = Local_id.get_name lvar_lid in

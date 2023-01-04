@@ -15,8 +15,6 @@ class type ['a] decl_type_visitor_type =
   object
     method on_tany : 'a -> decl_phase Reason.t_ -> 'a
 
-    method on_terr : 'a -> decl_phase Reason.t_ -> 'a
-
     method on_tmixed : 'a -> decl_phase Reason.t_ -> 'a
 
     method on_tnonnull : 'a -> decl_phase Reason.t_ -> 'a
@@ -72,8 +70,6 @@ class type ['a] decl_type_visitor_type =
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
   object (this)
     method on_tany acc _ = acc
-
-    method on_terr acc _ = acc
 
     method on_tmixed acc _ = acc
 
@@ -144,7 +140,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       let (r, x) = deref ty in
       match x with
       | Tany _ -> this#on_tany acc r
-      | Terr -> this#on_terr acc r
       | Tmixed -> this#on_tmixed acc r
       | Tnonnull -> this#on_tnonnull acc r
       | Tdynamic -> this#on_tdynamic acc r
@@ -169,8 +164,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
 class type ['a] locl_type_visitor_type =
   object
     method on_tany : 'a -> Reason.t -> 'a
-
-    method on_terr : 'a -> Reason.t -> 'a
 
     method on_tnonnull : 'a -> Reason.t -> 'a
 
@@ -226,8 +219,6 @@ class type ['a] locl_type_visitor_type =
 class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
   object (this)
     method on_tany acc _ = acc
-
-    method on_terr acc _ = acc
 
     method on_tnonnull acc _ = acc
 
@@ -302,7 +293,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       let (r, x) = deref ty in
       match x with
       | Tany _ -> this#on_tany acc r
-      | Terr -> this#on_terr acc r
       | Tnonnull -> this#on_tnonnull acc r
       | Tdynamic -> this#on_tdynamic acc r
       | Toption ty -> this#on_toption acc r ty

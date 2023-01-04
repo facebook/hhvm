@@ -129,6 +129,7 @@ type _ t_ =
   | Rimplicit_upper_bound : Pos_or_decl.t * string -> 'phase t_
   | Rtype_variable : Pos.t -> locl_phase t_
   | Rtype_variable_generics : Pos.t * string * string -> locl_phase t_
+  | Rtype_variable_error : Pos.t -> locl_phase t_
   | Rglobal_type_variable_generics :
       Pos_or_decl.t * string * string
       -> 'phase t_
@@ -407,6 +408,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
         r_inst
   | Rtype_variable _ ->
     [(p, prefix ^ " because a type could not be determined here")]
+  | Rtype_variable_error _ -> [(p, prefix ^ " because there was another error")]
   | Rtype_variable_generics (_, tp_name, s)
   | Rglobal_type_variable_generics (_, tp_name, s) ->
     [
@@ -686,6 +688,7 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rincdec_dynamic p
   | Rtype_variable p
   | Rtype_variable_generics (p, _, _)
+  | Rtype_variable_error p
   | Rlambda_param (p, _)
   | Rshape (p, _)
   | Rdestructure p
@@ -817,6 +820,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rincdec_dynamic _ -> "Rincdec_dynamic"
   | Rtype_variable _ -> "Rtype_variable"
   | Rtype_variable_generics _ -> "Rtype_variable_generics"
+  | Rtype_variable_error _ -> "Rtype_variable_error"
   | Rglobal_type_variable_generics _ -> "Rglobal_type_variable_generics"
   | Rsolve_fail _ -> "Rsolve_fail"
   | Rcstr_on_generics _ -> "Rcstr_on_generics"

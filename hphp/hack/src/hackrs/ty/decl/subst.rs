@@ -36,8 +36,8 @@ impl<R: Reason> From<Subst<R>> for IndexMap<TypeName, Ty<R>> {
 impl<R: Reason> Subst<R> {
     pub fn new(tparams: &[Tparam<R, Ty<R>>], targs: &[Ty<R>]) -> Self {
         // If there are fewer type arguments than type parameters, we'll have
-        // emitted an error elsewhere. We bind missing types to `Tany` (rather
-        // than `Terr`) here to keep parity with the OCaml implementation, which
+        // emitted an error elsewhere. We bind missing types to `Tany`
+        // here to keep parity with the OCaml implementation, which
         // produces `Tany` because of a now-dead feature called "silent_mode".
         let targs = targs
             .iter()

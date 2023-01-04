@@ -11,8 +11,6 @@ class type ['a] decl_type_visitor_type =
   object
     method on_tany : 'a -> Typing_reason.decl_t -> 'a
 
-    method on_terr : 'a -> Typing_reason.decl_t -> 'a
-
     method on_tmixed : 'a -> Typing_reason.decl_t -> 'a
 
     method on_tnonnull : 'a -> Typing_reason.decl_t -> 'a
@@ -95,8 +93,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type
 class type ['a] locl_type_visitor_type =
   object
     method on_tany : 'a -> Typing_reason.t -> 'a
-
-    method on_terr : 'a -> Typing_reason.t -> 'a
 
     method on_tnonnull : 'a -> Typing_reason.t -> 'a
 

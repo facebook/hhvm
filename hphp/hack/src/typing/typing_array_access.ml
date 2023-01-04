@@ -25,7 +25,7 @@ let mk_ty_mismatch_res ty_have ty_expect =
     ~default:(Ok ty_have)
     ~f:Fn.(const @@ Error (ty_have, ty_expect))
 
-let err_witness env p = TUtils.terr env (Reason.Rwitness p)
+let err_witness env p = Env.fresh_type_error env p
 
 let error_array env p ty =
   Errors.add_typing_error
@@ -39,7 +39,7 @@ let error_array env p ty =
              decl_pos = get_pos ty;
              ty_name = lazy (Typing_print.error env ty);
            });
-  (env, err_witness env p)
+  err_witness env p
 
 let error_const_mutation env p ty =
   Errors.add_typing_error
@@ -51,18 +51,19 @@ let error_const_mutation env p ty =
              decl_pos = get_pos ty;
              ty_name = lazy (Typing_print.error env ty);
            });
-  (env, err_witness env p)
+  err_witness env p
 
 let error_assign_array_append env p ty =
-  Errors.add_typing_error
-    Typing_error.(
-      primary
-      @@ Primary.Array_append
-           {
-             pos = p;
-             decl_pos = get_pos ty;
-             ty_name = lazy (Typing_print.error env ty);
-           });
+  if not (TUtils.is_tyvar_error env ty) then
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Array_append
+             {
+               pos = p;
+               decl_pos = get_pos ty;
+               ty_name = lazy (Typing_print.error env ty);
+             });
   (env, ty)
 
 (* Given a type `ty` known to be a lower bound on the type of the array operand
@@ -393,7 +394,8 @@ let rec array_get
                             "This is what makes me believe it can be `null`."
                             r);
                    });
-          (env, (err_witness env expr_pos, Some (ty_actual, ty_expected), None))
+          let (env, ty) = err_witness env expr_pos in
+          (env, (ty, Some (ty_actual, ty_expected), None))
       in
       let type_index env p ty_have ty_expect reason =
         Typing_log.(
@@ -443,7 +445,7 @@ let rec array_get
           | [ty] -> maybe_pessimise_type env ty
           | _ ->
             arity_error id;
-            (env, err_witness env expr_pos)
+            err_witness env expr_pos
         in
         let (_, p2, _) = e2 in
         let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx_vector p2)) in
@@ -462,7 +464,8 @@ let rec array_get
               primary
               @@ Primary.Keyset_set
                    { pos = expr_pos; decl_pos = Reason.to_pos r });
-          (env, (err_witness env expr_pos, Ok ty2, dflt_arr_res))
+          let (env, ty) = err_witness env expr_pos in
+          (env, (ty, Ok ty2, dflt_arr_res))
         ) else
           let (k, (env, v)) =
             match argl with
@@ -472,8 +475,8 @@ let rec array_get
               (k, maybe_pessimise_type env v)
             | _ ->
               arity_error id;
-              let any = err_witness env expr_pos in
-              (any, (env, any))
+              let (env, ty) = err_witness env expr_pos in
+              (ty, (env, ty))
           in
           (* dict and keyset are covariant in the key type, so subsumption
            * lets you upcast the key type beyond ty2 to arraykey.
@@ -518,8 +521,8 @@ let rec array_get
             | [k; v] -> (k, maybe_pessimise_type env v)
             | _ ->
               arity_error id;
-              let any = err_witness env expr_pos in
-              (any, (env, any))
+              let (env, ty) = err_witness env expr_pos in
+              (ty, (env, ty))
           in
           let (env, idx_err_res) =
             check_arraykey_index_read env expr_pos ty1 ty2
@@ -534,7 +537,7 @@ let rec array_get
           | [ty] -> maybe_pessimise_type env ty
           | _ ->
             arity_error id;
-            (env, err_witness env expr_pos)
+            err_witness env expr_pos
         in
         let (_, p2, _) = e2 in
         let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx (p2, r))) in
@@ -558,7 +561,9 @@ let rec array_get
         in
         let (env, tv) = maybe_pessimise_type env v in
         (env, (tv, dflt_arr_res, idx_err_res))
-      | Terr -> (env, (err_witness env expr_pos, dflt_arr_res, Ok ty2))
+      | Tvar _ when TUtils.is_tyvar_error env ty1 ->
+        let (env, ty) = err_witness env expr_pos in
+        (env, (ty, dflt_arr_res, Ok ty2))
       | Tdynamic
         when Typing_env_types.(
                TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
@@ -592,7 +597,8 @@ let rec array_get
                        pos = p;
                        msg = Reason.string_of_ureason Reason.index_tuple;
                      });
-            (env, (err_witness env p, dflt_arr_res, Ok ty2)))
+            let (env, ty) = err_witness env p in
+            (env, (ty, dflt_arr_res, Ok ty2)))
         | (_, p, _) ->
           Errors.add_typing_error
             Typing_error.(
@@ -602,10 +608,8 @@ let rec array_get
                      pos = p;
                      msg = Reason.string_of_ureason Reason.URtuple_access;
                    });
-          ( env,
-            ( err_witness env p,
-              dflt_arr_res,
-              Error (ty2, MakeType.int Reason.none) ) ))
+          let (env, ty) = err_witness env expr_pos in
+          (env, (ty, dflt_arr_res, Error (ty2, MakeType.int Reason.none))))
       | Tclass (((_, cn) as id), _, argl)
         when String.equal cn SN.Collections.cPair ->
         let (ty_fst, ty_snd) =
@@ -613,8 +617,8 @@ let rec array_get
           | [ty_fst; ty_snd] -> (ty_fst, ty_snd)
           | _ ->
             arity_error id;
-            let any = err_witness env expr_pos in
-            (any, any)
+            let (_env, ty) = err_witness env expr_pos in
+            (ty, ty)
         in
         (* requires integer literal *)
         (match e2 with
@@ -631,7 +635,8 @@ let rec array_get
                        pos = p;
                        msg = Reason.string_of_ureason (Reason.index_class cn);
                      });
-            (env, (err_witness env p, dflt_arr_res, Ok ty2)))
+            let (env, ty) = err_witness env p in
+            (env, (ty, dflt_arr_res, Ok ty2)))
         | (_, p, _) ->
           Errors.add_typing_error
             Typing_error.(
@@ -641,10 +646,8 @@ let rec array_get
                      pos = p;
                      msg = Reason.string_of_ureason Reason.URpair_access;
                    });
-          ( env,
-            ( err_witness env p,
-              dflt_arr_res,
-              Error (ty2, MakeType.int Reason.none) ) ))
+          let (env, ty) = err_witness env p in
+          (env, (ty, dflt_arr_res, Error (ty2, MakeType.int Reason.none))))
       | Tshape (_, fdm) ->
         if is_lvalue || lhs_of_null_coalesce then
           (* The expression $s['x'] ?? $y is semantically equivalent to
@@ -671,7 +674,8 @@ let rec array_get
             | None ->
               (* there was already an error in shape_field name,
                  don't report another one for a missing field *)
-              (env, (err_witness env p, dflt_arr_res, Ok ty2))
+              let (env, ty) = err_witness env p in
+              (env, (ty, dflt_arr_res, Ok ty2))
             | Some field ->
               let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
               begin
@@ -686,7 +690,8 @@ let rec array_get
                              name = TUtils.get_printable_shape_field_name field;
                              decl_pos = Reason.to_pos r;
                            });
-                  (env, (err_witness env p, dflt_arr_res, Ok ty2))
+                  let (env, ty) = err_witness env p in
+                  (env, (ty, dflt_arr_res, Ok ty2))
                 | Some { sft_optional; sft_ty } ->
                   if sft_optional then (
                     let declared_field =
@@ -706,7 +711,8 @@ let rec array_get
                                decl_pos =
                                  Typing_defs.TShapeField.pos declared_field;
                              });
-                    (env, (err_witness env p, dflt_arr_res, Ok ty2))
+                    let (env, ty) = err_witness env p in
+                    (env, (ty, dflt_arr_res, Ok ty2))
                   ) else
                     let (env, pess_sft_ty) = maybe_pessimise_type env sft_ty in
                     (env, (pess_sft_ty, dflt_arr_res, Ok ty2))
@@ -882,7 +888,6 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       in
       match deref ty1 with
       | (_, Tany _) -> (env, (ty1, Ok ty1, Ok ty2))
-      | (_, Terr) -> (env, (ty1, Ok ty1, Ok ty2))
       | (_, Tclass ((_, n), _, [tv])) when String.equal n SN.Collections.cVector
         ->
         let (env, tv) = maybe_pessimise_type env tv in
@@ -1102,7 +1107,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           | [tv] -> maybe_pessimise_type env tv
           | _ ->
             arity_error id;
-            (env, err_witness env expr_pos)
+            err_witness env expr_pos
         in
         let (_, p, _) = key in
         let tk = MakeType.enforced (MakeType.int (Reason.Ridx_vector p)) in
@@ -1130,7 +1135,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           | [tv] -> (env, tv)
           | _ ->
             arity_error id;
-            (env, err_witness env expr_pos)
+            err_witness env expr_pos
         in
         let (_, p, _) = key in
         let tk = MakeType.enforced (MakeType.int (Reason.Ridx_vector p)) in
@@ -1155,8 +1160,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           | [tk; tv] -> (tk, maybe_pessimise_type env tv)
           | _ ->
             arity_error id;
-            let any = err_witness env expr_pos in
-            (any, (env, any))
+            let (env, ty) = err_witness env expr_pos in
+            (ty, (env, ty))
         in
         let (env, tk) =
           let (_, p, _) = key in
@@ -1206,8 +1211,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           | [tk; tv] -> (tk, tv)
           | _ ->
             arity_error id;
-            let any = err_witness env expr_pos in
-            (any, any)
+            let (_env, ty) = err_witness env expr_pos in
+            (ty, ty)
         in
         let (env, tk') =
           let (_, p, _) = key in
@@ -1317,7 +1322,9 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         in
         let ty = mk (r, Tvec_or_dict (tk', tv')) in
         (env, (ty, Ok ty, idx_err, Ok ty2))
-      | Terr -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
+      | Tvar _ when TUtils.is_tyvar_error env ety1 ->
+        let (env, ty) = Env.fresh_type_error env expr_pos in
+        (env, (ty, Ok ty, Ok tkey, Ok ty2))
       | Tdynamic
         when Typing_env_types.(
                TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->

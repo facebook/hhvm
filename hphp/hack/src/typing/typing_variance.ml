@@ -331,7 +331,6 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   | Tdynamic
   | Tprim _
   | Tany _
-  | Terr
   | Tthis
   | Tmixed
   | Tvar _ ->

@@ -205,6 +205,7 @@ pub trait Reason:
                 OR::RtypeVariableGenerics(&(pos, s1, s2)) => {
                     RI::RtypeVariableGenerics(pos.into(), Symbol::new(s1), Symbol::new(s2))
                 }
+                OR::RtypeVariableError(pos) => RI::RtypeVariableError(pos.into()),
                 OR::RglobalTypeVariableGenerics(&(pos, s1, s2)) => {
                     RI::RglobalTypeVariableGenerics(pos.into(), Symbol::new(s1), Symbol::new(s2))
                 }
@@ -364,6 +365,7 @@ pub enum ReasonImpl<R, P> {
     RimplicitUpperBound(P, Symbol),
     RtypeVariable(P),
     RtypeVariableGenerics(P, Symbol, Symbol),
+    RtypeVariableError(P),
     RglobalTypeVariableGenerics(P, Symbol, Symbol),
     RsolveFail(P),
     RcstrOnGenerics(P, Positioned<TypeName, P>),
@@ -586,6 +588,7 @@ impl<'a> ToOxidized<'a> for BReason {
                     s2.to_oxidized(arena),
                 )))
             }
+            RI::RtypeVariableError(pos) => OR::RtypeVariableError(pos.to_oxidized(arena)),
             RI::RsolveFail(pos) => OR::RsolveFail(pos.to_oxidized(arena)),
             RI::RcstrOnGenerics(pos, pos_id) => OR::RcstrOnGenerics(
                 arena.alloc((pos.to_oxidized(arena), pos_id.to_oxidized(arena))),

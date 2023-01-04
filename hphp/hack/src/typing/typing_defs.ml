@@ -442,7 +442,6 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tunion _
   | Tintersection _ ->
     true
-  | Terr
   | Tnonnull
   | Tneg _
   | Tdynamic
@@ -539,7 +538,6 @@ let rec is_denotable ty =
   | Tintersection _
   | Tneg _
   | Tany _
-  | Terr
   | Tvar _
   | Tdependent _
   | Tunapplied_alias _ ->
@@ -610,9 +608,7 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tlike _ -> 103
   | Trefinement _ -> 104
   (* exist in both phases *)
-  | Tany _
-  | Terr ->
-    0
+  | Tany _ -> 0
   | Toption t -> begin
     match get_node t with
     | Tnonnull -> 1
@@ -738,11 +734,10 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | (Tneg neg1, Tneg neg2) -> compare_neg_type neg1 neg2
     | (Tnonnull, Tnonnull) -> 0
     | (Tdynamic, Tdynamic) -> 0
-    | (Terr, Terr) -> 0
     | ( ( Tprim _ | Toption _ | Tvec_or_dict _ | Tfun _ | Tintersection _
         | Tunion _ | Ttuple _ | Tgeneric _ | Tnewtype _ | Tdependent _
         | Tclass _ | Tshape _ | Tvar _ | Tunapplied_alias _ | Tnonnull
-        | Tdynamic | Terr | Taccess _ | Tany _ | Tneg _ | Trefinement _ ),
+        | Tdynamic | Taccess _ | Tany _ | Tneg _ | Trefinement _ ),
         _ ) ->
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
   and shape_field_type_compare :

@@ -256,7 +256,6 @@ and _ ty_ =
   | Tlike : decl_ty -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_
-  | Terr
   | Tnonnull
   | Tdynamic
       (** A dynamic type is a special type which sometimes behaves as if it were a
@@ -561,7 +560,6 @@ module Pp = struct
    fun fmt ty ->
     match ty with
     | Tany _ -> Format.pp_print_string fmt "Tany"
-    | Terr -> Format.pp_print_string fmt "Terr"
     | Tthis -> Format.pp_print_string fmt "Tthis"
     | Tmixed -> Format.pp_print_string fmt "Tmixed"
     | Tdynamic -> Format.pp_print_string fmt "Tdynamic"

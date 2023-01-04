@@ -84,11 +84,6 @@ module VisitedGoals = struct
         Some (SMap.add name (ITySet.add ty lower, upper) v)
 end
 
-let is_err ty =
-  match get_node ty with
-  | Terr -> true
-  | _ -> false
-
 type subtype_env = {
   require_soundness: bool;
       (** If set, requires the simplification of subtype constraints to be sound,
@@ -469,7 +464,6 @@ let rec null_not_subtype ty =
   | Tprim (Aast_defs.Tnull | Aast_defs.Tvoid)
   | Tgeneric _
   | Tdynamic
-  | Terr
   | Tany _
   | Toption _
   | Tvar _
@@ -636,11 +630,11 @@ and default_subtype
                   ~super_like
                   (LoclType ty_sub)
                   ty_super)
-      | (_, Terr) ->
+      (*| (_, Terr) ->
         if subtype_env.no_top_bottom then
           default env
         else
-          valid env
+          valid env*)
       | (_, Tvar id) ->
         (* For subtyping queries of the form
          *
@@ -1011,8 +1005,7 @@ and simplify_subtype_i
                  ty_super
                  env)
             &&& simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ty_super
-          | (_, (Tintersection _ | Tunion _ | Terr | Tvar _)) ->
-            default_subtype env
+          | (_, (Tintersection _ | Tunion _ | Tvar _)) -> default_subtype env
           | _ ->
             env
             |> simplify_subtype_i ~subtype_env ty_sub (LoclType lty_super)
@@ -1261,24 +1254,6 @@ and simplify_subtype_i
   (* Next deal with all locl types *)
   | LoclType ty_super ->
     (match deref ty_super with
-    | (_, Terr) ->
-      (match ety_sub with
-      | ConstraintType cty when is_constraint_type_union cty ->
-        default_subtype env
-      | ConstraintType _ ->
-        if subtype_env.no_top_bottom then
-          default env
-        else
-          valid env
-      | LoclType lty ->
-        (match deref lty with
-        | (_, Tunion _) -> default_subtype env
-        | (_, Terr) -> valid env
-        | _ ->
-          if subtype_env.no_top_bottom then
-            default env
-          else
-            valid env))
     | (_, Tvar var_super) ->
       (match ety_sub with
       | ConstraintType cty when is_constraint_type_union cty ->
@@ -1286,7 +1261,7 @@ and simplify_subtype_i
       | ConstraintType _ -> default env
       | LoclType ty_sub ->
         (match deref ty_sub with
-        | (_, (Tunion _ | Terr)) -> default_subtype env
+        | (_, Tunion _) -> default_subtype env
         | (_, Tdynamic) when coercing_from_dynamic subtype_env ->
           default_subtype env
         (* We want to treat nullable as a union with the same rule as above.
@@ -1323,7 +1298,6 @@ and simplify_subtype_i
       | ConstraintType cty when is_constraint_type_union cty ->
         default_subtype env
       | LoclType lty when is_union lty -> default_subtype env
-      | LoclType lty when is_err lty -> valid env
       (* t <: (t1 & ... & tn)
        *   if and only if
        * t <: t1 /\  ... /\ t <: tn
@@ -1448,7 +1422,7 @@ and simplify_subtype_i
         | (env, Some props) -> (env, props)
         | (env, None) ->
           (match deref lty_sub with
-          | (_, (Tunion _ | Terr | Tvar _)) -> default_subtype env
+          | (_, (Tunion _ | Tvar _)) -> default_subtype env
           | (_, Tgeneric _) when subtype_env.require_completeness ->
             default_subtype env
           (* Num is not atomic: it is equivalent to int|float. The rule below relies
@@ -1634,7 +1608,7 @@ and simplify_subtype_i
             Typing_defs.error_Tunapplied_alias_in_illegal_context ()
           | ( ( _,
                 ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
-                | Tclass _ | Tvec_or_dict _ | Tany _ | Terr | Taccess _ ) ),
+                | Tclass _ | Tvec_or_dict _ | Tany _ | Taccess _ ) ),
               _ ) ->
             simplify_subtype
               ~subtype_env
@@ -1724,8 +1698,7 @@ and simplify_subtype_i
          * parameters to the context, (so seen_generic_params = None), leave
          * subtype so that the bounds get added *)
         | Tvar _
-        | Tunion _
-        | Terr ->
+        | Tunion _ ->
           default_subtype env
         | _ ->
           if subtype_env.require_completeness then
@@ -1818,7 +1791,6 @@ and simplify_subtype_i
         @@
         (match deref lty_sub with
         | (_, Tany _)
-        | (_, Terr)
         | ( _,
             Tprim
               ( Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey | Tvoid
@@ -2689,20 +2661,24 @@ and simplify_subtype_can_traverse
   | ConstraintType _ ->
     default_subtype ~subtype_env ~this_ty ~fail env ty_sub ty_super
   | LoclType lty_sub ->
-    (match get_node lty_sub with
-    | Tdynamic ->
-      simplify_subtype ~subtype_env ~this_ty lty_sub ct.ct_val env
-      &&&
-      (match ct.ct_key with
-      | None -> valid
-      | Some ct_key -> simplify_subtype ~subtype_env ~this_ty lty_sub ct_key)
-    | Tclass _
-    | Tvec_or_dict _
-    | Tany _
-    | Terr ->
+    if TUtils.is_tyvar_error env lty_sub then
       let trav_ty = can_traverse_to_iface ct in
       simplify_subtype ~subtype_env ~this_ty lty_sub trav_ty env
-    | _ -> default_subtype ~subtype_env ~this_ty ~fail env ty_sub ty_super)
+    else (
+      match get_node lty_sub with
+      | Tdynamic ->
+        simplify_subtype ~subtype_env ~this_ty lty_sub ct.ct_val env
+        &&&
+        (match ct.ct_key with
+        | None -> valid
+        | Some ct_key -> simplify_subtype ~subtype_env ~this_ty lty_sub ct_key)
+      | Tclass _
+      | Tvec_or_dict _
+      | Tany _ ->
+        let trav_ty = can_traverse_to_iface ct in
+        simplify_subtype ~subtype_env ~this_ty lty_sub trav_ty env
+      | _ -> default_subtype ~subtype_env ~this_ty ~fail env ty_sub ty_super
+    )
 
 and simplify_subtype_has_type_member
     ~subtype_env ~this_ty ~fail ty_sub (r, htm) env =
@@ -2806,7 +2782,7 @@ and simplify_subtype_has_type_member
       when String.equal s Naming_special_names.Typehints.this ->
       let bnd_tys = Typing_set.elements (Env.get_upper_bounds env s ty_args) in
       concrete_rigid_tvar_access env Typing_type_member.This bnd_tys
-    | (_, (Tvar _ | Tgeneric _ | Tunion _ | Tintersection _ | Terr)) ->
+    | (_, (Tvar _ | Tgeneric _ | Tunion _ | Tintersection _)) ->
       default_subtype env
     | _ -> invalid ~fail env)
 
@@ -2888,7 +2864,7 @@ and simplify_subtype_has_member
     | _ -> default_subtype env)
   | LoclType ty_sub ->
     (match deref ty_sub with
-    | (_, (Tvar _ | Tunion _ | Terr)) -> default_subtype env
+    | (_, (Tvar _ | Tunion _)) -> default_subtype env
     | (r_null, Tprim Aast.Tnull) when using_new_method_call_inference ->
       if Option.is_some nullsafe then
         valid env
@@ -4348,8 +4324,8 @@ let is_type_disjoint env ty1 ty2 =
     let (env, ty1) = Env.expand_type env ty1 in
     let (env, ty2) = Env.expand_type env ty2 in
     match (get_node ty1, get_node ty2) with
-    | (_, (Tany _ | Terr | Tdynamic | Taccess _ | Tunapplied_alias _))
-    | ((Tany _ | Terr | Tdynamic | Taccess _ | Tunapplied_alias _), _) ->
+    | (_, (Tany _ | Tdynamic | Taccess _ | Tunapplied_alias _))
+    | ((Tany _ | Tdynamic | Taccess _ | Tunapplied_alias _), _) ->
       false
     | (Tshape _, Tshape _) ->
       (* This could be more precise, e.g., if we have two closed shapes with different fields.

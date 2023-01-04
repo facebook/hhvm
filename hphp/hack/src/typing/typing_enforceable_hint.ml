@@ -21,9 +21,6 @@ let validator =
     (* Only comes about because naming has reported an error and left Hany *)
     method! on_tany acc _ = acc
 
-    (* Already reported an error *)
-    method! on_terr acc _ = acc
-
     method! on_tprim acc r prim =
       match prim with
       | Aast.Tvoid -> this#invalid acc r "the `void` type"

@@ -8,9 +8,3 @@ No instance method `get` in `IEmpty` (Typing[4053])
   This is why I think it is an object of type IEmpty
   File "this_access_union_intersect.php", line 33, characters 11-16:
   Declaration of `IEmpty` is here
-File "this_access_union_intersect.php", line 44, characters 10-11:
-Invalid return type (Typing[4110])
-  File "this_access_union_intersect.php", line 41, characters 45-46:
-  Expected `TP`
-  File "this_access_union_intersect.php", line 18, characters 26-27:
-  But got `JB`

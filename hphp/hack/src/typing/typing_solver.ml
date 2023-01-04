@@ -74,7 +74,6 @@ let rec freshen_inside_ty env ty =
   match ty_ with
   | Tany _
   | Tnonnull
-  | Terr
   | Tdynamic
   | Tprim _
   | Tneg _ ->
@@ -153,7 +152,10 @@ let rec freshen_inside_ty env ty =
   | Tunapplied_alias _ -> default ()
 
 and freshen_ty env ty =
-  Env.fresh_type_invariant env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
+  if TUtils.is_tyvar_error env ty then
+    Env.fresh_type_error env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
+  else
+    Env.fresh_type_invariant env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
 
 and freshen_possibly_enforced_ty env ety =
   let (env, et_type) = freshen_ty env ety.et_type in
@@ -198,7 +200,9 @@ let bind env var (ty : locl_ty) =
    * nothing, as it will lead to type holes.
    *)
   let proj_ty_err_opt =
-    if Typing_utils.is_nothing env ty && not (SMap.is_empty tconsts) then
+    if Typing_utils.is_tyvar_error env ty then
+      None
+    else if Typing_utils.is_nothing env ty && not (SMap.is_empty tconsts) then
       let (_, ((proj_pos, tconst_name), _)) = SMap.choose tconsts
       and pos = Env.get_tyvar_pos env var in
       Some
@@ -329,41 +333,40 @@ let bind_to_upper_bound env r var upper_bounds =
 let ty_equal_shallow env ty1 ty2 =
   let (env, ty1) = Env.expand_type env ty1 in
   let (_env, ty2) = Env.expand_type env ty2 in
-  match (get_node ty1, get_node ty2) with
-  | (Tany _, Tany _)
-  | (Tnonnull, Tnonnull)
-  | (Terr, Terr)
-  | (Tdynamic, Tdynamic)
-  | (Ttuple _, Ttuple _) ->
+  if Typing_utils.is_tyvar_error env ty1 && Typing_utils.is_tyvar_error env ty2
+  then
     true
-  | (Tprim p1, Tprim p2) -> Aast_defs.equal_tprim p1 p2
-  | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->
-    String.equal (snd x_sub) (snd x_super) && equal_exact exact_sub exact_super
-  | (Tfun fty1, Tfun fty2) -> Int.equal fty1.ft_flags fty2.ft_flags
-  | (Tshape (shape_kind1, fdm1), Tshape (shape_kind2, fdm2)) ->
-    equal_shape_kind shape_kind1 shape_kind2
-    && List.equal
-         (fun (k1, v1) (k2, v2) ->
-           TShapeField.equal k1 k2 && Bool.equal v1.sft_optional v2.sft_optional)
-         (ShapeFieldMap.elements fdm1)
-         (ShapeFieldMap.elements fdm2)
-  | (Tnewtype (n1, _, _), Tnewtype (n2, _, _)) -> String.equal n1 n2
-  | (Tdependent (dep1, _), Tdependent (dep2, _)) ->
-    equal_dependent_type dep1 dep2
-  | _ -> false
+  else
+    match (get_node ty1, get_node ty2) with
+    | (Tany _, Tany _)
+    | (Tnonnull, Tnonnull)
+    | (Tdynamic, Tdynamic)
+    | (Ttuple _, Ttuple _) ->
+      true
+    | (Tprim p1, Tprim p2) -> Aast_defs.equal_tprim p1 p2
+    | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->
+      String.equal (snd x_sub) (snd x_super)
+      && equal_exact exact_sub exact_super
+    | (Tfun fty1, Tfun fty2) -> Int.equal fty1.ft_flags fty2.ft_flags
+    | (Tshape (shape_kind1, fdm1), Tshape (shape_kind2, fdm2)) ->
+      equal_shape_kind shape_kind1 shape_kind2
+      && List.equal
+           (fun (k1, v1) (k2, v2) ->
+             TShapeField.equal k1 k2
+             && Bool.equal v1.sft_optional v2.sft_optional)
+           (ShapeFieldMap.elements fdm1)
+           (ShapeFieldMap.elements fdm2)
+    | (Tnewtype (n1, _, _), Tnewtype (n2, _, _)) -> String.equal n1 n2
+    | (Tdependent (dep1, _), Tdependent (dep2, _)) ->
+      equal_dependent_type dep1 dep2
+    | _ -> false
 
 let union_any_if_any_in_lower_bounds env ty lower_bounds =
   let r = Reason.none in
-  let any = LoclType (mk (r, Typing_defs.make_tany ()))
-  and err = LoclType (MakeType.err r) in
+  let any = LoclType (mk (r, Typing_defs.make_tany ())) in
   let (env, ty) =
     match ITySet.find_opt any lower_bounds with
     | Some (LoclType any) -> Union.union env ty any
-    | _ -> (env, ty)
-  in
-  let (env, ty) =
-    match ITySet.find_opt err lower_bounds with
-    | Some (LoclType err) -> Union.union env ty err
     | _ -> (env, ty)
   in
   (env, ty)
@@ -384,9 +387,8 @@ let try_bind_to_equal_bound ~freshen env r var =
     let lower_bounds = expand_all (Env.get_tyvar_lower_bounds env var) in
     let upper_bounds = expand_all (Env.get_tyvar_upper_bounds env var) in
     let equal_bounds = ITySet.inter lower_bounds upper_bounds in
-    let any = LoclType (mk (Reason.none, Typing_defs.make_tany ()))
-    and err = LoclType (MakeType.err Reason.none) in
-    let equal_bounds = equal_bounds |> ITySet.remove any |> ITySet.remove err in
+    let any = LoclType (mk (Reason.none, Typing_defs.make_tany ())) in
+    let equal_bounds = equal_bounds |> ITySet.remove any in
     let (env, ty_err_opt) =
       match ITySet.choose_opt equal_bounds with
       | Some (LoclType ty) ->
@@ -695,22 +697,25 @@ let expand_type_and_solve
     | None ->
       let env =
         List.fold !vars_solved_to_nothing ~init:env ~f:(fun env (r, v) ->
-            let ty_err =
-              Typing_error.(
-                primary
-                @@ Primary.Unknown_type
-                     {
-                       expected = description_of_expected;
-                       pos = p;
-                       reason = lazy (Reason.to_string "It is unknown" r);
-                     })
-            in
-            ty_errs := ty_err :: !ty_errs;
-            Env.set_tyvar_eager_solve_fail env v)
+            match r with
+            | Reason.Rtype_variable_error _ -> env
+            | _ ->
+              let ty_err =
+                Typing_error.(
+                  primary
+                  @@ Primary.Unknown_type
+                       {
+                         expected = description_of_expected;
+                         pos = p;
+                         reason = lazy (Reason.to_string "It is unknown" r);
+                       })
+              in
+              ty_errs := ty_err :: !ty_errs;
+              Env.set_tyvar_eager_solve_fail env v)
       in
       let ty_err_opt = Typing_error.multiple_opt !ty_errs in
-      ( (env, ty_err_opt),
-        TUtils.terr env (Reason.Rsolve_fail (Pos_or_decl.of_raw_pos p)) )
+      let (env, ty) = Env.fresh_type_error env p in
+      ((env, ty_err_opt), ty)
   end
   | _ ->
     let ty_err_opt = Typing_error.multiple_opt !ty_errs in

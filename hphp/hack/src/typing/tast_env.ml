@@ -143,7 +143,6 @@ let get_receiver_ids env ty =
       let upper_bounds = Typing_env.get_upper_bounds env name targs in
       Typing_set.fold (fun ty acc -> aux seen acc ty) upper_bounds acc
     | Tdynamic -> [RIdynamic]
-    | Terr -> [RIerr]
     | Tany _ -> [RIany]
     | _ -> acc
   in

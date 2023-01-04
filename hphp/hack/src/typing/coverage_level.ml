@@ -128,7 +128,6 @@ let rec is_tany env ty =
   let (env, ty) = Tast_env.expand_type env ty in
   match get_node ty with
   | Tany _
-  | Terr
   | Tdynamic ->
     (env, Some (get_reason ty))
   | Tclass ((_, class_name), _, [ty])

@@ -88,7 +88,6 @@ let rec validate_free_type env locl_ty =
   | Tvar _
   | Taccess _
   | Tdependent _
-  | Terr
   (* Unsupported b/c relative/erroneous *)
   | Tgeneric _ ->
     [Printf.sprintf "Unsupported free type %s" (Typing_print.full env locl_ty)]

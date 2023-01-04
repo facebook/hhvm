@@ -115,7 +115,6 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
   in
   let r = get_reason dty |> Typing_reason.localize in
   match get_node dty with
-  | Terr -> ((env, None), TUtils.terr env r)
   | Trefinement (root, cr) -> localize_refinement ~ety_env env r root cr
   | Tany _ -> ((env, None), mk (r, TUtils.tany env))
   | Tvar _var ->
@@ -166,7 +165,8 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
       | (_ :: _, _, None) ->
         (* No kinding info, but type arguments given. We don't know the kinds of the arguments,
            so we can't localize them. Not much we can do. *)
-        ((env, None), mk (Reason.none, Terr))
+        let (env, ty) = Env.fresh_type_error env Pos.none in
+        ((env, None), ty)
     in
     begin
       match SMap.find_opt x ety_env.substs with
@@ -370,7 +370,10 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
                 @@ Primary.Cyclic_typedef
                      { pos = initial_taccess_pos; decl_pos }))
         in
-        ((env, ty_err_opt), MakeType.err r)
+        let (env, ty) =
+          Env.fresh_type_error env (Pos_or_decl.unsafe_to_raw_pos decl_pos)
+        in
+        ((env, ty_err_opt), ty)
       | None ->
         Decl_typedef_expand.expand_typedef
           ~force_expand:true
@@ -431,8 +434,9 @@ and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
     let (name, kind) = nkind in
     let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
     if is_higher_kinded then
+      let (env, ty) = Env.fresh_type_error env Pos.none in
       (* We don't support wildcards in place of HK type arguments *)
-      ((env, None, ety_env), mk (Reason.none, Terr))
+      ((env, None, ety_env), ty)
     else
       let full_kind_without_bounds =
         KindDefs.Simple.to_full_kind_without_bounds kind
@@ -645,7 +649,8 @@ and localize_with_kind
         then
           ((env, None), mk (r, Tclass (id, nonexact, [])))
         else
-          ((env, None), mk (Reason.none, Terr))
+          let (env, ty) = Env.fresh_type_error env Pos.none in
+          ((env, None), ty)
       | Some (Env.TypedefResult typedef) ->
         if Typing_env.is_typedef_visible env ~name typedef then
           ((env, None), mk (r, Tunapplied_alias name))
@@ -656,7 +661,8 @@ and localize_with_kind
       | None ->
         (* We are expected to localize a higher-kinded type, but are given an unknown class name.
               Not much we can do. *)
-        ((env, None), mk (Reason.none, Terr))
+        let (env, ty) = Env.fresh_type_error env Pos.none in
+        ((env, None), ty)
     end
     | Tgeneric (name, []) -> begin
       match Env.get_pos_and_kind_of_generic env name with
@@ -669,7 +675,8 @@ and localize_with_kind
         then
           ((env, None), mk (r, Tgeneric (name, [])))
         else
-          ((env, None), mk (Reason.none, Terr))
+          let (env, ty) = Env.fresh_type_error env Pos.none in
+          ((env, None), ty)
       | None ->
         (* FIXME: Ideally, we would like to fail here, but sometimes we see type
            parameters without an entry in the environment. *)
@@ -677,10 +684,12 @@ and localize_with_kind
     end
     | Tgeneric (_, _targs)
     | Tapply (_, _targs) ->
-      ((env, None), mk (Reason.none, Terr))
+      let (env, ty) = Env.fresh_type_error env Pos.none in
+      ((env, None), ty)
     | Tany _ -> ((env, None), mk (r, make_tany ()))
-    | Terr -> ((env, None), mk (r, Terr))
-    | _dty_ -> ((env, None), mk (Reason.none, Terr))
+    | _dty_ ->
+      let (env, ty) = Env.fresh_type_error env Pos.none in
+      ((env, None), ty)
 
 (* Recursive localizations of function types do not make judgements about enforceability *)
 and localize_possibly_enforced_ty ~ety_env env ety =
@@ -1084,7 +1093,9 @@ and localize_refinement ~ety_env env r root decl_cr =
         decl_cr
     in
     ((env, ty_err_opt), mk (r, Tclass (cid, Nonexact cr, tyl)))
-  | _ -> ((env, mk_unsupported_err ()), TUtils.terr env r)
+  | _ ->
+    let (env, ty) = Env.fresh_type_error env Pos.none in
+    ((env, mk_unsupported_err ()), ty)
 
 (* Like localize_no_subst, but uses the supplied kind, enabling support
    for higher-kinded types *)
@@ -1109,7 +1120,8 @@ let localize_targ_with_kind
     let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
     if is_higher_kinded then
       let ty_err = Typing_error.(primary @@ Primary.HKT_wildcard (fst hint)) in
-      ((env, Some ty_err), (mk (Reason.none, Terr), hint))
+      let (env, ty) = Env.fresh_type_error env p in
+      ((env, Some ty_err), (ty, hint))
     else
       let (env, ty) = Env.fresh_type env p in
       ((env, None), (ty, hint))
@@ -1256,7 +1268,8 @@ let localize_targs_with_kinds
                    param_name = snd kind_name;
                  })
         in
-        ((env, Some ty_err), (mk (Reason.none, Terr), wildcard_hint))
+        let (env, ty) = Env.fresh_type_error env use_pos in
+        ((env, Some ty_err), (ty, wildcard_hint))
       else
         let (env, tvar) =
           Env.fresh_type_reason

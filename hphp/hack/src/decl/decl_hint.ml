@@ -93,7 +93,7 @@ and aast_tparam_to_decl_tparam env t =
 
 and hint_ p env = function
   | Hany -> Typing_defs.make_tany ()
-  | Herr -> Terr
+  | Herr -> Typing_defs.make_tany ()
   | Hmixed -> Tmixed
   | Hnonnull -> Tnonnull
   | Hthis -> Tthis
@@ -266,7 +266,7 @@ and hint_ p env = function
   | Hfun_context _
   | Hvar _ ->
     Errors.internal_error p "Unexpected context hint";
-    Terr
+    Tunion []
 
 and possibly_enforced_hint env h =
   (* Initially we assume that a type is not enforced at runtime.

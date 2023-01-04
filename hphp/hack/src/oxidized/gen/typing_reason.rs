@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<21fa43a553ad095147f196dd3597a86c>>
+// @generated SignedSource<<cfbc40180b16f9ddd54ae48db9354050>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -272,6 +272,8 @@ pub enum T_ {
     RtypeVariable(pos::Pos),
     #[rust_to_ocaml(name = "Rtype_variable_generics")]
     RtypeVariableGenerics(pos::Pos, String, String),
+    #[rust_to_ocaml(name = "Rtype_variable_error")]
+    RtypeVariableError(pos::Pos),
     #[rust_to_ocaml(name = "Rglobal_type_variable_generics")]
     RglobalTypeVariableGenerics(pos_or_decl::PosOrDecl, String, String),
     #[rust_to_ocaml(name = "Rsolve_fail")]

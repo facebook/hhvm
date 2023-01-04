@@ -117,6 +117,18 @@ let fresh_type_invariant env p =
   let (inference_env, res) = Inf.fresh_type_invariant env.inference_env p in
   ({ env with inference_env }, res)
 
+let fresh_type_error env p =
+  log_env_change_ "fresh_type_error" env
+  @@
+  let (inference_env, res) =
+    Inf.fresh_type_reason
+      ~variance:Ast_defs.Invariant
+      env.inference_env
+      p
+      (Reason.Rtype_variable_error p)
+  in
+  ({ env with inference_env }, res)
+
 let new_global_tyvar env ?i r =
   log_env_change_ "new_global_tyvar" env
   @@
@@ -1415,7 +1427,6 @@ and get_tyvars_i env (ty : internal_type) =
     | Tvar v -> (env, ISet.singleton v, ISet.empty)
     | Tany _
     | Tnonnull
-    | Terr
     | Tdynamic
     | Tprim _
     | Tneg _ ->

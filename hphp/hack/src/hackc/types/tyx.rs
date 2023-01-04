@@ -33,7 +33,6 @@ pub(crate) fn convert(ty_: &typing_defs::Ty_<'_>) -> Tyx {
         Ty_::Trefinement(_) => Tyx::Mixed,
         Ty_::Tmixed => Tyx::Mixed,
         Ty_::Tlike(_) => Tyx::Mixed,
-        Ty_::Terr => Tyx::GiveUp,
         Ty_::Tdynamic => Tyx::GiveUp,
         Ty_::Toption(_) => Tyx::Mixed,
         Ty_::Tprim(_) => Tyx::Primitive,

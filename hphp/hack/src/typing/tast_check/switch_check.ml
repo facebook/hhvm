@@ -211,7 +211,6 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
              () ))
   | Tnewtype (name, args, _) ->
     apply_if_enum_or_enum_class env ~default:env ~f:check name args
-  | Terr
   | Tany _
   | Tnonnull
   | Tvec_or_dict _

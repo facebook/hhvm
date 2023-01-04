@@ -277,9 +277,8 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
                 alloc.set_field(&mut block, 0, alloc.add(&())); // TanySentinel
                 block.build()
             }
-            Ty_::Terr => ocamlrep::Value::int(2),
-            Ty_::Tnonnull => ocamlrep::Value::int(3),
-            Ty_::Tdynamic => ocamlrep::Value::int(4),
+            Ty_::Tnonnull => ocamlrep::Value::int(2),
+            Ty_::Tdynamic => ocamlrep::Value::int(3),
             Ty_::Toption(x) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 4u8);
                 alloc.set_field(&mut block, 0, alloc.add(&*x));
@@ -363,10 +362,9 @@ impl<R: Reason> FromOcamlRep for Ty_<R> {
             match value.as_int().unwrap() {
                 0 => Ok(Ty_::Tthis),
                 1 => Ok(Ty_::Tmixed),
-                2 => Ok(Ty_::Terr),
-                3 => Ok(Ty_::Tnonnull),
-                4 => Ok(Ty_::Tdynamic),
-                t => Err(ocamlrep::FromError::NullaryVariantTagOutOfRange { max: 4, actual: t }),
+                2 => Ok(Ty_::Tnonnull),
+                3 => Ok(Ty_::Tdynamic),
+                t => Err(ocamlrep::FromError::NullaryVariantTagOutOfRange { max: 3, actual: t }),
             }
         } else {
             let block = ocamlrep::from::expect_block(value)?;

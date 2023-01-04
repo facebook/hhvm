@@ -133,6 +133,7 @@ type _ t_ =
   | Rimplicit_upper_bound : Pos_or_decl.t * string -> 'phase t_
   | Rtype_variable : Pos.t -> locl_phase t_
   | Rtype_variable_generics : Pos.t * string * string -> locl_phase t_
+  | Rtype_variable_error : Pos.t -> locl_phase t_
   | Rglobal_type_variable_generics :
       Pos_or_decl.t * string * string
       -> 'phase t_

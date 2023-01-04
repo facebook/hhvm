@@ -297,7 +297,6 @@ pub enum Ty_<R: Reason> {
     Tmixed,
     Tlike(Ty<R>),
     Tany,
-    Terr,
     Tnonnull,
     /// A dynamic type is a special type which sometimes behaves as if it were a
     /// top type; roughly speaking, where a specific value of a particular type is
@@ -361,7 +360,7 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
     fn recurse(&self, v: &mut dyn crate::visitor::Visitor<R>) {
         use Ty_::*;
         match self {
-            Tthis | Tmixed | Tany | Terr | Tnonnull | Tdynamic | Tprim(_) | Tvar(_) => {}
+            Tthis | Tmixed | Tany | Tnonnull | Tdynamic | Tprim(_) | Tvar(_) => {}
             Tapply(id_and_args) => {
                 let (_, args) = &**id_and_args;
                 args.accept(v)

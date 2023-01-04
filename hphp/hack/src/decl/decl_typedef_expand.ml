@@ -38,12 +38,8 @@ let rec expand_and_instantiate
   let (td_tparams, expanded_type, cycles) =
     expand_typedef_ ~force_expand visited ctx name
   in
-  match expanded_type with
-  | Terr ->
-    (MakeType.err r, cycles @ [{ decl_pos = Reason.to_pos r; td_name = name }])
-  | _ ->
-    let subst = Decl_instantiate.make_subst td_tparams ty_argl in
-    (Decl_instantiate.instantiate subst (mk (r, expanded_type)), cycles)
+  let subst = Decl_instantiate.make_subst td_tparams ty_argl in
+  (Decl_instantiate.instantiate subst (mk (r, expanded_type)), cycles)
 
 (** [expand_typedef_ visited ctx name ty_argl] returns the full expansion of the type alias named [name].
     E.g. if `type A<T> = Vec<B<T>>; type B<T> = Map<int, T>`, [expand_typedef] on "A" returns `(["T"], Vec<Map<int, T>>)`.
@@ -77,37 +73,35 @@ and expand_typedef_ ?(force_expand = false) visited ctx (name : string) :
   } =
     td
   in
-  if SSet.mem name visited then
-    ([], Terr, [])
-  else
+  (* We don't want our visibility logic to depend on the filename of the caller,
+     so the best we can do is determine visibility just based on td_vis. *)
+  let should_expand =
+    (not (SSet.mem name visited))
+    && (force_expand
+       ||
+       match td_vis with
+       | Aast.OpaqueModule
+       | Aast.Opaque ->
+         false
+       | Aast.Transparent -> true)
+  in
+  if should_expand then
     let visited = SSet.add name visited in
-    (* We don't want our visibility logic to depend on the filename of the caller,
-       so the best we can do is determine visibility just based on td_vis. *)
-    let should_expand =
-      force_expand
-      ||
-      match td_vis with
-      | Aast.OpaqueModule
-      | Aast.Opaque ->
-        false
-      | Aast.Transparent -> true
+    let (ty, cycles) = expand_ visited ctx td_type in
+    (td_tparams, get_node ty, cycles)
+  else
+    let tparam_to_tgeneric tparam =
+      mk (Reason.Rhint (fst tparam.tp_name), Tgeneric (snd tparam.tp_name, []))
     in
-    if should_expand then
-      let (ty, cycles) = expand_ visited ctx td_type in
-      (td_tparams, get_node ty, cycles)
-    else
-      let tparam_to_tgeneric tparam =
-        mk (Reason.Rhint (fst tparam.tp_name), Tgeneric (snd tparam.tp_name, []))
-      in
-      let (tyl : decl_ty list) = List.map td_tparams ~f:tparam_to_tgeneric in
-      let cstr =
-        match td_as_constraint with
-        | Some cstr -> cstr
-        | None ->
-          let r_cstr = Reason.Rimplicit_upper_bound (td_pos, "?nonnull") in
-          MakeType.mixed r_cstr
-      in
-      (td_tparams, Tnewtype (name, tyl, cstr), [])
+    let (tyl : decl_ty list) = List.map td_tparams ~f:tparam_to_tgeneric in
+    let cstr =
+      match td_as_constraint with
+      | Some cstr -> cstr
+      | None ->
+        let r_cstr = Reason.Rimplicit_upper_bound (td_pos, "?nonnull") in
+        MakeType.mixed r_cstr
+    in
+    (td_tparams, Tnewtype (name, tyl, cstr), [])
 
 (** [expand_ visited ctx ty] traverses the type tree of [ty] and recursively expands all its transparent type alias.
     E.g. if `type B<Tb> = Map<int, Tb>`, [expand_ visited ctx (Vec<B<Ta>>)] returns `Vec<Map<int, Ta>>`.
@@ -132,8 +126,7 @@ and expand_ visited ctx (ty : decl_ty) : decl_ty * cyclic_td_usage list =
       (mk (r, Tapply ((_pos, name), tyl)), List.concat cycles)
   | Tvar _ -> failwith "not implemented"
   | Tthis -> failwith "should never happen"
-  | (Tmixed | Terr | Tnonnull | Tdynamic | Tprim _ | Tgeneric _ | Tany _) as x
-    ->
+  | (Tmixed | Tnonnull | Tdynamic | Tprim _ | Tgeneric _ | Tany _) as x ->
     (mk (r, x), [])
   | Trefinement (ty, rs) ->
     let (cycles, rs) =

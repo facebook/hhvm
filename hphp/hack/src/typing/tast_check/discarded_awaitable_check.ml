@@ -43,7 +43,6 @@ let rec enforce_not_awaitable env p ty =
       enforce_not_awaitable env p ty'
     else
       ()
-  | Terr
   | Tany _
   | Tnonnull
   | Tvec_or_dict _

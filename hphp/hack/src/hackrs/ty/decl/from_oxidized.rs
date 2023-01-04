@@ -140,7 +140,6 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             typing_defs_core::Ty_::Tmixed => Tmixed,
             typing_defs_core::Ty_::Tlike(ty) => Tlike(ty.into()),
             typing_defs_core::Ty_::Tany(_) => Tany,
-            typing_defs_core::Ty_::Terr => Terr,
             typing_defs_core::Ty_::Tnonnull => Tnonnull,
             typing_defs_core::Ty_::Tdynamic => Tdynamic,
             typing_defs_core::Ty_::Toption(ty) => Toption(ty.into()),

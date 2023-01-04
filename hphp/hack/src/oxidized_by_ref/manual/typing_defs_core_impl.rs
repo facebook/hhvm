@@ -131,7 +131,6 @@ impl std::fmt::Debug for Ty_<'_> {
             Tmixed => write!(f, "Tmixed"),
             Tlike(ty) => f.debug_tuple("Tlike").field(ty).finish(),
             Tany(_) => write!(f, "Tany"),
-            Terr => write!(f, "Terr"),
             Tnonnull => write!(f, "Tnonnull"),
             Tdynamic => write!(f, "Tdynamic"),
             TunappliedAlias(name) => write!(f, "TunappliedAlias({:?})", name),

@@ -91,8 +91,9 @@ let rec get_enforced_type env class_def_opt ty =
         ( Reason.Rnone,
           Tapply
             ( (Cls.pos cd, Cls.name cd),
-              List.map (Cls.tparams cd) ~f:(fun _ -> mk (Reason.Rnone, Terr)) )
-        )
+              List.map (Cls.tparams cd) ~f:(fun _ ->
+                  (* TODO akenn *)
+                  mk (Reason.Rnone, Tunion [])) ) )
   end
   | Toption t ->
     let ety = get_enforced_type env class_def_opt t in

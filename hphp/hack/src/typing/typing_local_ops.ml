@@ -142,7 +142,6 @@ let rec is_byval_collection_or_string_or_any_type env ty =
     | Tdependent _ ->
       (* FIXME we should probably look at the upper bounds here. *)
       false
-    | Terr
     | Tnonnull
     | Tprim _
     | Tfun _

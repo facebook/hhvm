@@ -2,5 +2,3 @@ File "assign_to_function_invocation.php", line 4, characters 19-33:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "assign_to_function_invocation.php", line 4, characters 19-33:
 You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
-File "assign_to_function_invocation.php", line 4, characters 19-22:
-Unbound name: `Time` (an object type) (Naming[2049])

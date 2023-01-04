@@ -11,14 +11,14 @@ Errors:
   [58:14-22] Bad regex pattern; Missing delimiter(s).
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       fd_file_attributes = []; fd_mode = Mstrict;
       fd_fun =
-      { f_span = [3:1-16:2]; f_readonly_this = None; f_annotation = ();
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid))));
-        f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
+      { f_span = [3:1-16:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid)))); 
+        f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -33,7 +33,7 @@ Errors:
                  (Binop ((Eq None), ((shape(0 => string)), [7:3-5], (Lvar ([7:3-5], $y))),
                     ((shape(0 => string)), [7:8-19],
                      (Call ((((function<T as shape(...)>(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): shape(0 => string))), [7:8-15], (Id ([7:8-15], "\\goodbye"))),
-                        [((shape(0 => string)), ([7:8-15], (Happly (([Pos.none], "_"), []))))],
+                        [((shape(0 => string)), ([7:8-15], (Happly (([Pos.none], "_"), []))))], 
                         [(Pnormal, ((HH\Lib\Regex\Pattern<shape(0 => string)>), [7:16-18], (Lvar ([7:16-18], $x))))], None)))
                     )))));
             ([12:3-16],
@@ -48,30 +48,30 @@ Errors:
                     ((string), [15:8-21], (Binop (Dot, ((HH\Lib\Regex\Pattern<shape(0 => string)>), [15:8-10], (Lvar ([15:8-10], $x))), ((string), [15:11-21], (String ", world!"))))))))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
       fd_internal = false; fd_module = None });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
-       { f_span = [18:1-20:2]; f_readonly_this = None; f_annotation = ();
-         f_readonly_ret = None; f_ret = ((T), (Some ([18:78-79], (Habstr ("T", [])))));
+       { f_span = [18:1-20:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((T), (Some ([18:78-79], (Habstr ("T", []))))); 
          f_name = ([18:10-17], "\\goodbye");
          f_tparams =
-         [{ tp_variance = Invariant; tp_name = ([18:18-19], "T"); tp_parameters = [];
-            tp_constraints = [(Constraint_as, ([18:23-41], (Happly (([18:23-41], "\\HH\\Lib\\Regex\\Match"), []))))];
+         [{ tp_variance = Invariant; tp_name = ([18:18-19], "T"); tp_parameters = []; 
+            tp_constraints = [(Constraint_as, ([18:23-41], (Happly (([18:23-41], "\\HH\\Lib\\Regex\\Match"), []))))]; 
             tp_reified = Erased; tp_user_attributes = [] }
            ];
          f_where_constraints = [];
          f_params =
          [{ param_annotation = (HH\Lib\Regex\Pattern<T>);
-            param_type_hint = ((HH\Lib\Regex\Pattern<T>), (Some ([18:43-66], (Happly (([18:43-63], "\\HH\\Lib\\Regex\\Pattern"), [([18:64-65], (Habstr ("T", [])))])))));
-            param_is_variadic = false; param_pos = [18:67-75]; param_name = "$pattern";
-            param_expr = None; param_readonly = None; param_callconv = Pnormal;
+            param_type_hint = ((HH\Lib\Regex\Pattern<T>), (Some ([18:43-66], (Happly (([18:43-63], "\\HH\\Lib\\Regex\\Pattern"), [([18:64-65], (Habstr ("T", [])))]))))); 
+            param_is_variadic = false; param_pos = [18:67-75]; param_name = "$pattern"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -83,19 +83,19 @@ Errors:
                  (New (((Exception), [19:13-22], (CI ([19:13-22], "\\Exception"))), [], [], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
-       { f_span = [24:1-42:2]; f_readonly_this = None; f_annotation = ();
-         f_readonly_ret = None; f_ret = ((void), (Some ([24:25-29], (Hprim Tvoid))));
-         f_name = ([24:10-21], "\\bad_pattern"); f_tparams = []; f_where_constraints = [];
+       { f_span = [24:1-42:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([24:25-29], (Hprim Tvoid)))); 
+         f_name = ([24:10-21], "\\bad_pattern"); f_tparams = []; f_where_constraints = []; 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -104,9 +104,9 @@ Errors:
                 ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'o' => string)>), [25:3-33],
                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'o' => string)>), [25:3-9], (Lvar ([25:3-9], $good0))),
                     ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'o' => string)>), [25:12-33], (PrefixedString ("re", ((string), [25:14-33], (String "/Hel(\\D)(?'o'\\D)/"))))))))));
-             ([26:3-37], (Expr ((_), [26:3-36], (Binop ((Eq None), ((_), [26:3-8], (Lvar ([26:3-8], $bad1))), ((_), [26:13-36], (String "/He(?'l'\\D)(?'l'\\D)o/")))))));
-             ([27:3-31], (Expr ((_), [27:3-30], (Binop ((Eq None), ((_), [27:3-8], (Lvar ([27:3-8], $bad2))), ((_), [27:13-30], (String "/He(?'42'\\D)lo/")))))));
-             ([28:3-20], (Expr ((_), [28:3-19], (Binop ((Eq None), ((_), [28:3-8], (Lvar ([28:3-8], $bad3))), ((_), [28:13-19], (String "/\\c/")))))));
+             ([26:3-37], (Expr ((nothing), [26:3-36], (Binop ((Eq None), ((nothing), [26:3-8], (Lvar ([26:3-8], $bad1))), ((nothing), [26:13-36], (String "/He(?'l'\\D)(?'l'\\D)o/")))))));
+             ([27:3-31], (Expr ((nothing), [27:3-30], (Binop ((Eq None), ((nothing), [27:3-8], (Lvar ([27:3-8], $bad2))), ((nothing), [27:13-30], (String "/He(?'42'\\D)lo/")))))));
+             ([28:3-20], (Expr ((nothing), [28:3-19], (Binop ((Eq None), ((nothing), [28:3-8], (Lvar ([28:3-8], $bad3))), ((nothing), [28:13-19], (String "/\\c/")))))));
              ([29:3-65],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 4 => string, 5 => string, 'one' => string, 'six' => string, 'three' => string)>), [29:3-64],
@@ -190,36 +190,36 @@ Errors:
                      )))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
-       { f_span = [46:1-59:2]; f_readonly_this = None; f_annotation = ();
-         f_readonly_ret = None; f_ret = ((void), (Some ([46:31-35], (Hprim Tvoid))));
-         f_name = ([46:10-27], "\\missing_delimiter"); f_tparams = [];
+       { f_span = [46:1-59:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([46:31-35], (Hprim Tvoid)))); 
+         f_name = ([46:10-27], "\\missing_delimiter"); f_tparams = []; 
          f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([47:3-21], (Expr ((_), [47:3-20], (Binop ((Eq None), ((_), [47:3-8], (Lvar ([47:3-8], $bad0))), ((_), [47:13-20], (String "Hello")))))));
+           [([47:3-21], (Expr ((nothing), [47:3-20], (Binop ((Eq None), ((nothing), [47:3-8], (Lvar ([47:3-8], $bad0))), ((nothing), [47:13-20], (String "Hello")))))));
              ([48:3-24],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [48:3-23],
                   (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [48:3-9], (Lvar ([48:3-9], $good1))),
                      ((HH\Lib\Regex\Pattern<shape(0 => string)>), [48:12-23], (PrefixedString ("re", ((string), [48:14-23], (String "/Hello/"))))))))));
-             ([49:3-22], (Expr ((_), [49:3-21], (Binop ((Eq None), ((_), [49:3-8], (Lvar ([49:3-8], $bad2))), ((_), [49:13-21], (String "/Hello")))))));
+             ([49:3-22], (Expr ((nothing), [49:3-21], (Binop ((Eq None), ((nothing), [49:3-8], (Lvar ([49:3-8], $bad2))), ((nothing), [49:13-21], (String "/Hello")))))));
              ([50:3-24],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [50:3-23],
                   (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [50:3-9], (Lvar ([50:3-9], $good3))),
                      ((HH\Lib\Regex\Pattern<shape(0 => string)>), [50:12-23], (PrefixedString ("re", ((string), [50:14-23], (String "#Hello#"))))))))));
-             ([51:3-23], (Expr ((_), [51:3-22], (Binop ((Eq None), ((_), [51:3-8], (Lvar ([51:3-8], $bad4))), ((_), [51:13-22], (String "#Hello/")))))));
-             ([52:3-22], (Expr ((_), [52:3-21], (Binop ((Eq None), ((_), [52:3-8], (Lvar ([52:3-8], $bad5))), ((_), [52:13-21], (String "#Hello")))))));
+             ([51:3-23], (Expr ((nothing), [51:3-22], (Binop ((Eq None), ((nothing), [51:3-8], (Lvar ([51:3-8], $bad4))), ((nothing), [51:13-22], (String "#Hello/")))))));
+             ([52:3-22], (Expr ((nothing), [52:3-21], (Binop ((Eq None), ((nothing), [52:3-8], (Lvar ([52:3-8], $bad5))), ((nothing), [52:13-21], (String "#Hello")))))));
              ([53:3-24],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [53:3-23],
@@ -230,28 +230,28 @@ Errors:
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [54:3-23],
                   (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [54:3-9], (Lvar ([54:3-9], $good7))),
                      ((HH\Lib\Regex\Pattern<shape(0 => string)>), [54:12-23], (PrefixedString ("re", ((string), [54:14-23], (String ")Hello)"))))))))));
-             ([55:3-23], (Expr ((_), [55:3-22], (Binop ((Eq None), ((_), [55:3-8], (Lvar ([55:3-8], $bad8))), ((_), [55:13-22], (String "(Hello(")))))));
+             ([55:3-23], (Expr ((nothing), [55:3-22], (Binop ((Eq None), ((nothing), [55:3-8], (Lvar ([55:3-8], $bad8))), ((nothing), [55:13-22], (String "(Hello(")))))));
              ([56:3-24],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [56:3-23],
                   (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [56:3-9], (Lvar ([56:3-9], $good9))),
                      ((HH\Lib\Regex\Pattern<shape(0 => string)>), [56:12-23], (PrefixedString ("re", ((string), [56:14-23], (String "[Hello]"))))))))));
-             ([57:3-26], (Expr ((_), [57:3-25], (Binop ((Eq None), ((_), [57:3-9], (Lvar ([57:3-9], $bad10))), ((_), [57:14-25], (String "\\Hello\\")))))));
-             ([58:3-23], (Expr ((_), [58:3-22], (Binop ((Eq None), ((_), [58:3-9], (Lvar ([58:3-9], $bad11))), ((_), [58:14-22], (String "HelloH")))))))]
+             ([57:3-26], (Expr ((nothing), [57:3-25], (Binop ((Eq None), ((nothing), [57:3-9], (Lvar ([57:3-9], $bad10))), ((nothing), [57:14-25], (String "\\Hello\\")))))));
+             ([58:3-23], (Expr ((nothing), [58:3-22], (Binop ((Eq None), ((nothing), [58:3-9], (Lvar ([58:3-9], $bad11))), ((nothing), [58:14-22], (String "HelloH")))))))]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
-       { f_span = [61:1-65:2]; f_readonly_this = None; f_annotation = ();
-         f_readonly_ret = None; f_ret = ((void), (Some ([61:35-39], (Hprim Tvoid))));
-         f_name = ([61:10-31], "\\parentheses_are_weird"); f_tparams = [];
+       { f_span = [61:1-65:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([61:35-39], (Hprim Tvoid)))); 
+         f_name = ([61:10-31], "\\parentheses_are_weird"); f_tparams = []; 
          f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -264,6 +264,6 @@ Errors:
                     )))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None })

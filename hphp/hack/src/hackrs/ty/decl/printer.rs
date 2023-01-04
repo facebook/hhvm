@@ -34,7 +34,6 @@ impl<R: Reason> Display for Ty_<R> {
         use Ty_::*;
         match self {
             Tany => write!(f, "_"),
-            Terr => write!(f, "err"),
             Tthis => write!(f, "this"),
             Tmixed => write!(f, "mixed"),
             Tnonnull => write!(f, "nonnull"),

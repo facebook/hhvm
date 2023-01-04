@@ -196,6 +196,8 @@ val is_tintersection : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
 val is_tyvar : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
+val is_tyvar_error : Typing_env_types.env -> Typing_defs.locl_ty -> bool
+
 val get_base_type :
   ?expand_supportdyn:bool ->
   Typing_env_types.env ->
@@ -448,8 +450,6 @@ val mk_tany :
 
 val mk_tany_ :
   Typing_env_types.env -> Pos_or_decl.t -> Typing_defs.locl_phase Typing_defs.ty
-
-val terr : Typing_env_types.env -> 'a Typing_defs.Reason.t_ -> 'a Typing_defs.ty
 
 val make_locl_subst_for_class_tparams :
   Decl_provider.Class.t ->

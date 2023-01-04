@@ -110,8 +110,7 @@ let locl_like r ty =
   else
     match get_node ty with
     | Tprim Aast.Tnoreturn
-    | Tany _
-    | Terr ->
+    | Tany _ ->
       ty
     | Tunion tys when List.exists Typing_defs.is_dynamic tys -> ty
     | _ -> mk (r, Tunion [dynamic r; ty])
@@ -137,8 +136,6 @@ let tyvar r v = mk (r, Tvar v)
 let generic ?(type_args = []) r n = mk (r, Tgeneric (n, type_args))
 
 let this r = mk (r, Tgeneric (SN.Typehints.this, []))
-
-let err r = mk (r, Terr)
 
 let taccess r ty id = mk (r, Taccess (ty, id))
 

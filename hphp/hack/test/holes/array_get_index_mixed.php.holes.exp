@@ -20,7 +20,7 @@
         { fb_ast =
           [([5:3-10],
             (Expr
-               ((_), [5:3-9],
+               ((nothing), [5:3-9],
                 (Array_get (((mixed), [5:3-6], (Hole (((mixed), [5:3-6], (Lvar ([5:3-6], $xs))), (mixed), (KeyedContainer<nothing, nothing>), Typing))), (Some ((int), [5:7-8], (Int "0"))))))))
             ]
           };

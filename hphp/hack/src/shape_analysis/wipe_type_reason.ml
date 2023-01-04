@@ -81,7 +81,6 @@ let rec wipe ty =
     wp (Tfun ft)
     (*we just wipe out the reason because below types are not recursive.*)
   | Tany _
-  | Terr
   | Tnonnull
   | Tdynamic
   | Tprim _

@@ -26,8 +26,6 @@ class type ['env] type_mapper_type =
 
     method on_tany : 'env -> Typing_reason.t -> 'env * Typing_defs.locl_ty
 
-    method on_terr : 'env -> Typing_reason.t -> 'env * Typing_defs.locl_ty
-
     method on_tprim :
       'env -> Typing_reason.t -> Aast.tprim -> 'env * Typing_defs.locl_ty
 

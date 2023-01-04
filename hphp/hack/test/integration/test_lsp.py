@@ -7284,7 +7284,7 @@ function main(): int {
                     "position": {"line": 2, "character": 13},
                 },
                 result={
-                    "contents": [{"language": "hack", "value": "_"}],
+                    "contents": [{"language": "hack", "value": "nothing"}],
                     "range": {
                         "start": {"line": 2, "character": 11},
                         "end": {"line": 2, "character": 14},

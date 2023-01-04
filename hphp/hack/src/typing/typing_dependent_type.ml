@@ -156,7 +156,7 @@ module ExprDepTy = struct
       (* TODO(T36532263) check if this is legal *)
       | ( _,
           ( Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic | Tvec_or_dict _
-          | Tfun _ | Tany _ | Tvar _ | Terr | Tneg _ ) ) ->
+          | Tfun _ | Tany _ | Tvar _ | Tneg _ ) ) ->
         (env, ty)
     in
     make ~seen:SSet.empty env ty

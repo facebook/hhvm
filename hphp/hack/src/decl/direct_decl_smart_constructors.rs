@@ -1321,10 +1321,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     fn node_to_ty_(&self, node: Node<'a>, allow_non_ret_ty: bool) -> Option<&'a Ty<'a>> {
         match node {
             Node::Ty(Ty(reason, Ty_::Tprim(aast::Tprim::Tvoid))) if !allow_non_ret_ty => {
-                Some(self.alloc(Ty(reason, Ty_::Terr)))
+                Some(self.alloc(Ty(reason, Ty_::Tprim(self.alloc(aast::Tprim::Tnull)))))
             }
             Node::Ty(Ty(reason, Ty_::Tprim(aast::Tprim::Tnoreturn))) if !allow_non_ret_ty => {
-                Some(self.alloc(Ty(reason, Ty_::Terr)))
+                Some(self.alloc(Ty(reason, Ty_::Tunion(&[]))))
             }
             Node::Ty(ty) => Some(ty),
             Node::Expr(expr) => {
@@ -1431,7 +1431,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
                             Ty_::TvecOrDict(self.alloc((key_type, value_type)))
                         }
-                        "_" => Ty_::Terr,
                         _ => {
                             let name = self.elaborate_raw_id(name);
                             Ty_::Tapply(self.alloc(((pos, name), &[][..])))
@@ -2254,7 +2253,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             | Ty_::Tany(_)
             | Ty_::Tclass(_)
             | Ty_::Tdynamic
-            | Ty_::Terr
             | Ty_::Tgeneric(_)
             | Ty_::Tmixed
             | Ty_::Tnonnull

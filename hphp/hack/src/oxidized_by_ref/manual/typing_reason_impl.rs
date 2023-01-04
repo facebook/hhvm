@@ -92,6 +92,7 @@ impl<'a> Reason<'a> {
             | RincdecDynamic(p)
             | RtypeVariable(p)
             | RtypeVariableGenerics((p, _, _))
+            | RtypeVariableError(p)
             | RglobalTypeVariableGenerics((p, _, _))
             | RsolveFail(p)
             | RcstrOnGenerics((p, _))

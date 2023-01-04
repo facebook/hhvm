@@ -21,7 +21,6 @@ let rec is_abstract_or_unknown env ty =
   let (_, ty) = Env.expand_type env ty in
   match get_node ty with
   | Tany _
-  | Terr
   | Tdynamic
   | Tvar _
   | Tgeneric _

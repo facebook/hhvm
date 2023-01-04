@@ -281,13 +281,6 @@ module Full = struct
     in
     (fuel, constraint_doc)
 
-  let terr () =
-    text
-      (if !debug_mode then
-        "err"
-      else
-        "_")
-
   let tprim x = text @@ Aast_defs.string_of_tprim x
 
   let tfun ~fuel ~ty to_doc st penv ft fun_implicit_params =
@@ -514,7 +507,6 @@ module Full = struct
     let k ~fuel x = ty ~fuel to_doc st penv x in
     match x with
     | Tany _ -> (fuel, text "_")
-    | Terr -> (fuel, terr ())
     | Tthis -> (fuel, text SN.Typehints.this)
     | Tmixed -> (fuel, text "mixed")
     | Tdynamic -> (fuel, text "dynamic")
@@ -619,7 +611,6 @@ module Full = struct
     let k ~fuel x = ty ~fuel to_doc st (Loclenv env) x in
     match x with
     | Tany _ -> (fuel, text "_")
-    | Terr -> (fuel, terr ())
     | Tdynamic -> (fuel, text "dynamic")
     | Tnonnull -> (fuel, text "nonnull")
     | Tvec_or_dict (x, y) -> list ~fuel "vec_or_dict<" k [x; y] ">"
@@ -1153,7 +1144,6 @@ module ErrorString = struct
     in
     match get_node ety with
     | Tany _ -> (fuel, "an untyped value")
-    | Terr -> (fuel, "a type error")
     | Tdynamic -> (fuel, "a dynamic value")
     | Tunion l when ignore_dynamic ->
       union ~fuel env (List.filter l ~f:(fun x -> not (is_dynamic x)))
@@ -1337,9 +1327,7 @@ module Json = struct
         | _ -> from_type env ty
       end
     | (p, Ttuple tys) -> obj @@ kind p "tuple" @ is_array false @ args tys
-    | (p, Tany _)
-    | (p, Terr) ->
-      obj @@ kind p "any"
+    | (p, Tany _) -> obj @@ kind p "any"
     | (p, Tnonnull) -> obj @@ kind p "nonnull"
     | (p, Tdynamic) -> obj @@ kind p "dynamic"
     | (p, Tgeneric (s, tyargs)) ->

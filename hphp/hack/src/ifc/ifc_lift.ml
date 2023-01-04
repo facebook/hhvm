@@ -147,7 +147,6 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   (* ---  types below are not yet supported *)
   | T.Tdependent (_, _ty) -> fail "Tdependent"
   | T.Tany _sentinel -> fail "Tany"
-  | T.Terr -> fail "Terr"
   | T.Tnewtype (_name, _ty_list, _as_bound) -> fail "Tnewtype"
   | T.Taccess (_locl_ty, _ids) -> fail "Taccess"
   | T.Tunapplied_alias _ -> fail "Tunapplied_alias"

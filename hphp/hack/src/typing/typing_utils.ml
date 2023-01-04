@@ -275,9 +275,7 @@ let is_dynamic env ty =
 let rec is_any env ty =
   let (env, ty) = Env.expand_type env ty in
   match get_node ty with
-  | Tany _
-  | Terr ->
-    true
+  | Tany _ -> true
   | Tunion tyl -> List.for_all tyl ~f:(is_any env)
   | Tintersection tyl -> List.exists tyl ~f:(is_any env)
   | _ -> false
@@ -298,6 +296,19 @@ let is_tyvar env ty =
   let (_env, ty) = Env.expand_type env ty in
   match get_node ty with
   | Tvar _ -> true
+  | _ -> false
+
+let is_tyvar_error env ty =
+  let (_env, ty) = Env.expand_type env ty in
+  let rec is_tyvar_error_reason r =
+    match r with
+    | Reason.Rtype_variable_error _ -> true
+    | Reason.Rtype_access (r, _) -> is_tyvar_error_reason r
+    | Reason.Rtypeconst (r, _, _, _) -> is_tyvar_error_reason r
+    | _ -> false
+  in
+  match deref ty with
+  | (r, Tvar _) -> is_tyvar_error_reason r
   | _ -> false
 
 (** Simplify unions and intersections of constraint
@@ -656,8 +667,6 @@ let tany = Env.tany
 let mk_tany env p = mk (Reason.Rwitness p, tany env)
 
 let mk_tany_ env p = mk (Reason.Rwitness_from_decl p, tany env)
-
-let terr _env r = MakeType.err r
 
 let collect_enum_class_upper_bounds env name =
   (* the boolean ok is here to see if we find anything at all,

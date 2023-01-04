@@ -329,7 +329,6 @@ module Enforce (ContextAccess : ContextAccess) :
       | Tprim Aast.(Tvoid | Tnoreturn) -> Unenforced None
       | Tprim _ -> Enforced ty
       | Tany _ -> Enforced ty
-      | Terr -> Enforced ty
       | Tnonnull -> Enforced ty
       | Tdynamic ->
         if (not enable_sound_dynamic) || is_dynamic_enforceable then

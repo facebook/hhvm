@@ -58,7 +58,7 @@ class forget_tyvar_mapper : forget_tyvar_mapper_type =
 
     method! on_tvar env r var =
       if Int.equal var env.tyvar then
-        ({ env with forget_reason = Some r }, mk (r, Terr))
+        ({ env with forget_reason = Some r }, mk (r, Tunion []))
       else
         (env, mk (r, Tvar var))
 

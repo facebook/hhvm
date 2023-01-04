@@ -204,9 +204,8 @@ and refresh_type renv v ty_orig =
   with_default ~default:ty_orig
   @@
   match deref ty with
-  | ( _,
-      ( Tany _ | Terr | Tnonnull | Tdynamic | Tprim _ | Tunapplied_alias _
-      | Tneg _ ) ) ->
+  | (_, (Tany _ | Tnonnull | Tdynamic | Tprim _ | Tunapplied_alias _ | Tneg _))
+    ->
     (renv, ty_orig, Unchanged)
   | (r, Toption ty1) ->
     let (renv, ty1, changed) = refresh_type renv v ty1 in

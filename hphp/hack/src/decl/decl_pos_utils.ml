@@ -107,6 +107,7 @@ struct
     | Rbitwise_dynamic p -> Rbitwise_dynamic (pos p)
     | Rincdec_dynamic p -> Rincdec_dynamic (pos p)
     | Rtype_variable p -> Rtype_variable (pos p)
+    | Rtype_variable_error p -> Rtype_variable_error (pos p)
     | Rtype_variable_generics (p, t, s) -> Rtype_variable_generics (pos p, t, s)
     | Rglobal_type_variable_generics (p, t, s) ->
       Rglobal_type_variable_generics (pos_or_decl p, t, s)
@@ -140,7 +141,7 @@ struct
     mk (reason p, ty_ x)
 
   and ty_ : decl_phase ty_ -> decl_phase ty_ = function
-    | (Tany _ | Tthis | Terr | Tmixed | Tnonnull | Tdynamic | Tvar _) as x -> x
+    | (Tany _ | Tthis | Tmixed | Tnonnull | Tdynamic | Tvar _) as x -> x
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (ty ty1, ty ty2)
     | Tprim _ as x -> x
     | Tgeneric (name, args) -> Tgeneric (name, List.map args ~f:ty)

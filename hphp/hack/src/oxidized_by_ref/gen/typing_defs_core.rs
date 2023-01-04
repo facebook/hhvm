@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fe5b48e3671786ca5e3ff0aa6295a0e9>>
+// @generated SignedSource<<c6aba82ce9af47a6950c0029a2742253>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -429,7 +429,6 @@ pub enum Ty_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tlike(&'a Ty<'a>),
     Tany(tany_sentinel::TanySentinel),
-    Terr,
     Tnonnull,
     /// A dynamic type is a special type which sometimes behaves as if it were a
     /// top type; roughly speaking, where a specific value of a particular type is

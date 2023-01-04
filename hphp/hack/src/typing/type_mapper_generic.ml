@@ -29,8 +29,6 @@ class type ['env] type_mapper_type =
 
     method on_tany : 'env -> Reason.t -> 'env * locl_ty
 
-    method on_terr : 'env -> Reason.t -> 'env * locl_ty
-
     method on_tprim : 'env -> Reason.t -> Aast.tprim -> 'env * locl_ty
 
     method on_ttuple : 'env -> Reason.t -> locl_ty list -> 'env * locl_ty
@@ -88,8 +86,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tany env r = (env, mk (r, Typing_defs.make_tany ()))
 
-    method on_terr env r = (env, mk (r, Terr))
-
     method on_tprim env r p = (env, mk (r, Tprim p))
 
     method on_ttuple env r tyl = (env, mk (r, Ttuple tyl))
@@ -128,7 +124,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tvar n -> this#on_tvar env r n
       | Tnonnull -> this#on_tnonnull env r
       | Tany _ -> this#on_tany env r
-      | Terr -> this#on_terr env r
       | Tprim p -> this#on_tprim env r p
       | Ttuple tyl -> this#on_ttuple env r tyl
       | Tunion tyl -> this#on_tunion env r tyl

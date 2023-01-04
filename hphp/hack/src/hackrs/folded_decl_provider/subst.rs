@@ -110,7 +110,6 @@ impl<'a, R: Reason> Substitution<'a, R> {
             | Ty_::Tdynamic
             | Ty_::Tnonnull
             | Ty_::Tany
-            | Ty_::Terr
             | Ty_::Tprim(_) => x.clone(),
             Ty_::Ttuple(tys) => Ty_::Ttuple(
                 tys.iter()

@@ -557,18 +557,21 @@ and obj_get_concrete_class
     on_error : internal_result =
   match Env.get_class env class_name with
   | None ->
+    let (env, ty) = Env.fresh_type_error env id_pos in
     ( env,
       None,
-      (Typing_utils.mk_tany env id_pos, []),
+      (ty, []),
       Ok concrete_ty,
       Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty )
   | Some class_info ->
-    let params =
-      if List.is_empty params then
-        List.map (Cls.tparams class_info) ~f:(fun _ ->
-            Typing_utils.mk_tany env id_pos)
+    let (env, params) =
+      if List.length params <> List.length (Cls.tparams class_info) then
+        (* We've already generated an arity error so just fill out params
+         * with error types *)
+        List.map_env env (Cls.tparams class_info) ~f:(fun env _ ->
+            Env.fresh_type_error env id_pos)
       else
-        params
+        (env, params)
     in
     let old_member_info = Env.get_member args.is_method env class_info id_str in
     let self_id = Option.value (Env.get_self_id env) ~default:"" in

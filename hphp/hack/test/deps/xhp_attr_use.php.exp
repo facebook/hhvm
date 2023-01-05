@@ -1,0 +1,2 @@
+Extends :foo -> Type :bar
+Type :foo -> Type :bar

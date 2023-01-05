@@ -89,6 +89,8 @@ type user_attribute = (ty, saved_env) Aast.user_attribute
 
 type fun_ = (ty, saved_env) Aast.fun_
 
+type efun = (ty, saved_env) Aast.efun
+
 type file_attribute = (ty, saved_env) Aast.file_attribute
 
 type fun_def = (ty, saved_env) Aast.fun_def

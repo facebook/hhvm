@@ -126,7 +126,7 @@ let check_expr env ((_, p, _) as expr : ETast.expr) (gamma : gamma) : gamma =
           gamma <- gamma_
         | _ -> (* TODO *) super#on_Binop env bop expr1 expr2
 
-      method! on_Efun _env _fun _id_list = raise Not_implemented
+      method! on_Efun _env _ = raise Not_implemented
 
       method! on_Lfun _env _fun _id_list = raise Not_implemented
 

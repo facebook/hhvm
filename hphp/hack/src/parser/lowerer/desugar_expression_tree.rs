@@ -180,7 +180,11 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
                 Expr::new(
                     (),
                     et_literal_pos.clone(),
-                    Expr_::mk_efun(typing_fun_, spliced_vars),
+                    Expr_::mk_efun(aast::Efun {
+                        fun: typing_fun_,
+                        use_: spliced_vars,
+                        closure_class_name: None,
+                    }),
                 ),
                 vec![],
                 vec![],

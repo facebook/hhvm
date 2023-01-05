@@ -1930,7 +1930,9 @@ let rec rewrite_expr_tree_maketree env expr f =
   let (env, expr_) =
     match expr_ with
     | Call
-        ( (fun_pos, p, (Lfun (fun_, idl) | Efun (fun_, idl))),
+        ( ( fun_pos,
+            p,
+            (Lfun (fun_, idl) | Efun { ef_fun = fun_; ef_use = idl; _ }) ),
           targs,
           args,
           variadic ) ->
@@ -4831,8 +4833,12 @@ and expr_
     in
     Option.iter ~f:Errors.add_typing_error ty_err_opt2;
     make_result env p (Aast.Upcast (te, hint)) hint_ty
-  | Efun (f, idl) -> lambda ~is_anon:true ?expected p env f idl
-  | Lfun (f, idl) -> lambda ~is_anon:false ?expected p env f idl
+  | Efun
+      { ef_fun = f; ef_use = idl; ef_closure_class_name = closure_class_name }
+    ->
+    lambda ~is_anon:true ~closure_class_name ?expected p env f idl
+  | Lfun (f, idl) ->
+    lambda ~is_anon:false ~closure_class_name:None ?expected p env f idl
   | Xml (sid, attrl, el) ->
     let cid = CI sid in
     let (env, _tal, _te, classes) =
@@ -5119,7 +5125,7 @@ and function_dynamically_callable ~this_class env f params_decl_ty ret_locl_ty =
   in
   if not interface_check then function_body_check ()
 
-and lambda ~is_anon ?expected p env f idl =
+and lambda ~is_anon ~closure_class_name ?expected p env f idl =
   (* This is the function type as declared on the lambda itself.
    * If type hints are absent then use Tany instead. *)
   let declared_fe = Decl_nast.lambda_decl_in_env env.decl_env f in
@@ -5171,7 +5177,17 @@ and lambda ~is_anon ?expected p env f idl =
   let check_body_under_known_params ~supportdyn env ?ret_ty ft :
       env * _ * locl_ty =
     let (env, (tefun, ft, support_dynamic_type)) =
-      closure_make ~supportdyn ?ret_ty env p declared_decl_ft f ft idl is_anon
+      closure_make
+        ~supportdyn
+        ~closure_class_name
+        ?ret_ty
+        env
+        p
+        declared_decl_ft
+        f
+        ft
+        idl
+        is_anon
     in
     let ty = mk (Reason.Rwitness p, Tfun ft) in
     let ty =
@@ -5526,6 +5542,7 @@ and closure_make
     ?ret_ty
     ?(check_escapes = true)
     ~supportdyn
+    ~closure_class_name
     env
     lambda_pos
     decl_ft
@@ -5811,7 +5828,12 @@ and closure_make
       lambda_pos
       ty
       (if is_anon then
-        Aast.Efun (tfun_, idl)
+        Aast.Efun
+          {
+            ef_fun = tfun_;
+            ef_use = idl;
+            ef_closure_class_name = closure_class_name;
+          }
       else
         Aast.Lfun (tfun_, idl))
   in

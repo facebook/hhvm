@@ -610,7 +610,7 @@ fn print_expr(
         Expr_::Xml(_) => {
             Err(Error::fail("expected Xml to be converted to New during rewriting").into())
         }
-        Expr_::Efun(f) => print_efun(ctx, w, env, &f.0, &f.1),
+        Expr_::Efun(f) => print_efun(ctx, w, env, f),
         Expr_::FunctionPointer(fp) => {
             let (fp_id, targs) = &**fp;
             match fp_id {
@@ -765,9 +765,9 @@ fn print_efun(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     env: &ExprEnv<'_, '_>,
-    f: &ast::Fun_,
-    use_list: &[ast::Lid],
+    efun: &ast::Efun<(), ()>,
 ) -> Result<()> {
+    let f = &efun.fun;
     if f.fun_kind.is_fasync() || f.fun_kind.is_fasync_generator() {
         write!(w, "async ",)?;
     }
@@ -776,6 +776,7 @@ fn print_efun(
         write::concat_by(w, ", ", &f.params, |w, p| print_fparam(ctx, w, env, p))
     })?;
     w.write_all(b" ")?;
+    let use_list = &efun.use_;
     if !use_list.is_empty() {
         w.write_all(b"use ")?;
         write::paren(w, |w| {

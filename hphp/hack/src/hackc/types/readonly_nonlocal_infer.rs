@@ -404,9 +404,17 @@ impl<'decl> Infer<'decl> {
                 });
                 (new, ty, ctx)
             }
-            Efun(box (fun, lids)) => {
-                let (fun, _fun_ty, ctx) = self.infer_fun(fun, ctx, next_where);
-                (Efun(box_tup!(fun, lids.clone())), Tyx::Todo, ctx)
+            Efun(efun) => {
+                let (fun, _fun_ty, ctx) = self.infer_fun(&efun.fun, ctx, next_where);
+                (
+                    Efun(Box::new(ast::Efun {
+                        fun,
+                        use_: efun.use_.clone(),
+                        closure_class_name: efun.closure_class_name.clone(),
+                    })),
+                    Tyx::Todo,
+                    ctx,
+                )
             }
             Lfun(box (fun, lid)) => {
                 let (fun, _fun_ty, ctx) = self.infer_fun(fun, ctx, next_where);

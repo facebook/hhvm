@@ -120,7 +120,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
             // For an Lfun, we don't want to recurse, because it's a separate scope.
             Expr_::Lfun(_) => Ok(()),
 
-            Expr_::Efun(box (fun_, use_list)) => {
+            Expr_::Efun(box efun) => {
                 // at this point AST is already rewritten so use lists on EFun nodes
                 // contain list of captured variables. However if use list was initially absent
                 // it is not correct to traverse such nodes to collect locals because it will impact
@@ -135,7 +135,8 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 // $b = 2;
                 //
                 // 'explicit_use_set' is used to in order to avoid synthesized use list
-                let fn_name = &fun_.name.1;
+                let use_list = &efun.use_;
+                let fn_name = &efun.closure_class_name.clone().unwrap_or_default();
                 let has_use_list = self
                     .context
                     .explicit_use_set_opt

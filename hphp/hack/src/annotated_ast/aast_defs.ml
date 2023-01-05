@@ -606,7 +606,7 @@ and ('ex, 'en) expr_ =
        *     new Foo(1, 2);
        *     new Foo<int, T>();
        *     new Foo('blah', ...$rest); *)
-  | Efun of ('ex, 'en) fun_ * lid list
+  | Efun of ('ex, 'en) efun
       (** PHP-style lambda. Does not capture variables unless explicitly
        * specified.
        *
@@ -802,6 +802,12 @@ and ('ex, 'en) fun_ = {
       (** true if this declaration has no body because it is an
        * external function declaration (e.g. from an HHI file) *)
   f_doc_comment: doc_comment option;
+}
+
+and ('ex, 'en) efun = {
+  ef_fun: ('ex, 'en) fun_;
+  ef_use: lid list;
+  ef_closure_class_name: string option;
 }
 
 (**

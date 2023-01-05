@@ -21,31 +21,33 @@
                      ((), [5:14-20],
                       (Call (
                          ((), [5:14-20],
-                          (Efun (
-                             { f_span = [5:14-20]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([5:14-20], ";anonymous"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([5:14-20],
-                                   (Return
-                                      (Some ((), [5:14-20],
-                                             (Call (
-                                                ((), [5:14-20],
-                                                 (Obj_get (
-                                                    ((), [5:14-15], (Call (((), [5:14-15], (Class_const (((), [5:14-15], (CI ([5:14-15], "\\ExampleDsl"))), ([5:14-15], "intType")))), [], [], None))),
-                                                    ((), [5:14-20], (Id ([5:14-20], "__unsupported"))), OG_nullthrows, Is_method))),
-                                                [],
-                                                [(Pnormal,
-                                                  ((), [5:19-20], (Call (((), [5:19-20], (Class_const (((), [5:19-20], (CI ([5:19-20], "\\ExampleDsl"))), ([5:19-20], "intType")))), [], [], None))))],
-                                                None))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
+                          (Efun
+                             { ef_fun =
+                               { f_span = [5:14-20]; f_readonly_this = None; 
+                                 f_annotation = (); f_readonly_ret = None; 
+                                 f_ret = ((), None); f_name = ([5:14-20], ";anonymous"); 
+                                 f_tparams = []; f_where_constraints = []; 
+                                 f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                                 f_body =
+                                 { fb_ast =
+                                   [([5:14-20],
+                                     (Return
+                                        (Some ((), [5:14-20],
+                                               (Call (
+                                                  ((), [5:14-20],
+                                                   (Obj_get (
+                                                      ((), [5:14-15], (Call (((), [5:14-15], (Class_const (((), [5:14-15], (CI ([5:14-15], "\\ExampleDsl"))), ([5:14-15], "intType")))), [], [], None))),
+                                                      ((), [5:14-20], (Id ([5:14-20], "__unsupported"))), OG_nullthrows, Is_method))),
+                                                  [],
+                                                  [(Pnormal,
+                                                    ((), [5:19-20], (Call (((), [5:19-20], (Class_const (((), [5:19-20], (CI ([5:19-20], "\\ExampleDsl"))), ([5:19-20], "intType")))), [], [], None))))
+                                                    ],
+                                                  None))))))
+                                     ]
+                                   };
+                                 f_fun_kind = FSync; f_user_attributes = []; 
+                                 f_external = false; f_doc_comment = None };
+                               ef_use = []; ef_closure_class_name = None })),
                          [], [], None)));
                      et_runtime_expr =
                      ((), [5:3-13],

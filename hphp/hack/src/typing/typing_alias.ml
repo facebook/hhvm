@@ -120,7 +120,7 @@ end = struct
             end
           ~default:acc
 
-      method! on_efun acc _ _ = acc
+      method! on_efun acc _ = acc
 
       method! on_lfun acc _ _ = acc
     end

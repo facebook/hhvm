@@ -1485,7 +1485,7 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
         (env, obj_pty)
       | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
     end
-  | A.Efun (fun_, captured_ids)
+  | A.Efun { A.ef_fun = fun_; ef_use = captured_ids; _ }
   | A.Lfun (fun_, captured_ids) ->
     (* weaken all the captured local variables and reset the local
        pc to create the initial continuation we'll use to check the

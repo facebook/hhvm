@@ -118,16 +118,17 @@ let visitor =
       vars := add_local_def !vars lv;
       super#on_catch () (c_name, lv, block)
 
-    method! on_Efun () e f idl =
+    method! on_Efun () e efun =
       let outer_vars = !vars in
+      let idl = efun.Aast.ef_use in
 
       (* We want to know about free variables inside the lambda, but
          we don't want its bound variables. *)
-      vars := add_params empty f;
+      vars := add_params empty efun.Aast.ef_fun;
       vars := add_local_defs !vars idl;
-      let f =
-        match super#on_Efun () e f idl with
-        | Aast.Efun (f, _) -> f
+      let efun =
+        match super#on_Efun () e efun with
+        | Aast.Efun efun -> efun
         | _ -> assert false
       in
       vars :=
@@ -151,7 +152,7 @@ let visitor =
             ) else
               true)
       in
-      Aast.Efun (f, idl)
+      Aast.Efun { efun with Aast.ef_use = idl }
 
     method! on_Lfun () e f _ =
       let outer_vars = !vars in

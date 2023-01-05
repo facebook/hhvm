@@ -244,7 +244,7 @@ let sequence_visitor ~require_used used_vars =
       | Obj_get (e1, e2, _, _)
       | Array_get (e1, Some e2) ->
         this#check_unsequenced_exprs env e1 e2
-      | Efun (f, idl)
+      | Efun { ef_fun = f; ef_use = idl; _ }
       | Lfun (f, idl) ->
         let nb = f.f_body in
         (* Ignore the current environment and start fresh. *)

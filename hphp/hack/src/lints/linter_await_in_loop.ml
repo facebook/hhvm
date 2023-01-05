@@ -19,7 +19,7 @@ class await_visitor =
       (new loop_visitor)#on_block () block
 
     (* Skip lambdas created inside for loops *)
-    method! on_efun () f _ = this#on_elfun f
+    method! on_efun () efun = this#on_elfun efun.ef_fun
 
     method! on_lfun () f _ = this#on_elfun f
 

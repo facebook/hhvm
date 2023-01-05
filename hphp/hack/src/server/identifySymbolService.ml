@@ -424,12 +424,15 @@ let visitor =
             ( ( _,
                 _,
                 Aast.Efun
-                  ( {
-                      Aast.f_body =
-                        { Aast.fb_ast = [(_, Aast.Return (Some e))]; _ };
-                      _;
-                    },
-                    _ ) ),
+                  {
+                    Aast.ef_fun =
+                      {
+                        Aast.f_body =
+                          { Aast.fb_ast = [(_, Aast.Return (Some e))]; _ };
+                        _;
+                      };
+                    _;
+                  } ),
               _,
               _,
               _ ) ->

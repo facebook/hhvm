@@ -385,7 +385,7 @@ class local_finding_visitor =
         *)
       LocalMap.force_add p.param_name p.param_pos localmap
 
-    method! on_efun localmap fn use_list =
+    method! on_efun localmap efun =
       (*
      * This is a traditional PHP nested function, and this is a bit tricky.
      * Consider first a normal case:
@@ -476,10 +476,10 @@ class local_finding_visitor =
       let localmap = LocalMap.push localmap in
       (* No need to pop; we're going to pop the whole scopechain. *)
       let localmap =
-        List.fold_left use_list ~init:localmap ~f:(fun l (p, n) ->
+        List.fold_left efun.ef_use ~init:localmap ~f:(fun l (p, n) ->
             LocalMap.add_from_use (Local_id.get_name n) p l)
       in
-      let localmap = this#on_fun_ localmap fn in
+      let localmap = this#on_fun_ localmap efun.ef_fun in
       LocalMap.pop_scopechain localmap
 
     method! on_catch localmap (_, (pos, name), body) =

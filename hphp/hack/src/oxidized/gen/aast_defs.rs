@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b1587427933b0563cc0ce4e214fc71a7>>
+// @generated SignedSource<<4c7a54e0016971f42853b991aac93ac6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -847,8 +847,7 @@ pub enum Expr_<Ex, En> {
     ///     function(int $x): int { return $x; }
     ///     function($x) use ($y) { return $y; }
     ///     function($x): int use ($y, $z) { return $x + $y + $z; }
-    #[rust_to_ocaml(inline_tuple)]
-    Efun(Box<(Fun_<Ex, En>, Vec<Lid>)>),
+    Efun(Box<Efun<Ex, En>>),
     /// Hack lambda. Captures variables automatically.
     ///
     ///     $x ==> $x
@@ -1252,6 +1251,29 @@ pub struct Fun_<Ex, En> {
     /// external function declaration (e.g. from an HHI file)
     pub external: bool,
     pub doc_comment: Option<DocComment>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "ef_")]
+#[repr(C)]
+pub struct Efun<Ex, En> {
+    pub fun: Fun_<Ex, En>,
+    pub use_: Vec<Lid>,
+    pub closure_class_name: Option<String>,
 }
 
 /// Naming has two phases and the annotation helps to indicate the phase.

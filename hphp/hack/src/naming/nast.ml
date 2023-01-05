@@ -51,6 +51,8 @@ type file_attribute = (unit, unit) Aast.file_attribute
 
 type fun_ = (unit, unit) Aast.fun_
 
+type efun = (unit, unit) Aast.efun
+
 type fun_def = (unit, unit) Aast.fun_def
 
 type func_body = (unit, unit) Aast.func_body
@@ -539,7 +541,7 @@ module Visitor_DEPRECATED = struct
 
       method on_record : 'a -> sid -> (expr * expr) list -> 'a
 
-      method on_efun : 'a -> fun_ -> id list -> 'a
+      method on_efun : 'a -> efun -> 'a
 
       method on_lfun : 'a -> fun_ -> id list -> 'a
 
@@ -794,7 +796,7 @@ module Visitor_DEPRECATED = struct
         | Upcast (e, h) -> this#on_upcast acc e h
         | New (cid, _, el, unpacked_element, _) ->
           this#on_new acc cid el unpacked_element
-        | Efun (f, idl) -> this#on_efun acc f idl
+        | Efun ef -> this#on_efun acc ef
         | Xml (sid, attrl, el) -> this#on_xml acc sid attrl el
         | ValCollection (s, ta, el) -> this#on_valCollection acc s ta el
         | KeyValCollection (s, tap, fl) -> this#on_keyValCollection acc s tap fl
@@ -1015,7 +1017,7 @@ module Visitor_DEPRECATED = struct
         in
         acc
 
-      method on_efun acc f _ = this#on_block acc f.f_body.fb_ast
+      method on_efun acc ef = this#on_block acc ef.ef_fun.f_body.fb_ast
 
       method on_lfun acc f _ = this#on_block acc f.f_body.fb_ast
 

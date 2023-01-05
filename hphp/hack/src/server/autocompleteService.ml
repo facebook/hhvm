@@ -1267,7 +1267,7 @@ let visitor ctx autocomplete_context sienv =
         | _ -> ())
       | (_, p, Aast.EnumClassLabel (opt_cname, n)) when is_auto_complete n ->
         autocomplete_enum_class_label env opt_cname (p, n) None
-      | (_, _, Aast.Efun (f, _))
+      | (_, _, Aast.Efun { Aast.ef_fun = f; _ })
       | (_, _, Aast.Lfun (f, _)) ->
         List.iter f.Aast.f_user_attributes ~f:(fun ua ->
             autocomplete_builtin_attribute

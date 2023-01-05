@@ -468,7 +468,10 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             Expr_::Await(e) => emit_await(emitter, env, pos, e),
             Expr_::ReadonlyExpr(e) => emit_readonly_expr(emitter, env, pos, e),
             Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
-            Expr_::Efun(e) => Ok(emit_pos_then(pos, emit_lambda(emitter, env, &e.0, &e.1)?)),
+            Expr_::Efun(e) => Ok(emit_pos_then(
+                pos,
+                emit_lambda(emitter, env, &e.use_, &e.closure_class_name)?,
+            )),
             Expr_::ClassGet(e) => emit_class_get_expr(emitter, env, pos, e),
 
             Expr_::String2(es) => emit_string2(emitter, env, pos, es),
@@ -781,14 +784,23 @@ fn emit_clone<'a, 'arena, 'decl>(
 fn emit_lambda<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
-    fndef: &ast::Fun_,
     ids: &[aast_defs::Lid],
+    closure_class_name: &Option<String>,
 ) -> Result<InstrSeq<'arena>> {
-    // Closure conversion puts the class number used for CreateCl in the "name"
-    // of the function definition
-    let fndef_name = &(fndef.name).1;
-    let explicit_use = e.global_state().explicit_use_set.contains(fndef_name);
+    let closure_class_name = if let Some(n) = closure_class_name {
+        n
+    } else {
+        return Err(Error::unrecoverable(
+            "Closure conversion should have set closure_class_name",
+        ));
+    };
+
+    let explicit_use = e
+        .global_state()
+        .explicit_use_set
+        .contains(closure_class_name);
     let is_in_lambda = env.scope.is_in_lambda();
+
     Ok(InstrSeq::gather(vec![
         InstrSeq::gather(
             ids.iter()
@@ -823,7 +835,7 @@ fn emit_lambda<'a, 'arena, 'decl>(
         ),
         instr::create_cl(
             ids.len() as u32,
-            hhbc::ClassName::from_raw_string(e.alloc, fndef_name),
+            hhbc::ClassName::from_raw_string(e.alloc, closure_class_name),
         ),
     ]))
 }

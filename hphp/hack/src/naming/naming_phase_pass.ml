@@ -1078,7 +1078,8 @@ module Ast_transform = struct
             on_list on_expr exprs ~env ~handler,
             on_option on_expr expr_opt ~env ~handler,
             ex )
-      | Efun (fun_, lids) -> Efun (on_fun_ fun_ ~env ~handler, lids)
+      | Efun efun ->
+        Efun { efun with ef_fun = on_fun_ efun.ef_fun ~env ~handler }
       | Lfun (fun_, lids) -> Lfun (on_fun_ fun_ ~env ~handler, lids)
       | Xml (class_name, xhp_attrs, exprs) ->
         Xml

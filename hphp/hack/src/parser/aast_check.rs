@@ -216,10 +216,10 @@ impl<'ast> Visitor<'ast> for Checker {
             if Self::name_eq_this_and_in_static_method(c, name) {
                 self.add_error(pos, syntax_error::this_in_static);
             }
-        } else if let Some((f, ..)) = p.2.as_efun() {
-            match f.ctxs {
+        } else if let Some(efun) = p.2.as_efun() {
+            match efun.fun.ctxs {
                 None if c.is_any_local_fun && c.is_typechecker => {
-                    self.add_error(&f.span, syntax_error::closure_in_local_context)
+                    self.add_error(&efun.fun.span, syntax_error::closure_in_local_context)
                 }
                 _ => {}
             }

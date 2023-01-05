@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<092fd90d14df6099aac3f4e64d26f31f>>
+// @generated SignedSource<<81cc4d7ad0c0e339e83363559c70c3b1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1042,8 +1042,7 @@ pub enum Expr_<'a, Ex, En> {
     ///     function($x) use ($y) { return $y; }
     ///     function($x): int use ($y, $z) { return $x + $y + $z; }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Efun(&'a (&'a Fun_<'a, Ex, En>, &'a [&'a Lid<'a>])),
+    Efun(&'a Efun<'a, Ex, En>),
     /// Hack lambda. Captures variables automatically.
     ///
     ///     $x ==> $x
@@ -1592,6 +1591,37 @@ pub struct Fun_<'a, Ex, En> {
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Fun_<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Fun_<'arena, Ex, En>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "ef_")]
+#[repr(C)]
+pub struct Efun<'a, Ex, En> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub fun: &'a Fun_<'a, Ex, En>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub use_: &'a [&'a Lid<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub closure_class_name: Option<&'a str>,
+}
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Efun<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(Efun<'arena, Ex, En>);
 
 /// Naming has two phases and the annotation helps to indicate the phase.
 /// In the first pass, it will perform naming on everything except for function

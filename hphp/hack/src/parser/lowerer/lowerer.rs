@@ -1098,8 +1098,8 @@ fn p_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Field, Error> {
 // We lower readonly lambda declarations as making the inner lambda have readonly_this.
 fn process_readonly_expr(mut e: ast::Expr) -> Expr_ {
     match &mut e {
-        ast::Expr(_, _, Expr_::Efun(ref mut efun)) if efun.0.readonly_this.is_none() => {
-            efun.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
+        ast::Expr(_, _, Expr_::Efun(ref mut efun)) if efun.fun.readonly_this.is_none() => {
+            efun.fun.readonly_this = Some(ast::ReadonlyKind::Readonly);
             e.2
         }
         ast::Expr(_, _, Expr_::Lfun(ref mut l)) if l.0.readonly_this.is_none() => {
@@ -2335,8 +2335,12 @@ fn p_anonymous_function<'a>(
         external,
         doc_comment,
     };
-    let uses = p_use(&c.use_, env).unwrap_or_else(|_| vec![]);
-    Ok(Expr_::mk_efun(fun, uses))
+    let use_ = p_use(&c.use_, env).unwrap_or_else(|_| vec![]);
+    Ok(Expr_::mk_efun(ast::Efun {
+        fun,
+        use_,
+        closure_class_name: None,
+    }))
 }
 
 fn p_awaitable_creation_expr<'a>(

@@ -38,6 +38,7 @@ use oxidized::ast::Class_;
 use oxidized::ast::ClassishKind;
 use oxidized::ast::Contexts;
 use oxidized::ast::Def;
+use oxidized::ast::Efun;
 use oxidized::ast::EmitId;
 use oxidized::ast::Expr;
 use oxidized::ast::Expr_;
@@ -558,8 +559,8 @@ fn make_closure(
     class_tparams: Vec<Tparam>,
     is_static: bool,
     mode: Mode,
-    mut fd: Fun_,
-) -> (Fun_, Class_) {
+    fd: &Fun_,
+) -> Class_ {
     let md = Method_ {
         span: fd.span.clone(),
         annotation: fd.annotation,
@@ -603,7 +604,7 @@ fn make_closure(
         .iter()
         .map(|name| make_class_var(string_utils::locals::strip_dollar(name)));
 
-    let cd = Class_ {
+    Class_ {
         span: p.clone(),
         annotation: fd.annotation,
         mode,
@@ -640,11 +641,7 @@ fn make_closure(
         // TODO: closures should have the visibility of the module they are defined in
         module: None,
         docs_url: None,
-    };
-
-    // TODO(hrust): can we reconstruct fd here from the scratch?
-    fd.name = cd.name.clone();
-    (fd, cd)
+    }
 }
 
 /// Translate special identifiers `__CLASS__`, `__METHOD__` and `__FUNCTION__`
@@ -797,7 +794,15 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
     };
     let force_val = if force { Expr_::True } else { Expr_::False };
     let force_val_expr = Expr((), pos(), force_val);
-    let efun = Expr((), pos(), Expr_::mk_efun(fd, vec![]));
+    let efun = Expr(
+        (),
+        pos(),
+        Expr_::mk_efun(Efun {
+            fun: fd,
+            use_: vec![],
+            closure_class_name: None,
+        }),
+    );
     let fun_handle = hack_expr!(
         pos = pos(),
         r#"\__SystemLib\dynamic_meth_caller(#{clone(cexpr)}, #{clone(fexpr)}, #efun, #force_val_expr)"#
@@ -1018,7 +1023,7 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
     ) -> Result<()> {
         stack_limit::maybe_grow(|| {
             *e = match strip_unsafe_casts(e) {
-                Expr_::Efun(x) => self.convert_lambda(scope, x.0, Some(x.1))?,
+                Expr_::Efun(x) => self.convert_lambda(scope, x.fun, Some(x.use_))?,
                 Expr_::Lfun(x) => self.convert_lambda(scope, x.0, None)?,
                 Expr_::Lvar(id_orig) => {
                     let id = if self.ro_state.for_debugger_eval
@@ -1437,7 +1442,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
 
         let pos = fd.span.clone();
         let lambda_vars_clone = lambda_vars.clone();
-        let (inline_fundef, cd) = make_closure(
+        let cd = make_closure(
             pos,
             scope,
             state,
@@ -1447,17 +1452,17 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
             class_tparams,
             is_static,
             scope.scope_fmode(),
-            fd,
+            &fd,
         );
 
+        let closure_class_name = cd.name.1.clone();
         if is_long_lambda {
             state
                 .global_state
                 .explicit_use_set
-                .insert(inline_fundef.name.1.clone());
+                .insert(closure_class_name.clone());
         }
 
-        let closure_class_name = &cd.name.1;
         if let Some(cd) = scope.as_class_summary() {
             state
                 .global_state
@@ -1491,7 +1496,12 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
 
         state.closures.push(cd);
 
-        Ok(Expr_::mk_efun(inline_fundef, use_vars))
+        let efun = Efun {
+            fun: fd,
+            use_: use_vars,
+            closure_class_name: Some(closure_class_name),
+        };
+        Ok(Expr_::mk_efun(efun))
     }
 
     fn convert_meth_caller_to_func_ptr(

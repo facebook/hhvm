@@ -565,7 +565,7 @@ let expr tenv ((), _p, e) =
   | Call (_, hl, _, _) ->
     List.concat_map hl ~f:(fun (_, h) -> hint tenv h)
   | Lfun (f, _)
-  | Efun (f, _) ->
+  | Efun { ef_fun = f; _ } ->
     fun_ tenv f
   | Darray _
   | Varray _

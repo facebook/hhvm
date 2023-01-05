@@ -23,64 +23,64 @@
                      ((), [4:14-8:4],
                       (Call (
                          ((), [4:14-8:4],
-                          (Efun (
-                             { f_span = [4:14-8:4]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([4:14-8:4], ";anonymous"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([4:14-8:4],
-                                   (Return
-                                      (Some ((), [4:14-8:4],
-                                             (Call (((), [4:14-8:4], (Class_const (((), [4:14-8:4], (CI ([4:14-8:4], "\\ExampleDsl"))), ([4:14-8:4], "lambdaType")))), 
-                                                [],
-                                                [(Pnormal,
-                                                  ((), [4:14-8:4],
-                                                   (Lfun (
-                                                      { f_span = [4:14-8:4]; 
-                                                        f_readonly_this = None; 
-                                                        f_annotation = (); 
-                                                        f_readonly_ret = None; 
-                                                        f_ret = ((), None); 
-                                                        f_name = ([4:14-8:4], ";anonymous"); 
-                                                        f_tparams = []; 
-                                                        f_where_constraints = []; 
-                                                        f_params = []; 
-                                                        f_ctxs = None; 
-                                                        f_unsafe_ctxs = None;
-                                                        f_body =
-                                                        { fb_ast =
-                                                          [([5:5-7:6],
-                                                            (For (
-                                                               [((), [5:10-16],
-                                                                 (Binop ((
+                          (Efun
+                             { ef_fun =
+                               { f_span = [4:14-8:4]; f_readonly_this = None; 
+                                 f_annotation = (); f_readonly_ret = None; 
+                                 f_ret = ((), None); f_name = ([4:14-8:4], ";anonymous"); 
+                                 f_tparams = []; f_where_constraints = []; 
+                                 f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                                 f_body =
+                                 { fb_ast =
+                                   [([4:14-8:4],
+                                     (Return
+                                        (Some ((), [4:14-8:4],
+                                               (Call (((), [4:14-8:4], (Class_const (((), [4:14-8:4], (CI ([4:14-8:4], "\\ExampleDsl"))), ([4:14-8:4], "lambdaType")))), 
+                                                  [],
+                                                  [(Pnormal,
+                                                    ((), [4:14-8:4],
+                                                     (Lfun (
+                                                        { f_span = [4:14-8:4]; 
+                                                          f_readonly_this = None; 
+                                                          f_annotation = (); 
+                                                          f_readonly_ret = None; 
+                                                          f_ret = ((), None); 
+                                                          f_name = ([4:14-8:4], ";anonymous"); 
+                                                          f_tparams = []; 
+                                                          f_where_constraints = []; 
+                                                          f_params = []; 
+                                                          f_ctxs = None; 
+                                                          f_unsafe_ctxs = None;
+                                                          f_body =
+                                                          { fb_ast =
+                                                            [([5:5-7:6],
+                                                              (For (
+                                                                 [((), [5:10-16],
+                                                                   (Binop ((
                                                                     Eq None), (
                                                                     (), [5:10-12], (Lvar ([5:10-12], $i))),
+                                                                    ((), [5:15-16],
+                                                                    (Call (((), [5:15-16], (Class_const (((), [5:15-16], (CI ([5:15-16], "\\ExampleDsl"))), ([5:15-16], "intType")))), [], [], None)))
+                                                                    )))
+                                                                   ],
+                                                                 (Some (
+                                                                 (), [5:18-22],
+                                                                 (Call (
                                                                     (
-                                                                    (), [5:15-16],
+                                                                    (), [5:18-22],
                                                                     (
-                                                                    Call (((), [5:15-16], (Class_const (((), [5:15-16], (CI ([5:15-16], "\\ExampleDsl"))), ([5:15-16], "intType")))), [], [], None))))))
-                                                                 ],
-                                                               (Some (
-                                                               (), [5:18-22],
-                                                               (Call (
-                                                                  ((), [5:18-22],
-                                                                   (Obj_get (
+                                                                    Obj_get (
                                                                     ((), [5:18-22],
                                                                     (Call (((), [5:18-22], (Class_const (((), [5:18-22], (CI ([5:18-22], "\\ExampleDsl"))), ([5:18-22], "boolType")))), [], [], None))),
-                                                                    ((), [5:18-22], (Id ([5:18-22], "__bool"))), OG_nullthrows, Is_method))),
-                                                                  [], 
-                                                                  [], None)))),
-                                                               [((), [5:24-35],
-                                                                 (Binop ((
+                                                                    ((), [5:18-22], (Id ([5:18-22], "__bool"))), OG_nullthrows, Is_method))), 
+                                                                    [], 
+                                                                    [], None)))),
+                                                                 [((), [5:24-35],
+                                                                   (Binop ((
                                                                     Eq None), (
                                                                     (), [5:24-26], (Lvar ([5:24-26], $i))),
-                                                                    (
-                                                                    (), [5:29-35],
-                                                                    (
-                                                                    Call (
+                                                                    ((), [5:29-35],
+                                                                    (Call (
                                                                     ((), [5:29-35],
                                                                     (Obj_get (((), [5:29-31], (Lvar ([5:29-31], $i))), ((), [5:29-35], (Id ([5:29-35], "__plus"))), OG_nullthrows, Is_method))), 
                                                                     [],
@@ -88,13 +88,11 @@
                                                                     ((), [5:34-35],
                                                                     (Call (((), [5:34-35], (Class_const (((), [5:34-35], (CI ([5:34-35], "\\ExampleDsl"))), ([5:34-35], "intType")))), [], [], None))))
                                                                     ], None))))))
-                                                                 ],
-                                                               [([6:7-13],
-                                                                 (Expr
-                                                                    (
-                                                                    (), [6:7-12],
-                                                                    (
-                                                                    Call (
+                                                                   ],
+                                                                 [([6:7-13],
+                                                                   (Expr
+                                                                    ((), [6:7-12],
+                                                                    (Call (
                                                                     ((), [6:7-12],
                                                                     (Call (
                                                                     ((), [6:7-12],
@@ -109,27 +107,30 @@
                                                                     [], None))), 
                                                                     [], 
                                                                     [], None)))))
-                                                                 ]
-                                                               )));
-                                                            ([4:14-8:4],
-                                                             (Return
-                                                                (Some (
-                                                                (), [4:14-8:4],
-                                                                (Call (((), [4:14-8:4], (Class_const (((), [4:14-8:4], (CI ([4:14-8:4], "\\ExampleDsl"))), ([4:14-8:4], "voidType")))), [], [], None))))))
-                                                            ]
-                                                          };
-                                                        f_fun_kind = FSync; 
-                                                        f_user_attributes = []; 
-                                                        f_external = false; 
-                                                        f_doc_comment = None },
-                                                      [([6:7-10], $0fp0)]))))
-                                                  ],
-                                                None))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             [([4:3-13], $0fp0)]))),
+                                                                   ]
+                                                                 )));
+                                                              ([4:14-8:4],
+                                                               (Return
+                                                                  (Some (
+                                                                  (), [4:14-8:4],
+                                                                  (Call ((
+                                                                    (), [4:14-8:4], (Class_const (((), [4:14-8:4], (CI ([4:14-8:4], "\\ExampleDsl"))), ([4:14-8:4], "voidType")))), 
+                                                                    [], 
+                                                                    [], None))))))
+                                                              ]
+                                                            };
+                                                          f_fun_kind = FSync; 
+                                                          f_user_attributes = []; 
+                                                          f_external = false; 
+                                                          f_doc_comment = None },
+                                                        [([6:7-10], $0fp0)]))))
+                                                    ],
+                                                  None))))))
+                                     ]
+                                   };
+                                 f_fun_kind = FSync; f_user_attributes = []; 
+                                 f_external = false; f_doc_comment = None };
+                               ef_use = [([4:3-13], $0fp0)]; ef_closure_class_name = None })),
                          [], [], None)));
                      et_runtime_expr =
                      ((), [4:14-8:4],

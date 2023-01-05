@@ -1040,6 +1040,14 @@ module Full = struct
           | ms -> Concat (List.map ms ~f:print_mod) ^^ SplitWith Cost.Base
         end)
     in
+    (* For functions and methods, interpret supportdyn as use of <<__SupportDynamicType>> attribute *)
+    let (prefix, x) =
+      match (occurrence, get_node x) with
+      | ({ type_ = Function | Method _; _ }, Tnewtype (name, [tyarg], _))
+        when String.equal name SN.Classes.cSupportDyn ->
+        (text "<<__SupportDynamicType>>" ^^ Newline ^^ prefix, tyarg)
+      | (_, _) -> (prefix, x)
+    in
     let (fuel, body_doc) =
       match (occurrence, get_node x) with
       | ({ type_ = Class _; name; _ }, _) ->

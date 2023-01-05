@@ -40,13 +40,24 @@ let call_handler ~path progress_ref (pos_map : XRefs.pos_map) =
       let call_args =
         Symbol_build_json.build_call_arguments_json (List.map args ~f)
       in
-      let callee_xref =
+      let (id_pos, receiver_span) =
         match callee_exp with
-        | Aast.Id (id_pos, _)
-        | Aast.Class_const (_, (id_pos, _))
-        | Aast.(Obj_get (_, (_, _, Id (id_pos, _)), _, _)) ->
-          XRefs.PosMap.find_opt id_pos pos_map
-        | _ -> None
+        | Aast.Id (id_pos, _) -> (Some id_pos, None)
+        | Aast.Class_const (_, (id_pos, _)) -> (Some id_pos, None)
+        | Aast.(Obj_get ((_, receiver_span, _), (_, _, Id (id_pos, _)), _, _))
+          ->
+          (Some id_pos, Some receiver_span)
+        | _ -> (None, None)
+      in
+      let dispatch_arg =
+        Option.(
+          receiver_span >>= fun pos ->
+          match Symbol_build_json.build_call_arguments_json [(None, pos)] with
+          | [arg] -> Some arg
+          | _ -> None)
+      in
+      let callee_xref =
+        Option.(id_pos >>= fun pos -> XRefs.PosMap.find_opt pos pos_map)
       in
       let (_fact_id, prog) =
         Add_fact.file_call
@@ -54,6 +65,7 @@ let call_handler ~path progress_ref (pos_map : XRefs.pos_map) =
           callee_pos
           ~callee_xref
           ~call_args
+          ~dispatch_arg
           !progress_ref
       in
       progress_ref := prog

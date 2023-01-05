@@ -4492,14 +4492,14 @@ and expr_
     let (env, _tal, te, cty) = class_expr env [] cid in
     (* Match Obj_get dynamic instance property access behavior *)
     let (env, tm, _) = expr env m in
-    let ty =
+    let (env, ty) =
       if
         TUtils.is_dynamic env cty
         || TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
       then
-        MakeType.dynamic (Reason.Rwitness p)
+        (env, MakeType.dynamic (Reason.Rwitness p))
       else
-        Typing_utils.mk_tany env p
+        Env.fresh_type_error env p
     in
     let (_, pos, tm) = tm in
     let env = might_throw env in
@@ -4598,11 +4598,11 @@ and expr_
   | Obj_get (e1, e2, nullflavor, prop_or_method) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let (env, te2, _) = expr env e2 in
-    let ty =
+    let (env, ty) =
       if TUtils.is_dynamic env ty1 then
-        MakeType.dynamic (Reason.Rwitness p)
+        (env, MakeType.dynamic (Reason.Rwitness p))
       else
-        Typing_utils.mk_tany env p
+        Env.fresh_type_error env p
     in
     let (_, pos, te2) = te2 in
     let env = might_throw env in

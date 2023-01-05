@@ -118,14 +118,14 @@ val make_depend_on_constructor : env -> type_key -> unit
     module *)
 val make_depend_on_current_module : env -> unit
 
+val add_extends_dependency : env -> string -> unit
+
 val env_with_method_droot_member : env -> string -> static:bool -> env
 
 val env_with_constructor_droot_member : env -> env
 
 (** Get class declaration from the appropriate backend and add dependency. *)
 val get_class : env -> type_key -> class_decl option
-
-val get_class_dep : env -> type_key -> class_decl option
 
 (** Get function declaration from the appropriate backend and add dependency. *)
 val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option

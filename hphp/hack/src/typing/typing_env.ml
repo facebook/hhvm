@@ -628,6 +628,9 @@ let make_depend_on_current_module env =
   Option.iter env.genv.current_module ~f:(fun (_, mid) ->
       make_depend_on_module env mid)
 
+let add_extends_dependency (env : Typing_env_types.env) x =
+  add_dependency_edge env (Dep.Extends x)
+
 let env_with_method_droot_member env m ~static =
   let child =
     if static then
@@ -718,14 +721,6 @@ let get_class_or_typedef env x =
     match get_class env x with
     | None -> None
     | Some cd -> Some (ClassResult cd)
-
-let get_class_dep env x =
-  let res = get_class env x in
-  match res with
-  | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> res
-  | _ ->
-    Decl_env.add_extends_dependency env.decl_env x;
-    res
 
 let get_fun env x =
   let res =
@@ -998,7 +993,7 @@ let get_parent_id env = Option.map env.genv.parent ~f:fst
 
 let get_parent_class env =
   let open Option in
-  get_parent_id env >>= get_class_dep env
+  get_parent_id env >>= get_class env
 
 let get_fn_kind env = env.genv.fun_kind
 

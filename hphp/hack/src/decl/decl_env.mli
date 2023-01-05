@@ -17,8 +17,6 @@ type env = {
 
 val tcopt : env -> TypecheckerOptions.t
 
-val add_extends_dependency : env -> string -> unit
-
 type class_cache = Decl_store.class_entries SMap.t
 
 (** Auxiliary constant fallback function that returns [None]. *)

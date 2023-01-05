@@ -536,21 +536,6 @@ let inherit_hack_xhp_attrs_only class_type members =
 
 (*****************************************************************************)
 
-(** Return all the heap entries for a class names, i.e. the entry from the class heap
-    and optionally all the entries from the property and method heaps.
-    [classes] acts as a cache for entries we already have at hand.
-    Also add dependency to that class. *)
-let heap_entries env class_name (classes : Decl_store.class_entries SMap.t) :
-    Decl_store.class_entries option =
-  match SMap.find_opt class_name classes with
-  | Some (class_, _) as heap_entries ->
-    if not (Pos_or_decl.is_hhi class_.dc_pos) then
-      Decl_env.add_extends_dependency env class_name;
-    heap_entries
-  | None ->
-    Decl_env.add_extends_dependency env class_name;
-    None
-
 (* Include definitions inherited from a class (extends) or a trait (use)
  * or requires extends
  *)
@@ -559,7 +544,7 @@ let from_class env c (parents : Decl_store.class_entries SMap.t) parent_ty :
   let (_, (_, parent_name), parent_class_params) =
     Decl_utils.unwrap_class_type parent_ty
   in
-  match heap_entries env parent_name parents with
+  match SMap.find_opt parent_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
@@ -573,10 +558,9 @@ let from_class env c (parents : Decl_store.class_entries SMap.t) parent_ty :
       parent_class_params
       parent_members
 
-let from_class_constants_only env (parents : Decl_store.class_entries SMap.t) ty
-    =
+let from_class_constants_only (parents : Decl_store.class_entries SMap.t) ty =
   let (_, (_, class_name), class_params) = Decl_utils.unwrap_class_type ty in
-  match heap_entries env class_name parents with
+  match SMap.find_opt class_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
@@ -584,12 +568,11 @@ let from_class_constants_only env (parents : Decl_store.class_entries SMap.t) ty
     (* The class lives in Hack *)
     inherit_hack_class_constants_only class_ class_params parent_members
 
-let from_class_xhp_attrs_only env (parents : Decl_store.class_entries SMap.t) ty
-    =
+let from_class_xhp_attrs_only (parents : Decl_store.class_entries SMap.t) ty =
   let (_, (_pos, class_name), _class_params) =
     Decl_utils.unwrap_class_type ty
   in
-  match heap_entries env class_name parents with
+  match SMap.find_opt class_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
@@ -622,12 +605,12 @@ let from_trait env c parents acc uses =
 
 let from_xhp_attr_use env c (parents : Decl_store.class_entries SMap.t) acc uses
     =
-  let inherited = from_class_xhp_attrs_only env parents uses in
+  let inherited = from_class_xhp_attrs_only parents uses in
   add_inherited env c inherited acc
 
 let from_interface_constants
     env c (parents : Decl_store.class_entries SMap.t) acc impls =
-  let inherited = from_class_constants_only env parents impls in
+  let inherited = from_class_constants_only parents impls in
   add_inherited env c inherited acc
 
 let has_highest_precedence : (OverridePrecedence.t * 'a) option -> bool =

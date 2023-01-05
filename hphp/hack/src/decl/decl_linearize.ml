@@ -271,7 +271,6 @@ let rec ancestor_linearization
   let { ty_pos; class_name = (use_pos, class_name); type_args; source } =
     ancestor
   in
-  Decl_env.add_extends_dependency env.decl_env class_name;
   let lin =
     (* If we followed a require class constraint, there is no need to add the parents
         of class_name to the linearisation order, because because an explicit

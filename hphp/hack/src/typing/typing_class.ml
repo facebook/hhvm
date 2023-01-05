@@ -494,7 +494,7 @@ let check_parents_sealed env child_def child_type =
   let parents = parents @ child_def.c_implements @ child_def.c_uses in
   List.iter parents ~f:(function
       | (_, Happly ((_, name), _)) -> begin
-        match Env.get_class_dep env name with
+        match Env.get_class env name with
         | Some parent_type ->
           check_parent_sealed (fst child_def.c_name, child_type) parent_type
         | None -> ()
@@ -531,11 +531,21 @@ let rec check_implements_or_extends_unique impl =
     | _ -> check_implements_or_extends_unique rest)
 
 (** Add a dependency to constructors or produce an error if not a Tapply. *)
-let check_is_tapply_add_constructor_dep env deps =
+let check_is_tapply_add_constructor_extends_dep
+    env ?(skip_constructor_dep = false) deps =
   List.iter deps ~f:(fun ((p, _dep_hint), dep) ->
       match get_node dep with
       | Tapply ((_, class_name), _) ->
-        Env.make_depend_on_constructor env class_name
+        if not skip_constructor_dep then
+          Env.make_depend_on_constructor env class_name;
+        let is_hhi =
+          let open Option.Monad_infix in
+          Env.get_class env class_name
+          >>| Cls.pos
+          >>| Pos_or_decl.is_hhi
+          |> Option.value ~default:false
+        in
+        if not is_hhi then Env.add_extends_dependency env class_name
       | Tgeneric _ ->
         Errors.add_typing_error
           Typing_error.(
@@ -1328,7 +1338,7 @@ let check_SupportDynamicType env c =
     | Ast_defs.Cinterface
     | Ast_defs.Ctrait ->
       List.iter parent_names ~f:(fun name ->
-          match Env.get_class_dep env name with
+          match Env.get_class env name with
           | Some parent_type -> begin
             match Cls.kind parent_type with
             | Ast_defs.Cclass _
@@ -1459,6 +1469,7 @@ type class_parents = {
   req_implements: (Aast.hint * decl_ty) list;
   req_class: (Aast.hint * decl_ty) list;
   enum_includes: (Aast.hint * decl_ty) list option;
+  xhp_attr_uses: (Aast.hint * decl_ty) list;
 }
 
 let class_parents_hints_to_types env c : class_parents =
@@ -1475,6 +1486,7 @@ let class_parents_hints_to_types env c : class_parents =
   let enum_includes =
     Option.map c.c_enum ~f:(fun e -> hints_and_decl_tys e.e_includes)
   in
+  let xhp_attr_uses = hints_and_decl_tys c.c_xhp_attr_uses in
   {
     extends;
     implements;
@@ -1483,10 +1495,12 @@ let class_parents_hints_to_types env c : class_parents =
     req_implements;
     req_class;
     enum_includes;
+    xhp_attr_uses;
   }
 
 (** Add dependencies to parent constructors or produce errors if they're not a Tapply. *)
-let check_parents_are_tapply_add_constructor_deps env c parents =
+let check_parents_are_tapply_add_constructor_deps
+    env c (parents : class_parents) =
   let {
     extends;
     implements;
@@ -1495,23 +1509,24 @@ let check_parents_are_tapply_add_constructor_deps env c parents =
     req_implements;
     req_class;
     enum_includes;
+    xhp_attr_uses;
   } =
     parents
   in
-  let additional_parents =
-    (* In an abstract class or a trait, we assume the interfaces
-       will be implemented in the future, so we take them as
-       part of the class (as requested by dependency injection implementers) *)
-    match c.c_kind with
-    | Ast_defs.Cclass k when Ast_defs.is_abstract k -> implements
-    | Ast_defs.Ctrait -> implements @ req_implements
-    | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> []
-  in
-  check_is_tapply_add_constructor_dep env extends;
-  check_is_tapply_add_constructor_dep env uses;
-  check_is_tapply_add_constructor_dep env (req_class @ req_extends);
-  check_is_tapply_add_constructor_dep env additional_parents;
-  Option.iter enum_includes ~f:(check_is_tapply_add_constructor_dep env);
+  check_is_tapply_add_constructor_extends_dep env extends;
+  check_is_tapply_add_constructor_extends_dep
+    env
+    implements
+    ~skip_constructor_dep:(not (Ast_defs.is_c_abstract c.c_kind));
+  check_is_tapply_add_constructor_extends_dep env uses;
+  check_is_tapply_add_constructor_extends_dep env req_class;
+  check_is_tapply_add_constructor_extends_dep env req_extends;
+  check_is_tapply_add_constructor_extends_dep env req_implements;
+  Option.iter enum_includes ~f:(check_is_tapply_add_constructor_extends_dep env);
+  check_is_tapply_add_constructor_extends_dep
+    env
+    xhp_attr_uses
+    ~skip_constructor_dep:true;
   ()
 
 let check_class_attributes env ~cls =
@@ -1596,6 +1611,7 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
       req_implements;
       req_class = _;
       enum_includes = _;
+      xhp_attr_uses = _;
     } =
       parents
     in
@@ -1760,7 +1776,7 @@ let setup_env_for_class_def_check ctx c =
   in
   env
 
-let class_def ctx c =
+let class_def ctx (c : _ class_) =
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span c.c_span @@ fun () ->
   let env = setup_env_for_class_def_check ctx c in

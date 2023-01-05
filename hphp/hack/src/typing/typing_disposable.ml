@@ -56,7 +56,7 @@ let is_disposable_type env ty =
 let enforce_is_disposable env hint =
   match hint with
   | (_, Aast.Happly ((p, c), _)) -> begin
-    match Env.get_class_dep env c with
+    match Env.get_class env c with
     | None -> ()
     | Some c ->
       if not (is_disposable_class env c || Ast_defs.is_c_interface (Cls.kind c))

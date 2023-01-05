@@ -25,7 +25,7 @@ let parent_init_prop = "parent::" ^ SN.Members.__construct
 let add_parent_construct env c props parent_ty =
   match get_node parent_ty with
   | Tapply ((_, parent), _) -> begin
-    match Env.get_class_dep env parent with
+    match Env.get_class env parent with
     | Some class_ when Cls.need_init class_ && Option.is_some c.sc_constructor
       ->
       SSet.add parent_init_prop props
@@ -106,7 +106,7 @@ and trait_props env c props =
         fun acc ty ->
           match get_node ty with
           | Tapply ((_, trait), _) ->
-            let cls = Env.get_class_dep env trait in
+            let cls = Env.get_class env trait in
             let shallow_class =
               Shallow_classes_provider.get (Env.get_ctx env) trait
             in

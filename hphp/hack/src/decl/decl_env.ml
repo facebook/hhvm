@@ -50,29 +50,6 @@ let add_wclass env x =
       dep;
   ()
 
-let add_extends_dependency env x =
-  let deps_mode = deps_mode env in
-  Option.iter env.droot ~f:(fun root ->
-      let dep = Dep.Type x in
-      Typing_deps.add_idep deps_mode root (Dep.Extends x);
-      Typing_deps.add_idep deps_mode root dep);
-  if
-    TypecheckerOptions.record_fine_grained_dependencies
-    @@ Provider_context.get_tcopt env.ctx
-  then (
-    Typing_pessimisation_deps.try_add_fine_dep
-      deps_mode
-      env.droot
-      None
-      (Dep.Extends x);
-    Typing_pessimisation_deps.try_add_fine_dep
-      deps_mode
-      env.droot
-      None
-      (Dep.Type x)
-  );
-  ()
-
 type class_cache = Decl_store.class_entries SMap.t
 
 let no_fallback (_ : env) (_ : string) : Decl_defs.decl_class_type option = None
@@ -85,14 +62,9 @@ let get_class_and_add_dep
     | None when shmem_fallback -> Decl_store.((get ()).get_class x)
     | None -> None
   in
-  let res =
-    match res with
-    | Some c -> Some c
-    | None -> fallback env x
-  in
-  Option.iter res ~f:(fun cd ->
-      if not (is_hhi cd) then add_extends_dependency env x);
-  res
+  match res with
+  | Some c -> Some c
+  | None -> fallback env x
 
 let get_construct env class_ =
   if not (is_hhi class_) then begin

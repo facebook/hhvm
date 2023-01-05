@@ -25,9 +25,9 @@ public final class MyUnionFieldPatch implements com.facebook.thrift.payload.Thri
 
     @ThriftConstructor
     public MyUnionFieldPatch(
-        @com.facebook.swift.codec.ThriftField(value=1, name="option1", requiredness=Requiredness.NONE) final com.facebook.thrift.op.StringPatch option1,
-        @com.facebook.swift.codec.ThriftField(value=2, name="option2", requiredness=Requiredness.NONE) final com.facebook.thrift.op.I32Patch option2,
-        @com.facebook.swift.codec.ThriftField(value=3, name="option3", requiredness=Requiredness.NONE) final test.fixtures.patch.InnerUnionPatch option3
+        @com.facebook.swift.codec.ThriftField(value=1, name="option1", requiredness=Requiredness.TERSE) final com.facebook.thrift.op.StringPatch option1,
+        @com.facebook.swift.codec.ThriftField(value=2, name="option2", requiredness=Requiredness.TERSE) final com.facebook.thrift.op.I32Patch option2,
+        @com.facebook.swift.codec.ThriftField(value=3, name="option3", requiredness=Requiredness.TERSE) final test.fixtures.patch.InnerUnionPatch option3
     ) {
         this.option1 = option1;
         this.option2 = option2;
@@ -36,18 +36,18 @@ public final class MyUnionFieldPatch implements com.facebook.thrift.payload.Thri
     
     @ThriftConstructor
     protected MyUnionFieldPatch() {
-      this.option1 = null;
-      this.option2 = null;
-      this.option3 = null;
+      this.option1 = com.facebook.thrift.op.StringPatch.defaultInstance();
+      this.option2 = com.facebook.thrift.op.I32Patch.defaultInstance();
+      this.option3 = test.fixtures.patch.InnerUnionPatch.defaultInstance();
     }
     
     public static class Builder {
     
-        private com.facebook.thrift.op.StringPatch option1 = null;
-        private com.facebook.thrift.op.I32Patch option2 = null;
-        private test.fixtures.patch.InnerUnionPatch option3 = null;
+        private com.facebook.thrift.op.StringPatch option1 = com.facebook.thrift.op.StringPatch.defaultInstance();
+        private com.facebook.thrift.op.I32Patch option2 = com.facebook.thrift.op.I32Patch.defaultInstance();
+        private test.fixtures.patch.InnerUnionPatch option3 = test.fixtures.patch.InnerUnionPatch.defaultInstance();
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="option1", requiredness=Requiredness.NONE)
+        @com.facebook.swift.codec.ThriftField(value=1, name="option1", requiredness=Requiredness.TERSE)
         public Builder setOption1(com.facebook.thrift.op.StringPatch option1) {
             this.option1 = option1;
             return this;
@@ -55,7 +55,7 @@ public final class MyUnionFieldPatch implements com.facebook.thrift.payload.Thri
     
         public com.facebook.thrift.op.StringPatch getOption1() { return option1; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="option2", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="option2", requiredness=Requiredness.TERSE)
         public Builder setOption2(com.facebook.thrift.op.I32Patch option2) {
             this.option2 = option2;
             return this;
@@ -63,7 +63,7 @@ public final class MyUnionFieldPatch implements com.facebook.thrift.payload.Thri
     
         public com.facebook.thrift.op.I32Patch getOption2() { return option2; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="option3", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=3, name="option3", requiredness=Requiredness.TERSE)
         public Builder setOption3(test.fixtures.patch.InnerUnionPatch option3) {
             this.option3 = option3;
             return this;
@@ -118,17 +118,17 @@ public final class MyUnionFieldPatch implements com.facebook.thrift.payload.Thri
     }
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=1, name="option1", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=1, name="option1", requiredness=Requiredness.TERSE)
     public com.facebook.thrift.op.StringPatch getOption1() { return option1; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=2, name="option2", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="option2", requiredness=Requiredness.TERSE)
     public com.facebook.thrift.op.I32Patch getOption2() { return option2; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=3, name="option3", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=3, name="option3", requiredness=Requiredness.TERSE)
     public test.fixtures.patch.InnerUnionPatch getOption3() { return option3; }
     
     @java.lang.Override
@@ -216,21 +216,39 @@ public final class MyUnionFieldPatch implements com.facebook.thrift.payload.Thri
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (option1 != null) {
+      int structStart = 0;
+      int pos = 0;
+      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
+      java.util.Objects.requireNonNull(option1, "option1 must not be null");
+      structStart = p.mark();
         oprot.writeFieldBegin(OPTION1_FIELD_DESC);
+        pos = p.mark();
         this.option1.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      if (option2 != null) {
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
+      java.util.Objects.requireNonNull(option2, "option2 must not be null");
+      structStart = p.mark();
         oprot.writeFieldBegin(OPTION2_FIELD_DESC);
+        pos = p.mark();
         this.option2.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      if (option3 != null) {
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
+      java.util.Objects.requireNonNull(option3, "option3 must not be null");
+      structStart = p.mark();
         oprot.writeFieldBegin(OPTION3_FIELD_DESC);
+        pos = p.mark();
         this.option3.write0(oprot);
-        oprot.writeFieldEnd();
-      }
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

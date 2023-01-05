@@ -25,21 +25,21 @@ public final class RecursiveFieldPatch implements com.facebook.thrift.payload.Th
 
     @ThriftConstructor
     public RecursiveFieldPatch(
-        @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.RecursiveField1Patch nodes
+        @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.RecursiveField1Patch nodes
     ) {
         this.nodes = nodes;
     }
     
     @ThriftConstructor
     protected RecursiveFieldPatch() {
-      this.nodes = null;
+      this.nodes = test.fixtures.patch.RecursiveField1Patch.defaultInstance();
     }
     
     public static class Builder {
     
-        private test.fixtures.patch.RecursiveField1Patch nodes = null;
+        private test.fixtures.patch.RecursiveField1Patch nodes = test.fixtures.patch.RecursiveField1Patch.defaultInstance();
     
-        @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.NONE)
+        @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.TERSE)
         public Builder setNodes(test.fixtures.patch.RecursiveField1Patch nodes) {
             this.nodes = nodes;
             return this;
@@ -78,7 +78,7 @@ public final class RecursiveFieldPatch implements com.facebook.thrift.payload.Th
     }
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.TERSE)
     public test.fixtures.patch.RecursiveField1Patch getNodes() { return nodes; }
     
     @java.lang.Override
@@ -144,11 +144,19 @@ public final class RecursiveFieldPatch implements com.facebook.thrift.payload.Th
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (nodes != null) {
+      int structStart = 0;
+      int pos = 0;
+      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
+      java.util.Objects.requireNonNull(nodes, "nodes must not be null");
+      structStart = p.mark();
         oprot.writeFieldBegin(NODES_FIELD_DESC);
+        pos = p.mark();
         this.nodes.write0(oprot);
-        oprot.writeFieldEnd();
-      }
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

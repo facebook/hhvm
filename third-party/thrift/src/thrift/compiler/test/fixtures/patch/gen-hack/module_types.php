@@ -2526,11 +2526,13 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'data1',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\StringPatch::class,
     ),
     2 => shape(
       'var' => 'data2',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\I32Patch::class,
     ),
@@ -2545,7 +2547,7 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'data2' => ?\thrift\op\I32Patch,
   );
 
-  const int STRUCTURAL_ID = 4934641526205074734;
+  const int STRUCTURAL_ID = 6838201112512803660;
   /**
    * Original thrift field:-
    * 1: struct patch.StringPatch data1
@@ -2578,6 +2580,8 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->data1 = null;
+    $this->data2 = null;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2983,6 +2987,7 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
   const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'innerOption',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\BinaryPatch::class,
     ),
@@ -2995,7 +3000,7 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'innerOption' => ?\thrift\op\BinaryPatch,
   );
 
-  const int STRUCTURAL_ID = 32095888299770904;
+  const int STRUCTURAL_ID = 7781104017677120443;
   /**
    * Original thrift field:-
    * 1: struct patch.BinaryPatch innerOption
@@ -3021,6 +3026,7 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->innerOption = null;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -3394,16 +3400,19 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'option1',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\StringPatch::class,
     ),
     2 => shape(
       'var' => 'option2',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\I32Patch::class,
     ),
     3 => shape(
       'var' => 'option3',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\InnerUnionPatch::class,
     ),
@@ -3420,7 +3429,7 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'option3' => ?\fixtures\patch\InnerUnionPatch,
   );
 
-  const int STRUCTURAL_ID = 7680965517871361038;
+  const int STRUCTURAL_ID = 2282223608803987365;
   /**
    * Original thrift field:-
    * 1: struct patch.StringPatch option1
@@ -3460,6 +3469,9 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->option1 = null;
+    $this->option2 = null;
+    $this->option3 = null;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -7371,151 +7383,181 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   const \ThriftStructTypes::TSpec SPEC = dict[
     -30 => shape(
       'var' => 'mapMap',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyStructField30Patch::class,
     ),
     -29 => shape(
       'var' => 'listMap',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyStructField29Patch::class,
     ),
     -28 => shape(
       'var' => 'optMapVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyStructField28Patch::class,
     ),
     -27 => shape(
       'var' => 'optSetVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyStructField27Patch::class,
     ),
     -26 => shape(
       'var' => 'optListVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyStructField26Patch::class,
     ),
     -25 => shape(
       'var' => 'optLateStructVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\LateDefStructPatch::class,
     ),
     -24 => shape(
       'var' => 'optStructVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyDataPatch::class,
     ),
     -23 => shape(
       'var' => 'optEnumVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyStructField23Patch::class,
     ),
     -22 => shape(
       'var' => 'optBinaryVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\BinaryPatch::class,
     ),
     -21 => shape(
       'var' => 'optStringVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\StringPatch::class,
     ),
     -20 => shape(
       'var' => 'optDoubleVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\DoublePatch::class,
     ),
     -19 => shape(
       'var' => 'optFloatVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\FloatPatch::class,
     ),
     -18 => shape(
       'var' => 'optI64Val',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\I64Patch::class,
     ),
     -17 => shape(
       'var' => 'optI32Val',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\I32Patch::class,
     ),
     -16 => shape(
       'var' => 'optI16Val',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\I16Patch::class,
     ),
     -15 => shape(
       'var' => 'optByteVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\BytePatch::class,
     ),
     -14 => shape(
       'var' => 'optBoolVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\BoolPatch::class,
     ),
     -13 => shape(
       'var' => 'lateStructVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\LateDefStructPatch::class,
     ),
     -12 => shape(
       'var' => 'unionVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyUnionPatch::class,
     ),
     -11 => shape(
       'var' => 'structVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyDataPatch::class,
     ),
     -10 => shape(
       'var' => 'enumVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyStructField10Patch::class,
     ),
     -9 => shape(
       'var' => 'binaryVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\BinaryPatch::class,
     ),
     -8 => shape(
       'var' => 'stringVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\StringPatch::class,
     ),
     -7 => shape(
       'var' => 'doubleVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\DoublePatch::class,
     ),
     -6 => shape(
       'var' => 'floatVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\FloatPatch::class,
     ),
     -5 => shape(
       'var' => 'i64Val',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\I64Patch::class,
     ),
     -4 => shape(
       'var' => 'i32Val',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\I32Patch::class,
     ),
     -3 => shape(
       'var' => 'i16Val',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\I16Patch::class,
     ),
     -2 => shape(
       'var' => 'byteVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\BytePatch::class,
     ),
     -1 => shape(
       'var' => 'boolVal',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \thrift\op\BoolPatch::class,
     ),
@@ -7586,7 +7628,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'boolVal' => ?\thrift\op\BoolPatch,
   );
 
-  const int STRUCTURAL_ID = 2873892039341882741;
+  const int STRUCTURAL_ID = 7201908858229330499;
   /**
    * Original thrift field:-
    * -30: struct module.MyStructField30Patch mapMap
@@ -7815,6 +7857,36 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->mapMap = null;
+    $this->listMap = null;
+    $this->optMapVal = null;
+    $this->optSetVal = null;
+    $this->optListVal = null;
+    $this->optLateStructVal = null;
+    $this->optStructVal = null;
+    $this->optEnumVal = null;
+    $this->optBinaryVal = null;
+    $this->optStringVal = null;
+    $this->optDoubleVal = null;
+    $this->optFloatVal = null;
+    $this->optI64Val = null;
+    $this->optI32Val = null;
+    $this->optI16Val = null;
+    $this->optByteVal = null;
+    $this->optBoolVal = null;
+    $this->lateStructVal = null;
+    $this->unionVal = null;
+    $this->structVal = null;
+    $this->enumVal = null;
+    $this->binaryVal = null;
+    $this->stringVal = null;
+    $this->doubleVal = null;
+    $this->floatVal = null;
+    $this->i64Val = null;
+    $this->i32Val = null;
+    $this->i16Val = null;
+    $this->byteVal = null;
+    $this->boolVal = null;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -9716,6 +9788,7 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata 
   const \ThriftStructTypes::TSpec SPEC = dict[
     -1 => shape(
       'var' => 'nodes',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\RecursiveField1Patch::class,
     ),
@@ -9728,7 +9801,7 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata 
     ?'nodes' => ?\fixtures\patch\RecursiveField1Patch,
   );
 
-  const int STRUCTURAL_ID = 1550759368524310852;
+  const int STRUCTURAL_ID = 5650747686776624114;
   /**
    * Original thrift field:-
    * -1: struct module.RecursiveField1Patch nodes
@@ -9754,6 +9827,7 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata 
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->nodes = null;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -10128,6 +10202,7 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   const \ThriftStructTypes::TSpec SPEC = dict[
     -1 => shape(
       'var' => 'loop',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\LoopPatch::class,
     ),
@@ -10140,7 +10215,7 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'loop' => ?\fixtures\patch\LoopPatch,
   );
 
-  const int STRUCTURAL_ID = 1773850756587145723;
+  const int STRUCTURAL_ID = 3282171960754554582;
   /**
    * Original thrift field:-
    * -1: struct module.LoopPatch loop
@@ -10166,6 +10241,7 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->loop = null;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -10549,6 +10625,7 @@ class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   const \ThriftStructTypes::TSpec SPEC = dict[
     -1 => shape(
       'var' => 'bar',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\BarPatch::class,
     ),
@@ -10561,7 +10638,7 @@ class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'bar' => ?\fixtures\patch\BarPatch,
   );
 
-  const int STRUCTURAL_ID = 5975782493242643972;
+  const int STRUCTURAL_ID = 3070424594391246387;
   /**
    * Original thrift field:-
    * -1: struct module.BarPatch bar
@@ -10587,6 +10664,7 @@ class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->bar = null;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

@@ -4482,8 +4482,6 @@ class MyDataFieldPatchStruct final  {
   ::apache::thrift::op::StringPatch __fbthrift_field_data1;
  private:
   ::apache::thrift::op::I32Patch __fbthrift_field_data2;
- private:
-  apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -4491,83 +4489,83 @@ class MyDataFieldPatchStruct final  {
   bool operator<(const MyDataFieldPatchStruct&) const;
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> data1_ref() const& {
-    return {this->__fbthrift_field_data1, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> data1_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_data1};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> data1_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_data1), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> data1_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_data1)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> data1_ref() & {
-    return {this->__fbthrift_field_data1, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> data1_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_data1};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> data1_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_data1), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> data1_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_data1)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> data1() const& {
-    return {this->__fbthrift_field_data1, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> data1() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_data1};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> data1() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_data1), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> data1() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_data1)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> data1() & {
-    return {this->__fbthrift_field_data1, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> data1() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_data1};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> data1() && {
-    return {static_cast<T&&>(this->__fbthrift_field_data1), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> data1() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_data1)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> data2_ref() const& {
-    return {this->__fbthrift_field_data2, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> data2_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_data2};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> data2_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_data2), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> data2_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_data2)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> data2_ref() & {
-    return {this->__fbthrift_field_data2, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> data2_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_data2};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> data2_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_data2), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> data2_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_data2)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> data2() const& {
-    return {this->__fbthrift_field_data2, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> data2() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_data2};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> data2() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_data2), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> data2() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_data2)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> data2() & {
-    return {this->__fbthrift_field_data2, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> data2() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_data2};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> data2() && {
-    return {static_cast<T&&>(this->__fbthrift_field_data2), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> data2() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_data2)};
   }
 
   template <class Protocol_>
@@ -5053,8 +5051,6 @@ class InnerUnionFieldPatchStruct final  {
   InnerUnionFieldPatchStruct& operator=(const InnerUnionFieldPatchStruct& src);
  private:
   ::apache::thrift::op::BinaryPatch __fbthrift_field_innerOption;
- private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -5062,43 +5058,43 @@ class InnerUnionFieldPatchStruct final  {
   bool operator<(const InnerUnionFieldPatchStruct&) const;
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> innerOption_ref() const& {
-    return {this->__fbthrift_field_innerOption, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> innerOption_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_innerOption};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> innerOption_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_innerOption), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> innerOption_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_innerOption)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> innerOption_ref() & {
-    return {this->__fbthrift_field_innerOption, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> innerOption_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_innerOption};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> innerOption_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_innerOption), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> innerOption_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_innerOption)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> innerOption() const& {
-    return {this->__fbthrift_field_innerOption, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> innerOption() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_innerOption};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> innerOption() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_innerOption), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> innerOption() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_innerOption)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> innerOption() & {
-    return {this->__fbthrift_field_innerOption, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> innerOption() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_innerOption};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> innerOption() && {
-    return {static_cast<T&&>(this->__fbthrift_field_innerOption), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> innerOption() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_innerOption)};
   }
 
   template <class Protocol_>
@@ -5604,8 +5600,6 @@ class MyUnionFieldPatchStruct final  {
   ::apache::thrift::op::I32Patch __fbthrift_field_option2;
  private:
   ::test::fixtures::patch::InnerUnionPatch __fbthrift_field_option3;
- private:
-  apache::thrift::detail::isset_bitset<3, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -5613,123 +5607,123 @@ class MyUnionFieldPatchStruct final  {
   bool operator<(const MyUnionFieldPatchStruct&) const;
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> option1_ref() const& {
-    return {this->__fbthrift_field_option1, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> option1_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_option1};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> option1_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_option1), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> option1_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_option1)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> option1_ref() & {
-    return {this->__fbthrift_field_option1, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> option1_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_option1};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> option1_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_option1), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> option1_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_option1)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> option1() const& {
-    return {this->__fbthrift_field_option1, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> option1() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_option1};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> option1() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_option1), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> option1() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_option1)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> option1() & {
-    return {this->__fbthrift_field_option1, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> option1() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_option1};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> option1() && {
-    return {static_cast<T&&>(this->__fbthrift_field_option1), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> option1() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_option1)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> option2_ref() const& {
-    return {this->__fbthrift_field_option2, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> option2_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_option2};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> option2_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_option2), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> option2_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_option2)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> option2_ref() & {
-    return {this->__fbthrift_field_option2, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> option2_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_option2};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> option2_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_option2), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> option2_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_option2)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> option2() const& {
-    return {this->__fbthrift_field_option2, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> option2() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_option2};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> option2() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_option2), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> option2() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_option2)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> option2() & {
-    return {this->__fbthrift_field_option2, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> option2() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_option2};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> option2() && {
-    return {static_cast<T&&>(this->__fbthrift_field_option2), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> option2() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_option2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> option3_ref() const& {
-    return {this->__fbthrift_field_option3, __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> option3_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_option3};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> option3_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_option3), __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> option3_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_option3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> option3_ref() & {
-    return {this->__fbthrift_field_option3, __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> option3_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_option3};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> option3_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_option3), __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> option3_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_option3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> option3() const& {
-    return {this->__fbthrift_field_option3, __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> option3() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_option3};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> option3() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_option3), __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> option3() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_option3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> option3() & {
-    return {this->__fbthrift_field_option3, __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> option3() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_option3};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> option3() && {
-    return {static_cast<T&&>(this->__fbthrift_field_option3), __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> option3() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_option3)};
   }
 
   template <class Protocol_>
@@ -10795,8 +10789,6 @@ class MyStructFieldPatchStruct final  {
   ::apache::thrift::op::BytePatch __fbthrift_field_byteVal;
  private:
   ::apache::thrift::op::BoolPatch __fbthrift_field_boolVal;
- private:
-  apache::thrift::detail::isset_bitset<30, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -10804,1203 +10796,1203 @@ class MyStructFieldPatchStruct final  {
   bool operator<(const MyStructFieldPatchStruct&) const;
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField30Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> mapMap_ref() const& {
-    return {this->__fbthrift_field_mapMap, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> mapMap_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_mapMap};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField30Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> mapMap_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_mapMap), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> mapMap_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_mapMap)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField30Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> mapMap_ref() & {
-    return {this->__fbthrift_field_mapMap, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> mapMap_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_mapMap};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField30Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> mapMap_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_mapMap), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> mapMap_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_mapMap)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField30Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> mapMap() const& {
-    return {this->__fbthrift_field_mapMap, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> mapMap() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_mapMap};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField30Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> mapMap() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_mapMap), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> mapMap() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_mapMap)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField30Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> mapMap() & {
-    return {this->__fbthrift_field_mapMap, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> mapMap() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_mapMap};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField30Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> mapMap() && {
-    return {static_cast<T&&>(this->__fbthrift_field_mapMap), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> mapMap() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_mapMap)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField29Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> listMap_ref() const& {
-    return {this->__fbthrift_field_listMap, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> listMap_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_listMap};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField29Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> listMap_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_listMap), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> listMap_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_listMap)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField29Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> listMap_ref() & {
-    return {this->__fbthrift_field_listMap, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> listMap_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_listMap};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField29Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> listMap_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_listMap), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> listMap_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_listMap)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField29Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> listMap() const& {
-    return {this->__fbthrift_field_listMap, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> listMap() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_listMap};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField29Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> listMap() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_listMap), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> listMap() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_listMap)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField29Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> listMap() & {
-    return {this->__fbthrift_field_listMap, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> listMap() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_listMap};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField29Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> listMap() && {
-    return {static_cast<T&&>(this->__fbthrift_field_listMap), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> listMap() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_listMap)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField28Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optMapVal_ref() const& {
-    return {this->__fbthrift_field_optMapVal, __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optMapVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optMapVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField28Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optMapVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optMapVal), __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optMapVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optMapVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField28Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optMapVal_ref() & {
-    return {this->__fbthrift_field_optMapVal, __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optMapVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optMapVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField28Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optMapVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optMapVal), __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optMapVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optMapVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField28Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optMapVal() const& {
-    return {this->__fbthrift_field_optMapVal, __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optMapVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optMapVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField28Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optMapVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optMapVal), __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optMapVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optMapVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField28Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optMapVal() & {
-    return {this->__fbthrift_field_optMapVal, __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optMapVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optMapVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField28Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optMapVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optMapVal), __isset.at(2), __isset.bit(2)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optMapVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optMapVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField27Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optSetVal_ref() const& {
-    return {this->__fbthrift_field_optSetVal, __isset.at(3), __isset.bit(3)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optSetVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optSetVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField27Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optSetVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optSetVal), __isset.at(3), __isset.bit(3)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optSetVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optSetVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField27Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optSetVal_ref() & {
-    return {this->__fbthrift_field_optSetVal, __isset.at(3), __isset.bit(3)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optSetVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optSetVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField27Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optSetVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optSetVal), __isset.at(3), __isset.bit(3)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optSetVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optSetVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField27Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optSetVal() const& {
-    return {this->__fbthrift_field_optSetVal, __isset.at(3), __isset.bit(3)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optSetVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optSetVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField27Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optSetVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optSetVal), __isset.at(3), __isset.bit(3)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optSetVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optSetVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField27Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optSetVal() & {
-    return {this->__fbthrift_field_optSetVal, __isset.at(3), __isset.bit(3)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optSetVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optSetVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField27Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optSetVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optSetVal), __isset.at(3), __isset.bit(3)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optSetVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optSetVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField26Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optListVal_ref() const& {
-    return {this->__fbthrift_field_optListVal, __isset.at(4), __isset.bit(4)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optListVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optListVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField26Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optListVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optListVal), __isset.at(4), __isset.bit(4)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optListVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optListVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField26Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optListVal_ref() & {
-    return {this->__fbthrift_field_optListVal, __isset.at(4), __isset.bit(4)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optListVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optListVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField26Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optListVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optListVal), __isset.at(4), __isset.bit(4)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optListVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optListVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField26Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optListVal() const& {
-    return {this->__fbthrift_field_optListVal, __isset.at(4), __isset.bit(4)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optListVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optListVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField26Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optListVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optListVal), __isset.at(4), __isset.bit(4)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optListVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optListVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField26Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optListVal() & {
-    return {this->__fbthrift_field_optListVal, __isset.at(4), __isset.bit(4)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optListVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optListVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField26Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optListVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optListVal), __isset.at(4), __isset.bit(4)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optListVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optListVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optLateStructVal_ref() const& {
-    return {this->__fbthrift_field_optLateStructVal, __isset.at(5), __isset.bit(5)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optLateStructVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optLateStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optLateStructVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optLateStructVal), __isset.at(5), __isset.bit(5)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optLateStructVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optLateStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optLateStructVal_ref() & {
-    return {this->__fbthrift_field_optLateStructVal, __isset.at(5), __isset.bit(5)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optLateStructVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optLateStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optLateStructVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optLateStructVal), __isset.at(5), __isset.bit(5)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optLateStructVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optLateStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optLateStructVal() const& {
-    return {this->__fbthrift_field_optLateStructVal, __isset.at(5), __isset.bit(5)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optLateStructVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optLateStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optLateStructVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optLateStructVal), __isset.at(5), __isset.bit(5)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optLateStructVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optLateStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optLateStructVal() & {
-    return {this->__fbthrift_field_optLateStructVal, __isset.at(5), __isset.bit(5)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optLateStructVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optLateStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optLateStructVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optLateStructVal), __isset.at(5), __isset.bit(5)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optLateStructVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optLateStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optStructVal_ref() const& {
-    return {this->__fbthrift_field_optStructVal, __isset.at(6), __isset.bit(6)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optStructVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optStructVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optStructVal), __isset.at(6), __isset.bit(6)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optStructVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optStructVal_ref() & {
-    return {this->__fbthrift_field_optStructVal, __isset.at(6), __isset.bit(6)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optStructVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optStructVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optStructVal), __isset.at(6), __isset.bit(6)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optStructVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optStructVal() const& {
-    return {this->__fbthrift_field_optStructVal, __isset.at(6), __isset.bit(6)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optStructVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optStructVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optStructVal), __isset.at(6), __isset.bit(6)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optStructVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optStructVal() & {
-    return {this->__fbthrift_field_optStructVal, __isset.at(6), __isset.bit(6)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optStructVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optStructVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optStructVal), __isset.at(6), __isset.bit(6)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optStructVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optEnumVal_ref() const& {
-    return {this->__fbthrift_field_optEnumVal, __isset.at(7), __isset.bit(7)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optEnumVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optEnumVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optEnumVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optEnumVal), __isset.at(7), __isset.bit(7)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optEnumVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optEnumVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optEnumVal_ref() & {
-    return {this->__fbthrift_field_optEnumVal, __isset.at(7), __isset.bit(7)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optEnumVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optEnumVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optEnumVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optEnumVal), __isset.at(7), __isset.bit(7)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optEnumVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optEnumVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optEnumVal() const& {
-    return {this->__fbthrift_field_optEnumVal, __isset.at(7), __isset.bit(7)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optEnumVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optEnumVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optEnumVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optEnumVal), __isset.at(7), __isset.bit(7)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optEnumVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optEnumVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optEnumVal() & {
-    return {this->__fbthrift_field_optEnumVal, __isset.at(7), __isset.bit(7)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optEnumVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optEnumVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optEnumVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optEnumVal), __isset.at(7), __isset.bit(7)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optEnumVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optEnumVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optBinaryVal_ref() const& {
-    return {this->__fbthrift_field_optBinaryVal, __isset.at(8), __isset.bit(8)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optBinaryVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optBinaryVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optBinaryVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optBinaryVal), __isset.at(8), __isset.bit(8)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optBinaryVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optBinaryVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optBinaryVal_ref() & {
-    return {this->__fbthrift_field_optBinaryVal, __isset.at(8), __isset.bit(8)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optBinaryVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optBinaryVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optBinaryVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optBinaryVal), __isset.at(8), __isset.bit(8)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optBinaryVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optBinaryVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optBinaryVal() const& {
-    return {this->__fbthrift_field_optBinaryVal, __isset.at(8), __isset.bit(8)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optBinaryVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optBinaryVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optBinaryVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optBinaryVal), __isset.at(8), __isset.bit(8)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optBinaryVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optBinaryVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optBinaryVal() & {
-    return {this->__fbthrift_field_optBinaryVal, __isset.at(8), __isset.bit(8)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optBinaryVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optBinaryVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optBinaryVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optBinaryVal), __isset.at(8), __isset.bit(8)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optBinaryVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optBinaryVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optStringVal_ref() const& {
-    return {this->__fbthrift_field_optStringVal, __isset.at(9), __isset.bit(9)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optStringVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optStringVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optStringVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optStringVal), __isset.at(9), __isset.bit(9)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optStringVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optStringVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optStringVal_ref() & {
-    return {this->__fbthrift_field_optStringVal, __isset.at(9), __isset.bit(9)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optStringVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optStringVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optStringVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optStringVal), __isset.at(9), __isset.bit(9)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optStringVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optStringVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optStringVal() const& {
-    return {this->__fbthrift_field_optStringVal, __isset.at(9), __isset.bit(9)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optStringVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optStringVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optStringVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optStringVal), __isset.at(9), __isset.bit(9)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optStringVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optStringVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optStringVal() & {
-    return {this->__fbthrift_field_optStringVal, __isset.at(9), __isset.bit(9)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optStringVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optStringVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optStringVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optStringVal), __isset.at(9), __isset.bit(9)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optStringVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optStringVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optDoubleVal_ref() const& {
-    return {this->__fbthrift_field_optDoubleVal, __isset.at(10), __isset.bit(10)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optDoubleVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optDoubleVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optDoubleVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optDoubleVal), __isset.at(10), __isset.bit(10)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optDoubleVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optDoubleVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optDoubleVal_ref() & {
-    return {this->__fbthrift_field_optDoubleVal, __isset.at(10), __isset.bit(10)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optDoubleVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optDoubleVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optDoubleVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optDoubleVal), __isset.at(10), __isset.bit(10)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optDoubleVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optDoubleVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optDoubleVal() const& {
-    return {this->__fbthrift_field_optDoubleVal, __isset.at(10), __isset.bit(10)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optDoubleVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optDoubleVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optDoubleVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optDoubleVal), __isset.at(10), __isset.bit(10)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optDoubleVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optDoubleVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optDoubleVal() & {
-    return {this->__fbthrift_field_optDoubleVal, __isset.at(10), __isset.bit(10)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optDoubleVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optDoubleVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optDoubleVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optDoubleVal), __isset.at(10), __isset.bit(10)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optDoubleVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optDoubleVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optFloatVal_ref() const& {
-    return {this->__fbthrift_field_optFloatVal, __isset.at(11), __isset.bit(11)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optFloatVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optFloatVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optFloatVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optFloatVal), __isset.at(11), __isset.bit(11)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optFloatVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optFloatVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optFloatVal_ref() & {
-    return {this->__fbthrift_field_optFloatVal, __isset.at(11), __isset.bit(11)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optFloatVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optFloatVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optFloatVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optFloatVal), __isset.at(11), __isset.bit(11)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optFloatVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optFloatVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optFloatVal() const& {
-    return {this->__fbthrift_field_optFloatVal, __isset.at(11), __isset.bit(11)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optFloatVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optFloatVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optFloatVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optFloatVal), __isset.at(11), __isset.bit(11)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optFloatVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optFloatVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optFloatVal() & {
-    return {this->__fbthrift_field_optFloatVal, __isset.at(11), __isset.bit(11)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optFloatVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optFloatVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optFloatVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optFloatVal), __isset.at(11), __isset.bit(11)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optFloatVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optFloatVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optI64Val_ref() const& {
-    return {this->__fbthrift_field_optI64Val, __isset.at(12), __isset.bit(12)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optI64Val_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optI64Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optI64Val_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optI64Val), __isset.at(12), __isset.bit(12)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optI64Val_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optI64Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optI64Val_ref() & {
-    return {this->__fbthrift_field_optI64Val, __isset.at(12), __isset.bit(12)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optI64Val_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optI64Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optI64Val_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optI64Val), __isset.at(12), __isset.bit(12)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optI64Val_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optI64Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optI64Val() const& {
-    return {this->__fbthrift_field_optI64Val, __isset.at(12), __isset.bit(12)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optI64Val() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optI64Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optI64Val() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optI64Val), __isset.at(12), __isset.bit(12)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optI64Val() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optI64Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optI64Val() & {
-    return {this->__fbthrift_field_optI64Val, __isset.at(12), __isset.bit(12)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optI64Val() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optI64Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optI64Val() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optI64Val), __isset.at(12), __isset.bit(12)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optI64Val() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optI64Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optI32Val_ref() const& {
-    return {this->__fbthrift_field_optI32Val, __isset.at(13), __isset.bit(13)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optI32Val_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optI32Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optI32Val_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optI32Val), __isset.at(13), __isset.bit(13)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optI32Val_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optI32Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optI32Val_ref() & {
-    return {this->__fbthrift_field_optI32Val, __isset.at(13), __isset.bit(13)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optI32Val_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optI32Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optI32Val_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optI32Val), __isset.at(13), __isset.bit(13)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optI32Val_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optI32Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optI32Val() const& {
-    return {this->__fbthrift_field_optI32Val, __isset.at(13), __isset.bit(13)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optI32Val() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optI32Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optI32Val() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optI32Val), __isset.at(13), __isset.bit(13)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optI32Val() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optI32Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optI32Val() & {
-    return {this->__fbthrift_field_optI32Val, __isset.at(13), __isset.bit(13)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optI32Val() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optI32Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optI32Val() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optI32Val), __isset.at(13), __isset.bit(13)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optI32Val() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optI32Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optI16Val_ref() const& {
-    return {this->__fbthrift_field_optI16Val, __isset.at(14), __isset.bit(14)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optI16Val_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optI16Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optI16Val_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optI16Val), __isset.at(14), __isset.bit(14)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optI16Val_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optI16Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optI16Val_ref() & {
-    return {this->__fbthrift_field_optI16Val, __isset.at(14), __isset.bit(14)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optI16Val_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optI16Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optI16Val_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optI16Val), __isset.at(14), __isset.bit(14)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optI16Val_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optI16Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optI16Val() const& {
-    return {this->__fbthrift_field_optI16Val, __isset.at(14), __isset.bit(14)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optI16Val() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optI16Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optI16Val() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optI16Val), __isset.at(14), __isset.bit(14)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optI16Val() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optI16Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optI16Val() & {
-    return {this->__fbthrift_field_optI16Val, __isset.at(14), __isset.bit(14)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optI16Val() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optI16Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optI16Val() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optI16Val), __isset.at(14), __isset.bit(14)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optI16Val() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optI16Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optByteVal_ref() const& {
-    return {this->__fbthrift_field_optByteVal, __isset.at(15), __isset.bit(15)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optByteVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optByteVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optByteVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optByteVal), __isset.at(15), __isset.bit(15)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optByteVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optByteVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optByteVal_ref() & {
-    return {this->__fbthrift_field_optByteVal, __isset.at(15), __isset.bit(15)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optByteVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optByteVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optByteVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optByteVal), __isset.at(15), __isset.bit(15)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optByteVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optByteVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optByteVal() const& {
-    return {this->__fbthrift_field_optByteVal, __isset.at(15), __isset.bit(15)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optByteVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optByteVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optByteVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optByteVal), __isset.at(15), __isset.bit(15)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optByteVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optByteVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optByteVal() & {
-    return {this->__fbthrift_field_optByteVal, __isset.at(15), __isset.bit(15)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optByteVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optByteVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optByteVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optByteVal), __isset.at(15), __isset.bit(15)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optByteVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optByteVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optBoolVal_ref() const& {
-    return {this->__fbthrift_field_optBoolVal, __isset.at(16), __isset.bit(16)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optBoolVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optBoolVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optBoolVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optBoolVal), __isset.at(16), __isset.bit(16)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optBoolVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optBoolVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optBoolVal_ref() & {
-    return {this->__fbthrift_field_optBoolVal, __isset.at(16), __isset.bit(16)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optBoolVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optBoolVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optBoolVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optBoolVal), __isset.at(16), __isset.bit(16)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optBoolVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optBoolVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> optBoolVal() const& {
-    return {this->__fbthrift_field_optBoolVal, __isset.at(16), __isset.bit(16)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> optBoolVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_optBoolVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optBoolVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optBoolVal), __isset.at(16), __isset.bit(16)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> optBoolVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_optBoolVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> optBoolVal() & {
-    return {this->__fbthrift_field_optBoolVal, __isset.at(16), __isset.bit(16)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> optBoolVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_optBoolVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> optBoolVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optBoolVal), __isset.at(16), __isset.bit(16)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> optBoolVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_optBoolVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lateStructVal_ref() const& {
-    return {this->__fbthrift_field_lateStructVal, __isset.at(17), __isset.bit(17)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> lateStructVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_lateStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lateStructVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_lateStructVal), __isset.at(17), __isset.bit(17)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> lateStructVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_lateStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> lateStructVal_ref() & {
-    return {this->__fbthrift_field_lateStructVal, __isset.at(17), __isset.bit(17)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> lateStructVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_lateStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lateStructVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_lateStructVal), __isset.at(17), __isset.bit(17)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> lateStructVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_lateStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lateStructVal() const& {
-    return {this->__fbthrift_field_lateStructVal, __isset.at(17), __isset.bit(17)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> lateStructVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_lateStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lateStructVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_lateStructVal), __isset.at(17), __isset.bit(17)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> lateStructVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_lateStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> lateStructVal() & {
-    return {this->__fbthrift_field_lateStructVal, __isset.at(17), __isset.bit(17)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> lateStructVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_lateStructVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lateStructVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_lateStructVal), __isset.at(17), __isset.bit(17)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> lateStructVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_lateStructVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> unionVal_ref() const& {
-    return {this->__fbthrift_field_unionVal, __isset.at(18), __isset.bit(18)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> unionVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_unionVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> unionVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_unionVal), __isset.at(18), __isset.bit(18)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> unionVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_unionVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> unionVal_ref() & {
-    return {this->__fbthrift_field_unionVal, __isset.at(18), __isset.bit(18)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> unionVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_unionVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> unionVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_unionVal), __isset.at(18), __isset.bit(18)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> unionVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_unionVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> unionVal() const& {
-    return {this->__fbthrift_field_unionVal, __isset.at(18), __isset.bit(18)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> unionVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_unionVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> unionVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_unionVal), __isset.at(18), __isset.bit(18)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> unionVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_unionVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> unionVal() & {
-    return {this->__fbthrift_field_unionVal, __isset.at(18), __isset.bit(18)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> unionVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_unionVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> unionVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_unionVal), __isset.at(18), __isset.bit(18)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> unionVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_unionVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> structVal_ref() const& {
-    return {this->__fbthrift_field_structVal, __isset.at(19), __isset.bit(19)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> structVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_structVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> structVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_structVal), __isset.at(19), __isset.bit(19)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> structVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_structVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> structVal_ref() & {
-    return {this->__fbthrift_field_structVal, __isset.at(19), __isset.bit(19)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> structVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_structVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> structVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_structVal), __isset.at(19), __isset.bit(19)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> structVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_structVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> structVal() const& {
-    return {this->__fbthrift_field_structVal, __isset.at(19), __isset.bit(19)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> structVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_structVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> structVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_structVal), __isset.at(19), __isset.bit(19)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> structVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_structVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> structVal() & {
-    return {this->__fbthrift_field_structVal, __isset.at(19), __isset.bit(19)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> structVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_structVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> structVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_structVal), __isset.at(19), __isset.bit(19)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> structVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_structVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField10Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> enumVal_ref() const& {
-    return {this->__fbthrift_field_enumVal, __isset.at(20), __isset.bit(20)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> enumVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_enumVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField10Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> enumVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_enumVal), __isset.at(20), __isset.bit(20)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> enumVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_enumVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField10Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> enumVal_ref() & {
-    return {this->__fbthrift_field_enumVal, __isset.at(20), __isset.bit(20)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> enumVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_enumVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField10Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> enumVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_enumVal), __isset.at(20), __isset.bit(20)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> enumVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_enumVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField10Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> enumVal() const& {
-    return {this->__fbthrift_field_enumVal, __isset.at(20), __isset.bit(20)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> enumVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_enumVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField10Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> enumVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_enumVal), __isset.at(20), __isset.bit(20)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> enumVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_enumVal)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField10Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> enumVal() & {
-    return {this->__fbthrift_field_enumVal, __isset.at(20), __isset.bit(20)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> enumVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_enumVal};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructField10Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> enumVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_enumVal), __isset.at(20), __isset.bit(20)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> enumVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_enumVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> binaryVal_ref() const& {
-    return {this->__fbthrift_field_binaryVal, __isset.at(21), __isset.bit(21)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> binaryVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_binaryVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> binaryVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_binaryVal), __isset.at(21), __isset.bit(21)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> binaryVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_binaryVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> binaryVal_ref() & {
-    return {this->__fbthrift_field_binaryVal, __isset.at(21), __isset.bit(21)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> binaryVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_binaryVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> binaryVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_binaryVal), __isset.at(21), __isset.bit(21)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> binaryVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_binaryVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> binaryVal() const& {
-    return {this->__fbthrift_field_binaryVal, __isset.at(21), __isset.bit(21)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> binaryVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_binaryVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> binaryVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_binaryVal), __isset.at(21), __isset.bit(21)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> binaryVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_binaryVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> binaryVal() & {
-    return {this->__fbthrift_field_binaryVal, __isset.at(21), __isset.bit(21)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> binaryVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_binaryVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BinaryPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> binaryVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_binaryVal), __isset.at(21), __isset.bit(21)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> binaryVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_binaryVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> stringVal_ref() const& {
-    return {this->__fbthrift_field_stringVal, __isset.at(22), __isset.bit(22)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> stringVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_stringVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> stringVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_stringVal), __isset.at(22), __isset.bit(22)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> stringVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_stringVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> stringVal_ref() & {
-    return {this->__fbthrift_field_stringVal, __isset.at(22), __isset.bit(22)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> stringVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_stringVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> stringVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_stringVal), __isset.at(22), __isset.bit(22)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> stringVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_stringVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> stringVal() const& {
-    return {this->__fbthrift_field_stringVal, __isset.at(22), __isset.bit(22)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> stringVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_stringVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> stringVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_stringVal), __isset.at(22), __isset.bit(22)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> stringVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_stringVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> stringVal() & {
-    return {this->__fbthrift_field_stringVal, __isset.at(22), __isset.bit(22)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> stringVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_stringVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::StringPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> stringVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_stringVal), __isset.at(22), __isset.bit(22)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> stringVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_stringVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> doubleVal_ref() const& {
-    return {this->__fbthrift_field_doubleVal, __isset.at(23), __isset.bit(23)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> doubleVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_doubleVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> doubleVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_doubleVal), __isset.at(23), __isset.bit(23)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> doubleVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_doubleVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> doubleVal_ref() & {
-    return {this->__fbthrift_field_doubleVal, __isset.at(23), __isset.bit(23)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> doubleVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_doubleVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> doubleVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_doubleVal), __isset.at(23), __isset.bit(23)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> doubleVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_doubleVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> doubleVal() const& {
-    return {this->__fbthrift_field_doubleVal, __isset.at(23), __isset.bit(23)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> doubleVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_doubleVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> doubleVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_doubleVal), __isset.at(23), __isset.bit(23)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> doubleVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_doubleVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> doubleVal() & {
-    return {this->__fbthrift_field_doubleVal, __isset.at(23), __isset.bit(23)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> doubleVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_doubleVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::DoublePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> doubleVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_doubleVal), __isset.at(23), __isset.bit(23)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> doubleVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_doubleVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> floatVal_ref() const& {
-    return {this->__fbthrift_field_floatVal, __isset.at(24), __isset.bit(24)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> floatVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_floatVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> floatVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_floatVal), __isset.at(24), __isset.bit(24)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> floatVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_floatVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> floatVal_ref() & {
-    return {this->__fbthrift_field_floatVal, __isset.at(24), __isset.bit(24)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> floatVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_floatVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> floatVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_floatVal), __isset.at(24), __isset.bit(24)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> floatVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_floatVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> floatVal() const& {
-    return {this->__fbthrift_field_floatVal, __isset.at(24), __isset.bit(24)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> floatVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_floatVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> floatVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_floatVal), __isset.at(24), __isset.bit(24)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> floatVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_floatVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> floatVal() & {
-    return {this->__fbthrift_field_floatVal, __isset.at(24), __isset.bit(24)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> floatVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_floatVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::FloatPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> floatVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_floatVal), __isset.at(24), __isset.bit(24)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> floatVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_floatVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> i64Val_ref() const& {
-    return {this->__fbthrift_field_i64Val, __isset.at(25), __isset.bit(25)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> i64Val_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_i64Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i64Val_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_i64Val), __isset.at(25), __isset.bit(25)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> i64Val_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_i64Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> i64Val_ref() & {
-    return {this->__fbthrift_field_i64Val, __isset.at(25), __isset.bit(25)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> i64Val_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_i64Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> i64Val_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_i64Val), __isset.at(25), __isset.bit(25)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> i64Val_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_i64Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> i64Val() const& {
-    return {this->__fbthrift_field_i64Val, __isset.at(25), __isset.bit(25)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> i64Val() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_i64Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i64Val() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_i64Val), __isset.at(25), __isset.bit(25)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> i64Val() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_i64Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> i64Val() & {
-    return {this->__fbthrift_field_i64Val, __isset.at(25), __isset.bit(25)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> i64Val() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_i64Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I64Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> i64Val() && {
-    return {static_cast<T&&>(this->__fbthrift_field_i64Val), __isset.at(25), __isset.bit(25)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> i64Val() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_i64Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> i32Val_ref() const& {
-    return {this->__fbthrift_field_i32Val, __isset.at(26), __isset.bit(26)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> i32Val_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_i32Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i32Val_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_i32Val), __isset.at(26), __isset.bit(26)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> i32Val_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_i32Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> i32Val_ref() & {
-    return {this->__fbthrift_field_i32Val, __isset.at(26), __isset.bit(26)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> i32Val_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_i32Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> i32Val_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_i32Val), __isset.at(26), __isset.bit(26)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> i32Val_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_i32Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> i32Val() const& {
-    return {this->__fbthrift_field_i32Val, __isset.at(26), __isset.bit(26)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> i32Val() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_i32Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i32Val() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_i32Val), __isset.at(26), __isset.bit(26)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> i32Val() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_i32Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> i32Val() & {
-    return {this->__fbthrift_field_i32Val, __isset.at(26), __isset.bit(26)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> i32Val() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_i32Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I32Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> i32Val() && {
-    return {static_cast<T&&>(this->__fbthrift_field_i32Val), __isset.at(26), __isset.bit(26)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> i32Val() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_i32Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> i16Val_ref() const& {
-    return {this->__fbthrift_field_i16Val, __isset.at(27), __isset.bit(27)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> i16Val_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_i16Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i16Val_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_i16Val), __isset.at(27), __isset.bit(27)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> i16Val_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_i16Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> i16Val_ref() & {
-    return {this->__fbthrift_field_i16Val, __isset.at(27), __isset.bit(27)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> i16Val_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_i16Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> i16Val_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_i16Val), __isset.at(27), __isset.bit(27)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> i16Val_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_i16Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> i16Val() const& {
-    return {this->__fbthrift_field_i16Val, __isset.at(27), __isset.bit(27)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> i16Val() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_i16Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> i16Val() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_i16Val), __isset.at(27), __isset.bit(27)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> i16Val() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_i16Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> i16Val() & {
-    return {this->__fbthrift_field_i16Val, __isset.at(27), __isset.bit(27)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> i16Val() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_i16Val};
   }
 
   template <typename..., typename T = ::apache::thrift::op::I16Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> i16Val() && {
-    return {static_cast<T&&>(this->__fbthrift_field_i16Val), __isset.at(27), __isset.bit(27)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> i16Val() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_i16Val)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> byteVal_ref() const& {
-    return {this->__fbthrift_field_byteVal, __isset.at(28), __isset.bit(28)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> byteVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_byteVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> byteVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_byteVal), __isset.at(28), __isset.bit(28)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> byteVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_byteVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> byteVal_ref() & {
-    return {this->__fbthrift_field_byteVal, __isset.at(28), __isset.bit(28)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> byteVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_byteVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> byteVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_byteVal), __isset.at(28), __isset.bit(28)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> byteVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_byteVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> byteVal() const& {
-    return {this->__fbthrift_field_byteVal, __isset.at(28), __isset.bit(28)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> byteVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_byteVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> byteVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_byteVal), __isset.at(28), __isset.bit(28)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> byteVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_byteVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> byteVal() & {
-    return {this->__fbthrift_field_byteVal, __isset.at(28), __isset.bit(28)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> byteVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_byteVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BytePatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> byteVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_byteVal), __isset.at(28), __isset.bit(28)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> byteVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_byteVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> boolVal_ref() const& {
-    return {this->__fbthrift_field_boolVal, __isset.at(29), __isset.bit(29)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> boolVal_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_boolVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> boolVal_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_boolVal), __isset.at(29), __isset.bit(29)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> boolVal_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_boolVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> boolVal_ref() & {
-    return {this->__fbthrift_field_boolVal, __isset.at(29), __isset.bit(29)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> boolVal_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_boolVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> boolVal_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_boolVal), __isset.at(29), __isset.bit(29)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> boolVal_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_boolVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> boolVal() const& {
-    return {this->__fbthrift_field_boolVal, __isset.at(29), __isset.bit(29)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> boolVal() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_boolVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> boolVal() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_boolVal), __isset.at(29), __isset.bit(29)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> boolVal() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_boolVal)};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> boolVal() & {
-    return {this->__fbthrift_field_boolVal, __isset.at(29), __isset.bit(29)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> boolVal() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_boolVal};
   }
 
   template <typename..., typename T = ::apache::thrift::op::BoolPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> boolVal() && {
-    return {static_cast<T&&>(this->__fbthrift_field_boolVal), __isset.at(29), __isset.bit(29)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> boolVal() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_boolVal)};
   }
 
   template <class Protocol_>
@@ -12713,8 +12705,6 @@ class RecursiveFieldPatchStruct final  {
   RecursiveFieldPatchStruct& operator=(const RecursiveFieldPatchStruct& src);
  private:
   ::test::fixtures::patch::RecursiveField1Patch __fbthrift_field_nodes;
- private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -12722,43 +12712,43 @@ class RecursiveFieldPatchStruct final  {
   bool operator<(const RecursiveFieldPatchStruct&) const;
 
   template <typename..., typename T = ::test::fixtures::patch::RecursiveField1Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> nodes_ref() const& {
-    return {this->__fbthrift_field_nodes, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> nodes_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_nodes};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::RecursiveField1Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> nodes_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_nodes), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> nodes_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_nodes)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::RecursiveField1Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> nodes_ref() & {
-    return {this->__fbthrift_field_nodes, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> nodes_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_nodes};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::RecursiveField1Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> nodes_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_nodes), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> nodes_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_nodes)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::RecursiveField1Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> nodes() const& {
-    return {this->__fbthrift_field_nodes, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> nodes() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_nodes};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::RecursiveField1Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> nodes() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_nodes), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> nodes() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_nodes)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::RecursiveField1Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> nodes() & {
-    return {this->__fbthrift_field_nodes, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> nodes() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_nodes};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::RecursiveField1Patch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> nodes() && {
-    return {static_cast<T&&>(this->__fbthrift_field_nodes), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> nodes() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_nodes)};
   }
 
   template <class Protocol_>
@@ -13461,8 +13451,6 @@ class BarFieldPatchStruct final  {
   BarFieldPatchStruct& operator=(const BarFieldPatchStruct& src);
  private:
   ::test::fixtures::patch::LoopPatch __fbthrift_field_loop;
- private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -13470,43 +13458,43 @@ class BarFieldPatchStruct final  {
   bool operator<(const BarFieldPatchStruct&) const;
 
   template <typename..., typename T = ::test::fixtures::patch::LoopPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> loop_ref() const& {
-    return {this->__fbthrift_field_loop, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> loop_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_loop};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LoopPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> loop_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_loop), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> loop_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_loop)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LoopPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> loop_ref() & {
-    return {this->__fbthrift_field_loop, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> loop_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_loop};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LoopPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> loop_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_loop), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> loop_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_loop)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LoopPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> loop() const& {
-    return {this->__fbthrift_field_loop, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> loop() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_loop};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LoopPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> loop() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_loop), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> loop() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_loop)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LoopPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> loop() & {
-    return {this->__fbthrift_field_loop, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> loop() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_loop};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LoopPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> loop() && {
-    return {static_cast<T&&>(this->__fbthrift_field_loop), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> loop() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_loop)};
   }
 
   template <class Protocol_>
@@ -13992,8 +13980,6 @@ class LoopFieldPatchStruct final  {
   LoopFieldPatchStruct& operator=(const LoopFieldPatchStruct& src);
  private:
   ::test::fixtures::patch::BarPatch __fbthrift_field_bar;
- private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -14001,43 +13987,43 @@ class LoopFieldPatchStruct final  {
   bool operator<(const LoopFieldPatchStruct&) const;
 
   template <typename..., typename T = ::test::fixtures::patch::BarPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> bar_ref() const& {
-    return {this->__fbthrift_field_bar, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> bar_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_bar};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::BarPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> bar_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_bar), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> bar_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_bar)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::BarPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> bar_ref() & {
-    return {this->__fbthrift_field_bar, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> bar_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_bar};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::BarPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> bar_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_bar), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> bar_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_bar)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::BarPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> bar() const& {
-    return {this->__fbthrift_field_bar, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> bar() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_bar};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::BarPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> bar() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_bar), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> bar() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_bar)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::BarPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> bar() & {
-    return {this->__fbthrift_field_bar, __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> bar() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_bar};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::BarPatch>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> bar() && {
-    return {static_cast<T&&>(this->__fbthrift_field_bar), __isset.at(0), __isset.bit(0)};
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> bar() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_bar)};
   }
 
   template <class Protocol_>

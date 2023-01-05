@@ -7658,8 +7658,8 @@ Loop.__setstate__ = Loop__setstate__
 all_structs.append(MyDataFieldPatch)
 MyDataFieldPatch.thrift_spec = (
   None, # 0
-  (1, TType.STRUCT, 'data1', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 2, ), # 1
-  (2, TType.STRUCT, 'data2', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 2, ), # 2
+  (1, TType.STRUCT, 'data1', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 3, ), # 1
+  (2, TType.STRUCT, 'data2', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 3, ), # 2
 )
 
 MyDataFieldPatch.thrift_struct_annotations = {
@@ -7723,7 +7723,7 @@ MyDataPatch.__setstate__ = MyDataPatch__setstate__
 all_structs.append(InnerUnionFieldPatch)
 InnerUnionFieldPatch.thrift_spec = (
   None, # 0
-  (1, TType.STRUCT, 'innerOption', [thrift.lib.thrift.patch.ttypes.BinaryPatch, thrift.lib.thrift.patch.ttypes.BinaryPatch.thrift_spec, False], None, 2, ), # 1
+  (1, TType.STRUCT, 'innerOption', [thrift.lib.thrift.patch.ttypes.BinaryPatch, thrift.lib.thrift.patch.ttypes.BinaryPatch.thrift_spec, False], None, 3, ), # 1
 )
 
 InnerUnionFieldPatch.thrift_struct_annotations = {
@@ -7785,9 +7785,9 @@ InnerUnionPatch.__setstate__ = InnerUnionPatch__setstate__
 all_structs.append(MyUnionFieldPatch)
 MyUnionFieldPatch.thrift_spec = (
   None, # 0
-  (1, TType.STRUCT, 'option1', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 2, ), # 1
-  (2, TType.STRUCT, 'option2', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 2, ), # 2
-  (3, TType.STRUCT, 'option3', [InnerUnionPatch, InnerUnionPatch.thrift_spec, False], None, 2, ), # 3
+  (1, TType.STRUCT, 'option1', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 3, ), # 1
+  (2, TType.STRUCT, 'option2', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 3, ), # 2
+  (3, TType.STRUCT, 'option3', [InnerUnionPatch, InnerUnionPatch.thrift_spec, False], None, 3, ), # 3
 )
 
 MyUnionFieldPatch.thrift_struct_annotations = {
@@ -8194,36 +8194,36 @@ MyStructField30Patch1.__setstate__ = MyStructField30Patch1__setstate__
 
 all_structs.append(MyStructFieldPatch)
 MyStructFieldPatch.thrift_spec = (
-  (-30, TType.STRUCT, 'mapMap', [MyStructField30Patch, MyStructField30Patch.thrift_spec, False], None, 2, ), # -30
-  (-29, TType.STRUCT, 'listMap', [MyStructField29Patch, MyStructField29Patch.thrift_spec, False], None, 2, ), # -29
-  (-28, TType.STRUCT, 'optMapVal', [MyStructField28Patch, MyStructField28Patch.thrift_spec, False], None, 2, ), # -28
-  (-27, TType.STRUCT, 'optSetVal', [MyStructField27Patch, MyStructField27Patch.thrift_spec, False], None, 2, ), # -27
-  (-26, TType.STRUCT, 'optListVal', [MyStructField26Patch, MyStructField26Patch.thrift_spec, False], None, 2, ), # -26
-  (-25, TType.STRUCT, 'optLateStructVal', [LateDefStructPatch, LateDefStructPatch.thrift_spec, False], None, 2, ), # -25
-  (-24, TType.STRUCT, 'optStructVal', [MyDataPatch, MyDataPatch.thrift_spec, False], None, 2, ), # -24
-  (-23, TType.STRUCT, 'optEnumVal', [MyStructField23Patch, MyStructField23Patch.thrift_spec, False], None, 2, ), # -23
-  (-22, TType.STRUCT, 'optBinaryVal', [thrift.lib.thrift.patch.ttypes.BinaryPatch, thrift.lib.thrift.patch.ttypes.BinaryPatch.thrift_spec, False], None, 2, ), # -22
-  (-21, TType.STRUCT, 'optStringVal', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 2, ), # -21
-  (-20, TType.STRUCT, 'optDoubleVal', [thrift.lib.thrift.patch.ttypes.DoublePatch, thrift.lib.thrift.patch.ttypes.DoublePatch.thrift_spec, False], None, 2, ), # -20
-  (-19, TType.STRUCT, 'optFloatVal', [thrift.lib.thrift.patch.ttypes.FloatPatch, thrift.lib.thrift.patch.ttypes.FloatPatch.thrift_spec, False], None, 2, ), # -19
-  (-18, TType.STRUCT, 'optI64Val', [thrift.lib.thrift.patch.ttypes.I64Patch, thrift.lib.thrift.patch.ttypes.I64Patch.thrift_spec, False], None, 2, ), # -18
-  (-17, TType.STRUCT, 'optI32Val', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 2, ), # -17
-  (-16, TType.STRUCT, 'optI16Val', [thrift.lib.thrift.patch.ttypes.I16Patch, thrift.lib.thrift.patch.ttypes.I16Patch.thrift_spec, False], None, 2, ), # -16
-  (-15, TType.STRUCT, 'optByteVal', [thrift.lib.thrift.patch.ttypes.BytePatch, thrift.lib.thrift.patch.ttypes.BytePatch.thrift_spec, False], None, 2, ), # -15
-  (-14, TType.STRUCT, 'optBoolVal', [thrift.lib.thrift.patch.ttypes.BoolPatch, thrift.lib.thrift.patch.ttypes.BoolPatch.thrift_spec, False], None, 2, ), # -14
-  (-13, TType.STRUCT, 'lateStructVal', [LateDefStructPatch, LateDefStructPatch.thrift_spec, False], None, 2, ), # -13
-  (-12, TType.STRUCT, 'unionVal', [MyUnionPatch, MyUnionPatch.thrift_spec, False], None, 2, ), # -12
-  (-11, TType.STRUCT, 'structVal', [MyDataPatch, MyDataPatch.thrift_spec, False], None, 2, ), # -11
-  (-10, TType.STRUCT, 'enumVal', [MyStructField10Patch, MyStructField10Patch.thrift_spec, False], None, 2, ), # -10
-  (-9, TType.STRUCT, 'binaryVal', [thrift.lib.thrift.patch.ttypes.BinaryPatch, thrift.lib.thrift.patch.ttypes.BinaryPatch.thrift_spec, False], None, 2, ), # -9
-  (-8, TType.STRUCT, 'stringVal', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 2, ), # -8
-  (-7, TType.STRUCT, 'doubleVal', [thrift.lib.thrift.patch.ttypes.DoublePatch, thrift.lib.thrift.patch.ttypes.DoublePatch.thrift_spec, False], None, 2, ), # -7
-  (-6, TType.STRUCT, 'floatVal', [thrift.lib.thrift.patch.ttypes.FloatPatch, thrift.lib.thrift.patch.ttypes.FloatPatch.thrift_spec, False], None, 2, ), # -6
-  (-5, TType.STRUCT, 'i64Val', [thrift.lib.thrift.patch.ttypes.I64Patch, thrift.lib.thrift.patch.ttypes.I64Patch.thrift_spec, False], None, 2, ), # -5
-  (-4, TType.STRUCT, 'i32Val', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 2, ), # -4
-  (-3, TType.STRUCT, 'i16Val', [thrift.lib.thrift.patch.ttypes.I16Patch, thrift.lib.thrift.patch.ttypes.I16Patch.thrift_spec, False], None, 2, ), # -3
-  (-2, TType.STRUCT, 'byteVal', [thrift.lib.thrift.patch.ttypes.BytePatch, thrift.lib.thrift.patch.ttypes.BytePatch.thrift_spec, False], None, 2, ), # -2
-  (-1, TType.STRUCT, 'boolVal', [thrift.lib.thrift.patch.ttypes.BoolPatch, thrift.lib.thrift.patch.ttypes.BoolPatch.thrift_spec, False], None, 2, ), # -1
+  (-30, TType.STRUCT, 'mapMap', [MyStructField30Patch, MyStructField30Patch.thrift_spec, False], None, 3, ), # -30
+  (-29, TType.STRUCT, 'listMap', [MyStructField29Patch, MyStructField29Patch.thrift_spec, False], None, 3, ), # -29
+  (-28, TType.STRUCT, 'optMapVal', [MyStructField28Patch, MyStructField28Patch.thrift_spec, False], None, 3, ), # -28
+  (-27, TType.STRUCT, 'optSetVal', [MyStructField27Patch, MyStructField27Patch.thrift_spec, False], None, 3, ), # -27
+  (-26, TType.STRUCT, 'optListVal', [MyStructField26Patch, MyStructField26Patch.thrift_spec, False], None, 3, ), # -26
+  (-25, TType.STRUCT, 'optLateStructVal', [LateDefStructPatch, LateDefStructPatch.thrift_spec, False], None, 3, ), # -25
+  (-24, TType.STRUCT, 'optStructVal', [MyDataPatch, MyDataPatch.thrift_spec, False], None, 3, ), # -24
+  (-23, TType.STRUCT, 'optEnumVal', [MyStructField23Patch, MyStructField23Patch.thrift_spec, False], None, 3, ), # -23
+  (-22, TType.STRUCT, 'optBinaryVal', [thrift.lib.thrift.patch.ttypes.BinaryPatch, thrift.lib.thrift.patch.ttypes.BinaryPatch.thrift_spec, False], None, 3, ), # -22
+  (-21, TType.STRUCT, 'optStringVal', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 3, ), # -21
+  (-20, TType.STRUCT, 'optDoubleVal', [thrift.lib.thrift.patch.ttypes.DoublePatch, thrift.lib.thrift.patch.ttypes.DoublePatch.thrift_spec, False], None, 3, ), # -20
+  (-19, TType.STRUCT, 'optFloatVal', [thrift.lib.thrift.patch.ttypes.FloatPatch, thrift.lib.thrift.patch.ttypes.FloatPatch.thrift_spec, False], None, 3, ), # -19
+  (-18, TType.STRUCT, 'optI64Val', [thrift.lib.thrift.patch.ttypes.I64Patch, thrift.lib.thrift.patch.ttypes.I64Patch.thrift_spec, False], None, 3, ), # -18
+  (-17, TType.STRUCT, 'optI32Val', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 3, ), # -17
+  (-16, TType.STRUCT, 'optI16Val', [thrift.lib.thrift.patch.ttypes.I16Patch, thrift.lib.thrift.patch.ttypes.I16Patch.thrift_spec, False], None, 3, ), # -16
+  (-15, TType.STRUCT, 'optByteVal', [thrift.lib.thrift.patch.ttypes.BytePatch, thrift.lib.thrift.patch.ttypes.BytePatch.thrift_spec, False], None, 3, ), # -15
+  (-14, TType.STRUCT, 'optBoolVal', [thrift.lib.thrift.patch.ttypes.BoolPatch, thrift.lib.thrift.patch.ttypes.BoolPatch.thrift_spec, False], None, 3, ), # -14
+  (-13, TType.STRUCT, 'lateStructVal', [LateDefStructPatch, LateDefStructPatch.thrift_spec, False], None, 3, ), # -13
+  (-12, TType.STRUCT, 'unionVal', [MyUnionPatch, MyUnionPatch.thrift_spec, False], None, 3, ), # -12
+  (-11, TType.STRUCT, 'structVal', [MyDataPatch, MyDataPatch.thrift_spec, False], None, 3, ), # -11
+  (-10, TType.STRUCT, 'enumVal', [MyStructField10Patch, MyStructField10Patch.thrift_spec, False], None, 3, ), # -10
+  (-9, TType.STRUCT, 'binaryVal', [thrift.lib.thrift.patch.ttypes.BinaryPatch, thrift.lib.thrift.patch.ttypes.BinaryPatch.thrift_spec, False], None, 3, ), # -9
+  (-8, TType.STRUCT, 'stringVal', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 3, ), # -8
+  (-7, TType.STRUCT, 'doubleVal', [thrift.lib.thrift.patch.ttypes.DoublePatch, thrift.lib.thrift.patch.ttypes.DoublePatch.thrift_spec, False], None, 3, ), # -7
+  (-6, TType.STRUCT, 'floatVal', [thrift.lib.thrift.patch.ttypes.FloatPatch, thrift.lib.thrift.patch.ttypes.FloatPatch.thrift_spec, False], None, 3, ), # -6
+  (-5, TType.STRUCT, 'i64Val', [thrift.lib.thrift.patch.ttypes.I64Patch, thrift.lib.thrift.patch.ttypes.I64Patch.thrift_spec, False], None, 3, ), # -5
+  (-4, TType.STRUCT, 'i32Val', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 3, ), # -4
+  (-3, TType.STRUCT, 'i16Val', [thrift.lib.thrift.patch.ttypes.I16Patch, thrift.lib.thrift.patch.ttypes.I16Patch.thrift_spec, False], None, 3, ), # -3
+  (-2, TType.STRUCT, 'byteVal', [thrift.lib.thrift.patch.ttypes.BytePatch, thrift.lib.thrift.patch.ttypes.BytePatch.thrift_spec, False], None, 3, ), # -2
+  (-1, TType.STRUCT, 'boolVal', [thrift.lib.thrift.patch.ttypes.BoolPatch, thrift.lib.thrift.patch.ttypes.BoolPatch.thrift_spec, False], None, 3, ), # -1
 )
 
 MyStructFieldPatch.thrift_struct_annotations = {
@@ -8416,7 +8416,7 @@ RecursiveField1Patch.__setstate__ = RecursiveField1Patch__setstate__
 
 all_structs.append(RecursiveFieldPatch)
 RecursiveFieldPatch.thrift_spec = (
-  (-1, TType.STRUCT, 'nodes', [RecursiveField1Patch, RecursiveField1Patch.thrift_spec, False], None, 2, ), # -1
+  (-1, TType.STRUCT, 'nodes', [RecursiveField1Patch, RecursiveField1Patch.thrift_spec, False], None, 3, ), # -1
 )
 
 RecursiveFieldPatch.thrift_struct_annotations = {
@@ -8477,7 +8477,7 @@ RecursivePatch.__setstate__ = RecursivePatch__setstate__
 
 all_structs.append(BarFieldPatch)
 BarFieldPatch.thrift_spec = (
-  (-1, TType.STRUCT, 'loop', [LoopPatch, LoopPatch.thrift_spec, False], None, 2, ), # -1
+  (-1, TType.STRUCT, 'loop', [LoopPatch, LoopPatch.thrift_spec, False], None, 3, ), # -1
 )
 
 BarFieldPatch.thrift_struct_annotations = {
@@ -8538,7 +8538,7 @@ BarPatch.__setstate__ = BarPatch__setstate__
 
 all_structs.append(LoopFieldPatch)
 LoopFieldPatch.thrift_spec = (
-  (-1, TType.STRUCT, 'bar', [BarPatch, BarPatch.thrift_spec, False], None, 2, ), # -1
+  (-1, TType.STRUCT, 'bar', [BarPatch, BarPatch.thrift_spec, False], None, 3, ), # -1
 )
 
 LoopFieldPatch.thrift_struct_annotations = {

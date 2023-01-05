@@ -46,6 +46,7 @@
 #include <thrift/lib/cpp2/async/ReplyInfo.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/RpcTypes.h>
+#include <thrift/lib/cpp2/async/SchemaV1.h>
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
@@ -112,6 +113,20 @@ class ServiceInfoHolder {
  */
 class AsyncProcessorFactory {
  public:
+#if defined(THRIFT_SCHEMA_AVAILABLE)
+  /**
+   * Reflects on the current service's methods, associated structs etc. at
+   * runtime. This is useful to, for example, a tool that can send requests to a
+   * service without knowing its schemata ahead of time.
+   *
+   * This is analogous to GraphQL introspection
+   * (https://graphql.org/learn/introspection/) and can be used to build a tool
+   * like GraphiQL.
+   */
+  virtual std::optional<std::vector<schema::SchemaV1>> getServiceMetadataV1() {
+    return {};
+  }
+#endif
   /**
    * Creates a per-connection processor that will handle requests for this
    * service. The returned AsyncProcessor has an implicit contract with the

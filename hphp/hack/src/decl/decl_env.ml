@@ -67,20 +67,6 @@ let get_class_and_add_dep
   | None -> fallback env x
 
 let get_construct env class_ =
-  if not (is_hhi class_) then begin
-    add_wclass env class_.dc_name;
-    let dep = Dep.Constructor class_.dc_name in
-    Option.iter env.droot ~f:(fun root ->
-        Typing_deps.add_idep (deps_mode env) root dep);
-    if
-      TypecheckerOptions.record_fine_grained_dependencies
-      @@ Provider_context.get_tcopt env.ctx
-    then
-      Typing_pessimisation_deps.try_add_fine_dep
-        (deps_mode env)
-        env.droot
-        env.droot_member
-        dep
-  end;
+  if not (is_hhi class_) then add_wclass env class_.dc_name;
 
   class_.dc_construct

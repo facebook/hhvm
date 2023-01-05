@@ -1517,7 +1517,8 @@ let check_parents_are_tapply_add_constructor_deps
   check_is_tapply_add_constructor_extends_dep
     env
     implements
-    ~skip_constructor_dep:(not (Ast_defs.is_c_abstract c.c_kind));
+    ~skip_constructor_dep:
+      (not (Ast_defs.is_c_trait c.c_kind || Ast_defs.is_c_abstract c.c_kind));
   check_is_tapply_add_constructor_extends_dep env uses;
   check_is_tapply_add_constructor_extends_dep env req_class;
   check_is_tapply_add_constructor_extends_dep env req_extends;

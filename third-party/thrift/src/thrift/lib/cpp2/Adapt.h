@@ -549,6 +549,14 @@ struct BaseInlineAdapter {
   static decltype(auto) toThrift(U&& value) {
     return std::forward<U>(value).toThrift();
   }
+
+  template <typename U>
+  static void clear(U& value) {
+    static_assert(
+        adapt_detail::is_mutable_ref<decltype(value.toThrift())>::value,
+        "not a mutable reference");
+    apache::thrift::clear(value.toThrift());
+  }
 };
 
 // A adapters for types that know how to adapt themselves.

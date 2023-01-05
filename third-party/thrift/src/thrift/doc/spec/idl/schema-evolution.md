@@ -10,8 +10,11 @@ Clearly not all changes to a Thrift struct permit the old and new version to be 
 
 This section describes when two Thrift structs are compatible with each other - i.e., when it is always possible to serialize from one struct and deserialize into the other without problems.  This section simply clarifies information already presented in the previous sections on **Serialization** and **Deserialization**.  Everything described here can be inferred by reading those sections.
 
-NOTE: Thrift fields using **"[default requiredness](https://thrift.apache.org/docs/idl#default-requiredness-implicit)"** (i.e. niether set as **required** or **optional**) are defined as **"unqualified"** in this document.
+:::note
 
+Thrift fields using **"[default requiredness](./field-qualifiers#fields-that-dont-have-a-specifier-or-thrifttersewrite)"** are defined as **"unqualified"** in this document.
+
+:::
 
 ### **Serialization by name**
 
@@ -117,11 +120,17 @@ When serializing by field id, field `x` in `Struct1` is copied to field `y` in `
 
 I.e., `Struct1` and `Struct2` are compatible regardless of the kind of serialization used, but the results are very different based on the kind of serialization used.
 
-> Note: Generally changes that maintain compatibility when serializing by field id do not necessarily maintain compatibility when serializing by field name.
+:::note
 
+Generally changes that maintain compatibility when serializing by field id do not necessarily maintain compatibility when serializing by field name.
 
-> Note: If you want to delete a **required** field from a Thrift struct, you can do it in two steps: First change the field from **required** to **unqualified**.  Then, once you are sure that all usage of the older version (with **required**) have been updated to use the new version, then you can make the second change to delete the field.
+:::
 
+:::note
+
+If you want to delete a **required** field from a Thrift struct, you can do it in two steps: First change the field from **required** to **unqualified**.  Then, once you are sure that all usage of the older version (with **required**) have been updated to use the new version, then you can make the second change to delete the field.
+
+:::
 
 ### **Versioning with enumeration types**
 

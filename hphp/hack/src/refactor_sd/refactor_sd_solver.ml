@@ -108,14 +108,6 @@ let simplify (_env : Typing_env_types.env) (constraints : constraint_ list) :
     List.fold ~init:constraints_init ~f:partition_constraint constraints
   in
 
-  let subsets_reflexive =
-    List.map ~f:(fun pos -> Literal pos) introductions
-    @ List.map ~f:(fun (e, _pos) -> e) upcasts
-    @ List.concat_map subsets ~f:(fun (e, e') -> [e; e'])
-    @ List.map ~f:(fun pos -> Literal pos) calleds
-    |> List.map ~f:(fun e -> (e, e))
-  in
-  let subsets = subsets_reflexive @ subsets in
   let subsets = PointsToSet.of_list subsets |> transitive_closure in
   (* Limit upcasts to functions of interest *)
   let subsets_pointers = subsets |> find_pointers introductions in

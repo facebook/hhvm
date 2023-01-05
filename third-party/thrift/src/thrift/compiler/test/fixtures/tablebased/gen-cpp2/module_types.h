@@ -188,13 +188,6 @@ class TrivialTypesStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::binary_t,
-    ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>,
-    ::apache::thrift::type::enum_t<::test::fixtures::tablebased::ExampleEnum>
-  >;
 
 
   void __fbthrift_clear();
@@ -562,16 +555,6 @@ class ContainerStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,12,2,3,4,5,6,7,8};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::cpp_type<std::list<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>,
-    ::apache::thrift::type::cpp_type<std::deque<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>,
-    ::apache::thrift::type::cpp_type<folly::fbvector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>,
-    ::apache::thrift::type::cpp_type<folly::small_vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>,
-    ::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>,
-    ::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::int32_t, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>>,
-    ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::tablebased::TrivialTypesStruct>>
-  >;
 
 
   void __fbthrift_clear();
@@ -1059,10 +1042,6 @@ class ExampleUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::struct_t<::test::fixtures::tablebased::ContainerStruct>,
-    ::apache::thrift::type::struct_t<::test::fixtures::tablebased::TrivialTypesStruct>
-  >;
 
 
   void __fbthrift_clear();

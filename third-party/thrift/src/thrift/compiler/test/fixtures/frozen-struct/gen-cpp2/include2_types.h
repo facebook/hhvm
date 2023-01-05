@@ -60,10 +60,6 @@ class IncludedB final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();

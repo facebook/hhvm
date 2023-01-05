@@ -446,10 +446,6 @@ class MyUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -750,17 +746,6 @@ class MyField final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i64_t,
-    ::apache::thrift::type::i64_t,
-    ::apache::thrift::type::i64_t,
-    ::apache::thrift::type::enum_t<::cpp2::MyEnum>,
-    ::apache::thrift::type::enum_t<::cpp2::MyEnum>,
-    ::apache::thrift::type::enum_t<::cpp2::MyEnum>,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -1205,11 +1190,6 @@ class MyStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::struct_t<::cpp2::MyField>,
-    ::apache::thrift::type::struct_t<::cpp2::MyField>,
-    ::apache::thrift::type::struct_t<::cpp2::MyField>
-  >;
 
 
   void __fbthrift_clear();
@@ -1407,11 +1387,6 @@ class StructWithUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::union_t<::cpp2::MyUnion>,
-    ::apache::thrift::type::double_t,
-    ::apache::thrift::type::struct_t<::cpp2::MyField>
-  >;
 
 
   void __fbthrift_clear();
@@ -1619,9 +1594,6 @@ class RecursiveStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::list<::apache::thrift::type::struct_t<::cpp2::RecursiveStruct>>
-  >;
 
 
   void __fbthrift_clear();
@@ -1752,14 +1724,6 @@ class StructWithContainers final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::set<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::set<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::list<::apache::thrift::type::i32_t>
-  >;
 
 
   void __fbthrift_clear();
@@ -2081,11 +2045,6 @@ class StructWithSharedConst final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::struct_t<::cpp2::MyField>,
-    ::apache::thrift::type::struct_t<::cpp2::MyField>,
-    ::apache::thrift::type::struct_t<::cpp2::MyField>
-  >;
 
 
   void __fbthrift_clear();
@@ -2281,8 +2240,6 @@ class Empty final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-  >;
 
 
   void __fbthrift_clear();
@@ -2357,11 +2314,6 @@ class StructWithRef final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::struct_t<::cpp2::Empty>,
-    ::apache::thrift::type::struct_t<::cpp2::Empty>,
-    ::apache::thrift::type::struct_t<::cpp2::Empty>
-  >;
 
 
   void __fbthrift_clear();
@@ -2559,11 +2511,6 @@ class StructWithBox final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::list<::apache::thrift::type::i64_t>,
-    ::apache::thrift::type::struct_t<::cpp2::StructWithRef>
-  >;
 
 
   void __fbthrift_clear();
@@ -2764,12 +2711,6 @@ class StructWithInternBox final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::struct_t<::cpp2::Empty>,
-    ::apache::thrift::type::struct_t<::cpp2::MyField>,
-    ::apache::thrift::type::struct_t<::cpp2::Empty>,
-    ::apache::thrift::type::struct_t<::cpp2::MyField>
-  >;
 
 
   void __fbthrift_clear();
@@ -3018,12 +2959,6 @@ class AdaptedStructWithInternBox final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>,
-    ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>,
-    ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>,
-    ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>
-  >;
 
 
   void __fbthrift_clear();
@@ -3274,11 +3209,6 @@ class StructWithRefTypeUnique final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::struct_t<::cpp2::Empty>,
-    ::apache::thrift::type::struct_t<::cpp2::Empty>,
-    ::apache::thrift::type::struct_t<::cpp2::Empty>
-  >;
 
 
   void __fbthrift_clear();
@@ -3476,11 +3406,6 @@ class StructWithRefTypeShared final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::struct_t<::cpp2::Empty>,
-    ::apache::thrift::type::struct_t<::cpp2::Empty>,
-    ::apache::thrift::type::struct_t<::cpp2::Empty>
-  >;
 
 
   void __fbthrift_clear();
@@ -3679,11 +3604,6 @@ class StructWithRefTypeSharedConst final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::struct_t<::cpp2::Empty>,
-    ::apache::thrift::type::struct_t<::cpp2::Empty>,
-    ::apache::thrift::type::struct_t<::cpp2::Empty>
-  >;
 
 
   void __fbthrift_clear();
@@ -3880,9 +3800,6 @@ class StructWithRefAndAnnotCppNoexceptMoveCtor final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::struct_t<::cpp2::Empty>
-  >;
 
 
   void __fbthrift_clear();
@@ -3999,13 +3916,6 @@ class StructWithString final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();

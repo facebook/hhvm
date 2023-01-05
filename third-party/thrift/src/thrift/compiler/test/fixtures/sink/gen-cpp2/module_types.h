@@ -90,9 +90,6 @@ class InitialResponse final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -223,9 +220,6 @@ class FinalResponse final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -356,9 +350,6 @@ class SinkPayload final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -489,9 +480,6 @@ class CompatibleWithKeywordSink final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -622,9 +610,6 @@ class FOLLY_EXPORT InitialException : public virtual apache::thrift::TException 
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -768,9 +753,6 @@ class FOLLY_EXPORT SinkException1 : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -914,9 +896,6 @@ class FOLLY_EXPORT SinkException2 : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i64_t
-  >;
 
 
   void __fbthrift_clear();

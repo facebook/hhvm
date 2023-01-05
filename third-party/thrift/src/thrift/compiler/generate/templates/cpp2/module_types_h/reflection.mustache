@@ -20,9 +20,6 @@
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0<%#struct:fields%>,<%field:key%><%/struct:fields%>};
-  using __fbthrift_reflection_type_tags = folly::tag_t<<%#struct:fields%>
-    <%field:type_tag%><%^last?%>,<%/last?%><%/struct:fields%>
-  >;
 
   <%#struct:thrift_uri%>
   static constexpr std::size_t __fbthrift_field_size_v = <%struct:fields_size%>;
@@ -31,7 +28,10 @@
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                         void<%#struct:fields%>,
+                                                         <%field:type_tag%><%/struct:fields%>>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 

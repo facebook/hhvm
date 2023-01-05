@@ -87,14 +87,6 @@ class InterceptedFields final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::i32_t
-  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 6;
 
@@ -102,7 +94,15 @@ class InterceptedFields final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                         void,
+                                                         ::apache::thrift::type::i32_t,
+                                                         ::apache::thrift::type::i32_t,
+                                                         ::apache::thrift::type::i32_t,
+                                                         ::apache::thrift::type::i32_t,
+                                                         ::apache::thrift::type::i32_t,
+                                                         ::apache::thrift::type::i32_t>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 

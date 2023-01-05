@@ -94,9 +94,6 @@ class Fields final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,100};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -227,9 +224,6 @@ class FieldsInjectedToEmptyStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,-1100};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -361,10 +355,6 @@ class FieldsInjectedToStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,-1100};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -555,12 +545,6 @@ class FieldsInjectedWithIncludedStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,-1100,-1101,-1102};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();

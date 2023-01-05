@@ -162,14 +162,6 @@ class ModuleA final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
-    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::struct_t<::some::ns::IncludedA>,
-    ::apache::thrift::type::struct_t<::some::ns::IncludedB>
-  >;
 
 
   void __fbthrift_clear();
@@ -560,10 +552,6 @@ class ModuleB final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::enum_t<::some::ns::EnumB>
-  >;
 
 
   void __fbthrift_clear();
@@ -745,9 +733,6 @@ class DirectlyAdapted final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i32_t
-  >;
 
 
   void __fbthrift_clear();

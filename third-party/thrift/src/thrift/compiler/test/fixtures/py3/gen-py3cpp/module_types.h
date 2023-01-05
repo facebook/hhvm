@@ -337,16 +337,6 @@ class SimpleStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::bool_t,
-    ::apache::thrift::type::byte_t,
-    ::apache::thrift::type::i16_t,
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::i64_t,
-    ::apache::thrift::type::double_t,
-    ::apache::thrift::type::float_t,
-    ::apache::thrift::type::i16_t
-  >;
 
 
   void __fbthrift_clear();
@@ -847,9 +837,6 @@ class AdaptedUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i16_t
-  >;
 
 
   void __fbthrift_clear();
@@ -1068,9 +1055,6 @@ class FOLLY_EXPORT SimpleException : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i16_t
-  >;
 
 
   void __fbthrift_clear();
@@ -1209,9 +1193,6 @@ class OptionalRefStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>
-  >;
 
 
   void __fbthrift_clear();
@@ -1342,9 +1323,6 @@ class GeneratedStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i16_t
-  >;
 
 
   void __fbthrift_clear();
@@ -1472,9 +1450,6 @@ class FOLLY_EXPORT HiddenException : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::i16_t
-  >;
 
 
   void __fbthrift_clear();
@@ -1621,17 +1596,6 @@ class ComplexStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>,
-    ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>,
-    ::apache::thrift::type::i32_t,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::enum_t<::py3::simple::AnEnum>,
-    ::apache::thrift::type::binary_t,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::cpp_type<foo::Bar, ::apache::thrift::type::binary_t>
-  >;
 
 
   void __fbthrift_clear();
@@ -2199,9 +2163,6 @@ class BinaryUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>
-  >;
 
 
   void __fbthrift_clear();
@@ -2426,9 +2387,6 @@ class BinaryUnionStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::union_t<::py3::simple::BinaryUnion>
-  >;
 
 
   void __fbthrift_clear();

@@ -106,9 +106,6 @@ class FOLLY_EXPORT Fiery : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -251,9 +248,6 @@ class FOLLY_EXPORT Serious : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -400,10 +394,6 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -606,10 +596,6 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::string_t
-  >;
 
 
   void __fbthrift_clear();
@@ -812,10 +798,6 @@ class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::i32_t
-  >;
 
 
   void __fbthrift_clear();
@@ -1013,10 +995,6 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-    ::apache::thrift::type::string_t,
-    ::apache::thrift::type::i32_t
-  >;
 
 
   void __fbthrift_clear();
@@ -1211,8 +1189,6 @@ class FOLLY_EXPORT Banal : public virtual apache::thrift::TException {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-  >;
 
 
   void __fbthrift_clear();

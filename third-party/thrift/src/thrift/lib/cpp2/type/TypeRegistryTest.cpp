@@ -85,5 +85,14 @@ TEST(TypeRegistry, Register) {
   EXPECT_EQ(treg.store(treg.load(any), test::kFollyToStringProtocol), any);
 }
 
+TEST(TypeRegistry, Registered) {
+  TypeRegistry treg;
+  EXPECT_FALSE(treg.isRegistered(Type::get<double_t>()));
+
+  test::FollyToStringSerializer<double_t> serializer;
+  treg.registerSerializer(serializer, double_t{});
+  EXPECT_TRUE(treg.isRegistered(Type::get<double_t>()));
+}
+
 } // namespace
 } // namespace apache::thrift::type

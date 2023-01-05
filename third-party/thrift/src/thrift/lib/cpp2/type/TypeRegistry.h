@@ -111,6 +111,11 @@ class TypeRegistry {
   bool registerSerializer(
       std::unique_ptr<op::Serializer> serializer, const C&& types);
 
+  // Check if a given type is registered.
+  //
+  // Returns true iff the type is registered.
+  bool isRegistered(const Type& type) const;
+
  private:
   struct TypeEntry {
     folly::F14FastMap<Protocol, const op::Serializer*> protocols;

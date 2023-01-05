@@ -73,6 +73,15 @@ bool TypeRegistry::registerSerializer(
       .second;
 }
 
+bool TypeRegistry::isRegistered(const Type& type) const {
+  if (!type.isFull()) { // TODO: Implement look up by type hash.
+    folly::throw_exception<std::out_of_range>("Not Implemented");
+  }
+
+  // Lookup by exact type.
+  return types_.find(type) != types_.end();
+}
+
 auto TypeRegistry::getEntry(const Type& type) const -> const TypeEntry& {
   if (!type.isFull()) { // TODO(afuller): Implement look by type hash.
     folly::throw_exception<std::out_of_range>("Not Implemented");

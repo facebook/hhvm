@@ -233,7 +233,9 @@ let idx
   let (env, res) = Env.fresh_type env expr_pos in
   let ((env, ty_err_opt), res) =
     match TUtils.shape_field_name env field with
-    | None -> ((env, None), TUtils.mk_tany env field_p)
+    | None ->
+      let (env, ty) = Env.fresh_type_error env field_p in
+      ((env, None), ty)
     | Some field_name ->
       let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
       let fake_super_shape_ty =
@@ -306,7 +308,7 @@ let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
   let (env, res) = Env.fresh_type env expr_pos in
   let (env, res) =
     match TUtils.shape_field_name env field with
-    | None -> (env, TUtils.mk_tany env field_p)
+    | None -> Env.fresh_type_error env field_p
     | Some field_name ->
       let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
       let fake_super_shape_ty =
@@ -341,7 +343,9 @@ let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
 
 let remove_key_with_ty_err p env shape_ty ((_, field_p, _) as field) =
   match TUtils.shape_field_name env field with
-  | None -> ((env, None), TUtils.mk_tany env field_p)
+  | None ->
+    let (env, ty) = Env.fresh_type_error env field_p in
+    ((env, None), ty)
   | Some field_name ->
     let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
     shrink_shape p field_name env shape_ty
@@ -351,7 +355,7 @@ let remove_key p env shape_ty field =
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (env, res)
 
-let to_collection env shape_ty res return_type =
+let to_collection env pos shape_ty res return_type =
   let mapper =
     object (self)
       inherit Type_mapper.shallow_type_mapper as super
@@ -371,7 +375,7 @@ let to_collection env shape_ty res return_type =
                   (env, MakeType.int (Reason.Rwitness_from_decl p))
                 | Typing_defs.TSFlit_str (p, _) ->
                   (env, MakeType.string (Reason.Rwitness_from_decl p))
-                | Typing_defs.TSFclass_const ((p, cid), (_, mid)) -> begin
+                | Typing_defs.TSFclass_const ((_, cid), (_, mid)) -> begin
                   match Env.get_class env cid with
                   | Some class_ -> begin
                     match Env.get_const env class_ mid with
@@ -384,9 +388,9 @@ let to_collection env shape_ty res return_type =
                       in
                       Option.iter ~f:Errors.add_typing_error ty_err_opt;
                       (env, lty)
-                    | None -> (env, TUtils.mk_tany_ env p)
+                    | None -> Env.fresh_type_error env pos
                   end
-                  | None -> (env, TUtils.mk_tany_ env p)
+                  | None -> Env.fresh_type_error env pos
                 end)
           in
           let (env, key) = Typing_union.union_list env r keys in
@@ -430,7 +434,7 @@ let to_array env pos shape_ty res =
       shape_ty
   in
   Option.iter ~f:Errors.add_typing_error e1;
-  to_collection env shape_ty res (fun env r key value ->
+  to_collection env pos shape_ty res (fun env r key value ->
       make_locl_like_type env (MakeType.darray r key value))
 
 let to_dict env pos shape_ty res =
@@ -442,7 +446,7 @@ let to_dict env pos shape_ty res =
       shape_ty
   in
   Option.iter ~f:Errors.add_typing_error e1;
-  to_collection env shape_ty res (fun env r key value ->
+  to_collection env pos shape_ty res (fun env r key value ->
       make_locl_like_type env (MakeType.dict r key value))
 
 let shape_field_pos = function

@@ -448,9 +448,6 @@ val tany : Typing_env_types.env -> Typing_defs.locl_phase Typing_defs.ty_
 val mk_tany :
   Typing_env_types.env -> Pos.t -> Typing_reason.locl_phase Typing_defs.ty
 
-val mk_tany_ :
-  Typing_env_types.env -> Pos_or_decl.t -> Typing_defs.locl_phase Typing_defs.ty
-
 val make_locl_subst_for_class_tparams :
   Decl_provider.Class.t ->
   Typing_defs.locl_ty list ->

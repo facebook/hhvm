@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::CreateMethodM
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::facebook::thrift::test::ServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

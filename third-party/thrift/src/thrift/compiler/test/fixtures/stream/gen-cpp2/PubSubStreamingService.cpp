@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::CreateMethodMeta
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::PubSubStreamingServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

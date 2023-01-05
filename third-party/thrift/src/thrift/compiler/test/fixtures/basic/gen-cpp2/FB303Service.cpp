@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>::CreateMet
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::test::fixtures::basic::FB303ServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

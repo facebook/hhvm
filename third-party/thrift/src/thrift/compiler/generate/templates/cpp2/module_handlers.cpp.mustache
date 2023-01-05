@@ -20,6 +20,9 @@
 #include "<%program:include_prefix%><%program:name%>_handlers.h"
 #include "<%program:include_prefix%><%program:name%>_handlers-inl.h"
 #include "<%program:include_prefix%><%program:name%>_metadata.h"
+<%#program:constants?%>
+#include "<%program:include_prefix%><%program:name%>_constants.h"
+<%/program:constants?%>
 <%/program%>
 
 #include <thrift/lib/cpp2/gen/service_cpp.h>

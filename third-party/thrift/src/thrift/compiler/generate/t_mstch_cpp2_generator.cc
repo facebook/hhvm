@@ -648,6 +648,8 @@ class cpp_mstch_service : public mstch_service {
         this,
         {
             {"service:program_name", &cpp_mstch_service::program_name},
+            {"service:program_qualified_name",
+             &cpp_mstch_service::program_qualified_name},
             {"service:program_path", &cpp_mstch_service::program_path},
             {"service:include_prefix", &cpp_mstch_service::include_prefix},
             {"service:thrift_includes", &cpp_mstch_service::thrift_includes},
@@ -666,6 +668,10 @@ class cpp_mstch_service : public mstch_service {
              &cpp_mstch_service::parent_service_qualified_name},
             {"service:thrift_uri_or_service_name",
              &cpp_mstch_service::thrift_uri_or_service_name},
+            {"service:service_schema_name",
+             &cpp_mstch_service::service_schema_name},
+            {"service:has_service_schema",
+             &cpp_mstch_service::has_service_schema},
             {"service:reduced_client?", &cpp_mstch_service::reduced_client},
         });
 
@@ -678,6 +684,10 @@ class cpp_mstch_service : public mstch_service {
     return t_mstch_cpp2_generator::get_cpp2_namespace(program);
   }
   mstch::node program_name() { return service_->program()->name(); }
+  mstch::node program_qualified_name() {
+    return get_service_namespace(service_->program()) +
+        "::" + service_->program()->name();
+  }
   mstch::node program_path() { return service_->program()->path(); }
   mstch::node cpp_includes() {
     return t_mstch_cpp2_generator::cpp_includes(service_->program());
@@ -733,6 +743,29 @@ class cpp_mstch_service : public mstch_service {
   }
   mstch::node thrift_uri_or_service_name() {
     return service_->uri().empty() ? parent_service_name() : service_->uri();
+  }
+  mstch::node has_service_schema() {
+    const t_const* annotation =
+        service_->find_structured_annotation_or_null(kGenerateRuntimeSchemaUri);
+    return annotation ? true : false;
+  }
+
+  mstch::node service_schema_name() {
+    const t_const* annotation =
+        service_->find_structured_annotation_or_null(kGenerateRuntimeSchemaUri);
+    if (!annotation) {
+      return "";
+    }
+
+    std::string name;
+    if (auto nameOverride = annotation
+            ? annotation->get_value_from_structured_annotation_or_null("name")
+            : nullptr) {
+      name = nameOverride->get_string();
+    } else {
+      name = fmt::format("schema{}", service_->name());
+    }
+    return name;
   }
 
  private:

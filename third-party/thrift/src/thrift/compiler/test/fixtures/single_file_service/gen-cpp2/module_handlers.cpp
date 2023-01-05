@@ -19,6 +19,7 @@ apache::thrift::ServiceHandler<::cpp2::A>::CreateMethodMetadataResult apache::th
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::AAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::A>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }
@@ -326,6 +327,7 @@ std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<:
 apache::thrift::ServiceHandler<::cpp2::B>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::cpp2::B>::createMethodMetadata() {
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::BAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
+
 
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::B>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
@@ -754,6 +756,7 @@ std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<:
 apache::thrift::ServiceHandler<::cpp2::C>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::cpp2::C>::createMethodMetadata() {
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::CAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
+
 
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::C>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();

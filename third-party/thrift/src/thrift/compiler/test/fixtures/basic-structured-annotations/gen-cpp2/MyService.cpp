@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::M
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::test::fixtures::basic-structured-annotations::MyServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

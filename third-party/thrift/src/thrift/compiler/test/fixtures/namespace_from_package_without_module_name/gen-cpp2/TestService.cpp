@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_nam
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::test::namespace_from_package_without_module_name::TestServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

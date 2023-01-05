@@ -114,6 +114,27 @@ TEST_F(MultiplexAsyncProcessorTest, getServiceHandlers_Nested) {
   EXPECT_EQ(processorFactory->getServiceHandlers().size(), 4);
 }
 
+#if defined(THRIFT_SCHEMA_AVAILABLE)
+TEST_F(MultiplexAsyncProcessorTest, getServiceMetadataV1) {
+  std::vector<std::shared_ptr<AsyncProcessorFactory>> servicesToMultiplex = {
+      std::make_shared<FirstHandler>(),
+      std::make_shared<SecondHandler>(),
+      std::make_shared<apache::thrift::ServiceHandler<SomeService>>(),
+      std::make_shared<ConflictsHandler>(),
+      std::make_shared<ThirdHandler>(),
+  };
+  auto processorFactory = std::make_shared<MultiplexAsyncProcessorFactory>(
+      std::move(servicesToMultiplex));
+  auto schemas = processorFactory->getServiceMetadataV1();
+  EXPECT_TRUE(schemas);
+  EXPECT_EQ(schemas->size(), 1);
+  auto schema = schemas->at(0);
+  EXPECT_EQ(schema.definitions()->size(), 1);
+  auto svc_schema_0 = schema.definitions()->at(0).get_serviceDef();
+  EXPECT_EQ(svc_schema_0.functions()->size(), 2);
+}
+#endif
+
 TEST_F(MultiplexAsyncProcessorTest, getServiceMetadata) {
   auto getMetadataFromService = [](AsyncProcessorFactory& service) {
     metadata::ThriftServiceMetadataResponse response;

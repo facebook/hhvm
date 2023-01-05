@@ -23,6 +23,14 @@ std::unique_ptr<apache::thrift::AsyncProcessor> <% > service_common/service_clas
   return ::apache::thrift::detail::ap::createMethodMetadataMap<<%service:qualified_name%>AsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+<%#service:has_service_schema%>
+#if defined(THRIFT_SCHEMA_AVAILABLE)
+std::optional<std::vector<facebook::thrift::type::Schema>> <% > service_common/service_class_name%>::getServiceMetadataV1() {
+  return apache::thrift::detail::si::schemaAsOptionalVector(<%service:program_qualified_name%>_constants::<%service:service_schema_name%>());
+}
+#endif
+<%/service:has_service_schema%>
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> <% > service_common/service_class_name%>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

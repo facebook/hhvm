@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::cpp2::Raiser>::CreateMethodMetadataResult apach
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::RaiserAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::Raiser>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

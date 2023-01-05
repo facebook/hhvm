@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::cpp2::SinkService>::CreateMethodMetadataResult 
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::SinkServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::SinkService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::some::valid::ns::EmptyService>::CreateMethodMet
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::some::valid::ns::EmptyServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::some::valid::ns::EmptyService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

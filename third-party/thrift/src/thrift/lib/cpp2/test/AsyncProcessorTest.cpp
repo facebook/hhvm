@@ -46,6 +46,7 @@
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyMonitor.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyStatus.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Parent.h>
+#include <thrift/lib/cpp2/test/gen-cpp2/SchemaService.h>
 
 namespace apache::thrift::test {
 
@@ -95,6 +96,19 @@ TEST(AsyncProcessorMetadataTest, ParentMetadata) {
   EXPECT_NE(metadataMap.find("parentMethod2"), metadataMap.end());
   EXPECT_NE(metadataMap.find("parentMethod3"), metadataMap.end());
 }
+
+#if defined(THRIFT_SCHEMA_AVAILABLE)
+TEST(AsyncProcessorMetadataTest, Schema) {
+  apache::thrift::ServiceHandler<SchemaService> service;
+  auto schemas = service.getServiceMetadataV1();
+  EXPECT_TRUE(schemas);
+  EXPECT_EQ(schemas->size(), 1);
+  auto schema = schemas->at(0);
+  EXPECT_EQ(schema.definitions()->size(), 1);
+  auto svc_schema_0 = schema.definitions()->at(0).get_serviceDef();
+  EXPECT_EQ(svc_schema_0.functions()->size(), 1);
+}
+#endif
 
 TEST(AsyncProcessorMetadataTest, ChildMetadata) {
   ChildHandler service;

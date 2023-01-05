@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+// @lint-ignore THRIFTCHECKS used by GenerateRuntimeSchema
+include "thrift/lib/thrift/schema.thrift"
+
 namespace cpp2 apache.thrift.test
 
 service Parent {
@@ -41,5 +45,10 @@ service DummyStatus {
 }
 
 service DummyControl {
+  i64 getOption();
+}
+
+@thrift.GenerateRuntimeSchema
+service SchemaService {
   i64 getOption();
 }

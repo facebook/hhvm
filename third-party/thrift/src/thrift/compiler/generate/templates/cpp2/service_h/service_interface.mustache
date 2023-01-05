@@ -40,6 +40,11 @@ class ServiceHandler<<%service:qualified_name%>> : <%#service:extends%>virtual p
   typedef <%service:qualified_name%>AsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
+  <%#service:has_service_schema%>
+  #if defined(THRIFT_SCHEMA_AVAILABLE)
+  std::optional<std::vector<facebook::thrift::type::Schema>> getServiceMetadataV1() override;
+  #endif
+  <%/service:has_service_schema%>
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:

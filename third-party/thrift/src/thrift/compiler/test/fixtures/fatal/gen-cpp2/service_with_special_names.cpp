@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::test_cpp2::cpp_reflection::service_with_special_namesAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

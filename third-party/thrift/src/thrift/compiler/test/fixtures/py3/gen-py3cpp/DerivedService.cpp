@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::py3::simple::DerivedService>::CreateMethodMetad
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::py3::simple::DerivedServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::py3::simple::DerivedService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

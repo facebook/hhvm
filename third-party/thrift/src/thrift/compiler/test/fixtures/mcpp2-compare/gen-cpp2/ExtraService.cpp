@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::extra::svc::ExtraService>::CreateMethodMetadata
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::extra::svc::ExtraServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::extra::svc::ExtraService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

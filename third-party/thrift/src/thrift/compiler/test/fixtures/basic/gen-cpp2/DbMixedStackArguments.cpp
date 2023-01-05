@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::test::fixtures::basic::DbMixedStackArgumentsAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

@@ -18,6 +18,7 @@ apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::CreateMethodMetad
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::DbMixedStackArgumentsAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }

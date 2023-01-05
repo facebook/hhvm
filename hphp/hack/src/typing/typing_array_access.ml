@@ -756,6 +756,34 @@ let rec array_get
               ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
           in
           (env, (ty, err_res_arr, err_res_idx))
+      | Tnewtype (cid, _, bound) when String.equal cid SN.Classes.cSupportDyn ->
+        (* We must be in_support_dynamic_type_method_check because
+           apply_rules_with_index_value_ty_mismatches otherwise decends into the newtype *)
+        let ty = mk (r, Tintersection [MakeType.dynamic r; bound]) in
+        let (env, (ty, err_opt_arr, err_opt_idx)) =
+          array_get
+            ~array_pos
+            ~expr_pos
+            ~lhs_of_null_coalesce
+            is_lvalue
+            env
+            ty
+            e2
+            ty2
+        in
+        let err_res_idx =
+          Option.value_map
+            err_opt_idx
+            ~default:(Ok ty2)
+            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+        in
+        let err_res_arr =
+          Option.value_map
+            err_opt_arr
+            ~default:dflt_arr_res
+            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+        in
+        (env, (ty, err_res_arr, err_res_idx))
       | Tnewtype (ts, [ty], bound) -> begin
         match deref bound with
         | (r, Tshape (shape_kind, fields))
@@ -854,7 +882,7 @@ let widen_for_assign_array_append ~expr_pos env ty =
     ((env, None), Some ty)
   | _ -> ((env, None), None)
 
-let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
+let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
   let ((env, ty_err1), ty1) =
     Typing_solver.expand_type_and_narrow
       ~description_of_expected:"an array or collection"
@@ -876,6 +904,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
           ty
         | _ -> ty1
       in
+      let dflt_arr_res = Ok ty1 in
       let got_dynamic () =
         let tv = Typing_make_type.dynamic (get_reason ty1) in
         let (env, val_ty_err_opt) =
@@ -1005,6 +1034,27 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       | (_, Tprim Tnull)
         when env.Typing_env_types.in_support_dynamic_type_method_check ->
         got_dynamic ()
+      | (r, Tnewtype (cid, _, bound))
+        when String.equal cid SN.Classes.cSupportDyn ->
+        (* We must be in_support_dynamic_type_method_check because
+           apply_rules_with_index_value_ty_mismatches otherwise decends into the newtype *)
+        let ty = mk (r, Tintersection [MakeType.dynamic r; bound]) in
+        let (env, (ty, err_opt_arr, err_opt_idx)) =
+          assign_array_append ~array_pos ~expr_pos ur env ty ty2
+        in
+        let err_res_idx =
+          Option.value_map
+            err_opt_idx
+            ~default:(Ok ty2)
+            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+        in
+        let err_res_arr =
+          Option.value_map
+            err_opt_arr
+            ~default:dflt_arr_res
+            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+        in
+        (env, (ty, err_res_arr, err_res_idx))
       | ( _,
           ( Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tvar _ | Tfun _
           | Tclass _ | Ttuple _ | Tshape _ | Tunion _ | Tintersection _
@@ -1042,8 +1092,8 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
  * Return the new array type
  *)
 
-let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
-    =
+let rec assign_array_get
+    ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2 =
   let ((env, ty_err1), ety1) =
     Typing_solver.expand_type_and_narrow
       ~description_of_expected:"an array or collection"
@@ -1405,6 +1455,32 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           let ty = mk (r, Tshape (shape_kind, fdm')) in
           (env, (ty, Ok ty, Ok tkey, Ok ty2))
       end
+      | Tnewtype (cid, _, bound) when String.equal cid SN.Classes.cSupportDyn ->
+        (* We must be in_support_dynamic_type_method_check because
+           apply_rules_with_index_value_ty_mismatches otherwise decends into the newtype *)
+        let ty = mk (r, Tintersection [MakeType.dynamic r; bound]) in
+        let (env, (ty, err_opt_arr, err_opt_tk, err_opt_idx)) =
+          assign_array_get ~array_pos ~expr_pos ur env ty key tkey ty2
+        in
+        let err_res_idx =
+          Option.value_map
+            err_opt_idx
+            ~default:(Ok ty2)
+            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+        in
+        let err_res_tk =
+          Option.value_map
+            err_opt_tk
+            ~default:(Ok tkey)
+            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+        in
+        let err_res_arr =
+          Option.value_map
+            err_opt_arr
+            ~default:(Ok ty1)
+            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+        in
+        (env, (ty, err_res_arr, err_res_tk, err_res_idx))
       | Tunapplied_alias _ ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Toption _

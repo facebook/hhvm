@@ -127,6 +127,12 @@ let apply_rules_with_array_index_value_ty_mismatches
       let (env, val_ty_mismatch) = intersect_errs env val_errs in
       let (env, ty) = Typing_intersection.intersect_list env r tys in
       (env, (ty, arr_ty_mismatch, key_ty_mismatch, val_ty_mismatch))
+    | (_, Tnewtype (cid, _, _))
+      when String.equal cid SN.Classes.cSupportDyn
+           && env.Typing_env_types.in_support_dynamic_type_method_check ->
+      (* If we are in_support_dynamic_type_method_check, we might want to take advantage of
+         the dynamic in supportdyn<t>, so don't break it apart as in the next case. *)
+      default ()
     (* Preserve supportdyn<_> across operation *)
     | (r, Tnewtype (cid, _, bound)) when String.equal cid SN.Classes.cSupportDyn
       ->

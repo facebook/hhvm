@@ -681,10 +681,11 @@ void StandardExtension::initVariable() {
   HHVM_FE(parse_str);
   HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
   HHVM_FALIAS(HH\\serialize_with_options, HH_serialize_with_options);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\first, HH_first);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\last, HH_last);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\first_key, HH_first_key);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\last_key, HH_last_key);
+  // Clang 15 doesn't like the HHVM_FALIAS macro with \\N
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\first", HH_first);
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\last", HH_last);
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\first_key", HH_first_key);
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\last_key", HH_last_key);
   HHVM_FALIAS(HH\\is_late_init_prop_init, HH_is_late_init_prop_init);
   HHVM_FALIAS(HH\\is_late_init_sprop_init, HH_is_late_init_sprop_init);
   HHVM_FALIAS(HH\\global_key_exists, HH_global_key_exists);

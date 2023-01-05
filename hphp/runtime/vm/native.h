@@ -98,6 +98,8 @@ struct Extension;
   HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn), nativeFuncs())
 #define HHVM_FALIAS(fn, falias)\
   HHVM_NAMED_FE_STR(#fn, HHVM_FN(falias), nativeFuncs())
+#define HHVM_FALIAS_FE_STR(fn, falias)\
+  HHVM_NAMED_FE_STR(fn, HHVM_FN(falias), nativeFuncs())
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> class instance methods.

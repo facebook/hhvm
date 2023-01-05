@@ -1413,20 +1413,32 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
   }
 
   auto const checkPatterns = [&] (Hdf hdf) {
-    // Check the patterns using "&" rather than "&&" so they all get
-    // evaluated; otherwise with multiple patterns, if an earlier
-    // one fails to match, the later one is reported as unused.
-    return
-      Config::matchHdfPattern(hostname, ini, hdf, "machine") &
-      Config::matchHdfPattern(tier, ini, hdf, "tier") &
-      Config::matchHdfPattern(task, ini, hdf, "task") &
-      Config::matchHdfPattern(tiers, ini, hdf, "tiers", "m") &
-      Config::matchHdfPattern(tags, ini, hdf, "tags", "m") &
-      Config::matchHdfPattern(cpu, ini, hdf, "cpu");
+    // Check the patterns one by one so they all get evaluated; otherwise, when
+    // using "&&" in a single expression with multiple patterns, if an earlier
+    // one fails to match, the later one would be reported as unused.
+    auto matched = true;
+    matched &= Config::matchHdfPattern(hostname, ini, hdf, "machine");
+    matched &= Config::matchHdfPattern(tier, ini, hdf, "tier");
+    matched &= Config::matchHdfPattern(task, ini, hdf, "task");
+    matched &= Config::matchHdfPattern(tiers, ini, hdf, "tiers", "m");
+    matched &= Config::matchHdfPattern(tags, ini, hdf, "tags", "m");
+    matched &= Config::matchHdfPattern(cpu, ini, hdf, "cpu");
+    return matched;
   };
 
   std::vector<std::string> messages;
   auto enableShards = true;
+
+  auto const matchesTier = [&] (Hdf hdf) {
+    // Check the patterns one by one so they all get evaluated; otherwise, when
+    // using "&&" in a single expression with multiple patterns, if an earlier
+    // one fails to match, the later one would be reported as unused.
+    auto matched = true;
+    matched &= checkPatterns(hdf);
+    matched &= !hdf.exists("exclude") || !checkPatterns(hdf["exclude"]);
+    matched &= matchShard(enableShards, hostname, ini, hdf, messages);
+    return matched;
+  };
 
   // Tier overwrites
   {
@@ -1439,12 +1451,7 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
                                 "cpu='{}', tiers='{}', tags='{}'",
                                 hostname, tier, task, cpu, tiers, tags));
       }
-      // Check the patterns using "&" rather than "&&" so they all get
-      // evaluated; otherwise with multiple patterns, if an earlier
-      // one fails to match, the later one is reported as unused.
-      if (checkPatterns(hdf) &
-          (!hdf.exists("exclude") || !checkPatterns(hdf["exclude"])) &
-          matchShard(enableShards, hostname, ini, hdf, messages)) {
+      if (matchesTier(hdf)) {
         messages.emplace_back(folly::sformat(
                                 "Matched tier: {}", hdf.getName()));
         if (enableShards && hdf["DisableShards"].configGetBool()) {

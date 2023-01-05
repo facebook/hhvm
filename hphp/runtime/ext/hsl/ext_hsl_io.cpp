@@ -82,8 +82,9 @@ namespace {
     IOExtension() : Extension("hsl_io", "1.0") {}
 
     void moduleInit() override {
-      HHVM_FALIAS(
-        HH\\Lib\\_Private\\Native\\pipe,
+      // Clang 15 doesn't like the HHVM_FALIAS macro with \\N
+      HHVM_FALIAS_FE_STR(
+        "HH\\Lib\\_Private\\Native\\pipe",
         HH_io_pipe
       );
       HHVM_FALIAS(

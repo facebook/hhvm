@@ -42,6 +42,9 @@ class Handler(ConformanceServiceInterface):
 
 
 async def main():
+    # Ensure OmniAnyRegistry is initialized before we start ThriftServer
+    OmniAnyRegistry()
+
     server = ThriftServer(Handler())
     serve_task = asyncio.create_task(server.serve())
     addr = await server.get_address()

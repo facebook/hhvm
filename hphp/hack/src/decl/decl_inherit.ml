@@ -432,7 +432,6 @@ let pair_with_heap_entries :
   SMap.mapi (fun name elt -> (elt, heap_entries >>= SMap.find_opt name)) elts
 
 let inherit_hack_class
-    env
     child
     parent_name
     parent
@@ -455,7 +454,7 @@ let inherit_hack_class
     SMap.map (Inst.instantiate_typeconst_type subst) parent.dc_typeconsts
   in
   let consts = SMap.map (Inst.instantiate_cc subst) parent.dc_consts in
-  let (cstr, constructor_consistency) = Decl_env.get_construct env parent in
+  let (cstr, constructor_consistency) = parent.dc_construct in
   let subst_ctx =
     {
       sc_subst = subst;
@@ -539,7 +538,7 @@ let inherit_hack_xhp_attrs_only class_type members =
 (* Include definitions inherited from a class (extends) or a trait (use)
  * or requires extends
  *)
-let from_class env c (parents : Decl_store.class_entries SMap.t) parent_ty :
+let from_class c (parents : Decl_store.class_entries SMap.t) parent_ty :
     inherited =
   let (_, (_, parent_name), parent_class_params) =
     Decl_utils.unwrap_class_type parent_ty
@@ -550,13 +549,7 @@ let from_class env c (parents : Decl_store.class_entries SMap.t) parent_ty :
     empty
   | Some (class_, parent_members) ->
     (* The class lives in Hack *)
-    inherit_hack_class
-      env
-      c
-      parent_name
-      class_
-      parent_class_params
-      parent_members
+    inherit_hack_class c parent_name class_ parent_class_params parent_members
 
 let from_class_constants_only (parents : Decl_store.class_entries SMap.t) ty =
   let (_, (_, class_name), class_params) = Decl_utils.unwrap_class_type ty in
@@ -591,16 +584,16 @@ let parents_which_provide_members c =
   | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> c.sc_extends
 
 let from_parent env c (parents : Decl_store.class_entries SMap.t) acc parent =
-  let inherited = from_class env c parents parent in
+  let inherited = from_class c parents parent in
   add_inherited env c inherited acc
 
 let from_requirements env c parents acc reqs =
-  let inherited = from_class env c parents reqs in
+  let inherited = from_class c parents reqs in
   let inherited = mark_as_synthesized inherited in
   add_inherited env c inherited acc
 
 let from_trait env c parents acc uses =
-  let inherited = from_class env c parents uses in
+  let inherited = from_class c parents uses in
   add_inherited env c inherited acc
 
 let from_xhp_attr_use env c (parents : Decl_store.class_entries SMap.t) acc uses

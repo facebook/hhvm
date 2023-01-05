@@ -8,8 +8,6 @@
  *)
 
 open Hh_prelude
-open Decl_defs
-module Dep = Typing_deps.Dep
 
 type env = {
   mode: FileInfo.mode;
@@ -31,25 +29,6 @@ let make_decl_posed env posed =
 
 let tcopt env = Provider_context.get_tcopt env.ctx
 
-let deps_mode env = Provider_context.get_deps_mode env.ctx
-
-let is_hhi cd = Pos_or_decl.is_hhi cd.dc_pos
-
-let add_wclass env x =
-  let dep = Dep.Type x in
-  Option.iter env.droot ~f:(fun root ->
-      Typing_deps.add_idep (deps_mode env) root dep);
-  if
-    TypecheckerOptions.record_fine_grained_dependencies
-    @@ Provider_context.get_tcopt env.ctx
-  then
-    Typing_pessimisation_deps.try_add_fine_dep
-      (deps_mode env)
-      env.droot
-      env.droot_member
-      dep;
-  ()
-
 type class_cache = Decl_store.class_entries SMap.t
 
 let no_fallback (_ : env) (_ : string) : Decl_defs.decl_class_type option = None
@@ -65,8 +44,3 @@ let get_class_and_add_dep
   match res with
   | Some c -> Some c
   | None -> fallback env x
-
-let get_construct env class_ =
-  if not (is_hhi class_) then add_wclass env class_.dc_name;
-
-  class_.dc_construct

@@ -12,8 +12,7 @@
  * nast produced from the filename passed as a parameter (the SharedMem must
  * thus have been initialized via SharedMem.init prior to calling this
  * function). Its performance benefits if the Parser_heap has been previously
- * populated. It also adds dependencies via Typing_deps.add_idep. It finally
- * adds all the typing information about classes, functions, typedefs,
+ * populated. It finally adds all the typing information about classes, functions, typedefs,
  * respectively in the globals in Typing_env.Class, Typing_env.Fun, and
  * Typing_env.Typedef.
  *)

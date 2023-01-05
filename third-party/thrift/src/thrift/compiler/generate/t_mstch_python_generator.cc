@@ -50,6 +50,12 @@ const t_const* find_structured_adapter_annotation(const t_named& node) {
   return node.find_structured_annotation_or_null(kPythonAdapterUri);
 }
 
+const t_const* find_structured_adapter_annotation(const t_type& type) {
+  // Traverse typedefs and find first adapter if any.
+  return t_typedef::get_first_structured_annotation_or_null(
+      &type, kPythonAdapterUri);
+}
+
 const std::string get_annotation_property(
     const t_const* annotation, const std::string& key) {
   if (annotation) {

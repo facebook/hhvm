@@ -35,7 +35,8 @@ typedef i32 Datetime
   name = "thrift.python.test.adapters.atoi.AtoiAdapter",
   typeHint = "int",
 }
-typedef string AdaptedInt
+typedef string AdaptedInt2
+typedef AdaptedInt2 AdaptedInt
 
 @python.Adapter{
   name = "thrift.python.test.adapters.noop.Wrapper",

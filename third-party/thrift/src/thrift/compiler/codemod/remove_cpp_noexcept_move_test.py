@@ -18,6 +18,8 @@ import tempfile
 import textwrap
 import unittest
 
+import pkg_resources
+
 from thrift.compiler.codemod.test_utils import read_file, run_binary, write_file
 
 # TODO(urielrivas): We can use clangr's unit-test formatting in the future.
@@ -47,8 +49,8 @@ class RemoveCppNoexceptMove(unittest.TestCase):
                 """
             ),
         )
-
-        run_binary("remove_cpp_noexcept_move", "foo.thrift")
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
 
         self.assertEqual(
             read_file("foo.thrift"),
@@ -62,7 +64,8 @@ class RemoveCppNoexceptMove(unittest.TestCase):
                 union Fee {
                     1: i32 fee1;
                     2: string fee2;
-                } 
+                } \
+
                 """
             ),
         )

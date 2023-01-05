@@ -18,6 +18,8 @@ import tempfile
 import textwrap
 import unittest
 
+import pkg_resources
+
 from thrift.compiler.codemod.test_utils import read_file, run_binary, write_file
 
 
@@ -45,7 +47,8 @@ class CppRefToUnstructured(unittest.TestCase):
             ),
         )
 
-        run_binary("cppref_to_structured", "foo.thrift")
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
 
         # NOTE: For current tests, user should rely on automated formatting.
         self.assertEqual(
@@ -85,7 +88,8 @@ class CppRefToUnstructured(unittest.TestCase):
             ),
         )
 
-        run_binary("cppref_to_structured", "foo.thrift")
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
 
         self.assertEqual(
             read_file("foo.thrift"),
@@ -122,7 +126,8 @@ class CppRefToUnstructured(unittest.TestCase):
             ),
         )
 
-        run_binary("cppref_to_structured", "foo.thrift")
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
 
         self.assertEqual(
             read_file("foo.thrift"),
@@ -153,7 +158,8 @@ class CppRefToUnstructured(unittest.TestCase):
             ),
         )
 
-        run_binary("cppref_to_structured", "foo.thrift")
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
 
         self.assertEqual(
             read_file("foo.thrift"),

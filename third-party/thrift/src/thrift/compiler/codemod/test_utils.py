@@ -14,20 +14,6 @@
 
 import os
 import subprocess
-import sys
-
-
-def ascend_find_exe(path, target):
-    if not os.path.isdir(path):
-        path = os.path.dirname(path)
-    while True:
-        test = os.path.join(path, target)
-        if os.access(test, os.X_OK):
-            return test
-        parent = os.path.dirname(path)
-        if os.path.samefile(parent, path):
-            return None
-        path = parent
 
 
 def read_file(path):
@@ -43,6 +29,4 @@ def write_file(path, content):
 
 
 def run_binary(build_rule, path):
-    exe = os.path.join(os.getcwd(), sys.argv[0])
-    build_rule = ascend_find_exe(exe, build_rule)
     subprocess.call([build_rule, "--gen", "mstch_cpp2", path])

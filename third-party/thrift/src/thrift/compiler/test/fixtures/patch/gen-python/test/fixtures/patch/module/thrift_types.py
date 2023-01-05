@@ -647,7 +647,7 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -655,7 +655,7 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataFieldPatch),  # typeinfo
             None,  # default value
@@ -671,7 +671,7 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataFieldPatch),  # typeinfo
             None,  # default value
@@ -759,7 +759,7 @@ class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -767,7 +767,7 @@ class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnionFieldPatch),  # typeinfo
             None,  # default value
@@ -783,7 +783,7 @@ class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnionFieldPatch),  # typeinfo
             None,  # default value
@@ -887,7 +887,7 @@ class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -895,7 +895,7 @@ class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnionFieldPatch),  # typeinfo
             None,  # default value
@@ -911,7 +911,7 @@ class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnionFieldPatch),  # typeinfo
             None,  # default value
@@ -959,7 +959,7 @@ class MyStructField10Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -1007,7 +1007,7 @@ class MyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -1055,7 +1055,7 @@ class MyStructField26Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -1063,7 +1063,7 @@ class MyStructField26Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I16Patch)),  # typeinfo
             None,  # default value
@@ -1071,7 +1071,7 @@ class MyStructField26Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             7,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
@@ -1079,7 +1079,7 @@ class MyStructField26Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             8,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "prepend",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
@@ -1087,7 +1087,7 @@ class MyStructField26Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             9,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "append",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
@@ -1135,7 +1135,7 @@ class MyStructField27Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -1143,7 +1143,7 @@ class MyStructField27Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             7,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
@@ -1151,7 +1151,7 @@ class MyStructField27Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             8,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "add",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
@@ -1199,7 +1199,7 @@ class MyStructField28Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -1207,7 +1207,7 @@ class MyStructField28Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch)),  # typeinfo
             None,  # default value
@@ -1215,7 +1215,7 @@ class MyStructField28Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             5,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "add",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
@@ -1223,7 +1223,7 @@ class MyStructField28Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch)),  # typeinfo
             None,  # default value
@@ -1231,7 +1231,7 @@ class MyStructField28Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             7,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
@@ -1239,7 +1239,7 @@ class MyStructField28Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             9,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "put",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
@@ -1287,7 +1287,7 @@ class MyStructField29Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -1295,7 +1295,7 @@ class MyStructField29Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.StructTypeInfo(MyStructField29Patch1)),  # typeinfo
             None,  # default value
@@ -1303,7 +1303,7 @@ class MyStructField29Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             7,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
@@ -1311,7 +1311,7 @@ class MyStructField29Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             8,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "prepend",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
@@ -1319,7 +1319,7 @@ class MyStructField29Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             9,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "append",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
@@ -1367,7 +1367,7 @@ class MyStructField29Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -1375,7 +1375,7 @@ class MyStructField29Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch)),  # typeinfo
             None,  # default value
@@ -1383,7 +1383,7 @@ class MyStructField29Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             5,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "add",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
@@ -1391,7 +1391,7 @@ class MyStructField29Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch)),  # typeinfo
             None,  # default value
@@ -1399,7 +1399,7 @@ class MyStructField29Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             7,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
@@ -1407,7 +1407,7 @@ class MyStructField29Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             9,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "put",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
@@ -1455,7 +1455,7 @@ class MyStructField30Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -1463,7 +1463,7 @@ class MyStructField30Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(MyStructField30Patch1)),  # typeinfo
             None,  # default value
@@ -1471,7 +1471,7 @@ class MyStructField30Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             5,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "add",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
@@ -1479,7 +1479,7 @@ class MyStructField30Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(MyStructField30Patch1)),  # typeinfo
             None,  # default value
@@ -1487,7 +1487,7 @@ class MyStructField30Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             7,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
@@ -1495,7 +1495,7 @@ class MyStructField30Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             9,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "put",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
@@ -1543,7 +1543,7 @@ class MyStructField30Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -1551,7 +1551,7 @@ class MyStructField30Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch)),  # typeinfo
             None,  # default value
@@ -1559,7 +1559,7 @@ class MyStructField30Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             5,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "add",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
@@ -1567,7 +1567,7 @@ class MyStructField30Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch)),  # typeinfo
             None,  # default value
@@ -1575,7 +1575,7 @@ class MyStructField30Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             7,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
@@ -1583,7 +1583,7 @@ class MyStructField30Patch1(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             9,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "put",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
@@ -1903,7 +1903,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -1911,7 +1911,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructFieldPatch),  # typeinfo
             None,  # default value
@@ -1927,7 +1927,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructFieldPatch),  # typeinfo
             None,  # default value
@@ -2007,7 +2007,7 @@ class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -2015,7 +2015,7 @@ class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructFieldPatch),  # typeinfo
             None,  # default value
@@ -2031,7 +2031,7 @@ class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructFieldPatch),  # typeinfo
             None,  # default value
@@ -2079,7 +2079,7 @@ class RecursiveField1Patch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -2167,7 +2167,7 @@ class RecursivePatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -2175,7 +2175,7 @@ class RecursivePatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(RecursiveFieldPatch),  # typeinfo
             None,  # default value
@@ -2191,7 +2191,7 @@ class RecursivePatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(RecursiveFieldPatch),  # typeinfo
             None,  # default value
@@ -2279,7 +2279,7 @@ class BarPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
@@ -2287,7 +2287,7 @@ class BarPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(BarFieldPatch),  # typeinfo
             None,  # default value
@@ -2303,7 +2303,7 @@ class BarPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(BarFieldPatch),  # typeinfo
             None,  # default value
@@ -2391,7 +2391,7 @@ class LoopPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value

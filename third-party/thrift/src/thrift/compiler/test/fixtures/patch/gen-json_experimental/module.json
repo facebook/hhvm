@@ -513,7 +513,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patchPrior" : {
@@ -521,7 +520,6 @@
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyDataFieldPatch"
@@ -543,7 +541,6 @@
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyDataFieldPatch"
@@ -611,7 +608,6 @@
             "docstring" : "Clears any set value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patchPrior" : {
@@ -619,7 +615,6 @@
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "InnerUnionFieldPatch"
@@ -641,7 +636,6 @@
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "InnerUnionFieldPatch"
@@ -728,7 +722,6 @@
             "docstring" : "Clears any set value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patchPrior" : {
@@ -736,7 +729,6 @@
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyUnionFieldPatch"
@@ -758,7 +750,6 @@
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyUnionFieldPatch"
@@ -798,7 +789,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
@@ -835,7 +825,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
@@ -872,7 +861,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patch" : {
@@ -880,7 +868,6 @@
             "docstring" : "Patches list values by index. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "i32",
@@ -896,7 +883,6 @@
             "docstring" : "Removes entries, if present. Applies third.\n",
             "key" : 7,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
   "inner_type" : "i16"
@@ -907,7 +893,6 @@
             "docstring" : "Prepends to the front of a given list.\n",
             "key" : 8,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
   "inner_type" : "i16"
@@ -918,7 +903,6 @@
             "docstring" : "Appends to the back of a given list.\n",
             "key" : 9,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
   "inner_type" : "i16"
@@ -958,7 +942,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "remove" : {
@@ -966,7 +949,6 @@
             "docstring" : "Removes entries, if present. Applies third.\n",
             "key" : 7,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "set",
   "inner_type" : "string"
@@ -977,7 +959,6 @@
             "docstring" : "Adds entries, if not already present. Applies fourth.\n",
             "key" : 8,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "set",
   "inner_type" : "string"
@@ -1018,7 +999,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patchPrior" : {
@@ -1026,7 +1006,6 @@
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1042,7 +1021,6 @@
             "docstring" : "Add the given values, if the keys are not already present. Applies forth.\n",
             "key" : 5,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1054,7 +1032,6 @@
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1070,7 +1047,6 @@
             "docstring" : "Removes entries, if present. Applies third.\n",
             "key" : 7,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "set",
   "inner_type" : "string"
@@ -1081,7 +1057,6 @@
             "docstring" : "Adds or replaces the given key/value pairs. Applies fifth.\n",
             "key" : 9,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1126,7 +1101,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patch" : {
@@ -1134,7 +1108,6 @@
             "docstring" : "Patches list values by index. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "i32",
@@ -1149,7 +1122,6 @@
             "docstring" : "Removes entries, if present. Applies third.\n",
             "key" : 7,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
   "inner_type" : {
@@ -1164,7 +1136,6 @@
             "docstring" : "Prepends to the front of a given list.\n",
             "key" : 8,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
   "inner_type" : {
@@ -1179,7 +1150,6 @@
             "docstring" : "Appends to the back of a given list.\n",
             "key" : 9,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
   "inner_type" : {
@@ -1224,7 +1194,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patchPrior" : {
@@ -1232,7 +1201,6 @@
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1248,7 +1216,6 @@
             "docstring" : "Add the given values, if the keys are not already present. Applies forth.\n",
             "key" : 5,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1260,7 +1227,6 @@
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1276,7 +1242,6 @@
             "docstring" : "Removes entries, if present. Applies third.\n",
             "key" : 7,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "set",
   "inner_type" : "string"
@@ -1287,7 +1252,6 @@
             "docstring" : "Adds or replaces the given key/value pairs. Applies fifth.\n",
             "key" : 9,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1333,7 +1297,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patchPrior" : {
@@ -1341,7 +1304,6 @@
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1356,7 +1318,6 @@
             "docstring" : "Add the given values, if the keys are not already present. Applies forth.\n",
             "key" : 5,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1372,7 +1333,6 @@
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1387,7 +1347,6 @@
             "docstring" : "Removes entries, if present. Applies third.\n",
             "key" : 7,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "set",
   "inner_type" : "string"
@@ -1398,7 +1357,6 @@
             "docstring" : "Adds or replaces the given key/value pairs. Applies fifth.\n",
             "key" : 9,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1444,7 +1402,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patchPrior" : {
@@ -1452,7 +1409,6 @@
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1468,7 +1424,6 @@
             "docstring" : "Add the given values, if the keys are not already present. Applies forth.\n",
             "key" : 5,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1480,7 +1435,6 @@
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1496,7 +1450,6 @@
             "docstring" : "Removes entries, if present. Applies third.\n",
             "key" : 7,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "set",
   "inner_type" : "string"
@@ -1507,7 +1460,6 @@
             "docstring" : "Adds or replaces the given key/value pairs. Applies fifth.\n",
             "key" : 9,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -1854,7 +1806,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patchPrior" : {
@@ -1862,7 +1813,6 @@
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructFieldPatch"
@@ -1884,7 +1834,6 @@
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructFieldPatch"
@@ -1940,7 +1889,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patchPrior" : {
@@ -1948,7 +1896,6 @@
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "LateDefStructFieldPatch"
@@ -1970,7 +1917,6 @@
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "LateDefStructFieldPatch"
@@ -2014,7 +1960,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 89,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
@@ -2078,7 +2023,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patchPrior" : {
@@ -2086,7 +2030,6 @@
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "RecursiveFieldPatch"
@@ -2108,7 +2051,6 @@
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "RecursiveFieldPatch"
@@ -2175,7 +2117,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "patchPrior" : {
@@ -2183,7 +2124,6 @@
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BarFieldPatch"
@@ -2205,7 +2145,6 @@
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BarFieldPatch"
@@ -2272,7 +2211,6 @@
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },

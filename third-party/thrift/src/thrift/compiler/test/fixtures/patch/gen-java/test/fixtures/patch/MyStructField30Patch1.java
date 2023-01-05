@@ -26,12 +26,12 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
     @ThriftConstructor
     public MyStructField30Patch1(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final Map<String, Integer> assign,
-        @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE) final boolean clear,
-        @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.NONE) final Map<String, com.facebook.thrift.op.I32Patch> patchPrior,
-        @com.facebook.swift.codec.ThriftField(value=5, name="add", requiredness=Requiredness.NONE) final Map<String, Integer> add,
-        @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.NONE) final Map<String, com.facebook.thrift.op.I32Patch> patch,
-        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE) final Set<String> remove,
-        @com.facebook.swift.codec.ThriftField(value=9, name="put", requiredness=Requiredness.NONE) final Map<String, Integer> put
+        @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
+        @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE) final Map<String, com.facebook.thrift.op.I32Patch> patchPrior,
+        @com.facebook.swift.codec.ThriftField(value=5, name="add", requiredness=Requiredness.TERSE) final Map<String, Integer> add,
+        @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final Map<String, com.facebook.thrift.op.I32Patch> patch,
+        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE) final Set<String> remove,
+        @com.facebook.swift.codec.ThriftField(value=9, name="put", requiredness=Requiredness.TERSE) final Map<String, Integer> put
     ) {
         this.assign = assign;
         this.clear = clear;
@@ -46,22 +46,22 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
     protected MyStructField30Patch1() {
       this.assign = null;
       this.clear = false;
-      this.patchPrior = null;
-      this.add = null;
-      this.patch = null;
-      this.remove = null;
-      this.put = null;
+      this.patchPrior = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
+      this.add = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
+      this.patch = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
+      this.remove = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
+      this.put = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
     }
     
     public static class Builder {
     
         private Map<String, Integer> assign = null;
         private boolean clear = false;
-        private Map<String, com.facebook.thrift.op.I32Patch> patchPrior = null;
-        private Map<String, Integer> add = null;
-        private Map<String, com.facebook.thrift.op.I32Patch> patch = null;
-        private Set<String> remove = null;
-        private Map<String, Integer> put = null;
+        private Map<String, com.facebook.thrift.op.I32Patch> patchPrior = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
+        private Map<String, Integer> add = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
+        private Map<String, com.facebook.thrift.op.I32Patch> patch = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
+        private Set<String> remove = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
+        private Map<String, Integer> put = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
         public Builder setAssign(Map<String, Integer> assign) {
@@ -71,7 +71,7 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
     
         public Map<String, Integer> getAssign() { return assign; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE)
         public Builder setClear(boolean clear) {
             this.clear = clear;
             return this;
@@ -79,7 +79,7 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
     
         public boolean isClear() { return clear; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE)
         public Builder setPatchPrior(Map<String, com.facebook.thrift.op.I32Patch> patchPrior) {
             this.patchPrior = patchPrior;
             return this;
@@ -87,7 +87,7 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
     
         public Map<String, com.facebook.thrift.op.I32Patch> getPatchPrior() { return patchPrior; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="add", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=5, name="add", requiredness=Requiredness.TERSE)
         public Builder setAdd(Map<String, Integer> add) {
             this.add = add;
             return this;
@@ -95,7 +95,7 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
     
         public Map<String, Integer> getAdd() { return add; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE)
         public Builder setPatch(Map<String, com.facebook.thrift.op.I32Patch> patch) {
             this.patch = patch;
             return this;
@@ -103,7 +103,7 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
     
         public Map<String, com.facebook.thrift.op.I32Patch> getPatch() { return patch; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE)
         public Builder setRemove(Set<String> remove) {
             this.remove = remove;
             return this;
@@ -111,7 +111,7 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
     
         public Set<String> getRemove() { return remove; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="put", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=9, name="put", requiredness=Requiredness.TERSE)
         public Builder setPut(Map<String, Integer> put) {
             this.put = put;
             return this;
@@ -203,32 +203,32 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE)
     public boolean isClear() { return clear; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE)
     public Map<String, com.facebook.thrift.op.I32Patch> getPatchPrior() { return patchPrior; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=5, name="add", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=5, name="add", requiredness=Requiredness.TERSE)
     public Map<String, Integer> getAdd() { return add; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE)
     public Map<String, com.facebook.thrift.op.I32Patch> getPatch() { return patch; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE)
     public Set<String> getRemove() { return remove; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=9, name="put", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=9, name="put", requiredness=Requiredness.TERSE)
     public Map<String, Integer> getPut() { return put; }
     
     @java.lang.Override
@@ -425,6 +425,9 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
+      int structStart = 0;
+      int pos = 0;
+      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
       if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         Map<String, Integer> _iter0 = assign;
@@ -436,10 +439,14 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      oprot.writeFieldBegin(CLEAR_FIELD_DESC);
-      oprot.writeBool(this.clear);
-      oprot.writeFieldEnd();
-      if (patchPrior != null) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(clear)) {
+        oprot.writeFieldBegin(CLEAR_FIELD_DESC);
+        oprot.writeBool(this.clear);
+        oprot.writeFieldEnd();
+      };
+      java.util.Objects.requireNonNull(patchPrior, "patchPrior must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(patchPrior)) {
         oprot.writeFieldBegin(PATCH_PRIOR_FIELD_DESC);
         Map<String, com.facebook.thrift.op.I32Patch> _iter0 = patchPrior;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter0.size()));
@@ -450,7 +457,9 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (add != null) {
+      java.util.Objects.requireNonNull(add, "add must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(add)) {
         oprot.writeFieldBegin(ADD_FIELD_DESC);
         Map<String, Integer> _iter0 = add;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter0.size()));
@@ -461,7 +470,9 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (patch != null) {
+      java.util.Objects.requireNonNull(patch, "patch must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(patch)) {
         oprot.writeFieldBegin(PATCH_FIELD_DESC);
         Map<String, com.facebook.thrift.op.I32Patch> _iter0 = patch;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter0.size()));
@@ -472,7 +483,9 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (remove != null) {
+      java.util.Objects.requireNonNull(remove, "remove must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(remove)) {
         oprot.writeFieldBegin(REMOVE_FIELD_DESC);
         Set<String> _iter0 = remove;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
@@ -482,7 +495,9 @@ public final class MyStructField30Patch1 implements com.facebook.thrift.payload.
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (put != null) {
+      java.util.Objects.requireNonNull(put, "put must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(put)) {
         oprot.writeFieldBegin(PUT_FIELD_DESC);
         Map<String, Integer> _iter0 = put;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter0.size()));

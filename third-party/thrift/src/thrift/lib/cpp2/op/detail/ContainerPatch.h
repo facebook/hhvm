@@ -184,7 +184,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
 
     {
       decltype(auto) rhs = *std::forward<U>(next).toThrift().patch();
-      auto& patch = data_.patch().ensure();
+      auto& patch = data_.patch().value();
       for (auto&& el : rhs) {
         patch[el.first].merge(std::forward<decltype(el)>(el).second);
       }

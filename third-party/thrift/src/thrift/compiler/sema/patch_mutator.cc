@@ -126,8 +126,7 @@ struct StructGen {
     generated.append_field(
         std::make_unique<t_field>(type, std::move(name), id));
     t_field& result = generated.fields().back();
-    // TODO(afuller): Make terse when supported.
-    // result.set_qualifier(t_field_qualifier::terse);
+    result.set_qualifier(t_field_qualifier::terse);
     result.set_src_range(annot.src_range());
     return result;
   }
@@ -172,11 +171,6 @@ struct StructGen {
     auto intern_box =
         std::make_unique<t_const>(&program_, annotation, "", std::move(value));
     field.add_structured_annotation(std::move(intern_box));
-    return field;
-  }
-
-  t_field& terse(t_field& field) {
-    field.set_qualifier(t_field_qualifier::terse);
     return field;
   }
 };
@@ -250,16 +244,20 @@ struct PatchGen : StructGen {
 
   // {kEnsureUnionId}: {type} ensure;
   t_field& ensureUnion(t_type_ref type) {
-    return doc(
+    t_field& node = doc(
         "Assigns the value, if not already set to the same field. Applies third.",
         field(kEnsureUnionId, type, "ensure"));
+    node.set_qualifier(t_field_qualifier::none);
+    return node;
   }
 
   // {kEnsureStructId}: {type} ensure;
   t_field& ensureStruct(t_type_ref type) {
-    return doc(
-        "Initialize fields, using the given defaults. Applies third.",
-        field(kEnsureStructId, type, "ensure"));
+    t_field& node =
+        doc("Initialize fields, using the given defaults. Applies third.",
+            field(kEnsureStructId, type, "ensure"));
+    node.set_qualifier(t_field_qualifier::none);
+    return node;
   }
 
   // {kAddMapId}: {type} ensure;
@@ -373,8 +371,8 @@ t_struct& patch_generator::add_field_patch(
   }
   StructGen gen{annot, gen_suffix_struct(annot, orig, "FieldPatch"), program_};
   for (const auto& entry : types) {
-    gen.terse(gen.field(
-        entry.first, entry.second, orig.get_field_by_id(entry.first)->name()));
+    gen.field(
+        entry.first, entry.second, orig.get_field_by_id(entry.first)->name());
   }
   gen.set_adapter("FieldPatchAdapter");
   return gen;

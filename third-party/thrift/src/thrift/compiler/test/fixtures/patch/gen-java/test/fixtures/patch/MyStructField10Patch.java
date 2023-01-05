@@ -26,7 +26,7 @@ public final class MyStructField10Patch implements com.facebook.thrift.payload.T
     @ThriftConstructor
     public MyStructField10Patch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyEnum assign,
-        @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE) final boolean clear
+        @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear
     ) {
         this.assign = assign;
         this.clear = clear;
@@ -51,7 +51,7 @@ public final class MyStructField10Patch implements com.facebook.thrift.payload.T
     
         public test.fixtures.patch.MyEnum getAssign() { return assign; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE)
         public Builder setClear(boolean clear) {
             this.clear = clear;
             return this;
@@ -103,7 +103,7 @@ public final class MyStructField10Patch implements com.facebook.thrift.payload.T
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE)
     public boolean isClear() { return clear; }
     
     @java.lang.Override
@@ -180,14 +180,19 @@ public final class MyStructField10Patch implements com.facebook.thrift.payload.T
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
+      int structStart = 0;
+      int pos = 0;
+      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
       if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         oprot.writeI32(this.assign == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.assign));
         oprot.writeFieldEnd();
       }
-      oprot.writeFieldBegin(CLEAR_FIELD_DESC);
-      oprot.writeBool(this.clear);
-      oprot.writeFieldEnd();
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(clear)) {
+        oprot.writeFieldBegin(CLEAR_FIELD_DESC);
+        oprot.writeBool(this.clear);
+        oprot.writeFieldEnd();
+      };
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

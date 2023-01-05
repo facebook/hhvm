@@ -26,9 +26,9 @@ public final class MyStructField27Patch implements com.facebook.thrift.payload.T
     @ThriftConstructor
     public MyStructField27Patch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final Set<String> assign,
-        @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE) final boolean clear,
-        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE) final Set<String> remove,
-        @com.facebook.swift.codec.ThriftField(value=8, name="add", requiredness=Requiredness.NONE) final Set<String> add
+        @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
+        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE) final Set<String> remove,
+        @com.facebook.swift.codec.ThriftField(value=8, name="add", requiredness=Requiredness.TERSE) final Set<String> add
     ) {
         this.assign = assign;
         this.clear = clear;
@@ -40,16 +40,16 @@ public final class MyStructField27Patch implements com.facebook.thrift.payload.T
     protected MyStructField27Patch() {
       this.assign = null;
       this.clear = false;
-      this.remove = null;
-      this.add = null;
+      this.remove = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
+      this.add = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
     }
     
     public static class Builder {
     
         private Set<String> assign = null;
         private boolean clear = false;
-        private Set<String> remove = null;
-        private Set<String> add = null;
+        private Set<String> remove = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
+        private Set<String> add = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
         public Builder setAssign(Set<String> assign) {
@@ -59,7 +59,7 @@ public final class MyStructField27Patch implements com.facebook.thrift.payload.T
     
         public Set<String> getAssign() { return assign; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE)
         public Builder setClear(boolean clear) {
             this.clear = clear;
             return this;
@@ -67,7 +67,7 @@ public final class MyStructField27Patch implements com.facebook.thrift.payload.T
     
         public boolean isClear() { return clear; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE)
         public Builder setRemove(Set<String> remove) {
             this.remove = remove;
             return this;
@@ -75,7 +75,7 @@ public final class MyStructField27Patch implements com.facebook.thrift.payload.T
     
         public Set<String> getRemove() { return remove; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="add", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=8, name="add", requiredness=Requiredness.TERSE)
         public Builder setAdd(Set<String> add) {
             this.add = add;
             return this;
@@ -143,17 +143,17 @@ public final class MyStructField27Patch implements com.facebook.thrift.payload.T
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE)
     public boolean isClear() { return clear; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE)
     public Set<String> getRemove() { return remove; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=8, name="add", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=8, name="add", requiredness=Requiredness.TERSE)
     public Set<String> getAdd() { return add; }
     
     @java.lang.Override
@@ -282,6 +282,9 @@ public final class MyStructField27Patch implements com.facebook.thrift.payload.T
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
+      int structStart = 0;
+      int pos = 0;
+      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
       if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         Set<String> _iter0 = assign;
@@ -292,10 +295,14 @@ public final class MyStructField27Patch implements com.facebook.thrift.payload.T
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      oprot.writeFieldBegin(CLEAR_FIELD_DESC);
-      oprot.writeBool(this.clear);
-      oprot.writeFieldEnd();
-      if (remove != null) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(clear)) {
+        oprot.writeFieldBegin(CLEAR_FIELD_DESC);
+        oprot.writeBool(this.clear);
+        oprot.writeFieldEnd();
+      };
+      java.util.Objects.requireNonNull(remove, "remove must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(remove)) {
         oprot.writeFieldBegin(REMOVE_FIELD_DESC);
         Set<String> _iter0 = remove;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
@@ -305,7 +312,9 @@ public final class MyStructField27Patch implements com.facebook.thrift.payload.T
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (add != null) {
+      java.util.Objects.requireNonNull(add, "add must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(add)) {
         oprot.writeFieldBegin(ADD_FIELD_DESC);
         Set<String> _iter0 = add;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));

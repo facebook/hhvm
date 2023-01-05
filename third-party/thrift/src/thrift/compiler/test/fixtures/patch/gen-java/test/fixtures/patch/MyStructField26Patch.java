@@ -26,11 +26,11 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
     @ThriftConstructor
     public MyStructField26Patch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final List<Short> assign,
-        @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE) final boolean clear,
-        @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.NONE) final Map<Integer, com.facebook.thrift.op.I16Patch> patch,
-        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE) final List<Short> remove,
-        @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.NONE) final List<Short> prepend,
-        @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.NONE) final List<Short> append
+        @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
+        @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.TERSE) final Map<Integer, com.facebook.thrift.op.I16Patch> patch,
+        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE) final List<Short> remove,
+        @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.TERSE) final List<Short> prepend,
+        @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.TERSE) final List<Short> append
     ) {
         this.assign = assign;
         this.clear = clear;
@@ -44,20 +44,20 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
     protected MyStructField26Patch() {
       this.assign = null;
       this.clear = false;
-      this.patch = null;
-      this.remove = null;
-      this.prepend = null;
-      this.append = null;
+      this.patch = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
+      this.remove = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
+      this.prepend = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
+      this.append = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
     }
     
     public static class Builder {
     
         private List<Short> assign = null;
         private boolean clear = false;
-        private Map<Integer, com.facebook.thrift.op.I16Patch> patch = null;
-        private List<Short> remove = null;
-        private List<Short> prepend = null;
-        private List<Short> append = null;
+        private Map<Integer, com.facebook.thrift.op.I16Patch> patch = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
+        private List<Short> remove = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
+        private List<Short> prepend = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
+        private List<Short> append = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
         public Builder setAssign(List<Short> assign) {
@@ -67,7 +67,7 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
     
         public List<Short> getAssign() { return assign; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE)
         public Builder setClear(boolean clear) {
             this.clear = clear;
             return this;
@@ -75,7 +75,7 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
     
         public boolean isClear() { return clear; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.TERSE)
         public Builder setPatch(Map<Integer, com.facebook.thrift.op.I16Patch> patch) {
             this.patch = patch;
             return this;
@@ -83,7 +83,7 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
     
         public Map<Integer, com.facebook.thrift.op.I16Patch> getPatch() { return patch; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE)
         public Builder setRemove(List<Short> remove) {
             this.remove = remove;
             return this;
@@ -91,7 +91,7 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
     
         public List<Short> getRemove() { return remove; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.TERSE)
         public Builder setPrepend(List<Short> prepend) {
             this.prepend = prepend;
             return this;
@@ -99,7 +99,7 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
     
         public List<Short> getPrepend() { return prepend; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.TERSE)
         public Builder setAppend(List<Short> append) {
             this.append = append;
             return this;
@@ -183,27 +183,27 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE)
     public boolean isClear() { return clear; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.TERSE)
     public Map<Integer, com.facebook.thrift.op.I16Patch> getPatch() { return patch; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE)
     public List<Short> getRemove() { return remove; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.TERSE)
     public List<Short> getPrepend() { return prepend; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.TERSE)
     public List<Short> getAppend() { return append; }
     
     @java.lang.Override
@@ -375,6 +375,9 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
+      int structStart = 0;
+      int pos = 0;
+      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
       if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         List<Short> _iter0 = assign;
@@ -385,10 +388,14 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      oprot.writeFieldBegin(CLEAR_FIELD_DESC);
-      oprot.writeBool(this.clear);
-      oprot.writeFieldEnd();
-      if (patch != null) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(clear)) {
+        oprot.writeFieldBegin(CLEAR_FIELD_DESC);
+        oprot.writeBool(this.clear);
+        oprot.writeFieldEnd();
+      };
+      java.util.Objects.requireNonNull(patch, "patch must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(patch)) {
         oprot.writeFieldBegin(PATCH_FIELD_DESC);
         Map<Integer, com.facebook.thrift.op.I16Patch> _iter0 = patch;
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, _iter0.size()));
@@ -399,7 +406,9 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (remove != null) {
+      java.util.Objects.requireNonNull(remove, "remove must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(remove)) {
         oprot.writeFieldBegin(REMOVE_FIELD_DESC);
         List<Short> _iter0 = remove;
         oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
@@ -409,7 +418,9 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (prepend != null) {
+      java.util.Objects.requireNonNull(prepend, "prepend must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(prepend)) {
         oprot.writeFieldBegin(PREPEND_FIELD_DESC);
         List<Short> _iter0 = prepend;
         oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
@@ -419,7 +430,9 @@ public final class MyStructField26Patch implements com.facebook.thrift.payload.T
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (append != null) {
+      java.util.Objects.requireNonNull(append, "append must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(append)) {
         oprot.writeFieldBegin(APPEND_FIELD_DESC);
         List<Short> _iter0 = append;
         oprot.writeListBegin(new TList(TType.I16, _iter0.size()));

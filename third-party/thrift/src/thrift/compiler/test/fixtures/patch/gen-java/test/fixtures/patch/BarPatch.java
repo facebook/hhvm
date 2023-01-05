@@ -26,10 +26,10 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
     @ThriftConstructor
     public BarPatch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.Bar assign,
-        @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE) final boolean clear,
-        @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.NONE) final test.fixtures.patch.BarFieldPatch patchPrior,
+        @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
+        @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE) final test.fixtures.patch.BarFieldPatch patchPrior,
         @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.Bar ensure,
-        @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.NONE) final test.fixtures.patch.BarFieldPatch patch
+        @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final test.fixtures.patch.BarFieldPatch patch
     ) {
         this.assign = assign;
         this.clear = clear;
@@ -42,18 +42,18 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
     protected BarPatch() {
       this.assign = null;
       this.clear = false;
-      this.patchPrior = null;
+      this.patchPrior = test.fixtures.patch.BarFieldPatch.defaultInstance();
       this.ensure = null;
-      this.patch = null;
+      this.patch = test.fixtures.patch.BarFieldPatch.defaultInstance();
     }
     
     public static class Builder {
     
         private test.fixtures.patch.Bar assign = null;
         private boolean clear = false;
-        private test.fixtures.patch.BarFieldPatch patchPrior = null;
+        private test.fixtures.patch.BarFieldPatch patchPrior = test.fixtures.patch.BarFieldPatch.defaultInstance();
         private test.fixtures.patch.Bar ensure = null;
-        private test.fixtures.patch.BarFieldPatch patch = null;
+        private test.fixtures.patch.BarFieldPatch patch = test.fixtures.patch.BarFieldPatch.defaultInstance();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
         public Builder setAssign(test.fixtures.patch.Bar assign) {
@@ -63,7 +63,7 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
     
         public test.fixtures.patch.Bar getAssign() { return assign; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE)
         public Builder setClear(boolean clear) {
             this.clear = clear;
             return this;
@@ -71,7 +71,7 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
     
         public boolean isClear() { return clear; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE)
         public Builder setPatchPrior(test.fixtures.patch.BarFieldPatch patchPrior) {
             this.patchPrior = patchPrior;
             return this;
@@ -87,7 +87,7 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
     
         public test.fixtures.patch.Bar getEnsure() { return ensure; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE)
         public Builder setPatch(test.fixtures.patch.BarFieldPatch patch) {
             this.patch = patch;
             return this;
@@ -163,12 +163,12 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE)
     public boolean isClear() { return clear; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE)
     public test.fixtures.patch.BarFieldPatch getPatchPrior() { return patchPrior; }
     
     
@@ -178,7 +178,7 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE)
     public test.fixtures.patch.BarFieldPatch getPatch() { return patch; }
     
     @java.lang.Override
@@ -288,29 +288,44 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
+      int structStart = 0;
+      int pos = 0;
+      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
       if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         this.assign.write0(oprot);
         oprot.writeFieldEnd();
       }
-      oprot.writeFieldBegin(CLEAR_FIELD_DESC);
-      oprot.writeBool(this.clear);
-      oprot.writeFieldEnd();
-      if (patchPrior != null) {
-        oprot.writeFieldBegin(PATCH_PRIOR_FIELD_DESC);
-        this.patchPrior.write0(oprot);
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(clear)) {
+        oprot.writeFieldBegin(CLEAR_FIELD_DESC);
+        oprot.writeBool(this.clear);
         oprot.writeFieldEnd();
-      }
+      };
+      java.util.Objects.requireNonNull(patchPrior, "patchPrior must not be null");
+      structStart = p.mark();
+        oprot.writeFieldBegin(PATCH_PRIOR_FIELD_DESC);
+        pos = p.mark();
+        this.patchPrior.write0(oprot);
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
       if (ensure != null) {
         oprot.writeFieldBegin(ENSURE_FIELD_DESC);
         this.ensure.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (patch != null) {
+      java.util.Objects.requireNonNull(patch, "patch must not be null");
+      structStart = p.mark();
         oprot.writeFieldBegin(PATCH_FIELD_DESC);
+        pos = p.mark();
         this.patch.write0(oprot);
-        oprot.writeFieldEnd();
-      }
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

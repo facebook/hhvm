@@ -41,6 +41,11 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(ClientHostMetadata, getClientHostMetadata) {
 #endif
   return hostMetadata;
 }
+
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    void, hookForClientTransport, folly::AsyncTransport*) {
+  return;
+}
 } // namespace detail
 
 /* static */ const std::optional<ClientHostMetadata>&

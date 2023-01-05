@@ -714,7 +714,9 @@ RocketClientChannel::RocketClientChannel(
           std::move(socket),
           std::make_unique<rocket::SetupFrame>(
               makeSetupFrame(std::move(meta)))),
-      evb_(eventBase) {}
+      evb_(eventBase) {
+  apache::thrift::detail::hookForClientTransport(getTransport());
+}
 
 RocketClientChannel::~RocketClientChannel() {
   DCHECK(!evb_ || evb_->isInEventBaseThread());

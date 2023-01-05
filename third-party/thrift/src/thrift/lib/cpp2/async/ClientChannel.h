@@ -34,7 +34,9 @@ struct ClientHostMetadata {
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(ClientHostMetadata, getClientHostMetadata);
-}
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    void, hookForClientTransport, folly::AsyncTransport* transport);
+} // namespace detail
 
 /**
  * Interface for Thrift Client channels

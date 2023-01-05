@@ -113,6 +113,7 @@ HeaderClientChannel::HeaderClientChannel(
       protocolId_(options.protocolId),
       agentName_(options.agentName) {
   checkSupportedClient(clientType_);
+  apache::thrift::detail::hookForClientTransport(getTransport());
   if (options.httpClientOptions) {
     updateHttpClientConfig(
         options.httpClientOptions->host, options.httpClientOptions->uri);

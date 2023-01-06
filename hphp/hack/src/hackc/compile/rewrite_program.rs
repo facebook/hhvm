@@ -171,7 +171,6 @@ fn extract_debugger_main(
         readonly_this: None, // TODO(readonly): readonly_this in closure_convert
         readonly_ret: None,  // TODO(readonly): readonly_ret in closure_convert
         ret: TypeHint((), None),
-        name: Id(Pos::make_none(), "include".into()),
         tparams: vec![],
         where_constraints: vec![],
         params,
@@ -190,6 +189,7 @@ fn extract_debugger_main(
         namespace: RcOc::clone(empty_namespace),
         file_attributes: vec![],
         mode: Mode::Mstrict,
+        name: Id(Pos::make_none(), "include".into()),
         fun: f,
         // TODO(T116039119): Populate value with presence of internal attribute
         internal: false,

@@ -75,12 +75,11 @@ class visitor =
       let method_fullname = combine_name (Some class_name) (Some method_name) in
       self#fun_call env target_type method_fullname pos
 
-    method! on_fun_ env f =
-      let name = snd f.Aast.f_name in
-      let is_anon = String.equal name ";anonymous" in
-      if not is_anon then cur_caller <- Some (Utils.strip_ns name);
-      let acc = super#on_fun_ env f in
-      if not is_anon then cur_caller <- None;
+    method! on_fun_def env fd =
+      let name = snd fd.Aast.fd_name in
+      cur_caller <- Some (Utils.strip_ns name);
+      let acc = super#on_fun_def env fd in
+      cur_caller <- None;
       acc
 
     method! on_method_ env m =

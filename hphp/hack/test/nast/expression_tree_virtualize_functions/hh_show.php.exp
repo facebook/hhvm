@@ -11,12 +11,12 @@
            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
          }
         ];
-      fd_mode = Mstrict;
+      fd_mode = Mstrict; fd_name = ([5:10-14], "\\test");
       fd_fun =
       { f_span = [5:1-10:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([5:18-22], (Hprim Tvoid)))); 
-        f_name = ([5:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+        f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([6:3-9:6],
@@ -33,9 +33,9 @@
                              { ef_fun =
                                { f_span = [6:14-9:4]; f_readonly_this = None; 
                                  f_annotation = (); f_readonly_ret = None; 
-                                 f_ret = ((), None); f_name = ([6:14-9:4], ";anonymous"); 
-                                 f_tparams = []; f_where_constraints = []; 
-                                 f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                                 f_ret = ((), None); f_tparams = []; 
+                                 f_where_constraints = []; f_params = []; 
+                                 f_ctxs = None; f_unsafe_ctxs = None;
                                  f_body =
                                  { fb_ast =
                                    [([6:14-9:4],
@@ -51,7 +51,6 @@
                                                           f_annotation = (); 
                                                           f_readonly_ret = None; 
                                                           f_ret = ((), None); 
-                                                          f_name = ([6:14-9:4], ";anonymous"); 
                                                           f_tparams = []; 
                                                           f_where_constraints = []; 
                                                           f_params = []; 
@@ -117,8 +116,8 @@
                              (Lfun (
                                 { f_span = [6:14-9:4]; f_readonly_this = None; 
                                   f_annotation = (); f_readonly_ret = None; 
-                                  f_ret = ((), None); f_name = ([6:14-9:4], ";anonymous"); 
-                                  f_tparams = []; f_where_constraints = [];
+                                  f_ret = ((), None); f_tparams = []; 
+                                  f_where_constraints = [];
                                   f_params =
                                   [{ param_annotation = (); param_type_hint = ((), (Some ([6:3-13], (Happly (([6:3-13], "\\ExampleDsl"), []))))); 
                                      param_is_variadic = false; param_pos = [6:3-13]; 

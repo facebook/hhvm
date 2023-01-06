@@ -153,12 +153,12 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-13], "\\bar");
       fd_fun =
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((string), (Some ([4:17-23], (Hprim Tstring)))); 
-        f_name = ([4:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
-        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((string), [5:10-17], (String "class")))))] }; 
+        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+        f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((string), [5:10-17], (String "class")))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
       fd_internal = false; fd_module = None });
@@ -219,11 +219,11 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([20:10-21], "\\class_const");
        fd_fun =
        { f_span = [20:1-104:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([20:35-39], (Hprim Tvoid)))); 
-         f_name = ([20:10-21], "\\class_const"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([20:22-29], Hdynamic))); 
             param_is_variadic = false; param_pos = [20:30-32]; param_name = "$x"; 
@@ -311,11 +311,11 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([107:10-19], "\\class_get");
        fd_fun =
        { f_span = [107:1-157:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([107:33-37], (Hprim Tvoid)))); 
-         f_name = ([107:10-19], "\\class_get"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([107:20-27], Hdynamic))); 
             param_is_variadic = false; param_pos = [107:28-30]; param_name = "$x"; 

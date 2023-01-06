@@ -3,11 +3,11 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-22], "\\takes_an_int");
       fd_fun =
       { f_span = [3:1-41]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:34-38], (Hprim Tvoid)))); 
-        f_name = ([3:10-22], "\\takes_an_int"); f_tparams = []; f_where_constraints = [];
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([3:23-26], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:27-31]; param_name = "$int"; 
@@ -23,11 +23,11 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-25], "\\pipe_param_call");
        fd_fun =
        { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([5:35-39], (Hprim Tvoid)))); 
-         f_name = ([5:10-25], "\\pipe_param_call"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([5:26-29], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [5:30-32]; param_name = "$x"; 
@@ -52,12 +52,12 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-25], "\\pipe_local_call");
        fd_fun =
        { f_span = [9:1-12:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([9:29-33], (Hprim Tvoid)))); 
-         f_name = ([9:10-25], "\\pipe_local_call"); f_tparams = []; f_where_constraints = []; 
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([10:3-10], (Expr ((), [10:3-9], (Binop ((Eq None), ((), [10:3-5], (Lvar ([10:3-5], $x))), ((), [10:8-9], (Int "1")))))));
@@ -97,12 +97,12 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([18:10-22], "\\pipe_taccess");
        fd_fun =
        { f_span = [18:1-21:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([18:26-30], (Hprim Tvoid)))); 
-         f_name = ([18:10-22], "\\pipe_taccess"); f_tparams = []; f_where_constraints = []; 
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([19:3-21],
@@ -122,12 +122,12 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([23:10-27], "\\pipe_taccess_call");
        fd_fun =
        { f_span = [23:1-25:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([23:31-35], (Hprim Tvoid)))); 
-         f_name = ([23:10-27], "\\pipe_taccess_call"); f_tparams = []; 
-         f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([24:3-36],

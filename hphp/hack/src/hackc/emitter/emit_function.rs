@@ -34,7 +34,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
 
     let alloc = e.alloc;
     let f = &fd.fun;
-    let original_id = FunctionName::from_ast_name(alloc, &f.name.1);
+    let original_id = FunctionName::from_ast_name(alloc, &fd.name.1);
     let mut flags = FunctionFlags::empty();
     flags.set(
         FunctionFlags::ASYNC,
@@ -54,7 +54,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
             original_id
         }
     };
-    let is_meth_caller = f.name.1.starts_with("\\MethCaller$");
+    let is_meth_caller = fd.name.1.starts_with("\\MethCaller$");
     let call_context = if is_meth_caller {
         match &f.user_attributes[..] {
             [
@@ -98,13 +98,13 @@ pub fn emit_function<'a, 'arena, 'decl>(
         coeffects = coeffects.with_caller(alloc)
     }
     if e.systemlib()
-        && (f.name.1 == "\\HH\\Coeffects\\backdoor"
-            || f.name.1 == "\\HH\\Coeffects\\backdoor_async")
+        && (fd.name.1 == "\\HH\\Coeffects\\backdoor"
+            || fd.name.1 == "\\HH\\Coeffects\\backdoor_async")
     {
         coeffects = coeffects.with_backdoor(alloc)
     }
     if e.systemlib()
-        && (f.name.1 == "\\HH\\Coeffects\\fb\\backdoor_to_globals_leak_safe__DO_NOT_USE")
+        && (fd.name.1 == "\\HH\\Coeffects\\fb\\backdoor_to_globals_leak_safe__DO_NOT_USE")
     {
         coeffects = coeffects.with_backdoor_globals_leak_safe(alloc)
     }

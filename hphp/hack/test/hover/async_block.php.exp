@@ -21,5 +21,3 @@ concurrent {
   }
 }
 ```
--------------
-Awaitable<int>

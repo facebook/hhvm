@@ -20,9 +20,8 @@ module MakeType = Typing_make_type
 open Aast
 
 let fun_env ?origin ctx fd =
-  let f = fd.fd_fun in
-  let file = Pos.filename (fst f.f_name) in
-  let droot = Some (Typing_deps.Dep.Fun (snd f.f_name)) in
+  let file = Pos.filename (fst fd.fd_name) in
+  let droot = Some (Typing_deps.Dep.Fun (snd fd.fd_name)) in
   let env = Typing_env_types.empty ?origin ctx file ~mode:fd.fd_mode ~droot in
   Typing_inference_env.Identifier_provider.reinitialize ();
   env

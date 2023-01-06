@@ -76,8 +76,8 @@ let handler =
         Errors.add_nast_check_error @@ Nast_check_error.Magic { pos; meth_name }
       | _ -> ()
 
-    method! at_fun_ _ f =
-      let (pos, fname) = f.f_name in
+    method! at_fun_def _ fd =
+      let (pos, fname) = fd.fd_name in
       let fname_lower = String.lowercase (strip_ns fname) in
       if
         String.equal fname_lower SN.Members.__construct

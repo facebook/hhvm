@@ -154,7 +154,7 @@ let handlers =
       {
         S.plus = collect_in_decl#plus;
         S.on_method = collect_in_decl#on_method_;
-        S.on_fun = collect_in_decl#on_fun_;
+        S.on_fun_def = collect_in_decl#on_fun_def;
       };
     S.get_state =
       begin

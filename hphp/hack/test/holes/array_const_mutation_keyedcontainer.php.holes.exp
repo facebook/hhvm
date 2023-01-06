@@ -3,11 +3,10 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-45], "\\array_const_mutation_keyedcontainer");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:81-85], (Hprim Tvoid)))); 
-        f_name = ([3:10-45], "\\array_const_mutation_keyedcontainer"); 
         f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (KeyedContainer<arraykey, int>);

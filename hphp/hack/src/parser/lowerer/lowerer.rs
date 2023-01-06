@@ -1671,7 +1671,7 @@ fn p_expr_impl<'a>(
         NullableAsExpression(c) => p_as_expr(&c.left_operand, &c.right_operand, env, true),
         UpcastExpression(c) => p_upcast_expr(&c.left_operand, &c.right_operand, env),
         AnonymousFunction(c) => p_anonymous_function(node, c, env),
-        AwaitableCreationExpression(c) => p_awaitable_creation_expr(node, c, env, pos),
+        AwaitableCreationExpression(c) => p_awaitable_creation_expr(c, env, pos),
         XHPExpression(c) if c.open.is_xhp_open() => p_xhp_expr(c, env),
         EnumClassLabelExpression(c) => p_enum_class_label_expr(c, env),
         _ => {
@@ -1737,7 +1737,6 @@ fn p_lambda_expression<'a>(
         annotation: (),
         readonly_ret,
         ret: ast::TypeHint((), ret),
-        name: ast::Id(pos, String::from(";anonymous")),
         tparams: vec![],
         where_constraints: vec![],
         body: ast::FuncBody { fb_ast: body },
@@ -2316,14 +2315,12 @@ fn p_anonymous_function<'a>(
     let user_attributes = p_user_attributes(&c.attribute_spec, env);
     let external = c.body.is_external();
     let params = could_map(&c.parameters, env, p_fun_param)?;
-    let name_pos = p_fun_pos(node, env);
     let fun = ast::Fun_ {
         span: p_pos(node, env),
         readonly_this: None, // set in process_readonly_expr
         annotation: (),
         readonly_ret: map_optional(&c.readonly_return, env, p_readonly)?,
         ret: ast::TypeHint((), map_optional(&c.type_, env, p_hint)?),
-        name: ast::Id(name_pos, String::from(";anonymous")),
         tparams: vec![],
         where_constraints: vec![],
         body: ast::FuncBody { fb_ast: body },
@@ -2344,7 +2341,6 @@ fn p_anonymous_function<'a>(
 }
 
 fn p_awaitable_creation_expr<'a>(
-    node: S<'a>,
     c: &'a AwaitableCreationExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
     pos: Pos,
@@ -2353,14 +2349,12 @@ fn p_awaitable_creation_expr<'a>(
     let (blk, yld) = map_yielding(&c.compound_statement, env, p_function_body)?;
     let user_attributes = p_user_attributes(&c.attribute_spec, env);
     let external = c.compound_statement.is_external();
-    let name_pos = p_fun_pos(node, env);
     let body = ast::Fun_ {
         span: pos.clone(),
         annotation: (),
         readonly_this: None, // set in process_readonly_expr
         readonly_ret: None,  // TODO: awaitable creation expression
         ret: ast::TypeHint((), None),
-        name: ast::Id(name_pos, String::from(";anonymous")),
         tparams: vec![],
         where_constraints: vec![],
         body: ast::FuncBody {
@@ -5568,7 +5562,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 annotation: (),
                 ret,
                 readonly_ret: hdr.readonly_return,
-                name: hdr.name,
                 tparams: hdr.type_parameters,
                 where_constraints: hdr.constrs,
                 params: hdr.parameters,
@@ -5585,6 +5578,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 namespace: mk_empty_ns_env(env),
                 file_attributes: vec![],
                 mode: env.file_mode(),
+                name: hdr.name,
                 fun,
                 internal: hdr.internal,
                 module: None,

@@ -104,8 +104,8 @@ let handle_method
 
 (* Run IFC on a single toplevel function, catching exceptions *)
 let handle_fun (ctx : Provider_context.t) (fd : Tast.fun_def) =
+  let (_, name) = fd.fd_name in
   let {
-    f_name = (_, name);
     f_annotation = saved_env;
     f_params = params;
     f_body = body;

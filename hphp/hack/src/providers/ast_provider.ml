@@ -288,7 +288,7 @@ let find_class_impl (def : Nast.def) : (Nast.class_ * string) option =
 
 let find_fun_impl def =
   match def with
-  | Aast.Fun f -> Some (f, snd f.Aast.fd_fun.Aast.f_name)
+  | Aast.Fun f -> Some (f, snd f.Aast.fd_name)
   | _ -> None
 
 let find_typedef_impl def =

@@ -114,7 +114,7 @@ let handler =
 
     method! at_fun_def _env f =
       let f_properties : fun_prop =
-        { fun_name = snd f.fd_fun.f_name; pos = f.fd_fun.f_span }
+        { fun_name = snd f.fd_name; pos = f.fd_fun.f_span }
       in
       let is_f_or_m : is_fun_or_method = Is_fun f_properties in
       check_unconditional_recursion f.fd_fun.f_body.fb_ast is_f_or_m

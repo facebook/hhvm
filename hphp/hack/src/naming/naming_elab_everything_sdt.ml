@@ -71,23 +71,26 @@ let on_hint (env, hint, err) =
   in
   Ok (env, hint, err)
 
-let on_fun_ (env, f, err) =
-  let f =
+let on_fun_def (env, fd, err) =
+  let fd_fun = fd.Aast.fd_fun in
+
+  let fd_fun =
     if Env.everything_sdt env then
-      let (pos, _) = f.Aast.f_name in
+      let (pos, _) = fd.Aast.fd_name in
       let f_user_attributes =
         Aast.
           {
             ua_name = (pos, SN.UserAttributes.uaSupportDynamicType);
             ua_params = [];
           }
-        :: f.Aast.f_user_attributes
+        :: fd_fun.Aast.f_user_attributes
       in
-      Aast.{ f with f_user_attributes }
+      Aast.{ fd_fun with f_user_attributes }
     else
-      f
+      fd_fun
   in
-  Ok (env, f, err)
+  let fd = Aast.{ fd with fd_fun } in
+  Ok (env, fd, err)
 
 let on_tparam (env, t, err) =
   let t =
@@ -182,7 +185,7 @@ let bottom_up_pass =
         {
           identity with
           on_hint = Some on_hint;
-          on_fun_ = Some on_fun_;
+          on_fun_def = Some on_fun_def;
           on_tparam = Some on_tparam;
           on_class_ = Some on_class_;
           on_class_c_consts = Some on_class_c_consts;

@@ -36,11 +36,11 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-14], "\\test");
        fd_fun =
        { f_span = [8:1-22:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([8:22-26], (Hprim Tvoid)))); 
-         f_name = ([8:10-14], "\\test"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (C); param_type_hint = ((C), (Some ([8:15-16], (Happly (([8:15-16], "\\C"), []))))); 
             param_is_variadic = false; param_pos = [8:17-19]; param_name = "$c"; 

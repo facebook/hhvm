@@ -49,11 +49,11 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([16:10-14], "\\test");
        fd_fun =
        { f_span = [16:1-19:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((arraykey), (Some ([16:44-52], (Hprim Tarraykey)))); 
-         f_name = ([16:10-14], "\\test"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (C1); param_type_hint = ((C1), (Some ([16:15-17], (Happly (([16:15-17], "\\C1"), []))))); 
             param_is_variadic = false; param_pos = [16:18-21]; param_name = "$c1"; 

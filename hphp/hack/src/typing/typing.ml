@@ -5029,7 +5029,8 @@ and class_const ?(incl_tc = false) env p (cid, mid) =
   in
   make_result env p (Aast.Class_const (ce, mid)) const_ty
 
-and function_dynamically_callable ~this_class env f params_decl_ty ret_locl_ty =
+and function_dynamically_callable
+    ~this_class env f_name f params_decl_ty ret_locl_ty =
   let env = { env with in_support_dynamic_type_method_check = true } in
   (* If any of the parameters doesn't have an explicit hint, then we have
    * to treat this is non-enforceable and therefore not dynamically callable
@@ -5044,7 +5045,7 @@ and function_dynamically_callable ~this_class env f params_decl_ty ret_locl_ty =
          ret_locl_ty
   in
   let function_body_check () =
-    Typing_log.log_sd_pass env (fst f.f_name);
+    Typing_log.log_sd_pass env f.f_span;
     (* Here the body of the function is typechecked again to ensure it is safe
      * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
      * The code below must be kept in sync with with the fun_def checks.
@@ -5055,7 +5056,14 @@ and function_dynamically_callable ~this_class env f params_decl_ty ret_locl_ty =
     let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
     let hint_pos =
       match f.f_ret with
-      | (_, None) -> fst f.f_name
+      | (_, None) ->
+        (match f_name with
+        | Some (pos, _) ->
+          (* We don't have a return hint, highlight the function name instead. *)
+          pos
+        | None ->
+          (* Anonymos function, just use the position of the whole function. *)
+          f.f_span)
       | (_, Some (pos, _)) -> pos
     in
     let dynamic_return_info =
@@ -5106,7 +5114,12 @@ and function_dynamically_callable ~this_class env f params_decl_ty ret_locl_ty =
         ~f:bind_param_and_check
     in
 
-    let pos = fst f.f_name in
+    let (pos, name) =
+      match f_name with
+      | Some n -> n
+      | None -> (f.f_span, ";anonymous")
+    in
+
     let env = set_tyvars_variance_in_callable env dynamic_return_ty param_tys in
     let disable =
       Naming_attributes.mem
@@ -5120,8 +5133,7 @@ and function_dynamically_callable ~this_class env f params_decl_ty ret_locl_ty =
           fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind
         in
         ())
-      (fun error ->
-        Errors.function_is_not_dynamically_callable (snd f.f_name) error)
+      (fun error -> Errors.function_is_not_dynamically_callable name error)
   in
   if not interface_check then function_body_check ()
 
@@ -5602,11 +5614,7 @@ and closure_make
       (env, Env.get_local env Typing_coeffects.local_capability_id)
     | (_, _) ->
       let (env, cap_ty, unsafe_cap_ty) =
-        Typing_coeffects.type_capability
-          env
-          f.f_ctxs
-          f.f_unsafe_ctxs
-          (fst f.f_name)
+        Typing_coeffects.type_capability env f.f_ctxs f.f_unsafe_ctxs f.f_span
       in
       let (env, _) =
         Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
@@ -5799,6 +5807,7 @@ and closure_make
     function_dynamically_callable
       ~this_class
       sound_dynamic_check_saved_env
+      None
       f
       params_decl_ty
       hret.et_type;
@@ -5809,7 +5818,6 @@ and closure_make
       Aast.f_span = f.f_span;
       Aast.f_ret = (hret.et_type, hint_of_type_hint f.f_ret);
       Aast.f_readonly_ret = f.f_readonly_ret;
-      Aast.f_name = f.f_name;
       Aast.f_tparams = tparams;
       Aast.f_where_constraints = f.f_where_constraints;
       Aast.f_fun_kind = f.f_fun_kind;

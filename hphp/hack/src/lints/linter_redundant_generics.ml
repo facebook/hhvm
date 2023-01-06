@@ -129,8 +129,8 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_fun_ env f =
-      match Decl_provider.get_fun (Tast_env.get_ctx env) (snd f.f_name) with
+    method! at_fun_def env fd =
+      match Decl_provider.get_fun (Tast_env.get_ctx env) (snd fd.fd_name) with
       | Some { fe_type; _ } -> begin
         match get_node fe_type with
         | Tfun ft -> check_redundant_generics_fun env ft

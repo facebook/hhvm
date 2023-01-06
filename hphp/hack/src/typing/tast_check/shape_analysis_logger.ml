@@ -207,7 +207,8 @@ let handler =
         |> log_events tast_env
 
     method! at_fun_def tast_env fd =
-      let A.{ f_body; f_name = (_, id); f_params; f_ret; _ } = fd.A.fd_fun in
+      let (_, id) = fd.A.fd_name in
+      let A.{ f_body; f_params; f_ret; _ } = fd.A.fd_fun in
       let source_file = Tast_env.get_file tast_env in
       if should_not_skip tast_env then
         compute_results source_file tast_env id f_params f_ret f_body

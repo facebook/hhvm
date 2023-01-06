@@ -3,11 +3,11 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:16-19], "\\foo");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([3:29-45], (Happly (([3:29-38], "\\HH\\Awaitable"), [([3:39-44], Hmixed)]))))); 
-        f_name = ([3:16-19], "\\foo"); f_tparams = []; f_where_constraints = [];
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:20-23], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:24-26]; param_name = "$x"; 

@@ -356,7 +356,8 @@ let program
     let tast_env = Tast_env.def_env ctx def in
     match def with
     | A.Fun fd ->
-      let A.{ f_body; f_name = (_, id); f_params; _ } = fd.A.fd_fun in
+      let (_, id) = fd.A.fd_name in
+      let A.{ f_body; f_params; _ } = fd.A.fd_fun in
       [(id, callable upcasted_info tast_env f_params f_body)]
     | A.Class A.{ c_methods; c_name = (_, class_name); _ } ->
       let handle_method A.{ m_body; m_name = (_, method_name); m_params; _ } =

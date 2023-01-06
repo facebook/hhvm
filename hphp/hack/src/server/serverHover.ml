@@ -134,8 +134,8 @@ let nth_param_name (params : ('a, 'b) Aast.fun_param list) (n : int) :
 let nth_fun_param tast fun_name n : string option =
   List.find_map tast ~f:(fun def ->
       match def with
-      | Aast.Fun { Aast.fd_fun; _ } ->
-        if String.equal fun_name (snd fd_fun.Aast.f_name) then
+      | Aast.Fun { Aast.fd_fun; fd_name; _ } ->
+        if String.equal fun_name (snd fd_name) then
           nth_param_name fd_fun.Aast.f_params n
         else
           None

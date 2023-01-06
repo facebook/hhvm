@@ -7,11 +7,11 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-11], "\\f");
       fd_fun =
       { f_span = [4:1-7:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([4:18-22], (Hprim Tvoid)))); 
-        f_name = ([4:10-11], "\\f"); f_tparams = [{ tp_variance = Invariant; tp_name = ([4:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+        f_readonly_ret = None; f_ret = ((void), (Some ([4:18-22], (Hprim Tvoid))));
+        f_tparams = [{ tp_variance = Invariant; tp_name = ([4:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
         f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =

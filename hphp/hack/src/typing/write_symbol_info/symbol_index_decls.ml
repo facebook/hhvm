@@ -183,7 +183,7 @@ let process_enum_decl ctx path source_text enm (all_decls, progress) =
 
 let process_func_decl ctx path source_text fd (all_decls, progress) =
   let elem = fd.fd_fun in
-  let (pos, id) = elem.f_name in
+  let (pos, id) = fd.fd_name in
   let (decl_id, prog) =
     process_decl_loc
       Add_fact.func_decl

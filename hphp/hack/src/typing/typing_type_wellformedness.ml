@@ -624,6 +624,7 @@ let _toplevel_def tenv = function
       fd_mode = _;
       fd_file_attributes = _;
       fd_fun;
+      fd_name = _;
       fd_internal = _;
       fd_module = _;
     } =

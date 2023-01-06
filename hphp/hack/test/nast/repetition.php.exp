@@ -5,12 +5,11 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-30], "\\repetition_fun_param");
       fd_fun =
       { f_span = [3:1-55]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:48-52], (Hprim Tvoid)))); 
-        f_name = ([3:10-30], "\\repetition_fun_param"); f_tparams = []; 
-        f_where_constraints = [];
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([3:31-34], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:35-37]; param_name = "$x"; 
@@ -30,11 +29,10 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-42], "\\repetition_fun_param_placeholder");
        fd_fun =
        { f_span = [5:1-67]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([5:60-64], (Hprim Tvoid)))); 
-         f_name = ([5:10-42], "\\repetition_fun_param_placeholder"); 
          f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([5:43-46], (Hprim Tint)))); 
@@ -73,11 +71,10 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-31], "\\repetition_fun_tparam");
        fd_fun =
        { f_span = [9:1-48]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([9:41-45], (Hprim Tvoid)))); 
-         f_name = ([9:10-31], "\\repetition_fun_tparam");
+         f_readonly_ret = None; f_ret = ((), (Some ([9:41-45], (Hprim Tvoid))));
          f_tparams =
          [{ tp_variance = Invariant; tp_name = ([9:32-33], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
            { tp_variance = Invariant; tp_name = ([9:35-36], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];

@@ -31,13 +31,13 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
   let ft_is_memoized = FunUtils.has_memoize_attribute f.f_user_attributes in
   let params = FunUtils.make_params env ~is_lambda f.f_params in
   let (_pos, capability) =
-    Decl_hint.aast_contexts_to_decl_capability env f.f_ctxs (fst f.f_name)
+    Decl_hint.aast_contexts_to_decl_capability env f.f_ctxs f.f_span
   in
   let ret_ty =
     FunUtils.ret_from_fun_kind
       ~is_lambda
       env
-      (fst f.f_name)
+      f.f_span
       f.f_fun_kind
       (hint_of_type_hint f.f_ret)
   in
@@ -48,7 +48,7 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
   let fe_deprecated =
     Naming_attributes_params.deprecated
       ~kind:"function"
-      f.f_name
+      (f.f_span, ";anonymous")
       f.f_user_attributes
   in
   let fe_php_std_lib =
@@ -59,7 +59,7 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
       SN.UserAttributes.uaSupportDynamicType
       f.f_user_attributes
   in
-  let fe_pos = Decl_env.make_decl_pos env @@ fst f.f_name in
+  let fe_pos = Decl_env.make_decl_pos env @@ f.f_span in
   let fe_type =
     mk
       ( Reason.Rwitness_from_decl fe_pos,

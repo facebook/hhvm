@@ -344,11 +344,11 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       fd_mode = Mstrict;
+       fd_mode = Mstrict; fd_name = ([20:10-12], "\\ff");
        fd_fun =
        { f_span = [19:1-20:60]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid)))); 
-         f_name = ([20:10-12], "\\ff"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([20:44-47], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [20:48-50]; param_name = "$i"; 

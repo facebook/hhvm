@@ -16,9 +16,9 @@ Errors:
                 ((), [6:17-22],
                  (Lfun (
                     { f_span = [6:17-22]; f_readonly_this = None; f_annotation = (); 
-                      f_readonly_ret = None; f_ret = ((), None); f_name = ([6:17-22], "invalid_expr"); 
-                      f_tparams = []; f_where_constraints = []; f_params = []; 
-                      f_ctxs = None; f_unsafe_ctxs = None;
+                      f_readonly_ret = None; f_ret = ((), None); f_tparams = []; 
+                      f_where_constraints = []; f_params = []; f_ctxs = None; 
+                      f_unsafe_ctxs = None;
                       f_body =
                       { fb_ast = [([6:17-22], (Throw ((), [6:17-22], (New (((), [6:17-22], (CI ([6:17-22], "\\Exception"))), [], [((), [6:17-22], (String "invalid expression"))], None, ())))))] };
                       f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -41,12 +41,12 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-13], "\\baz");
        fd_fun =
        { f_span = [9:1-24]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([9:17-21], (Hprim Tvoid)))); 
-         f_name = ([9:10-13], "\\baz"); f_tparams = []; f_where_constraints = []; 
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None })

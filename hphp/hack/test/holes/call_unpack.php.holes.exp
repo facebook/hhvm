@@ -3,11 +3,11 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-18], "\\unpack_a");
       fd_fun =
       { f_span = [3:1-47]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:40-44], (Hprim Tvoid)))); 
-        f_name = ([3:10-18], "\\unpack_a"); f_tparams = []; f_where_constraints = [];
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:19-22], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:23-25]; param_name = "$x"; 
@@ -27,11 +27,11 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-18], "\\unpack_b");
        fd_fun =
        { f_span = [4:1-65]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([4:58-62], (Hprim Tvoid)))); 
-         f_name = ([4:10-18], "\\unpack_b"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (float); param_type_hint = ((float), (Some ([4:19-24], (Hprim Tfloat)))); 
             param_is_variadic = false; param_pos = [4:25-27]; param_name = "$x"; 
@@ -55,11 +55,11 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-18], "\\unpack_c");
        fd_fun =
        { f_span = [5:1-66]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([5:59-63], (Hprim Tvoid)))); 
-         f_name = ([5:10-18], "\\unpack_c"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (float); param_type_hint = ((float), (Some ([5:19-24], (Hprim Tfloat)))); 
             param_is_variadic = false; param_pos = [5:25-27]; param_name = "$x"; 
@@ -83,11 +83,11 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([6:10-18], "\\unpack_d");
        fd_fun =
        { f_span = [6:1-71]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([6:64-68], (Hprim Tvoid)))); 
-         f_name = ([6:10-18], "\\unpack_d"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([6:19-22], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [6:23-25]; param_name = "$x"; 
@@ -116,11 +116,11 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-18], "\\unpack_e");
        fd_fun =
        { f_span = [7:1-11:11]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid)))); 
-         f_name = ([7:10-18], "\\unpack_e"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (float); param_type_hint = ((float), (Some ([8:1-6], (Hprim Tfloat)))); 
             param_is_variadic = false; param_pos = [8:7-9]; param_name = "$x"; 
@@ -152,11 +152,11 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([13:10-21], "\\call_unpack");
        fd_fun =
        { f_span = [13:1-43:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([24:4-8], (Hprim Tvoid)))); 
-         f_name = ([13:10-21], "\\call_unpack"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (Pair<int, float>);
             param_type_hint = ((Pair<int, float>), (Some ([14:1-17], (Happly (([14:1-5], "\\HH\\Pair"), [([14:6-9], (Hprim Tint)); ([14:11-16], (Hprim Tfloat))]))))); 

@@ -118,12 +118,12 @@ let make_handler ctx =
     object
       inherit Tast_visitor.handler_base
 
-      method! at_fun_ env f =
+      method! at_fun_def env fd =
         match
           Decl_provider.get_fun
             ~tracing_info:(get_tracing_info env)
             ctx
-            (snd f.f_name)
+            (snd fd.fd_name)
         with
         | Some { fe_type; _ } -> begin
           match get_node fe_type with

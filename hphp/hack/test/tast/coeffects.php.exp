@@ -1,14 +1,13 @@
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
       fd_fun =
-      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = ();
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:25-29], (Hprim Tvoid))));
-        f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
-        f_params = []; f_ctxs = (Some ([3:13-23], [([3:14-22], (Happly (([3:14-22], "\\HH\\Contexts\\defaults"), [])))]));
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:25-29], (Hprim Tvoid)))); 
+        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = (Some ([3:13-23], [([3:14-22], (Happly (([3:14-22], "\\HH\\Contexts\\defaults"), [])))]));
         f_unsafe_ctxs = (Some ([3:13-23], [([3:14-22], (Happly (([3:14-22], "\\HH\\Contexts\\Unsafe\\defaults"), [])))]));
         f_body =
         { fb_ast =
@@ -18,26 +17,25 @@
                 (Binop ((Eq None), (((function(mixed $i)[(HH\Capabilities\Rx & HH\Capabilities\WriteProperty)]: void)), [4:3-5], (Lvar ([4:3-5], $x))),
                    (((function(mixed $i)[(HH\Capabilities\Rx & HH\Capabilities\WriteProperty)]: void)), [4:8-23],
                     (Lfun (
-                       { f_span = [4:8-23]; f_readonly_this = None; f_annotation = ();
-                         f_readonly_ret = None; f_ret = ((void), None);
-                         f_name = ([4:8-23], ";anonymous"); f_tparams = [];
-                         f_where_constraints = [];
+                       { f_span = [4:8-23]; f_readonly_this = None; f_annotation = (); 
+                         f_readonly_ret = None; f_ret = ((void), None); 
+                         f_tparams = []; f_where_constraints = [];
                          f_params =
-                         [{ param_annotation = (mixed); param_type_hint = ((mixed), None);
-                            param_is_variadic = false; param_pos = [4:9-11];
-                            param_name = "$i"; param_expr = None; param_readonly = None;
-                            param_callconv = Pnormal; param_user_attributes = [];
+                         [{ param_annotation = (mixed); param_type_hint = ((mixed), None); 
+                            param_is_variadic = false; param_pos = [4:9-11]; 
+                            param_name = "$i"; param_expr = None; param_readonly = None; 
+                            param_callconv = Pnormal; param_user_attributes = []; 
                             param_visibility = None }
                            ];
                          f_ctxs = (Some ([4:12-16], [([4:13-15], (Happly (([4:13-15], "\\HH\\Contexts\\rx"), [])))]));
-                         f_unsafe_ctxs = (Some ([4:12-16], [([4:13-15], (Happly (([4:13-15], "\\HH\\Contexts\\Unsafe\\rx"), [])))]));
-                         f_body = { fb_ast = [([Pos.none], Noop)] };
-                         f_fun_kind = FSync; f_user_attributes = [];
+                         f_unsafe_ctxs = (Some ([4:12-16], [([4:13-15], (Happly (([4:13-15], "\\HH\\Contexts\\Unsafe\\rx"), [])))])); 
+                         f_body = { fb_ast = [([Pos.none], Noop)] }; 
+                         f_fun_kind = FSync; f_user_attributes = []; 
                          f_external = false; f_doc_comment = None },
                        [])))
                    )))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
       fd_internal = false; fd_module = None })

@@ -30,12 +30,12 @@ type env = {
 
 let get_tcopt env = Provider_context.get_tcopt env.ctx
 
-let fun_env env f =
-  { env with function_name = Some f.f_name; function_kind = Some f.f_fun_kind }
+let fun_env env f = { env with function_kind = Some f.f_fun_kind }
 
 let fun_def_env env fd =
   {
     (fun_env env fd.fd_fun) with
+    function_name = Some fd.fd_name;
     file_mode = fd.fd_mode;
     module_ = fd.fd_module;
   }

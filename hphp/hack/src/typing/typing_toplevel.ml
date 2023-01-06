@@ -50,23 +50,27 @@ let fun_def ctx fd :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
   let f = fd.fd_fun in
   let tcopt = Provider_context.get_tcopt ctx in
-  Profile.measure_elapsed_time_and_report tcopt None f.f_name @@ fun () ->
+  Profile.measure_elapsed_time_and_report tcopt None fd.fd_name @@ fun () ->
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span f.f_span @@ fun () ->
   let env = EnvFromDef.fun_env ~origin:Decl_counters.TopLevel ctx fd in
-  with_timeout env f.f_name @@ fun env ->
+  with_timeout env fd.fd_name @@ fun env ->
   (* reset the expression dependent display ids for each function body *)
   Reason.expr_display_id_map := IMap.empty;
-  let pos = fst f.f_name in
-  let decl_header = get_decl_function_header env (snd f.f_name) in
-  let env = Env.open_tyvars env (fst f.f_name) in
+  let pos = fst fd.fd_name in
+  let decl_header = get_decl_function_header env (snd fd.fd_name) in
+  let env = Env.open_tyvars env (fst fd.fd_name) in
   let env = Env.set_env_callable_pos env pos in
   let (env, user_attributes) =
     Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
   in
   let (env, file_attrs) = Typing.file_attributes env fd.fd_file_attributes in
   let (env, cap_ty, unsafe_cap_ty) =
-    Typing_coeffects.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
+    Typing_coeffects.type_capability
+      env
+      f.f_ctxs
+      f.f_unsafe_ctxs
+      (fst fd.fd_name)
   in
   let env = Env.set_current_module env fd.fd_module in
   let env = Env.set_internal env fd.fd_internal in
@@ -96,7 +100,7 @@ let fun_def ctx fd :
   in
   let hint_pos =
     match f.f_ret with
-    | (_, None) -> fst f.f_name
+    | (_, None) -> fst fd.fd_name
     | (_, Some (pos, _)) -> pos
   in
   let ety_env =
@@ -189,6 +193,7 @@ let fun_def ctx fd :
     Typing.function_dynamically_callable
       ~this_class:None
       sound_dynamic_check_saved_env
+      (Some fd.fd_name)
       f
       params_decl_ty
       return_ty.et_type;
@@ -200,7 +205,6 @@ let fun_def ctx fd :
       Aast.f_span = f.f_span;
       Aast.f_readonly_ret = f.f_readonly_ret;
       Aast.f_ret = (return_ty.et_type, hint_of_type_hint f.f_ret);
-      Aast.f_name = f.f_name;
       Aast.f_tparams = tparams;
       Aast.f_where_constraints = f.f_where_constraints;
       Aast.f_params = typed_params;
@@ -216,6 +220,7 @@ let fun_def ctx fd :
   let fundef =
     {
       Aast.fd_mode = fd.fd_mode;
+      Aast.fd_name = fd.fd_name;
       Aast.fd_fun = fun_;
       Aast.fd_file_attributes = file_attrs;
       Aast.fd_namespace = fd.fd_namespace;

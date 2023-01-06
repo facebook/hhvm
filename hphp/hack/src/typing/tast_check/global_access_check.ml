@@ -1201,7 +1201,7 @@ let handler =
         visitor#on_method_ (env, (current_ctx, full_name)) m
 
     method! at_fun_def env f =
-      let (_, function_name) = f.fd_fun.f_name in
+      let (_, function_name) = f.fd_name in
       (* Function name starts with '\'*)
       let function_name =
         String.sub function_name ~pos:1 ~len:(String.length function_name - 1)

@@ -2174,9 +2174,9 @@ let analyse_callable
 let walk_tast opts decl_env ctx =
   let def = function
     | A.Fun fd ->
+      let (_, name) = fd.A.fd_name in
       let {
-        A.f_name = (_, name);
-        f_annotation = saved_env;
+        A.f_annotation = saved_env;
         f_params = params;
         f_body = body;
         f_ret = (return, _);

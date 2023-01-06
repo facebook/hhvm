@@ -14,12 +14,12 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
       fd_fun =
       { f_span = [3:1-16:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid)))); 
-        f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
-        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+        f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([4:3-20],
@@ -56,11 +56,10 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([18:10-17], "\\goodbye");
        fd_fun =
        { f_span = [18:1-20:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((T), (Some ([18:78-79], (Habstr ("T", []))))); 
-         f_name = ([18:10-17], "\\goodbye");
+         f_readonly_ret = None; f_ret = ((T), (Some ([18:78-79], (Habstr ("T", [])))));
          f_tparams =
          [{ tp_variance = Invariant; tp_name = ([18:18-19], "T"); tp_parameters = []; 
             tp_constraints = [(Constraint_as, ([18:23-41], (Happly (([18:23-41], "\\HH\\Lib\\Regex\\Match"), []))))]; 
@@ -91,12 +90,12 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([24:10-21], "\\bad_pattern");
        fd_fun =
        { f_span = [24:1-42:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([24:25-29], (Hprim Tvoid)))); 
-         f_name = ([24:10-21], "\\bad_pattern"); f_tparams = []; f_where_constraints = []; 
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([25:3-34],
@@ -198,12 +197,12 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([46:10-27], "\\missing_delimiter");
        fd_fun =
        { f_span = [46:1-59:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([46:31-35], (Hprim Tvoid)))); 
-         f_name = ([46:10-27], "\\missing_delimiter"); f_tparams = []; 
-         f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([47:3-21], (Expr ((nothing), [47:3-20], (Binop ((Eq None), ((nothing), [47:3-8], (Lvar ([47:3-8], $bad0))), ((nothing), [47:13-20], (String "Hello")))))));
@@ -247,12 +246,12 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([61:10-31], "\\parentheses_are_weird");
        fd_fun =
        { f_span = [61:1-65:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([61:35-39], (Hprim Tvoid)))); 
-         f_name = ([61:10-31], "\\parentheses_are_weird"); f_tparams = []; 
-         f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([64:3-77],

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<81cc4d7ad0c0e339e83363559c70c3b1>>
+// @generated SignedSource<<267c33669904b8c99dfaa61973a922ef>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1567,8 +1567,6 @@ pub struct Fun_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ret: &'a TypeHint<'a, Ex>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub name: Sid<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
@@ -2382,6 +2380,8 @@ pub struct FunDef<'a, Ex, En> {
     pub file_attributes: &'a [&'a FileAttribute<'a, Ex, En>],
     #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: oxidized::file_info::Mode,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub name: Sid<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub fun: &'a Fun_<'a, Ex, En>,
     pub internal: bool,

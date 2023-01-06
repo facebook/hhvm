@@ -408,7 +408,7 @@ impl<'ast> Visitor<'ast> for Checker {
         let mut new_context = Context::from_context(c);
         let ctxs = d.fun.ctxs.as_ref();
         new_context.set_has_defaults(has_defaults(ctxs));
-        new_context.set_is_constructor_or_clone(is_constructor_or_clone(&d.fun.name));
+        new_context.set_is_constructor_or_clone(is_constructor_or_clone(&d.name));
         new_context.set_has_write_props(has_capability(ctxs, Ctx::WriteProps));
         new_context.set_has_write_this_props(has_capability(ctxs, Ctx::WriteThisProps));
         new_context.set_has_read_globals(has_capability(ctxs, Ctx::ReadGlobals));

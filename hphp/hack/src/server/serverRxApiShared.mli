@@ -13,7 +13,7 @@ val pos_to_json : Relative_path.t -> int -> int -> Hh_json.json
 type 'a walker = {
   plus: 'a -> 'a -> 'a;
   on_method: Tast_env.env -> Tast.method_ -> 'a;
-  on_fun: Tast_env.env -> Tast.fun_ -> 'a;
+  on_fun_def: Tast_env.env -> Tast.fun_def -> 'a;
 }
 
 type ('a, 'r, 's) handlers = {

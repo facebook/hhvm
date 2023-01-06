@@ -97,11 +97,10 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "XhpSimple"); 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([14:12-32], "\\XhpSimple\\xhp_simple_attribute");
        fd_fun =
        { f_span = [14:3-17:4]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([14:48-52], (Hprim Tvoid)))); 
-         f_name = ([14:12-32], "\\XhpSimple\\xhp_simple_attribute"); 
          f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (string); param_type_hint = ((string), (Some ([14:33-39], (Hprim Tstring)))); 

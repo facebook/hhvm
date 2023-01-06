@@ -87,6 +87,7 @@ val triple_to_pair :
 val function_dynamically_callable :
   this_class:Decl_provider.Class.t option ->
   Typing_env_types.env ->
+  Aast_defs.sid option ->
   Nast.fun_ ->
   Typing_defs.decl_ty option list ->
   Typing_defs.locl_ty ->

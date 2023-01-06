@@ -208,7 +208,7 @@ let handler ctx =
       let new_env =
         {
           env with
-          droot = Typing_deps.Dep.Fun (snd f.Aast.f_name);
+          droot = Typing_deps.Dep.Fun (snd fd.Aast.fd_name);
           type_params = extend_type_params env.type_params f.Aast.f_tparams;
         }
       in

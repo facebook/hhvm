@@ -3,12 +3,11 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-30], "\\tycon_arity_darray_3");
       fd_fun =
       { f_span = [3:1-71]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:64-68], (Hprim Tvoid)))); 
-        f_name = ([3:10-30], "\\tycon_arity_darray_3"); f_tparams = []; 
-        f_where_constraints = [];
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([3:31-58], (Happly (([3:31-37], "\\HH\\dict"), [([3:38-41], (Hprim Tint)); ([3:43-49], (Hprim Tstring))])))));
            param_is_variadic = false; param_pos = [3:59-61]; param_name = "$x"; 

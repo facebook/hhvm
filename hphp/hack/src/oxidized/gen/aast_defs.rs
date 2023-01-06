@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4c7a54e0016971f42853b991aac93ac6>>
+// @generated SignedSource<<0f187c4cf0df0cd512822e32ce82e206>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1238,7 +1238,6 @@ pub struct Fun_<Ex, En> {
     /// Whether the return value is readonly
     pub readonly_ret: Option<ast_defs::ReadonlyKind>,
     pub ret: TypeHint<Ex>,
-    pub name: Sid,
     pub tparams: Vec<Tparam<Ex, En>>,
     pub where_constraints: Vec<WhereConstraintHint>,
     pub params: Vec<FunParam<Ex, En>>,
@@ -1919,6 +1918,7 @@ pub struct FunDef<Ex, En> {
     pub file_attributes: Vec<FileAttribute<Ex, En>>,
     #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: file_info::Mode,
+    pub name: Sid,
     pub fun: Fun_<Ex, En>,
     pub internal: bool,
     pub module: Option<Sid>,

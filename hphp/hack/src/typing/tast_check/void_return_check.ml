@@ -234,7 +234,7 @@ let visitor =
         this#traverse_fun_body
           fun_.f_span
           (hint_of_type_hint fun_.f_ret)
-          (fst fun_.f_name)
+          fun_.f_span
           fun_.f_fun_kind
           has_impl_ret
           env

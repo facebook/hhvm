@@ -340,7 +340,7 @@ let summarize_fun fd =
   let modifiers = modifier_of_fun_kind [] f.f_fun_kind in
   let params = Some (List.map f.f_params ~f:summarize_param) in
   let kind = SymbolDefinition.Function in
-  let name = Utils.strip_ns (snd f.f_name) in
+  let name = Utils.strip_ns (snd fd.fd_name) in
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in
   {
@@ -348,7 +348,7 @@ let summarize_fun fd =
     name;
     full_name;
     id;
-    pos = fst f.f_name;
+    pos = fst fd.fd_name;
     span = f.f_span;
     modifiers;
     children = None;

@@ -18,23 +18,23 @@ File "switch_fallthrough.php", line 37, characters 3-13:
   (bool | num)
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-14], "\\test");
       fd_fun =
-      { f_span = [3:1-38:2]; f_readonly_this = None; f_annotation = ();
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:18-22], (Hprim Tvoid))));
-        f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = [];
-        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+      { f_span = [3:1-38:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:18-22], (Hprim Tvoid)))); 
+        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+        f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([5:3-10], (Expr ((int), [5:3-9], (Binop ((Eq None), ((int), [5:3-5], (Lvar ([5:3-5], $x))), ((int), [5:8-9], (Int "0")))))));
             ([6:3-15],
              (Expr
                 ((#0), [6:3-14],
-                 (Call ((((function<T>(readonly #0 $val)[]: #0)), [6:3-10], (Id ([6:3-10], "\\hh_show"))),
-                    [((#0), ([6:3-10], (Happly (([Pos.none], "_"), []))))],
+                 (Call ((((function<T>(readonly #0 $val)[]: #0)), [6:3-10], (Id ([6:3-10], "\\hh_show"))), 
+                    [((#0), ([6:3-10], (Happly (([Pos.none], "_"), []))))], 
                     [(Pnormal, ((int), [6:11-13], (Lvar ([6:11-13], $x))))], None)))));
             ([7:3-35:4],
              (Switch (((int), [7:11-13], (Lvar ([7:11-13], $x))),
@@ -43,53 +43,53 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                    [([12:7-19],
                      (Expr
                         ((#1), [12:7-18],
-                         (Call ((((function<T>(readonly #1 $val)[]: #1)), [12:7-14], (Id ([12:7-14], "\\hh_show"))),
-                            [((#1), ([12:7-14], (Happly (([Pos.none], "_"), []))))],
+                         (Call ((((function<T>(readonly #1 $val)[]: #1)), [12:7-14], (Id ([12:7-14], "\\hh_show"))), 
+                            [((#1), ([12:7-14], (Happly (([Pos.none], "_"), []))))], 
                             [(Pnormal, ((int), [12:15-17], (Lvar ([12:15-17], $x))))], None)))));
                      ([14:7-15], (Expr ((string), [14:7-14], (Binop ((Eq None), ((string), [14:7-9], (Lvar ([14:7-9], $x))), ((string), [14:12-14], (String "")))))));
                      ([15:7-19],
                       (Expr
                          ((#2), [15:7-18],
-                          (Call ((((function<T>(readonly #2 $val)[]: #2)), [15:7-14], (Id ([15:7-14], "\\hh_show"))),
-                             [((#2), ([15:7-14], (Happly (([Pos.none], "_"), []))))],
+                          (Call ((((function<T>(readonly #2 $val)[]: #2)), [15:7-14], (Id ([15:7-14], "\\hh_show"))), 
+                             [((#2), ([15:7-14], (Happly (([Pos.none], "_"), []))))], 
                              [(Pnormal, ((string), [15:15-17], (Lvar ([15:15-17], $x))))], None)))));
                      ([Pos.none], Fallthrough)]);
                   (((int), [17:10-11], (Int "3")),
                    [([19:7-19],
                      (Expr
                         ((#3), [19:7-18],
-                         (Call ((((function<T>(readonly #3 $val)[]: #3)), [19:7-14], (Id ([19:7-14], "\\hh_show"))),
-                            [((#3), ([19:7-14], (Happly (([Pos.none], "_"), []))))],
+                         (Call ((((function<T>(readonly #3 $val)[]: #3)), [19:7-14], (Id ([19:7-14], "\\hh_show"))), 
+                            [((#3), ([19:7-14], (Happly (([Pos.none], "_"), []))))], 
                             [(Pnormal, (((int | string)), [19:15-17], (Lvar ([19:15-17], $x))))], None)))));
                      ([20:7-17], (Expr ((bool), [20:7-16], (Binop ((Eq None), ((bool), [20:7-9], (Lvar ([20:7-9], $x))), ((bool), [20:12-16], True))))));
                      ([22:7-19],
                       (Expr
                          ((#4), [22:7-18],
-                          (Call ((((function<T>(readonly #4 $val)[]: #4)), [22:7-14], (Id ([22:7-14], "\\hh_show"))),
-                             [((#4), ([22:7-14], (Happly (([Pos.none], "_"), []))))],
+                          (Call ((((function<T>(readonly #4 $val)[]: #4)), [22:7-14], (Id ([22:7-14], "\\hh_show"))), 
+                             [((#4), ([22:7-14], (Happly (([Pos.none], "_"), []))))], 
                              [(Pnormal, ((bool), [22:15-17], (Lvar ([22:15-17], $x))))], None)))));
                      ([Pos.none], Fallthrough)]);
                   (((int), [24:10-11], (Int "4")),
                    [([26:7-19],
                      (Expr
                         ((#5), [26:7-18],
-                         (Call ((((function<T>(readonly #5 $val)[]: #5)), [26:7-14], (Id ([26:7-14], "\\hh_show"))),
-                            [((#5), ([26:7-14], (Happly (([Pos.none], "_"), []))))],
+                         (Call ((((function<T>(readonly #5 $val)[]: #5)), [26:7-14], (Id ([26:7-14], "\\hh_show"))), 
+                            [((#5), ([26:7-14], (Happly (([Pos.none], "_"), []))))], 
                             [(Pnormal, (((int | bool)), [26:15-17], (Lvar ([26:15-17], $x))))], None)))));
                      ([27:7-13], Break)]);
                   (((int), [28:10-11], (Int "4")),
                    [([30:7-19],
                      (Expr
                         ((#6), [30:7-18],
-                         (Call ((((function<T>(readonly #6 $val)[]: #6)), [30:7-14], (Id ([30:7-14], "\\hh_show"))),
-                            [((#6), ([30:7-14], (Happly (([Pos.none], "_"), []))))],
+                         (Call ((((function<T>(readonly #6 $val)[]: #6)), [30:7-14], (Id ([30:7-14], "\\hh_show"))), 
+                            [((#6), ([30:7-14], (Happly (([Pos.none], "_"), []))))], 
                             [(Pnormal, ((int), [30:15-17], (Lvar ([30:15-17], $x))))], None)))));
                      ([32:7-16], (Expr ((float), [32:7-15], (Binop ((Eq None), ((float), [32:7-9], (Lvar ([32:7-9], $x))), ((float), [32:12-15], (Float "1.0")))))));
                      ([33:7-19],
                       (Expr
                          ((#7), [33:7-18],
-                          (Call ((((function<T>(readonly #7 $val)[]: #7)), [33:7-14], (Id ([33:7-14], "\\hh_show"))),
-                             [((#7), ([33:7-14], (Happly (([Pos.none], "_"), []))))],
+                          (Call ((((function<T>(readonly #7 $val)[]: #7)), [33:7-14], (Id ([33:7-14], "\\hh_show"))), 
+                             [((#7), ([33:7-14], (Happly (([Pos.none], "_"), []))))], 
                              [(Pnormal, ((float), [33:15-17], (Lvar ([33:15-17], $x))))], None)))));
                      ([34:7-13], Break)])
                   ],
@@ -97,11 +97,11 @@ File "switch_fallthrough.php", line 37, characters 3-13:
             ([37:3-15],
              (Expr
                 ((#8), [37:3-14],
-                 (Call ((((function<T>(readonly #8 $val)[]: #8)), [37:3-10], (Id ([37:3-10], "\\hh_show"))),
-                    [((#8), ([37:3-10], (Happly (([Pos.none], "_"), []))))],
+                 (Call ((((function<T>(readonly #8 $val)[]: #8)), [37:3-10], (Id ([37:3-10], "\\hh_show"))), 
+                    [((#8), ([37:3-10], (Happly (([Pos.none], "_"), []))))], 
                     [(Pnormal, (((bool | num)), [37:11-13], (Lvar ([37:11-13], $x))))], None)))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
       fd_internal = false; fd_module = None })

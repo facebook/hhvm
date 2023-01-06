@@ -569,7 +569,7 @@ fn make_closure(
         static_: is_static,
         readonly_this: fd.readonly_this.is_some(),
         visibility: Visibility::Public,
-        name: Id(fd.name.0.clone(), "__invoke".into()),
+        name: Id(p.clone(), "__invoke".into()),
         tparams: fun_tparams,
         where_constraints: fd.where_constraints.clone(),
         params: fd.params.clone(),
@@ -774,7 +774,6 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         readonly_this: None, // TODO: readonly_this in closure_convert
         readonly_ret: None,  // TODO: readonly_ret in closure convert
         ret: TypeHint((), None),
-        name: Id(pos(), ";anonymous".to_string()),
         tparams: vec![],
         where_constraints: vec![],
         params: vec![
@@ -929,13 +928,13 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
                     coeffects,
                     fun_kind: fd.fun.fun_kind,
                     mode: fd.mode,
-                    name: &fd.fun.name,
+                    name: &fd.name,
                     span: &fd.fun.span,
                     tparams: &fd.fun.tparams,
                 });
                 self.with_subscope(scope, si, variables, |self_, scope| {
                     fd.fun.body.recurse(scope, self_)?;
-                    let uid = get_unique_id_for_function(&fd.fun.name.1);
+                    let uid = get_unique_id_for_function(&fd.name.1);
                     self_
                         .state_mut()
                         .record_function_state(uid, Coeffects::default());
@@ -1552,7 +1551,6 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
             readonly_this: None, // TODO(readonly): readonly_this in closure_convert
             readonly_ret: None,
             ret: TypeHint((), None),
-            name: Id(pos(), mangle_name.clone()),
             tparams: vec![],
             where_constraints: vec![],
             params: vec![
@@ -1579,6 +1577,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
             file_attributes: vec![],
             namespace: RcOc::clone(&self.ro_state.empty_namespace),
             mode: scope.scope_fmode(),
+            name: Id(pos(), mangle_name.clone()),
             fun: f,
             // TODO(T116039119): Populate value with presence of internal attribute
             internal: false,

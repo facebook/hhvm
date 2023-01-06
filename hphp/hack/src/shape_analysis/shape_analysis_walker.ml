@@ -904,7 +904,8 @@ let program mode (ctx : Provider_context.t) (tast : Tast.program) =
     let tast_env = Tast_env.def_env ctx def in
     match def with
     | A.Fun fd ->
-      let A.{ f_body; f_name = (_, id); f_params; f_ret; _ } = fd.A.fd_fun in
+      let (_, id) = fd.A.fd_name in
+      let A.{ f_body; f_params; f_ret; _ } = fd.A.fd_fun in
       [(id, callable mode id tast_env f_params ~return:f_ret f_body)]
     | A.Class A.{ c_kind = Ast_defs.Cenum; _ } ->
       (* There is nothing to analyse in an enum definition *)

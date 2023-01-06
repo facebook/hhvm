@@ -240,7 +240,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
       ~is_symbol:(fun symbol_name ->
         String.equal (Naming_sqlite.to_canon_name_key symbol_name) name)
   in
-  let canon_name fd = snd fd.Aast.fd_fun.Aast.f_name in
+  let canon_name fd = snd fd.Aast.fd_name in
   let compute_symbol_canon_name path =
     Ast_provider.find_ifun_in_file ctx path name >>| canon_name
   in
@@ -681,7 +681,7 @@ let get_fun_full_pos ctx (pos, name) =
       Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
     | _ ->
       Ast_provider.find_fun_in_file ctx fn name
-      |> Option.map ~f:(fun fd -> fst fd.Aast.fd_fun.Aast.f_name)
+      |> Option.map ~f:(fun fd -> fst fd.Aast.fd_name)
   end
   | FileInfo.(File ((Class | Typedef | Const | Module), _fn)) -> None
 

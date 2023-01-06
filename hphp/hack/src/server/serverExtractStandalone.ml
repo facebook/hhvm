@@ -1290,7 +1290,7 @@ end = struct
       SGConst { name; line = Pos.line pos; type_; init_val }
 
     let mk_gfun ast =
-      let Aast.{ f_name = (pos, name); _ } = ast.Aast.fd_fun in
+      let (pos, name) = ast.Aast.fd_name in
       SGFun (name, Pos.line pos, ast)
 
     let mk_tydef (Aast.{ t_name = (pos, name); _ } as ast) =

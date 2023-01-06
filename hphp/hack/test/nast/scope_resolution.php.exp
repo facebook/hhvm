@@ -45,12 +45,12 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-13], "\\bar");
       fd_fun =
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([4:17-23], (Hprim Tstring)))); 
-        f_name = ([4:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
-        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((), [5:10-17], (String "class")))))] }; 
+        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+        f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((), [5:10-17], (String "class")))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
       fd_internal = false; fd_module = None });
@@ -111,11 +111,11 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([20:10-21], "\\class_const");
        fd_fun =
        { f_span = [20:1-104:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([20:35-39], (Hprim Tvoid)))); 
-         f_name = ([20:10-21], "\\class_const"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([20:22-29], Hdynamic))); 
             param_is_variadic = false; param_pos = [20:30-32]; param_name = "$x"; 
@@ -196,11 +196,11 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([107:10-19], "\\class_get");
        fd_fun =
        { f_span = [107:1-157:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([107:33-37], (Hprim Tvoid)))); 
-         f_name = ([107:10-19], "\\class_get"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([107:20-27], Hdynamic))); 
             param_is_variadic = false; param_pos = [107:28-30]; param_name = "$x"; 
@@ -339,11 +339,11 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([159:10-23], "\\invalid_exprs");
        fd_fun =
        { f_span = [159:1-196:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([159:37-41], (Hprim Tvoid)))); 
-         f_name = ([159:10-23], "\\invalid_exprs"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([159:24-31], Hdynamic))); 
             param_is_variadic = false; param_pos = [159:32-34]; param_name = "$x"; 
@@ -361,9 +361,8 @@ Errors:
                      (Lfun (
                         { f_span = [165:3-15]; f_readonly_this = None; 
                           f_annotation = (); f_readonly_ret = None; f_ret = ((), None); 
-                          f_name = ([165:3-15], "invalid_expr"); f_tparams = []; 
-                          f_where_constraints = []; f_params = []; f_ctxs = None; 
-                          f_unsafe_ctxs = None;
+                          f_tparams = []; f_where_constraints = []; f_params = []; 
+                          f_ctxs = None; f_unsafe_ctxs = None;
                           f_body =
                           { fb_ast =
                             [([165:3-15], (Throw ((), [165:3-15], (New (((), [165:3-15], (CI ([165:3-15], "\\Exception"))), [], [((), [165:3-15], (String "invalid expression"))], None, ())))))] };
@@ -379,8 +378,7 @@ Errors:
                       (Lfun (
                          { f_span = [166:4-22]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([166:4-22], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -399,8 +397,7 @@ Errors:
                           (Lfun (
                              { f_span = [167:4-32]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([167:4-32], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
+                               f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
@@ -419,8 +416,7 @@ Errors:
                       (Lfun (
                          { f_span = [169:3-18]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([169:3-18], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -437,8 +433,7 @@ Errors:
                       (Lfun (
                          { f_span = [170:4-19]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([170:4-19], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -457,8 +452,7 @@ Errors:
                           (Lfun (
                              { f_span = [171:4-19]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([171:4-19], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
+                               f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
@@ -477,8 +471,7 @@ Errors:
                       (Lfun (
                          { f_span = [173:3-14]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([173:3-14], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -495,8 +488,7 @@ Errors:
                       (Lfun (
                          { f_span = [174:4-15]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([174:4-15], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -515,8 +507,7 @@ Errors:
                           (Lfun (
                              { f_span = [175:4-15]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([175:4-15], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
+                               f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
@@ -535,8 +526,7 @@ Errors:
                       (Lfun (
                          { f_span = [177:3-14]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([177:3-14], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -553,8 +543,7 @@ Errors:
                       (Lfun (
                          { f_span = [178:4-15]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([178:4-15], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -573,8 +562,7 @@ Errors:
                           (Lfun (
                              { f_span = [179:4-15]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([179:4-15], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
+                               f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
@@ -593,8 +581,7 @@ Errors:
                       (Lfun (
                          { f_span = [181:3-16]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([181:3-16], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -611,8 +598,7 @@ Errors:
                       (Lfun (
                          { f_span = [182:4-17]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([182:4-17], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -631,8 +617,7 @@ Errors:
                           (Lfun (
                              { f_span = [183:4-17]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([183:4-17], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
+                               f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
@@ -651,8 +636,7 @@ Errors:
                       (Lfun (
                          { f_span = [185:3-16]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([185:3-16], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -669,8 +653,7 @@ Errors:
                       (Lfun (
                          { f_span = [186:4-17]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([186:4-17], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -689,8 +672,7 @@ Errors:
                           (Lfun (
                              { f_span = [187:4-17]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([187:4-17], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
+                               f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
@@ -709,8 +691,7 @@ Errors:
                       (Lfun (
                          { f_span = [189:3-14]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([189:3-14], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -727,8 +708,7 @@ Errors:
                       (Lfun (
                          { f_span = [190:4-15]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([190:4-15], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -747,8 +727,7 @@ Errors:
                           (Lfun (
                              { f_span = [191:4-15]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([191:4-15], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
+                               f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
@@ -767,8 +746,7 @@ Errors:
                       (Lfun (
                          { f_span = [193:3-14]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([193:3-14], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -785,8 +763,7 @@ Errors:
                       (Lfun (
                          { f_span = [194:4-15]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((), None); f_name = ([194:4-15], "invalid_expr"); 
-                           f_tparams = []; f_where_constraints = []; 
+                           f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                            f_body =
                            { fb_ast =
@@ -805,8 +782,7 @@ Errors:
                           (Lfun (
                              { f_span = [195:4-15]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([195:4-15], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
+                               f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =

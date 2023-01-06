@@ -1,18 +1,17 @@
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-30], "\\throwFromDoWhileLoop");
       fd_fun =
-      { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = ();
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid))));
-        f_name = ([3:10-30], "\\throwFromDoWhileLoop"); f_tparams = [];
-        f_where_constraints = [];
+      { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid)))); 
+        f_tparams = []; f_where_constraints = [];
         f_params =
-        [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:31-35], (Hprim Tbool))));
-           param_is_variadic = false; param_pos = [3:36-41]; param_name = "$cond";
-           param_expr = None; param_readonly = None; param_callconv = Pnormal;
+        [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:31-35], (Hprim Tbool)))); 
+           param_is_variadic = false; param_pos = [3:36-41]; param_name = "$cond"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
@@ -23,12 +22,12 @@
                [([5:5-40],
                  (Throw
                     ((Exception), [5:11-39],
-                     (New (((Exception), [5:15-24], (CI ([5:15-24], "\\Exception"))),
+                     (New (((Exception), [5:15-24], (CI ([5:15-24], "\\Exception"))), 
                         [], [((string), [5:25-38], (String "DoWhileBody"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                  ],
                ((nothing), [6:12-17], (Lvar ([6:12-17], $cond))))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
       fd_internal = false; fd_module = None })

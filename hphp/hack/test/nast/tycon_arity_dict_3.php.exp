@@ -3,12 +3,11 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-28], "\\tycon_arity_dict_3");
       fd_fun =
       { f_span = [3:1-67]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:60-64], (Hprim Tvoid)))); 
-        f_name = ([3:10-28], "\\tycon_arity_dict_3"); f_tparams = []; 
-        f_where_constraints = [];
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = ();
            param_type_hint = ((), (Some ([3:29-54], (Happly (([3:29-33], "\\HH\\dict"), [([3:34-37], (Hprim Tint)); ([3:39-45], (Hprim Tstring)); ([3:47-53], (Hprim Tstring))])))));

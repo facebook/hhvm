@@ -768,9 +768,12 @@ let visitor =
       parent_class_hint := None;
       acc
 
+    method! on_fun_def env fd =
+      let acc = process_fun_id ~is_declaration:true fd.Aast.fd_name in
+      self#plus acc (super#on_fun_def env fd)
+
     method! on_fun_ env fun_ =
-      let acc = process_fun_id ~is_declaration:true fun_.Aast.f_name in
-      self#plus acc (super#on_fun_ env { fun_ with Aast.f_unsafe_ctxs = None })
+      super#on_fun_ env { fun_ with Aast.f_unsafe_ctxs = None }
 
     method! on_typedef env typedef =
       let acc = process_class_id ~is_declaration:true typedef.Aast.t_name in

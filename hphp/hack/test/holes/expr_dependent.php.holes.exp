@@ -45,11 +45,10 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([10:10-16], "\\my_gen");
        fd_fun =
        { f_span = [10:1-12:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((TR), (Some ([10:54-56], (Habstr ("TR", []))))); 
-         f_name = ([10:10-16], "\\my_gen");
+         f_readonly_ret = None; f_ret = ((TR), (Some ([10:54-56], (Habstr ("TR", [])))));
          f_tparams =
          [{ tp_variance = Invariant; tp_name = ([10:17-18], "T"); tp_parameters = []; 
             tp_constraints = [(Constraint_as, ([10:22-38], (Happly (([10:22-38], "\\WithTypeConstant"), []))))]; 
@@ -82,7 +81,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([14:10-16], "\\my_log");
        fd_fun =
        { f_span = [14:1-18:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None;
@@ -94,7 +93,6 @@
                       hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
                       hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([16:4-8], (Hprim Tvoid)); 
                       hf_is_readonly_return = None }))));
-         f_name = ([14:10-16], "\\my_log");
          f_tparams =
          [{ tp_variance = Invariant; tp_name = ([14:17-18], "T"); tp_parameters = []; 
             tp_constraints = [(Constraint_as, ([14:22-38], (Happly (([14:22-38], "\\WithTypeConstant"), []))))]; 
@@ -116,8 +114,7 @@
                        (Lfun (
                           { f_span = [17:10-38]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
-                            f_ret = ((void), None); f_name = ([17:10-38], ";anonymous"); 
-                            f_tparams = []; f_where_constraints = [];
+                            f_ret = ((void), None); f_tparams = []; f_where_constraints = [];
                             f_params =
                             [{ param_annotation = (TR); param_type_hint = ((TR), (Some ([17:11-13], (Habstr ("TR", []))))); 
                                param_is_variadic = false; param_pos = [17:14-16]; 
@@ -150,11 +147,11 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([20:10-18], "\\my_error");
        fd_fun =
        { f_span = [20:1-27:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([20:62-66], (Hprim Tvoid)))); 
-         f_name = ([20:10-18], "\\my_error"); f_tparams = []; f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (WithTypeConstant); param_type_hint = ((WithTypeConstant), (Some ([20:19-35], (Happly (([20:19-35], "\\WithTypeConstant"), []))))); 
             param_is_variadic = false; param_pos = [20:36-38]; param_name = "$x"; 

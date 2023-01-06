@@ -10,11 +10,11 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-12], "\\f1");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((int), None); f_name = ([3:10-12], "\\f1"); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((int), None); f_tparams = []; 
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
@@ -30,11 +30,11 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-12], "\\f2");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((int), None); f_name = ([3:10-12], "\\f2"); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((int), None); f_tparams = []; 
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
@@ -54,11 +54,11 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-12], "\\f3");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((int), None); f_name = ([3:10-12], "\\f3"); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((int), None); f_tparams = []; 
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 

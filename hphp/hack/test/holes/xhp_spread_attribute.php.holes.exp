@@ -207,11 +207,10 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "XhpSpread"); 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([25:12-32], "\\XhpSpread\\xhp_spread_attribute");
        fd_fun =
        { f_span = [25:3-28:4]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([25:52-56], (Hprim Tvoid)))); 
-         f_name = ([25:12-32], "\\XhpSpread\\xhp_spread_attribute"); 
          f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (XhpSpread\:element2); param_type_hint = ((XhpSpread\:element2), (Some ([25:33-42], (Happly (([25:33-42], "\\XhpSpread\\:element2"), []))))); 

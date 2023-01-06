@@ -789,7 +789,6 @@ and ('ex, 'en) fun_ = {
   f_readonly_ret: Ast_defs.readonly_kind option;
       (** Whether the return value is readonly *)
   f_ret: 'ex type_hint;
-  f_name: sid;
   f_tparams: ('ex, 'en) tparam list;
   f_where_constraints: where_constraint_hint list;
   f_params: ('ex, 'en) fun_param list;
@@ -1047,6 +1046,7 @@ and ('ex, 'en) fun_def = {
   fd_namespace: nsenv;
   fd_file_attributes: ('ex, 'en) file_attribute list;
   fd_mode: FileInfo.mode; [@visitors.opaque]
+  fd_name: sid;
   fd_fun: ('ex, 'en) fun_;
   fd_internal: bool;
   fd_module: sid option;

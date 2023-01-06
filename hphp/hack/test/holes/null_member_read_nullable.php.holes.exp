@@ -55,12 +55,11 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-35], "\\null_member_read_nullable");
        fd_fun =
        { f_span = [8:1-14:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([8:46-50], (Hprim Tvoid)))); 
-         f_name = ([8:10-35], "\\null_member_read_nullable"); f_tparams = []; 
-         f_where_constraints = [];
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([8:36-40], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [8:41-43]; param_name = "$a"; 

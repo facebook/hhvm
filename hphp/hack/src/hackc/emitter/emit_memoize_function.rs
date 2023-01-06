@@ -79,7 +79,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
 ) -> Result<Function<'arena>> {
     let alloc = emitter.alloc;
     let f = &fd.fun;
-    emit_memoize_helpers::check_memoize_possible(&(f.name).0, &f.params, false)?;
+    emit_memoize_helpers::check_memoize_possible(&(fd.name).0, &f.params, false)?;
     let scope = Scope::with_item(ScopeItem::Function(ast_scope::Fun::new_ref(fd)));
     let mut tparams = scope
         .get_tparams()

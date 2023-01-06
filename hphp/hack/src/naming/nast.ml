@@ -197,7 +197,7 @@ let get_defs (ast : program) =
         Aast.(
           match def with
           | Fun f ->
-            ( FileInfo.pos_full (to_id f.fd_fun.f_name) :: funs,
+            ( FileInfo.pos_full (to_id f.fd_name) :: funs,
               classes,
               typedefs,
               constants,
@@ -1058,7 +1058,6 @@ module Visitor_DEPRECATED = struct
       method on_targ acc _ = acc
 
       method on_fun_ acc f =
-        let acc = this#on_id acc f.f_name in
         let acc = this#on_func_body acc f.f_body in
         let acc =
           match hint_of_type_hint f.f_ret with
@@ -1091,7 +1090,9 @@ module Visitor_DEPRECATED = struct
         let acc = List.fold_left c.c_methods ~f:this#on_method_ ~init:acc in
         acc
 
-      method on_fun_def acc f = this#on_fun_ acc f.fd_fun
+      method on_fun_def acc f =
+        let acc = this#on_id acc f.fd_name in
+        this#on_fun_ acc f.fd_fun
 
       method on_class_typeconst_def acc t =
         let acc = this#on_id acc t.c_tconst_name in

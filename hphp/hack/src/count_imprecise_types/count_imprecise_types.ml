@@ -62,8 +62,8 @@ let bad_type_visitor =
     method plus =
       SMap.union ~combine:(fun id _ _ -> failwith ("Clash at %s" ^ id))
 
-    method! on_fun_ env (Aast_defs.{ f_name = (_, id); _ } as fun_def) =
-      let result = bad_type_visitor_per_def#on_fun_ env fun_def in
+    method! on_fun_def env ({ Aast.fd_name = (_, id); _ } as fun_def) =
+      let result = bad_type_visitor_per_def#on_fun_def env fun_def in
       SMap.singleton id result
 
     method! on_method_ env (Aast_defs.{ m_name = (_, mid); _ } as method_def) =

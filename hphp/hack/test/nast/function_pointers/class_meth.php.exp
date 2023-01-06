@@ -27,12 +27,12 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "Foo\\Bar"); 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-13], "\\Foo\\Bar\\baz");
        fd_fun =
        { f_span = [9:1-15:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([9:17-21], (Hprim Tvoid)))); 
-         f_name = ([9:10-13], "\\Foo\\Bar\\baz"); f_tparams = []; f_where_constraints = []; 
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([11:3-21],

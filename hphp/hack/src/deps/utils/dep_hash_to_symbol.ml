@@ -31,8 +31,10 @@ let from_nast (nast : Nast.program) : _ Dep.variant DepMap.t =
 
       method plus = DepMap.union ~combine:report_collision
 
-      method! on_fun_ env x =
-        this#plus (mapping (Dep.Fun (snd x.Aast.f_name))) (super#on_fun_ env x)
+      method! on_fun_def env fd =
+        this#plus
+          (mapping (Dep.Fun (snd fd.Aast.fd_name)))
+          (super#on_fun_def env fd)
 
       method! on_method_ cls x =
         this#plus

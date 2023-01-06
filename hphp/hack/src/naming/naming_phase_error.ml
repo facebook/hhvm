@@ -126,7 +126,6 @@ let invalid_expr_ pos =
               f_annotation = ();
               f_readonly_ret = None;
               f_ret = ((), None);
-              f_name = (pos, "invalid_expr");
               f_tparams = [];
               f_where_constraints = [];
               f_params = [];

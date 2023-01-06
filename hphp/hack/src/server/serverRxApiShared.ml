@@ -42,7 +42,7 @@ let pos_contains_line_char pos line char =
 type 'a walker = {
   plus: 'a -> 'a -> 'a;
   on_method: Tast_env.env -> Tast.method_ -> 'a;
-  on_fun: Tast_env.env -> Tast.fun_ -> 'a;
+  on_fun_def: Tast_env.env -> Tast.fun_def -> 'a;
 }
 
 let find_in_tree (walker : 'a walker) line char =
@@ -59,9 +59,9 @@ let find_in_tree (walker : 'a walker) line char =
       else
         self#zero
 
-    method! on_fun_ env f =
-      if pos_contains_line_char (fst f.Aast.f_name) line char then
-        Some (walker.on_fun env f)
+    method! on_fun_def env fd =
+      if pos_contains_line_char (fst fd.Aast.fd_name) line char then
+        Some (walker.on_fun_def env fd)
       else
         self#zero
   end

@@ -169,7 +169,7 @@ impl<'a> Fun<'a> {
 
     pub fn get_name(&self) -> &ast::Id {
         match self {
-            Self::Borrowed(x) => &x.fun.name,
+            Self::Borrowed(x) => &x.name,
             Self::Counted(x) => &x.name,
         }
     }
@@ -310,7 +310,7 @@ impl Fun_ {
     fn new(fd: &ast::FunDef) -> Self {
         let f = &fd.fun;
         Self {
-            name: f.name.clone(),
+            name: fd.name.clone(),
             span: f.span.clone(),
             tparams: f.tparams.clone(),
             user_attributes: f.user_attributes.clone(),

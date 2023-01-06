@@ -13,10 +13,10 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_fun_ env fun_ =
+    method! at_fun_def env fd =
       let ctx = env.ctx in
       let deps_mode = Provider_context.get_deps_mode ctx in
-      let name = fun_.Aast.f_name |> Ast_defs.get_id in
+      let name = fd.Aast.fd_name |> Ast_defs.get_id in
       let node = Typing_deps.Dep.Fun name in
       Typing_pessimisation_deps.add_node deps_mode node None
 

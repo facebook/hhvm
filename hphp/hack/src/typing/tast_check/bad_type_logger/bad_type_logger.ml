@@ -174,9 +174,9 @@ let collect_infos =
 
     method plus = ( @ )
 
-    method! on_fun_ env (Aast.{ f_name; _ } as f) =
-      let context_id = Function (snd f_name) in
-      (collect_infos_methods_functions context_id)#on_fun_ env f
+    method! on_fun_def env (Aast.{ fd_name; _ } as fd) =
+      let context_id = Function (snd fd_name) in
+      (collect_infos_methods_functions context_id)#on_fun_def env fd
 
     method! on_method_ env (Aast.{ m_name; _ } as m) =
       let context_id =
@@ -191,8 +191,8 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_fun_ env f =
-      let infos = collect_infos#on_fun_ env f in
+    method! at_fun_def env f =
+      let infos = collect_infos#on_fun_def env f in
       log_info env infos
 
     method! at_class_ env c =

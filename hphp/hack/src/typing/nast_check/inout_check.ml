@@ -43,8 +43,9 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_fun_ env f =
-      let (p, name) = f.f_name in
+    method! at_fun_def env fd =
+      let f = fd.fd_fun in
+      let (p, name) = fd.fd_name in
       check_param env f.f_params p f.f_user_attributes name
 
     method! at_method_ env m =

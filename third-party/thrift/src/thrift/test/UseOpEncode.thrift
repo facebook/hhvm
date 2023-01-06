@@ -67,6 +67,8 @@ struct OpEncodeStruct {
 
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   17: list<AdaptedFoo> inplace_adapted_list_field;
+
+  18: i64 (cpp.type = "Timestamp", cpp.indirection) timestamp;
 }
 
 struct Baz {

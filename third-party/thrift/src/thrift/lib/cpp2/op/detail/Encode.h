@@ -35,6 +35,10 @@ FOLLY_INLINE_VARIABLE constexpr bool kIsStrongType =
     std::is_enum<folly::remove_cvref_t<T>>::value&&
         type::is_a_v<Tag, type::integral_c>;
 
+template <typename T, typename Tag>
+FOLLY_INLINE_VARIABLE constexpr bool kIsIntegral =
+    type::is_a_v<Tag, type::integral_c>;
+
 using apache::thrift::protocol::TType;
 
 template <typename>
@@ -743,14 +747,13 @@ struct Decode<type::map<Key, Value>> {
 template <typename T, typename Tag>
 struct Decode<type::cpp_type<T, Tag>> : Decode<Tag> {
   template <class Protocol, class U>
-  std::enable_if_t<kIsStrongType<U, Tag>> operator()(
-      Protocol& prot, U& m) const {
+  std::enable_if_t<kIsIntegral<U, Tag>> operator()(Protocol& prot, U& m) const {
     type::native_type<Tag> i;
     Decode<Tag>::operator()(prot, i);
     m = static_cast<U>(i);
   }
   template <class Protocol, class U>
-  std::enable_if_t<!kIsStrongType<U, Tag>> operator()(
+  std::enable_if_t<!kIsIntegral<U, Tag>> operator()(
       Protocol& prot, U& m) const {
     Decode<Tag>::operator()(prot, m);
   }

@@ -11699,9 +11699,9 @@ class struct_with_indirections final  {
                                                          void,
                                                          ::apache::thrift::type::i32_t,
                                                          ::apache::thrift::type::cpp_type<CppFakeI32, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasANumber>, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasAResult>, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasAPhrase>, ::apache::thrift::type::string_t>>;
+                                                         ::apache::thrift::type::indirected<CppHasANumber, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::indirected<CppHasAResult, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::indirected<CppHasAPhrase, ::apache::thrift::type::string_t>>;
 
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
@@ -11739,9 +11739,9 @@ class struct_with_indirections final  {
     template<class, class, class> struct Impl { static constexpr int value = 0; };
     template<class T> struct Impl<::apache::thrift::type::i32_t, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
     template<class T> struct Impl<::apache::thrift::type::cpp_type<CppFakeI32, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasANumber>, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasAResult>, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasAPhrase>, ::apache::thrift::type::string_t>, T, std::enable_if_t<sizeof(T) != -5>> { static constexpr int value = 5; };
+    template<class T> struct Impl<::apache::thrift::type::indirected<CppHasANumber, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
+    template<class T> struct Impl<::apache::thrift::type::indirected<CppHasAResult, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
+    template<class T> struct Impl<::apache::thrift::type::indirected<CppHasAPhrase, ::apache::thrift::type::string_t>, T, std::enable_if_t<sizeof(T) != -5>> { static constexpr int value = 5; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };

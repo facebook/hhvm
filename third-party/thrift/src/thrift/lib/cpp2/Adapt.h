@@ -532,6 +532,17 @@ struct IndirectionAdapter {
   }
 };
 
+namespace type {
+template <typename Type, typename Tag>
+using indirected = adapted<
+    ::apache::thrift::IndirectionAdapter<Type>,
+    cpp_type<
+        folly::remove_cvref_t<::apache::thrift::adapt_detail::thrift_t<
+            ::apache::thrift::IndirectionAdapter<Type>,
+            folly::remove_cvref_t<Type>>>,
+        Tag>>;
+}
+
 template <typename AdaptedT, typename ThriftT>
 struct StaticCastAdapter {
   template <typename T>

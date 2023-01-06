@@ -187,6 +187,8 @@ TYPED_TEST(IndirectionTypeTagTest, type_tag) {
   using apache::thrift::test::same_type;
   using namespace apache::thrift::type;
   using namespace reflection_indirection;
+  using int_tag =
+      apache::thrift::type::cpp_type<int, apache::thrift::type::i32_t>;
 
   same_type<get_type_tag<field_ordinal<0>, TypeParam>, void>;
   same_type<get_type_tag<field_ordinal<1>, TypeParam>, i32_t>;
@@ -198,17 +200,18 @@ TYPED_TEST(IndirectionTypeTagTest, type_tag) {
       apache::thrift::type::adapted<
           apache::thrift::IndirectionAdapter<
               reflection_indirection::CppHasANumber>,
-          apache::thrift::type::i32_t>>;
+          int_tag>>;
   same_type<
       get_type_tag<field_ordinal<4>, TypeParam>,
       apache::thrift::type::adapted<
           apache::thrift::IndirectionAdapter<
               reflection_indirection::CppHasAResult>,
-          apache::thrift::type::i32_t>>;
+          int_tag>>;
   same_type<
       get_type_tag<field_ordinal<5>, TypeParam>,
       apache::thrift::type::adapted<
           apache::thrift::IndirectionAdapter<
               reflection_indirection::CppHasAPhrase>,
-          apache::thrift::type::string_t>>;
+          apache::thrift::type::
+              cpp_type<std::string, apache::thrift::type::string_t>>>;
 }

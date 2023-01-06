@@ -290,13 +290,6 @@ Object HHVM_METHOD(RpcOptions, setInteractionId, const Object& interaction_id) {
   return Object(this_);
 }
 
-Object HHVM_METHOD(RpcOptions, setFaultToInject, const String& key, const String& value) {
-  auto data = RpcOptions::GetDataOrThrowException(this_);
-  data->rpcOptions.setFaultToInject(std::string(key.c_str(), key.size()),
-    std::string(value.c_str(), value.size()));
-  return Object(this_);
-}
-
 Object HHVM_METHOD(RpcOptions, setSerializedAuthProofs, const String& payload) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   data->rpcOptions.setSerializedAuthProofs(
@@ -327,19 +320,6 @@ String HHVM_METHOD(RpcOptions, __toString) {
       first = false;
     }
     result += "\"" + it.first + "\": \"" + it.second + "\"";
-  }
-  result += "}; ";
-  result += "faultsToInject: {";
-  first = true;
-  if (const auto& faultsToInject = data->rpcOptions.getFaultsToInject()) {
-    for (const auto& it : *faultsToInject) {
-      if (!first) {
-        result += ", ";
-      } else {
-        first = false;
-      }
-      result += "\"" + it.first + "\": \"" + it.second + "\"";
-    }
   }
   result += "}";
   result += ")\n";
@@ -376,7 +356,6 @@ static struct ThriftExtension final : Extension {
     HHVM_ME(RpcOptions, setProcessingTimeout);
     HHVM_ME(RpcOptions, setChunkTimeout);
     HHVM_ME(RpcOptions, setInteractionId);
-    HHVM_ME(RpcOptions, setFaultToInject);
     HHVM_ME(RpcOptions, setSerializedAuthProofs);
     HHVM_ME(RpcOptions, __toString);
 

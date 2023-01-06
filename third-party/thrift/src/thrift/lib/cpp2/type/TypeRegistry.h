@@ -55,11 +55,20 @@ class TypeRegistry {
   AnyData store(ConstRef value) const {
     return store(value, Protocol::get<P>());
   }
-  AnyData store(const AnyValue& value, const Protocol& protocol) const;
-  template <StandardProtocol P>
-  AnyData store(const AnyValue& value) const {
-    return store(value, Protocol::get<P>());
+  template <
+      typename T,
+      std::enable_if_t<!std::is_constructible_v<ConstRef, T>, bool> = true>
+  AnyData store(T&& value, const Protocol& protocol) const {
+    return storeImpl(AnyConstRef(value), protocol);
   }
+  template <
+      StandardProtocol P,
+      typename T,
+      std::enable_if_t<!std::is_constructible_v<ConstRef, T>, bool> = true>
+  AnyData store(T&& value) const {
+    return store(std::forward<T>(value), Protocol::get<P>());
+  }
+
   template <typename Tag>
   AnyData store(const native_type<Tag>& value, const Protocol& protocol) const {
     return store(Ref::to<Tag>(value), protocol);

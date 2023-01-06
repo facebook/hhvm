@@ -16,9 +16,12 @@
 
 #pragma once
 
+#include <stdexcept>
 #include <type_traits>
+#include <variant>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/Indestructible.h>
 #include <folly/Poly.h>
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/Clear.h>
@@ -68,7 +71,15 @@ struct AnyData {
   const T& get() const { return data; }
 
   constexpr bool empty() const noexcept { return op::isEmpty<Tag>(data); }
-  constexpr void clear() noexcept { op::clear<Tag>(data); }
+  constexpr void clear() noexcept {
+    // For const types, we cannot clear the value. So do nothing and keep
+    // method to satisfy interface requirements.
+    if constexpr (!std::is_const_v<std::remove_reference_t<T>>) {
+      op::clear<Tag>(data);
+    } else {
+      throw std::runtime_error("clear() is not supported on a const type");
+    }
+  }
   constexpr bool identical(const AnyData& other) const noexcept {
     return op::identical<Tag>(data, other.data);
   }
@@ -111,10 +122,13 @@ struct AnyData<void_t, T, isPointer> {
   folly::exception_wrapper asExceptionWrapper() const { return {}; }
 };
 
+template <bool Const, typename RefBase, typename... OtherBases>
+class AnyRefBase;
+
 // An abstract base class for all AnyData-based types.
 template <typename I>
 class AnyBase {
-  using Holder = folly::Poly<I>;
+  using Holder = folly::Poly<IAnyData>;
 
  protected:
   template <typename Tag>
@@ -123,7 +137,14 @@ class AnyBase {
   constexpr const Type& type() const { return type_; }
 
   bool empty() const noexcept { return data_.empty(); }
-  void clear() noexcept { data_.clear(); }
+
+  template <
+      class U = I,
+      std::enable_if_t<!std::is_const_v<std::remove_reference_t<U>>, bool> =
+          true>
+  void clear() noexcept {
+    data_.clear();
+  }
 
   // Throws folly::BadPolyCast if the underlying types are incompatible.
   bool identical(const AnyBase& other) const {
@@ -187,13 +208,142 @@ class AnyBase {
 
  private:
   Type type_;
-  Holder data_ = AnyData<void_t>{};
+  Holder data_ = apache::thrift::type::detail::AnyData<void_t, void>{};
+
+  template <bool Const, typename RefBase, typename... OtherBases>
+  friend class AnyRefBase;
 };
 
 // Base classes for the public classes.
 using AnyValueBase = AnyBase<IAnyData>;
-// TODO(afuller): Implement AnyRef.
-// using AnyaRefBase = AnyBase<IAnyData&>;
+
+template <typename I>
+class AnyRefWrapper : AnyBase<I> {
+  using Base = AnyBase<I>;
+
+ public:
+  constexpr AnyRefWrapper() = default;
+  AnyRefWrapper(const AnyRefWrapper&) = default;
+  AnyRefWrapper(AnyRefWrapper&&) noexcept = default;
+  ~AnyRefWrapper() = default;
+
+  AnyRefWrapper& operator=(const AnyRefWrapper&) = default;
+  AnyRefWrapper& operator=(AnyRefWrapper&&) noexcept = default;
+
+  // Inplace constructor.
+  template <typename Tag, typename = if_concrete<Tag>, typename... Args>
+  constexpr explicit AnyRefWrapper(Tag t, Args&&... args) noexcept
+      : Base(std::move(t), std::forward<Args&&>(args)...) {}
+
+  using Base::as;
+  using Base::empty;
+  using Base::type;
+};
+
+template <bool Const, typename RefBase, typename... OtherBases>
+class AnyRefBase {
+  using AnyValueRef =
+      std::conditional_t<Const, const AnyValueBase&, AnyValueBase&>;
+  using AnyValuePtr =
+      std::conditional_t<Const, AnyValueBase const*, AnyValueBase*>;
+
+  template <class Tag>
+  using RefType =
+      std::conditional_t<Const, const native_type<Tag>&, native_type<Tag>&>;
+
+ public:
+  AnyRefBase(const AnyRefBase&) = default;
+  AnyRefBase(AnyRefBase&&) noexcept = default;
+  ~AnyRefBase() = default;
+
+  AnyRefBase& operator=(const AnyRefBase&) = default;
+  AnyRefBase& operator=(AnyRefBase&&) noexcept = default;
+
+  // Implicit initializer from Thrift types.
+  template <typename T, typename Tag = infer_tag<T>>
+  /* implicit */ AnyRefBase(T&& ref)
+      : ref_(RefBase(Tag{}, std::forward<T&&>(ref))) {}
+
+  // Implicit initializer from AnyValue.
+  /* implicit */ AnyRefBase(AnyValueRef ref) : ref_(&ref) {}
+
+  // Conversion from mutable Ref to ConstRef.
+  template <bool Enabled = Const, std::enable_if_t<Enabled, bool> = true>
+  /* implicit */ AnyRefBase(
+      const AnyRefBase<false, AnyRefWrapper<IAnyData&>>& other) {
+    *this = other;
+  }
+
+  template <bool Enabled = Const, std::enable_if_t<Enabled, bool> = true>
+  AnyRefBase& operator=(
+      const AnyRefBase<false, AnyRefWrapper<IAnyData&>>& other) {
+    other.invoke([this](auto&& otherRef) {
+      *this = otherRef;
+      return true;
+    });
+    return *this;
+  }
+
+  constexpr const Type& type() const {
+    return invoke([](auto&& arg) -> decltype(auto) { return arg.type(); });
+  }
+
+  bool empty() const noexcept {
+    return invoke([](auto&& arg) -> decltype(auto) { return arg.empty(); });
+  }
+
+  template <typename Tag>
+  decltype(auto) as() {
+    return invoke(
+        [](auto&& arg) -> RefType<Tag> { return arg.template as<Tag>(); });
+  }
+  template <typename Tag>
+  decltype(auto) as() const {
+    return invoke([](auto&& arg) -> const RefType<Tag> {
+      return arg.template as<Tag>();
+    });
+  }
+
+ private:
+  std::variant<RefBase, AnyValuePtr, OtherBases...> ref_;
+
+  template <class I>
+  AnyRefBase& operator=(const AnyRefWrapper<I>& wrapper) {
+    ref_ = wrapper;
+    return *this;
+  }
+
+  template <typename F>
+  decltype(auto) invoke(F&& f) {
+    return std::visit(
+        [&](auto&& arg) -> decltype(auto) {
+          if constexpr (std::is_pointer_v<
+                            std::remove_reference_t<decltype(arg)>>) {
+            return f(*arg);
+          } else {
+            return f(arg);
+          }
+        },
+        ref_);
+  }
+
+  template <typename F>
+  decltype(auto) invoke(F&& f) const {
+    return std::visit(
+        [&](auto&& arg) -> decltype(auto) {
+          if constexpr (std::is_pointer_v<
+                            std::remove_reference_t<decltype(arg)>>) {
+            return f(*arg);
+          } else {
+            return f(arg);
+          }
+        },
+        ref_);
+  }
+
+  template <bool Const2, typename RefBase2, typename... OtherBases2>
+  friend class AnyRefBase;
+};
 
 } // namespace detail
 } // namespace type

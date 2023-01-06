@@ -68,6 +68,37 @@ TEST(AnyValueTest, Identical) {
   EXPECT_FALSE(value.identical(AnyValue::create<double_t>(0.0)));
 }
 
+TEST(AnyRefTest, Initialization) {
+  double value = 1.1;
+  auto anyValue = AnyValue::create<double_t>(value);
+  AnyRef ref1 = value;
+  AnyRef ref2 = anyValue;
+  AnyConstRef constRef = ref1;
+  EXPECT_FALSE(ref1.empty());
+  EXPECT_FALSE(ref2.empty());
+  EXPECT_TRUE(ref1.type() == ref2.type());
+  EXPECT_EQ(ref1.as<double_t>(), value);
+  EXPECT_EQ(ref2.as<double_t>(), value);
+  EXPECT_EQ(constRef.as<double_t>(), value);
+}
+
+TEST(AnyRefTest, Assignment) {
+  double value = 1.1;
+  AnyRef ref = value;
+  ref.as<double_t>() = 1.2;
+  EXPECT_EQ(value, 1.2);
+
+  AnyConstRef constRef = value;
+  double otherValue = 0.1;
+  AnyRef otherRef = otherValue;
+  ref = otherRef;
+  EXPECT_EQ(ref.as<double_t>(), 0.1);
+  constRef = otherValue;
+  EXPECT_EQ(constRef.as<double_t>(), 0.1);
+  ref = value;
+  EXPECT_EQ(ref.as<double_t>(), 1.2);
+}
+
 struct IntValue {
   int value;
 

@@ -58,8 +58,7 @@ class Serializer {
   virtual void encode(
       type::ConstRef value, folly::io::QueueAppender&& appender) const = 0;
   virtual void encode(
-      const type::AnyValue& value,
-      folly::io::QueueAppender&& appender) const = 0;
+      type::AnyConstRef value, folly::io::QueueAppender&& appender) const = 0;
 
   // Decode a value.
   //
@@ -105,7 +104,7 @@ class TagSerializer : public Serializer {
       type::ConstRef value, folly::io::QueueAppender&& appender) const final {
     derived().encode(value.as<Tag>(), std::move(appender));
   }
-  void encode(const type::AnyValue& value, folly::io::QueueAppender&& appender)
+  void encode(type::AnyConstRef value, folly::io::QueueAppender&& appender)
       const final {
     derived().encode(value.as<Tag>(), std::move(appender));
   }

@@ -100,7 +100,19 @@ class AnyValue : public detail::AnyValueBase {
 
  private:
   using Base::Base;
+
+  template <bool Const, typename RefBase, typename... OtherBases>
+  friend class apache::thrift::type::detail::AnyRefBase;
 };
+
+// Reference holders to type-erased Thrift value.
+// Can be initialized from concrete Thrift value, or from AnyValue.
+using AnyRef =
+    detail::AnyRefBase<false, detail::AnyRefWrapper<detail::IAnyData&>>;
+using AnyConstRef = detail::AnyRefBase<
+    true,
+    detail::AnyRefWrapper<const detail::IAnyData&>,
+    detail::AnyRefWrapper<detail::IAnyData&>>;
 
 } // namespace type
 } // namespace thrift

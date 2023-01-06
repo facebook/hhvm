@@ -36,11 +36,6 @@ AnyData TypeRegistry::store(ConstRef value, const Protocol& protocol) const {
   return storeImpl(value, protocol);
 }
 
-AnyData TypeRegistry::store(
-    const AnyValue& value, const Protocol& protocol) const {
-  return storeImpl(value, protocol);
-}
-
 void TypeRegistry::load(const AnyData& data, Ref out) const {
   if (data.type() == Type::get<type::void_t>()) {
     if (out.type() != Type::get<type::void_t>()) {

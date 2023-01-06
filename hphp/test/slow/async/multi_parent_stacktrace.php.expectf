@@ -1,0 +1,21 @@
+#0  cache$memoize_impl() called at [%s/hphp/test/slow/async/multi_parent_stacktrace.php:28]
+#1  cache() called at [%s/hphp/test/slow/async/multi_parent_stacktrace.php:8]
+#2  foo() called at [%s/hphp/test/slow/async/multi_parent_stacktrace.php:33]
+#3  main()
+#4  Closure$__SystemLib\enter_async_entry_point()
+#5  HH\Asio\join()
+#6  __SystemLib\enter_async_entry_point()
+
+#0  cache$memoize_impl() called at [%s/hphp/test/slow/async/multi_parent_stacktrace.php:8]
+#1  foo() called at [%s/hphp/test/slow/async/multi_parent_stacktrace.php:32]
+#2  main()
+#3  Closure$__SystemLib\enter_async_entry_point()
+#4  HH\Asio\join()
+#5  __SystemLib\enter_async_entry_point()
+
+#0  cache$memoize_impl() called at [%s/hphp/test/slow/async/multi_parent_stacktrace.php:8]
+#1  foo() called at [%s/hphp/test/slow/async/multi_parent_stacktrace.php:32]
+#2  main()
+#3  Closure$__SystemLib\enter_async_entry_point()
+#4  HH\Asio\join()
+#5  __SystemLib\enter_async_entry_point()

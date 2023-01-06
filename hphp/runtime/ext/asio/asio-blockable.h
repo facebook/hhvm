@@ -29,7 +29,7 @@ struct c_WaitableWaitHandle;
 
 /*
  * AsioBlockable is an intrusive node in an AsioBlockableChain.
- * Each node contains a pointer to the next node (AsioBlockable*)
+ * Each node contains a pointer to the prev node (AsioBlockable*)
  * as well as a Kind, describing the waithandle that owns *this* node.
  */
 struct AsioBlockable final {
@@ -44,7 +44,7 @@ struct AsioBlockable final {
     return offsetof(AsioBlockable, m_bits);
   }
 
-  AsioBlockable* getNextParent() const {
+  AsioBlockable* getPrevParent() const {
     return reinterpret_cast<AsioBlockable*>(m_bits & kParentMask);
   }
 
@@ -55,14 +55,14 @@ struct AsioBlockable final {
   // return ptr to the WH containing this blockable
   c_WaitableWaitHandle* getWaitHandle() const;
 
-  void setNextParent(AsioBlockable* parent, Kind kind) {
+  void setPrevParent(AsioBlockable* parent, Kind kind) {
     assertx(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
     assertx(!(static_cast<intptr_t>(kind) & kParentMask));
     m_bits = reinterpret_cast<intptr_t>(parent) | static_cast<intptr_t>(kind);
   }
 
-  // Only update the next parent w/o changing kind.
-  void updateNextParent(AsioBlockable* parent) {
+  // Only update the prev parent w/o changing kind.
+  void updatePrevParent(AsioBlockable* parent) {
     assertx(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
     m_bits = (m_bits & ~kParentMask) | reinterpret_cast<intptr_t>(parent);
   }
@@ -71,18 +71,18 @@ struct AsioBlockable final {
   static constexpr uint64_t kParentMask = ~kKindMask;
 
 private:
-  // m_bits stores kind in the lowest 3 bits and next parent in the
+  // m_bits stores kind in the lowest 3 bits and prev parent in the
   // upper 61 bits.
   // +--- Layout for m_bits (64 bits) ---+
   // | 63.....................3 | 2....0 |
-  // | [Pointer to next parent] | [Kind] |
+  // | [Pointer to prev parent] | [Kind] |
   // +-----------------------------------+
   union {
     uintptr_t m_bits;
-    AsioBlockable* m_next;
+    AsioBlockable* m_prev;
   };
   TYPE_SCAN_CUSTOM() {
-    scanner.scan(m_next);
+    scanner.scan(m_prev);
   }
 };
 
@@ -91,17 +91,17 @@ private:
  * waithandles, formed by AsioBlockable fields in each waithandle.
  */
 struct AsioBlockableChain final {
-  static constexpr ptrdiff_t firstParentOff() {
-    return offsetof(AsioBlockableChain, m_firstParent);
+  static constexpr ptrdiff_t lastParentOff() {
+    return offsetof(AsioBlockableChain, m_lastParent);
   }
 
   void init() noexcept {
-    m_firstParent = nullptr;
+    m_lastParent = nullptr;
   }
 
   void addParent(AsioBlockable& parent, AsioBlockable::Kind kind) {
-    parent.setNextParent(m_firstParent, kind);
-    m_firstParent = &parent;
+    parent.setPrevParent(m_lastParent, kind);
+    m_lastParent = &parent;
   }
 
   static void Unblock(AsioBlockableChain chain) { chain.unblock(); }
@@ -114,7 +114,7 @@ struct AsioBlockableChain final {
   c_WaitableWaitHandle* firstInContext(context_idx_t ctx_idx);
 
 private:
-  AsioBlockable* m_firstParent;
+  AsioBlockable* m_lastParent;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

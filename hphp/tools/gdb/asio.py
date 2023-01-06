@@ -116,8 +116,9 @@ class WaitHandle(object):
         """Same as wh->getParentChain().firstInContext(wh->getContextIdx())."""
 
         ctx_idx = self.wh['m_contextIdx']
-        blockable = self.wh['m_parentChain']['m_firstParent']
+        blockable = self.wh['m_parentChain']['m_lastParent']
 
+        result = None
         while blockable != nullptr():
             wh = WaitHandle.from_blockable(blockable)
 
@@ -126,12 +127,12 @@ class WaitHandle(object):
                 and not wh.finished()
                 and wh['m_contextIdx'] == ctx_idx
             ):
-                return wh
+                result = wh
 
             ty = T('HPHP::AsioBlockable').pointer()
             blockable = (blockable['m_bits'] & ~0x7).cast(ty)
 
-        return None
+        return result
 
     def chain(self):
         """Generate a WaitHandle's parent chain."""

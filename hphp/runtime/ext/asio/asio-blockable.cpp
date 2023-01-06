@@ -138,9 +138,9 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
 }
 
 void AsioBlockableChain::unblock() {
-  while (auto cur = m_firstParent) {
-    m_firstParent = cur->getNextParent();
-    cur->updateNextParent(nullptr);
+  while (auto cur = m_lastParent) {
+    m_lastParent = cur->getPrevParent();
+    cur->updatePrevParent(nullptr);
     // the onUnblocked handler may free cur
     switch (cur->getKind()) {
       case Kind::AsyncFunctionWaitHandleNode:
@@ -162,10 +162,10 @@ void AsioBlockableChain::unblock() {
 void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
   std::vector<AsioBlockableChain> worklist = { *this };
   while (!worklist.empty()) {
-    auto const firstParent = worklist.back().m_firstParent;
+    auto const lastParent = worklist.back().m_lastParent;
     worklist.pop_back();
 
-    for (auto cur = firstParent; cur; cur = cur->getNextParent()) {
+    for (auto cur = lastParent; cur; cur = cur->getPrevParent()) {
       switch (cur->getKind()) {
         case Kind::AsyncFunctionWaitHandleNode:
           exitContextImpl(
@@ -187,21 +187,21 @@ void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
 
 // Currently only AAWH utilizes this to handle failures.
 void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
-  AsioBlockable* prev = nullptr;
-  for (AsioBlockable* cur = m_firstParent, *next; cur; cur = next) {
-    next = cur->getNextParent();
+  AsioBlockable* next = nullptr;
+  for (AsioBlockable* cur = m_lastParent, *prev; cur; cur = prev) {
+    prev = cur->getPrevParent();
     if (ab == cur) {
       // Found the AAWH we need to remove
       assertx(cur->getKind() == Kind::AwaitAllWaitHandleNode);
-      if (!prev) {
-        m_firstParent = next;
+      if (!next) {
+        m_lastParent = prev;
       } else {
-        prev->updateNextParent(next);
+        next->updatePrevParent(prev);
       }
-      cur->updateNextParent(nullptr);
+      cur->updatePrevParent(nullptr);
       return;
     }
-    prev = cur;
+    next = cur;
   }
   // We should always be able to find the parent.
   assertx(false);
@@ -209,13 +209,14 @@ void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
 
 c_WaitableWaitHandle*
 AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
-  for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
+  c_WaitableWaitHandle* result = nullptr;
+  for (auto cur = m_lastParent; cur; cur = cur->getPrevParent()) {
     auto const wh = cur->getWaitHandle();
     if (!wh->isFinished() && wh->getContextIdx() == ctx_idx) {
-      return wh;
+      result = wh;
     }
   }
-  return nullptr;
+  return result;
 }
 
 void AsioBlockableChain::UnblockJitHelper(ActRec* ar,

@@ -425,23 +425,23 @@ void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
 
   auto const blockableOff = AFWH::childrenOff() + AFWH::Node::blockableOff();
 
-  // parent->m_blockable.m_bits = child->m_parentChain.m_firstParent|Kind::AFWH;
+  // parent->m_blockable.m_bits = child->m_parentChain.m_lastParent|Kind::AFWH;
   static_assert(
     uint8_t(AsioBlockable::Kind::AsyncFunctionWaitHandleNode) == 0,
     "AFWH kind must be 0."
   );
-  auto const firstParentOff = c_WaitableWaitHandle::parentChainOff() +
-                              AsioBlockableChain::firstParentOff();
-  auto const nextParentOff = blockableOff + AsioBlockable::bitsOff();
+  auto const lastParentOff = c_WaitableWaitHandle::parentChainOff() +
+                              AsioBlockableChain::lastParentOff();
+  auto const prevParentOff = blockableOff + AsioBlockable::bitsOff();
 
-  auto const firstParent = v.makeReg();
-  v << load{child[firstParentOff], firstParent};
-  v << store{firstParent, parentAR[ar_rel(nextParentOff)]};
+  auto const lastParent = v.makeReg();
+  v << load{child[lastParentOff], lastParent};
+  v << store{lastParent, parentAR[ar_rel(prevParentOff)]};
 
-  // child->m_parentChain.m_firstParent = &parent->m_blockable;
+  // child->m_parentChain.m_lastParent = &parent->m_blockable;
   auto objToAR = v.makeReg();
   v << lea{parentAR[ar_rel(blockableOff)], objToAR};
-  v << store{objToAR, child[firstParentOff]};
+  v << store{objToAR, child[lastParentOff]};
 
   // parent->m_child = child;
   auto const childOff = AFWH::childrenOff() + AFWH::Node::childOff();

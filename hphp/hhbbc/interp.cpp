@@ -4215,7 +4215,15 @@ void resolveClsMethodSImpl(ISS& env, SpecialClsRef ref, LSString meth_name) {
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
       !rfunc.couldHaveReifiedGenerics()) {
     auto const clsName = dcls_of(clsTy).cls().name();
-    return reduce(env, bc::ResolveClsMethodD { clsName, meth_name });
+    if (reifiedVersion) {
+      return reduce(
+        env,
+        bc::PopC {},
+        bc::ResolveClsMethodD { clsName, meth_name }
+      );
+    } else {
+      return reduce(env, bc::ResolveClsMethodD { clsName, meth_name });
+    }
   }
   if (reifiedVersion) popC(env);
   if (!reifiedVersion || !rfunc.couldHaveReifiedGenerics()) {

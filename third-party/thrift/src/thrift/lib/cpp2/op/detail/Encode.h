@@ -675,6 +675,20 @@ struct Decode<type::list<Tag>> {
   }
 };
 
+template <typename Container, typename... Args>
+using emplace_hint_t = decltype(FOLLY_DECLVAL(Container).emplace_hint(
+    FOLLY_DECLVAL(Container).end(), FOLLY_DECLVAL(Args)...));
+template <typename Container, typename... Args>
+auto emplace_at_end(Container& container, Args&&... args) {
+  return folly::if_constexpr<
+      folly::is_detected_v<emplace_hint_t, Container, Args...>>(
+      [&](auto& c) {
+        return c.emplace_hint(c.end(), std::forward<Args>(args)...);
+      },
+      [&](auto& c) { return c.emplace(std::forward<Args>(args)...).first; })(
+      container);
+}
+
 template <typename Tag>
 struct Decode<type::set<Tag>> {
   template <typename Protocol, typename SetType>
@@ -682,7 +696,7 @@ struct Decode<type::set<Tag>> {
     auto consumeElem = [&] {
       typename SetType::value_type value;
       Decode<Tag>{}(prot, value);
-      set.emplace_hint(set.end(), std::move(value));
+      emplace_at_end(set, std::move(value));
     };
     TType t;
     uint32_t s;
@@ -714,8 +728,8 @@ struct Decode<type::map<Key, Value>> {
     auto consumeElem = [&] {
       typename MapType::key_type key;
       Decode<Key>{}(prot, key);
-      auto iter = map.emplace_hint(
-          map.end(), std::move(key), typename MapType::mapped_type{});
+      auto iter =
+          emplace_at_end(map, std::move(key), typename MapType::mapped_type{});
       Decode<Value>{}(prot, iter->second);
     };
 

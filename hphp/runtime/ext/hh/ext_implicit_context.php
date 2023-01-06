@@ -41,6 +41,73 @@ function soft_run_with<Tout>(
   }
 }
 
+const string RUN_WITH_SOFT_INACCESSIBLE_KEY_PREFIX = 'nonfunction/';
+
+/**
+ * async version of run_with_soft_inaccessible_state
+ */
+async function run_with_soft_inaccessible_state_async<Tout>(
+  (function ()[_]: Awaitable<Tout>) $f,
+  string $key,
+)[zoned, ctx $f]: Awaitable<Tout> {
+  $prev = _Private\set_implicit_context_by_value(
+    _Private\create_special_implicit_context(
+      \HH\MEMOIZE_IC_TYPE_SOFT_INACCESSIBLE,
+      RUN_WITH_SOFT_INACCESSIBLE_KEY_PREFIX.$key
+    ),
+  );
+  try {
+    if ($prev is nonnull) {
+      throw new \InvalidOperationException('Cannot call '.__FUNCTION__.' from non-null state.');
+    }
+    $result = $f();
+  } finally {
+    _Private\set_implicit_context_by_value($prev);
+  }
+  // Needs to be awaited here so that context dependency is established
+  // between parent/child functions
+  return await $result;
+}
+
+/**
+ * This function runs the given callable under the "soft inaccessible" IC state
+ * i.e. as if it were called via a function with
+ * `__Memoize(#SoftMakeICInaccessible)`
+ *
+ * The $key (with a prefix) is used in place of the memoized function name in
+ * the IC blame sent to the error handler.
+ *
+ * This function can only be called from the null state.
+ * (this is the only use case we expect and have determined behavior for)
+ *
+ * The intended use of this function is to migrate code that is currently
+ * executed via a backdoor in order to allow it to be executed from an
+ * "inaccessible" state.
+ *
+ * Within the backdoor, you first run the code using this function.
+ * After you have addressed all the logs and have determined it safe, you
+ * remove both the backdoor and this function and call the callable directly.
+ */
+function run_with_soft_inaccessible_state<Tout>(
+  (function ()[_]: Tout) $f,
+  string $key,
+)[zoned, ctx $f]: Tout {
+  $prev = _Private\set_implicit_context_by_value(
+    _Private\create_special_implicit_context(
+      \HH\MEMOIZE_IC_TYPE_SOFT_INACCESSIBLE,
+      RUN_WITH_SOFT_INACCESSIBLE_KEY_PREFIX.$key
+    ),
+  );
+  try {
+    if ($prev is nonnull) {
+      throw new \InvalidOperationException('Cannot call '.__FUNCTION__.' from non-null state.');
+    }
+    return $f();
+  } finally {
+    _Private\set_implicit_context_by_value($prev);
+  }
+}
+
 function embed_implicit_context_state_in_closure(
   (function ()[defaults]: void) $f,
 )[zoned]: (function ()[defaults]: void) {

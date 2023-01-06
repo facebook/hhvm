@@ -58,8 +58,13 @@ Object create_new_IC() {
 void set_implicit_context_blame(ImplicitContext* context,
                                 const StringData* memo_key) {
   auto const state = context->m_state;
+
+  // the memo_key is only provided for one of two situations:
+  // (1) always when entering the SoftSet state
+  // (2) when entering the SoftInaccessible state via
+  //     the function run_with_soft_inaccessible_state
   assertx(IMPLIES(state == ImplicitContext::State::SoftSet, memo_key));
-  assertx(IMPLIES(state != ImplicitContext::State::SoftSet, !memo_key));
+  assertx(IMPLIES(state != ImplicitContext::State::SoftSet && state != ImplicitContext::State::SoftInaccessible, !memo_key));
 
   if (state == ImplicitContext::State::Value ||
       state == ImplicitContext::State::Inaccessible) {
@@ -199,12 +204,15 @@ Object HHVM_FUNCTION(create_special_implicit_context,
   }
 
   if (type == ImplicitContext::State::SoftInaccessible) {
-    VMRegAnchor _;
-    auto const func =
-      fromCaller([] (const BTFrame& frm) { return frm.func(); });
-    assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
-    assertx(func->isSoftMakeICInaccessibleMemoize());
-    auto const sampleRate = func->softMakeICInaccessibleSampleRate();
+    auto const sampleRate = [&] {
+      if (!memo_key.isNull()) return 1u;
+      VMRegAnchor _;
+      auto const func =
+        fromCaller([] (const BTFrame& frm) { return frm.func(); });
+      assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
+      assertx(func->isSoftMakeICInaccessibleMemoize());
+      return func->softMakeICInaccessibleSampleRate();
+    }();
     if (sampleRate > 1 && !folly::Random::oneIn(sampleRate)) {
       // Return the previous object if we coinflipped false
       return Object{prev_obj};

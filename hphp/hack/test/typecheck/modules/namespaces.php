@@ -1,7 +1,7 @@
 //// modules.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 
 namespace A {
   new module foo {}
@@ -14,7 +14,7 @@ namespace {
 //// foo.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 module foo;
 
 namespace Bing {
@@ -26,7 +26,7 @@ namespace Bing {
 //// bar.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 module bar;
 
 function g(): void {
@@ -36,6 +36,6 @@ function g(): void {
 //// a-foo.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 module A\foo;
 function h(): void {}

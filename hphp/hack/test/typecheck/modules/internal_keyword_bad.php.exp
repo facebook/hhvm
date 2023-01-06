@@ -1,4 +1,2 @@
 File "internal_keyword_bad.php", line 3, characters 3-10:
 `internal` cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
-File "internal_keyword_bad.php", line 3, characters 3-34:
-Cannot use unstable feature: `modules` (Parsing[1002])

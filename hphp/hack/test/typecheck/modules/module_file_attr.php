@@ -1,6 +1,6 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 
 new module Foo {}
 
@@ -8,7 +8,7 @@ new module Foo {}
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 module Foo;
 
 

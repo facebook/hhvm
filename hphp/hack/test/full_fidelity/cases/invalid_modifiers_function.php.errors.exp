@@ -1,4 +1,3 @@
-(4,1)-(4,69) Cannot use unstable feature: `modules`
 (4,7)-(4,15) Top-level functions cannot be declared `abstract`
 (4,16)-(4,21) Top-level functions cannot be declared `final`
 (4,22)-(4,28) Top-level functions cannot be declared `static`

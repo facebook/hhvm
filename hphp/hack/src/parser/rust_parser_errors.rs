@@ -1596,7 +1596,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
                     if kind == TokenKind::Internal {
                         if !self.in_module {
-                            self.check_can_use_feature(node, &UnstableFeatures::Modules);
                             self.errors.push(make_error_from_node(
                                 modifier,
                                 errors::internal_outside_of_module,
@@ -1604,7 +1603,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         }
                     } else if kind == TokenKind::Public && toplevel {
                         if !self.in_module {
-                            self.check_can_use_feature(node, &UnstableFeatures::Modules);
                             self.errors.push(make_error_from_node(
                                 modifier,
                                 errors::public_toplevel_outside_of_module,
@@ -4095,7 +4093,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             self.check_attr_enabled(attrs);
             // Module newtype errors
             if !ad.module_kw_opt.is_missing() {
-                self.check_can_use_feature(node, &UnstableFeatures::Modules);
                 if !self.in_module {
                     self.errors.push(make_error_from_node(
                         &ad.module_kw_opt,
@@ -5270,13 +5267,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             FileAttributeSpecification(_) => self.file_attribute_spec(node),
             ModuleDeclaration(x) => {
-                self.check_can_use_feature(node, &UnstableFeatures::Modules);
                 if !x.exports.is_missing() || !x.imports.is_missing() {
                     self.check_can_use_feature(node, &UnstableFeatures::ModuleReferences);
                 }
             }
             ModuleMembershipDeclaration(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::Modules);
                 self.in_module = true;
             }
             PackageDeclaration(_) => {

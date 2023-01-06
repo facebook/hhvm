@@ -1,6 +1,6 @@
 //// a.module.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 <<file:__EnableUnstableFeatures('module_references')>>
 
 new module A {
@@ -11,7 +11,7 @@ new module A {
 
 //// b.module.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 <<file:__EnableUnstableFeatures('module_references')>>
 
 new module B {
@@ -22,14 +22,14 @@ new module B {
 
 //// c.module.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 <<file:__EnableUnstableFeatures('module_references')>>
 
 new module C {}
 
 //// a.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 
 module A;
 
@@ -40,7 +40,7 @@ public class A {
 
 //// b.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 
 module B;
 
@@ -52,7 +52,7 @@ public class B {
 
 //// c.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 
 module C;
 

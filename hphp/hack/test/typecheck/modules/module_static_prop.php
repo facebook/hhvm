@@ -1,6 +1,6 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 
 new module A {}
 new module B {}
@@ -8,7 +8,7 @@ new module B {}
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 module A;
 
 class A {
@@ -24,7 +24,7 @@ function a(): void {
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 module B;
 
 function b(): void {

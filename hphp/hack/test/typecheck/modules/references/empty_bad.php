@@ -1,6 +1,6 @@
 //// a.module.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 <<file:__EnableUnstableFeatures('module_references')>>
 
 new module A {
@@ -12,7 +12,7 @@ new module A {
 
 //// a.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 module A;
 
 public function f1(): C1 {

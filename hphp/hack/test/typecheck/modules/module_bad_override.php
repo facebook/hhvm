@@ -1,13 +1,13 @@
 //// decls.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 
 new module A {}
 new module D {}
 
 //// A.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 module A;
 
 abstract class A {
@@ -35,7 +35,7 @@ class C extends A {
 
 //// D.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 module D;
 
 class D extends A {

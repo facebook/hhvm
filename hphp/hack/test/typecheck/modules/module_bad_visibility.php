@@ -1,10 +1,10 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 new module A {}
 //// test.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 module A;
 
 

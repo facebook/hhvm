@@ -1,6 +1,6 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 
 new module A {}
 new module B {}
@@ -11,7 +11,7 @@ class UserAttribute implements HH\ClassAttribute {
 //// A.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 module A;
 
 internal class InternalToA {}
@@ -22,7 +22,7 @@ public trait PublicTraitA {}
 //// B.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 module B;
 
 <<UserAttribute(InternalToA::class)>> // Error

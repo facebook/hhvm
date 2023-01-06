@@ -1,13 +1,13 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 
 new module here {}
 new module there {}
 //// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules')>>
+
 module here;
 
 internal class C {
@@ -33,7 +33,7 @@ internal class C {
 //// there.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules')>>
+
 module there;
 
 internal class D {

@@ -21,7 +21,7 @@ newtype Tnew = string;
 //// there.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules')>>
+
 module there;
 
 class C {

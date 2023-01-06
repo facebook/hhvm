@@ -1,6 +1,6 @@
 //// a.module.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 <<file:__EnableUnstableFeatures('module_references')>>
 
 new module A {
@@ -11,7 +11,7 @@ new module A {
 
 //// a.x.module.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 <<file:__EnableUnstableFeatures('module_references')>>
 
 new module A.X {
@@ -22,7 +22,7 @@ new module A.X {
 
 //// a.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 module A;
 
 public function f1(): C1 {
@@ -34,7 +34,7 @@ public class C1 {}
 //// a.x.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 module A.X;
 
 internal function f2(): C1 {

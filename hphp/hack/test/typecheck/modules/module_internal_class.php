@@ -1,6 +1,6 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+
 
 new module here {}
 new module there {}
@@ -8,7 +8,7 @@ new module there {}
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 module here;
 
 internal class C {
@@ -42,7 +42,7 @@ internal class E extends C {} // Ok!
 //// there.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
+
 module there;
 
 class F extends C {} // Bad!

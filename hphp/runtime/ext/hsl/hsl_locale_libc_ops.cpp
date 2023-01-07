@@ -331,7 +331,7 @@ String HSLLocaleLibcOps::replace_every_nonrecursive_ci(const String& haystack,
     haystack,
     replacements,
     /* to_t = */ id,
-    /* from_t = */ id, 
+    /* from_t = */ id,
     /* normalize = */ [](String* s) {},
     [](String* s) {
       *s = HHVM_FN(strtolower)(*s);

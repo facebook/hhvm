@@ -1416,6 +1416,8 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
     // Check the patterns one by one so they all get evaluated; otherwise, when
     // using "&&" in a single expression with multiple patterns, if an earlier
     // one fails to match, the later one would be reported as unused.
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wbitwise-instead-of-logical"
     auto matched = true;
     matched &= Config::matchHdfPattern(hostname, ini, hdf, "machine");
     matched &= Config::matchHdfPattern(tier, ini, hdf, "tier");
@@ -1423,6 +1425,8 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
     matched &= Config::matchHdfPattern(tiers, ini, hdf, "tiers", "m");
     matched &= Config::matchHdfPattern(tags, ini, hdf, "tags", "m");
     matched &= Config::matchHdfPattern(cpu, ini, hdf, "cpu");
+    #pragma clang diagnostic pop
+
     return matched;
   };
 
@@ -1433,10 +1437,14 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
     // Check the patterns one by one so they all get evaluated; otherwise, when
     // using "&&" in a single expression with multiple patterns, if an earlier
     // one fails to match, the later one would be reported as unused.
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wbitwise-instead-of-logical"
     auto matched = true;
     matched &= checkPatterns(hdf);
     matched &= !hdf.exists("exclude") || !checkPatterns(hdf["exclude"]);
     matched &= matchShard(enableShards, hostname, ini, hdf, messages);
+    #pragma clang diagnostic pop
+
     return matched;
   };
 

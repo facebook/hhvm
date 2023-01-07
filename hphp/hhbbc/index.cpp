@@ -312,6 +312,8 @@ struct MethTabEntry {
   bool topLevel() const { return cls.tag() & TopLevel; }
   // This method isn't overridden by methods in any regular classes.
   bool noOverrideRegular() const { return cls.tag() & NoOverrideRegular; }
+  // First appearance of a method with this name in the hierarchy.
+  bool firstName() const { return cls.tag() & FirstName; }
 
   void setHasPrivateAncestor() {
     cls.set(Bits(cls.tag() | HasPrivateAncestor), cls.ptr());
@@ -321,6 +323,9 @@ struct MethTabEntry {
   }
   void setNoOverrideRegular() {
     cls.set(Bits(cls.tag() | NoOverrideRegular), cls.ptr());
+  }
+  void setFirstName() {
+    cls.set(Bits(cls.tag() | FirstName), cls.ptr());
   }
 
   void clearHasPrivateAncestor() {
@@ -332,6 +337,9 @@ struct MethTabEntry {
   void clearNoOverrideRegular() {
     cls.set(Bits(cls.tag() & ~NoOverrideRegular), cls.ptr());
   }
+  void clearFirstName() {
+    cls.set(Bits(cls.tag() & ~FirstName), cls.ptr());
+  }
 
 private:
   // Logically, a MethTabEntry stores a MethRef. However doing so
@@ -342,7 +350,8 @@ private:
   enum Bits : uint8_t {
     HasPrivateAncestor = (1u << 0),
     TopLevel = (1u << 1),
-    NoOverrideRegular = (1u << 2)
+    NoOverrideRegular = (1u << 2),
+    FirstName = (1u << 3)
   };
   CompactTaggedPtr<const StringData, Bits> cls;
   uint32_t clsIdx;
@@ -445,11 +454,6 @@ struct res::Func::FuncInfo {
    * the parameter type verification does not count as a use in this context.
    */
   std::bitset<64> unusedParams;
-
-  /*
-   * If this function is a method on a regular class.
-   */
-  std::atomic<bool> regularClassMethod{false};
 
   /*
    * List of all func families this function belongs to.
@@ -915,17 +919,17 @@ struct FuncFamilyEntry {
 
   boost::variant<
     BothFF, FFAndSingle, FFAndNone, BothSingle, SingleAndNone, None
-  > m_meths;
+  > m_meths{None{}};
   // A resolution is "incomplete" if there's a subclass which does not
   // contain any method with that name (not even inheriting it). If a
   // resolution is incomplete, it means besides the set of resolved
   // methods, the call might also error due to missing method. This
   // distinction is only important in a few limited circumstances.
-  bool m_allIncomplete;
-  bool m_regularIncomplete;
+  bool m_allIncomplete{true};
+  bool m_regularIncomplete{true};
   // Whether any method in the resolution overrides a private
   // method. This is only of interest when building func families.
-  bool m_privateAncestor;
+  bool m_privateAncestor{false};
 
   template <typename SerDe> void serde(SerDe& sd) {
     if constexpr (SerDe::deserializing) {
@@ -3263,6 +3267,10 @@ struct Index::IndexData {
   // associated ClassInfo2. Only has entries for instantiable classes.
   ISStringToOneT<UniquePtrRef<ClassInfo2>> classInfoRefs;
 
+  // Func family entries representing all methods with a particular
+  // name.
+  SStringToOneT<FuncFamilyEntry> nameOnlyMethodFamilies;
+
   // Maps func-family ids to the func family group which contains the
   // func family with that id.
   hphp_fast_map<FuncFamily2::Id, Ref<FuncFamilyGroup>> funcFamilyRefs;
@@ -3758,246 +3766,6 @@ void add_program_to_index(IndexData& index) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Given a func list, canonicalize it, and return the appropriate
- * FuncFamilyOrSingle for both the entire list, and for the subset of
- * funcs on regular classes. If 'complete' is true, then the func list
- * is exhaustive list of possible resolutions for a lookup of
- * `cinfo::name` (this is propagated into the FuncFamilyOrSingle
- * entries). If `base` is nullptr, it's assumed we're building a
- * name-only method table. This only affects the "completeness" of the
- * regular subset result.
- *
- * The func list is assumed to only contain uniques (no multiple
- * entries with the same func, even if their "inRegular" status
- * differ).
- */
-std::pair<FuncFamilyOrSingle, FuncFamilyOrSingle>
-make_method_family_entry(IndexData& index,
-                         FuncFamily::PFuncVec funcs,
-                         const ClassInfo* base,
-                         SString name,
-                         bool complete) {
-  // Name-only tables are never complete
-  assertx(IMPLIES(!base, !complete));
-  assertx(!funcs.empty());
-
-  // Canonicalize the func list by sorting it. We've already assumed
-  // the list only contains unique functions. We order functions which
-  // are "inRegular" before ones which are not (this simplifies the
-  // logic below). After that, we sort by class name.
-  std::sort(
-    begin(funcs), end(funcs),
-    [] (FuncFamily::PossibleFunc a, const FuncFamily::PossibleFunc b) {
-      if (a.inRegular() && !b.inRegular()) return true;
-      if (!a.inRegular() && b.inRegular()) return false;
-      return string_data_lti{}(a.ptr()->cls->name, b.ptr()->cls->name);
-    }
-  );
-  funcs.shrink_to_fit();
-
-  if (Trace::moduleEnabled(Trace::hhbbc_index, 4)) {
-    FTRACE(4, "func family: {}::{} (for {}::{}):\n",
-           funcs.front().ptr()->cls->name, name,
-           base ? base->cls->name->data() : "*", name);
-    for (auto const DEBUG_ONLY func : funcs) {
-      FTRACE(
-        4, "  {}::{}{}\n",
-        func.ptr()->cls->name, func.ptr()->name,
-        func.inRegular() ? "" : " (not regular)"
-      );
-    }
-  }
-
-  // Create a func family for this func list, allocating space for the
-  // "extra" results for the regular subset. If the func family
-  // already exists, that's returned.
-  auto const ff = [&] (bool extra) {
-    assertx(funcs.size() > 1);
-    auto it = index.funcFamilies.find(funcs);
-    if (it != index.funcFamilies.end()) return it->first.get();
-    return index.funcFamilies.insert(
-      std::make_unique<FuncFamily>(std::move(funcs), extra),
-      false
-    ).first->first.get();
-  };
-
-  if (funcs.size() > 1) {
-    if (funcs.back().inRegular()) {
-      // The list is sorted so that all the "inRegular" funcs come
-      // first. If the last func is "inRegular", then every func on
-      // the list is like that. Therefore there's no need to allocate
-      // space to distinguish the regular subset.
-      auto const funcFamily = ff(false);
-      return std::make_pair(
-        FuncFamilyOrSingle{funcFamily, !complete},
-        FuncFamilyOrSingle{funcFamily, !base}
-      );
-    } else if (!funcs.front().inRegular()) {
-      // On the other hand, if the first func isn't "inRegular", then
-      // none of them are. Again, no need to allocate space to
-      // distinguish the regular subset since the "regular" result is
-      // empty.
-      return std::make_pair(
-        FuncFamilyOrSingle{ff(false), !complete},
-        FuncFamilyOrSingle{}
-      );
-    } else if (!funcs[1].inRegular()) {
-      // The first func is "inRegular", but the 2nd one isn't. This
-      // means only one func (the first one) is "inRegular", so the
-      // regular subset result is just that func. Since the regular
-      // result isn't using the func family, we don't need the extra
-      // space.
-      auto const f = funcs.front().ptr();
-      return std::make_pair(
-        FuncFamilyOrSingle{ff(false), !complete},
-        FuncFamilyOrSingle{f, !base}
-      );
-    } else {
-      // For the rest of the cases, we have a mix of "inRegular" and
-      // not "inRegular". Both get the func family, but we need to
-      // allocate extra space because walking the list may produce
-      // different results depending on whether you're filtering on
-      // the regular subset.
-      auto const funcFamily = ff(true);
-      return std::make_pair(
-        FuncFamilyOrSingle{funcFamily, !complete},
-        FuncFamilyOrSingle{funcFamily, !base}
-      );
-    }
-  }
-
-  // There's only one func on the list, so no func family is
-  // necessary.
-  assertx(funcs.size() == 1);
-  auto const f = funcs.front();
-  if (f.inRegular()) {
-    // The single func is on a regular class, so it applies to both
-    // all and the regular subset.
-    return std::make_pair(
-      FuncFamilyOrSingle{f.ptr(), !complete},
-      FuncFamilyOrSingle{f.ptr(), !base}
-    );
-  } else {
-    // The single func isn't on any regular class, so it applies to
-    // only the all result. The regular subset is empty.
-    return std::make_pair(
-      FuncFamilyOrSingle{f.ptr(), !complete},
-      FuncFamilyOrSingle{}
-    );
-  }
-}
-
-/*
- * Calculate FuncFamilyOrSingle entries corresponding *all* methods in
- * the program with the given name and insert them in the global
- * name-only method family map.
- */
-void define_name_only_func_family(IndexData& index, SString name) {
-  hphp_fast_map<const php::Func*, bool> funcSet;
-
-  auto const range = index.methods.equal_range(name);
-  for (auto it = range.first; it != range.second; ++it) {
-    auto const func = it->second;
-    assertx(func->cls);
-    // Only include methods for classes which have a ClassInfo,
-    // which means they're instantiatable.
-    auto const cinfoIt = index.classInfo.find(func->cls->name);
-    if (cinfoIt == index.classInfo.end()) continue;
-    auto const cinfo = cinfoIt->second;
-    if (!cinfo->methods.count(name)) continue;
-    // We need to know if the method is present *anywhere* on a
-    // regular class (not just the class which defines it). We already
-    // calculated this earlier when we built the normal method family
-    // data.
-    auto const inRegular = func_info(index, func)->regularClassMethod.load();
-    funcSet[func] |= inRegular;
-    // If we asserted that this method isn't used anywhere by a
-    // regular class, it's defining class shouldn't be regular.
-    assertx(IMPLIES(!inRegular, !is_regular_class(*func->cls)));
-  }
-  // The set can be empty if every class which defines a method with
-  // that name doesn't have a ClassInfo. If so, bail out.
-  if (funcSet.empty()) return;
-
-  FuncFamily::PFuncVec funcs;
-  funcs.reserve(funcSet.size());
-  auto allRegular = true;
-  for (auto const& [func, inRegular] : funcSet) {
-    allRegular &= inRegular;
-    funcs.emplace_back(func, inRegular);
-  }
-
-  // Create the entries
-  auto const [all, regular] = make_method_family_entry(
-    index,
-    std::move(funcs),
-    nullptr,
-    name,
-    false
-  );
-  FTRACE(
-    4,
-    "method family *::{}:\n"
-    "  all: {}\n"
-    "  regular: {}\n",
-    name, show(all), show(regular)
-  );
-
-  // Shouldn't have an empty entry because we know there's at least
-  // one method (we made sure the func list was non-empty above).
-  assertx(!all.isEmpty());
-  // Name-only tables are always incomplete
-  assertx(all.isIncomplete());
-  // "regular" is always incomplete (like "all"), except if it's empty
-  // (which is neither incomplete nor complete).
-  assertx(regular.isEmpty() || regular.isIncomplete());
-
-  // If both "all" and "regular" contain a func family, they must be
-  // the same func family.
-  assertx(IMPLIES(all.funcFamily() && regular.funcFamily(),
-                  all.funcFamily() == regular.funcFamily()));
-  // If both "all" and "regular" contain a single func, it must be the
-  // same func.
-  assertx(IMPLIES(all.func() && regular.func(), all.func() == regular.func()));
-
-  // "regular" is a subset of "all", so if "all" is a func, then
-  // "regular" must be a func or empty.
-  assertx(IMPLIES(all.func(), regular.func() || regular.isEmpty()));
-  // If "all" has a func family and "regular" does not, then the func
-  // family shouldn't have extra space allocated for the regular
-  // subset result.
-  assertx(IMPLIES(all.funcFamily() && !regular.funcFamily(),
-                  !all.funcFamily()->m_regular));
-
-  // If we observed that all of the methods are on regular classes,
-  // then "all" and "regular" should be the same. Moreover, if there's
-  // a func family, that func family should not have space allocated
-  // for the non-regular subset (there's no point since the results
-  // will always be the same).
-  assertx(IMPLIES(allRegular, all.funcFamily() == regular.funcFamily()));
-  assertx(IMPLIES(allRegular, all.func() == regular.func()));
-  assertx(
-    IMPLIES(
-      allRegular && regular.funcFamily(),
-      !regular.funcFamily()->m_regular
-    )
-  );
-
-  // No fancy logic here to avoid redundant entries. We don't have the
-  // AttrNoOverride or noOverrideRegular bits to help us, and there's
-  // not enough name-only entries for the space savings to matter.
-  auto const famIt = index.methodFamilies.find(name);
-  // An entry in the table should have been pre-created for us (this
-  // lets us avoid mutating the map from multiple threads), and
-  // shouldn't have had an entry already.
-  assertx(famIt != end(index.methodFamilies));
-  assertx(famIt->second.m_all.isEmpty());
-  assertx(famIt->second.m_regular.isEmpty());
-  famIt->second.m_all = all;
-  famIt->second.m_regular = regular;
-}
-
 // Calculate the StaticInfo for the given FuncFamily, and assign it
 // the pointer to the unique allocation corresponding to it. If `all`
 // is true, then all possible funcs should be considered. Otherwise,
@@ -4130,69 +3898,9 @@ void build_func_family_static_info(IndexData& index, FuncFamily* ff, bool all) {
   }
 }
 
-void define_func_families(IndexData& index) {
-  trace_time tracer("define_func_families", index.sample);
-
-  parallel::for_each(
-    index.allClassInfos,
-    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      for (auto const& [name, mte] : cinfo->methods) {
-        auto const func = func_from_meth_ref(index, mte.meth());
-
-        // If this is a regular class, record that this func is used
-        // by a regular class. This will be used when building the
-        // name-only tables below. Private methods on non-regular
-        // classes can be called even from regular contexts, to
-        // include those as well.
-        if (is_regular_class(*cinfo->cls) ||
-            ((mte.attrs & AttrPrivate) && mte.topLevel())) {
-          create_func_info(index, func)->regularClassMethod = true;
-        }
-      }
-    }
-  );
-
-  // Then calculate func families for methods with particular names
-  // across all classes:
-  {
-    // Build a list of all unique method names. Pre-allocate entries
-    // in methodFamilies for each one. This lets us insert into the
-    // map from multiple threads safely (we don't have to mutate the
-    // actual map).
-    std::vector<SString> allMethods;
-    for (auto const& [name, _] : index.methods) {
-      // index.methods is a multi-map, so we might have multiple
-      // entries with the same name (but they'll be contiguous).
-      if (!allMethods.empty() && allMethods.back() == name) continue;
-      // We don't bother with constructing name-only func families for
-      // constructors, or special methods because it's not
-      // particularly useful.
-      if (name == s_construct.get() ||
-          name == s_invoke.get() ||
-          is_special_method_name(name)) continue;
-      allMethods.emplace_back(name);
-      always_assert(
-        index.methodFamilies.emplace(
-          name,
-          IndexData::MethodFamilyEntry{}).second
-      );
-    }
-
-    // Populate the maps
-    parallel::for_each(
-      allMethods,
-      [&] (SString m) { define_name_only_func_family(index, m); }
-    );
-
-    // Now clean any empty entries out of the maps. These correspond
-    // to method names which didn't end up in any func families.
-    folly::erase_if(
-      index.methodFamilies,
-      [&] (const std::pair<SString, IndexData::MethodFamilyEntry>& p) {
-        return p.second.m_all.isEmpty() && p.second.m_regular.isEmpty();
-      }
-    );
-  }
+void fixup_func_families(IndexData& index) {
+  trace_time tracer("fixup_func_families");
+  tracer.ignore_client_stats();
 
   // Now that all of the FuncFamilies have been created, generate the
   // back links from FuncInfo to their FuncFamilies.
@@ -4471,9 +4179,7 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
     // Every method (except for constructors and special methods
     // should be in the global name-only tables.
     auto const nameIt = index.methodFamilies.find(m->name);
-    if (m->name == s_construct.get() ||
-        m->name == s_invoke.get() ||
-        is_special_method_name(m->name)) {
+    if (!has_name_only_func_family(m->name)) {
       always_assert(nameIt == end(index.methodFamilies));
       continue;
     }
@@ -6890,7 +6596,12 @@ private:
         auto const res = cinfo.methods.emplace(m->name, MethTabEntry { *m });
         always_assert(res.second);
         always_assert(state.m_methodIndices.emplace(m->name, idx++).second);
-        cinfo.missingMethods.erase(m->name);
+        if (cinfo.missingMethods.count(m->name)) {
+          assertx(!res.first->second.firstName());
+          cinfo.missingMethods.erase(m->name);
+        } else {
+          res.first->second.setFirstName();
+        }
         ITRACE(4, "  {}: adding method {}::{}\n",
                cls.name, cls.name, m->name);
       }
@@ -6949,6 +6660,7 @@ private:
         auto const emplaced = cinfo.methods.emplace(mte);
         always_assert(emplaced.second);
         emplaced.first->second.clearTopLevel();
+        emplaced.first->second.clearFirstName();
 
         always_assert(
           state.m_methodIndices.emplace(
@@ -6983,13 +6695,20 @@ private:
           m->name
         );
         always_assert(state.m_methodIndices.emplace(m->name, idx++).second);
-        cinfo.missingMethods.erase(m->name);
+        if (cinfo.missingMethods.count(m->name)) {
+          assertx(!emplaced.first->second.firstName());
+          cinfo.missingMethods.erase(m->name);
+        } else {
+          emplaced.first->second.setFirstName();
+        }
         continue;
       }
 
       // If the method is already in our table, it shouldn't be
       // missing.
       assertx(!cinfo.missingMethods.count(m->name));
+
+      assertx(!emplaced.first->second.firstName());
 
       if ((m->attrs & AttrTrait) && (m->attrs & AttrAbstract)) {
         // Abstract methods from traits never override anything.
@@ -7015,6 +6734,10 @@ private:
           auto const idx = index.methodIdx(tname, name);
           assertx(!methods[idx].first);
           methods[idx] = std::make_pair(name, &mte);
+          if (auto it = cinfo.methods.find(name);
+              it != end(cinfo.methods)) {
+            it->second.clearFirstName();
+          }
         }
 
         for (auto const name : t.missingMethods) {
@@ -7584,6 +7307,26 @@ private:
           return string_data_lti{}(p1.cls->name, p2.cls->name);
         }
       );
+    }
+
+    // Flattening methods into traits can turn methods from not "first
+    // name" to "first name", so recalculate that here.
+    for (auto& [name, mte] : cinfo.methods) {
+      if (mte.firstName()) continue;
+      auto const firstName = [&, name=name] {
+        if (cls.parentName) {
+          auto const& parentInfo = index.classInfo(cls.parentName);
+          if (parentInfo.methods.count(name)) return false;
+          if (parentInfo.missingMethods.count(name)) return false;
+        }
+        for (auto const iname : cinfo.declInterfaces) {
+          auto const& iface = index.classInfo(iname);
+          if (iface.methods.count(name)) return false;
+          if (iface.missingMethods.count(name)) return false;
+        }
+        return true;
+      }();
+      if (firstName) mte.setFirstName();
     }
 
     struct EqHash {
@@ -8334,9 +8077,15 @@ struct BuildSubclassListJob {
     // produced. The ids are grouped together to become
     // FuncFamilyGroups.
     std::vector<std::vector<FuncFamily2::Id>> newFuncFamilyIds;
+    // Func family entries corresponding to all methods with a
+    // particular name encountered in this job. Multiple jobs will
+    // generally produce func family entries for the same name, so
+    // they must be aggregated together afterwards.
+    std::vector<std::pair<SString, FuncFamilyEntry>> nameOnly;
     template <typename SerDe> void serde(SerDe& sd) {
       sd(funcFamilyDeps, std::less<FuncFamily2::Id>{})
         (newFuncFamilyIds)
+        (nameOnly)
         ;
     }
   };
@@ -8350,10 +8099,13 @@ struct BuildSubclassListJob {
   // Each job takes the list of classes and splits which should be
   // produced, dependency classes and splits (which are not updated),
   // edges between classes and splits, and func families (needed by
-  // dependency classes).
+  // dependency classes). Leafs are like deps, except they'll be
+  // considered as part of calculating the name-only func families
+  // (normal deps are not).
   static Output
   run(Variadic<std::unique_ptr<ClassInfo2>> classes,
       Variadic<std::unique_ptr<ClassInfo2>> deps,
+      Variadic<std::unique_ptr<ClassInfo2>> leafs,
       Variadic<std::unique_ptr<Split>> splits,
       Variadic<std::unique_ptr<Split>> splitDeps,
       Variadic<EdgeToSplit> edges,
@@ -8367,6 +8119,11 @@ struct BuildSubclassListJob {
       index.top.emplace(cinfo->name);
     }
     for (auto& cinfo : deps.vals) {
+      always_assert(
+        index.classInfos.emplace(cinfo->name, cinfo.get()).second
+      );
+    }
+    for (auto& cinfo : leafs.vals) {
       always_assert(
         index.classInfos.emplace(cinfo->name, cinfo.get()).second
       );
@@ -8392,10 +8149,25 @@ struct BuildSubclassListJob {
       }
     }
 
-    build_children(index, edges.vals);
-    process_roots(index, classes.vals, splits.vals);
+    // If there's no classes or splits, this job is doing nothing but
+    // calculating name only func family entries (so should have at
+    // least one leaf).
+    if (!index.top.empty()) {
+      build_children(index, edges.vals);
+      process_roots(index, classes.vals, splits.vals);
+    } else {
+      assertx(classes.vals.empty());
+      assertx(splits.vals.empty());
+      assertx(index.splits.empty());
+      assertx(index.funcFamilies.empty());
+      assertx(!leafs.vals.empty());
+      assertx(!index.classInfos.empty());
+    }
 
     OutputMeta meta;
+
+    meta.nameOnly =
+      make_name_only_method_entries(index, classes.vals, leafs.vals);
 
     // Record dependencies for each input class. A func family is a
     // dependency of the class if it appears in the method families
@@ -8427,7 +8199,8 @@ struct BuildSubclassListJob {
       std::move(meta)
     );
   }
-private:
+
+protected:
 
   /*
    * MethInfo caching
@@ -8597,6 +8370,126 @@ private:
     }
   }
 
+  // Produce a set of name-only func families from the given set of
+  // roots and leafs. It is assumed that any roots have already been
+  // processed by process_roots, so that they'll have any appropriate
+  // method families on them. Only entries which are "first name" are
+  // processed.
+  static std::vector<std::pair<SString, FuncFamilyEntry>>
+  make_name_only_method_entries(
+    LocalIndex& index,
+    const std::vector<std::unique_ptr<ClassInfo2>>& roots,
+    const std::vector<std::unique_ptr<ClassInfo2>>& leafs
+  ) {
+    SStringToOneT<Data::MethInfo> infos;
+
+    // If the method is AttrNoOverride, we can create an entry from
+    // just the single MethRef.
+    auto const noOverride = [&] (const ClassInfo2* cinfo,
+                                 SString name,
+                                 const MethTabEntry& mte) {
+      auto& info = infos[name];
+      info.complete = false;
+      info.regularComplete = false;
+
+      auto const meth = mte.meth();
+      if (cinfo->isRegularClass || cinfo->hasRegularSubclass) {
+        if (!info.regularMeths.count(meth)) {
+          info.regularMeths.emplace(meth);
+          info.nonRegularPrivateMeths.erase(meth);
+          info.nonRegularMeths.erase(meth);
+        }
+      } else if (bool(mte.attrs & AttrPrivate) && mte.topLevel()) {
+        if (!info.regularMeths.count(meth) &&
+            !info.nonRegularPrivateMeths.count(meth)) {
+          info.nonRegularPrivateMeths.emplace(meth);
+          info.nonRegularMeths.erase(meth);
+        }
+          } else if (!info.regularMeths.count(meth) &&
+                     !info.nonRegularPrivateMeths.count(meth)) {
+        info.nonRegularMeths.emplace(meth);
+      }
+    };
+
+    // Otherwise, use the already calculated method family and merge
+    // it's contents into what we already have.
+    auto const overridden = [&] (const ClassInfo2* cinfo,
+                                 SString name) {
+      auto const it = cinfo->methodFamilies.find(name);
+      always_assert(it != end(cinfo->methodFamilies));
+      auto entryInfo = meth_info_from_func_family_entry(index, it->second);
+
+      auto& info = infos[name];
+      info.complete = false;
+      info.regularComplete = false;
+
+      for (auto const& meth : entryInfo.regularMeths) {
+        if (info.regularMeths.count(meth)) continue;
+        info.regularMeths.emplace(meth);
+        info.nonRegularPrivateMeths.erase(meth);
+        info.nonRegularMeths.erase(meth);
+      }
+      for (auto const& meth : entryInfo.nonRegularPrivateMeths) {
+        if (info.regularMeths.count(meth) ||
+            info.nonRegularPrivateMeths.count(meth)) {
+          continue;
+        }
+        info.nonRegularPrivateMeths.emplace(meth);
+        info.nonRegularMeths.erase(meth);
+      }
+      for (auto const& meth : entryInfo.nonRegularMeths) {
+        if (info.regularMeths.count(meth) ||
+            info.nonRegularPrivateMeths.count(meth) ||
+            info.nonRegularMeths.count(meth)) {
+          continue;
+        }
+        info.nonRegularMeths.emplace(meth);
+      }
+    };
+
+    // First process the roots. These methods might be overridden or
+    // not.
+    for (auto const& cinfo : roots) {
+      for (auto const& [name, mte] : cinfo->methods) {
+        if (!mte.firstName()) continue;
+        if (!has_name_only_func_family(name)) continue;
+        if (mte.attrs & AttrNoOverride) {
+          noOverride(cinfo.get(), name, mte);
+        } else {
+          overridden(cinfo.get(), name);
+        }
+      }
+    }
+
+    // Leafs are by definition always AttrNoOverride.
+    for (auto const& cinfo : leafs) {
+      for (auto const& [name, mte] : cinfo->methods) {
+        if (!mte.firstName()) continue;
+        if (!has_name_only_func_family(name)) continue;
+        assertx(mte.attrs & AttrNoOverride);
+        noOverride(cinfo.get(), name, mte);
+      }
+    }
+
+    // Make the MethInfo order deterministic
+    std::vector<SString> sorted;
+    sorted.reserve(infos.size());
+    for (auto const& [name, _] : infos) sorted.emplace_back(name);
+    std::sort(begin(sorted), end(sorted), string_data_lt{});
+
+    std::vector<std::pair<SString, FuncFamilyEntry>> entries;
+    entries.reserve(infos.size());
+
+    // Turn the MethInfos into FuncFamilyEntries
+    for (auto const name : sorted) {
+      entries.emplace_back(
+        name,
+        make_method_family_entry(index, infos.at(name))
+      );
+    }
+    return entries;
+  }
+
   // From the information present in the inputs, calculate a mapping
   // of classes and splits to their children (which can be other
   // classes or split nodes). This is not just direct children, but
@@ -8683,7 +8576,6 @@ private:
   // Turn a FuncFamilyEntry into an equivalent Data::MethInfo.
   static Data::MethInfo
   meth_info_from_func_family_entry(LocalIndex& index,
-                                   const ClassInfo2& cinfo,
                                    const FuncFamilyEntry& entry) {
     Data::MethInfo info;
     info.complete = !entry.m_allIncomplete;
@@ -8695,9 +8587,7 @@ private:
       auto const it = index.funcFamilies.find(id);
       always_assert_flog(
         it != end(index.funcFamilies),
-        "While processing class '{}', "
-        "tried to access non-existent func-family '{}'",
-        cinfo.name,
+        "Tried to access non-existent func-family '{}'",
         id.toString()
       );
       return *it->second;
@@ -8787,7 +8677,7 @@ private:
       for (auto const& [name, entry] : cinfo->methodFamilies) {
         data.methods.emplace(
           name,
-          meth_info_from_func_family_entry(index, *cinfo, entry)
+          meth_info_from_func_family_entry(index, entry)
         );
       }
 
@@ -9024,7 +8914,7 @@ private:
   // Create (or re-use an existing) FuncFamily for the given MethInfo.
   static FuncFamily2::Id make_func_family(
     LocalIndex& index,
-    Data::MethInfo& info
+    const Data::MethInfo& info
   ) {
     // We should have more than one method because otherwise we
     // shouldn't be trying to create a FuncFamily for it.
@@ -9130,16 +9020,11 @@ private:
     return id;
   }
 
-  // Translate a MethInfo into the appropriate FuncFamilyEntry and add
-  // it to the method families map.
-  static void make_method_family_entry(
+  // Translate a MethInfo into the appropriate FuncFamilyEntry
+  static FuncFamilyEntry make_method_family_entry(
     LocalIndex& index,
-    ClassInfo2& cinfo,
-    SString name,
-    Data::MethInfo& info
+    const Data::MethInfo& info
   ) {
-    assertx(!is_special_method_name(name));
-
     FuncFamilyEntry entry;
     entry.m_allIncomplete = !info.complete;
     entry.m_regularIncomplete = !info.regularComplete;
@@ -9189,12 +9074,7 @@ private:
       entry.m_meths = FuncFamilyEntry::None{};
     }
 
-    always_assert(
-      cinfo.methodFamilies.emplace(
-        name,
-        std::move(entry)
-      ).second
-    );
+    return entry;
   }
 
   // Calculate the data for each root (those which will we'll provide
@@ -9342,7 +9222,10 @@ private:
 
         if (!(mte.attrs & AttrNoOverride)) {
           assertx(!(cinfo->attrs & AttrNoOverride));
-          make_method_family_entry(index, *cinfo, name, info);
+          auto entry = make_method_family_entry(index, info);
+          always_assert(
+            cinfo->methodFamilies.emplace(name, std::move(entry)).second
+          );
         } else if (debug) {
           always_assert(info.complete);
           always_assert(info.regularComplete);
@@ -9411,7 +9294,11 @@ private:
        */
       for (auto& [name, info] : data.methods) {
         if (cinfo->methods.count(name)) continue;
-        make_method_family_entry(index, *cinfo, name, info);
+        assertx(!is_special_method_name(name));
+        auto entry = make_method_family_entry(index, info);
+        always_assert(
+          cinfo->methodFamilies.emplace(name, std::move(entry)).second
+        );
       }
 
       // Flatten classes sets up the subclass list to just contain this
@@ -9447,7 +9334,90 @@ private:
   }
 };
 
+/*
+ * BuildSubclassListJob produces name-only func family entries. This
+ * job merges entries for the same name into one.
+ */
+struct AggregateNameOnlyJob: public BuildSubclassListJob {
+  static std::string name() { return "hhbbc-aggregate-name-only"; }
+
+  struct OutputMeta {
+    std::vector<std::vector<FuncFamily2::Id>> newFuncFamilyIds;
+    std::vector<FuncFamilyEntry> nameOnly;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(newFuncFamilyIds)
+        (nameOnly)
+        ;
+    }
+  };
+  using Output = Multi<
+    Variadic<FuncFamilyGroup>,
+    OutputMeta
+  >;
+
+  static Output
+  run(std::vector<std::vector<FuncFamilyEntry>> allEntries,
+      Variadic<FuncFamilyGroup> funcFamilies) {
+    LocalIndex index;
+
+    for (auto& group : funcFamilies.vals) {
+      for (auto& ff : group.m_ffs) {
+        auto const id = ff->m_id;
+        // We could have multiple groups which contain the same
+        // FuncFamily, so don't assert uniqueness here. We'll just
+        // take the first one we see (they should all be equivalent).
+        index.funcFamilies.emplace(id, std::move(ff));
+      }
+    }
+
+    OutputMeta meta;
+
+    for (auto const& entries : allEntries) {
+      Data::MethInfo info;
+      info.complete = false;
+      info.regularComplete = false;
+
+      for (auto const& entry : entries) {
+        auto entryInfo = meth_info_from_func_family_entry(index, entry);
+        for (auto const& meth : entryInfo.regularMeths) {
+          if (info.regularMeths.count(meth)) continue;
+          info.regularMeths.emplace(meth);
+          info.nonRegularPrivateMeths.erase(meth);
+          info.nonRegularMeths.erase(meth);
+        }
+        for (auto const& meth : entryInfo.nonRegularPrivateMeths) {
+          if (info.regularMeths.count(meth) ||
+              info.nonRegularPrivateMeths.count(meth)) {
+            continue;
+          }
+          info.nonRegularPrivateMeths.emplace(meth);
+          info.nonRegularMeths.erase(meth);
+        }
+        for (auto const& meth : entryInfo.nonRegularMeths) {
+          if (info.regularMeths.count(meth) ||
+              info.nonRegularPrivateMeths.count(meth) ||
+              info.nonRegularMeths.count(meth)) {
+            continue;
+          }
+          info.nonRegularMeths.emplace(meth);
+        }
+      }
+
+      meta.nameOnly.emplace_back(make_method_family_entry(index, info));
+    }
+
+    Variadic<FuncFamilyGroup> funcFamilyGroups;
+    group_func_families(index, funcFamilyGroups.vals, meta.newFuncFamilyIds);
+
+    return std::make_tuple(
+      std::move(funcFamilyGroups),
+      std::move(meta)
+    );
+  }
+};
+
 Job<BuildSubclassListJob> s_buildSubclassJob;
+Job<AggregateNameOnlyJob> s_aggregateNameOnlyJob;
 
 struct SubclassWork {
   ISStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> allSplits;
@@ -9456,6 +9426,7 @@ struct SubclassWork {
     std::vector<SString> deps;
     std::vector<SString> splits;
     std::vector<SString> splitDeps;
+    std::vector<SString> leafs;
     std::vector<BuildSubclassListJob::EdgeToSplit> edges;
   };
   std::vector<std::vector<Bucket>> buckets;
@@ -9600,9 +9571,11 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
 
     // Do nothing with this class this round
     struct Defer { SString cls; };
-    // This class will be processed this round, but will not be a
-    // root. It is a dependency of some root.
-    struct Process { SString cls; };
+    // This class is a leaf. Leafs never need to be processed (since
+    // their method families are already correct), but they may be
+    // dependencies, and need to be examined to create name-only func
+    // families.
+    struct Leaf { SString cls; };
     // This class will be processed this round and is a root.
     struct Root { SString cls; };
     // This class' children should be split. The class' child list
@@ -9617,16 +9590,16 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       };
       std::vector<Data> splits;
     };
-    using Action = boost::variant<Defer, Process, Root, Split>;
+    using Action = boost::variant<Defer, Leaf, Root, Split>;
 
     auto const actions = parallel::map(
       toProcess,
       [&] (SString cls) {
         auto const& meta = subclassMeta.meta.at(cls);
-        // If the class has no children, it's a leaf and can always be
-        // processed. It never will be a root because it's information
-        // is already correct and doesn't need to be updated.
-        if (meta.children.empty()) return Action{ Process{cls} };
+        // If the class has no children, it's a leaf. It never will be
+        // a root because it's information is already correct and
+        // doesn't need to be updated.
+        if (meta.children.empty()) return Action{ Leaf{cls} };
 
         if (willProcess(cls)) return Action{ Root{cls} };
 
@@ -9733,6 +9706,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     assertx(actions.size() == toProcess.size());
     std::vector<SString> roots;
     std::vector<SString> markProcessed;
+    ISStringSet leafs;
     roots.reserve(actions.size());
     markProcessed.reserve(actions.size());
     // Clear the list of classes to process. It will be repopulated
@@ -9743,7 +9717,20 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       match<void>(
         action,
         [&] (Defer d) { toProcess.emplace_back(d.cls); },
-        [&] (Process p) { markProcessed.emplace_back(p.cls); },
+        [&] (Leaf l) {
+          // Leafs have some special handling. Generally they're just
+          // deps, but they need to be examined for name-only
+          // entries. We only want this done for a leaf in one
+          // specific job (as a dep they can appear in multiple
+          // jobs). We'll use the dep promotion machinery to
+          // selectively promote these to roots in a certain job.
+          toProcess.emplace_back(l.cls);
+          leafs.emplace(l.cls);
+          auto const& meta = subclassMeta.meta.at(l.cls);
+          // If the leaf has no parent either, it will never be a dep,
+          // so cannot promote it. Just treat it as a root.
+          if (meta.parents.empty()) roots.emplace_back(l.cls);
+        },
         [&] (Root r) {
           roots.emplace_back(r.cls);
           markProcessed.emplace_back(r.cls);
@@ -9790,10 +9777,9 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       // Called to get the class index for promotion from a dependency
       // to an output.
       [&] (SString c) -> Optional<size_t> {
-        // Never promote anything. If it's not already a root, it's
-        // already processed or a leaf class and in either case
-        // there's no need for promotion.
-        return std::nullopt;
+        // We only promote leafs
+        if (!leafs.count(c)) return std::nullopt;
+        return subclassMeta.meta.at(c).idx;
       }
     );
 
@@ -9819,8 +9805,14 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     for (auto const& w : work) {
       out.buckets.back().emplace_back();
       auto& bucket = out.buckets.back().back();
+      // Separate out any of the "roots" which are actually leafs.
       for (auto const cls : w.classes) {
-        add(cls, bucket.classes, bucket.splits, bucket.edges);
+        if (leafs.count(cls)) {
+          bucket.leafs.emplace_back(cls);
+          markProcessed.emplace_back(cls);
+        } else {
+          add(cls, bucket.classes, bucket.splits, bucket.edges);
+        }
       }
       for (auto const cls : w.deps) {
         add(cls, bucket.deps, bucket.splitDeps, bucket.edges);
@@ -9835,11 +9827,20 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
           return string_data_lti{}(a.split, b.split);
         }
       );
+      std::sort(begin(bucket.leafs), end(bucket.leafs), string_data_lti{});
     }
 
     // Update the processed set. We have to defer that until here
     // because we'd check it when building the buckets.
     processed.insert(begin(markProcessed), end(markProcessed));
+
+    toProcess.erase(
+      std::remove_if(
+        begin(toProcess), end(toProcess),
+        [&] (SString c) { return processed.count(c); }
+      ),
+      end(toProcess)
+    );
   }
 
   // Keep all split nodes created in the output
@@ -9861,6 +9862,10 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
         for (auto const DEBUG_ONLY s : bucket.splitDeps) {
           FTRACE(6, "    {}\n", s);
         }
+        FTRACE(5, "  leafs ({}):\n", bucket.leafs.size());
+        for (auto const DEBUG_ONLY c : bucket.leafs) {
+          FTRACE(6, "    {}\n", c);
+        }
         FTRACE(5, "  edges ({}):\n", bucket.edges.size());
         for (DEBUG_ONLY auto const& e : bucket.edges) {
           FTRACE(6, "    {} -> {}\n", e.cls, e.split);
@@ -9870,6 +9875,170 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   }
 
   return out;
+}
+
+/*
+ * Aggregate together func family entries corresponding to the same
+ * name. Insert the aggregate entries into the index.
+ */
+void aggregate_name_only_entries(
+  IndexData& index,
+  SStringToOneT<std::vector<FuncFamilyEntry>> work
+) {
+  trace_time tracer{"aggregate name-only entries", index.sample};
+
+  using namespace folly::gen;
+
+  constexpr size_t kBucketSize = 3000;
+
+  auto buckets = consistently_bucketize(
+    [&] {
+      std::vector<SString> sorted;
+      sorted.reserve(work.size());
+      for (auto const& [name, entries] : work) {
+        if (entries.size() <= 1) {
+          // If there's only one entry for a name, there's nothing to
+          // aggregate, and can be inserted directly as the final
+          // result.
+          always_assert(
+            index.nameOnlyMethodFamilies.emplace(name, entries[0]).second
+          );
+          continue;
+        }
+        // Otherwise insert a dummy entry. This will let us update the
+        // entry later from multiple threads without having to mutate
+        // the map.
+        always_assert(
+          index.nameOnlyMethodFamilies.emplace(name, FuncFamilyEntry{}).second
+        );
+        sorted.emplace_back(name);
+      }
+      std::sort(begin(sorted), end(sorted), string_data_lt{});
+      return sorted;
+    }(),
+    kBucketSize
+  );
+
+  struct Updates {
+    std::vector<
+      std::pair<FuncFamily2::Id, Ref<FuncFamilyGroup>>
+    > funcFamilies;
+  };
+
+  auto const run = [&] (std::vector<SString> names) -> coro::Task<Updates> {
+    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+
+    if (names.empty()) HPHP_CORO_RETURN(Updates{});
+
+    std::vector<std::vector<FuncFamilyEntry>> entries;
+    std::vector<Ref<FuncFamilyGroup>> funcFamilies;
+
+    entries.reserve(names.size());
+    // Extract out any func families the entries refer to, so they can
+    // be provided to the job.
+    for (auto const n : names) {
+      auto& e = work.at(n);
+      entries.emplace_back(std::move(e));
+      for (auto const& entry : entries.back()) {
+        match<void>(
+          entry.m_meths,
+          [&] (const FuncFamilyEntry::BothFF& e) {
+            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
+          },
+          [&] (const FuncFamilyEntry::FFAndSingle& e) {
+            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
+          },
+          [&] (const FuncFamilyEntry::FFAndNone& e) {
+            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
+          },
+          [&] (const FuncFamilyEntry::BothSingle&)    {},
+          [&] (const FuncFamilyEntry::SingleAndNone&) {},
+          [&] (const FuncFamilyEntry::None&)          {}
+        );
+      }
+    }
+
+    std::sort(begin(funcFamilies), end(funcFamilies));
+    funcFamilies.erase(
+      std::unique(begin(funcFamilies), end(funcFamilies)),
+      end(funcFamilies)
+    );
+
+    auto [entriesRef, config] = HPHP_CORO_AWAIT(coro::collect(
+      index.client->store(std::move(entries)),
+      index.configRef->getCopy()
+    ));
+
+    Client::ExecMetadata metadata{
+      .job_key = folly::sformat(
+        "aggregate name-only {}",
+        names[0]
+      )
+    };
+
+    auto results = HPHP_CORO_AWAIT(
+      index.client->exec(
+        s_aggregateNameOnlyJob,
+        std::move(config),
+        singleton_vec(
+          std::make_tuple(std::move(entriesRef), std::move(funcFamilies))
+        ),
+        std::move(metadata)
+      )
+    );
+    assertx(results.size() == 1);
+    auto& [ffRefs, outMetaRef] = results[0];
+
+    auto outMeta = HPHP_CORO_AWAIT(index.client->load(std::move(outMetaRef)));
+    assertx(outMeta.newFuncFamilyIds.size() == ffRefs.size());
+    assertx(outMeta.nameOnly.size() == names.size());
+
+    // Update the dummy entries with the actual result.
+    for (size_t i = 0, size = names.size(); i < size; ++i) {
+      auto& old = index.nameOnlyMethodFamilies.at(names[i]);
+      assertx(boost::get<FuncFamilyEntry::None>(&old.m_meths));
+      old = std::move(outMeta.nameOnly[i]);
+    }
+
+    Updates updates;
+    updates.funcFamilies.reserve(outMeta.newFuncFamilyIds.size());
+    for (size_t i = 0, size = outMeta.newFuncFamilyIds.size(); i < size; ++i) {
+      auto const ref = ffRefs[i];
+      for (auto const& id : outMeta.newFuncFamilyIds[i]) {
+        updates.funcFamilies.emplace_back(id, ref);
+      }
+    }
+
+    HPHP_CORO_RETURN(updates);
+  };
+
+  auto const updates = coro::wait(coro::collectRange(
+    from(buckets)
+      | move
+      | map([&] (std::vector<SString>&& n) {
+          return run(std::move(n)).scheduleOn(index.executor->sticky());
+        })
+      | as<std::vector>()
+  ));
+
+  for (auto const& u : updates) {
+    for (auto const& [id, ref] : u.funcFamilies) {
+      // The same FuncFamily can be grouped into multiple
+      // different groups. Prefer the group that's smaller and
+      // if they're the same size, use the one with the lowest
+      // id to keep determinism.
+      auto const& [existing, inserted] =
+        index.funcFamilyRefs.emplace(id, ref);
+      if (inserted) continue;
+      if (existing->second.id().m_size < ref.id().m_size) continue;
+      if (ref.id().m_size < existing->second.id().m_size) {
+        existing->second = ref;
+        continue;
+      }
+      if (existing->second.id() <= ref.id()) continue;
+      existing->second = ref;
+    }
+  }
 }
 
 void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
@@ -9882,6 +10051,8 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
   ISStringToOneT<UniquePtrRef<BuildSubclassListJob::Split>> splitsToRefs;
 
   ISStringToOneT<hphp_fast_set<FuncFamily2::Id>> funcFamilyDeps;
+
+  SStringToOneT<std::vector<FuncFamilyEntry>> nameOnlyEntries;
 
   // Use the metadata to assign to rounds and buckets.
   auto work = build_subclass_lists_assign(std::move(meta));
@@ -9900,14 +10071,16 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
     std::vector<
       std::pair<SString, hphp_fast_set<FuncFamily2::Id>>
     > funcFamilyDeps;
+    std::vector<std::pair<SString, FuncFamilyEntry>> nameOnly;
   };
 
   auto const run = [&] (SubclassWork::Bucket bucket, size_t round)
     -> coro::Task<Updates> {
     HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
 
-    if (bucket.classes.empty() && bucket.splits.empty()) {
-      assertx(bucket.deps.empty());
+    if (bucket.classes.empty() &&
+        bucket.splits.empty() &&
+        bucket.leafs.empty()) {
       assertx(bucket.splitDeps.empty());
       HPHP_CORO_RETURN(Updates{});
     }
@@ -9928,6 +10101,9 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
       | map([&] (SString c) { return index.classInfoRefs.at(c); })
       | as<std::vector>();
     auto deps = from(bucket.deps)
+      | map([&] (SString c) { return index.classInfoRefs.at(c); })
+      | as<std::vector>();
+    auto leafs = from(bucket.leafs)
       | map([&] (SString c) { return index.classInfoRefs.at(c); })
       | as<std::vector>();
     auto splits = from(bucket.splits)
@@ -9979,7 +10155,12 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
     Client::ExecMetadata metadata{
       .job_key = folly::sformat(
         "build subclass list {}",
-        bucket.classes.empty() ? bucket.splits[0] : bucket.classes[0]
+        [&] {
+          if (!bucket.classes.empty()) return bucket.classes[0];
+          if (!bucket.splits.empty()) return bucket.splits[0];
+          assertx(!bucket.leafs.empty());
+          return bucket.leafs[0];
+        }()
       )
     };
 
@@ -9991,6 +10172,7 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
           std::make_tuple(
             std::move(classes),
             std::move(deps),
+            std::move(leafs),
             std::move(splitRefs),
             std::move(splitDeps),
             std::move(edges),
@@ -10016,6 +10198,7 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
     updates.splits.reserve(bucket.splits.size());
     updates.funcFamilies.reserve(outMeta.newFuncFamilyIds.size());
     updates.funcFamilyDeps.reserve(outMeta.funcFamilyDeps.size());
+    updates.nameOnly.reserve(outMeta.nameOnly.size());
 
     for (size_t i = 0, size = bucket.classes.size(); i < size; ++i) {
       updates.classes.emplace_back(bucket.classes[i], cinfoRefs[i]);
@@ -10035,78 +10218,95 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
         std::move(outMeta.funcFamilyDeps[i])
       );
     }
+    updates.nameOnly = std::move(outMeta.nameOnly);
+
     HPHP_CORO_MOVE_RETURN(updates);
   };
 
-  trace_time tracer2{"build subclass lists work"};
-  tracer2.ignore_client_stats();
+  {
+    trace_time tracer2{"build subclass lists work", index.sample};
 
-  for (size_t roundNum = 0; roundNum < work.buckets.size(); ++roundNum) {
-    auto& round = work.buckets[roundNum];
-    // In each round, run all of the work for each bucket
-    // simultaneously, gathering up updates from each job.
-    auto const updates = coro::wait(coro::collectRange(
-      from(round)
-        | move
-        | map([&] (SubclassWork::Bucket&& b) {
-            return run(std::move(b), roundNum)
-              .scheduleOn(index.executor->sticky());
-          })
-        | as<std::vector>()
-    ));
+    for (size_t roundNum = 0; roundNum < work.buckets.size(); ++roundNum) {
+      auto& round = work.buckets[roundNum];
+      // In each round, run all of the work for each bucket
+      // simultaneously, gathering up updates from each job.
+      auto const updates = coro::wait(coro::collectRange(
+        from(round)
+          | move
+          | map([&] (SubclassWork::Bucket&& b) {
+              return run(std::move(b), roundNum)
+                .scheduleOn(index.executor->sticky());
+            })
+          | as<std::vector>()
+      ));
 
-    // Apply the updates to ClassInfo refs. We can do this
-    // concurrently because every ClassInfo is already in the map, so
-    // we can update in place (without mutating the map).
-    parallel::for_each(
-      updates,
-      [&] (const Updates& u) {
-        for (auto const& [name, ref] : u.classes) {
-          index.classInfoRefs.at(name) = ref;
-        }
-      }
-    );
-
-    // However updating splitsToRefs cannot be, because we're mutating
-    // the map by inserting into it. However there's a relatively
-    // small number of splits, so this should be fine.
-    parallel::parallel(
-      [&] {
-        for (auto const& u : updates) {
-          for (auto const& [name, ref] : u.splits) {
-            always_assert(splitsToRefs.emplace(name, ref).second);
+      // Apply the updates to ClassInfo refs. We can do this
+      // concurrently because every ClassInfo is already in the map, so
+      // we can update in place (without mutating the map).
+      parallel::for_each(
+        updates,
+        [&] (const Updates& u) {
+          for (auto const& [name, ref] : u.classes) {
+            index.classInfoRefs.at(name) = ref;
           }
         }
-      },
-      [&] {
-        for (auto const& u : updates) {
-          for (auto const& [id, ref] : u.funcFamilies) {
-            // The same FuncFamily can be grouped into multiple
-            // different groups. Prefer the group that's smaller and
-            // if they're the same size, use the one with the lowest
-            // id to keep determinism.
-            auto const& [existing, inserted] =
-              index.funcFamilyRefs.emplace(id, ref);
-            if (inserted) continue;
-            if (existing->second.id().m_size < ref.id().m_size) continue;
-            if (ref.id().m_size < existing->second.id().m_size) {
-              existing->second = ref;
-              continue;
+      );
+
+      // However updating splitsToRefs cannot be, because we're mutating
+      // the map by inserting into it. However there's a relatively
+      // small number of splits, so this should be fine.
+      parallel::parallel(
+        [&] {
+          for (auto const& u : updates) {
+            for (auto const& [name, ref] : u.splits) {
+              always_assert(splitsToRefs.emplace(name, ref).second);
             }
-            if (existing->second.id() <= ref.id()) continue;
-            existing->second = ref;
+          }
+        },
+        [&] {
+          for (auto const& u : updates) {
+            for (auto const& [id, ref] : u.funcFamilies) {
+              // The same FuncFamily can be grouped into multiple
+              // different groups. Prefer the group that's smaller and
+              // if they're the same size, use the one with the lowest
+              // id to keep determinism.
+              auto const& [existing, inserted] =
+                index.funcFamilyRefs.emplace(id, ref);
+              if (inserted) continue;
+              if (existing->second.id().m_size < ref.id().m_size) continue;
+              if (ref.id().m_size < existing->second.id().m_size) {
+                existing->second = ref;
+                continue;
+              }
+              if (existing->second.id() <= ref.id()) continue;
+              existing->second = ref;
+            }
+          }
+        },
+        [&] {
+          for (auto& u : updates) {
+            for (auto& [name, ids] : u.funcFamilyDeps) {
+              always_assert(funcFamilyDeps.emplace(name, std::move(ids)).second);
+            }
+          }
+        },
+        [&] {
+          for (auto& u : updates) {
+            for (auto& [name, entry] : u.nameOnly) {
+              nameOnlyEntries[name].emplace_back(std::move(entry));
+            }
           }
         }
-      },
-      [&] {
-        for (auto const& u : updates) {
-          for (auto& [name, ids] : u.funcFamilyDeps) {
-            always_assert(funcFamilyDeps.emplace(name, std::move(ids)).second);
-          }
-        }
-      }
-    );
+      );
+    }
   }
+
+  splitsToRefs.clear();
+  funcFamilyDeps.clear();
+  work.buckets.clear();
+  work.allSplits.clear();
+
+  aggregate_name_only_entries(index, std::move(nameOnlyEntries));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -10680,6 +10880,75 @@ void make_class_infos_local(
     }
   );
 
+  for (auto const& [name, entry] : index.nameOnlyMethodFamilies) {
+    match<void>(
+      entry.m_meths,
+      [&, name=name] (const FuncFamilyEntry::BothFF& e) {
+        auto const it = ffState.find(e.m_ff);
+        assertx(it != end(ffState));
+
+        FuncFamilyOrSingle f{ it->second->notExpanded(index), true };
+        index.methodFamilies.emplace(
+          name,
+          IndexData::MethodFamilyEntry { f, f }
+        );
+      },
+      [&, name=name] (const FuncFamilyEntry::FFAndSingle& e) {
+        auto const it = ffState.find(e.m_ff);
+        assertx(it != end(ffState));
+
+        index.methodFamilies.emplace(
+          name,
+          IndexData::MethodFamilyEntry {
+            FuncFamilyOrSingle {
+              it->second->notExpanded(index),
+              true
+            },
+            FuncFamilyOrSingle {
+              func_from_meth_ref(index, e.m_regular),
+              true
+            }
+          }
+        );
+      },
+      [&, name=name] (const FuncFamilyEntry::FFAndNone& e) {
+        auto const it = ffState.find(e.m_ff);
+        assertx(it != end(ffState));
+
+        index.methodFamilies.emplace(
+          name,
+          IndexData::MethodFamilyEntry {
+            FuncFamilyOrSingle {
+              it->second->notExpanded(index),
+              true
+            },
+            FuncFamilyOrSingle {}
+          }
+        );
+      },
+      [&, name=name] (const FuncFamilyEntry::BothSingle& e) {
+        FuncFamilyOrSingle f{ func_from_meth_ref(index, e.m_all), true };
+        index.methodFamilies.emplace(
+          name,
+          IndexData::MethodFamilyEntry { f, f }
+        );
+      },
+      [&, name=name] (const FuncFamilyEntry::SingleAndNone& e) {
+        index.methodFamilies.emplace(
+          name,
+          IndexData::MethodFamilyEntry {
+            FuncFamilyOrSingle {
+              func_from_meth_ref(index, e.m_all),
+              true
+            },
+            FuncFamilyOrSingle {}
+          }
+        );
+      },
+      [&] (const FuncFamilyEntry::None&) { always_assert(false); }
+    );
+  }
+
   remote.clear();
   funcFamilies.clear();
 }
@@ -10989,6 +11258,8 @@ void make_local(IndexData& index) {
     std::move(remoteClassInfos),
     std::move(remoteFuncFamilies)
   );
+
+  decltype(index.nameOnlyMethodFamilies){}.swap(index.nameOnlyMethodFamilies);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -11035,11 +11306,7 @@ Index::Index(Input input,
   build_subclass_lists(*m_data, std::move(subclassMeta));
 
   make_local(*m_data);
-
-  // This looks stupid, but using resize means FuncInfo needs to be
-  // copyable/movable but we have an std::atomic in it (which is
-  // not). This avoids that.
-  m_data->funcInfo = decltype(m_data->funcInfo)(m_data->nextFuncId);
+  m_data->funcInfo.resize(m_data->nextFuncId);
 
   auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
   m_data->compute_iface_vtables = std::thread([&] {
@@ -11050,8 +11317,8 @@ Index::Index(Input input,
       compute_iface_vtables(*m_data);
     }
   );
-  define_func_families(*m_data);        // AttrNoOverride, iface_vtables,
-                                        // subclass_list
+  fixup_func_families(*m_data);
+
   check_invariants(*m_data);
 
   trace_time tracer_2("initialize return types", sample);
@@ -12045,9 +12312,10 @@ res::Func Index::resolve_method(Context ctx,
     // We don't produce name-only global func families for special
     // methods, so be conservative. We don't call special methods in a
     // context where we'd expect to not know the class, so it's not
-    // worthwhile. The same goes for __invoke, which is corresponds to
-    // every closure, and gets too large without much value.
-    if (is_special_method_name(name) || name == s_invoke.get()) {
+    // worthwhile. The same goes for __invoke and __debuginfo, which
+    // is corresponds to every closure, and gets too large without
+    // much value.
+    if (!has_name_only_func_family(name)) {
       return Func { Func::MethodName { name } };
     }
 
@@ -14084,16 +14352,13 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
     find_deps(*m_data, func, dep, deps);
     if (resetFuncFamilies) {
       assertx(has_dep(dep, Dep::ReturnTy));
-      auto const regular = finfo->regularClassMethod.load();
       for (auto const ff : finfo->families) {
         // Reset the cached return type information for all the
         // FuncFamilies this function is a part of. Always reset the
-        // "all" information, and if this function is on a regular
-        // class and there's regular subset information, reset that
-        // too.
+        // "all" information, and if there's regular subset
+        // information, reset that too.
         if (!ff->m_all.m_returnTy.reset() &&
-            (!regular || !ff->m_regular ||
-             !ff->m_regular->m_returnTy.reset())) {
+            (!ff->m_regular || !ff->m_regular->m_returnTy.reset())) {
           continue;
         }
         // Only load the deps for this func family if we're the ones

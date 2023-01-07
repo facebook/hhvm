@@ -73,6 +73,12 @@ php::Func* find_method(const php::Class*, SString name);
 bool is_special_method_name(SString name);
 
 /*
+ * Whether a method by this name should get a "name-only" func family
+ * entry.
+ */
+bool has_name_only_func_family(SString);
+
+/*
  * Returns true if a class has the __MockClass user attribute.  This
  * attribute allows final methods and final classes to be overridden.
  */

@@ -37,7 +37,11 @@ const StaticString
   s_SimpleXMLElement("SimpleXMLElement"),
   s_Closure("Closure"),
   s_MockClass("__MockClass"),
-  s_NoFlatten("__NoFlatten");
+  s_NoFlatten("__NoFlatten"),
+  s_invoke("__invoke"),
+  s_debugInfo("__debugInfo"),
+  s_construct("__construct");
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -65,6 +69,14 @@ php::Func* find_method(const php::Class* cls, SString name) {
 bool is_special_method_name(SString name) {
   auto const p = name->data();
   return p && p[0] == '8' && p[1] == '6';
+}
+
+bool has_name_only_func_family(SString name) {
+  return
+    name != s_construct.get() &&
+    name != s_invoke.get() &&
+    name != s_debugInfo.get() &&
+    !is_special_method_name(name);
 }
 
 bool is_mock_class(const php::Class* cls) {

@@ -235,9 +235,14 @@ bool record_vm_metadata_mem_event(data_map::result res, const void* addr,
       record.setStr("kind", "Func");
       fill_record(func, addr, record);
     },
-    [&](const NamedEntity* ne) {
+    [&](const NamedType* ne) {
       record.setInt("offset", pos - reinterpret_cast<const char*>(ne));
-      record.setStr("kind", "NamedEntity");
+      record.setStr("kind", "NamedType");
+      try_member(ne, addr, record);
+    },
+    [&](const NamedFunc* ne) {
+      record.setInt("offset", pos - reinterpret_cast<const char*>(ne));
+      record.setStr("kind", "NamedFunc");
       try_member(ne, addr, record);
     },
     [&](const StringData* sd) {

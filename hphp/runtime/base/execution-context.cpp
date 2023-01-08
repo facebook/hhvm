@@ -1043,7 +1043,7 @@ String ExecutionContext::getenv(const String& name) const {
   return String();
 }
 
-TypedValue ExecutionContext::lookupClsCns(const NamedEntity* ne,
+TypedValue ExecutionContext::lookupClsCns(const NamedType* ne,
                                       const StringData* cls,
                                       const StringData* cns) {
   Class* class_ = nullptr;
@@ -1431,7 +1431,7 @@ void ExecutionContext::requestInit() {
   HHProf::Request::StartProfiling();
 
 #ifndef NDEBUG
-  Class* cls = NamedEntity::getType(s_stdClass.get())->clsList();
+  Class* cls = NamedType::get(s_stdClass.get())->clsList();
   assertx(cls);
   assertx(cls == SystemLib::s_stdClassClass);
 #endif

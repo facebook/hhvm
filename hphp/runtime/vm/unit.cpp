@@ -133,7 +133,7 @@ Unit::~Unit() {
   // ExecutionContext and the TC may retain references to Class'es, so
   // it is possible for Class'es to outlive their Unit.
   for (auto const& pcls : m_preClasses) {
-    Class* cls = pcls->namedEntity()->clsList();
+    Class* cls = pcls->namedType()->clsList();
     while (cls) {
       Class* cur = cls;
       cls = cls->m_next;
@@ -553,7 +553,7 @@ namespace {
 Array getClassesWithAttrInfo(Attr attrs, bool inverse = false) {
   auto builtins = Array::CreateVec();
   auto non_builtins = Array::CreateVec();
-  NamedEntity::foreach_cached_class([&](Class* c) {
+  NamedType::foreach_cached_class([&](Class* c) {
     if ((c->attrs() & attrs) ? !inverse : inverse) {
       if (c->isBuiltin()) {
         builtins.append(make_tv<KindOfPersistentString>(c->name()));
@@ -576,7 +576,7 @@ Array getFunctions() {
   // Return an array of all defined functions.  This method is used
   // to support get_defined_functions().
   Array a = Array::CreateVec();
-  NamedEntity::foreach_cached_func([&](Func* func) {
+  NamedFunc::foreach_cached_func([&](Func* func) {
     if ((system ^ func->isBuiltin()) || func->isGenerated()) return; //continue
     a.append(Variant(func->nameStr()));
   });

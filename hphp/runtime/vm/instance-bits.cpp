@@ -129,10 +129,10 @@ void initImpl(F&& func) {
   // into their class lists, but in practice most Classes will already be
   // created by now and this process is very fast.
   SharedMutex::WriteHolder clsLocker(g_clsInitLock);
-  NamedEntity::foreach_class([&](Class* cls) {
+  NamedType::foreach_class([&](Class* cls) {
     cls->setInstanceBitsAndParents();
   });
-  NamedEntity::foreach_class([&](Class* cls) {
+  NamedType::foreach_class([&](Class* cls) {
     cls->setInstanceBitsIndex(lookup(cls->name()));
   });
 

@@ -380,7 +380,7 @@ public:
    * type.  Raises an error if the class has no constant with that
    * name, or if the class is not defined.
    */
-  TypedValue lookupClsCns(const NamedEntity* ne,
+  TypedValue lookupClsCns(const NamedType*,
                     const StringData* cls,
                     const StringData* cns);
   TypedValue lookupClsCns(const StringData* cls,

@@ -453,7 +453,7 @@ Class::ExtraData::~ExtraData() {
 
 void Class::destroy() {
   /*
-   * If we were never put on NamedEntity::classList, or
+   * If we were never put on NamedType::classList, or
    * we've already been destroy'd, there's nothing to do
    */
   if (!m_cachedClass.bound()) return;
@@ -474,7 +474,7 @@ void Class::destroy() {
    * lock.)
    */
   auto const pcls = m_preClass.get();
-  pcls->namedEntity()->removeClass(this);
+  pcls->namedType()->removeClass(this);
 
   releaseSProps();
 
@@ -639,7 +639,7 @@ Class::Avail Class::avail(Class*& parent,
   if (Class *ourParent = m_parent.get()) {
     if (!parent) {
       PreClass *ppcls = ourParent->m_preClass.get();
-      parent = Class::get(ppcls->namedEntity(),
+      parent = Class::get(ppcls->namedType(),
                               m_preClass.get()->parent(), tryAutoload);
       if (!parent) {
         parent = ourParent;
@@ -659,7 +659,7 @@ Class::Avail Class::avail(Class*& parent,
     for (size_t i = 0; i < ie.size(); ++i) {
       auto const de = ie[i].get();
       auto const penum = ie[i]->m_preClass.get();
-      auto const included_enum = Class::get(penum->namedEntity(),
+      auto const included_enum = Class::get(penum->namedType(),
                                             penum->name(), tryAutoload);
       if (included_enum != de) {
         if (!included_enum) {
@@ -680,7 +680,7 @@ Class::Avail Class::avail(Class*& parent,
     assertx(pdi->isame(di->name()));
 
     PreClass *pint = di->m_preClass.get();
-    Class* interface = Class::get(pint->namedEntity(), pdi,
+    Class* interface = Class::get(pint->namedType(), pdi,
                                       tryAutoload);
     if (interface != di) {
       if (interface == nullptr) {
@@ -701,7 +701,7 @@ Class::Avail Class::avail(Class*& parent,
         auto di = m_interfaces[i].get();
 
         PreClass *pint = di->m_preClass.get();
-        Class* interface = Class::get(pint->namedEntity(), pint->name(),
+        Class* interface = Class::get(pint->namedType(), pint->name(),
                                           tryAutoload);
         if (interface != di) {
           if (interface == nullptr) {
@@ -720,7 +720,7 @@ Class::Avail Class::avail(Class*& parent,
       auto usedTrait = m_extra->m_usedTraits[i].get();
       const StringData* usedTraitName = m_preClass.get()->usedTraits()[i];
       PreClass* ptrait = usedTrait->m_preClass.get();
-      Class* trait = Class::get(ptrait->namedEntity(), usedTraitName,
+      Class* trait = Class::get(ptrait->namedType(), usedTraitName,
                                     tryAutoload);
       if (trait != usedTrait) {
         if (trait == nullptr) {
@@ -4736,7 +4736,7 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
 
 namespace {
 
-void setupClass(Class* newClass, NamedEntity* nameList) {
+void setupClass(Class* newClass, NamedType* nameList) {
   bool const isPersistent = shouldUsePersistentHandles(newClass);
   nameList->m_cachedClass.bind(
     isPersistent ? rds::Mode::Persistent : rds::Mode::Normal,
@@ -4765,7 +4765,7 @@ void setupClass(Class* newClass, NamedEntity* nameList) {
   );
 
   if (RuntimeOption::EvalEnableReverseDataMap) {
-    // The corresponding deregister is in NamedEntity::removeClass().
+    // The corresponding deregister is in NamedType::removeClass().
     data_map::register_start(newClass);
     for (unsigned i = 0, n = newClass->numMethods(); i < n; i++) {
       if (auto meth = newClass->getMethod(i)) {
@@ -4784,12 +4784,12 @@ const StaticString s__JitSerdesPriority("__JitSerdesPriority");
 Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
   FTRACE(3, "  Defining cls {} failIsFatal {}\n",
          preClass->name()->data(), failIsFatal);
-  NamedEntity* const nameList = preClass->namedEntity();
+  NamedType* const nameList = preClass->namedType();
   Class* top = nameList->clsList();
 
   /*
    * Check if there is already a name defined in this request for this
-   * NamedEntity.
+   * NamedType.
    *
    * Raise a fatal unless the existing class definition is identical to the
    * one this invocation would create.
@@ -4928,11 +4928,11 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
 }
 
 Class* Class::defClosure(const PreClass* preClass, bool cache) {
-  auto const nameList = preClass->namedEntity();
+  auto const nameList = preClass->namedType();
 
   auto const find = [&] () -> Class* {
     if (RO::RepoAuthoritative) {
-      // In repo mode the cached class slot in the NamedEntity should
+      // In repo mode the cached class slot in the NamedType should
       // be authoritative. Closure names are unique in repo mode so
       // there should only ever be one pre-class with the same
       // name. This is more than an optimization. We don't want to
@@ -4983,7 +4983,7 @@ Class* Class::defClosure(const PreClass* preClass, bool cache) {
   return newClass.get();
 }
 
-Class* Class::load(const NamedEntity* ne, const StringData* name) {
+Class* Class::load(const NamedType* ne, const StringData* name) {
   Class* cls;
   if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
     return cls;
@@ -5000,7 +5000,7 @@ void handleModuleBoundaryViolation(const Class* cls, const Func* caller) {
 }
 } // namespace
 
-Class* Class::resolve(const NamedEntity* ne, const StringData* name,
+Class* Class::resolve(const NamedType* ne, const StringData* name,
                       const Func* callerFunc) {
   Class* cls = load(ne, name);
   handleModuleBoundaryViolation(cls, callerFunc);
@@ -5013,7 +5013,7 @@ Class* Class::resolve(const StringData* name, const Func* callerFunc) {
   return cls;
 }
 
-Class* Class::loadMissing(const NamedEntity* ne, const StringData* name) {
+Class* Class::loadMissing(const NamedType* ne, const StringData* name) {
   VMRegAnchor _;
   CoeffectsAutoGuard _2;
   AutoloadHandler::s_instance->autoloadType(
@@ -5021,7 +5021,7 @@ Class* Class::loadMissing(const NamedEntity* ne, const StringData* name) {
   return Class::lookup(ne);
 }
 
-Class* Class::get(const NamedEntity* ne, const StringData *name, bool tryAutoload) {
+Class* Class::get(const NamedType* ne, const StringData *name, bool tryAutoload) {
   Class *cls = lookup(ne);
   if (UNLIKELY(!cls)) {
     if (tryAutoload) {

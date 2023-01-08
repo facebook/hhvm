@@ -82,8 +82,8 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
           auto const value = new APCTypedValue(func);
           return {value->getHandle(), sizeof(APCTypedValue)};
         }
-        auto const value = new APCNamedEntity(func);
-        return {value->getHandle(), sizeof(APCNamedEntity)};
+        auto const value = new APCNamedFunc(func);
+        return {value->getHandle(), sizeof(APCNamedFunc)};
       }
       invalidFuncConversion("string");
     }
@@ -93,8 +93,8 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
         auto const value = new APCTypedValue(cls);
         return {value->getHandle(), sizeof(APCTypedValue)};
       }
-      auto const value = new APCNamedEntity(cls);
-      return {value->getHandle(), sizeof(APCNamedEntity)};
+      auto const value = new APCNamedClass(cls);
+      return {value->getHandle(), sizeof(APCNamedClass)};
     }
     case KindOfLazyClass: {
       auto const value = new APCTypedValue(val(cell).plazyclass);
@@ -187,10 +187,10 @@ Variant APCHandle::toLocalHelper(bool pure) const {
       not_reached();
 
     case APCKind::FuncEntity:
-      return APCNamedEntity::fromHandle(this)->getEntityOrNull();
+      return APCNamedFunc::fromHandle(this)->getEntityOrNull();
 
     case APCKind::ClassEntity:
-      return APCNamedEntity::fromHandle(this)->getEntityOrNull();
+      return APCNamedClass::fromHandle(this)->getEntityOrNull();
 
     case APCKind::ClsMeth:
       return APCClsMeth::fromHandle(this)->getEntityOrNull();
@@ -318,11 +318,11 @@ void APCHandle::deleteShared() {
       return;
 
     case APCKind::FuncEntity:
-      delete APCNamedEntity::fromHandle(this);
+      delete APCNamedFunc::fromHandle(this);
       return;
 
     case APCKind::ClassEntity:
-      delete APCNamedEntity::fromHandle(this);
+      delete APCNamedClass::fromHandle(this);
       return;
 
     case APCKind::SerializedVec:

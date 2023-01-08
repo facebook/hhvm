@@ -185,7 +185,7 @@ void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
   if (false) { // typecheck
     const UNUSED Func* f = StaticMethodCache::lookup(
       ch,
-      extra->namedEntity,
+      extra->namedType,
       extra->clsName,
       extra->methodName,
       extra->context,
@@ -195,7 +195,7 @@ void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
 
   auto const args = argGroup(env, inst)
     .imm(ch)
-    .immPtr(extra->namedEntity)
+    .immPtr(extra->namedType)
     .immPtr(extra->clsName)
     .immPtr(extra->methodName)
     .immPtr(extra->context)

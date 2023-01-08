@@ -1269,10 +1269,10 @@ OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName) {
 }
 
 OPTBLD_INLINE void iopClsCnsD(const StringData* clsCnsName, Id classId) {
-  const NamedEntityPair& classNamedEntity =
+  const NamedTypePair& classNamedType =
     vmfp()->func()->unit()->lookupNamedTypePairId(classId);
-  auto const clsCns = g_context->lookupClsCns(classNamedEntity.second,
-                                       classNamedEntity.first, clsCnsName);
+  auto const clsCns = g_context->lookupClsCns(classNamedType.second,
+                                       classNamedType.first, clsCnsName);
   auto const c1 = vmStack().allocC();
   tvDup(clsCns, *c1);
 }
@@ -1525,7 +1525,7 @@ OPTBLD_INLINE void iopDblAsBits() {
 
 ALWAYS_INLINE
 bool implInstanceOfHelper(const StringData* str1, TypedValue* c2) {
-  const NamedEntity* rhs = NamedEntity::getType(str1, false);
+  const NamedType* rhs = NamedType::get(str1, false);
   // Because of other codepaths, an un-normalized name might enter the
   // table without a Class* so we need to check if it's there.
   if (LIKELY(rhs && rhs->getCachedClass() != nullptr)) {
@@ -1557,7 +1557,7 @@ OPTBLD_INLINE void iopInstanceOf() {
 }
 
 OPTBLD_INLINE void iopInstanceOfD(Id id) {
-  const NamedEntity* ne = vmfp()->func()->unit()->lookupNamedTypeId(id);
+  const NamedType* ne = vmfp()->func()->unit()->lookupNamedTypeId(id);
   TypedValue* c1 = vmStack().topC();
   bool r = tvInstanceOf(c1, ne);
   vmStack().replaceC<KindOfBoolean>(r);
@@ -4157,7 +4157,7 @@ iopFCallClsMethodM(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
 OPTBLD_INLINE JitResumeAddr
 iopFCallClsMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                    Id classId, const StringData* methName) {
-  const NamedEntityPair &nep =
+  const NamedTypePair &nep =
     vmfp()->func()->unit()->lookupNamedTypePairId(classId);
   Class* cls = Class::resolve(nep.second, nep.first, vmfp()->func());
   if (cls == nullptr) {
@@ -4225,7 +4225,7 @@ OPTBLD_INLINE void iopNewObj() {
 }
 
 OPTBLD_INLINE void iopNewObjD(Id id) {
-  const NamedEntityPair &nep =
+  const NamedTypePair &nep =
     vmfp()->func()->unit()->lookupNamedTypePairId(id);
   auto cls = Class::resolve(nep.second, nep.first, vmfp()->func());
   if (cls == nullptr) {
@@ -5384,9 +5384,9 @@ iopWrapReturn(JitResumeAddr(fn)(bool, PC, Params...),
 }
 
 /*
- * Some bytecodes with SA immediates want the raw Id to look up a NamedEntity
- * quickly, and some want the const StringData*. Support both by decoding to
- * this struct and implicitly converting to what the callee wants.
+ * Some bytecodes with SA immediates want the raw Id to look up a NamedType
+ * or NamedFunc quickly, and some want the const StringData*. Support both by
+ * decoding to this struct and implicitly converting to what the callee wants.
  */
 struct litstr_id {
   /* implicit */ ALWAYS_INLINE operator const StringData*() const {

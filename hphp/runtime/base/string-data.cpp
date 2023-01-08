@@ -112,7 +112,7 @@ Class* StringData::getCachedClass() const {
   return getSymbolPrefix(this)->cls;
 }
 
-NamedEntity* StringData::getNamedType() const {
+NamedType* StringData::getNamedType() const {
   return getSymbolPrefix(this)->nty;
 }
 
@@ -122,7 +122,7 @@ void StringData::setCachedClass(Class* cls) {
   prefix->cls = cls;
 }
 
-void StringData::setNamedType(NamedEntity* nty) {
+void StringData::setNamedType(NamedType* nty) {
   auto const prefix = getSymbolPrefix(this);
   assertx(IMPLIES(prefix->nty, prefix->nty == nty));
   prefix->nty = nty;

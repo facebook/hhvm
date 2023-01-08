@@ -125,12 +125,12 @@ bool AutoloadHandler::setMap(const Array& map, String root) {
 namespace {
 struct FuncExistsChecker {
   const StringData* m_name;
-  mutable NamedEntity* m_ne;
+  mutable NamedFunc* m_ne;
   explicit FuncExistsChecker(const StringData* name)
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
-      m_ne = NamedEntity::getFunc(m_name, false);
+      m_ne = NamedFunc::get(m_name, false);
       if (!m_ne) {
         return false;
       }
@@ -143,12 +143,12 @@ struct FuncExistsChecker {
 
 struct ClassExistsChecker {
   const String& m_name;
-  mutable NamedEntity* m_ne;
+  mutable NamedType* m_ne;
   explicit ClassExistsChecker(const String& name)
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
-      m_ne = NamedEntity::getType(m_name.get(), false);
+      m_ne = NamedType::get(m_name.get(), false);
       if (!m_ne) {
         return false;
       }
@@ -168,12 +168,12 @@ struct ConstExistsChecker {
 
 struct TypeAliasExistsChecker {
   const String& m_name;
-  mutable NamedEntity* m_ne;
+  mutable NamedType* m_ne;
   explicit TypeAliasExistsChecker(const String& name)
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
-      m_ne = NamedEntity::getType(m_name.get(), false);
+      m_ne = NamedType::get(m_name.get(), false);
       if (!m_ne) {
         return false;
       }
@@ -184,12 +184,12 @@ struct TypeAliasExistsChecker {
 
 struct NamedTypeExistsChecker {
   const String& m_name;
-  mutable NamedEntity* m_ne;
+  mutable NamedType* m_ne;
   explicit NamedTypeExistsChecker(const String& name)
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
-      m_ne = NamedEntity::getType(m_name.get(), false);
+      m_ne = NamedType::get(m_name.get(), false);
       if (!m_ne) {
         return false;
       }

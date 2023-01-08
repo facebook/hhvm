@@ -334,11 +334,11 @@ struct InstanceOfIfaceVtableData : IRExtraData {
  */
 struct ClsMethodData : IRExtraData {
   ClsMethodData(const StringData* cls, const StringData* method,
-                const NamedEntity* ne, const Class* context,
+                const NamedType* ne, const Class* context,
                 const Func* callerFunc)
     : clsName(cls)
     , methodName(method)
-    , namedEntity(ne)
+    , namedType(ne)
     , context(context)
     , callerFunc(callerFunc)
   {}
@@ -380,7 +380,7 @@ struct ClsMethodData : IRExtraData {
 
   const StringData* clsName;
   const StringData* methodName;
-  const NamedEntity* namedEntity;
+  const NamedType* namedType;
   const Class* context;
   const Func* callerFunc;
 };

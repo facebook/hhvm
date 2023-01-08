@@ -37,7 +37,7 @@ struct APCString;
 struct Array;
 struct String;
 struct APCHandle;
-struct NamedEntity;
+struct NamedType;
 struct UnitEmitter;
 struct Unit;
 
@@ -407,9 +407,9 @@ struct StringData final : MaybeCountable,
    * Pre: isSymbol()
    */
   Class* getCachedClass() const;
-  NamedEntity* getNamedType() const;
+  NamedType* getNamedType() const;
   void setCachedClass(Class* cls);
-  void setNamedType(NamedEntity* ne);
+  void setNamedType(NamedType* ne);
 
   /*
    * Helpers used to JIT access to the symbol cache.
@@ -530,7 +530,7 @@ private:
  * Some static StringData has a SymbolPrefix allocated right in front.
  */
 struct SymbolPrefix {
-  AtomicLowPtr<NamedEntity> nty;
+  AtomicLowPtr<NamedType> nty;
   AtomicLowPtr<Class> cls;
 };
 

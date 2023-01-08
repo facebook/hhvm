@@ -45,7 +45,7 @@ namespace HPHP {
 
 struct ActRec;
 struct Class;
-struct NamedEntity;
+struct NamedFunc;
 struct PreClass;
 struct StringData;
 struct StructuredLogEntry;
@@ -355,8 +355,8 @@ public:
    *
    * @requires: shared()->m_preClass == nullptr
    */
-  NamedEntity* getNamedEntity();
-  const NamedEntity* getNamedEntity() const;
+  NamedFunc* getNamedFunc();
+  const NamedFunc* getNamedFunc() const;
 
   /**
    * meth_caller
@@ -1251,26 +1251,26 @@ public:
 
   /*
    * Look up the defined Func in this request with name `name', or with the name
-   * mapped to the NamedEntity `ne'.
+   * mapped to the NamedFunc `ne'.
    *
    * Return nullptr if the function is not yet defined in this request.
    */
-  static Func* lookup(const NamedEntity* ne);
+  static Func* lookup(const NamedFunc* ne);
   static Func* lookup(const StringData* name);
 
   /*
    * Look up, or autoload and define, the Func in this request with name `name',
-   * or with the name mapped to the NamedEntity `ne'.
+   * or with the name mapped to the NamedFunc `ne'.
    *
-   * @requires: NamedEntity::get(name) == ne
+   * @requires: NamedFunc::get(name) == ne
    */
-  static Func* load(const NamedEntity* ne, const StringData* name);
+  static Func* load(const NamedFunc* ne, const StringData* name);
   static Func* load(const StringData* name);
 
   /*
    * Same as Func::load but also checks for module boundary violations
    */
-  static Func* resolve(const NamedEntity* ne, const StringData* name,
+  static Func* resolve(const NamedFunc* ne, const StringData* name,
                        const Func* callerFunc);
   static Func* resolve(const StringData* name, const Func* callerFunc);
 
@@ -1481,7 +1481,7 @@ private:
   void initPrologues(int numParams);
   void setFullName(int numParams);
   void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
-  void setNamedEntity(const NamedEntity*);
+  void setNamedFunc(const NamedFunc*);
 
   PC loadBytecode();
 
@@ -1730,7 +1730,7 @@ private:
   UnionWrapper m_u{nullptr};
   union {
     Slot m_methodSlot{0};
-    LowPtr<const NamedEntity>::storage_type m_namedEntity;
+    LowPtr<const NamedFunc>::storage_type m_namedFunc;
   };
   mutable ClonedFlag m_cloned;
   mutable AtomicFlags m_atomicFlags;

@@ -310,7 +310,7 @@ void cgProfileSubClsCns(IRLS& env, const IRInstruction* inst) {
 }
 
 static TypedValue initClsCnsHelper(TypedValue* cache,
-                                   const NamedEntity* ne,
+                                   const NamedType* ne,
                                    const StringData* cls,
                                    const StringData* cns) {
   auto const clsCns = g_context->lookupClsCns(ne, cls, cns);
@@ -327,7 +327,7 @@ void cgInitClsCns(IRLS& env, const IRInstruction* inst) {
   markRDSAccess(v, link.handle());
   auto const args = argGroup(env, inst)
     .addr(rvmtl(), safe_cast<int32_t>(link.handle()))
-    .immPtr(NamedEntity::getType(extra->clsName))
+    .immPtr(NamedType::get(extra->clsName))
     .immPtr(extra->clsName)
     .immPtr(extra->cnsName);
 

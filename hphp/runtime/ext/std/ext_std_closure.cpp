@@ -253,7 +253,7 @@ ObjectData* createClosure(Class* cls) {
    * instead, but only in non-repo-auth mode.
    */
   if (!rds::isHandleInit(cls->classHandle())) {
-    cls->preClass()->namedEntity()->clsList()->setCached();
+    cls->preClass()->namedType()->clsList()->setCached();
   }
   return createClosureRepoAuth(cls);
 }

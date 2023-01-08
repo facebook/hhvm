@@ -455,7 +455,7 @@ std::unique_ptr<ProfTransRec> read_prof_trans_rec(ProfDataDeserializer& ser) {
   return ret;
 }
 
-bool write_seen_type(ProfDataSerializer& ser, const NamedEntity* ne) {
+bool write_seen_type(ProfDataSerializer& ser, const NamedType* ne) {
   if (!ne) return false;
   if (auto const cls = ne->clsList()) {
     if (!(cls->attrs() & AttrUnique)) return false;
@@ -479,7 +479,7 @@ bool write_seen_type(ProfDataSerializer& ser, const NamedEntity* ne) {
   return false;
 }
 
-void write_named_type(ProfDataSerializer& ser, const NamedEntity* ne) {
+void write_named_type(ProfDataSerializer& ser, const NamedType* ne) {
   always_assert(ne);
   if (auto const cls = ne->clsList()) {
     write_raw(ser, SeenType::Class);
@@ -501,9 +501,9 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
   read_container(ser,
                  [&] {
                    auto const dep = read_class(ser);
-                   auto const ne = dep->preClass()->namedEntity();
+                   auto const ne = dep->preClass()->namedType();
                    // if it's not persistent, make sure that dep
-                   // is the active class for this NamedEntity
+                   // is the active class for this NamedType
                    assertx(ne->m_cachedClass.bound());
                    if (ne->m_cachedClass.isNormal()) {
                      ne->setCachedClass(dep);
@@ -518,8 +518,8 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
     read_named_type(ser);
   }
 
-  auto const ne = preClass->namedEntity();
-  // If it's not persistent, make sure its NamedEntity is
+  auto const ne = preClass->namedType();
+  // If it's not persistent, make sure its NamedType is
   // unbound, ready for DefClass
   if (ne->m_cachedClass.bound() &&
       ne->m_cachedClass.isNormal()) {
@@ -553,7 +553,7 @@ const TypeAlias* read_typealias_internal(ProfDataDeserializer& ser) {
 /*
  * This reads in TypeAliases and Classes that are used for code gen,
  * but otherwise aren't needed for profiling. We just need them to be
- * loaded into the NamedEntity table, so this function just returns
+ * loaded into the NamedType table, so this function just returns
  * whether or not to continue.
  */
 bool read_seen_type(ProfDataDeserializer& ser) {
@@ -607,15 +607,15 @@ void write_seen_types(ProfDataSerializer& ser, ProfData* pd) {
   pd->forEachProfilingFunc([&](auto const& func) {
     always_assert(func);
     for (auto const& p : func->params()) {
-      if (auto const ne = p.typeConstraint.anyNamedEntity()) {
+      if (auto const ne = p.typeConstraint.anyNamedType()) {
         write_seen_type(ser, ne);
       }
     }
   });
 
   // Now just iterate and write anything that remains
-  NamedEntity::foreach_name(
-    [&] (NamedEntity& ne) {
+  NamedType::foreach_name(
+    [&] (NamedType& ne) {
       write_seen_type(ser, &ne);
     }
   );
@@ -627,7 +627,7 @@ void read_seen_types(ProfDataDeserializer& ser) {
                          RuntimeOption::ServerExecutionMode());
   while (read_seen_type(ser)) {
     // nothing to do. this was just to make sure everything is loaded
-    // into the NamedEntity table
+    // into the NamedType table
   }
 }
 
@@ -1501,7 +1501,7 @@ void write_class(ProfDataSerializer& ser, const Class* cls) {
 
   if (cls->attrs() & AttrEnum &&
       cls->preClass()->enumBaseTy().isUnresolved()) {
-    write_named_type(ser, cls->preClass()->enumBaseTy().typeNamedEntity());
+    write_named_type(ser, cls->preClass()->enumBaseTy().typeNamedType());
   }
 
   if (cls->parent() == c_Closure::classof()) {
@@ -1661,8 +1661,8 @@ Func* read_func(ProfDataDeserializer& ser) {
         auto const unit = read_unit(ser);
         for (auto const f : unit->funcs()) {
           if (f->sn() == id) {
-            auto const ne = f->getNamedEntity();
-            // If it's not persistent, make sure its NamedEntity is
+            auto const ne = f->getNamedFunc();
+            // If it's not persistent, make sure its NamedFunc is
             // unbound, ready for DefFunc
             if (ne->m_cachedFunc.bound() && ne->m_cachedFunc.isNormal()) {
               ne->m_cachedFunc.markUninit();

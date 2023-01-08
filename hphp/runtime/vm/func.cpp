@@ -297,7 +297,7 @@ void Func::setFullName(int /*numParams*/) {
     // `methodSlot', which refers to its slot in its `baseCls' (which still
     // points to a subclass of Closure).
     if (!isMethod()) {
-      setNamedEntity(NamedEntity::getFunc(m_name));
+      setNamedFunc(NamedFunc::get(m_name));
     }
   }
 }
@@ -785,7 +785,7 @@ void Func::def(Func* func) {
   // Don't define the __debugger_main() function
   DEBUGGER_ATTACHED_ONLY(if (func->userAttributes().count(s_DebuggerMain.get())) { return; });
 
-  auto const ne = func->getNamedEntity();
+  auto const ne = func->getNamedFunc();
 
   Func* f = ne->getCachedFunc();
   if (f == nullptr) {
@@ -827,12 +827,12 @@ void Func::def(Func* func) {
   raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
 }
 
-Func* Func::lookup(const NamedEntity* ne) {
+Func* Func::lookup(const NamedFunc* ne) {
   return ne->getCachedFunc();
 }
 
 Func* Func::lookup(const StringData* name) {
-  const NamedEntity* ne = NamedEntity::getFunc(name);
+  const NamedFunc* ne = NamedFunc::get(name);
   return ne->getCachedFunc();
 }
 
@@ -840,13 +840,13 @@ Func* Func::lookupBuiltin(const StringData* name) {
   // Builtins are either persistent (the normal case), or defined at the
   // beginning of every request (if JitEnableRenameFunction or interception is
   // enabled). In either case, they're unique, so they should be present in the
-  // NamedEntity.
-  auto const ne = NamedEntity::getFunc(name);
+  // NamedFunc.
+  auto const ne = NamedFunc::get(name);
   auto const f = ne->getCachedFunc();
   return (f && f->isUnique() && f->isBuiltin()) ? f : nullptr;
 }
 
-Func* Func::load(const NamedEntity* ne, const StringData* name) {
+Func* Func::load(const NamedFunc* ne, const StringData* name) {
   Func* func = ne->getCachedFunc();
   if (LIKELY(func != nullptr)) return func;
   if (AutoloadHandler::s_instance->autoloadFunc(
@@ -858,7 +858,7 @@ Func* Func::load(const NamedEntity* ne, const StringData* name) {
 
 Func* Func::load(const StringData* name) {
   String normStr;
-  auto ne = NamedEntity::getFunc(name, true, &normStr);
+  auto ne = NamedFunc::get(name, true, &normStr);
 
   // Try to fetch from cache
   Func* func_ = ne->getCachedFunc();
@@ -884,7 +884,7 @@ void handleModuleBoundaryViolation(const Func* callee, const Func* caller) {
 }
 } // namespace
 
-Func* Func::resolve(const NamedEntity* ne, const StringData* name,
+Func* Func::resolve(const NamedFunc* ne, const StringData* name,
                     const Func* callerFunc) {
   Func* func = load(ne, name);
   handleModuleBoundaryViolation(func, callerFunc);

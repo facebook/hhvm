@@ -58,7 +58,8 @@ namespace detail {
   T(RFuncData*, TRFunc)          \
   T(ClsMethDataRef, TClsMeth)    \
   T(RClsMethData*, TRClsMeth)    \
-  T(NamedEntity*, TNamedEntity)  \
+  T(NamedType*, TNamedType)      \
+  T(NamedFunc*, TNamedFunc)      \
   T(ResourceHdr*, TRes)          \
   T(StringData*, TStr)           \
   T(TCA, TTCA)                   \

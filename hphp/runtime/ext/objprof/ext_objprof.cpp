@@ -754,7 +754,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
   });
   issueWarnings(deferred_warnings);
 
-  NamedEntity::foreach_class([&](Class* cls) {
+  NamedType::foreach_class([&](Class* cls) {
     if (cls->needsInitSProps()) {
       return;
     }

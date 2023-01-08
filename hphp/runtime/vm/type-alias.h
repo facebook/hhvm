@@ -132,7 +132,7 @@ struct TypeAlias {
 
   /*
    * Define the type alias given by `id', binding it to the appropriate
-   * NamedEntity for this request.
+   * NamedType for this request.
    *
    * Raises a fatal error if type alias already defined or cannot be defined
    * unless failIsFatal is unset

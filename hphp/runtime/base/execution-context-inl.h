@@ -280,7 +280,7 @@ inline ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
 
 inline TypedValue ExecutionContext::lookupClsCns(const StringData* cls,
                                       const StringData* cns) {
-  return lookupClsCns(NamedEntity::getType(cls), cls, cns);
+  return lookupClsCns(NamedType::get(cls), cls, cns);
 }
 
 inline ActRec*

@@ -21,7 +21,7 @@ namespace HPHP {
 
 APCRFunc::APCRFunc(RFuncData* rfuncData, APCHandle* generics):
   m_handle(APCKind::RFunc),
-  m_entity(rfuncData->m_func->getNamedEntity()),
+  m_entity(rfuncData->m_func->getNamedFunc()),
   m_name(rfuncData->m_func->name()),
   m_generics(generics)
 {

@@ -59,7 +59,7 @@ struct TypeConstraint {
     : m_flags(NoFlags)
     , m_clsName(nullptr)
     , m_typeName(nullptr)
-    , m_namedEntity(nullptr)
+    , m_namedType(nullptr)
   {
     init();
   }
@@ -68,7 +68,7 @@ struct TypeConstraint {
     : m_flags(flags)
     , m_clsName(nullptr)
     , m_typeName(typeName)
-    , m_namedEntity(nullptr)
+    , m_namedType(nullptr)
   {
     init();
   }
@@ -127,15 +127,15 @@ struct TypeConstraint {
    */
   const StringData* clsName() const { return m_clsName; }
   const StringData* typeName() const { return m_typeName; }
-  const NamedEntity* clsNamedEntity() const {
+  const NamedType* clsNamedType() const {
     assertx(isObject());
-    return m_namedEntity;
+    return m_namedType;
   }
-  const NamedEntity* typeNamedEntity() const {
+  const NamedType* typeNamedType() const {
     assertx(isUnresolved());
-    return m_namedEntity;
+    return m_namedType;
   }
-  const NamedEntity* anyNamedEntity() const { return m_namedEntity; }
+  const NamedType* anyNamedType() const { return m_namedType; }
   Flags flags() const { return m_flags; }
 
   /*
@@ -423,7 +423,7 @@ private:
   Flags m_flags;
   LowStringPtr m_clsName;   // valid iff isObject()
   LowStringPtr m_typeName;
-  LowPtr<const NamedEntity> m_namedEntity;
+  LowPtr<const NamedType> m_namedType;
 };
 
 //////////////////////////////////////////////////////////////////////

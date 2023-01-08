@@ -403,7 +403,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/vm-tcaddr:       show addresses of translation cache sections\n"
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
-        "/vm-namedentities:show size of the NamedEntityTable\n"
+        "/vm-namedentities:show combined size of the NamedType and\n"
+        "                  NamedFunc tables\n"
         "/load-factor:     get or set load factor\n"
         "    set           optional, set new load factor (default 1.0,\n"
         "                  valid range [-1.0, 10.0])\n"
@@ -1050,8 +1051,8 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("fixups", jit::FixupMap::size());
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::maxFuncIdNum());
-    appendStat("named-entities", NamedEntity::tableSize());
-    for (auto& pair : NamedEntity::tableStats()) {
+    appendStat("named-entities", namedEntityTableSize());
+    for (auto& pair : namedEntityStats()) {
       appendStat(folly::sformat("named-entities-{}", pair.first), pair.second);
     }
     appendStat("static-strings", makeStaticStringCount());
@@ -1399,7 +1400,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
   }
   if (cmd == "vm-namedentities") {
     std::ostringstream result;
-    result << NamedEntity::tableSize();
+    result << namedEntityTableSize();
     transport->sendString(result.str());
     return true;
   }

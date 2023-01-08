@@ -353,7 +353,7 @@ public:
   rds::Handle coverageDataHandle() const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Litstrs and NamedEntitys.                                          [const]
+  // Litstrs and NamedTypes/Funcs.                                      [const]
 
   /*
    * Size of the Unit's litstr table.
@@ -365,10 +365,10 @@ public:
    */
   StringData* lookupLitstrId(Id id) const;
 
-  const NamedEntity* lookupNamedTypeId(Id id) const;
-  const NamedEntity* lookupNamedFuncId(Id id) const;
-  NamedEntityPair lookupNamedTypePairId(Id id) const;
-  NamedEntityPair lookupNamedFuncPairId(Id id) const;
+  const NamedType* lookupNamedTypeId(Id id) const;
+  const NamedFunc* lookupNamedFuncId(Id id) const;
+  NamedTypePair lookupNamedTypePairId(Id id) const;
+  NamedFuncPair lookupNamedFuncPairId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Arrays.                                                            [const]

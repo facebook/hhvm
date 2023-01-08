@@ -332,7 +332,7 @@ const Func* lookupImmutableCtor(const Class* cls,
 }
 
 ImmutableFuncLookup lookupImmutableFunc(const StringData* name) {
-  auto const ne = NamedEntity::getFunc(name);
+  auto const ne = NamedFunc::get(name);
   if (auto const f = ne->getCachedFunc()) {
     if (f->isUnique()) {
       // We have an unique function. However, it may be interceptable, which means

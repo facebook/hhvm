@@ -258,7 +258,7 @@ DEBUG_ONLY bool throwable_has_expected_props() {
   // to know.
   auto const isException = [&](const TypeConstraint& tc) {
     if (!tc.isUnresolved() && !tc.isObject()) return false;
-    auto const cls = Class::lookup(tc.anyNamedEntity());
+    auto const cls = Class::lookup(tc.anyNamedType());
     return cls && cls == SystemLib::s_ThrowableClass;
   };
 

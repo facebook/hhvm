@@ -38,7 +38,7 @@ namespace HPHP {
 struct Class;
 struct Func;
 struct ObjectData;
-struct NamedEntity;
+struct NamedType;
 struct StaticCoeffects;
 struct StringData;
 struct Unit;
@@ -315,7 +315,7 @@ public:
    * Basic info.
    */
   Unit*             unit()         const { return m_unit; }
-  NamedEntity*      namedEntity()  const { return m_namedEntity; }
+  NamedType*        namedType()    const { return m_namedType; }
   int               line1()        const { return m_line1; }
   int               line2()        const { return m_line2; }
   Attr              attrs()        const { return m_attrs; }
@@ -457,7 +457,7 @@ public:
 
 private:
   Unit* m_unit;
-  LowPtr<NamedEntity> m_namedEntity;
+  LowPtr<NamedType> m_namedType;
   int m_line1;
   int m_line2;
   Attr m_attrs;

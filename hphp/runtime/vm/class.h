@@ -482,7 +482,7 @@ struct Class : AtomicCountable {
    *
    * This may happen before its refcount hits zero if it is still referred to
    * by any of:
-   *    - its NamedEntity;
+   *    - its NamedType;
    *    - any derived Class;
    *    - any Class that implements it (for interfaces); or
    *    - any Class that uses it (for traits)
@@ -1489,11 +1489,11 @@ public:
 
   /*
    * Look up the Class in this request with name `name', or with the name
-   * mapped to the NamedEntity `ne'.
+   * mapped to the NamedType `ne'.
    *
    * Return nullptr if the class is not yet defined in this request.
    */
-  static Class* lookup(const NamedEntity* ne);
+  static Class* lookup(const NamedType* ne);
   static Class* lookup(const StringData* name);
 
   /*
@@ -1503,7 +1503,7 @@ public:
    *
    * Return nullptr if there is no such class.
    */
-  static const Class* lookupUniqueInContext(const NamedEntity* ne,
+  static const Class* lookupUniqueInContext(const NamedType* ne,
                                             const Class* ctx,
                                             const Unit* unit);
   static const Class* lookupUniqueInContext(const StringData* name,
@@ -1512,32 +1512,32 @@ public:
 
   /*
    * Look up, or autoload and define, the Class in this request with name
-   * `name', or with the name mapped to the NamedEntity `ne'.
+   * `name', or with the name mapped to the NamedType `ne'.
    *
-   * @requires: NamedEntity::get(name) == ne
+   * @requires: NamedType::get(name) == ne
    */
-  static Class* load(const NamedEntity* ne, const StringData* name);
+  static Class* load(const NamedType* ne, const StringData* name);
   static Class* load(const StringData* name);
 
   /*
    * Same as Class::load but also checks for module boundary violations
    */
-  static Class* resolve(const NamedEntity* ne, const StringData* name,
+  static Class* resolve(const NamedType* ne, const StringData* name,
                         const Func* callerFunc);
   static Class* resolve(const StringData* name, const Func* callerFunc);
 
   /*
    * Autoload the Class with name `name' and bind it `ne' in this request.
    *
-   * @requires: NamedEntity::get(name) == ne
+   * @requires: NamedType::get(name) == ne
    */
-  static Class* loadMissing(const NamedEntity* ne, const StringData* name);
+  static Class* loadMissing(const NamedType* ne, const StringData* name);
 
   /*
    * Same as lookupClass(), but if `tryAutoload' is set, call and return
    * loadMissingClass().
    */
-  static Class* get(const NamedEntity* ne, const StringData* name,
+  static Class* get(const NamedType* ne, const StringData* name,
                     bool tryAutoload);
   static Class* get(const StringData* name, bool tryAutoload);
 
@@ -2020,7 +2020,7 @@ private:
   mutable rds::Link<Array, rds::Mode::Normal> m_nonScalarConstantCache;
 
 public:
-  LowPtr<Class> m_next{nullptr}; // used by NamedEntity
+  LowPtr<Class> m_next{nullptr}; // used by NamedType
 
 private:
 #ifndef NDEBUG

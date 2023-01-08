@@ -50,7 +50,7 @@ private:
 
 private:
   APCHandle m_handle;
-  LowPtr<const NamedEntity> m_entity;
+  LowPtr<const NamedFunc> m_entity;
   LowPtr<const StringData> m_name;
 public:
   APCHandle* m_generics;

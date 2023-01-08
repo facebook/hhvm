@@ -214,18 +214,18 @@ inline void invalidFuncConversion(const char* type) {
   ));
 }
 
-inline NamedEntity* Func::getNamedEntity() {
+inline NamedFunc* Func::getNamedFunc() {
   assertx(!shared()->m_preClass);
-  return *reinterpret_cast<LowPtr<NamedEntity>*>(&m_namedEntity);
+  return *reinterpret_cast<LowPtr<NamedFunc>*>(&m_namedFunc);
 }
 
-inline const NamedEntity* Func::getNamedEntity() const {
+inline const NamedFunc* Func::getNamedFunc() const {
   assertx(!shared()->m_preClass);
-  return *reinterpret_cast<const LowPtr<const NamedEntity>*>(&m_namedEntity);
+  return *reinterpret_cast<const LowPtr<const NamedFunc>*>(&m_namedFunc);
 }
 
-inline void Func::setNamedEntity(const NamedEntity* e) {
-  *reinterpret_cast<LowPtr<const NamedEntity>*>(&m_namedEntity) = e;
+inline void Func::setNamedFunc(const NamedFunc* e) {
+  *reinterpret_cast<LowPtr<const NamedFunc>*>(&m_namedFunc) = e;
 }
 
 inline const StringData* Func::methCallerClsName() const {

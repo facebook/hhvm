@@ -461,7 +461,7 @@ rds::Handle StaticMethodFCache::alloc(const StringData* clsName,
 }
 
 const Func*
-StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
+StaticMethodCache::lookup(rds::Handle handle, const NamedType *ne,
                           const StringData* clsName,
                           const StringData* methName, const Class* ctx,
                           const Func* callerFunc) {

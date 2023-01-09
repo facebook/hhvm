@@ -51,8 +51,6 @@ where
         for key in keys {
             if self.get(key)?.is_some() {
                 self.store.remove(&key);
-            } else {
-                anyhow::bail!("remove_batch: Trying to remove a non-existent value");
             }
         }
         Ok(())

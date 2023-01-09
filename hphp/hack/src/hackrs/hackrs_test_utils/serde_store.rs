@@ -121,8 +121,6 @@ where
             if self.get(key)?.is_some() {
                 self.store.remove(&key);
                 self.cache.invalidate(&key);
-            } else {
-                anyhow::bail!("remove_batch: Trying to remove a non-existent value");
             }
         }
         Ok(())

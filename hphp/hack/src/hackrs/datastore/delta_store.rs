@@ -59,8 +59,6 @@ impl<K: Copy + Hash + Eq, V: Clone> DeltaStore<K, V> {
         for key in keys {
             if self.get(key)?.is_some() {
                 self.remove(key)?;
-            } else {
-                anyhow::bail!("remove_batch: Trying to remove a non-existent value");
             }
         }
         Ok(())

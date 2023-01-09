@@ -108,4 +108,6 @@ module Codes = struct
   let redundant_unsafe_cast = 5647
 
   let redundant_cast = 5648
+
+  let internal_classname = 5649
 end

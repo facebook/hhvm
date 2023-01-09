@@ -40,6 +40,7 @@ let typed_linters =
     Linter_comparing_booleans.handler;
     Linter_unconditional_recursion.handler;
     Linter_branches_return_same_value.handler;
+    Linter_internal_class.handler;
   ]
   @ Linting_service.typed_linters
 

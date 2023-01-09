@@ -502,3 +502,12 @@ let branches_return_same_value p =
     Lint_warning
     p
     "There are multiple return statements, but they all return the same value."
+
+let internal_classname p =
+  Lints.add
+    Codes.internal_classname
+    Lint_warning
+    p
+    ("This is a classname of an `internal` class. Internal classnames are dangerous because they are effectively raw strings. "
+    ^ "Please avoid them, or make sure that they are never used outside of the module."
+    )

@@ -161,10 +161,6 @@ class RpcOptions {
       SerializedAuthProofs serializedAuthProofs);
   const SerializedAuthProofs& getSerializedAuthProofs() const;
 
-  void setFaultToInject(const std::string& key, const std::string& value);
-  const std::optional<std::unordered_map<std::string, std::string>>&
-  getFaultsToInject() const;
-
   RpcOptions& setDefconPriority(DefconPriority defconPriority);
   const std::optional<DefconPriority>& getDefconPriority() const;
 
@@ -201,10 +197,6 @@ class RpcOptions {
 
   // Per request authentication data
   SerializedAuthProofs serializedAuthProofs_;
-
-  // Defines faults to be injected within the routing layer, if any
-  std::optional<std::unordered_map<std::string, std::string>>
-      faultsToInject_; // fault ID --> value
 
   // Classifies the current request based on its impact on the end user
   std::optional<DefconPriority> defconPriority_;

@@ -260,19 +260,6 @@ const SerializedAuthProofs& RpcOptions::getSerializedAuthProofs() const {
   return serializedAuthProofs_;
 }
 
-void RpcOptions::setFaultToInject(
-    const std::string& key, const std::string& value) {
-  if (!faultsToInject_) {
-    faultsToInject_.emplace();
-  }
-  (*faultsToInject_)[key] = value;
-}
-
-const std::optional<std::unordered_map<std::string, std::string>>&
-RpcOptions::getFaultsToInject() const {
-  return faultsToInject_;
-}
-
 RpcOptions& RpcOptions::setDefconPriority(DefconPriority defconPriority) {
   defconPriority_ = defconPriority;
   return *this;

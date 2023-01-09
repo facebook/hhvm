@@ -17,6 +17,6 @@ abstract class RecursiveFilterIterator<Tv>
   // Methods
   public function __construct(RecursiveIterator<Tv> $iterator);
   public function getChildren();
-  public function hasChildren();
+  public function hasChildren(): bool;
 
 }

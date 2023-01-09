@@ -482,9 +482,9 @@ class SplFileObject extends SplFileInfo
    * An SplFileObject does not have children so this method always return
    * FALSE.
    *
-   * @return     mixed   Returns FALSE
+   * @return     bool    Returns FALSE
    */
-  public function hasChildren() {
+  public function hasChildren(): bool {
     return false; // An SplFileOjbect does not have children
   }
 

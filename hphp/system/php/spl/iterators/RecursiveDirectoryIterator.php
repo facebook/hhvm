@@ -47,10 +47,10 @@ class RecursiveDirectoryIterator extends FilesystemIterator
    * http://php.net/manual/en/recursivedirectoryiterator.haschildren.php )
    *
    *
-   * @return     mixed   Returns whether the current entry is a directory,
+   * @return     bool    Returns whether the current entry is a directory,
    *                     but not '.' or '..'
    */
-  public function hasChildren() {
+  public function hasChildren(): bool {
     if ($this->isDot()) {
       return false;
     }

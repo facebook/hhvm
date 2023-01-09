@@ -51,10 +51,10 @@ abstract class RecursiveFilterIterator extends FilterIterator
    *
    * Check whether the inner iterator's current element has children.
    *
-   * @return     mixed   TRUE if the inner iterator has children, otherwise
+   * @return     bool    TRUE if the inner iterator has children, otherwise
    *                     FALSE
    */
-  public function hasChildren() {
+  public function hasChildren(): bool {
     return $this->getInnerIterator()->hasChildren();
   }
 

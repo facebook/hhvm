@@ -20,7 +20,7 @@ class RecursiveDirectoryIterator
     HH\FIXME\MISSING_PARAM_TYPE $path,
     HH\FIXME\MISSING_PARAM_TYPE $flags = null,
   );
-  public function hasChildren();
+  public function hasChildren(): bool;
   public function getChildren();
   public function getSubPath();
   public function getSubPathname();

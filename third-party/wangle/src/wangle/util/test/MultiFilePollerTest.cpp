@@ -77,7 +77,7 @@ TEST_F(MultiFilePollerTest, BasicTest) {
 
   // Register the callback.
   auto cbId = updater_->registerFile(
-      f, [&](const MultiFilePoller::CallbackArg& newData) {
+      f, [&](const MultiFilePoller::CallbackArg& newData) noexcept {
         auto& content = folly::get_or_throw(newData, f);
         EXPECT_EQ(d2, content);
         EXPECT_EQ(1, ++count);
@@ -111,7 +111,9 @@ TEST_F(MultiFilePollerTest, CancellationTest) {
   const std::string f(tmpdirPath_ + "/Cancel1"), d("111");
 
   auto cb = updater_->registerFile(
-      f, [&](const MultiFilePoller::CallbackArg& /* unused */) { FAIL(); });
+      f, [&](const MultiFilePoller::CallbackArg& /* unused */) noexcept {
+        FAIL();
+      });
 
   // Proper cancellation.
   updater_->cancelCallback(cb);
@@ -146,7 +148,7 @@ TEST_F(MultiFilePollerTest, ComplexTest) {
   // cb1 is only triggered once. It expects the content to equal d1, which is
   // written to the file to trigger the callback.
   auto cb1 = updater_->registerFile(
-      f1, [&](const MultiFilePoller::CallbackArg& newData) {
+      f1, [&](const MultiFilePoller::CallbackArg& newData) noexcept {
         auto& content = folly::get_or_throw(newData, f1);
         EXPECT_EQ(d1, content);
         EXPECT_EQ(1, ++count1); // Fail if run more than once.
@@ -155,7 +157,7 @@ TEST_F(MultiFilePollerTest, ComplexTest) {
 
   // cb2 copies content of f2 from arg to data2, and increments count2.
   auto cb2 = updater_->registerFile(
-      f2, [&](const MultiFilePoller::CallbackArg& newData) {
+      f2, [&](const MultiFilePoller::CallbackArg& newData) noexcept {
         data2 = folly::get_or_throw(newData, f2);
         count2++;
         sem2.post();
@@ -163,7 +165,7 @@ TEST_F(MultiFilePollerTest, ComplexTest) {
 
   // cb3 concatenates the data of f3 and f3 and writes the value to data3.
   /* cb3 */ updater_->registerFiles(
-      {f3, f1}, [&](const MultiFilePoller::CallbackArg& newData) {
+      {f3, f1}, [&](const MultiFilePoller::CallbackArg& newData) noexcept {
         if (count3 == 0) {
           // When we write to f3 to trigger cb3, f1 does not exist yet.
           // Check that f1 is not in the map.
@@ -214,7 +216,7 @@ TEST_F(MultiFilePollerTest, ComplexTest) {
 
   // cb4 is the same as cb2 except that it's another callback.
   auto cb4 = updater_->registerFile(
-      f2, [&](const MultiFilePoller::CallbackArg& newData) {
+      f2, [&](const MultiFilePoller::CallbackArg& newData) noexcept {
         data4 = folly::get_or_throw(newData, f2);
         count4++;
         sem4.post();

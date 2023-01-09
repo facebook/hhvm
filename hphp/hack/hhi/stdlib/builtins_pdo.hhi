@@ -133,7 +133,7 @@ class PDO {
   public function __sleep()[]: HH\FIXME\MISSING_RETURN_TYPE;
   static public function getAvailableDrivers(): HH\FIXME\MISSING_RETURN_TYPE;
 }
-class PDOStatement {
+class PDOStatement /* implements Iterator<mixed> */ {
   public function __construct();
   public function execute(
     HH\FIXME\MISSING_PARAM_TYPE $params = null,

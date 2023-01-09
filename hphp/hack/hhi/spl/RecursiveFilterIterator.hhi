@@ -10,7 +10,9 @@
 
 abstract class RecursiveFilterIterator<Tv>
   extends FilterIterator<Tv>
-  implements OuterIterator<Tv>, RecursiveIterator<Tv> {
+  implements
+    OuterIterator<HH\FIXME\POISON_MARKER<Tv>>,
+    RecursiveIterator<HH\FIXME\POISON_MARKER<Tv>> {
 
   // Methods
   public function __construct(RecursiveIterator<Tv> $iterator);

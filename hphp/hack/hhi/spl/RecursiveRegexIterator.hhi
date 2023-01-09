@@ -10,7 +10,7 @@
 
 class RecursiveRegexIterator<Tv>
   extends RegexIterator<Tv>
-  implements RecursiveIterator<Tv> {
+  implements RecursiveIterator<HH\FIXME\POISON_MARKER<Tv>> {
 
   // Methods
   public function __construct(

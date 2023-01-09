@@ -8,14 +8,15 @@
  *
  */
 
-class IteratorIterator<Tv> implements OuterIterator<Tv> {
+class IteratorIterator<Tv>
+  implements OuterIterator<HH\FIXME\POISON_MARKER<Tv>> {
 
   // Methods
   public function __construct(Traversable<Tv> $iterator);
   public function getInnerIterator(): Iterator<Tv>;
   public function valid(): bool;
   public function key();
-  public function current();
+  public function current(): HH\FIXME\POISON_MARKER<Tv>;
   public function next(): void;
   public function rewind(): void;
   public function call__(

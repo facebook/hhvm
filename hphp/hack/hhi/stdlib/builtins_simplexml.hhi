@@ -139,7 +139,7 @@ class LibXMLError {
   public string $file;
   public int $line;
 }
-class SimpleXMLElementIterator {
+class SimpleXMLElementIterator /* implements Iterator<SimpleXMLElement> */ {
   public function __construct();
   public function current(): HH\FIXME\MISSING_RETURN_TYPE;
   public function key(): HH\FIXME\MISSING_RETURN_TYPE;

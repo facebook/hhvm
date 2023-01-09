@@ -17,7 +17,7 @@ abstract class FilterIterator<Tv> extends IteratorIterator<Tv> {
   public function next(): void;
   public function valid(): bool;
   public function key();
-  public function current();
+  public function current(): HH\FIXME\POISON_MARKER<Tv>;
   protected function __clone();
   public function call__(
     HH\FIXME\MISSING_PARAM_TYPE $func,

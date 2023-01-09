@@ -30,7 +30,7 @@ class RecursiveIteratorIterator<Tv> implements OuterIterator<Tv> {
     HH\FIXME\MISSING_PARAM_TYPE $flags = 0,
   );
   public function getInnerIterator(): Iterator<Tv>;
-  public function current();
+  public function current(): Tv;
   public function key();
   public function next(): void;
   public function rewind(): void;

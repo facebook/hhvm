@@ -342,16 +342,21 @@ let build_visibility_json (visibility : Aast.visibility) =
   in
   JSON_Number (string_of_int num)
 
-let build_xrefs_json (fact_map : XRefs.fact_map) =
+let build_generic_xrefs_json (sym_pos : (Hh_json.json * Util.pos list) Seq.t) =
   let xrefs =
-    Fact_id.Map.fold
-      (fun _id (target_json, pos_list) acc ->
-        let sorted_pos = Caml.List.sort_uniq Pos.compare pos_list in
-        let first_pos = List.hd sorted_pos |> Option.value ~default:Pos.none in
+    Caml.Seq.fold_left
+      (fun acc (target_json, pos_list) ->
+        let sorted_pos = Caml.List.sort_uniq Util.compare_pos pos_list in
+        let first_pos =
+          match sorted_pos with
+          | hd :: _ -> hd
+          | [] -> Util.{ start = 0; length = 0 }
+        in
         let (rev_byte_spans, _) =
-          List.fold sorted_pos ~init:([], 0) ~f:(fun (spans, last_start) pos ->
-              let start = fst (Pos.info_raw pos) in
-              let length = Pos.length pos in
+          List.fold
+            sorted_pos
+            ~init:([], 0)
+            ~f:(fun (spans, last_start) Util.{ start; length } ->
               let span = build_rel_bytespan_json (start - last_start) length in
               (span :: spans, start))
         in
@@ -361,37 +366,29 @@ let build_xrefs_json (fact_map : XRefs.fact_map) =
             [("target", target_json); ("ranges", JSON_Array byte_spans)]
         in
         (first_pos, xref) :: acc)
-      fact_map
       []
+      sym_pos
   in
   let sorted_xrefs =
-    List.sort ~compare:(fun (p, _) (p', _) -> Pos.compare p p') xrefs
+    List.sort ~compare:(fun (p, _) (p', _) -> Util.compare_pos p p') xrefs
   in
   JSON_Array (sorted_xrefs |> List.map ~f:snd)
 
-(* TODO refactor to avoid duplication *)
-let build_hint_xrefs_json sym_pos =
-  let xrefs =
-    List.fold
-      ~f:(fun acc (target_json, pos_list) ->
-        let sorted_pos = Caml.List.sort_uniq Util.compare_pos pos_list in
-        let (rev_byte_spans, _) =
-          List.fold sorted_pos ~init:([], 0) ~f:(fun (spans, last_start) pos ->
-              let start = pos.Util.start in
-              let length = pos.Util.length in
-              let span = build_rel_bytespan_json (start - last_start) length in
-              (span :: spans, start))
-        in
-        let byte_spans = List.rev rev_byte_spans in
-        let xref =
-          JSON_Object
-            [("target", target_json); ("ranges", JSON_Array byte_spans)]
-        in
-        xref :: acc)
-      ~init:[]
-      sym_pos
+let build_xrefs_json (fact_map : XRefs.fact_map) =
+  let f (_fact_id, (json, pos_list)) =
+    let util_pos_list =
+      List.map pos_list ~f:(fun pos ->
+          let start = fst (Pos.info_raw pos) in
+          let length = Pos.length pos in
+          Util.{ start; length })
+    in
+    (json, util_pos_list)
   in
-  JSON_Array xrefs
+  let sym_pos = Fact_id.Map.to_seq fact_map |> Caml.Seq.map f in
+  build_generic_xrefs_json sym_pos
+
+let build_hint_xrefs_json sym_pos =
+  Caml.List.to_seq sym_pos |> build_generic_xrefs_json
 
 (* These are functions for building JSON to reference some
    existing fact. *)

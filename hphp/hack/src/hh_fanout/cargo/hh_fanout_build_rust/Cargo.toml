@@ -11,6 +11,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
+delta_log = { path = "../../../utils/rust/delta_log" }
 env_logger = "0.7"
 hh_fanout_build = { path = "../hh_fanout_build" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }

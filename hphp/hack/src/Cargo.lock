@@ -1176,6 +1176,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "delta_log"
+version = "0.0.0"
+dependencies = [
+ "env_logger 0.7.1",
+ "once_cell",
+]
+
+[[package]]
 name = "dep"
 version = "0.0.0"
 dependencies = [
@@ -2207,6 +2215,7 @@ dependencies = [
 name = "hh_fanout_build_rust"
 version = "0.0.0"
 dependencies = [
+ "delta_log",
  "env_logger 0.7.1",
  "hh_fanout_build",
  "ocamlrep_ocamlpool",

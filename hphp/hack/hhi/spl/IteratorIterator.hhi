@@ -13,7 +13,7 @@ class IteratorIterator<Tv> implements OuterIterator<Tv> {
   // Methods
   public function __construct(Traversable<Tv> $iterator);
   public function getInnerIterator(): Iterator<Tv>;
-  public function valid();
+  public function valid(): bool;
   public function key();
   public function current();
   public function next(): void;

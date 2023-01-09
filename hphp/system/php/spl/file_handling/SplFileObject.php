@@ -655,9 +655,9 @@ class SplFileObject extends SplFileInfo
    *
    * Check whether EOF has been reached.
    *
-   * @return     mixed   Returns TRUE if not reached EOF, FALSE otherwise.
+   * @return     bool    Returns TRUE if not reached EOF, FALSE otherwise.
    */
-  public function valid() {
+  public function valid(): bool {
     if ((int)$this->flags & self::READ_AHEAD) {
       return $this->current() !== false;
     }

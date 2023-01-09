@@ -135,10 +135,10 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator {
    *
    * Check whether current DirectoryIterator position is a valid file.
    *
-   * @return     mixed   Returns TRUE if the position is valid, otherwise
+   * @return     bool    Returns TRUE if the position is valid, otherwise
    *                     FALSE
    */
-  public function valid() {
+  public function valid(): bool {
     return $this->getPathname() !== false;
   }
 

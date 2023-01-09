@@ -15,7 +15,7 @@ class LazyTakeWhileKeyedIterator<Tk, +Tv>
   public function rewind() {
     $this->it->rewind();
   }
-  public function valid() {
+  public function valid(): bool {
     $it = $this->it;
     return ($it->valid() && ($this->fn)($it->current()));
   }

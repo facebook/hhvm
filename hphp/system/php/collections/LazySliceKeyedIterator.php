@@ -28,7 +28,7 @@ class LazySliceKeyedIterator implements \HH\KeyedIterator {
       --$start;
     }
   }
-  public function valid() {
+  public function valid(): bool {
     $this->impureInit();
     return $this->it->valid() && $this->currentLen !== 0;
   }

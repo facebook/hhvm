@@ -145,5 +145,5 @@ class SimpleXMLElementIterator {
   public function key(): HH\FIXME\MISSING_RETURN_TYPE;
   public function next(): HH\FIXME\MISSING_RETURN_TYPE;
   public function rewind(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function valid(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function valid(): bool;
 }

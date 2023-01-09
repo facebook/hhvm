@@ -15,7 +15,7 @@ abstract class FilterIterator<Tv> extends IteratorIterator<Tv> {
   public function rewind(): void;
   public abstract function accept(): bool;
   public function next(): void;
-  public function valid();
+  public function valid(): bool;
   public function key();
   public function current();
   protected function __clone();

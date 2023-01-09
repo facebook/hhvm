@@ -17,7 +17,7 @@ class LazyTakeIterator implements \HH\Iterator {
     $this->it->rewind();
     $this->numLeft = $this->n;
   }
-  public function valid() {
+  public function valid(): bool {
     return ($this->numLeft > 0 && $this->it->valid());
   }
   public function next() {

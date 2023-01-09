@@ -16,7 +16,7 @@ class LazyZipKeyedIterator implements \HH\KeyedIterator {
     $this->it1->rewind();
     $this->it2->rewind();
   }
-  public function valid() {
+  public function valid(): bool {
     return ($this->it1->valid() && $this->it2->valid());
   }
   public function next() {

@@ -602,10 +602,10 @@ class PDOStatement implements Iterator {
   <<__Native>>
   public function rewind(): mixed;
 
-  /* @return mixed
+  /* @return bool
    */
   <<__Native>>
-  public function valid(): mixed;
+  public function valid(): bool;
 
   /* @return mixed
    */

@@ -3252,7 +3252,7 @@ static Variant HHVM_METHOD(PDOStatement, rewind) {
   return init_null();
 }
 
-static Variant HHVM_METHOD(PDOStatement, valid) {
+static bool HHVM_METHOD(PDOStatement, valid) {
   auto data = Native::data<PDOStatementData>(this_);
 
   return data->m_rowIndex >= 0;

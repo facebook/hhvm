@@ -428,9 +428,9 @@ class SplFileObject extends SplFileInfo
    *
    * An SplFileObject does not have children so this method returns NULL.
    *
-   * @return     mixed   No value is returned.
+   * @return     null    No value is returned.
    */
-  public function getChildren() {
+  public function getChildren(): null {
     return null; // An SplFileOjbect does not have children
   }
 

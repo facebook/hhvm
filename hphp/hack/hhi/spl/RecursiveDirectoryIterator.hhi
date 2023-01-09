@@ -21,7 +21,8 @@ class RecursiveDirectoryIterator
     HH\FIXME\MISSING_PARAM_TYPE $flags = null,
   );
   public function hasChildren(): bool;
-  public function getChildren();
+  // implementation can also return string or false
+  public function getChildren(): HH\FIXME\POISON_MARKER<this>;
   public function getSubPath();
   public function getSubPathname();
 

@@ -319,6 +319,8 @@ class MyStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
@@ -326,9 +328,7 @@ class MyStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -438,6 +438,22 @@ class StructLevelTerseStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::bool_t,
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::i16_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::float_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::binary_t,
+    ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>,
+    ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 14;
 
@@ -445,23 +461,7 @@ class StructLevelTerseStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::byte_t,
-                                                         ::apache::thrift::type::i16_t,
-                                                         ::apache::thrift::type::i32_t,
-                                                         ::apache::thrift::type::i64_t,
-                                                         ::apache::thrift::type::float_t,
-                                                         ::apache::thrift::type::double_t,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::binary_t,
-                                                         ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1391,6 +1391,36 @@ class FieldLevelTerseStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::bool_t,
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::i16_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::float_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::binary_t,
+    ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>,
+    ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>,
+    ::apache::thrift::type::bool_t,
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::i16_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::float_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::binary_t,
+    ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>,
+    ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 28;
 
@@ -1398,37 +1428,7 @@ class FieldLevelTerseStruct final  {
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
 
   template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::byte_t,
-                                                         ::apache::thrift::type::i16_t,
-                                                         ::apache::thrift::type::i32_t,
-                                                         ::apache::thrift::type::i64_t,
-                                                         ::apache::thrift::type::float_t,
-                                                         ::apache::thrift::type::double_t,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::binary_t,
-                                                         ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>,
-                                                         ::apache::thrift::type::bool_t,
-                                                         ::apache::thrift::type::byte_t,
-                                                         ::apache::thrift::type::i16_t,
-                                                         ::apache::thrift::type::i32_t,
-                                                         ::apache::thrift::type::i64_t,
-                                                         ::apache::thrift::type::float_t,
-                                                         ::apache::thrift::type::double_t,
-                                                         ::apache::thrift::type::string_t,
-                                                         ::apache::thrift::type::binary_t,
-                                                         ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated::MyEnum>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>;
-
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 

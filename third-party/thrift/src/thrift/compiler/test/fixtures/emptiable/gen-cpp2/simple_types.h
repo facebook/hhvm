@@ -319,6 +319,8 @@ class MyStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
 
 
   void __fbthrift_clear();
@@ -404,6 +406,22 @@ class EmptiableStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::bool_t,
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::i16_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::float_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::binary_t,
+    ::apache::thrift::type::enum_t<::apache::thrift::test::MyEnum>,
+    ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::struct_t<::apache::thrift::test::MyStruct>
+  >;
 
 
   void __fbthrift_clear();
@@ -1273,6 +1291,22 @@ class EmptiableTerseStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::bool_t,
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::i16_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::float_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::binary_t,
+    ::apache::thrift::type::enum_t<::apache::thrift::test::MyEnum>,
+    ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::struct_t<::apache::thrift::test::MyStruct>
+  >;
 
 
   void __fbthrift_clear();
@@ -2094,6 +2128,22 @@ class NotEmptiableStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::bool_t,
+    ::apache::thrift::type::byte_t,
+    ::apache::thrift::type::i16_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::float_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::binary_t,
+    ::apache::thrift::type::enum_t<::apache::thrift::test::MyEnum>,
+    ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
+    ::apache::thrift::type::struct_t<::apache::thrift::test::MyStruct>
+  >;
 
 
   void __fbthrift_clear();

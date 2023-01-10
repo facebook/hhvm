@@ -330,6 +330,13 @@ class Internship final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::enum_t<::cpp2::Company>,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::string_t
+  >;
 
 
   void __fbthrift_clear();
@@ -688,6 +695,10 @@ class Range final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t
+  >;
 
 
   void __fbthrift_clear();
@@ -867,6 +878,10 @@ class struct1 final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::string_t
+  >;
 
 
   void __fbthrift_clear();
@@ -1054,6 +1069,12 @@ class struct2 final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::struct_t<::cpp2::struct1>,
+    ::apache::thrift::type::list<::apache::thrift::type::i32_t>
+  >;
 
 
   void __fbthrift_clear();
@@ -1341,6 +1362,11 @@ class struct3 final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::struct_t<::cpp2::struct2>
+  >;
 
 
   void __fbthrift_clear();
@@ -1577,6 +1603,11 @@ class struct4 final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::byte_t
+  >;
 
 
   void __fbthrift_clear();
@@ -1820,6 +1851,10 @@ class union1 final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::double_t
+  >;
 
 
   void __fbthrift_clear();
@@ -2101,6 +2136,12 @@ class union2 final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::double_t,
+    ::apache::thrift::type::struct_t<::cpp2::struct1>,
+    ::apache::thrift::type::union_t<::cpp2::union1>
+  >;
 
 
   void __fbthrift_clear();

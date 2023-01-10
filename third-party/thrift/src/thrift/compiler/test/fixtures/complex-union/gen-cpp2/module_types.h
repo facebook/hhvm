@@ -157,6 +157,14 @@ class ComplexUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,5,2,3,9,14};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::list<::apache::thrift::type::i64_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::string_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::string_t
+  >;
 
 
   void __fbthrift_clear();
@@ -766,6 +774,10 @@ class ListUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,2,3};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::list<::apache::thrift::type::i64_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::string_t>
+  >;
 
 
   void __fbthrift_clear();
@@ -1073,6 +1085,10 @@ class DataUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::binary_t,
+    ::apache::thrift::type::string_t
+  >;
 
 
   void __fbthrift_clear();
@@ -1381,6 +1397,11 @@ class Val final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,9};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::string_t>
+  >;
 
 
   void __fbthrift_clear();
@@ -1616,6 +1637,10 @@ class ValUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::struct_t<::cpp2::Val>,
+    ::apache::thrift::type::struct_t<::cpp2::Val>
+  >;
 
 
   void __fbthrift_clear();
@@ -1923,6 +1948,10 @@ class VirtualComplexUnion  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::string_t
+  >;
 
 
   void __fbthrift_clear();
@@ -2229,6 +2258,9 @@ class NonCopyableStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i64_t
+  >;
 
 
   void __fbthrift_clear();
@@ -2352,6 +2384,9 @@ class NonCopyableUnion final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::struct_t<::cpp2::NonCopyableStruct>
+  >;
 
 
   void __fbthrift_clear();

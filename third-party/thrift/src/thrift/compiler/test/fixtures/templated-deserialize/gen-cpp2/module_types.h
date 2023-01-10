@@ -232,6 +232,10 @@ class SmallStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::bool_t,
+    ::apache::thrift::type::i32_t
+  >;
 
 
   void __fbthrift_clear();
@@ -433,6 +437,30 @@ class containerStruct final  {
   >;
 
   static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::bool_t,
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::bool_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::i32_t>>>,
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>>,
+    ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::i32_t>>,
+    ::apache::thrift::type::bool_t,
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>,
+    ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::i32_t>>>>,
+    ::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::bool_t>>>,
+    ::apache::thrift::type::map<::apache::thrift::type::set<::apache::thrift::type::list<::apache::thrift::type::i32_t>>, ::apache::thrift::type::map<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::string_t>>, ::apache::thrift::type::string_t>>,
+    ::apache::thrift::type::list<::apache::thrift::type::indirected<Foo, ::apache::thrift::type::i64_t>>,
+    ::apache::thrift::type::list<::apache::thrift::type::indirected<Bar, ::apache::thrift::type::double_t>>,
+    ::apache::thrift::type::list<::apache::thrift::type::indirected<Baz, ::apache::thrift::type::i32_t>>,
+    ::apache::thrift::type::enum_t<::cpp2::MyEnumA>,
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::bool_t>,
+    ::apache::thrift::type::struct_t<::cpp2::SmallStruct>,
+    ::apache::thrift::type::struct_t<::cpp2::SmallStruct>,
+    ::apache::thrift::type::struct_t<::cpp2::SmallStruct>,
+    ::apache::thrift::type::struct_t<::cpp2::SmallStruct>
+  >;
 
 
   void __fbthrift_clear();

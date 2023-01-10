@@ -70,6 +70,12 @@ module Shallow_decls_info = struct
 end
 
 type _ saved_state_type =
+  | Naming_and_dep_table_distc : {
+      naming_sqlite: bool;
+    }
+      -> (Naming_and_dep_table_info.main_artifacts
+         * Naming_and_dep_table_info.additional_info)
+         saved_state_type
   | Naming_and_dep_table : {
       naming_sqlite: bool;
     }

@@ -347,6 +347,20 @@ let download_and_load_state_exn
       result
       Future.t =
     Hh_logger.log "Downloading dependency graph from DevX infra";
+    let saved_state_type =
+      if genv.local_config.ServerLocalConfig.load_hack_64_distc_saved_state then
+        Saved_state_loader.Naming_and_dep_table_distc
+          {
+            naming_sqlite =
+              genv.local_config.ServerLocalConfig.use_hack_64_naming_table;
+          }
+      else
+        Saved_state_loader.Naming_and_dep_table
+          {
+            naming_sqlite =
+              genv.local_config.ServerLocalConfig.use_hack_64_naming_table;
+          }
+    in
     let loader_future =
       State_loader_futures.load
         ~env
@@ -358,12 +372,7 @@ let download_and_load_state_exn
         ~watchman_opts:
           Saved_state_loader.Watchman_options.{ root; sockname = None }
         ~ignore_hh_version
-        ~saved_state_type:
-          (Saved_state_loader.Naming_and_dep_table
-             {
-               naming_sqlite =
-                 genv.local_config.ServerLocalConfig.use_hack_64_naming_table;
-             })
+        ~saved_state_type
       |> Future.with_timeout
            ~timeout:genv.local_config.SLC.load_state_natively_download_timeout
     in

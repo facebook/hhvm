@@ -2215,7 +2215,6 @@ let rec bind_param
             env
             ty
       in
-
       begin
         match enforced with
         | Enforced
@@ -2237,6 +2236,19 @@ let rec bind_param
       env
   in
   (env, tparam)
+
+and bind_params env ?(can_read_globals = false) ctxs param_tys params =
+  let params_need_immutable = Typing_coeffects.get_ctx_vars ctxs in
+  let bind_param_and_check env lty_and_param =
+    let (_ty, param) = lty_and_param in
+    let name = param.param_name in
+    let immutable = List.exists ~f:(String.equal name) params_need_immutable in
+    let (env, fun_param) =
+      bind_param ~immutable ~can_read_globals env lty_and_param
+    in
+    (env, fun_param)
+  in
+  List.map_env env (List.zip_exn param_tys params) ~f:bind_param_and_check
 
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
@@ -5081,39 +5093,7 @@ and function_dynamically_callable
         params_decl_ty
         f.f_params
     in
-    let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
-    let (env, _) =
-      (* In this pass, bind_param_and_check receives a pair where the lhs is
-       * either Tdynamic or TInstersection of the original type and TDynamic,
-       * but the fun_param is still referencing the source hint. We amend
-       * the source hint to keep in in sync before calling bind_param
-       * so the right enforcement is computed.
-       *)
-      let bind_param_and_check env lty_and_param =
-        let (ty, param) = lty_and_param in
-        let name = param.param_name in
-        let (hi, hopt) = param.param_type_hint in
-        let hopt =
-          Option.map hopt ~f:(fun (p, h) ->
-              if Typing_utils.is_tintersection env ty then
-                (p, Hintersection [(p, h); (p, Hdynamic)])
-              else
-                (p, Hdynamic))
-        in
-        let param_type_hint = (hi, hopt) in
-        let param = (ty, { param with param_type_hint }) in
-        let immutable =
-          List.exists ~f:(String.equal name) params_need_immutable
-        in
-        let (env, fun_param) = bind_param ~immutable env param in
-        (env, fun_param)
-      in
-      List.map_env
-        env
-        (List.zip_exn param_tys f.f_params)
-        ~f:bind_param_and_check
-    in
-
+    let (env, _) = bind_params env f.f_ctxs param_tys f.f_params in
     let (pos, name) =
       match f_name with
       | Some n -> n

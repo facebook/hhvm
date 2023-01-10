@@ -78,39 +78,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
         params_decl_ty
         m.m_params
     in
-    let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in
-    let (env, _) =
-      (* In this pass, bind_param_and_check receives a pair where the lhs is
-       * either Tdynamic or TInstersection of the original type and TDynamic,
-       * but the fun_param is still referencing the source hint. We amend
-       * the source hint to keep in in sync before calling bind_param
-       * so the right enforcement is computed.
-       *)
-      let bind_param_and_check env lty_and_param =
-        let (ty, param) = lty_and_param in
-        let name = param.param_name in
-        let (hi, hopt) = param.param_type_hint in
-        let hopt =
-          Option.map hopt ~f:(fun (p, h) ->
-              if Typing_utils.is_tintersection env ty then
-                (p, Hintersection [(p, h); (p, Hdynamic)])
-              else
-                (p, Hdynamic))
-        in
-        let param_type_hint = (hi, hopt) in
-        let param = (ty, { param with param_type_hint }) in
-        let immutable =
-          List.exists ~f:(String.equal name) params_need_immutable
-        in
-        let (env, fun_param) = Typing.bind_param ~immutable env param in
-        (env, fun_param)
-      in
-      List.map_env
-        env
-        (List.zip_exn param_tys m.m_params)
-        ~f:bind_param_and_check
-    in
-
+    let (env, _) = Typing.bind_params env m.m_ctxs param_tys m.m_params in
     let pos = fst m.m_name in
     let env = set_tyvars_variance_in_callable env dynamic_return_ty param_tys in
 
@@ -271,7 +239,6 @@ let method_def ~is_disposable env cls m =
       m.m_params
   in
   Typing_memoize.check_method env m;
-  let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in
   let can_read_globals =
     Typing_subtype.is_sub_type
       env
@@ -279,17 +246,7 @@ let method_def ~is_disposable env cls m =
       (MakeType.capability (get_reason cap_ty) SN.Capabilities.accessGlobals)
   in
   let (env, typed_params) =
-    let bind_param_and_check env param =
-      let name = (snd param).param_name in
-      let immutable =
-        List.exists ~f:(String.equal name) params_need_immutable
-      in
-      let (env, fun_param) =
-        Typing.bind_param ~immutable ~can_read_globals env param
-      in
-      (env, fun_param)
-    in
-    List.map_env env (List.zip_exn param_tys m.m_params) ~f:bind_param_and_check
+    Typing.bind_params env ~can_read_globals m.m_ctxs param_tys m.m_params
   in
   let ret_locl_ty = return.Typing_env_return_info.return_type.et_type in
   let env = set_tyvars_variance_in_callable env ret_locl_ty param_tys in

@@ -135,7 +135,6 @@ let fun_def ctx fd :
       params_decl_ty
       f.f_params
   in
-  let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
   let can_read_globals =
     Typing_subtype.is_sub_type
       env
@@ -143,17 +142,7 @@ let fun_def ctx fd :
       (MakeType.capability (get_reason cap_ty) SN.Capabilities.accessGlobals)
   in
   let (env, typed_params) =
-    let bind_param_and_check env param =
-      let name = (snd param).param_name in
-      let immutable =
-        List.exists ~f:(String.equal name) params_need_immutable
-      in
-      let (env, fun_param) =
-        Typing.bind_param ~immutable ~can_read_globals env param
-      in
-      (env, fun_param)
-    in
-    List.map_env env (List.zip_exn param_tys f.f_params) ~f:bind_param_and_check
+    Typing.bind_params env ~can_read_globals f.f_ctxs param_tys f.f_params
   in
   let env = set_tyvars_variance_in_callable env return_ty.et_type param_tys in
   let local_tpenv = Env.get_tpenv env in

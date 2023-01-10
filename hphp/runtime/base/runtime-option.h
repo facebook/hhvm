@@ -1434,6 +1434,8 @@ struct RuntimeOption {
   F(uint32_t, ThrowOnIterationOverObjects, 0)                           \
   F(bool, DiamondTraitMethods, false)                                   \
   F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
+  F(uint32_t, NFLogSlowWatchmanMsec, 500)                               \
+  F(uint32_t, NFLogSlowWatchmanSampleRate, 1)                           \
   /* */
 
 private:

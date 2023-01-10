@@ -948,7 +948,10 @@ struct FactsStoreImpl final
         return {};
       }
     }
-    auto updateFuture = m_updateFuture.wlock();
+    auto updateFuture = [&] {
+      tracing::Block _{"autoload-update-acquire-lock"};
+      return m_updateFuture.wlock();
+    }();
     auto updateStart = std::chrono::steady_clock::now();
     // We need at least one Watchman query to start and complete after
     // `update()` is called. We model our updater and Watchman querier as a
@@ -959,6 +962,7 @@ struct FactsStoreImpl final
     // finish after this call to update().
     if (!m_queryingWatchman) {
       m_queryingWatchman = true;
+      auto start = std::chrono::steady_clock::now();
       *updateFuture = folly::splitFuture(
           updateFuture->getFuture()
               .via(&m_updateExec)
@@ -967,7 +971,27 @@ struct FactsStoreImpl final
                 m_lastWatchmanQueryStart = std::chrono::steady_clock::now();
                 return m_watcher->getChanges(getClock());
               })
-              .thenTry([this](folly::Try<Watcher::Results>&& results) {
+              .thenTry([this, start](folly::Try<Watcher::Results>&& results) {
+                auto const dur =
+                    std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::steady_clock::now() - start)
+                        .count();
+                auto const rate = RO::EvalNFLogSlowWatchmanSampleRate;
+                if (RO::EvalNFLogSlowWatchmanMsec &&
+                    RO::EvalNFLogSlowWatchmanMsec < dur &&
+                    StructuredLog::coinflip(rate)) {
+                  StructuredLogEntry ent;
+                  ent.setInt("sample_rate", rate);
+                  ent.setInt("duration_ms", dur);
+                  if (!results.hasException()) {
+                    auto& v = results.value();
+                    ent.setInt("fresh", v.m_fresh);
+                    ent.setInt("num_files", v.m_files.size());
+                  } else {
+                    ent.setStr("exn_message", results.exception().what());
+                  }
+                  StructuredLog::log("hhvm_slow_nf_watchman", ent);
+                }
                 if (results.hasException()) {
                   auto msg = folly::sformat(
                       "Exception while querying watcher: {}",
@@ -1017,6 +1041,7 @@ struct FactsStoreImpl final
       throw UpdateExc{"Shutting down"};
     }
 
+    tracing::Block _{"autoload-update-parse-results"};
     bool isFresh = results.m_fresh;
     Clock lastClock = *results.m_lastClock;
     Clock newClock = results.m_newClock;

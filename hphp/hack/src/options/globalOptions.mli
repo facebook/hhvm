@@ -341,6 +341,7 @@ type t = {
      controls whether the heap will be populated or not. *)
   tco_populate_dead_unsafe_cast_heap: bool;
   po_disallow_static_constants_in_default_func_args: bool;
+  tco_load_hack_64_distc_saved_state: bool;
 }
 [@@deriving eq, show]
 
@@ -482,6 +483,7 @@ val make :
   ?tco_allowed_locations_for_type_constant_in_enum_class:string list ->
   ?tco_populate_dead_unsafe_cast_heap:bool ->
   ?po_disallow_static_constants_in_default_func_args:bool ->
+  ?tco_load_hack_64_distc_saved_state:bool ->
   unit ->
   t
 

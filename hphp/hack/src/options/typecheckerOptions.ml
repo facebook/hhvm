@@ -322,3 +322,6 @@ let use_type_alias_heap t = t.GlobalOptions.tco_use_type_alias_heap
 
 let populate_dead_unsafe_cast_heap t =
   t.GlobalOptions.tco_populate_dead_unsafe_cast_heap
+
+let load_hack_64_distc_saved_state t =
+  t.GlobalOptions.tco_load_hack_64_distc_saved_state

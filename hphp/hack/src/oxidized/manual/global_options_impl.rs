@@ -149,6 +149,7 @@ impl Default for GlobalOptions {
             tco_allowed_locations_for_type_constant_in_enum_class: vec![],
             tco_populate_dead_unsafe_cast_heap: false,
             po_disallow_static_constants_in_default_func_args: false,
+            tco_load_hack_64_distc_saved_state: false,
         }
     }
 }

@@ -212,6 +212,7 @@ class structured_annotation_inline final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -222,7 +223,6 @@ class structured_annotation_inline final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -417,6 +417,7 @@ class structured_annotation_with_default final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -427,7 +428,6 @@ class structured_annotation_with_default final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -569,6 +569,7 @@ class structured_annotation_forward final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -579,7 +580,6 @@ class structured_annotation_forward final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -721,6 +721,7 @@ class structured_annotation_recursive final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -731,7 +732,6 @@ class structured_annotation_recursive final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -965,6 +965,7 @@ class structured_annotation_nested final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -975,7 +976,6 @@ class structured_annotation_nested final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1173,6 +1173,7 @@ class MyStruct final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1183,7 +1184,6 @@ class MyStruct final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1487,6 +1487,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1497,7 +1498,6 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1653,6 +1653,7 @@ class MyUnion final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1663,7 +1664,6 @@ class MyUnion final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
 

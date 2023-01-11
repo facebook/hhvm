@@ -338,7 +338,24 @@ class Internship final  {
     ::apache::thrift::type::string_t
   >;
 
+  static constexpr std::size_t __fbthrift_field_size_v = 5;
 
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -700,7 +717,24 @@ class Range final  {
     ::apache::thrift::type::i32_t
   >;
 
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
 
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -883,7 +917,24 @@ class struct1 final  {
     ::apache::thrift::type::string_t
   >;
 
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
 
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1076,7 +1127,24 @@ class struct2 final  {
     ::apache::thrift::type::list<::apache::thrift::type::i32_t>
   >;
 
+  static constexpr std::size_t __fbthrift_field_size_v = 4;
 
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1368,7 +1436,24 @@ class struct3 final  {
     ::apache::thrift::type::struct_t<::cpp2::struct2>
   >;
 
+  static constexpr std::size_t __fbthrift_field_size_v = 3;
 
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1609,7 +1694,24 @@ class struct4 final  {
     ::apache::thrift::type::byte_t
   >;
 
+  static constexpr std::size_t __fbthrift_field_size_v = 3;
 
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1856,7 +1958,24 @@ class union1 final  {
     ::apache::thrift::type::double_t
   >;
 
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
 
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
 
@@ -2143,7 +2262,24 @@ class union2 final  {
     ::apache::thrift::type::union_t<::cpp2::union1>
   >;
 
+  static constexpr std::size_t __fbthrift_field_size_v = 4;
 
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
 

@@ -53,7 +53,24 @@ class FOLLY_EXPORT FooStreamEx : public virtual apache::thrift::TException {
   using __fbthrift_reflection_type_tags = folly::tag_t<
   >;
 
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
 
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -138,7 +155,24 @@ class FOLLY_EXPORT FooEx : public virtual apache::thrift::TException {
   using __fbthrift_reflection_type_tags = folly::tag_t<
   >;
 
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
 
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -223,7 +257,24 @@ class FOLLY_EXPORT FooEx2 : public virtual apache::thrift::TException {
   using __fbthrift_reflection_type_tags = folly::tag_t<
   >;
 
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
 
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;

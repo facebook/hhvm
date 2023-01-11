@@ -600,6 +600,7 @@ class decorated_struct final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -610,7 +611,6 @@ class decorated_struct final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -765,6 +765,7 @@ class ContainerStruct final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -775,7 +776,6 @@ class ContainerStruct final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1270,6 +1270,7 @@ class CppTypeStruct final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1280,7 +1281,6 @@ class CppTypeStruct final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1415,6 +1415,7 @@ class VirtualStruct  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1425,7 +1426,6 @@ class VirtualStruct  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1567,6 +1567,7 @@ class MyStructWithForwardRefEnum final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1577,7 +1578,6 @@ class MyStructWithForwardRefEnum final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1769,6 +1769,7 @@ class TrivialNumeric final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1779,7 +1780,6 @@ class TrivialNumeric final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1972,6 +1972,7 @@ class TrivialNestedWithDefault final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1982,7 +1983,6 @@ class TrivialNestedWithDefault final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -2174,6 +2174,7 @@ class ComplexString final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -2184,7 +2185,6 @@ class ComplexString final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -2378,6 +2378,7 @@ class ComplexNestedWithDefault final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -2388,7 +2389,6 @@ class ComplexNestedWithDefault final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -2590,6 +2590,7 @@ class MinPadding final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -2600,7 +2601,6 @@ class MinPadding final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -2955,6 +2955,7 @@ class MinPaddingWithCustomType final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -2965,7 +2966,6 @@ class MinPaddingWithCustomType final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -3300,6 +3300,7 @@ class MyDataItem final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -3310,7 +3311,6 @@ class MyDataItem final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -3396,6 +3396,7 @@ class MyStruct final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -3406,7 +3407,6 @@ class MyStruct final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -3701,6 +3701,7 @@ class Renamed final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -3711,7 +3712,6 @@ class Renamed final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -3851,6 +3851,7 @@ class AnnotatedTypes final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -3861,7 +3862,6 @@ class AnnotatedTypes final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4053,6 +4053,7 @@ class ForwardUsageStruct final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4063,7 +4064,6 @@ class ForwardUsageStruct final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4187,6 +4187,7 @@ class ForwardUsageRoot final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4197,7 +4198,6 @@ class ForwardUsageRoot final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4373,6 +4373,7 @@ class ForwardUsageByRef final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4383,7 +4384,6 @@ class ForwardUsageByRef final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4505,6 +4505,7 @@ class IncompleteMap final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4515,7 +4516,6 @@ class IncompleteMap final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4649,6 +4649,7 @@ class IncompleteMapDep final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4659,7 +4660,6 @@ class IncompleteMapDep final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4740,6 +4740,7 @@ class CompleteMapDep final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4750,7 +4751,6 @@ class CompleteMapDep final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4833,6 +4833,7 @@ class CompleteMap final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4843,7 +4844,6 @@ class CompleteMap final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4979,6 +4979,7 @@ class IncompleteList final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -4989,7 +4990,6 @@ class IncompleteList final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5123,6 +5123,7 @@ class IncompleteListDep final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -5133,7 +5134,6 @@ class IncompleteListDep final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5214,6 +5214,7 @@ class CompleteListDep final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -5224,7 +5225,6 @@ class CompleteListDep final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5307,6 +5307,7 @@ class CompleteList final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -5317,7 +5318,6 @@ class CompleteList final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5453,6 +5453,7 @@ class AdaptedList final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -5463,7 +5464,6 @@ class AdaptedList final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5600,6 +5600,7 @@ class AdaptedListDep final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -5610,7 +5611,6 @@ class AdaptedListDep final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5747,6 +5747,7 @@ class DependentAdaptedListDep final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -5757,7 +5758,6 @@ class DependentAdaptedListDep final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5884,6 +5884,7 @@ class DependentAdaptedList final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -5894,7 +5895,6 @@ class DependentAdaptedList final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -6042,6 +6042,7 @@ class AllocatorAware final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -6052,7 +6053,6 @@ class AllocatorAware final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -6520,6 +6520,7 @@ class AllocatorAware2 final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -6530,7 +6531,6 @@ class AllocatorAware2 final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -6691,6 +6691,7 @@ class TypedefStruct final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -6701,7 +6702,6 @@ class TypedefStruct final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -6944,6 +6944,7 @@ class StructWithDoubleUnderscores final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -6954,7 +6955,6 @@ class StructWithDoubleUnderscores final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;

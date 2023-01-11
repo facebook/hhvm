@@ -238,6 +238,7 @@ class MyDataItem final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -248,7 +249,6 @@ class MyDataItem final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -347,6 +347,7 @@ class MyStruct final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -357,7 +358,6 @@ class MyStruct final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -926,6 +926,7 @@ class MyUnion final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -936,7 +937,6 @@ class MyUnion final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
 
@@ -1397,6 +1397,7 @@ class ReservedKeyword final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1407,7 +1408,6 @@ class ReservedKeyword final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1545,6 +1545,7 @@ class UnionToBeRenamed final  {
 
   template<class T>
   using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
   template<class T>
   using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
@@ -1555,7 +1556,6 @@ class UnionToBeRenamed final  {
       __fbthrift_reflection_field_id_list
     )
   >;
-
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
 

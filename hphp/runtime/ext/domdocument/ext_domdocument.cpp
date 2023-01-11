@@ -1151,40 +1151,24 @@ static xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
   return ret;
 }
 
-// These need to be lowercase...
-const StaticString
-  s_domdocument("domdocument"),
-  s_domdocumenttype("domdocumenttype"),
-  s_domelement("domelement"),
-  s_domattr("domattr"),
-  s_domtext("domtext"),
-  s_domcomment("domcomment"),
-  s_domprocessinginstruction("domprocessinginstruction"),
-  s_domentityreference("domentityreference"),
-  s_domentity("domentity"),
-  s_domcdatasection("domcdatasection"),
-  s_domdocumentfragment("domdocumentfragment"),
-  s_domnotation("domnotation"),
-  s_domnamespacenode("domnamespacenode");
-
 static String domClassname(xmlNodePtr obj) {
   switch (obj->type) {
   case XML_DOCUMENT_NODE:
-  case XML_HTML_DOCUMENT_NODE: return s_domdocument;
+  case XML_HTML_DOCUMENT_NODE: return s_DOMDocument;
   case XML_DTD_NODE:
-  case XML_DOCUMENT_TYPE_NODE: return s_domdocumenttype;
-  case XML_ELEMENT_NODE:       return s_domelement;
-  case XML_ATTRIBUTE_NODE:     return s_domattr;
-  case XML_TEXT_NODE:          return s_domtext;
-  case XML_COMMENT_NODE:       return s_domcomment;
-  case XML_PI_NODE:            return s_domprocessinginstruction;
-  case XML_ENTITY_REF_NODE:    return s_domentityreference;
+  case XML_DOCUMENT_TYPE_NODE: return s_DOMDocumentType;
+  case XML_ELEMENT_NODE:       return s_DOMElement;
+  case XML_ATTRIBUTE_NODE:     return s_DOMAttr;
+  case XML_TEXT_NODE:          return s_DOMText;
+  case XML_COMMENT_NODE:       return s_DOMComment;
+  case XML_PI_NODE:            return s_DOMProcessingInstruction;
+  case XML_ENTITY_REF_NODE:    return s_DOMEntityReference;
   case XML_ENTITY_DECL:
-  case XML_ELEMENT_DECL:       return s_domentity;
-  case XML_CDATA_SECTION_NODE: return s_domcdatasection;
-  case XML_DOCUMENT_FRAG_NODE: return s_domdocumentfragment;
-  case XML_NOTATION_NODE:      return s_domnotation;
-  case XML_NAMESPACE_DECL:     return s_domnamespacenode;
+  case XML_ELEMENT_DECL:       return s_DOMEntity;
+  case XML_CDATA_SECTION_NODE: return s_DOMCdataSection;
+  case XML_DOCUMENT_FRAG_NODE: return s_DOMDocumentFragment;
+  case XML_NOTATION_NODE:      return s_DOMNotation;
+  case XML_NAMESPACE_DECL:     return s_DOMNameSpaceNode;
   default:
     return String((StringData*)nullptr);
   }
@@ -1198,10 +1182,13 @@ Variant php_dom_create_object(xmlNodePtr obj,
     return init_null();
   }
   if (doc) {
-    if (doc->m_classmap.exists(clsname)) {
+    // Need to lowercase because that is what registerNodeClass does
+    // when it adds things to this map.
+    auto lower_clsname = HHVM_FN(strtolower)(clsname);
+    if (doc->m_classmap.exists(lower_clsname)) {
       // or const char * is not safe
-      assertx(doc->m_classmap[clsname].isString());
-      clsname = doc->m_classmap[clsname].toString();
+      assertx(doc->m_classmap[lower_clsname].isString());
+      clsname = doc->m_classmap[lower_clsname].toString();
     }
   }
 

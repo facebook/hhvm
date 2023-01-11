@@ -681,7 +681,7 @@ using emplace_hint_t = decltype(FOLLY_DECLVAL(Container).emplace_hint(
 template <typename Container, typename... Args>
 auto emplace_at_end(Container& container, Args&&... args) {
   return folly::if_constexpr<
-      folly::is_detected_v<emplace_hint_t, Container, Args...>>(
+      folly::is_detected_v<emplace_hint_t, Container&, Args&&...>>(
       [&](auto& c) {
         return c.emplace_hint(c.end(), std::forward<Args>(args)...);
       },

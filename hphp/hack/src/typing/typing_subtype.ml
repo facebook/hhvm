@@ -1870,9 +1870,10 @@ and simplify_subtype_i
               *)
               let rec subtype_args tparams tyargs env =
                 match (tparams, tyargs) with
-                | ([], _)
+                | ([], _) -> valid env
                 | (_, []) ->
-                  valid env
+                  (* If there are missing type arguments, we don't know that they are subtypes of dynamic, unless the bounds enforce that *)
+                  invalid_env env
                 | (tp :: tparams, tyarg :: tyargs) ->
                   let has_require_dynamic =
                     Attributes.mem
@@ -2325,12 +2326,18 @@ and simplify_subtype_i
               (* This is side-effecting as it registers a dependency *)
               let class_def_sub = Env.get_class env cid_sub in
               (* If class is final then exactness is superfluous *)
-              let is_final =
+              let (has_generics, is_final) =
                 match class_def_sub with
-                | Some tc -> Cls.final tc
-                | None -> false
+                | Some tc -> (not (List.is_empty (Cls.tparams tc)), Cls.final tc)
+                | None -> (false, false)
               in
               if not (exact_match || is_final) then
+                invalid_env env
+              else if has_generics && List.is_empty tyl_super then
+                (* C<t> <: C where C represents all possible instantiations of C's generics *)
+                valid env
+              else if has_generics && List.is_empty tyl_sub then
+                (* C </: C<t>, since C's generic can be instantiated to other things than t *)
                 invalid_env env
               else
                 let variance_reifiedl =
@@ -2362,7 +2369,12 @@ and simplify_subtype_i
               (* This should have been caught already in the naming phase *)
               valid env
             | Some class_sub ->
-              (* We handle the case where a generic A<T> is used as A *)
+              (* We handle the case where a generic A<T> is used as A for the sub-class.
+                 This works because there will be no locls to substitute for type parameters
+                 T in the type build by get_ancestor. If T does show up in that type, then
+                 the call to simplify subtype will fail. This is what we expect since we
+                 would need it to be a sub-type of the super-type for all T. If T is not there,
+                 then simplify_subtype should succeed. *)
               let ety_env =
                 {
                   empty_expand_env with

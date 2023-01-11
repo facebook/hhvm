@@ -1,0 +1,40 @@
+File "missing_generic.php", line 28, characters 10-11:
+Invalid return type (Typing[4110])
+  File "missing_generic.php", line 27, characters 20-20:
+  Expected `C`
+  File "missing_generic.php", line 27, characters 12-12:
+  But got `B`
+File "missing_generic.php", line 33, characters 10-11:
+Invalid return type (Typing[4110])
+  File "missing_generic.php", line 32, characters 20-25:
+  Expected `C<int>`
+  File "missing_generic.php", line 32, characters 12-12:
+  But got `C`
+File "missing_generic.php", line 43, characters 10-11:
+Invalid return type (Typing[4110])
+  File "missing_generic.php", line 42, characters 20-20:
+  Expected `A`
+  File "missing_generic.php", line 42, characters 12-12:
+  But got `C`
+File "missing_generic.php", line 48, characters 10-11:
+Invalid return type (Typing[4110])
+  File "missing_generic.php", line 47, characters 20-20:
+  Expected `C`
+  File "missing_generic.php", line 47, characters 12-12:
+  But got `A`
+File "missing_generic.php", line 53, characters 10-11:
+Invalid return type (Typing[4110])
+  File "missing_generic.php", line 52, characters 22-24:
+  Expected `int`
+  File "missing_generic.php", line 52, characters 22-24:
+  This type argument to `C` must match exactly (it is invariant)
+  File "missing_generic.php", line 9, characters 22-22:
+  But got `T`
+File "missing_generic.php", line 78, characters 10-11:
+Invalid return type (Typing[4110])
+  File "missing_generic.php", line 77, characters 22-24:
+  Expected `int`
+  File "missing_generic.php", line 77, characters 22-24:
+  This type argument to `C` must match exactly (it is invariant)
+  File "missing_generic.php", line 18, characters 21-21:
+  But got `T`

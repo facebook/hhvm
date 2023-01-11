@@ -64,7 +64,7 @@ Errors:
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([12:19-23], "meth"); m_tparams = []; m_where_constraints = [];
           m_params =
-          [{ param_annotation = (vec<_>); param_type_hint = ((vec<_>), None); 
+          [{ param_annotation = (mixed); param_type_hint = ((mixed), None); 
              param_is_variadic = true; param_pos = [12:27-32]; param_name = "$args"; 
              param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }

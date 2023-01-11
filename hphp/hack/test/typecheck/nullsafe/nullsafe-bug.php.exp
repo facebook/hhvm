@@ -1,2 +1,8 @@
 File "nullsafe-bug.php", line 8, characters 25-28:
 Was expecting a type hint (Typing[4032])
+File "nullsafe-bug.php", line 9, characters 10-28:
+Was expecting an object but type is unknown (Typing[4297])
+  File "nullsafe-bug.php", line 9, characters 10-12:
+  It is unknown because type parameter `T` of `foo` could not be determined. Please add explicit type parameters to the invocation of `foo`
+  File "nullsafe-bug.php", line 5, characters 35-35:
+    via this generic `T`

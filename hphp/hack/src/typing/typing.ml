@@ -2084,15 +2084,23 @@ let is_lvalue = function
 
 (* Given a localized parameter type and parameter information, infer
  * a type for the parameter default expression (if present) and check that
- * it is a subtype of the parameter type (if present). If no parameter type
- * is specified, then union with Tany. (So it's as though we did a conditional
- * assignment of the default expression to the parameter).
+ * it is a subtype of the parameter type (if present).
  * Set the type of the parameter in the locals environment *)
 let rec bind_param
-    env ?(immutable = false) ?(can_read_globals = false) (ty1, param) =
+    env ?(immutable = false) ?(can_read_globals = false) (opt_ty1, param) =
   let (env, param_te, ty1) =
     match param.param_expr with
-    | None -> (env, None, ty1)
+    | None -> begin
+      match opt_ty1 with
+      | None ->
+        (* If no parameter type has been provided, we assume that an error
+         * has already been reported, and generate an error type variable *)
+        let (env, err_ty) =
+          Env.fresh_type_error_contravariant env param.param_pos
+        in
+        (env, None, err_ty)
+      | Some ty1 -> (env, None, ty1)
+    end
     | Some e ->
       let decl_hint =
         Option.map
@@ -2108,13 +2116,17 @@ let rec bind_param
             env
             ty
       in
-      let ty1_enforced = { et_type = ty1; et_enforced = enforced } in
+
       let expected =
-        ExpectedTy.make_and_allow_coercion_opt
-          env
-          param.param_pos
-          Reason.URparam
-          ty1_enforced
+        match opt_ty1 with
+        | None -> None
+        | Some ty1 ->
+          let ty1_enforced = { et_type = ty1; et_enforced = enforced } in
+          ExpectedTy.make_and_allow_coercion_opt
+            env
+            param.param_pos
+            Reason.URparam
+            ty1_enforced
       in
       let (env, (te, ty2)) =
         let reason = Reason.Rwitness param.param_pos in
@@ -2130,17 +2142,12 @@ let rec bind_param
       in
       Typing_sequencing.sequence_check_expr e;
       let (env, ty1) =
-        if
-          Option.is_none (hint_of_type_hint param.param_type_hint)
-          && (not @@ TCO.global_inference (Env.get_tcopt env))
-          (* ty1 will be Tany iff we have no type hint and we are not in
-           * 'infer missing mode'. When it ty1 is Tany we just union it with
-           * the type of the default expression *)
-        then
-          Union.union env ty1 ty2
+        match opt_ty1 with
+        (* Type hint is missing *)
+        | None -> (env, ty2)
         (* Otherwise we have an explicit type, and the default expression type
          * must be a subtype *)
-        else
+        | Some ty1 ->
           (* Under Sound Dynamic, if t is the declared type of the parameter, then we
            * allow the default expression to have any type u such that u <: ~t.
            * If t is enforced, then the parameter is assumed to have that type when checking the body,
@@ -5486,13 +5493,13 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
         Phase.localize_no_subst env ~ignore_errors:false decl_ty
       in
       Option.iter ~f:Errors.add_typing_error ty_err_opt1;
-      let (env, t_param) = bind_param env (h, param) in
+      let (env, t_param) = bind_param env (Some h, param) in
       (env, t_params @ [t_param])
     | None ->
       let ty =
         mk (Reason.Rlambda_param (param.param_pos, get_reason ty), get_node ty)
       in
-      let (env, t_param) = bind_param env (ty, param) in
+      let (env, t_param) = bind_param env (Some ty, param) in
       (env, t_params @ [t_param]))
 
 and closure_bind_variadic env vparam variadic_ty =
@@ -5511,19 +5518,18 @@ and closure_bind_variadic env vparam variadic_ty =
   let r = Reason.Rvar_param_from_decl pos in
   let arr_values = mk (r, get_node ty) in
   let ty = MakeType.varray r arr_values in
-  let (env, t_variadic) = bind_param env (ty, vparam) in
+  let (env, t_variadic) = bind_param env (Some ty, vparam) in
   (env, t_variadic)
 
 and closure_bind_opt_param env param : env =
   match param.param_expr with
   | None ->
-    let ty = Typing_utils.mk_tany env param.param_pos in
-    let (env, _) = bind_param env (ty, param) in
+    let (env, _) = bind_param env (None, param) in
     env
   | Some default ->
     let (env, _te, ty) = expr env default ~allow_awaitable:(*?*) false in
     Typing_sequencing.sequence_check_expr default;
-    let (env, _) = bind_param env (ty, param) in
+    let (env, _) = bind_param env (Some ty, param) in
     env
 
 (* Make a type-checking function for an anonymous function or lambda. *)

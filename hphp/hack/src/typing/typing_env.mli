@@ -73,6 +73,8 @@ val fresh_type_invariant : env -> Pos.t -> env * locl_ty
     case of type errors. *)
 val fresh_type_error : env -> Pos.t -> env * locl_ty
 
+val fresh_type_error_contravariant : env -> Pos.t -> env * locl_ty
+
 (** What type variables are fresh in the current scope? *)
 val get_current_tyvars : env -> Ident.t list
 

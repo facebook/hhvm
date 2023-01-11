@@ -129,6 +129,18 @@ let fresh_type_error env p =
   in
   ({ env with inference_env }, res)
 
+let fresh_type_error_contravariant env p =
+  log_env_change_ "fresh_type_error_contravariant" env
+  @@
+  let (inference_env, res) =
+    Inf.fresh_type_reason
+      ~variance:Ast_defs.Contravariant
+      env.inference_env
+      p
+      (Reason.Rtype_variable_error p)
+  in
+  ({ env with inference_env }, res)
+
 let new_global_tyvar env ?i r =
   log_env_change_ "new_global_tyvar" env
   @@

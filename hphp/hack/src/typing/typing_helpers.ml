@@ -138,7 +138,12 @@ let set_tyvars_variance_in_callable env return_ty param_tys =
   @@
   let set_variance = Env.set_tyvar_variance ~for_all_vars:true in
   let env = set_variance env return_ty in
-  let env = List.fold param_tys ~init:env ~f:(set_variance ~flip:true) in
+  let env =
+    List.fold param_tys ~init:env ~f:(fun env opt_ty ->
+        match opt_ty with
+        | None -> env
+        | Some ty -> set_variance ~flip:true env ty)
+  in
   env
 
 let reify_kind = function

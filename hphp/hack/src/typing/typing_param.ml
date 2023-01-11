@@ -15,7 +15,6 @@ open Typing_helpers
 module Reason = Typing_reason
 module MakeType = Typing_make_type
 module Phase = Typing_phase
-module TUtils = Typing_utils
 module Env = Typing_env
 
 let enforce_param_not_disposable env param ty =
@@ -28,7 +27,7 @@ let enforce_param_not_disposable env param ty =
         Typing_error.Primary.Invalid_disposable_hint
           { pos = param.param_pos; class_name = Utils.strip_ns class_name })
 
-let check_param_has_hint env param ty =
+let check_param_has_hint env param =
   let prim_err_opt =
     if Env.is_hhi env then
       None
@@ -39,8 +38,7 @@ let check_param_has_hint env param ty =
         else
           Typing_error.Primary.Expecting_type_hint param.param_pos)
     else
-      (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
-      enforce_param_not_disposable env param ty
+      None
   in
   Option.iter prim_err_opt ~f:(fun err ->
       Errors.add_typing_error @@ Typing_error.primary err)
@@ -86,17 +84,18 @@ let check_param_has_hint env param ty =
  * A similar line of reasoning is applied for the static method create.
  *)
 let make_param_local_ty ~dynamic_mode env decl_hint param =
-  let r = Reason.Rwitness param.param_pos in
-  let ((env, ty_err_opt), ty) =
-    match decl_hint with
-    | None -> ((env, None), mk (r, TUtils.tany env))
-    | Some ty ->
+  (* Don't check (again) for existence of hint in dynamic mode *)
+  if not dynamic_mode then check_param_has_hint env param;
+  match decl_hint with
+  | None -> (env, None)
+  | Some hint ->
+    let ((env, ty_err_opt), ty) =
       let { et_type = ty; et_enforced } =
         Typing_enforceability.compute_enforced_and_pessimize_ty
           ~this_class:(Env.get_self_class env)
           ~explicitly_untrusted:param.param_is_variadic
           env
-          ty
+          hint
       in
       (match et_enforced with
       | Unenforced ->
@@ -130,21 +129,23 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
           ty
       in
       Phase.localize_no_subst env ~ignore_errors:false ty
-  in
-  Option.iter ty_err_opt ~f:Errors.add_typing_error;
-  let ty =
-    match get_node ty with
-    | t when param.param_is_variadic ->
-      (* when checking the body of a function with a variadic
-       * argument, "f(C ...$args)", $args is a varray<C> *)
-      let r = Reason.Rvar_param param.param_pos in
-      let arr_values = mk (r, t) in
-      MakeType.varray r arr_values
-    | _ -> ty
-  in
-  (* Don't check (again) for existence of hint in dynamic mode *)
-  if not dynamic_mode then check_param_has_hint env param ty;
-  (env, ty)
+    in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
+    let ty =
+      match get_node ty with
+      | t when param.param_is_variadic ->
+        (* when checking the body of a function with a variadic
+         * argument, "f(C ...$args)", $args is a varray<C> *)
+        let r = Reason.Rvar_param param.param_pos in
+        let arr_values = mk (r, t) in
+        MakeType.varray r arr_values
+      | _ -> ty
+    in
+    (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
+    let prim_err_opt = enforce_param_not_disposable env param ty in
+    Option.iter prim_err_opt ~f:(fun err ->
+        Errors.add_typing_error @@ Typing_error.primary err);
+    (env, Some ty)
 
 let make_param_local_tys ~dynamic_mode env decl_tys params =
   List.zip_exn params decl_tys

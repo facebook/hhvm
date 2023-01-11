@@ -125,25 +125,28 @@ let merge_and_sum cs1 cs2 =
     cs2
 
 let rec is_tany env ty =
-  let (env, ty) = Tast_env.expand_type env ty in
-  match get_node ty with
-  | Tany _
-  | Tdynamic ->
+  if TUtils.is_tyvar_error (Tast_env.tast_env_as_typing_env env) ty then
     (env, Some (get_reason ty))
-  | Tclass ((_, class_name), _, [ty])
-    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
-    is_tany env ty
-  | Tunion [] -> (env, None)
-  | Tunion (h :: tl) ->
-    let (env, r_opt) = is_tany env h in
-    (match r_opt with
-    | Some r
-      when List.for_all
-             tl
-             ~f:(compose Option.is_some (compose snd (is_tany env))) ->
-      (env, Some r)
-    | _ -> (env, None))
-  | _ -> (env, None)
+  else
+    let (env, ty) = Tast_env.expand_type env ty in
+    match get_node ty with
+    | Tany _
+    | Tdynamic ->
+      (env, Some (get_reason ty))
+    | Tclass ((_, class_name), _, [ty])
+      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+      is_tany env ty
+    | Tunion [] -> (env, None)
+    | Tunion (h :: tl) ->
+      let (env, r_opt) = is_tany env h in
+      (match r_opt with
+      | Some r
+        when List.for_all
+               tl
+               ~f:(compose Option.is_some (compose snd (is_tany env))) ->
+        (env, Some r)
+      | _ -> (env, None))
+    | _ -> (env, None)
 
 let level_of_type env fixme_map ((pos : Aast.pos), ty) =
   let (env, ty) = Tast_env.expand_type env ty in

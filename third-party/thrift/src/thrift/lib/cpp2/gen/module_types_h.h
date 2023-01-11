@@ -257,6 +257,69 @@ struct at_impl<folly::tag_t<Args...>, Ord> {
 template <class List, FieldOrdinal Ord>
 using at = typename at_impl<List, Ord>::type;
 
+// Similar to std::find, but returns ordinal
+template <class T>
+FOLLY_CONSTEVAL type::Ordinal findOrdinal(
+    const T* first, const T* last, const T& value) {
+  for (const T* iter = first; iter != last; ++iter) {
+    if (*iter == value) {
+      return static_cast<type::Ordinal>(iter - first + 1);
+    }
+  }
+
+  return static_cast<type::Ordinal>(0);
+}
+
+template <class T, class List>
+class FindOrdinal {
+  static_assert(sizeof(T) < 0, "");
+};
+
+// TODO: Optimize the build time by using the technique mentioned here:
+// https://mpark.github.io/programming/2019/01/22/variant-visitation-v2/
+template <class T, class... Args>
+class FindOrdinal<T, folly::tag_t<Args...>> {
+ private:
+  static constexpr bool matches[sizeof...(Args)] = {
+      std::is_same<T, Args>::value...};
+
+ public:
+  static constexpr auto value = findOrdinal(matches, std::end(matches), true);
+  static FOLLY_CONSTEVAL size_t count() {
+    size_t count = 0;
+    for (bool b : matches) {
+      count += b;
+    }
+    return count;
+  }
+};
+
+template <class Id, class Idents, class TypeTags, class IdList>
+FOLLY_CONSTEVAL std::enable_if_t<std::is_same<Id, void>::value, FieldOrdinal>
+getFieldOrdinal(IdList&&) {
+  return static_cast<FieldOrdinal>(0);
+}
+
+template <class Id, class Idents, class TypeTags, class IdList>
+FOLLY_CONSTEVAL std::enable_if_t<type::is_field_id_v<Id>, FieldOrdinal>
+getFieldOrdinal(IdList&& ids) {
+  return findOrdinal(ids + 1, std::end(ids), folly::to_underlying(Id::value));
+}
+
+template <class Id, class Idents, class TypeTags, class IdList>
+FOLLY_CONSTEVAL std::enable_if_t<type::is_ident_v<Id>, FieldOrdinal>
+getFieldOrdinal(IdList&&) {
+  return FindOrdinal<Id, Idents>::value;
+}
+
+template <class Id, class Idents, class TypeTags, class IdList>
+FOLLY_CONSTEVAL std::enable_if_t<type::detail::is_type_tag_v<Id>, FieldOrdinal>
+getFieldOrdinal(IdList&&) {
+  static_assert(
+      FindOrdinal<Id, TypeTags>::count() <= 1, "Type Tag is not unique");
+  return FindOrdinal<Id, TypeTags>::value;
+}
+
 } // namespace detail
 namespace ident {
 template <class T>

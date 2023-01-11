@@ -2398,10 +2398,6 @@ void in(ISS& env, const bc::AKExists&) {
 
 void in(ISS& env, const bc::GetMemoKeyL& op) {
   auto const& func = env.ctx.func;
-  auto const name = folly::to<std::string>(
-    func && func->cls ? func->cls->name->data() : "",
-    func && func->cls ? "::" : "",
-    func ? func->name->data() : "");
   always_assert(func->isMemoizeWrapper);
 
   auto const tyIMemoizeParam =

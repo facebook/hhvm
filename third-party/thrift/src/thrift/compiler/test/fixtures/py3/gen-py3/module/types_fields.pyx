@@ -15,7 +15,7 @@ from thrift.py3.types cimport (
     StructFieldsSetter as __StructFieldsSetter
 )
 
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
 
 
 @__cython.auto_pickle(False)
@@ -231,7 +231,7 @@ cdef class __ComplexStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cComplexStruct](deref(self._struct_cpp_obj), 4)
             return
-        if not isinstance(_fbthrift_value, _module_types.AnEnum):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.AnEnum):
             raise TypeError(f'field an_enum value: {repr(_fbthrift_value)} is not of the enum type { _module_types.AnEnum }.')
         deref(self._struct_cpp_obj).an_enum_ref().assign(<_module_types.cAnEnum><int>_fbthrift_value)
 

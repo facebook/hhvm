@@ -15,5 +15,5 @@ from thrift.py3.types cimport (
     StructFieldsSetter as __StructFieldsSetter
 )
 
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
 

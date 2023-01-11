@@ -15,7 +15,7 @@ from thrift.py3.types cimport (
     StructFieldsSetter as __StructFieldsSetter
 )
 
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
 
 
 @__cython.auto_pickle(False)
@@ -78,7 +78,7 @@ cdef class __MyField_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cMyField](deref(self._struct_cpp_obj), 3)
             return
-        if not isinstance(_fbthrift_value, _module_types.MyEnum):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnum):
             raise TypeError(f'field opt_enum_value value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnum }.')
         assign_unique_ptr[_module_types.cMyEnum](deref(self._struct_cpp_obj).opt_enum_value_ref(), make_unique[_module_types.cMyEnum](deref((<_module_types.MyEnum?>_fbthrift_value)._cpp_obj)))
 
@@ -87,7 +87,7 @@ cdef class __MyField_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cMyField](deref(self._struct_cpp_obj), 4)
             return
-        if not isinstance(_fbthrift_value, _module_types.MyEnum):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnum):
             raise TypeError(f'field enum_value value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnum }.')
         assign_unique_ptr[_module_types.cMyEnum](deref(self._struct_cpp_obj).enum_value_ref(), make_unique[_module_types.cMyEnum](deref((<_module_types.MyEnum?>_fbthrift_value)._cpp_obj)))
 
@@ -96,7 +96,7 @@ cdef class __MyField_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cMyField](deref(self._struct_cpp_obj), 5)
             return
-        if not isinstance(_fbthrift_value, _module_types.MyEnum):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnum):
             raise TypeError(f'field req_enum_value value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnum }.')
         assign_unique_ptr[_module_types.cMyEnum](deref(self._struct_cpp_obj).req_enum_value_ref(), make_unique[_module_types.cMyEnum](deref((<_module_types.MyEnum?>_fbthrift_value)._cpp_obj)))
 

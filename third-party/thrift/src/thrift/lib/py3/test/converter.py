@@ -19,7 +19,7 @@ import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
 import convertible.types as py3_types
 from thrift.py3.converter import to_py3_struct
-from thrift.py3.types import Struct
+from thrift.py3.types import BadEnum, Struct
 
 
 class PyDeprecatedToPy3ConverterTest(unittest.TestCase):
@@ -168,6 +168,24 @@ class PyDeprecatedToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(to.type, py3_types.Potahto.Type.to)
         self.assertEqual(to.value, True)
 
+    def test_py_bad_enum(self) -> None:
+        simple = py_deprecated_types.Simple(
+            intField=42,
+            strField="simple",
+            intList=[1, 2, 3],
+            strSet={"hello", "world"},
+            strToIntMap={"one": 1, "two": 2},
+            color=1234,  # pyre-ignore[6]: In call `py_deprecated_types.Simple.__init__`, for 6th parameter `color` expected `Optional[Color]` but got `int`.
+            name="myname",
+        )._to_py3()
+        self.assertIsInstance(simple.color, BadEnum)
+        self.assertEqual(
+            simple.color.enum,
+            py3_types.Color,
+        )
+
+        self.assertEqual(int(simple.color), 1234)
+
 
 class PythonToPy3ConverterTest(unittest.TestCase):
     def test_simple(self) -> None:
@@ -187,6 +205,8 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(simple.strToIntMap, {"one": 1, "two": 2})
         self.assertEqual(simple.color, py3_types.Color.GREEN)
         self.assertEqual(simple.name_, "myname")
+        self.assertIsInstance(simple.empty, BadEnum)
+        self.assertEqual(int(simple.empty), 0)
 
     def test_nested(self) -> None:
         nested = python_types.Nested(

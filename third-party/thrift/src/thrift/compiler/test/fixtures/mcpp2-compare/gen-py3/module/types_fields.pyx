@@ -15,7 +15,7 @@ from thrift.py3.types cimport (
     StructFieldsSetter as __StructFieldsSetter
 )
 
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
 
 
 @__cython.auto_pickle(False)
@@ -319,7 +319,7 @@ cdef class __AnException_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cAnException](deref(self._struct_cpp_obj), 8)
             return
-        if not isinstance(_fbthrift_value, _module_types.MyEnumA):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnumA):
             raise TypeError(f'field enum_field value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnumA }.')
         deref(self._struct_cpp_obj).enum_field_ref().assign(<_module_types.cMyEnumA><int>_fbthrift_value)
 
@@ -689,7 +689,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 24)
             return
-        if not isinstance(_fbthrift_value, _module_types.MyEnumA):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnumA):
             raise TypeError(f'field fieldQ value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnumA }.')
         deref(self._struct_cpp_obj).fieldQ_ref().assign(<_module_types.cMyEnumA><int>_fbthrift_value)
 
@@ -698,7 +698,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 25)
             return
-        if not isinstance(_fbthrift_value, _module_types.MyEnumA):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnumA):
             raise TypeError(f'field fieldR value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnumA }.')
         deref(self._struct_cpp_obj).fieldR_ref().assign(<_module_types.cMyEnumA><int>_fbthrift_value)
 
@@ -707,7 +707,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 26)
             return
-        if not isinstance(_fbthrift_value, _module_types.MyEnumA):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnumA):
             raise TypeError(f'field req_fieldR value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnumA }.')
         deref(self._struct_cpp_obj).req_fieldR_ref().assign(<_module_types.cMyEnumA><int>_fbthrift_value)
 
@@ -716,7 +716,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 27)
             return
-        if not isinstance(_fbthrift_value, _module_types.MyEnumA):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnumA):
             raise TypeError(f'field opt_fieldR value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnumA }.')
         deref(self._struct_cpp_obj).opt_fieldR_ref().assign(<_module_types.cMyEnumA><int>_fbthrift_value)
 
@@ -725,7 +725,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 28)
             return
-        if not isinstance(_fbthrift_value, _module_types.MyEnumA):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnumA):
             raise TypeError(f'field fieldS value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnumA }.')
         deref(self._struct_cpp_obj).fieldS_ref().assign(<_module_types.cMyEnumA><int>_fbthrift_value)
 
@@ -837,7 +837,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 42)
             return
-        if not isinstance(_fbthrift_value, _module_types.MyEnumB):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.MyEnumB):
             raise TypeError(f'field fieldAC value: {repr(_fbthrift_value)} is not of the enum type { _module_types.MyEnumB }.')
         deref(self._struct_cpp_obj).fieldAC_ref().assign(<_module_types.cMyEnumB><int>_fbthrift_value)
 
@@ -846,7 +846,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.ccontainerStruct](deref(self._struct_cpp_obj), 43)
             return
-        if not isinstance(_fbthrift_value, _includes_types.AnEnum):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _includes_types.AnEnum):
             raise TypeError(f'field fieldAD value: {repr(_fbthrift_value)} is not of the enum type { _includes_types.AnEnum }.')
         deref(self._struct_cpp_obj).fieldAD_ref().assign(<_includes_types.cAnEnum><int>_fbthrift_value)
 

@@ -15,7 +15,7 @@ from thrift.py3.types cimport (
     StructFieldsSetter as __StructFieldsSetter
 )
 
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
 
 
 @__cython.auto_pickle(False)
@@ -244,7 +244,7 @@ cdef class __Person_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_types.cPerson](deref(self._struct_cpp_obj), 8)
             return
-        if not isinstance(_fbthrift_value, _module_types.Animal):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.Animal):
             raise TypeError(f'field afraidOfAnimal value: {repr(_fbthrift_value)} is not of the enum type { _module_types.Animal }.')
         deref(self._struct_cpp_obj).afraidOfAnimal_ref().assign(<_module_types.cAnimal><int>_fbthrift_value)
 

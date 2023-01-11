@@ -15,7 +15,7 @@ from thrift.py3.types cimport (
     StructFieldsSetter as __StructFieldsSetter
 )
 
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
 
 
 @__cython.auto_pickle(False)
@@ -41,7 +41,7 @@ cdef class __TestError_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_nolegacy_module_types.cTestError](deref(self._struct_cpp_obj), 0)
             return
-        if not isinstance(_fbthrift_value, _test_fixtures_nolegacy_module_types.TestEnum):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _test_fixtures_nolegacy_module_types.TestEnum):
             raise TypeError(f'field test_enum value: {repr(_fbthrift_value)} is not of the enum type { _test_fixtures_nolegacy_module_types.TestEnum }.')
         deref(self._struct_cpp_obj).test_enum_ref().assign(<_test_fixtures_nolegacy_module_types.cTestEnum><int>_fbthrift_value)
 

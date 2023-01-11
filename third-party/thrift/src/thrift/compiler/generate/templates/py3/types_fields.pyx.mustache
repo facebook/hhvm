@@ -28,7 +28,7 @@ from thrift.py3.types cimport (
 )
 
 {{#program:structs?}}
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
 {{/program:structs?}}
 
 {{#program:filtered_structs}}
@@ -62,7 +62,7 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
             return
         {{^type:container?}}
         {{#type:enum?}}
-        if not isinstance(_fbthrift_value, {{> types/python_type}}):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, {{> types/python_type}}):
             raise TypeError(f'field {{field:py_name}} value: {repr(_fbthrift_value)} is not of the enum type { {{> types/python_type}} }.')
         {{/type:enum?}}
         {{^type:enum?}}

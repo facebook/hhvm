@@ -15,7 +15,7 @@ from thrift.py3.types cimport (
     StructFieldsSetter as __StructFieldsSetter
 )
 
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
 
 
 @__cython.auto_pickle(False)
@@ -192,7 +192,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 9)
             return
-        if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyEnum):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyEnum):
             raise TypeError(f'field enumVal value: {repr(_fbthrift_value)} is not of the enum type { _test_fixtures_patch_module_types.MyEnum }.')
         deref(self._struct_cpp_obj).enumVal_ref().assign(<_test_fixtures_patch_module_types.cMyEnum><int>_fbthrift_value)
 
@@ -313,7 +313,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 22)
             return
-        if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyEnum):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyEnum):
             raise TypeError(f'field optEnumVal value: {repr(_fbthrift_value)} is not of the enum type { _test_fixtures_patch_module_types.MyEnum }.')
         deref(self._struct_cpp_obj).optEnumVal_ref().assign(<_test_fixtures_patch_module_types.cMyEnum><int>_fbthrift_value)
 

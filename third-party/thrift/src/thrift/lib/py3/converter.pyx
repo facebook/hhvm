@@ -19,7 +19,7 @@ from thrift.py3.reflection import inspect
 
 from libcpp cimport bool
 from thrift.py3.reflection cimport FieldSpec, MapSpec, Qualifier, StructType
-from thrift.py3.types cimport CompiledEnum, Container, Struct
+from thrift.py3.types cimport BadEnum, CompiledEnum, Container, Struct
 from thrift.python.types cimport Struct as PythonStruct, Union as PythonUnion
 
 def to_py3_struct(cls, obj):
@@ -99,6 +99,10 @@ cdef object _to_py3_field(object cls, object obj):
         else:
             return [_to_py3_field(container_spec.value, elem) for elem in obj]
     elif issubclass(cls, CompiledEnum):
-        return cls(obj.value) if isinstance(obj, Enum) else cls(obj)
+        int_val = int(obj)
+        try:
+            return cls(int_val)
+        except ValueError:
+            return BadEnum(cls, int_val)
     else:
         return obj

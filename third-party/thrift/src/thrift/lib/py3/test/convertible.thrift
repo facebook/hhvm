@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+enum Empty {
+}
+
 enum Color {
   NONE = 0,
   RED = 1,
@@ -29,6 +32,7 @@ struct Simple {
   5: map<string, i64> strToIntMap;
   6: Color color;
   7: string name (py3.name = "name_");
+  8: Empty empty;
 }
 
 struct Nested {

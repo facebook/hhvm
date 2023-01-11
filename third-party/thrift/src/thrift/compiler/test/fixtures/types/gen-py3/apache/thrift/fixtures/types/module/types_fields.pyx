@@ -15,7 +15,7 @@ from thrift.py3.types cimport (
     StructFieldsSetter as __StructFieldsSetter
 )
 
-from thrift.py3.types cimport const_pointer_cast
+from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
 
 
 @__cython.auto_pickle(False)
@@ -202,7 +202,7 @@ cdef class __MyStructWithForwardRefEnum_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cMyStructWithForwardRefEnum](deref(self._struct_cpp_obj), 0)
             return
-        if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.MyForwardRefEnum):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.MyForwardRefEnum):
             raise TypeError(f'field a value: {repr(_fbthrift_value)} is not of the enum type { _apache_thrift_fixtures_types_module_types.MyForwardRefEnum }.')
         deref(self._struct_cpp_obj).a_ref().assign(<_apache_thrift_fixtures_types_module_types.cMyForwardRefEnum><int>_fbthrift_value)
 
@@ -211,7 +211,7 @@ cdef class __MyStructWithForwardRefEnum_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_types.cMyStructWithForwardRefEnum](deref(self._struct_cpp_obj), 1)
             return
-        if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.MyForwardRefEnum):
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.MyForwardRefEnum):
             raise TypeError(f'field b value: {repr(_fbthrift_value)} is not of the enum type { _apache_thrift_fixtures_types_module_types.MyForwardRefEnum }.')
         deref(self._struct_cpp_obj).b_ref().assign(<_apache_thrift_fixtures_types_module_types.cMyForwardRefEnum><int>_fbthrift_value)
 

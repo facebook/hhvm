@@ -453,7 +453,7 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
       // Merge anything in patch into patchPrior.
       data_.patchPrior()->merge(std::move(*data_.patch()));
       // Merge in next.patchPrior into patchPrior.
-      data_.patchPrior()->merge(temp);
+      data_.patchPrior()->merge(std::move(temp));
       // Consume next.ensure, if any.
       if (hasValue(next.toThrift().ensure())) {
         data_.ensure() = *std::forward<U>(next).toThrift().ensure();

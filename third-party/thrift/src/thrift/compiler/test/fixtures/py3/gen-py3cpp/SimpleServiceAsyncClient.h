@@ -3924,6 +3924,101 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
   void get_binary_union_structT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::py3::simple::BinaryUnion& p_u);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_binary_union_structCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+  virtual void get_struct_hidden(std::unique_ptr<apache::thrift::RequestCallback> callback);
+  virtual void get_struct_hidden(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
+ protected:
+  void get_struct_hiddenImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
+ public:
+
+  virtual void sync_get_struct_hidden(::py3::simple::SimpleStruct& _return);
+  virtual void sync_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::SimpleStruct& _return);
+
+  virtual folly::Future<::py3::simple::SimpleStruct> future_get_struct_hidden();
+  virtual folly::SemiFuture<::py3::simple::SimpleStruct> semifuture_get_struct_hidden();
+  virtual folly::Future<::py3::simple::SimpleStruct> future_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::SemiFuture<::py3::simple::SimpleStruct> semifuture_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::Future<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::SemiFuture<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions);
+
+#if FOLLY_HAS_COROUTINES
+#if __clang__
+  template <int = 0>
+  folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct_hidden() {
+    return co_get_struct_hidden<false>(nullptr);
+  }
+  template <int = 0>
+  folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions) {
+    return co_get_struct_hidden<true>(&rpcOptions);
+  }
+#else
+  folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct_hidden() {
+    co_return co_await folly::coro::detachOnCancel(semifuture_get_struct_hidden());
+  }
+  folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions) {
+    co_return co_await folly::coro::detachOnCancel(semifuture_get_struct_hidden(rpcOptions));
+  }
+#endif
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<::py3::simple::SimpleStruct> co_get_struct_hidden(apache::thrift::RpcOptions* rpcOptions) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
+    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto [ctx, header] = get_struct_hiddenCtx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions defaultRpcOptions;
+    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    if constexpr (hasRpcOptions) {
+      get_struct_hiddenImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+    } else {
+      get_struct_hiddenImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+    }
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
+    }
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
+    }
+    returnState.resetProtocolId(protocolId);
+    returnState.resetCtx(std::move(ctx));
+    SCOPE_EXIT {
+      if (hasRpcOptions && returnState.header()) {
+        auto* rheader = returnState.header();
+        if (!rheader->getHeaders().empty()) {
+          rpcOptions->setReadHeaders(rheader->releaseHeaders());
+        }
+        rpcOptions->setRoutingData(rheader->releaseRoutingData());
+      }
+    };
+    ::py3::simple::SimpleStruct _return;
+    if (auto ew = recv_wrapped_get_struct_hidden(_return, returnState)) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+    co_return _return;
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
+
+  virtual void get_struct_hidden(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
+
+
+  static folly::exception_wrapper recv_wrapped_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
+  static void recv_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  virtual void recv_instance_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
+  virtual folly::exception_wrapper recv_instance_wrapped_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state);
+ private:
+  template <typename Protocol_, typename RpcOptions>
+  void get_struct_hiddenT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_struct_hiddenCtx(apache::thrift::RpcOptions* rpcOptions);
+ public:
 };
 
 } // namespace apache::thrift

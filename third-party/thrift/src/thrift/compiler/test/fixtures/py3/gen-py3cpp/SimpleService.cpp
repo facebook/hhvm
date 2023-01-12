@@ -4530,6 +4530,118 @@ determineInvocationType:
   }
 }
 
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_struct_hidden(::py3::simple::SimpleStruct& /*_return*/) {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("get_struct_hidden");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_get_struct_hidden(::py3::simple::SimpleStruct& _return) {
+  return get_struct_hidden(_return);
+}
+
+folly::SemiFuture<std::unique_ptr<::py3::simple::SimpleStruct>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_get_struct_hidden() {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_get_struct_hidden.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  auto ret = std::make_unique<::py3::simple::SimpleStruct>();
+  sync_get_struct_hidden(*ret);
+  return folly::makeSemiFuture(std::move(ret));
+}
+
+folly::Future<std::unique_ptr<::py3::simple::SimpleStruct>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::future_get_struct_hidden() {
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_get_struct_hidden.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(semifuture_get_struct_hidden(), getInternalKeepAlive());
+}
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::py3::simple::SimpleStruct>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::co_get_struct_hidden() {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_get_struct_hidden.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<>());
+}
+
+folly::coro::Task<std::unique_ptr<::py3::simple::SimpleStruct>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::co_get_struct_hidden(apache::thrift::RequestParams /* params */) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_get_struct_hidden.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_get_struct_hidden();
+}
+#endif // FOLLY_HAS_COROUTINES
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::async_tm_get_struct_hidden(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::SimpleStruct>>> callback) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
+  auto invocationType = __fbthrift_invocation_get_struct_hidden.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm:
+      {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_get_struct_hidden.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_get_struct_hidden(params);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_get_struct_hidden.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
+      }
+      case apache::thrift::detail::si::InvocationType::Future:
+      {
+        auto fut = future_get_struct_hidden();
+        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture:
+      {
+        auto fut = semifuture_get_struct_hidden();
+        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        return;
+      }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_get_struct_hidden(params);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_get_struct_hidden();
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::Sync:
+      {
+        ::py3::simple::SimpleStruct _return;
+        sync_get_struct_hidden(_return);
+        callback->result(_return);
+        return;
+      }
+      default:
+      {
+        folly::assume_unreachable();
+      }
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie() = std::move(ex).restoreArgs<>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
+}
+
 
 namespace py3 { namespace simple {
 
@@ -4660,6 +4772,8 @@ void SimpleServiceSvNull::contain_binary(::std::set<::std::string>& /*_return*/,
 void SimpleServiceSvNull::contain_enum(::std::vector<::py3::simple::AnEnum>& /*_return*/, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> /*the_enum*/) {}
 
 void SimpleServiceSvNull::get_binary_union_struct(::py3::simple::BinaryUnionStruct& /*_return*/, std::unique_ptr<::py3::simple::BinaryUnion> /*u*/) {}
+
+void SimpleServiceSvNull::get_struct_hidden(::py3::simple::SimpleStruct& /*_return*/) {}
 
 
 const char* SimpleServiceAsyncProcessor::getServiceName() {
@@ -4892,6 +5006,11 @@ const SimpleServiceAsyncProcessor::ProcessMap SimpleServiceAsyncProcessor::kOwnP
      &SimpleServiceAsyncProcessor::setUpAndProcess_get_binary_union_struct<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
      &SimpleServiceAsyncProcessor::executeRequest_get_binary_union_struct<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
      &SimpleServiceAsyncProcessor::executeRequest_get_binary_union_struct<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"get_struct_hidden",
+    {&SimpleServiceAsyncProcessor::setUpAndProcess_get_struct_hidden<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &SimpleServiceAsyncProcessor::setUpAndProcess_get_struct_hidden<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &SimpleServiceAsyncProcessor::executeRequest_get_struct_hidden<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &SimpleServiceAsyncProcessor::executeRequest_get_struct_hidden<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
 };
 
 apache::thrift::ServiceRequestInfoMap const& SimpleServiceServiceInfoHolder::requestInfoMap() const {
@@ -5145,6 +5264,12 @@ apache::thrift::ServiceRequestInfoMap SimpleServiceServiceInfoHolder::staticRequ
     {false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SimpleService.get_binary_union_struct",
+     std::nullopt,
+     apache::thrift::concurrency::NORMAL}},
+  {"get_struct_hidden",
+    {false,
+     apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+     "SimpleService.get_struct_hidden",
      std::nullopt,
      apache::thrift::concurrency::NORMAL}},
   };

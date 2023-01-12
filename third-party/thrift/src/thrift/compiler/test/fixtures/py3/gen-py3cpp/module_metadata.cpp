@@ -952,6 +952,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct_hidden(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "get_struct_hidden";
+  auto func_ret_type = std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct");
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
@@ -1008,6 +1016,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contain_binary,
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contain_enum,
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_binary_union_struct,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct_hidden,
   };
   for (auto& function_gen : functions) {
     function_gen(metadata, module_SimpleService);

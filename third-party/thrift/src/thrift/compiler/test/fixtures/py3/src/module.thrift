@@ -189,6 +189,7 @@ service SimpleService {
   set<binary> contain_binary(1: list<binary> binaries);
   list<AnEnum> contain_enum(1: list<AnEnum> the_enum);
   BinaryUnionStruct get_binary_union_struct(1: BinaryUnion u);
+  SimpleStruct get_struct_hidden() (py3.hidden);
 }
 
 service DerivedService extends SimpleService {

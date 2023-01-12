@@ -534,6 +534,10 @@ def _fbthrift_gen_metadata_service_SimpleService(metadata_struct: _fbthrift_meta
         ], exceptions = [
         ], is_oneway=False, structured_annotations=[
         ]),
+        _fbthrift_metadata.ThriftFunction(name="get_struct_hidden", return_type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.SimpleStruct")), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
     ]
     
     service_dict = dict(metadata_struct.services)
@@ -793,6 +797,11 @@ def _fbthrift_gen_metadata_service_SimpleService(metadata_struct: _fbthrift_meta
     
     
     new_struct = _fbthrift_gen_metadata_struct_BinaryUnionStruct(new_struct) # return value
+    
+    
+    
+    
+    new_struct = _fbthrift_gen_metadata_struct_SimpleStruct(new_struct) # return value
     
     
     return new_struct

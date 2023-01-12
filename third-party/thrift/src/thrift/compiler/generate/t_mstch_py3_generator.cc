@@ -121,9 +121,13 @@ const t_type* get_stream_elem_type(const t_type& type) {
   return dynamic_cast<const t_stream_response&>(type).get_elem_type();
 }
 
+bool is_hidden(const t_function& func) {
+  return func.has_annotation("py3.hidden");
+}
+
 bool is_func_supported(bool no_stream, const t_function* func) {
-  return !(no_stream && func->returns_stream()) && !func->returns_sink() &&
-      !func->get_returntype()->is_service();
+  return !is_hidden(*func) && !(no_stream && func->returns_stream()) &&
+      !func->returns_sink() && !func->get_returntype()->is_service();
 }
 
 bool is_hidden(const t_type& node) {
@@ -309,6 +313,9 @@ class py3_mstch_program : public mstch_program {
 
   void visit_type_single_service(const t_service* service) {
     for (const auto& function : service->functions()) {
+      if (is_hidden(function)) {
+        continue;
+      }
       for (const auto& field : function.get_paramlist()->fields()) {
         visit_type(field.get_type());
       }

@@ -1693,6 +1693,24 @@ class _fbthrift_SimpleService_get_binary_union_struct_result(metaclass=_fbthrift
     )
 
 
+class _fbthrift_SimpleService_get_struct_hidden_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SimpleService_get_struct_hidden_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+
 
 
 class _fbthrift_DerivedService_get_six_args(metaclass=_fbthrift_python_types.StructMeta):
@@ -1817,6 +1835,8 @@ _fbthrift_python_types.fill_specs(
     _fbthrift_SimpleService_contain_enum_result,
     _fbthrift_SimpleService_get_binary_union_struct_args,
     _fbthrift_SimpleService_get_binary_union_struct_result,
+    _fbthrift_SimpleService_get_struct_hidden_args,
+    _fbthrift_SimpleService_get_struct_hidden_result,
     
     _fbthrift_DerivedService_get_six_args,
     _fbthrift_DerivedService_get_six_result,

@@ -93,6 +93,8 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::list<::apache::thrift::type_class::enumeration>, ::std::vector<::py3::simple::AnEnum>*>> SimpleService_contain_enum_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::variant, ::py3::simple::BinaryUnion*>> SimpleService_get_binary_union_struct_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::py3::simple::BinaryUnionStruct*>> SimpleService_get_binary_union_struct_presult;
+typedef apache::thrift::ThriftPresult<false> SimpleService_get_struct_hidden_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct*>> SimpleService_get_struct_hidden_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
 void SimpleServiceAsyncProcessor::setUpAndProcess_get_five(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, FOLLY_MAYBE_UNUSED apache::thrift::concurrency::ThreadManager* tm) {
   if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
@@ -2970,6 +2972,74 @@ void SimpleServiceAsyncProcessor::throw_wrapped_get_binary_union_struct(apache::
   {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
         ew, std::move(req), reqCtx, ctx, "get_binary_union_struct");
+    return;
+  }
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void SimpleServiceAsyncProcessor::setUpAndProcess_get_struct_hidden(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, FOLLY_MAYBE_UNUSED apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
+    return;
+  }
+  auto scope = iface_->getRequestExecutionScope(ctx, apache::thrift::concurrency::NORMAL);
+  ctx->setRequestExecutionScope(std::move(scope));
+  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, &SimpleServiceAsyncProcessor::executeRequest_get_struct_hidden<ProtocolIn_, ProtocolOut_>, this);
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void SimpleServiceAsyncProcessor::executeRequest_get_struct_hidden(apache::thrift::ServerRequest&& serverRequest) {
+  // make sure getRequestContext is null
+  // so async calls don't accidentally use it
+  iface_->setRequestContext(nullptr);
+  ::py3::simple::SimpleService_get_struct_hidden_pargs args;
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "SimpleService.get_struct_hidden", serverRequest.requestContext()));
+  try {
+    deserializeRequest<ProtocolIn_>(args, "get_struct_hidden", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+  }
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ew
+        , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
+        , serverRequest.requestContext()
+        , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
+        , "get_struct_hidden");
+    return;
+  }
+  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
+  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::SimpleStruct>>>(
+    apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
+    , std::move(ctxStack)
+    , return_get_struct_hidden<ProtocolIn_,ProtocolOut_>
+    , throw_wrapped_get_struct_hidden<ProtocolIn_, ProtocolOut_>
+    , serverRequest.requestContext()->getProtoSeqId()
+    , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
+    , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
+    , serverRequest.requestContext()
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
+    );
+  iface_->async_tm_get_struct_hidden(std::move(callback));
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_struct_hidden(apache::thrift::ContextStack* ctx, ::py3::simple::SimpleStruct const& _return) {
+  ProtocolOut_ prot;
+  ::py3::simple::SimpleService_get_struct_hidden_presult result;
+  result.get<0>().value = const_cast<::py3::simple::SimpleStruct*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse(&prot, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void SimpleServiceAsyncProcessor::throw_wrapped_get_struct_hidden(apache::thrift::ResponseChannelRequest::UniquePtr req,FOLLY_MAYBE_UNUSED int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "get_struct_hidden");
     return;
   }
 }

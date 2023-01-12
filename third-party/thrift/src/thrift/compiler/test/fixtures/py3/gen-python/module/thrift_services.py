@@ -76,6 +76,7 @@ class SimpleServiceInterface(
             b"contain_binary": self._fbthrift__handler_contain_binary,
             b"contain_enum": self._fbthrift__handler_contain_enum,
             b"get_binary_union_struct": self._fbthrift__handler_get_binary_union_struct,
+            b"get_struct_hidden": self._fbthrift__handler_get_struct_hidden,
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -668,6 +669,19 @@ class SimpleServiceInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_args, args, protocol)
         value = await self.get_binary_union_struct(args_struct.u,)
         return_struct = module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_result(success=value)
+
+        return serialize_iobuf(return_struct, protocol)
+
+
+    async def get_struct_hidden(
+            self
+        ) -> module.thrift_types.SimpleStruct:
+        raise NotImplementedError("async def get_struct_hidden is not implemented")
+
+    async def _fbthrift__handler_get_struct_hidden(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_struct_hidden_args, args, protocol)
+        value = await self.get_struct_hidden()
+        return_struct = module.thrift_types._fbthrift_SimpleService_get_struct_hidden_result(success=value)
 
         return serialize_iobuf(return_struct, protocol)
 

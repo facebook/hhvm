@@ -417,6 +417,15 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
   virtual folly::coro::Task<std::unique_ptr<::py3::simple::BinaryUnionStruct>> co_get_binary_union_struct(apache::thrift::RequestParams params, std::unique_ptr<::py3::simple::BinaryUnion> p_u);
 #endif
   virtual void async_tm_get_binary_union_struct(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::BinaryUnionStruct>>> callback, std::unique_ptr<::py3::simple::BinaryUnion> p_u);
+  virtual void sync_get_struct_hidden(::py3::simple::SimpleStruct& /*_return*/);
+  [[deprecated("Use sync_get_struct_hidden instead")]] virtual void get_struct_hidden(::py3::simple::SimpleStruct& /*_return*/);
+  virtual folly::Future<std::unique_ptr<::py3::simple::SimpleStruct>> future_get_struct_hidden();
+  virtual folly::SemiFuture<std::unique_ptr<::py3::simple::SimpleStruct>> semifuture_get_struct_hidden();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::py3::simple::SimpleStruct>> co_get_struct_hidden();
+  virtual folly::coro::Task<std::unique_ptr<::py3::simple::SimpleStruct>> co_get_struct_hidden(apache::thrift::RequestParams params);
+#endif
+  virtual void async_tm_get_struct_hidden(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::SimpleStruct>>> callback);
  private:
   static ::py3::simple::SimpleServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_get_five{apache::thrift::detail::si::InvocationType::AsyncTm};
@@ -460,6 +469,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_contain_binary{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_contain_enum{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_get_binary_union_struct{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_get_struct_hidden{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
 } // namespace apache::thrift
@@ -511,6 +521,7 @@ class SimpleServiceSvNull : public ::apache::thrift::ServiceHandler<SimpleServic
   void contain_binary(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*binaries*/) override;
   void contain_enum(::std::vector<::py3::simple::AnEnum>& /*_return*/, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> /*the_enum*/) override;
   void get_binary_union_struct(::py3::simple::BinaryUnionStruct& /*_return*/, std::unique_ptr<::py3::simple::BinaryUnion> /*u*/) override;
+  void get_struct_hidden(::py3::simple::SimpleStruct& /*_return*/) override;
 };
 
 class SimpleServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
@@ -862,6 +873,14 @@ class SimpleServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProce
   static apache::thrift::SerializedResponse return_get_binary_union_struct(apache::thrift::ContextStack* ctx, ::py3::simple::BinaryUnionStruct const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_get_binary_union_struct(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_get_struct_hidden(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_get_struct_hidden(apache::thrift::ServerRequest&& serverRequest);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_get_struct_hidden(apache::thrift::ContextStack* ctx, ::py3::simple::SimpleStruct const& _return);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_get_struct_hidden(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
  public:
   SimpleServiceAsyncProcessor(::apache::thrift::ServiceHandler<::py3::simple::SimpleService>* iface) :
       iface_(iface) {}

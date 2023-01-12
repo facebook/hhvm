@@ -152,6 +152,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServ
   static void gen_contain_binary(ThriftMetadata& metadata, ThriftService& context);
   static void gen_contain_enum(ThriftMetadata& metadata, ThriftService& context);
   static void gen_get_binary_union_struct(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_get_struct_hidden(ThriftMetadata& metadata, ThriftService& context);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>> {

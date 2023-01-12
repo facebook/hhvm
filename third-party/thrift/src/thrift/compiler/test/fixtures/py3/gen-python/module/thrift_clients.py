@@ -980,6 +980,27 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 "Empty Response",
             )
     
+        async def get_struct_hidden(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> module.thrift_types.SimpleStruct:
+            _fbthrift_resp = await self._send_request(
+                "SimpleService",
+                "get_struct_hidden",
+                module.thrift_types._fbthrift_SimpleService_get_struct_hidden_args(),
+                module.thrift_types._fbthrift_SimpleService_get_struct_hidden_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -1867,6 +1888,26 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_args(
                     u=u,),
                 module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_result,
+                rpc_options=rpc_options,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        def get_struct_hidden(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> module.thrift_types.SimpleStruct:
+            _fbthrift_resp = self._send_request(
+                "SimpleService",
+                "get_struct_hidden",
+                module.thrift_types._fbthrift_SimpleService_get_struct_hidden_args(),
+                module.thrift_types._fbthrift_SimpleService_get_struct_hidden_result,
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns

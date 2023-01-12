@@ -1398,6 +1398,31 @@ class _fbthrift_SimpleService_get_binary_union_struct_result(_fbthrift_python_ty
         ]]]: ...
 
 
+class _fbthrift_SimpleService_get_struct_hidden_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SimpleService_get_struct_hidden_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[SimpleStruct]
+
+    def __init__(
+        self, *, success: _typing.Optional[SimpleStruct] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            SimpleStruct,
+        ]]]: ...
+
+
 class _fbthrift_DerivedService_get_six_args(_fbthrift_python_types.Struct):
 
     def __init__(

@@ -92,6 +92,8 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::list<::apache::thrift::type_class::enumeration>, ::std::vector<::py3::simple::AnEnum>*>> SimpleService_contain_enum_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::variant, ::py3::simple::BinaryUnion*>> SimpleService_get_binary_union_struct_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::py3::simple::BinaryUnionStruct*>> SimpleService_get_binary_union_struct_presult;
+typedef apache::thrift::ThriftPresult<false> SimpleService_get_struct_hidden_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct*>> SimpleService_get_struct_hidden_presult;
 }} // py3::simple
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::py3::simple::SimpleService>::get_fiveT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
@@ -743,6 +745,21 @@ void apache::thrift::Client<::py3::simple::SimpleService>::get_binary_union_stru
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "get_binary_union_struct",
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "SimpleService");
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
+}
+
+template <typename Protocol_, typename RpcOptions>
+void apache::thrift::Client<::py3::simple::SimpleService>::get_struct_hiddenT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback) {
+
+  ::py3::simple::SimpleService_get_struct_hidden_pargs args;
+  auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
+  auto writer = [&](Protocol_* p) { args.write(p); };
+
+  static ::apache::thrift::MethodMetadata::Data* methodMetadata =
+        new ::apache::thrift::MethodMetadata::Data(
+                "get_struct_hidden",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "SimpleService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -8498,6 +8515,194 @@ void apache::thrift::Client<::py3::simple::SimpleService>::recv_instance_get_bin
 
 folly::exception_wrapper apache::thrift::Client<::py3::simple::SimpleService>::recv_instance_wrapped_get_binary_union_struct(::py3::simple::BinaryUnionStruct& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_get_binary_union_struct(_return, state);
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::get_struct_hidden(std::unique_ptr<apache::thrift::RequestCallback> callback) {
+  ::apache::thrift::RpcOptions rpcOptions;
+  get_struct_hidden(rpcOptions, std::move(callback));
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::get_struct_hidden(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
+  auto [ctx, header] = get_struct_hiddenCtx(&rpcOptions);
+  apache::thrift::RequestCallback::Context callbackContext;
+  callbackContext.protocolId =
+      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* contextStack = ctx.get();
+  if (callback) {
+    callbackContext.ctx = std::move(ctx);
+  }
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  get_struct_hiddenImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::get_struct_hiddenImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+  switch (apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId()) {
+    case apache::thrift::protocol::T_BINARY_PROTOCOL:
+    {
+      apache::thrift::BinaryProtocolWriter writer;
+      if (stealRpcOptions) {
+        get_struct_hiddenT(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback));
+      } else {
+        get_struct_hiddenT(&writer, rpcOptions, std::move(header), contextStack, std::move(callback));
+      }
+      break;
+    }
+    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
+    {
+      apache::thrift::CompactProtocolWriter writer;
+      if (stealRpcOptions) {
+        get_struct_hiddenT(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback));
+      } else {
+        get_struct_hiddenT(&writer, rpcOptions, std::move(header), contextStack, std::move(callback));
+      }
+      break;
+    }
+    default:
+    {
+      apache::thrift::detail::ac::throw_app_exn("Could not find Protocol");
+    }
+  }
+}
+
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::py3::simple::SimpleService>::get_struct_hiddenCtx(apache::thrift::RpcOptions* rpcOptions) {
+  auto header = std::make_shared<apache::thrift::transport::THeader>(
+      apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
+  header->setProtocolId(channel_->getProtocolId());
+  if (rpcOptions) {
+    header->setHeaders(rpcOptions->releaseWriteHeaders());
+  }
+
+  auto ctx = apache::thrift::ContextStack::createWithClientContext(
+      handlers_,
+      getServiceName(),
+      "SimpleService.get_struct_hidden",
+      *header);
+
+  return {std::move(ctx), std::move(header)};
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::sync_get_struct_hidden(::py3::simple::SimpleStruct& _return) {
+  ::apache::thrift::RpcOptions rpcOptions;
+  sync_get_struct_hidden(rpcOptions, _return);
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::sync_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions, ::py3::simple::SimpleStruct& _return) {
+  apache::thrift::ClientReceiveState returnState;
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto ctxAndHeader = get_struct_hiddenCtx(&rpcOptions);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  callback.waitUntilDone(
+    evb,
+    [&] {
+      get_struct_hiddenImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
+    });
+
+  if (returnState.isException()) {
+    returnState.exception().throw_exception();
+  }
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctxAndHeader.first));
+  SCOPE_EXIT {
+    if (returnState.header() && !returnState.header()->getHeaders().empty()) {
+      rpcOptions.setReadHeaders(returnState.header()->releaseHeaders());
+    }
+  };
+  return folly::fibers::runInMainContext([&] {
+      recv_get_struct_hidden(_return, returnState);
+  });
+}
+
+
+folly::Future<::py3::simple::SimpleStruct> apache::thrift::Client<::py3::simple::SimpleService>::future_get_struct_hidden() {
+  ::apache::thrift::RpcOptions rpcOptions;
+  return future_get_struct_hidden(rpcOptions);
+}
+
+folly::SemiFuture<::py3::simple::SimpleStruct> apache::thrift::Client<::py3::simple::SimpleService>::semifuture_get_struct_hidden() {
+  ::apache::thrift::RpcOptions rpcOptions;
+  return semifuture_get_struct_hidden(rpcOptions);
+}
+
+folly::Future<::py3::simple::SimpleStruct> apache::thrift::Client<::py3::simple::SimpleService>::future_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions) {
+  folly::Promise<::py3::simple::SimpleStruct> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::py3::simple::SimpleStruct>>(std::move(promise), recv_wrapped_get_struct_hidden, channel_);
+  get_struct_hidden(rpcOptions, std::move(callback));
+  return future;
+}
+
+folly::SemiFuture<::py3::simple::SimpleStruct> apache::thrift::Client<::py3::simple::SimpleService>::semifuture_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions) {
+  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_get_struct_hidden, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  get_struct_hidden(rpcOptions, std::move(callback));
+  return std::move(callbackAndFuture.second);
+}
+
+folly::Future<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_future_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions) {
+  folly::Promise<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::py3::simple::SimpleStruct>>(std::move(promise), recv_wrapped_get_struct_hidden, channel_);
+  get_struct_hidden(rpcOptions, std::move(callback));
+  return future;
+}
+
+folly::SemiFuture<std::pair<::py3::simple::SimpleStruct, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::SimpleService>::header_semifuture_get_struct_hidden(apache::thrift::RpcOptions& rpcOptions) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_get_struct_hidden, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  get_struct_hidden(rpcOptions, std::move(callback));
+  return std::move(callbackAndFuture.second);
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::get_struct_hidden(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
+  get_struct_hidden(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
+}
+
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
+folly::exception_wrapper apache::thrift::Client<::py3::simple::SimpleService>::recv_wrapped_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state) {
+  if (state.isException()) {
+    return std::move(state.exception());
+  }
+  if (!state.hasResponseBuffer()) {
+    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+  }
+
+  using result = ::py3::simple::SimpleService_get_struct_hidden_presult;
+  switch (state.protocolId()) {
+    case apache::thrift::protocol::T_BINARY_PROTOCOL:
+    {
+      apache::thrift::BinaryProtocolReader reader;
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state, _return);
+    }
+    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
+    {
+      apache::thrift::CompactProtocolReader reader;
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state, _return);
+    }
+    default:
+    {
+    }
+  }
+  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::recv_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state) {
+  auto ew = recv_wrapped_get_struct_hidden(_return, state);
+  if (ew) {
+    ew.throw_exception();
+  }
+}
+
+void apache::thrift::Client<::py3::simple::SimpleService>::recv_instance_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state) {
+  return recv_get_struct_hidden(_return, state);
+}
+
+folly::exception_wrapper apache::thrift::Client<::py3::simple::SimpleService>::recv_instance_wrapped_get_struct_hidden(::py3::simple::SimpleStruct& _return, ::apache::thrift::ClientReceiveState& state) {
+  return recv_wrapped_get_struct_hidden(_return, state);
 }
 
 

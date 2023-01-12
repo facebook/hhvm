@@ -133,9 +133,6 @@ let remote_old_decls_no_limit t = t.GlobalOptions.tco_remote_old_decls_no_limit
 
 let fetch_remote_old_decls t = t.GlobalOptions.tco_fetch_remote_old_decls
 
-let force_load_hot_shallow_decls t =
-  t.GlobalOptions.tco_force_load_hot_shallow_decls
-
 let populate_member_heaps t = t.GlobalOptions.tco_populate_member_heaps
 
 let skip_hierarchy_checks t = t.GlobalOptions.tco_skip_hierarchy_checks

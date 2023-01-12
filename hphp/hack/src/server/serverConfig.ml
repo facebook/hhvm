@@ -346,8 +346,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         local_config.ServerLocalConfig.force_shallow_decl_fanout
       ~tco_remote_old_decls_no_limit:
         local_config.ServerLocalConfig.remote_old_decls_no_limit
-      ~tco_force_load_hot_shallow_decls:
-        local_config.ServerLocalConfig.force_load_hot_shallow_decls
       ~tco_fetch_remote_old_decls:
         local_config.ServerLocalConfig.fetch_remote_old_decls
       ~tco_populate_member_heaps:

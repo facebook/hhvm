@@ -45,7 +45,6 @@ impl Default for GlobalOptions {
             tco_force_shallow_decl_fanout: false,
             tco_remote_old_decls_no_limit: false,
             tco_fetch_remote_old_decls: false,
-            tco_force_load_hot_shallow_decls: false,
             tco_populate_member_heaps: true,
             tco_skip_hierarchy_checks: false,
             tco_skip_tast_checks: false,

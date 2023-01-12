@@ -796,7 +796,6 @@ let type_check_dirty
       let (to_undecl, to_recheck) =
         if
           genv.local_config.SLC.load_decls_from_saved_state
-          || genv.local_config.SLC.force_load_hot_shallow_decls
           || genv.local_config.SLC.fetch_remote_old_decls
         then
           get_files_to_undecl_and_recheck dirty_local_files_changed_hash
@@ -822,7 +821,6 @@ let type_check_dirty
       let (to_undecl, to_recheck) =
         if
           genv.local_config.SLC.load_decls_from_saved_state
-          || genv.local_config.SLC.force_load_hot_shallow_decls
           || genv.local_config.SLC.fetch_remote_old_decls
         then
           get_files_to_undecl_and_recheck dirty_files_changed_hash

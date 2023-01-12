@@ -42,7 +42,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_shallow_class_decl: false,
     tco_force_shallow_decl_fanout: false,
     tco_remote_old_decls_no_limit: false,
-    tco_force_load_hot_shallow_decls: false,
     tco_fetch_remote_old_decls: false,
     tco_populate_member_heaps: true,
     tco_skip_hierarchy_checks: false,

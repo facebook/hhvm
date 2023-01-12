@@ -401,8 +401,6 @@ type t = {
   force_shallow_decl_fanout: bool;
       (** Use fanout algorithm based solely on shallow decl comparison. This is the
       default in shallow decl mode. Use this option if using folded decls. *)
-  force_load_hot_shallow_decls: bool;
-      (** Always load hot shallow decls from saved state. *)
   populate_member_heaps: bool;
       (** Populate the member signature heaps.
 
@@ -573,7 +571,6 @@ let default =
     idle_gc_slice = 0;
     shallow_class_decl = false;
     force_shallow_decl_fanout = false;
-    force_load_hot_shallow_decls = false;
     populate_member_heaps = true;
     fetch_remote_old_decls = false;
     use_hack_64_naming_table = true;
@@ -1055,13 +1052,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let force_load_hot_shallow_decls =
-    bool_if_min_version
-      "force_load_hot_shallow_decls"
-      ~default:default.force_load_hot_shallow_decls
-      ~current_version
-      config
-  in
   let populate_member_heaps =
     bool_if_min_version
       "populate_member_heaps"
@@ -1282,14 +1272,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let force_load_hot_shallow_decls =
-    if force_load_hot_shallow_decls && not force_shallow_decl_fanout then (
-      Hh_logger.warn
-        "You have force_load_hot_shallow_decls=true but force_shallow_decl_fanout=false. This is incompatible. Turning off force_load_hot_shallow_decls";
-      false
-    ) else
-      force_load_hot_shallow_decls
-  in
   let fetch_remote_old_decls =
     if fetch_remote_old_decls && not force_shallow_decl_fanout then (
       Hh_logger.warn
@@ -1499,7 +1481,6 @@ let load_ fn ~silent ~current_version overrides =
     idle_gc_slice;
     shallow_class_decl;
     force_shallow_decl_fanout;
-    force_load_hot_shallow_decls;
     populate_member_heaps;
     fetch_remote_old_decls;
     use_hack_64_naming_table;

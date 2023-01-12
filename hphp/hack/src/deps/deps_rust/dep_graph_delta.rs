@@ -70,6 +70,10 @@ impl DepGraphDelta {
         })
     }
 
+    pub fn into_rdeps(self) -> impl Iterator<Item = (Dep, HashSet<Dep>)> {
+        self.rdeps.into_iter()
+    }
+
     /// Return the number of edges in the dep graph delta.
     pub fn len(&self) -> usize {
         self.num_edges

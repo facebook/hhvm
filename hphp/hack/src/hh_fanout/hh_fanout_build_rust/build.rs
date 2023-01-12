@@ -56,7 +56,7 @@ impl EdgesDir {
     }
 
     fn read_all_edges(self) -> io::Result<Edges> {
-        let mut acc = Edges::new();
+        let mut acc = Edges::default();
 
         register_dep_graph_delta_files(&self.struct_handles, &mut acc)?;
 
@@ -121,6 +121,7 @@ fn high_dashmap_shard_count() -> usize {
 /// This mapping is not deterministic, it's designed to hand out numbers
 /// quickly. Later, when we have seen all Deps, we renumber uses to
 /// use a final deterministic numbering based on Dep order.
+#[derive(Debug)]
 struct DepToHashIndex {
     /// Recently added mappings we haven't flushed to deps.
     deps: DashMap<Dep, HashIndex>,
@@ -155,8 +156,9 @@ impl DepToHashIndex {
     }
 }
 
-/// Structure used to read in all edges in parallel.
-struct Edges {
+/// Structure used to read in all edges in parallel
+#[derive(Debug)]
+pub struct Edges {
     /// This table maps a HashIndex for dependencies to a HashSet of dependents.
     ///
     /// For scalability it's sharded. The low bits of the HashIndex pick which shard
@@ -167,18 +169,20 @@ struct Edges {
     dep_to_temp_index: DepToHashIndex,
 }
 
-impl Edges {
-    const NUM_SHARDS: usize = 2048;
-
-    fn new() -> Self {
+impl Default for Edges {
+    fn default() -> Self {
         Self {
             shards: std::array::from_fn(|_| Default::default()),
             dep_to_temp_index: DepToHashIndex::new(),
         }
     }
+}
+
+impl Edges {
+    const NUM_SHARDS: usize = 2048;
 
     /// Register many dependents for one dependency in a single shot.
-    fn register_many<T>(&self, dependency: Dep, dependents: T)
+    pub fn register_many<T>(&self, dependency: Dep, dependents: T)
     where
         T: Iterator<Item = Dep>,
     {
@@ -199,7 +203,7 @@ impl Edges {
         shard[index].extend(dependents);
     }
 
-    fn finish(self) -> MemDepGraph {
+    pub fn finish(self) -> MemDepGraph {
         // Sort the hashes.
         info!("Sorting all hashes");
         let mut dep_to_temp_index: Vec<_> = self.dep_to_temp_index.finish().into_iter().collect();
@@ -373,7 +377,7 @@ pub fn build(
         }
         (None, Some(delta_file)) => {
             info!("Opening dep graph delta at {:?}", delta_file);
-            let mut all_edges = Edges::new();
+            let mut all_edges = Edges::default();
             register_dep_graph_delta_files(&[delta_file.into()], &mut all_edges)?;
             info!("Delta loaded with {} edges", all_edges.count_edges());
             all_edges

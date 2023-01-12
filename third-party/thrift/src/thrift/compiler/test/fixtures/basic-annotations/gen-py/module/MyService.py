@@ -53,21 +53,21 @@ class Iface:
     pass
 
   def hasDataById(self, id=None):
-    """
+    r"""
     Parameters:
      - id
     """
     pass
 
   def getDataById(self, id=None):
-    """
+    r"""
     Parameters:
      - id
     """
     pass
 
   def putDataById(self, id=None, data=None):
-    """
+    r"""
     Parameters:
      - id
      - data
@@ -75,7 +75,7 @@ class Iface:
     pass
 
   def lobDataById(self, id=None, data=None):
-    """
+    r"""
     Parameters:
      - id
      - data
@@ -94,21 +94,21 @@ class ContextIface:
     pass
 
   def hasDataById(self, handler_ctx, id=None):
-    """
+    r"""
     Parameters:
      - id
     """
     pass
 
   def getDataById(self, handler_ctx, id=None):
-    """
+    r"""
     Parameters:
      - id
     """
     pass
 
   def putDataById(self, handler_ctx, id=None, data=None):
-    """
+    r"""
     Parameters:
      - id
      - data
@@ -116,7 +116,7 @@ class ContextIface:
     pass
 
   def lobDataById(self, handler_ctx, id=None, data=None):
-    """
+    r"""
     Parameters:
      - id
      - data
@@ -210,7 +210,7 @@ ping_args.thrift_field_annotations = {
 }
 
 class ping_result:
-  """
+  r"""
   Attributes:
    - myExcept
   """
@@ -407,7 +407,7 @@ getRandomData_args.thrift_field_annotations = {
 }
 
 class getRandomData_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -521,7 +521,7 @@ getRandomData_result.__getstate__ = lambda self: self.__dict__.copy()
 getRandomData_result.__setstate__ = getRandomData_result__setstate__
 
 class hasDataById_args:
-  """
+  r"""
   Attributes:
    - id
   """
@@ -636,7 +636,7 @@ hasDataById_args.__getstate__ = lambda self: self.__dict__.copy()
 hasDataById_args.__setstate__ = hasDataById_args__setstate__
 
 class hasDataById_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -750,7 +750,7 @@ hasDataById_result.__getstate__ = lambda self: self.__dict__.copy()
 hasDataById_result.__setstate__ = hasDataById_result__setstate__
 
 class getDataById_args:
-  """
+  r"""
   Attributes:
    - id
   """
@@ -865,7 +865,7 @@ getDataById_args.__getstate__ = lambda self: self.__dict__.copy()
 getDataById_args.__setstate__ = getDataById_args__setstate__
 
 class getDataById_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -979,7 +979,7 @@ getDataById_result.__getstate__ = lambda self: self.__dict__.copy()
 getDataById_result.__setstate__ = getDataById_result__setstate__
 
 class putDataById_args:
-  """
+  r"""
   Attributes:
    - id
    - data
@@ -1194,7 +1194,7 @@ putDataById_result.thrift_field_annotations = {
 }
 
 class lobDataById_args:
-  """
+  r"""
   Attributes:
    - id
    - data
@@ -1629,7 +1629,7 @@ class Client(Iface):
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getRandomData failed: unknown result");
 
   def hasDataById(self, id=None):
-    """
+    r"""
     Parameters:
      - id
     """
@@ -1666,7 +1666,7 @@ class Client(Iface):
     raise TApplicationException(TApplicationException.MISSING_RESULT, "hasDataById failed: unknown result");
 
   def getDataById(self, id=None):
-    """
+    r"""
     Parameters:
      - id
     """
@@ -1703,7 +1703,7 @@ class Client(Iface):
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getDataById failed: unknown result");
 
   def putDataById(self, id=None, data=None):
-    """
+    r"""
     Parameters:
      - id
      - data
@@ -1739,7 +1739,7 @@ class Client(Iface):
     return
 
   def lobDataById(self, id=None, data=None):
-    """
+    r"""
     Parameters:
      - id
      - data

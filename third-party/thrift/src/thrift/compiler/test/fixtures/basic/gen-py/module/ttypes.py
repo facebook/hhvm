@@ -65,7 +65,7 @@ class HackEnum:
   }
 
 class MyStruct:
-  """
+  r"""
   Attributes:
    - MyIntField
    - MyStringField
@@ -417,7 +417,7 @@ class MyDataItem:
     return self
 
 class MyUnion(object):
-  """
+  r"""
   Attributes:
    - myEnum
    - myStruct
@@ -653,7 +653,7 @@ class MyUnion(object):
     return self
 
 class ReservedKeyword:
-  """
+  r"""
   Attributes:
    - reserved_field
   """
@@ -762,7 +762,7 @@ class ReservedKeyword:
     return self
 
 class UnionToBeRenamed(object):
-  """
+  r"""
   Attributes:
    - reserved_field
   """

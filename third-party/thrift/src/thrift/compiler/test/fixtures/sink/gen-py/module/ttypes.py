@@ -35,7 +35,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'InitialResponse', 'FinalResponse', 'SinkPayload', 'CompatibleWithKeywordSink', 'InitialException', 'SinkException1', 'SinkException2']
 
 class InitialResponse:
-  """
+  r"""
   Attributes:
    - content
   """
@@ -142,7 +142,7 @@ class InitialResponse:
     return self
 
 class FinalResponse:
-  """
+  r"""
   Attributes:
    - content
   """
@@ -249,7 +249,7 @@ class FinalResponse:
     return self
 
 class SinkPayload:
-  """
+  r"""
   Attributes:
    - content
   """
@@ -356,7 +356,7 @@ class SinkPayload:
     return self
 
 class CompatibleWithKeywordSink:
-  """
+  r"""
   Attributes:
    - sink
   """
@@ -463,7 +463,7 @@ class CompatibleWithKeywordSink:
     return self
 
 class InitialException(TException):
-  """
+  r"""
   Attributes:
    - reason
   """
@@ -577,7 +577,7 @@ class InitialException(TException):
     return self
 
 class SinkException1(TException):
-  """
+  r"""
   Attributes:
    - reason
   """
@@ -691,7 +691,7 @@ class SinkException1(TException):
     return self
 
 class SinkException2(TException):
-  """
+  r"""
   Attributes:
    - reason
   """

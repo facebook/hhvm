@@ -51,7 +51,7 @@ class MyEnum:
   }
 
 class MyStruct:
-  """
+  r"""
   Attributes:
    - myIntField
    - myStringField
@@ -175,7 +175,7 @@ class MyStruct:
     return self
 
 class MyUnion(object):
-  """
+  r"""
   Attributes:
    - myEnum
    - myDataItem

@@ -45,7 +45,7 @@ from thrift.util.Decorators import (
 
 class Iface:
   def global_PY_RESERVED_KEYWORD(self, raise_PY_RESERVED_KEYWORD=None):
-    """
+    r"""
     Parameters:
      - raise_PY_RESERVED_KEYWORD
     """
@@ -57,7 +57,7 @@ class Iface:
 
 class ContextIface:
   def global_PY_RESERVED_KEYWORD(self, handler_ctx, raise_PY_RESERVED_KEYWORD=None):
-    """
+    r"""
     Parameters:
      - raise_PY_RESERVED_KEYWORD
     """
@@ -70,7 +70,7 @@ class ContextIface:
 # HELPER FUNCTIONS AND STRUCTURES
 
 class global_args:
-  """
+  r"""
   Attributes:
    - raise_PY_RESERVED_KEYWORD
   """
@@ -185,7 +185,7 @@ global_args.__getstate__ = lambda self: self.__dict__.copy()
 global_args.__setstate__ = global_args__setstate__
 
 class global_PY_RESERVED_KEYWORD_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -379,7 +379,7 @@ import_args.thrift_field_annotations = {
 }
 
 class import_PY_RESERVED_KEYWORD_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -570,7 +570,7 @@ class Client(Iface):
         pass
 
   def global_PY_RESERVED_KEYWORD(self, raise_PY_RESERVED_KEYWORD=None):
-    """
+    r"""
     Parameters:
      - raise_PY_RESERVED_KEYWORD
     """

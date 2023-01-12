@@ -33,7 +33,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Fiery', 'Serious', 'ComplexFieldNames', 'CustomFieldNames', 'ExceptionWithPrimitiveField', 'ExceptionWithStructuredAnnotation', 'Banal']
 
 class Fiery(TException):
-  """
+  r"""
   Attributes:
    - message
   """
@@ -135,7 +135,7 @@ class Fiery(TException):
     return self
 
 class Serious(TException):
-  """
+  r"""
   Attributes:
    - sonnet
   """
@@ -237,7 +237,7 @@ class Serious(TException):
     return self
 
 class ComplexFieldNames(TException):
-  """
+  r"""
   Attributes:
    - error_message
    - internal_error_message
@@ -354,7 +354,7 @@ class ComplexFieldNames(TException):
     return self
 
 class CustomFieldNames(TException):
-  """
+  r"""
   Attributes:
    - error_message
    - internal_error_message
@@ -471,7 +471,7 @@ class CustomFieldNames(TException):
     return self
 
 class ExceptionWithPrimitiveField(TException):
-  """
+  r"""
   Attributes:
    - message
    - error_code
@@ -588,7 +588,7 @@ class ExceptionWithPrimitiveField(TException):
     return self
 
 class ExceptionWithStructuredAnnotation(TException):
-  """
+  r"""
   Attributes:
    - message_field
    - error_code

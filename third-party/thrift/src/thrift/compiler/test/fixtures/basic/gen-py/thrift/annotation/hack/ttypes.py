@@ -37,7 +37,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'FieldWrapper', 'Wrapper', 'Adapter', 'SkipCodegen', 'Name', 'UnionEnumAttributes', 'StructTrait', 'Attributes', 'StructAsTrait']
 
 class FieldWrapper:
-  """
+  r"""
   Attributes:
    - name
   """
@@ -144,7 +144,7 @@ class FieldWrapper:
     return self
 
 class Wrapper:
-  """
+  r"""
   Attributes:
    - name
    - underlyingName
@@ -285,7 +285,7 @@ class Wrapper:
     return self
 
 class Adapter:
-  """
+  r"""
   Attributes:
    - name
   """
@@ -392,7 +392,7 @@ class Adapter:
     return self
 
 class SkipCodegen:
-  """
+  r"""
   Attributes:
    - reason
   """
@@ -499,7 +499,7 @@ class SkipCodegen:
     return self
 
 class Name:
-  """
+  r"""
   Attributes:
    - name
    - reason
@@ -623,7 +623,7 @@ class Name:
     return self
 
 class UnionEnumAttributes:
-  """
+  r"""
   Attributes:
    - attributes
   """
@@ -745,7 +745,7 @@ class UnionEnumAttributes:
     return self
 
 class StructTrait:
-  """
+  r"""
   Attributes:
    - name
   """
@@ -852,7 +852,7 @@ class StructTrait:
     return self
 
 class Attributes:
-  """
+  r"""
   Attributes:
    - attributes
   """

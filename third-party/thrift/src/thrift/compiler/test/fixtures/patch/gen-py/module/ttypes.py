@@ -50,7 +50,7 @@ class MyEnum:
   }
 
 class MyData:
-  """
+  r"""
   Attributes:
    - data1
    - data2
@@ -176,7 +176,7 @@ class MyData:
     return self
 
 class InnerUnion(object):
-  """
+  r"""
   Attributes:
    - innerOption
   """
@@ -300,7 +300,7 @@ class InnerUnion(object):
     return self
 
 class MyUnion(object):
-  """
+  r"""
   Attributes:
    - option1
    - option2
@@ -486,7 +486,7 @@ class MyUnion(object):
     return self
 
 class MyStruct:
-  """
+  r"""
   Attributes:
    - boolVal
    - byteVal
@@ -1359,7 +1359,7 @@ class LateDefStruct:
     return self
 
 class Recursive:
-  """
+  r"""
   Attributes:
    - nodes
   """
@@ -1489,7 +1489,7 @@ class Recursive:
     return self
 
 class Bar:
-  """
+  r"""
   Attributes:
    - loop
   """
@@ -1598,7 +1598,7 @@ class Bar:
     return self
 
 class Loop:
-  """
+  r"""
   Attributes:
    - bar
   """
@@ -1707,7 +1707,7 @@ class Loop:
     return self
 
 class MyDataFieldPatch:
-  """
+  r"""
   Attributes:
    - data1
    - data2
@@ -1835,7 +1835,7 @@ class MyDataFieldPatch:
     return self
 
 class MyDataPatch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -2023,7 +2023,7 @@ class MyDataPatch:
     return self
 
 class InnerUnionFieldPatch:
-  """
+  r"""
   Attributes:
    - innerOption
   """
@@ -2132,7 +2132,7 @@ class InnerUnionFieldPatch:
     return self
 
 class InnerUnionPatch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -2320,7 +2320,7 @@ class InnerUnionPatch:
     return self
 
 class MyUnionFieldPatch:
-  """
+  r"""
   Attributes:
    - option1
    - option2
@@ -2467,7 +2467,7 @@ class MyUnionFieldPatch:
     return self
 
 class MyUnionPatch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -2655,7 +2655,7 @@ class MyUnionPatch:
     return self
 
 class MyStructField10Patch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -2790,7 +2790,7 @@ class MyStructField10Patch:
     return self
 
 class MyStructField23Patch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -2925,7 +2925,7 @@ class MyStructField23Patch:
     return self
 
 class MyStructField26Patch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -3215,7 +3215,7 @@ class MyStructField26Patch:
     return self
 
 class MyStructField27Patch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -3423,7 +3423,7 @@ class MyStructField27Patch:
     return self
 
 class MyStructField28Patch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -3755,7 +3755,7 @@ class MyStructField28Patch:
     return self
 
 class MyStructField29Patch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -4173,7 +4173,7 @@ class MyStructField29Patch:
     return self
 
 class MyStructField29Patch1:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -4511,7 +4511,7 @@ class MyStructField29Patch1:
     return self
 
 class MyStructField30Patch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -4945,7 +4945,7 @@ class MyStructField30Patch:
     return self
 
 class MyStructField30Patch1:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -5283,7 +5283,7 @@ class MyStructField30Patch1:
     return self
 
 class MyStructFieldPatch:
-  """
+  r"""
   Attributes:
    - mapMap
    - listMap
@@ -5943,7 +5943,7 @@ class MyStructFieldPatch:
     return self
 
 class MyStructPatch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -6217,7 +6217,7 @@ class LateDefStructFieldPatch:
     return self
 
 class LateDefStructPatch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -6405,7 +6405,7 @@ class LateDefStructPatch:
     return self
 
 class RecursiveField1Patch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -6557,7 +6557,7 @@ class RecursiveField1Patch:
     return self
 
 class RecursiveFieldPatch:
-  """
+  r"""
   Attributes:
    - nodes
   """
@@ -6666,7 +6666,7 @@ class RecursiveFieldPatch:
     return self
 
 class RecursivePatch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -6854,7 +6854,7 @@ class RecursivePatch:
     return self
 
 class BarFieldPatch:
-  """
+  r"""
   Attributes:
    - loop
   """
@@ -6963,7 +6963,7 @@ class BarFieldPatch:
     return self
 
 class BarPatch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   
@@ -7151,7 +7151,7 @@ class BarPatch:
     return self
 
 class LoopFieldPatch:
-  """
+  r"""
   Attributes:
    - bar
   """
@@ -7260,7 +7260,7 @@ class LoopFieldPatch:
     return self
 
 class LoopPatch:
-  """
+  r"""
   Attributes:
    - assign: Assigns to a (set) value.
   

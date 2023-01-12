@@ -55,7 +55,7 @@ class RefType:
   }
 
 class EnumUnderlyingType:
-  """
+  r"""
   Enum in C++ by default uses signed 32 bit integer. There is no need to specify
   underlying type for signed 32 bit integer.
   """
@@ -82,7 +82,7 @@ class EnumUnderlyingType:
   }
 
 class Ref:
-  """
+  r"""
   Attributes:
    - type
   """
@@ -195,7 +195,7 @@ class Ref:
     return self
 
 class Lazy:
-  """
+  r"""
   Attributes:
    - ref
   """
@@ -388,7 +388,7 @@ class DisableLazyChecksum:
     return self
 
 class Adapter:
-  """
+  r"""
   An annotation that applies a C++ adapter to typedef, field, or struct.
   
   For example:
@@ -609,7 +609,7 @@ class Adapter:
     return self
 
 class PackIsset:
-  """
+  r"""
   Attributes:
    - atomic
   """
@@ -974,7 +974,7 @@ class ScopedEnumAsUnionType:
     return self
 
 class StrongType:
-  """
+  r"""
   Indicates a typedef should be 'strong', and require an explicit cast to
   the underlying type.
   
@@ -1074,7 +1074,7 @@ class StrongType:
     return self
 
 class FieldInterceptor:
-  """
+  r"""
   An annotation that intercepts field access with C++ field interceptor.
   Use with *caution* since this may introduce substantial performance overhead on each field access.
   
@@ -1309,7 +1309,7 @@ class UseOpEncode:
     return self
 
 class EnumType:
-  """
+  r"""
   Indicates an integer type for C++ to use as the underlying type of enum, for example:
   
       @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}

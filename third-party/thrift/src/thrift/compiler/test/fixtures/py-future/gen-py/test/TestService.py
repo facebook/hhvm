@@ -53,14 +53,14 @@ class Iface:
     return fut
 
   def isPrime(self, num=None):
-    """
+    r"""
     Parameters:
      - num
     """
     pass
 
   def future_isPrime(self, num=None):
-    """
+    r"""
     Parameters:
      - num
     """
@@ -220,7 +220,7 @@ sleep_result.thrift_field_annotations = {
 }
 
 class isPrime_args:
-  """
+  r"""
   Attributes:
    - num
   """
@@ -319,7 +319,7 @@ isPrime_args.__getstate__ = lambda self: self.__dict__.copy()
 isPrime_args.__setstate__ = isPrime_args__setstate__
 
 class isPrime_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -485,7 +485,7 @@ getResult_args.thrift_field_annotations = {
 }
 
 class getResult_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -687,7 +687,7 @@ class Client(Iface):
     return
 
   def isPrime(self, num=None):
-    """
+    r"""
     Parameters:
      - num
     """

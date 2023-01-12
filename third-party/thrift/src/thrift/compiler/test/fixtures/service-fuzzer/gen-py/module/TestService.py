@@ -41,7 +41,7 @@ from thrift.util.Decorators import (
 
 class Iface:
   def init(self, int1=None, int2=None, int3=None, int4=None, int5=None, int6=None, int7=None, int8=None, int9=None, int10=None, int11=None, int12=None, int13=None, int14=None, int15=None, int16=None):
-    """
+    r"""
     Parameters:
      - int1
      - int2
@@ -65,7 +65,7 @@ class Iface:
 
 class ContextIface:
   def init(self, handler_ctx, int1=None, int2=None, int3=None, int4=None, int5=None, int6=None, int7=None, int8=None, int9=None, int10=None, int11=None, int12=None, int13=None, int14=None, int15=None, int16=None):
-    """
+    r"""
     Parameters:
      - int1
      - int2
@@ -90,7 +90,7 @@ class ContextIface:
 # HELPER FUNCTIONS AND STRUCTURES
 
 class init_args:
-  """
+  r"""
   Attributes:
    - int1
    - int2
@@ -460,7 +460,7 @@ init_args.__getstate__ = lambda self: self.__dict__.copy()
 init_args.__setstate__ = init_args__setstate__
 
 class init_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -634,7 +634,7 @@ class Client(Iface):
         pass
 
   def init(self, int1=None, int2=None, int3=None, int4=None, int5=None, int6=None, int7=None, int8=None, int9=None, int10=None, int11=None, int12=None, int13=None, int14=None, int15=None, int16=None):
-    """
+    r"""
     Parameters:
      - int1
      - int2

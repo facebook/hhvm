@@ -146,7 +146,7 @@ bar_args.thrift_field_annotations = {
 }
 
 class bar_result:
-  """
+  r"""
   Attributes:
    - success
   """

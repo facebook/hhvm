@@ -34,7 +34,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Fields', 'FieldsInjectedToEmptyStruct', 'FieldsInjectedToStruct', 'FieldsInjectedWithIncludedStruct']
 
 class Fields:
-  """
+  r"""
   Attributes:
    - injected_field
   """
@@ -126,7 +126,7 @@ class Fields:
     return self
 
 class FieldsInjectedToEmptyStruct:
-  """
+  r"""
   Attributes:
    - injected_field
   """
@@ -218,7 +218,7 @@ class FieldsInjectedToEmptyStruct:
     return self
 
 class FieldsInjectedToStruct:
-  """
+  r"""
   Attributes:
    - string_field
    - injected_field
@@ -325,7 +325,7 @@ class FieldsInjectedToStruct:
     return self
 
 class FieldsInjectedWithIncludedStruct:
-  """
+  r"""
   Attributes:
    - string_field
    - injected_field

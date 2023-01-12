@@ -33,7 +33,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Beta', 'Experimental', 'Testing', 'Deprecated', 'ReserveIds', 'Legacy', 'RequiresBackwardCompatibility', 'NoTesting', 'NoExperimental', 'NoBeta', 'Released', 'NoLegacy', 'NoDeprecated', 'TerseWrite', 'Box', 'Mixin', 'Bit', 'SerializeInFieldIdOrder', 'BitmaskEnum', 'GenDefaultEnumValue', 'GenEnumSet', 'v1', 'v1beta', 'v1alpha', 'v1test', 'ExceptionMessage', 'GenerateRuntimeSchema', 'InternBox']
 
 class Beta:
-  """
+  r"""
   Indicates a definition/feature may change in incompatible ways.
   """
 
@@ -109,7 +109,7 @@ class Beta:
     return self
 
 class Experimental:
-  """
+  r"""
   Indicates a definition/feature should only be used with permission, may only
   work in specific contexts, and may change in incompatible ways without notice.
   """
@@ -186,7 +186,7 @@ class Experimental:
     return self
 
 class Testing:
-  """
+  r"""
   Indicates a definition/feature should only be used in an ephemeral testing
   enviornment.
   
@@ -267,7 +267,7 @@ class Testing:
     return self
 
 class Deprecated:
-  """
+  r"""
   Indicates a definition/feature should no longer be used.
   
   Attributes:
@@ -361,7 +361,7 @@ class Deprecated:
     return self
 
 class ReserveIds:
-  """
+  r"""
   Annotate a thrift structured or enum to indicate if ids or values should not be used.
   
   For example, you may want to mark ids as deprecated, or these ids
@@ -516,7 +516,7 @@ class ReserveIds:
     return self
 
 class Legacy:
-  """
+  r"""
   Indicates  a definition/feature will be removed in the next release.
   
   Pleased migrate off of all @Legacy as soon as possible.
@@ -612,7 +612,7 @@ class Legacy:
     return self
 
 class RequiresBackwardCompatibility:
-  """
+  r"""
   Indicates additional backward compatibility restrictions, beyond the
   standard Thrift required 'wire' compatibility.
   
@@ -707,7 +707,7 @@ class RequiresBackwardCompatibility:
     return self
 
 class NoTesting:
-  """
+  r"""
   Disables testing features.
   """
 
@@ -783,7 +783,7 @@ class NoTesting:
     return self
 
 class NoExperimental:
-  """
+  r"""
   Disables experimental features.
   """
 
@@ -859,7 +859,7 @@ class NoExperimental:
     return self
 
 class NoBeta:
-  """
+  r"""
   Disables @Beta features.
   """
 
@@ -935,7 +935,7 @@ class NoBeta:
     return self
 
 class Released:
-  """
+  r"""
   Indicates a definition/feature must not depend directly on an unreleased
   or testing definition/feature.
   """
@@ -1012,7 +1012,7 @@ class Released:
     return self
 
 class NoLegacy:
-  """
+  r"""
   Disables @Legacy features.
   """
 
@@ -1088,7 +1088,7 @@ class NoLegacy:
     return self
 
 class NoDeprecated:
-  """
+  r"""
   Disables @Deprecated features.
   
   Should only be enabled in `test` versions, as deprecated implies removing
@@ -1168,7 +1168,7 @@ class NoDeprecated:
     return self
 
 class TerseWrite:
-  """
+  r"""
   An annotation that changes the field qualifier from 'none' to 'terse'.
   A terse field is eligible to skip serialization, when it equals to the
   intrinsic default value. It also clears to the intrinsic default value
@@ -1254,7 +1254,7 @@ class TerseWrite:
     return self
 
 class Box:
-  """
+  r"""
   Indicates that a field's value should never be stored on the stack.
   """
 
@@ -1403,7 +1403,7 @@ class Mixin:
     return self
 
 class Bit:
-  """
+  r"""
   Indicates that a boolean type **may** be 'packed' in memory.
   
   This allows an implementation to not allocate a full native 'bool' type, and
@@ -1484,7 +1484,7 @@ class Bit:
     return self
 
 class SerializeInFieldIdOrder:
-  """
+  r"""
   Option to serialize thrift struct in ascending field id order.
   
   This can potentially make serialized data size smaller in compact protocol,
@@ -1563,7 +1563,7 @@ class SerializeInFieldIdOrder:
     return self
 
 class BitmaskEnum:
-  """
+  r"""
   Indicates an enum is a bitmask and should support bit-wise operators.
   """
 
@@ -1639,7 +1639,7 @@ class BitmaskEnum:
     return self
 
 class GenDefaultEnumValue:
-  """
+  r"""
   Adds a default enum value (0), with the given name, if one is not
   already defined.
   
@@ -1747,7 +1747,7 @@ class GenDefaultEnumValue:
     return self
 
 class GenEnumSet:
-  """
+  r"""
   Adds a typedef of {enum}Set that is sutable for storing a `packed` set of
   values for the annotated enum.
   
@@ -1858,7 +1858,7 @@ class GenEnumSet:
     return self
 
 class v1:
-  """
+  r"""
   Enables all released v1 features.
   """
 
@@ -1934,7 +1934,7 @@ class v1:
     return self
 
 class v1beta:
-  """
+  r"""
   Enables all beta v1 features.
   
   Beta features are guaranteed to *not* break unrelated Thrift features
@@ -2014,7 +2014,7 @@ class v1beta:
     return self
 
 class v1alpha:
-  """
+  r"""
   Enables all experimental v1 features.
   
   Use with *caution* and only with explicit permission. This may enable
@@ -2094,7 +2094,7 @@ class v1alpha:
     return self
 
 class v1test:
-  """
+  r"""
   Enables experimental features, even those that are known to break common
   use cases.
   """
@@ -2171,7 +2171,7 @@ class v1test:
     return self
 
 class ExceptionMessage:
-  """
+  r"""
   Specifies the field where the exception message is stored. The field
   is used to generate an additional method to get it.
   
@@ -2266,7 +2266,7 @@ class ExceptionMessage:
     return self
 
 class GenerateRuntimeSchema:
-  """
+  r"""
   Generates a const of type schema. Struct containing the schema of the
   annotated type. Optionally specify name to override default
   schema<structName>.
@@ -2362,7 +2362,7 @@ class GenerateRuntimeSchema:
     return self
 
 class InternBox:
-  """
+  r"""
   Indicates that a field's value should never be stored on the stack, and that
   identical values can be shared in immutable contexts.
   """

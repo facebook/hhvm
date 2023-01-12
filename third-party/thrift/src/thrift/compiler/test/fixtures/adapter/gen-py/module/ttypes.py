@@ -78,7 +78,7 @@ class ThriftAdaptedEnum:
   }
 
 class MyAnnotation:
-  """
+  r"""
   Attributes:
    - signature
    - color
@@ -208,7 +208,7 @@ class MyAnnotation:
     return self
 
 class Foo:
-  """
+  r"""
   Attributes:
    - intField
    - optionalIntField
@@ -611,7 +611,7 @@ class Foo:
     return self
 
 class Baz(object):
-  """
+  r"""
   Attributes:
    - intField
    - setField
@@ -913,7 +913,7 @@ class Baz(object):
     return self
 
 class Bar:
-  """
+  r"""
   Attributes:
    - structField
    - optionalStructField
@@ -1184,7 +1184,7 @@ class Bar:
     return self
 
 class DirectlyAdapted:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -1293,7 +1293,7 @@ class DirectlyAdapted:
     return self
 
 class IndependentDirectlyAdapted:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -1402,7 +1402,7 @@ class IndependentDirectlyAdapted:
     return self
 
 class StructWithFieldAdapter:
-  """
+  r"""
   Attributes:
    - field
    - shared_field
@@ -1568,7 +1568,7 @@ class StructWithFieldAdapter:
     return self
 
 class TerseAdaptedFields:
-  """
+  r"""
   Attributes:
    - int_field
    - string_field
@@ -1728,7 +1728,7 @@ class TerseAdaptedFields:
     return self
 
 class B:
-  """
+  r"""
   Attributes:
    - a
   """
@@ -1923,7 +1923,7 @@ class A:
     return self
 
 class Config:
-  """
+  r"""
   Attributes:
    - path
   """
@@ -2030,7 +2030,7 @@ class Config:
     return self
 
 class MyStruct:
-  """
+  r"""
   Attributes:
    - field
    - set_string
@@ -2171,7 +2171,7 @@ class MyStruct:
     return self
 
 class AdaptTestStruct:
-  """
+  r"""
   Attributes:
    - delay
    - custom
@@ -2433,7 +2433,7 @@ class AdaptTestStruct:
     return self
 
 class AdaptTemplatedTestStruct:
-  """
+  r"""
   Attributes:
    - adaptedBool
    - adaptedByte
@@ -3013,7 +3013,7 @@ class AdaptTemplatedTestStruct:
     return self
 
 class AdaptTemplatedNestedTestStruct:
-  """
+  r"""
   Attributes:
    - adaptedStruct
   """
@@ -3122,7 +3122,7 @@ class AdaptTemplatedNestedTestStruct:
     return self
 
 class AdaptTestUnion(object):
-  """
+  r"""
   Attributes:
    - delay
    - custom
@@ -3275,7 +3275,7 @@ class AdaptTestUnion(object):
     return self
 
 class AdaptedStruct:
-  """
+  r"""
   Attributes:
    - data
   """
@@ -3382,7 +3382,7 @@ class AdaptedStruct:
     return self
 
 class DirectlyAdaptedStruct:
-  """
+  r"""
   Attributes:
    - data
   """
@@ -3489,7 +3489,7 @@ class DirectlyAdaptedStruct:
     return self
 
 class StructFieldAdaptedStruct:
-  """
+  r"""
   Attributes:
    - adaptedStruct
    - adaptedTypedef
@@ -3655,7 +3655,7 @@ class StructFieldAdaptedStruct:
     return self
 
 class CircularAdaptee:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -3764,7 +3764,7 @@ class CircularAdaptee:
     return self
 
 class CircularStruct:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -3873,7 +3873,7 @@ class CircularStruct:
     return self
 
 class ReorderedStruct:
-  """
+  r"""
   Attributes:
    - reordered_dependent_adapted
   """
@@ -4068,7 +4068,7 @@ class DeclaredAfterStruct:
     return self
 
 class RenamedStruct:
-  """
+  r"""
   Attributes:
    - data
   """
@@ -4175,7 +4175,7 @@ class RenamedStruct:
     return self
 
 class SameNamespaceStruct:
-  """
+  r"""
   Attributes:
    - data
   """
@@ -4368,7 +4368,7 @@ class HeapAllocated:
     return self
 
 class MoveOnly:
-  """
+  r"""
   Attributes:
    - ptr
   """
@@ -4477,7 +4477,7 @@ class MoveOnly:
     return self
 
 class AlsoMoveOnly:
-  """
+  r"""
   Attributes:
    - ptr
   """
@@ -4756,7 +4756,7 @@ class TransitiveAdapted:
     return self
 
 class CountingStruct:
-  """
+  r"""
   Attributes:
    - regularInt
    - countingInt
@@ -4897,7 +4897,7 @@ class CountingStruct:
     return self
 
 class Person:
-  """
+  r"""
   Attributes:
    - name
   """
@@ -5004,7 +5004,7 @@ class Person:
     return self
 
 class Person2:
-  """
+  r"""
   Attributes:
    - name
   """

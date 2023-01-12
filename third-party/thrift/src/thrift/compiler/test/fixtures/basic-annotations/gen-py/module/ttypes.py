@@ -54,7 +54,7 @@ class MyEnum:
   }
 
 class MyStructNestedAnnotation:
-  """
+  r"""
   Attributes:
    - name
   """
@@ -344,7 +344,7 @@ class MyException(TException):
     return self
 
 class MyStruct:
-  """
+  r"""
   Attributes:
    - major
    - package
@@ -629,7 +629,7 @@ class MyStruct:
     return self
 
 class SecretStruct:
-  """
+  r"""
   Attributes:
    - id
    - password

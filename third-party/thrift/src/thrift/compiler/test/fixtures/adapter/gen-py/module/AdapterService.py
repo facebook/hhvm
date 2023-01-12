@@ -57,7 +57,7 @@ class Iface:
     pass
 
   def adaptedTypes(self, arg=None):
-    """
+    r"""
     Parameters:
      - arg
     """
@@ -69,7 +69,7 @@ class ContextIface:
     pass
 
   def adaptedTypes(self, handler_ctx, arg=None):
-    """
+    r"""
     Parameters:
      - arg
     """
@@ -159,7 +159,7 @@ count_args.thrift_field_annotations = {
 }
 
 class count_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -275,7 +275,7 @@ count_result.__getstate__ = lambda self: self.__dict__.copy()
 count_result.__setstate__ = count_result__setstate__
 
 class adaptedTypes_args:
-  """
+  r"""
   Attributes:
    - arg
   """
@@ -392,7 +392,7 @@ adaptedTypes_args.__getstate__ = lambda self: self.__dict__.copy()
 adaptedTypes_args.__setstate__ = adaptedTypes_args__setstate__
 
 class adaptedTypes_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -614,7 +614,7 @@ class Client(Iface):
     raise TApplicationException(TApplicationException.MISSING_RESULT, "count failed: unknown result");
 
   def adaptedTypes(self, arg=None):
-    """
+    r"""
     Parameters:
      - arg
     """

@@ -33,7 +33,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Included', 'IncludedInt64', 'TransitiveFoo']
 
 class Included:
-  """
+  r"""
   Attributes:
    - MyIntField
    - MyTransitiveField

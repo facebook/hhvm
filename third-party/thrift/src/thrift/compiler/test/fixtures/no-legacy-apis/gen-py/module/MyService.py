@@ -47,7 +47,7 @@ from thrift.util.Decorators import (
 
 class Iface:
   def query(self, u=None):
-    """
+    r"""
     Parameters:
      - u
     """
@@ -56,7 +56,7 @@ class Iface:
 
 class ContextIface:
   def query(self, handler_ctx, u=None):
-    """
+    r"""
     Parameters:
      - u
     """
@@ -66,7 +66,7 @@ class ContextIface:
 # HELPER FUNCTIONS AND STRUCTURES
 
 class query_args:
-  """
+  r"""
   Attributes:
    - u
   """
@@ -183,7 +183,7 @@ query_args.__getstate__ = lambda self: self.__dict__.copy()
 query_args.__setstate__ = query_args__setstate__
 
 class query_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -374,7 +374,7 @@ class Client(Iface):
         pass
 
   def query(self, u=None):
-    """
+    r"""
     Parameters:
      - u
     """

@@ -273,7 +273,7 @@ doRaise_args.thrift_field_annotations = {
 }
 
 class doRaise_result:
-  """
+  r"""
   Attributes:
    - b
    - f
@@ -479,7 +479,7 @@ get200_args.thrift_field_annotations = {
 }
 
 class get200_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -645,7 +645,7 @@ get500_args.thrift_field_annotations = {
 }
 
 class get500_result:
-  """
+  r"""
   Attributes:
    - success
    - f

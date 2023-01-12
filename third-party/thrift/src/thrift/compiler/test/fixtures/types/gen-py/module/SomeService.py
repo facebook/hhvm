@@ -45,14 +45,14 @@ from thrift.util.Decorators import (
 
 class Iface:
   def bounce_map(self, m=None):
-    """
+    r"""
     Parameters:
      - m
     """
     pass
 
   def binary_keyed_map(self, r=None):
-    """
+    r"""
     Parameters:
      - r
     """
@@ -61,14 +61,14 @@ class Iface:
 
 class ContextIface:
   def bounce_map(self, handler_ctx, m=None):
-    """
+    r"""
     Parameters:
      - m
     """
     pass
 
   def binary_keyed_map(self, handler_ctx, r=None):
-    """
+    r"""
     Parameters:
      - r
     """
@@ -78,7 +78,7 @@ class ContextIface:
 # HELPER FUNCTIONS AND STRUCTURES
 
 class bounce_map_args:
-  """
+  r"""
   Attributes:
    - m
   """
@@ -194,7 +194,7 @@ bounce_map_args.__getstate__ = lambda self: self.__dict__.copy()
 bounce_map_args.__setstate__ = bounce_map_args__setstate__
 
 class bounce_map_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -309,7 +309,7 @@ bounce_map_result.__getstate__ = lambda self: self.__dict__.copy()
 bounce_map_result.__setstate__ = bounce_map_result__setstate__
 
 class binary_keyed_map_args:
-  """
+  r"""
   Attributes:
    - r
   """
@@ -422,7 +422,7 @@ binary_keyed_map_args.__getstate__ = lambda self: self.__dict__.copy()
 binary_keyed_map_args.__setstate__ = binary_keyed_map_args__setstate__
 
 class binary_keyed_map_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -612,7 +612,7 @@ class Client(Iface):
         pass
 
   def bounce_map(self, m=None):
-    """
+    r"""
     Parameters:
      - m
     """
@@ -649,7 +649,7 @@ class Client(Iface):
     raise TApplicationException(TApplicationException.MISSING_RESULT, "bounce_map failed: unknown result");
 
   def binary_keyed_map(self, r=None):
-    """
+    r"""
     Parameters:
      - r
     """

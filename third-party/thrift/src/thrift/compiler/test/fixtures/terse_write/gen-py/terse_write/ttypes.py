@@ -139,7 +139,7 @@ class MyStruct:
     return self
 
 class MyUnion(object):
-  """
+  r"""
   Attributes:
    - bool_field
    - byte_field
@@ -711,7 +711,7 @@ class MyUnion(object):
     return self
 
 class MyStructWithCustomDefault:
-  """
+  r"""
   Attributes:
    - field1
   """
@@ -818,7 +818,7 @@ class MyStructWithCustomDefault:
     return self
 
 class StructLevelTerseStruct:
-  """
+  r"""
   Attributes:
    - bool_field
    - byte_field
@@ -1236,7 +1236,7 @@ class StructLevelTerseStruct:
     return self
 
 class FieldLevelTerseStruct:
-  """
+  r"""
   Attributes:
    - terse_bool_field
    - terse_byte_field
@@ -1982,7 +1982,7 @@ class FieldLevelTerseStruct:
     return self
 
 class TerseStructWithCustomDefault:
-  """
+  r"""
   Attributes:
    - bool_field
    - byte_field
@@ -2381,7 +2381,7 @@ class TerseStructWithCustomDefault:
     return self
 
 class AdaptedFields:
-  """
+  r"""
   Attributes:
    - field1
    - field2
@@ -2528,7 +2528,7 @@ class AdaptedFields:
     return self
 
 class WrappedFields:
-  """
+  r"""
   Attributes:
    - field1
   """
@@ -2637,7 +2637,7 @@ class WrappedFields:
     return self
 
 class TerseException(TException):
-  """
+  r"""
   Attributes:
    - msg
   """

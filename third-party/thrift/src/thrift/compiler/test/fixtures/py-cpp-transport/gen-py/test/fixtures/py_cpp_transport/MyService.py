@@ -44,7 +44,7 @@ class Iface:
     pass
 
   def echo(self, input=None):
-    """
+    r"""
     Parameters:
      - input
     """
@@ -56,7 +56,7 @@ class ContextIface:
     pass
 
   def echo(self, handler_ctx, input=None):
-    """
+    r"""
     Parameters:
      - input
     """
@@ -200,7 +200,7 @@ ping_result.thrift_field_annotations = {
 }
 
 class echo_args:
-  """
+  r"""
   Attributes:
    - input
   """
@@ -299,7 +299,7 @@ echo_args.__getstate__ = lambda self: self.__dict__.copy()
 echo_args.__setstate__ = echo_args__setstate__
 
 class echo_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -500,7 +500,7 @@ class Client(Iface):
     return
 
   def echo(self, input=None):
-    """
+    r"""
     Parameters:
      - input
     """

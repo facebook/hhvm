@@ -86,7 +86,7 @@ class MyForwardRefEnum:
   }
 
 class decorated_struct:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -178,7 +178,7 @@ class decorated_struct:
     return self
 
 class ContainerStruct:
-  """
+  r"""
   Attributes:
    - fieldA
    - fieldB
@@ -485,7 +485,7 @@ class ContainerStruct:
     return self
 
 class CppTypeStruct:
-  """
+  r"""
   Attributes:
    - fieldA
   """
@@ -590,7 +590,7 @@ class CppTypeStruct:
     return self
 
 class VirtualStruct:
-  """
+  r"""
   Attributes:
    - MyIntField
   """
@@ -682,7 +682,7 @@ class VirtualStruct:
     return self
 
 class MyStructWithForwardRefEnum:
-  """
+  r"""
   Attributes:
    - a
    - b
@@ -789,7 +789,7 @@ class MyStructWithForwardRefEnum:
     return self
 
 class TrivialNumeric:
-  """
+  r"""
   Attributes:
    - a
    - b
@@ -896,7 +896,7 @@ class TrivialNumeric:
     return self
 
 class TrivialNestedWithDefault:
-  """
+  r"""
   Attributes:
    - z
    - n
@@ -1004,7 +1004,7 @@ class TrivialNestedWithDefault:
     return self
 
 class ComplexString:
-  """
+  r"""
   Attributes:
    - a
    - b
@@ -1127,7 +1127,7 @@ class ComplexString:
     return self
 
 class ComplexNestedWithDefault:
-  """
+  r"""
   Attributes:
    - z
    - n
@@ -1235,7 +1235,7 @@ class ComplexNestedWithDefault:
     return self
 
 class MinPadding:
-  """
+  r"""
   Attributes:
    - small
    - big
@@ -1387,7 +1387,7 @@ class MinPadding:
     return self
 
 class MinPaddingWithCustomType:
-  """
+  r"""
   Attributes:
    - small
    - big
@@ -1539,7 +1539,7 @@ class MinPaddingWithCustomType:
     return self
 
 class MyStruct:
-  """
+  r"""
   Attributes:
    - MyIntField
    - MyStringField
@@ -1750,7 +1750,7 @@ class MyDataItem:
     return self
 
 class Renaming:
-  """
+  r"""
   Attributes:
    - foo
   """
@@ -1842,7 +1842,7 @@ class Renaming:
     return self
 
 class AnnotatedTypes:
-  """
+  r"""
   Attributes:
    - binary_field
    - list_field
@@ -1990,7 +1990,7 @@ class AnnotatedTypes:
     return self
 
 class ForwardUsageRoot:
-  """
+  r"""
   Attributes:
    - ForwardUsageStruct
    - ForwardUsageByRef
@@ -2099,7 +2099,7 @@ class ForwardUsageRoot:
     return self
 
 class ForwardUsageStruct:
-  """
+  r"""
   Attributes:
    - foo
   """
@@ -2192,7 +2192,7 @@ class ForwardUsageStruct:
     return self
 
 class ForwardUsageByRef:
-  """
+  r"""
   Attributes:
    - foo
   """
@@ -2285,7 +2285,7 @@ class ForwardUsageByRef:
     return self
 
 class IncompleteMap:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -2468,7 +2468,7 @@ class IncompleteMapDep:
     return self
 
 class CompleteMap:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -2651,7 +2651,7 @@ class CompleteMapDep:
     return self
 
 class IncompleteList:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -2831,7 +2831,7 @@ class IncompleteListDep:
     return self
 
 class CompleteList:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -3011,7 +3011,7 @@ class CompleteListDep:
     return self
 
 class AdaptedList:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -3118,7 +3118,7 @@ class AdaptedList:
     return self
 
 class AdaptedListDep:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -3211,7 +3211,7 @@ class AdaptedListDep:
     return self
 
 class DependentAdaptedList:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -3318,7 +3318,7 @@ class DependentAdaptedList:
     return self
 
 class DependentAdaptedListDep:
-  """
+  r"""
   Attributes:
    - field
   """
@@ -3410,7 +3410,7 @@ class DependentAdaptedListDep:
     return self
 
 class AllocatorAware:
-  """
+  r"""
   Attributes:
    - aa_list
    - aa_set
@@ -3634,7 +3634,7 @@ class AllocatorAware:
     return self
 
 class AllocatorAware2:
-  """
+  r"""
   Attributes:
    - not_a_container
   """
@@ -3726,7 +3726,7 @@ class AllocatorAware2:
     return self
 
 class TypedefStruct:
-  """
+  r"""
   Attributes:
    - i32_field
    - IntTypedef_field
@@ -3848,7 +3848,7 @@ class TypedefStruct:
     return self
 
 class StructWithDoubleUnderscores:
-  """
+  r"""
   Attributes:
    - __field
   """

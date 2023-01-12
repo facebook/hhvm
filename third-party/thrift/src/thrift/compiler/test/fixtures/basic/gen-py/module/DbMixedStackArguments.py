@@ -47,14 +47,14 @@ from thrift.util.Decorators import (
 
 class Iface:
   def getDataByKey0(self, key=None):
-    """
+    r"""
     Parameters:
      - key
     """
     pass
 
   def getDataByKey1(self, key=None):
-    """
+    r"""
     Parameters:
      - key
     """
@@ -63,14 +63,14 @@ class Iface:
 
 class ContextIface:
   def getDataByKey0(self, handler_ctx, key=None):
-    """
+    r"""
     Parameters:
      - key
     """
     pass
 
   def getDataByKey1(self, handler_ctx, key=None):
-    """
+    r"""
     Parameters:
      - key
     """
@@ -80,7 +80,7 @@ class ContextIface:
 # HELPER FUNCTIONS AND STRUCTURES
 
 class getDataByKey0_args:
-  """
+  r"""
   Attributes:
    - key
   """
@@ -195,7 +195,7 @@ getDataByKey0_args.__getstate__ = lambda self: self.__dict__.copy()
 getDataByKey0_args.__setstate__ = getDataByKey0_args__setstate__
 
 class getDataByKey0_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -309,7 +309,7 @@ getDataByKey0_result.__getstate__ = lambda self: self.__dict__.copy()
 getDataByKey0_result.__setstate__ = getDataByKey0_result__setstate__
 
 class getDataByKey1_args:
-  """
+  r"""
   Attributes:
    - key
   """
@@ -424,7 +424,7 @@ getDataByKey1_args.__getstate__ = lambda self: self.__dict__.copy()
 getDataByKey1_args.__setstate__ = getDataByKey1_args__setstate__
 
 class getDataByKey1_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -613,7 +613,7 @@ class Client(Iface):
         pass
 
   def getDataByKey0(self, key=None):
-    """
+    r"""
     Parameters:
      - key
     """
@@ -650,7 +650,7 @@ class Client(Iface):
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getDataByKey0 failed: unknown result");
 
   def getDataByKey1(self, key=None):
-    """
+    r"""
     Parameters:
      - key
     """

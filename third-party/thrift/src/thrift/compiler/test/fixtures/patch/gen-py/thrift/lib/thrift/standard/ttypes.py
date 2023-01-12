@@ -49,7 +49,7 @@ class Void:
   }
 
 class StandardProtocol:
-  """
+  r"""
   The standard Thrift protocols.
   """
   Custom = 0
@@ -75,7 +75,7 @@ class StandardProtocol:
   }
 
 class TypeUri(object):
-  """
+  r"""
   The uri of an IDL defined type.
   
   Attributes:
@@ -230,7 +230,7 @@ class TypeUri(object):
     return self
 
 class TypeName(object):
-  """
+  r"""
   Uniquely identifies a Thrift type.
   
   Attributes:

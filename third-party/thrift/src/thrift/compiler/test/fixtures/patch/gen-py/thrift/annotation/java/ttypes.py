@@ -37,7 +37,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Adapter', 'Wrapper']
 
 class Adapter:
-  """
+  r"""
   Attributes:
    - adapterClassName
    - typeClassName
@@ -161,7 +161,7 @@ class Adapter:
     return self
 
 class Wrapper:
-  """
+  r"""
   Attributes:
    - wrapperClassName
    - typeClassName

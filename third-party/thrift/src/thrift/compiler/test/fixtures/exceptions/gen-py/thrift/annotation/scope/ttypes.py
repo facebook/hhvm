@@ -31,7 +31,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Transitive', 'Schema', 'Program', 'Struct', 'Union', 'Exception', 'Field', 'Typedef', 'Service', 'Interaction', 'Function', 'EnumValue', 'Const', 'Enum', 'Structured', 'Interface', 'RootDefinition', 'Definition']
 
 class Transitive:
-  """
+  r"""
   Indicates that the scope of sibling annotations is transitive.
   
   For example:
@@ -129,7 +129,7 @@ class Transitive:
     return self
 
 class Schema:
-  """
+  r"""
   Indicates that an annotation should be included in the runtime schema.
   
   See thrift/lib/thrift/schema.thrift
@@ -207,7 +207,7 @@ class Schema:
     return self
 
 class Program:
-  """
+  r"""
   The Program scope.
   
   This allows annotations on the `package` definition, which implies the
@@ -286,7 +286,7 @@ class Program:
     return self
 
 class Struct:
-  """
+  r"""
   The `struct` definition scope.
   """
 
@@ -362,7 +362,7 @@ class Struct:
     return self
 
 class Union:
-  """
+  r"""
   The `union` definition scope.
   """
 
@@ -438,7 +438,7 @@ class Union:
     return self
 
 class Exception:
-  """
+  r"""
   The `exception` definition scope.
   """
 
@@ -514,7 +514,7 @@ class Exception:
     return self
 
 class Field:
-  """
+  r"""
   Field declartaions, for example in `struct` or `function` declartions.
   """
 
@@ -590,7 +590,7 @@ class Field:
     return self
 
 class Typedef:
-  """
+  r"""
   The `typedef` definition scope.
   """
 
@@ -666,7 +666,7 @@ class Typedef:
     return self
 
 class Service:
-  """
+  r"""
   The `service` definition scope.
   """
 
@@ -742,7 +742,7 @@ class Service:
     return self
 
 class Interaction:
-  """
+  r"""
   The `interaction` definition scope.
   """
 
@@ -818,7 +818,7 @@ class Interaction:
     return self
 
 class Function:
-  """
+  r"""
   The `function` definition scope.
   """
 
@@ -894,7 +894,7 @@ class Function:
     return self
 
 class EnumValue:
-  """
+  r"""
   The Enum value definition scope.
   """
 
@@ -970,7 +970,7 @@ class EnumValue:
     return self
 
 class Const:
-  """
+  r"""
   The `const` definition scope.
   """
 
@@ -1119,7 +1119,7 @@ class Enum:
     return self
 
 class Structured:
-  """
+  r"""
   A scope that includes all 'structured' definitions.
   """
 
@@ -1195,7 +1195,7 @@ class Structured:
     return self
 
 class Interface:
-  """
+  r"""
   A scope that includes all 'interface' definitions.
   """
 
@@ -1271,7 +1271,7 @@ class Interface:
     return self
 
 class RootDefinition:
-  """
+  r"""
   A scope that includes all program-scoped definition.
   """
 
@@ -1347,7 +1347,7 @@ class RootDefinition:
     return self
 
 class Definition:
-  """
+  r"""
   A scope that includes all definitions.
   """
 

@@ -3583,7 +3583,7 @@ void t_py_generator::generate_python_docstring(
   }
 
   if (has_doc) {
-    generate_docstring_comment(out, "\"\"\"\n", "", ss.str(), "\"\"\"\n");
+    generate_docstring_comment(out, "r\"\"\"\n", "", ss.str(), "\"\"\"\n");
   }
 }
 
@@ -3594,7 +3594,7 @@ void t_py_generator::generate_python_docstring(
     ofstream& out, const t_node* tdoc) {
   if (tdoc->has_doc()) {
     generate_docstring_comment(
-        out, "\"\"\"\n", "", tdoc->get_doc(), "\"\"\"\n");
+        out, "r\"\"\"\n", "", tdoc->get_doc(), "\"\"\"\n");
   }
 }
 

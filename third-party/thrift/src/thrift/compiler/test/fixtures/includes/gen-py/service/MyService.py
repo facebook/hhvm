@@ -43,11 +43,11 @@ from thrift.util.Decorators import (
 )
 
 class Iface:
-  """
+  r"""
   This is a service-level docblock
   """
   def query(self, s=None, i=None):
-    """
+    r"""
     This is a function-level docblock
     
     Parameters:
@@ -57,7 +57,7 @@ class Iface:
     pass
 
   def has_arg_docs(self, s=None, i=None):
-    """
+    r"""
     Parameters:
      - s
      - i: arg doc
@@ -66,11 +66,11 @@ class Iface:
 
 
 class ContextIface:
-  """
+  r"""
   This is a service-level docblock
   """
   def query(self, handler_ctx, s=None, i=None):
-    """
+    r"""
     This is a function-level docblock
     
     Parameters:
@@ -80,7 +80,7 @@ class ContextIface:
     pass
 
   def has_arg_docs(self, handler_ctx, s=None, i=None):
-    """
+    r"""
     Parameters:
      - s
      - i: arg doc
@@ -91,7 +91,7 @@ class ContextIface:
 # HELPER FUNCTIONS AND STRUCTURES
 
 class query_args:
-  """
+  r"""
   Attributes:
    - s
    - i
@@ -278,7 +278,7 @@ query_result.thrift_field_annotations = {
 }
 
 class has_arg_docs_args:
-  """
+  r"""
   Attributes:
    - s
    - i: arg doc
@@ -465,7 +465,7 @@ has_arg_docs_result.thrift_field_annotations = {
 }
 
 class Client(Iface):
-  """
+  r"""
   This is a service-level docblock
   """
   _fbthrift_force_cpp_transport = False
@@ -543,7 +543,7 @@ class Client(Iface):
         pass
 
   def query(self, s=None, i=None):
-    """
+    r"""
     This is a function-level docblock
     
     Parameters:
@@ -581,7 +581,7 @@ class Client(Iface):
     return
 
   def has_arg_docs(self, s=None, i=None):
-    """
+    r"""
     Parameters:
      - s
      - i: arg doc

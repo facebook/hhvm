@@ -192,7 +192,7 @@ class MyBitmaskEnum2:
   }
 
 class SomeStruct:
-  """
+  r"""
   Attributes:
    - reasonable
    - fine
@@ -385,7 +385,7 @@ class SomeStruct:
     return self
 
 class MyStruct:
-  """
+  r"""
   Attributes:
    - me2_3
    - me3_n3

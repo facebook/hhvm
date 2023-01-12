@@ -31,7 +31,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Foo', 'NegativeId']
 
 class Foo:
-  """
+  r"""
   Attributes:
    - mymap
    - myset
@@ -169,7 +169,7 @@ class Foo:
     return self
 
 class NegativeId:
-  """
+  r"""
   Attributes:
    - field1
    - field2

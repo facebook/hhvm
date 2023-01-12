@@ -37,7 +37,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Foo', 'Foo2']
 
 class Foo:
-  """
+  r"""
   Attributes:
    - field1
    - field2
@@ -184,7 +184,7 @@ class Foo:
     return self
 
 class Foo2:
-  """
+  r"""
   Attributes:
    - field1
    - field2

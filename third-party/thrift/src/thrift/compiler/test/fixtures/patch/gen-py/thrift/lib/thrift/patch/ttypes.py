@@ -40,7 +40,7 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'PatchOp', 'GeneratePatch', 'AssignOnlyPatch', 'BoolPatch', 'BytePatch', 'I16Patch', 'I32Patch', 'I64Patch', 'FloatPatch', 'DoublePatch', 'StringPatch', 'BinaryPatch']
 
 class PatchOp:
-  """
+  r"""
   The meaning of the patch op field ids, in all properly formulated patch
   definitions.
   
@@ -85,7 +85,7 @@ class PatchOp:
   }
 
 class GeneratePatch:
-  """
+  r"""
   An annotation that indicates a patch representation
   should be generated for the associated definition.
   """
@@ -261,7 +261,7 @@ class AssignOnlyPatch:
     return self
 
 class BoolPatch:
-  """
+  r"""
   A patch for a boolean value.
   
   Attributes:
@@ -408,7 +408,7 @@ class BoolPatch:
     return self
 
 class BytePatch:
-  """
+  r"""
   A patch for an 8-bit integer value.
   
   Attributes:
@@ -559,7 +559,7 @@ class BytePatch:
     return self
 
 class I16Patch:
-  """
+  r"""
   A patch for a 16-bit integer value.
   
   Attributes:
@@ -710,7 +710,7 @@ class I16Patch:
     return self
 
 class I32Patch:
-  """
+  r"""
   A patch for a 32-bit integer value.
   
   Attributes:
@@ -861,7 +861,7 @@ class I32Patch:
     return self
 
 class I64Patch:
-  """
+  r"""
   A patch for a 64-bit integer value.
   
   Attributes:
@@ -1008,7 +1008,7 @@ class I64Patch:
     return self
 
 class FloatPatch:
-  """
+  r"""
   A patch for a 32-bit floating point value.
   
   Attributes:
@@ -1155,7 +1155,7 @@ class FloatPatch:
     return self
 
 class DoublePatch:
-  """
+  r"""
   A patch for an 64-bit floating point value.
   
   Attributes:
@@ -1302,7 +1302,7 @@ class DoublePatch:
     return self
 
 class StringPatch:
-  """
+  r"""
   A patch for a string value.
   
   Attributes:
@@ -1466,7 +1466,7 @@ class StringPatch:
     return self
 
 class BinaryPatch:
-  """
+  r"""
   A patch for a binary value.
   
   Attributes:

@@ -48,7 +48,7 @@ class Iface:
     pass
 
   def interact(self, arg=None):
-    """
+    r"""
     Parameters:
      - arg
     """
@@ -63,7 +63,7 @@ class ContextIface:
     pass
 
   def interact(self, handler_ctx, arg=None):
-    """
+    r"""
     Parameters:
      - arg
     """
@@ -236,7 +236,7 @@ foo_result.thrift_field_annotations = {
 }
 
 class interact_args:
-  """
+  r"""
   Attributes:
    - arg
   """
@@ -513,7 +513,7 @@ interactFast_args.thrift_field_annotations = {
 }
 
 class interactFast_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -731,7 +731,7 @@ class Client(Iface):
     return
 
   def interact(self, arg=None):
-    """
+    r"""
     Parameters:
      - arg
     """

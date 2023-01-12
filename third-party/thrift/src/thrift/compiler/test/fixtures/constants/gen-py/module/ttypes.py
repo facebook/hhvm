@@ -79,7 +79,7 @@ class Company:
   }
 
 class Internship:
-  """
+  r"""
   Attributes:
    - weeks
    - title
@@ -231,7 +231,7 @@ class Internship:
     return self
 
 class Range:
-  """
+  r"""
   Attributes:
    - min
    - max
@@ -338,7 +338,7 @@ class Range:
     return self
 
 class struct1:
-  """
+  r"""
   Attributes:
    - a
    - b
@@ -445,7 +445,7 @@ class struct1:
     return self
 
 class struct2:
-  """
+  r"""
   Attributes:
    - a
    - b
@@ -596,7 +596,7 @@ class struct2:
     return self
 
 class struct3:
-  """
+  r"""
   Attributes:
    - a
    - b
@@ -719,7 +719,7 @@ class struct3:
     return self
 
 class struct4:
-  """
+  r"""
   Attributes:
    - a
    - b
@@ -841,7 +841,7 @@ class struct4:
     return self
 
 class union1(object):
-  """
+  r"""
   Attributes:
    - i
    - d
@@ -970,7 +970,7 @@ class union1(object):
     return self
 
 class union2(object):
-  """
+  r"""
   Attributes:
    - i
    - d

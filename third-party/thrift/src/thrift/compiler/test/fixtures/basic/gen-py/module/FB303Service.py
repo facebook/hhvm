@@ -47,7 +47,7 @@ from thrift.util.Decorators import (
 
 class Iface:
   def simple_rpc(self, int_parameter=None):
-    """
+    r"""
     Parameters:
      - int_parameter
     """
@@ -56,7 +56,7 @@ class Iface:
 
 class ContextIface:
   def simple_rpc(self, handler_ctx, int_parameter=None):
-    """
+    r"""
     Parameters:
      - int_parameter
     """
@@ -66,7 +66,7 @@ class ContextIface:
 # HELPER FUNCTIONS AND STRUCTURES
 
 class simple_rpc_args:
-  """
+  r"""
   Attributes:
    - int_parameter
   """
@@ -183,7 +183,7 @@ simple_rpc_args.__getstate__ = lambda self: self.__dict__.copy()
 simple_rpc_args.__setstate__ = simple_rpc_args__setstate__
 
 class simple_rpc_result:
-  """
+  r"""
   Attributes:
    - success
   """
@@ -374,7 +374,7 @@ class Client(Iface):
         pass
 
   def simple_rpc(self, int_parameter=None):
-    """
+    r"""
     Parameters:
      - int_parameter
     """

@@ -1,12 +1,6 @@
-object(Closure%s) (1) {
-  ["this"]=>
-  object(E) (0) {
-  }
+object(Closure%s) (0) {
 }
 string(1) "d"
-object(Closure%s) (1) {
-  ["this"]=>
-  object(F) (0) {
-  }
+object(Closure%s) (0) {
 }
 string(1) "d"

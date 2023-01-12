@@ -31,58 +31,7 @@ namespace HPHP {
 Class* c_Closure::cls_Closure;
 
 const StaticString
-  s_Closure("Closure"),
-  s_this("this"),
-  s_varprefix("$"),
-  s_parameter("parameter"),
-  s_required("<required>"),
-  s_optional("<optional>");
-
-static Array HHVM_METHOD(Closure, __debugInfo) {
-  auto closure = c_Closure::fromObject(this_);
-
-  Array ret = Array::CreateDict();
-
-  // Serialize 'use' parameters.
-  auto cls = this_->getVMClass();
-  if (auto nProps = cls->numDeclProperties()) {
-    DictInit useVars(nProps);
-
-    auto propsInfos = cls->declProperties();
-    auto idx = 0;
-    closure->props()->foreach(nProps, [&](tv_rval rval){
-      useVars.set(StrNR(propsInfos[idx++].name), *rval);
-    });
-
-    ret.set(s_static, make_array_like_tv(useVars.toArray().get()));
-  }
-
-  auto const func = closure->getInvokeFunc();
-
-  // Serialize function parameters.
-  if (auto nParams = func->numParams()) {
-   Array params = Array::CreateDict();
-
-   auto lNames = func->localNames();
-   for (int i = 0; i < nParams; ++i) {
-      auto str = String::attach(
-        StringData::Make(s_varprefix.get(), lNames[i])
-      );
-
-      bool optional = func->params()[i].phpCode;
-      params.set(str, optional ? s_optional : s_required);
-    }
-
-    ret.set(s_parameter, params);
-  }
-
-  // Serialize 'this' object.
-  if (closure->hasThis()) {
-    ret.set(s_this, Object(closure->getThis()));
-  }
-
-  return ret;
-}
+  s_Closure("Closure");
 
 struct ClosurePropHandler: Native::BasePropHandler {
   static bool isPropSupported(const String&, const String&) {
@@ -303,7 +252,6 @@ ObjectData* c_Closure::clone() {
 
 void StandardExtension::loadClosure() {
   Native::registerNativePropHandler<ClosurePropHandler>(s_Closure);
-  HHVM_SYS_ME(Closure, __debugInfo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

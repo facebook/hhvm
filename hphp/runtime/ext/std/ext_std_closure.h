@@ -106,11 +106,6 @@ struct c_Closure final : ObjectData {
   /////////////////////////////////////////////////////////////////////////////
 
   /*
-   * The closure's underlying function.
-   */
-  const Func* getInvokeFunc() const { return getVMClass()->getRegularInvoke(); }
-
-  /*
    * The Class scope the closure was defined in.
    */
   Class* getScope() { return getInvokeFunc()->cls(); }
@@ -177,6 +172,11 @@ private:
 
   static Class* cls_Closure;
   static void setAllocators(Class* cls);
+
+  /*
+   * The closure's underlying function.
+   */
+  const Func* getInvokeFunc() const { return getVMClass()->getRegularInvoke(); }
 };
 
 ObjectData* createClosureRepoAuthRawSmall(Class* cls, size_t size,

@@ -32,6 +32,7 @@ use crate::decl::ty::Enforceable;
 use crate::decl::ty::EnumType;
 use crate::decl::ty::FunElt;
 use crate::decl::ty::ModuleDefType;
+use crate::decl::ty::Tag;
 use crate::decl::ty::Tparam;
 use crate::decl::ty::Ty;
 use crate::decl::ty::Typeconst;
@@ -112,6 +113,19 @@ impl<R: Reason> ShallowProp<R> {
         match &self.ty {
             Some(ty) => ty.clone(),
             None => Ty::any(R::witness_from_decl(self.name.pos().clone())),
+        }
+    }
+
+    pub fn is_required_xhp_attribute(&self) -> bool {
+        match self.xhp_attr {
+            None => false,
+            Some(attr) => match attr.tag {
+                None => false,
+                Some(tag) => match tag {
+                    Tag::Required => true,
+                    Tag::LateInit => false,
+                },
+            },
         }
     }
 }

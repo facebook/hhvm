@@ -6718,7 +6718,7 @@ and call_parent_construct pos recv_pos env el unpacked_element =
     check_parent_construct pos recv_pos env el unpacked_element parent
   | None ->
     (* continue here *)
-    let ty = Typing_utils.mk_tany env pos in
+    let (env, ty) = Env.fresh_type_error env pos in
     let should_invalidate_fake_members = true in
     let default = (env, [], None, ty, ty, ty, should_invalidate_fake_members) in
     (match Env.get_self_id env with

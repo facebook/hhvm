@@ -18,11 +18,16 @@ package com.facebook.nifty.core;
 
 import java.util.Iterator;
 import java.util.Map;
+import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
-@Deprecated
 public interface RequestContext {
+  String REQUEST_CONTEXT_KEY = "ThriftRequestContext";
+
+  @Deprecated
   ConnectionContext getConnectionContext();
 
+  @Deprecated
   void setContextData(String key, Object val);
 
   Object getContextData(String key);
@@ -34,4 +39,12 @@ public interface RequestContext {
   Map<String, String> getRequestHeader();
 
   void setResponseHeader(String key, String value);
+
+  static RequestContext fromContextView(ContextView contextView) {
+    return contextView.get(REQUEST_CONTEXT_KEY);
+  }
+
+  static Context toContext(Context context, RequestContext requestContext) {
+    return context.put(REQUEST_CONTEXT_KEY, requestContext);
+  }
 }

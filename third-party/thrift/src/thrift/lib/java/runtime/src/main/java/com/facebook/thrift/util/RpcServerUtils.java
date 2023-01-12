@@ -18,6 +18,7 @@ package com.facebook.thrift.util;
 
 import static com.facebook.thrift.util.PlatformUtils.getOS;
 
+import com.facebook.nifty.core.RequestContext;
 import com.facebook.nifty.ssl.SslSession;
 import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.legacy.server.LegacyServerTransportFactory;
@@ -53,11 +54,14 @@ import javax.net.ssl.SSLSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class RpcServerUtils {
+public final class RpcServerUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(RpcServerUtils.class);
+
+  private RpcServerUtils() {}
 
   /**
    * Returns ServerChannel Class from eventLoopGroup and socketAddress. Throws
@@ -234,5 +238,15 @@ public class RpcServerUtils {
     } catch (Exception e) {
       throw Exceptions.propagate(e);
     }
+  }
+
+  public static <T> Mono<T> decorateWithRequestContext(
+      com.facebook.nifty.core.RequestContext requestContext, Mono<T> mono) {
+    return mono.contextWrite(context -> RequestContext.toContext(context, requestContext));
+  }
+
+  public static <T> Flux<T> decorateWithRequestContext(
+      com.facebook.nifty.core.RequestContext requestContext, Flux<T> flux) {
+    return flux.contextWrite(context -> RequestContext.toContext(context, requestContext));
   }
 }

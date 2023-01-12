@@ -21,11 +21,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
+import com.facebook.nifty.core.RequestContext;
 import com.facebook.nifty.ssl.SslSession;
 import com.facebook.swift.service.SwiftConstants;
 import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.legacy.server.ThriftOptionalSslHandler;
 import com.facebook.thrift.util.resources.RpcResources;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollServerDomainSocketChannel;
@@ -39,9 +41,14 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 public class RpcServerUtilsTest {
 
@@ -127,6 +134,42 @@ public class RpcServerUtilsTest {
     ThriftOptionalSslHandler optionalSslHandler = new ThriftOptionalSslHandler(context);
     // This should re-use sslSession
     AttributeKey<SslSession> sslSessionAttributeKey = SwiftConstants.THRIFT_SSL_SESSION_KEY;
+  }
+
+  @Test
+  public void testDecorateMonoWithRequestContext() {
+    RequestContext mock = Mockito.mock(RequestContext.class);
+    Mockito.when(mock.getRequestHeader()).thenReturn(ImmutableMap.of("hello", "world"));
+    Mono<Long> count =
+        Flux.range(0, 100)
+            .count()
+            .handle(
+                (aLong, longSynchronousSink) -> {
+                  RequestContext context =
+                      RequestContext.fromContextView(longSynchronousSink.contextView());
+                  Assert.assertEquals(context.getRequestHeader().get("hello"), "world");
+                  longSynchronousSink.next(aLong);
+                });
+    Mono<Long> longMono = RpcServerUtils.decorateWithRequestContext(mock, count);
+    StepVerifier.create(longMono).expectNextCount(1).verifyComplete();
+  }
+
+  @Test
+  public void testDecorateFluxWithRequestContext() {
+    RequestContext mock = Mockito.mock(RequestContext.class);
+    Mockito.when(mock.getRequestHeader()).thenReturn(ImmutableMap.of("hello", "world"));
+    Flux<Object> handle =
+        Flux.range(0, 100)
+            .handle(
+                (aLong, longSynchronousSink) -> {
+                  RequestContext context =
+                      RequestContext.fromContextView(longSynchronousSink.contextView());
+                  assertEquals(context.getRequestHeader().get("hello"), "world");
+                  longSynchronousSink.next(aLong);
+                });
+
+    Flux<Object> objectFlux = RpcServerUtils.decorateWithRequestContext(mock, handle);
+    StepVerifier.create(objectFlux.ignoreElements()).verifyComplete();
   }
 
   private static boolean isMacos() {

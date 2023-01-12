@@ -291,7 +291,7 @@ class ConfigPreprocessor::Context {
 
 class ConfigPreprocessor::Macro {
  public:
-  using Func = std::function<dynamic(Context&&)>;
+  using Func = folly::Function<dynamic(Context&&) const>;
 
   Macro(
       const ConfigPreprocessor& prep,

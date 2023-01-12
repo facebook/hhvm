@@ -7,11 +7,11 @@
 
 #pragma once
 
-#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include <folly/Function.h>
 #include <folly/dynamic.h>
 #include <folly/experimental/StringKeyedUnorderedMap.h>
 #include <folly/json.h>
@@ -72,7 +72,7 @@ class ConfigPreprocessor {
   folly::StringKeyedUnorderedMap<std::unique_ptr<Const>> consts_;
   folly::StringKeyedUnorderedMap<folly::dynamic> importCache_;
   folly::StringKeyedUnorderedMap<
-      std::function<folly::dynamic(folly::dynamic&&, const Context&)>>
+      folly::Function<folly::dynamic(folly::dynamic&&, const Context&) const>>
       builtInCalls_;
 
   folly::json::metadata_map& configMetadataMap_;
@@ -132,7 +132,7 @@ class ConfigPreprocessor {
   void addMacro(
       folly::StringPiece name,
       const std::vector<folly::dynamic>& params,
-      std::function<folly::dynamic(Context&&)> func,
+      folly::Function<folly::dynamic(Context&&) const> func,
       bool autoExpand = true);
 
   void parseMacroDef(const folly::dynamic& key, const folly::dynamic& obj);

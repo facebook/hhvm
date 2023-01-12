@@ -18,7 +18,6 @@ package com.facebook.thrift.protocol;
 
 import com.facebook.thrift.util.Utf8Util;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -154,9 +153,8 @@ public final class ByteBufTBinaryProtocol extends ByteBufTProtocol {
 
   @Override
   public void writeString(String str) throws TException {
-    final int length = ByteBufUtil.utf8Bytes(str);
-    writeI32(length);
-    ByteBufUtil.reserveAndWriteUtf8(byteBuf, str, length);
+    byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+    getWritableBinaryAsByteBuf(bytes.length).writeBytes(bytes);
   }
 
   @Override
@@ -282,12 +280,11 @@ public final class ByteBufTBinaryProtocol extends ByteBufTProtocol {
 
   @Override
   public String readString() throws TException {
-    final int size = readI32();
-    return readStringBody(size);
+    return Utf8Util.readString(readBinaryAsSlice());
   }
 
   private String readStringBody(int size) throws TException {
-    return byteBuf.readSlice(size).toString(StandardCharsets.UTF_8);
+    return Utf8Util.readString(byteBuf.readSlice(size));
   }
 
   @Override

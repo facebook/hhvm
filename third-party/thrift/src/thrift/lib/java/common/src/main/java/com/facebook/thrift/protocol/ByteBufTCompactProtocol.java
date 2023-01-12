@@ -21,7 +21,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TField;
@@ -459,8 +458,7 @@ public final class ByteBufTCompactProtocol extends ByteBufTProtocol {
 
   /** Reads a byte[] (via readBinary), and then UTF-8 decodes it. */
   public String readString() throws TException {
-    final int size = readVarInt32();
-    return byteBuf.readCharSequence(size, StandardCharsets.UTF_8).toString();
+    return Utf8Util.readString(readBinaryAsSlice());
   }
 
   /** Read a byte[] from the wire. */

@@ -118,4 +118,31 @@ public class Utf8Util {
       throw new RuntimeException(t);
     }
   }
+
+  /**
+   * Read string from given ByteBuf. If the bytes are not valid UTF-8 encoded data, they are
+   * replaced with replacement char.
+   *
+   * @param src
+   * @return String
+   */
+  public static String readString(ByteBuf src) throws TProtocolException {
+    final int length = src.readableBytes();
+    if (length == 0) {
+      return StringUtil.EMPTY_STRING;
+    }
+    final byte[] array;
+    final int offset;
+
+    if (src.hasArray()) {
+      array = src.array();
+      offset = src.arrayOffset();
+    } else {
+      array = threadLocalTempArray(length);
+      offset = 0;
+      src.getBytes(0, array, 0, length);
+    }
+
+    return new String(array, offset, length);
+  }
 }

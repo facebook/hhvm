@@ -372,8 +372,6 @@ type t = {
   ide_max_num_linearizations: int;  (** tuning of clientIdeDaemon local cache *)
   ide_symbolindex_search_provider: string;
       (** like [symbolindex_search_provider] but for IDE *)
-  ide_use_shallow_decls: bool;
-      (** use shallow decls instead folded decls in Hack IDE *)
   predeclare_ide: bool;
   max_typechecker_worker_memory_mb: int option;
       (** if set, the worker will stop early at the end of a file if its heap exceeds this number *)
@@ -556,7 +554,6 @@ let default =
     ide_max_num_decls = 5000;
     ide_max_num_shallow_decls = 10000;
     ide_max_num_linearizations = 10000;
-    ide_use_shallow_decls = true;
     predeclare_ide = false;
     max_typechecker_worker_memory_mb = None;
     use_max_typechecker_worker_memory_for_decl_deferral = false;
@@ -957,13 +954,6 @@ let load_ fn ~silent ~current_version overrides =
     int_
       "ide_max_num_linearizations"
       ~default:default.ide_max_num_linearizations
-      config
-  in
-  let ide_use_shallow_decls =
-    bool_if_min_version
-      "ide_use_shallow_decls"
-      ~default:default.ide_use_shallow_decls
-      ~current_version
       config
   in
   let predeclare_ide =
@@ -1466,7 +1456,6 @@ let load_ fn ~silent ~current_version overrides =
     ide_max_num_shallow_decls;
     ide_max_num_linearizations;
     ide_symbolindex_search_provider;
-    ide_use_shallow_decls;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
     use_max_typechecker_worker_memory_for_decl_deferral;
@@ -1565,7 +1554,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       ide_max_num_decls = options.ide_max_num_decls;
       ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;
       ide_max_num_linearizations = options.ide_max_num_linearizations;
-      ide_use_shallow_decls = options.ide_use_shallow_decls;
       max_bucket_size = options.max_bucket_size;
       max_workers = Option.value options.max_workers ~default:(-1);
       max_typechecker_worker_memory_mb =

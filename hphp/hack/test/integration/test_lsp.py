@@ -43,7 +43,6 @@ lazy_init2 = {use_saved_state}
 symbolindex_search_provider = SqliteIndex
 allow_unstable_features = true
 ide_serverless = {use_serverless_ide}
-ide_use_shallow_decls = true
 """.format(
                     use_saved_state=str(use_saved_state).lower(),
                     use_serverless_ide=str(use_serverless_ide).lower(),
@@ -2270,28 +2269,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                         },
                         {
-                            "label": "MyEnum::TYPE_A",
-                            "kind": 13,
-                            "detail": "enum",
-                            "inlineDetail": "enum",
-                            "sortText": "MyEnum::TYPE_A",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 36},
-                                    "end": {"line": 3, "character": 36},
-                                },
-                                "newText": "MyEnum::TYPE_A",
-                            },
-                            "data": {
-                                "fullname": "MyEnum::TYPE_A",
-                                "filename": "${root_path}/xhp_class_definitions.php",
-                                "line": 13,
-                                "char": 14,
-                                "base_class": "\\MyEnum",
-                            },
-                        },
-                        {
                             "label": "MyEnum::TYPE_B",
                             "kind": 13,
                             "detail": "enum",
@@ -2307,6 +2284,28 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "MyEnum::TYPE_B",
+                                "filename": "${root_path}/xhp_class_definitions.php",
+                                "line": 13,
+                                "char": 14,
+                                "base_class": "\\MyEnum",
+                            },
+                        },
+                        {
+                            "label": "MyEnum::TYPE_A",
+                            "kind": 13,
+                            "detail": "enum",
+                            "inlineDetail": "enum",
+                            "sortText": "MyEnum::TYPE_A",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 36},
+                                    "end": {"line": 3, "character": 36},
+                                },
+                                "newText": "MyEnum::TYPE_A",
+                            },
+                            "data": {
+                                "fullname": "MyEnum::TYPE_A",
                                 "filename": "${root_path}/xhp_class_definitions.php",
                                 "line": 13,
                                 "char": 14,
@@ -3897,12 +3896,12 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result=[
                     {
-                        "uri": "file://${root_path}/override.php",
+                        "uri": "${php_file_uri}",
                         "range": {
-                            "start": {"line": 7, "character": 18},
-                            "end": {"line": 7, "character": 21},
+                            "start": {"line": 3, "character": 18},
+                            "end": {"line": 3, "character": 21},
                         },
-                        "title": "MyTrait::foo",
+                        "title": "MyParent::foo",
                     }
                 ],
                 powered_by="serverless_ide",

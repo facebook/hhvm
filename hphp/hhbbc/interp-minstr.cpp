@@ -2274,7 +2274,7 @@ void in(ISS& env, const bc::QueryM& op) {
       op.subop2 == QueryMOp::CGet &&
       nDiscard == 1 &&
       op.mkey.mcode == MemberCode::MET &&
-      op.mkey.litstr->isame(s_classname.get())) {
+      op.mkey.litstr == s_classname.get()) {
     if (auto const last = last_op(env, 0)) {
       if (last->op == Op::BaseC) {
         if (auto const prev = last_op(env, 1)) {

@@ -33,10 +33,11 @@
          { fb_ast =
            [([7:3-24],
              (Expr
-                ((_), [7:3-23],
+                ((nothing), [7:3-23],
                  (Call (
-                    ((_), [7:3-21],
-                     (Obj_get (((C), [7:3-5], (Hole (((C), [7:3-5], (Lvar ([7:3-5], $c))), (C), (nothing), Typing))), ((_), [7:7-21], (Id ([7:7-21], "does_not_exist"))), OG_nullthrows, Is_method))),
+                    ((nothing), [7:3-21],
+                     (Obj_get (((C), [7:3-5], (Hole (((C), [7:3-5], (Lvar ([7:3-5], $c))), (C), (nothing), Typing))), (
+                        (nothing), [7:7-21], (Id ([7:7-21], "does_not_exist"))), OG_nullthrows, Is_method))),
                     [], [], None)))))
              ]
            };

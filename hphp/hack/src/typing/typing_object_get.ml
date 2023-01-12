@@ -907,11 +907,8 @@ and obj_get_concrete_class_without_member_info
       ?(lval_mismatch = dflt_lval_mismatch)
       ?(rval_mismatch = dflt_rval_mismatch)
       ty_err_opt =
-    ( env,
-      ty_err_opt,
-      (Typing_utils.mk_tany env id_pos, []),
-      lval_mismatch,
-      rval_mismatch )
+    let (env, ty) = Env.fresh_type_error env id_pos in
+    (env, ty_err_opt, (ty, []), lval_mismatch, rval_mismatch)
   in
   if Cls.has_upper_bounds_on_this_from_constraints class_info then
     let res =

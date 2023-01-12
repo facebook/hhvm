@@ -1,0 +1,30 @@
+(executable
+ (name pp)
+ (modules pp)
+ (libraries ppx_transform ppxlib))
+
+(rule
+ (targets test.actual.ml)
+ (deps
+  (:pp pp.exe)
+  (:input test.ml))
+ (action
+   (progn
+     (with-stdout-to %{targets} (run ./%{pp} --impl %{input} -o %{targets}))
+     (bash "arc f %{targets}")
+   )
+ )
+)
+
+(rule
+ (alias runtest)
+ (action
+  (diff test.expected.ml test.actual.ml)))
+
+(test
+ (name test)
+ (modules test)
+ (preprocess
+  (pps ppx_transform)))
+
+(include dune.inc)

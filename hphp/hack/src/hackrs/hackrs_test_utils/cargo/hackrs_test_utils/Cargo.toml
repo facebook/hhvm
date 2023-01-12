@@ -18,7 +18,7 @@ folded_decl_provider = { path = "../../../folded_decl_provider/cargo/folded_decl
 hash = { path = "../../../../utils/hash" }
 indicatif = { version = "0.17.1", features = ["improved_unicode", "rayon", "tokio"] }
 intern = { path = "../../../../utils/intern" }
-lz4 = "1.23.1"
+lz4 = "1.24.0"
 moka = { version = "0.9.3", features = ["future"] }
 naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
 pos = { path = "../../../pos/cargo/pos" }

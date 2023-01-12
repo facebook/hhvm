@@ -15,6 +15,6 @@ fnv = "1.0"
 framing = { path = "framing" }
 itertools = "0.10.3"
 lazy_static = "1.4"
-lz4 = "1.23.1"
+lz4 = "1.24.0"
 rayon = "1.2"
 structopt = "0.3.23"

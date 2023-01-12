@@ -62,9 +62,8 @@ public class TerseWriteProtocolTest {
         SerializationProtocol.TCompact,
         SerializationProtocol.TBinary,
         SerializationProtocol.TSimpleJSONBase64,
-        SerializationProtocol.TSimpleJSON
-        /** SerializationProtocol.TJSON * */
-        );
+        SerializationProtocol.TSimpleJSON,
+        SerializationProtocol.TJSON);
   }
 
   private final SerializationProtocol serializationProtocol;
@@ -75,6 +74,10 @@ public class TerseWriteProtocolTest {
 
   private ByteBuf dest;
   private ByteBufTProtocol protocol;
+
+  private ByteBufTProtocol createNewProtocol() {
+    return SerializerUtil.toByteBufProtocol(serializationProtocol, dest);
+  }
 
   private void serialize(ThriftSerializable st) {
     dest = RpcResources.getUnpooledByteBufAllocator().buffer();
@@ -100,6 +103,7 @@ public class TerseWriteProtocolTest {
     serialize(st);
 
     // deserialize it
+    protocol = createNewProtocol();
     TopLevelStruct read = TopLevelStruct.read0(protocol);
     assertEquals(IntrinsicDefaults.defaultInt(), read.getIntField());
     assertNotNull(read.getInnerField());
@@ -113,6 +117,7 @@ public class TerseWriteProtocolTest {
     assertEquals("test", v1.getStringField());
 
     SingleFieldStruct inner = new SingleFieldStruct.Builder().build();
+    size(inner);
     Structv2 v2 = new Structv2.Builder().setStringField("test").setInnerField(inner).build();
 
     assertEquals("test", v2.getStringField());
@@ -263,6 +268,7 @@ public class TerseWriteProtocolTest {
     serialize(st);
 
     // deserialize it
+    protocol = createNewProtocol();
     StructLevelTerseStruct read = StructLevelTerseStruct.read0(protocol);
     assertNotNull(read.getUnionField());
   }
@@ -293,6 +299,7 @@ public class TerseWriteProtocolTest {
     serialize(st);
 
     // deserialize it
+    protocol = createNewProtocol();
     StructLevelTerseStruct read = StructLevelTerseStruct.read0(protocol);
     assertNotNull(read.getExceptionField());
   }
@@ -305,6 +312,7 @@ public class TerseWriteProtocolTest {
     AdaptedTerseStruct st = new AdaptedTerseStruct.Builder().build();
     serialize(st);
 
+    protocol = createNewProtocol();
     TerseStruct received = TerseStruct.read0(protocol);
     assertEquals(IntrinsicDefaults.defaultBoolean(), received.isBooleanField());
     assertEquals(IntrinsicDefaults.defaultShort(), received.getShortField());

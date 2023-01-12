@@ -80,7 +80,7 @@ public class ByteBufTJSONProtocol extends ByteBufTProtocol {
 
   private static final TStruct ANONYMOUS_STRUCT = new TStruct();
 
-  private static final int EMPTY_STRUCT_SIZE = 2;
+  private static final int EMPTY_STRUCT_SIZE = 3;
 
   private static final byte[] getTypeNameForTypeID(byte typeID) throws TException {
     switch (typeID) {
@@ -269,6 +269,10 @@ public class ByteBufTJSONProtocol extends ByteBufTProtocol {
       }
       hasData_ = true;
       return data_;
+    }
+
+    protected boolean bytesAvailable() {
+      return getByteBuf().readableBytes() > 0;
     }
   }
 
@@ -665,6 +669,9 @@ public class ByteBufTJSONProtocol extends ByteBufTProtocol {
   private String readJSONNumericChars() throws TException {
     StringBuilder strbld = new StringBuilder();
     while (true) {
+      if (!reader_.bytesAvailable()) {
+        break;
+      }
       byte ch = reader_.peek();
       if (!isJSONNumeric(ch)) {
         break;

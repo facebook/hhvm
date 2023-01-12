@@ -130,6 +130,14 @@ MCROUTER_OPTION_INTEGER(
     "If nonzero, big value chunks are written/read in batches of at most"
     " this size.  Used to prevent queue build up with really large values")
 
+MCROUTER_OPTION_TOGGLE(
+    big_value_hide_reply_flag,
+    false,
+    "big-value-hide-reply-flag",
+    no_short,
+    "If enabled, the reply flags will not contain MC_MSG_FLAG_BIG_VALUE in"
+    " case of a big value.")
+
 MCROUTER_OPTION_INTEGER(
     size_t,
     fibers_max_pool_size,

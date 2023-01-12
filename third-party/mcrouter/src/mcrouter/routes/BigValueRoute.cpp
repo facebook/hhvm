@@ -82,6 +82,10 @@ McLeaseGetReply BigValueRoute::doLeaseGetRoute(
   if (!isBigValue) {
     return initialReply;
   }
+  // unset big value flag
+  if (options_.hideReplyFlags) {
+    *initialReply.flags_ref() ^= MC_MSG_FLAG_BIG_VALUE;
+  }
 
   if (!isHitResult(*initialReply.result_ref())) {
     // if bigValue item, create a new reply with result, lease-token and return

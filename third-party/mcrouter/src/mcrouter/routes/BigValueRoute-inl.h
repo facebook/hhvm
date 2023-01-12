@@ -99,6 +99,11 @@ BigValueRoute::route(const Request& req) const {
     return initialReply;
   }
 
+  // unset big value flag
+  if (options_.hideReplyFlags) {
+    *initialReply.flags_ref() ^= MC_MSG_FLAG_BIG_VALUE;
+  }
+
   if (!isHitResult(*initialReply.result_ref())) {
     // if bigValue item, create a new reply with result and return
     // so that we don't send any meta data that may be present in initialReply

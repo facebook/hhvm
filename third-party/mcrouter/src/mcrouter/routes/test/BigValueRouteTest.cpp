@@ -29,7 +29,10 @@ using TestHandle = TestHandleImpl<McrouterRouteHandleIf>;
 namespace {
 constexpr int version = 1;
 constexpr size_t threshold = 128;
-constexpr BigValueRouteOptions opts(threshold, /* batchSize= */ 0);
+constexpr BigValueRouteOptions
+    opts(threshold, /* batchSize */ 0, /* hideReplyFlags */ false);
+constexpr BigValueRouteOptions
+    optsNoFlag(threshold, /* batchSize */ 0, /* hideReplyFlags */ true);
 } // namespace
 
 TEST(BigValueRouteTest, smallvalue) {
@@ -60,6 +63,70 @@ TEST(BigValueRouteTest, smallvalue) {
     auto fSet = rh.route(reqSet);
     EXPECT_EQ(carbon::Result::STORED, *fSet.result_ref());
     EXPECT_EQ(testHandles[0]->saw_keys, vector<std::string>{keySet});
+  }});
+}
+
+TEST(BigValueRouteTest, bigvalueWithFlag) {
+  const std::string rand_suffix_get = "123456";
+  const size_t num_chunks = 10;
+  // initial reply of the form version-num_chunks-rand_suffix for get path
+  const auto init_reply =
+      folly::sformat("{}-{}-{}", version, num_chunks, rand_suffix_get);
+  const auto init_reply_error = folly::sformat("{}-{}", version, num_chunks);
+  vector<std::shared_ptr<TestHandle>> testHandles{
+      make_shared<TestHandle>(GetRouteTestData(
+          carbon::Result::FOUND, init_reply, MC_MSG_FLAG_BIG_VALUE)),
+      make_shared<TestHandle>(GetRouteTestData(
+          carbon::Result::FOUND, init_reply_error, MC_MSG_FLAG_BIG_VALUE)),
+      make_shared<TestHandle>(UpdateRouteTestData(carbon::Result::STORED)),
+      make_shared<TestHandle>(UpdateRouteTestData(carbon::Result::STORED)),
+      make_shared<TestHandle>(UpdateRouteTestData(carbon::Result::STORED))};
+  auto routeHandles = get_route_handles(testHandles);
+
+  const std::string keyGet = "bigvalue_get";
+
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() {
+    { // Test Get Like path with init_reply in corect format
+      McrouterRouteHandle<BigValueRoute> rh(routeHandles[0], opts);
+
+      McGetRequest reqGet(keyGet);
+
+      auto fGet = rh.route(reqGet);
+      EXPECT_TRUE((*fGet.flags_ref() & MC_MSG_FLAG_BIG_VALUE) != 0);
+    }
+  }});
+}
+
+TEST(BigValueRouteTest, bigvalueWithoutFlag) {
+  const std::string rand_suffix_get = "123456";
+  const size_t num_chunks = 10;
+  // initial reply of the form version-num_chunks-rand_suffix for get path
+  const auto init_reply =
+      folly::sformat("{}-{}-{}", version, num_chunks, rand_suffix_get);
+  const auto init_reply_error = folly::sformat("{}-{}", version, num_chunks);
+  vector<std::shared_ptr<TestHandle>> testHandles{
+      make_shared<TestHandle>(GetRouteTestData(
+          carbon::Result::FOUND, init_reply, MC_MSG_FLAG_BIG_VALUE)),
+      make_shared<TestHandle>(GetRouteTestData(
+          carbon::Result::FOUND, init_reply_error, MC_MSG_FLAG_BIG_VALUE)),
+      make_shared<TestHandle>(UpdateRouteTestData(carbon::Result::STORED)),
+      make_shared<TestHandle>(UpdateRouteTestData(carbon::Result::STORED)),
+      make_shared<TestHandle>(UpdateRouteTestData(carbon::Result::STORED))};
+  auto routeHandles = get_route_handles(testHandles);
+
+  const std::string keyGet = "bigvalue_get";
+
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() {
+    { // Test Get Like path with init_reply in corect format
+      McrouterRouteHandle<BigValueRoute> rh(routeHandles[0], optsNoFlag);
+
+      McGetRequest reqGet(keyGet);
+
+      auto fGet = rh.route(reqGet);
+      EXPECT_TRUE((*fGet.flags_ref() & MC_MSG_FLAG_BIG_VALUE) == 0);
+    }
   }});
 }
 

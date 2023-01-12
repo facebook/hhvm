@@ -12,10 +12,16 @@ namespace memcache {
 namespace mcrouter {
 
 struct BigValueRouteOptions {
-  constexpr explicit BigValueRouteOptions(size_t threshold_, size_t batchSize_)
-      : threshold(threshold_), batchSize(batchSize_) {}
+  constexpr explicit BigValueRouteOptions(
+      size_t threshold_,
+      size_t batchSize_,
+      bool hideReplyFlags_)
+      : threshold(threshold_),
+        batchSize(batchSize_),
+        hideReplyFlags(hideReplyFlags_) {}
   const size_t threshold;
   const size_t batchSize;
+  const bool hideReplyFlags;
 };
 
 } // namespace mcrouter

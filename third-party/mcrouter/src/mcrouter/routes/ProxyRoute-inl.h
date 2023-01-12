@@ -34,7 +34,9 @@ wrapWithBigValueRoute(
     std::shared_ptr<RouteHandleIf> ch,
     const McrouterOptions& routerOpts) {
   BigValueRouteOptions options(
-      routerOpts.big_value_split_threshold, routerOpts.big_value_batch_size);
+      routerOpts.big_value_split_threshold,
+      routerOpts.big_value_batch_size,
+      routerOpts.big_value_hide_reply_flag);
   return makeBigValueRoute(std::move(ch), std::move(options));
 }
 

@@ -429,11 +429,8 @@ let rec obj_get_concrete_ty
       ?(lval_mismatch = dflt_lval_mismatch)
       ?(rval_mismatch = dflt_rval_mismatch)
       ty_err_opt =
-    ( env,
-      ty_err_opt,
-      (Typing_utils.mk_tany env id_pos, []),
-      lval_mismatch,
-      rval_mismatch )
+    let (env, ty) = Env.fresh_type_error env id_pos in
+    (env, ty_err_opt, (ty, []), lval_mismatch, rval_mismatch)
   in
   let read_context = Option.is_none args.coerce_from_ty in
   let (env, concrete_ty) = Env.expand_type env concrete_ty in
@@ -457,7 +454,8 @@ let rec obj_get_concrete_ty
     in
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
     (env, err_opt, (ty, []), dflt_lval_mismatch, dflt_rval_mismatch)
-  | (_, Tany _) -> default None
+  | (_, Tany _) ->
+    (env, None, (concrete_ty, []), dflt_lval_mismatch, dflt_rval_mismatch)
   | (r, Tnonnull) ->
     let ty_reasons =
       match r with

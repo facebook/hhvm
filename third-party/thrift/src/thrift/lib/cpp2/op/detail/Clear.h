@@ -184,19 +184,19 @@ template <typename T>
 struct GetIntrinsicDefault<type::union_t<T>>
     : ThriftClearDefault<type::union_t<T>> {};
 
-template <typename Adapter, typename UTag, typename Struct, int16_t id>
+template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
 using adapted_field_tag =
-    type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, id>>;
+    type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, FieldId>>;
 
 // Cache the result of op::create for adapters.
 template <typename Adapter, typename UTag>
 struct GetDefault<type::adapted<Adapter, UTag>>
     : CreateDefault<type::adapted<Adapter, UTag>> {};
-template <typename Adapter, typename UTag, typename Struct, int16_t id>
+template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
 struct GetDefault<
-    type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, id>>> {
+    type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, FieldId>>> {
   using Tag =
-      type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, id>>;
+      type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, FieldId>>;
   template <typename AdapterT = Adapter>
   const adapt_detail::
       if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&
@@ -206,7 +206,7 @@ struct GetDefault<
 
   template <typename AdapterT = Adapter>
   const adapt_detail::
-      if_field_adapter<AdapterT, id, type::native_type<UTag>, Struct>&
+      if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&
       operator()() const {
     return staticDefault([] {
       // TODO(afuller): Remove or move this logic to the adapter.
@@ -228,9 +228,9 @@ struct GetIntrinsicDefault<type::adapted<Adapter, UTag>> {
     });
   }
 };
-template <typename Adapter, typename UTag, typename Struct, int16_t id>
-struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, id>> {
-  using Tag = adapted_field_tag<Adapter, UTag, Struct, id>;
+template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
+struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, FieldId>> {
+  using Tag = adapted_field_tag<Adapter, UTag, Struct, FieldId>;
   template <typename AdapterT = Adapter>
   const adapt_detail::
       if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&
@@ -240,7 +240,7 @@ struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, id>> {
 
   template <typename AdapterT = Adapter>
   const adapt_detail::
-      if_field_adapter<AdapterT, id, type::native_type<UTag>, Struct>&
+      if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&
       operator()() const {
     return staticDefault([] {
       // TODO(afuller): Remove or move this logic to the adapter.
@@ -249,8 +249,8 @@ struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, id>> {
       apache::thrift::clear(obj);
       auto adapted = AdapterT::fromThriftField(
           folly::copy(GetIntrinsicDefault<UTag>{}()),
-          FieldContext<Struct, id>{obj});
-      adapt_detail::construct<Adapter, id>(adapted, obj);
+          FieldContext<Struct, FieldId>{obj});
+      adapt_detail::construct<Adapter, FieldId>(adapted, obj);
       return std::make_unique<type::native_type<Tag>>(std::move(adapted));
     });
   }
@@ -273,9 +273,9 @@ struct IsEmpty<type::adapted<Adapter, UTag>> {
     return op::identical<Tag>(value, GetIntrinsicDefault<Tag>{}());
   }
 };
-template <typename Adapter, typename UTag, typename Struct, int16_t id>
-struct IsEmpty<adapted_field_tag<Adapter, UTag, Struct, id>> {
-  using Tag = adapted_field_tag<Adapter, UTag, Struct, id>;
+template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
+struct IsEmpty<adapted_field_tag<Adapter, UTag, Struct, FieldId>> {
+  using Tag = adapted_field_tag<Adapter, UTag, Struct, FieldId>;
   constexpr bool operator()(const type::native_type<Tag>& value) const {
     return op::identical<Tag>(value, GetIntrinsicDefault<Tag>{}());
   }
@@ -343,26 +343,26 @@ struct ClearField<type::field<Tag, Context>> : ClearOptionalField {
   }
 };
 
-template <typename Adapter, typename UTag, typename Struct, int16_t id>
-struct ClearField<adapted_field_tag<Adapter, UTag, Struct, id>>
+template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
+struct ClearField<adapted_field_tag<Adapter, UTag, Struct, FieldId>>
     : ClearOptionalField {
-  using Tag = adapted_field_tag<Adapter, UTag, Struct, id>;
+  using Tag = adapted_field_tag<Adapter, UTag, Struct, FieldId>;
   static_assert(type::is_concrete_v<Tag>, "");
 
   using ClearOptionalField::operator();
   template <typename T>
   void operator()(required_field_ref<T> field, Struct& s) const {
-    ::apache::thrift::adapt_detail::clear<Adapter, id>(*field, s);
+    ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
   }
 
   template <typename T>
   void operator()(terse_field_ref<T> field, Struct& s) const {
-    ::apache::thrift::adapt_detail::clear<Adapter, id>(*field, s);
+    ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
   }
 
   template <typename T>
   void operator()(field_ref<T> field, Struct& s) const {
-    ::apache::thrift::adapt_detail::clear<Adapter, id>(*field, s);
+    ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
   }
 };
 

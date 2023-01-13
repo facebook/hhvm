@@ -220,7 +220,7 @@ bool typeStructureIsType(
         input,
         [&](TypedValue k, TypedValue v1) {
           assertx(tvIsString(k));
-          if (k.m_data.pstr->isame(s_alias.get())) return false;
+          if (k.m_data.pstr->same(s_alias.get())) return false;
           auto const v2 = type->get(k.m_data.pstr);
           if (v2.is_init() && tvEqual(v1, v2)) return false;
           result = false;
@@ -1057,7 +1057,7 @@ bool doesTypeStructureContainTUnresolved(const ArrayData* ts) {
   IterateKV(
     ts,
     [&] (TypedValue k, TypedValue v) {
-      if (tvIsInt(v) && tvIsString(k) && k.m_data.pstr->isame(s_kind.get()) &&
+      if (tvIsInt(v) && tvIsString(k) && k.m_data.pstr->same(s_kind.get()) &&
           static_cast<TypeStructure::Kind>(v.m_data.num) ==
           TypeStructure::Kind::T_unresolved) {
         result = true;

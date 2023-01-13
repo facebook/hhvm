@@ -13,6 +13,7 @@ doctest = false
 bytemuck = { version = "1.12.3", features = ["derive"] }
 dashmap = { version = "5.4", features = ["raw-api", "rayon", "serde"] }
 dep_graph_delta = { path = "../../../deps" }
+depgraph_compress = { path = "../../../depgraph/depgraph_compress/cargo/depgraph_compress" }
 depgraph_reader = { path = "../../../depgraph/cargo/depgraph_reader" }
 depgraph_writer = { path = "../../../depgraph/cargo/depgraph_writer" }
 hash = { path = "../../../utils/hash" }

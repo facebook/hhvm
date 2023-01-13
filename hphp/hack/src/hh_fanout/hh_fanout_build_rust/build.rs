@@ -12,6 +12,8 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 
 use dep_graph_delta::DepGraphDeltaIterator;
+use depgraph_compress::OptimizeConfig;
+use depgraph_compress::WriteConfig;
 use depgraph_reader::Dep;
 use depgraph_reader::DepGraph;
 use depgraph_reader::DepGraphOpener;
@@ -409,7 +411,14 @@ pub fn build(
     }
 
     info!("Registering {} unique hashes", mem_dep_graph.hashes.len());
-    depgraph_writer::write_dep_graph(output, mem_dep_graph)?;
+
+    if output.extension().and_then(|x| x.to_str()) == Some("zhhdg") {
+        let write_config = WriteConfig::default();
+        let optimize_config = OptimizeConfig::default();
+        depgraph_compress::write_dep_graph(output, mem_dep_graph, &write_config, &optimize_config)?;
+    } else {
+        depgraph_writer::write_dep_graph(output, mem_dep_graph)?;
+    }
 
     info!("Done");
     Ok(())

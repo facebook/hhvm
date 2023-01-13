@@ -754,7 +754,7 @@ namespace {
 
   interface Serializable {
     public function serialize(): string;
-    public function unserialize($serialized): void;
+    public function unserialize(string $serialized): void;
   }
 
   interface Countable {

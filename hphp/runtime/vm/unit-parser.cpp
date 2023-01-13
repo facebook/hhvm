@@ -198,8 +198,17 @@ CompilerResult hackc_compile(
   }
 
   auto const fromHackCUnit = [&]() -> CompilerResult {
-    auto const unit_wrapped =
-      hackc::compile_unit_from_text_cpp_ffi(native_env, code);
+    rust::Box<hackc::UnitWrapper> unit_wrapped = [&] {
+      tracing::Block _{
+        "hackc_translator",
+        [&] {
+          return tracing::Props{}
+            .add("filename", filename ? filename : "")
+            .add("code_size", strlen(code));
+        }
+      };
+      return hackc::compile_unit_from_text_cpp_ffi(native_env, code);
+    }();
 
     auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
     const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);

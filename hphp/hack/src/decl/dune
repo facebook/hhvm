@@ -121,13 +121,6 @@
   (pps ppx_deriving.std)))
 
 (library
- (name decl_ancestors)
- (modules decl_ancestors)
- (libraries decl_defs decl_linearize shallow_decl_defs typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name decl_class)
  (modules decl_class)
  (libraries
@@ -230,22 +223,6 @@
   (pps ppx_deriving.std)))
 
 (library
- (name decl_inheritance)
- (modules decl_inheritance)
- (libraries
-  bloom_filter
-  decl_defs
-  decl_enum
-  decl_instantiate
-  decl_linearize
-  decl_to_typing
-  shallow_classes_provider
-  typing_class_types
-  typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name decl_init_check)
  (modules decl_init_check)
  (libraries decl_defs decl_env shallow_decl_defs typing_defs)
@@ -263,22 +240,6 @@
  (name decl_typedef_expand)
  (modules decl_typedef_expand)
  (libraries decl_subst decl_provider provider_context typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name decl_linearize)
- (modules decl_linearize)
- (libraries
-  decl_defs
-  decl_env
-  decl_instantiate
-  decl_subst
-  decl_utils
-  shallow_decl_defs
-  shallow_classes_provider
-  linearization_provider
-  typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -304,7 +265,6 @@
   decl
   decl_class_elements
   decl_compare
-  decl_linearize
   heap_global_storage
   naming
   procs_procs
@@ -396,7 +356,6 @@
  (name shallow_classes_heap)
  (modules shallow_classes_heap)
  (libraries
-  bloom_filter
   decl_defs
   decl_utils
   heap_shared_mem

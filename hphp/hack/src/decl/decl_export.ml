@@ -252,7 +252,6 @@ let collect_shallow_decls ctx workers classnames =
 
 let restore_shallow_decls decls =
   SMap.iter decls.classes ~f:(fun name cls ->
-      Shallow_classes_heap.Classes.add name cls;
-      Shallow_classes_heap.MemberFilters.add cls);
+      Shallow_classes_heap.Classes.add name cls);
   (* return the number of classes that we restored *)
   SMap.cardinal decls.classes

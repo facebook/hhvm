@@ -65,7 +65,6 @@ type mode =
   | Highlight_refs of int * int
   | Decl_compare
   | Shallow_class_diff
-  | Linearization
   | Go_to_impl of int * int
   | Dump_glean_deps
   | Hover of (int * int) option
@@ -534,9 +533,6 @@ let parse_options () =
             set_mode (Get_member class_and_member_id) ()),
         " Given ClassName::MemberName, fetch the decl of members with that name and print them."
       );
-      ( "--mro",
-        Arg.Unit (set_mode Linearization),
-        " Grabs the linearization of all classes in a file." );
       ( "--log-inference-constraints",
         Arg.Unit (set_bool log_inference_constraints),
         " Log inference constraints to Scuba." );
@@ -2606,95 +2602,6 @@ let handle_mode
         in
         Printf.printf "  %stypeconst%s: %s %s\n" abstract from mid ty);
       ())
-  | Linearization ->
-    if not (List.is_empty parse_errors) then (
-      print_error error_format (List.hd_exn parse_errors);
-      exit 2
-    );
-    let files_info =
-      Relative_path.Map.fold
-        builtins
-        ~f:
-          begin
-            (fun k _ acc -> Relative_path.Map.remove acc k)
-          end
-        ~init:files_info
-    in
-    Relative_path.Map.iter files_info ~f:(fun _file info ->
-        let { FileInfo.classes; _ } = info in
-        let is_first = ref true in
-        List.iter classes ~f:(fun (_, classname, _) ->
-            if not !is_first then Printf.printf "\n";
-            is_first := false;
-            let { Decl_linearize.lin_members; Decl_linearize.lin_ancestors } =
-              Decl_linearize.get_linearizations ctx classname
-            in
-            let display mro =
-              let name = Utils.strip_ns mro.Decl_defs.mro_name in
-              let env =
-                Typing_env_types.empty ctx Relative_path.default ~droot:None
-              in
-              let targs =
-                List.map
-                  mro.Decl_defs.mro_type_args
-                  ~f:(Typing_print.full_strip_ns_decl env)
-              in
-              let targs =
-                if List.is_empty targs then
-                  ""
-                else
-                  "<" ^ String.concat ~sep:", " targs ^ ">"
-              in
-              Decl_defs.(
-                let modifiers =
-                  [
-                    (if Option.is_some mro.mro_required_at then
-                      Some "requirement"
-                    else if
-                    is_set mro_via_req_extends mro.mro_flags
-                    || is_set mro_via_req_impl mro.mro_flags
-                   then
-                      Some "synthesized"
-                    else
-                      None);
-                    (if is_set mro_xhp_attrs_only mro.mro_flags then
-                      Some "xhp_attrs_only"
-                    else
-                      None);
-                    (if is_set mro_consts_only mro.mro_flags then
-                      Some "consts_only"
-                    else
-                      None);
-                    (if is_set mro_copy_private_members mro.mro_flags then
-                      Some "copy_private_members"
-                    else
-                      None);
-                    (if is_set mro_passthrough_abstract_typeconst mro.mro_flags
-                    then
-                      Some "PAT"
-                    else
-                      None);
-                    Option.map mro.mro_trait_reuse ~f:(fun c ->
-                        "trait reuse via " ^ c);
-                  ]
-                  |> List.filter_map ~f:(fun x -> x)
-                  |> String.concat ~sep:", "
-                in
-                Printf.sprintf
-                  "%s%s%s"
-                  name
-                  targs
-                  (if String.equal modifiers "" then
-                    ""
-                  else
-                    Printf.sprintf " (%s)" modifiers))
-            in
-            let member_linearization = List.map lin_members ~f:display in
-            let ancestor_linearization = List.map lin_ancestors ~f:display in
-            Printf.printf "Member Linearization %s:\n" classname;
-            List.iter member_linearization ~f:(Printf.printf "  %s\n");
-            Printf.printf "Ancestor Linearization %s:\n" classname;
-            List.iter ancestor_linearization ~f:(Printf.printf "  %s\n")))
   | Hover pos_given ->
     let filename = expect_single_file () in
     let (ctx, entry) =

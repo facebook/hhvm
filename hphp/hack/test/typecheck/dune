@@ -18,30 +18,6 @@
       --error-format plain)))
 
 (rule
-    (alias typecheck_shallow_decl)
-          (deps %{exe:../../src/hh_single_type_check.exe}
-          %{project_root}/hack/test/verify.py
-          %{project_root}/hack/test/review.sh
-          %{project_root}/hack/test/hhi/coeffects.hhi
-          %{project_root}/hack/test/hhi/expr_tree.hhi
-          %{project_root}/hack/test/hhi/XHPTest.hhi
-          (glob_files_rec %{project_root}/hack/test/typecheck/**.json)
-          (glob_files_rec %{project_root}/hack/test/typecheck/**.exp)
-          (glob_files_rec %{project_root}/hack/test/typecheck/**.php-only-typecheck)
-          (glob_files_rec %{project_root}/hack/test/typecheck/**.php)
-          (glob_files_rec %{project_root}/hack/test/typecheck/**HH_FLAGS))
-        (action (run %{project_root}/hack/test/verify.py %{project_root}/hack/test/typecheck
-          --program %{exe:../../src/hh_single_type_check.exe}
-          --batch
-      --out-extension .shallow_decl.out
-      --expect-extension .shallow_decl.exp
-      --fallback-expect-extension .exp
-      --flags
-      --shallow-class-decl
-      --out-extension .shallow_decl.out
-      --error-format plain)))
-
-(rule
     (alias decl_compare)
           (deps %{exe:../../src/hh_single_type_check.exe}
           %{project_root}/hack/test/verify.py
@@ -74,7 +50,6 @@
           --timeout 20
       --verbose
       --flags
-      --shallow-class-decl
       --error-format plain)))
 
 
@@ -82,5 +57,4 @@
   (name runtest)
   (deps
     (alias typecheck)
-    (alias decl_compare)
-    (alias typecheck_shallow_decl)))
+    (alias decl_compare)))

@@ -9,6 +9,8 @@
 type get_class_add_dep =
   Decl_env.env -> string -> Decl_defs.decl_class_type option
 
+val parent_init_prop : string
+
 val init_not_required_props : Nast.class_ -> SSet.t -> SSet.t
 
 val parent :

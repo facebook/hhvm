@@ -44,9 +44,6 @@ module CheckStats = struct
     }
 end
 
-let shallow_decl_enabled (ctx : Provider_context.t) =
-  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-
 (*****************************************************************************)
 (* Debugging *)
 (*****************************************************************************)
@@ -1404,7 +1401,7 @@ functor
          as well as the set of files whose folded class declarations must be
          recomputed as a consequence of those changes (in phase 2).
 
-         When shallow_class_decl is enabled, there is no need to do phase 2--the
+         When force_shallow_decl_fanout is enabled, there is no need to do phase 2--the
          only source of class information needing recomputing is linearizations.
          These are invalidated by Decl_redecl_service.redo_type_decl in phase 1,
          and are lazily recomputed as needed. *)
@@ -1467,15 +1464,12 @@ functor
         Telemetry.duration telemetry ~key:"redecl2_now_start" ~start_time
       in
       let (defs_per_file_redecl_phase2_now, lazy_decl_later) =
-        if shallow_decl_enabled ctx then
-          (Relative_path.Map.empty, Relative_path.Map.empty)
-        else
-          CheckKind.get_defs_to_redecl_phase2
-            genv
-            ~decl_defs:defs_per_file
-            ~naming_table
-            ~to_redecl_phase2
-            ~env
+        CheckKind.get_defs_to_redecl_phase2
+          genv
+          ~decl_defs:defs_per_file
+          ~naming_table
+          ~to_redecl_phase2
+          ~env
       in
       let count = Relative_path.Map.cardinal defs_per_file_redecl_phase2_now in
       let telemetry =
@@ -1496,17 +1490,9 @@ functor
         |> Telemetry.int_
              ~key:"redecl2_count_later"
              ~value:(Relative_path.Map.cardinal lazy_decl_later)
-        |> Telemetry.bool_ ~key:"shallow" ~value:(shallow_decl_enabled ctx)
+        |> Telemetry.bool_ ~key:"shallow" ~value:false
         |> Telemetry.bool_ ~key:"direct_decl" ~value:true
       in
-
-      if not (shallow_decl_enabled ctx) then (
-        Hh_logger.log
-          "(Recomputing type declarations for descendants of changed classes and determining full typechecking fanout)";
-        Hh_logger.log
-          "Invalidating (but not recomputing) declarations in %d files"
-          (Relative_path.Map.cardinal lazy_decl_later)
-      );
 
       (* Redeclare the set of files whose folded class decls needed to be
          recomputed as a result of phase 1. Collect the set of files which need to
@@ -1515,7 +1501,7 @@ functor
          because our to_redecl set from phase 1 included the transitive children
          of changed classes.
 
-         When shallow_class_decl is enabled, there is no need to do phase 2. *)
+         When force_shallow_decl_fanout is enabled, there is no need to do phase 2. *)
       let {
         errors_after_phase2 = errors;
         needs_phase2_redecl;
@@ -1525,9 +1511,8 @@ functor
         old_decl_missing_count;
       } =
         if
-          shallow_decl_enabled ctx
-          || TypecheckerOptions.force_shallow_decl_fanout
-               (Provider_context.get_tcopt ctx)
+          TypecheckerOptions.force_shallow_decl_fanout
+            (Provider_context.get_tcopt ctx)
         then
           {
             errors_after_phase2 = errors;
@@ -1537,7 +1522,12 @@ functor
             time_errors_pushed = None;
             old_decl_missing_count = 0;
           }
-        else
+        else (
+          Hh_logger.log
+            "(Recomputing type declarations for descendants of changed classes and determining full typechecking fanout)";
+          Hh_logger.log
+            "Invalidating (but not recomputing) declarations in %d files"
+            (Relative_path.Map.cardinal lazy_decl_later);
           do_redecl_phase2
             genv
             env
@@ -1548,6 +1538,7 @@ functor
             ~oldified_defs
             ~to_redecl_phase2_deps
             ~cgroup_steps
+        )
       in
       let telemetry =
         telemetry

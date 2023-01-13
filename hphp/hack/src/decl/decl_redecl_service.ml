@@ -31,9 +31,6 @@ type redo_type_decl_result = {
 
 let lvl = Hh_logger.Level.Debug
 
-let shallow_decl_enabled (ctx : Provider_context.t) =
-  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-
 let force_shallow_decl_fanout_enabled (ctx : Provider_context.t) =
   TypecheckerOptions.force_shallow_decl_fanout (Provider_context.get_tcopt ctx)
 
@@ -174,7 +171,7 @@ let compare_decls_and_get_fanout
     compare_gconsts_and_get_fanout ctx old_consts acc n_consts
   in
   let (acc, old_classes_missing) =
-    if shallow_decl_enabled ctx || force_shallow_decl_fanout_enabled ctx then
+    if force_shallow_decl_fanout_enabled ctx then
       (acc, 0)
     else
       let old_classes = Decl_heap.Classes.get_old_batch n_classes in
@@ -384,17 +381,14 @@ let[@warning "-21"] remove_defs (* -21 for dune stubs *)
     Decl_class_elements.remove_all elems;
     Decl_heap.Classes.remove_batch n_classes;
     Shallow_classes_provider.remove_batch ctx n_classes;
-    Linearization_provider.remove_batch ctx n_classes;
     Decl_heap.Typedefs.remove_batch n_types;
     Decl_heap.GConsts.remove_batch n_consts;
     Decl_heap.Modules.remove_batch n_modules;
     if collect_garbage then SharedMem.GC.collect `gentle;
     ()
 
-let is_dependent_class_of_any ctx classes (c : string) : bool =
+let is_dependent_class_of_any classes (c : string) : bool =
   if SSet.mem classes c then
-    true
-  else if shallow_decl_enabled ctx then
     true
   else
     match Decl_heap.Classes.get c with
@@ -430,20 +424,17 @@ let get_dependent_classes_files (ctx : Provider_context.t) (classes : SSet.t) :
   |> Naming_provider.get_files ctx
 
 let filter_dependent_classes
-    (ctx : Provider_context.t)
-    (classes : SSet.t)
-    (maybe_dependent_classes : string list) : string list =
-  List.filter maybe_dependent_classes ~f:(is_dependent_class_of_any ctx classes)
+    (classes : SSet.t) (maybe_dependent_classes : string list) : string list =
+  List.filter maybe_dependent_classes ~f:(is_dependent_class_of_any classes)
 
 module ClassSetStore = GlobalStorage.Make (struct
   type t = SSet.t
 end)
 
-let load_and_filter_dependent_classes
-    (ctx : Provider_context.t) (maybe_dependent_classes : string list) :
+let load_and_filter_dependent_classes (maybe_dependent_classes : string list) :
     string list * int =
   let classes = ClassSetStore.load () in
-  ( filter_dependent_classes ctx classes maybe_dependent_classes,
+  ( filter_dependent_classes classes maybe_dependent_classes,
     List.length maybe_dependent_classes )
 
 let merge_dependent_classes
@@ -461,13 +452,12 @@ let merge_dependent_classes
   dependent_classes @ acc
 
 let filter_dependent_classes_parallel
-    (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     ~(bucket_size : int)
     (classes : SSet.t)
     (maybe_dependent_classes : string list) : string list =
   if List.length maybe_dependent_classes < 10 then
-    filter_dependent_classes ctx classes maybe_dependent_classes
+    filter_dependent_classes classes maybe_dependent_classes
   else (
     ClassSetStore.store classes;
     let classes_initial_count = List.length maybe_dependent_classes in
@@ -483,7 +473,7 @@ let filter_dependent_classes_parallel
     let res =
       MultiWorker.call
         workers
-        ~job:(fun _ c -> load_and_filter_dependent_classes ctx c)
+        ~job:(fun _ c -> load_and_filter_dependent_classes c)
         ~merge:
           (merge_dependent_classes classes_initial_count classes_filtered_count)
         ~neutral:[]
@@ -508,7 +498,7 @@ let get_dependent_classes
     (classes : SSet.t) : SSet.t =
   get_dependent_classes_files ctx classes
   |> get_maybe_dependent_classes get_classes classes
-  |> filter_dependent_classes_parallel ctx workers ~bucket_size classes
+  |> filter_dependent_classes_parallel workers ~bucket_size classes
   |> SSet.of_list
 
 let merge_elements
@@ -528,47 +518,43 @@ let merge_elements
  * Get the [Decl_class_elements.t]s corresponding to the classes contained in
  * [defs]. *)
 let get_elems
-    (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     ~(bucket_size : int)
     ~(old : bool)
     (defs : FileInfo.names) : Decl_class_elements.t SMap.t =
-  if shallow_decl_enabled ctx then
-    SMap.empty
-  else
-    let classes = SSet.elements defs.FileInfo.n_classes in
-    (* Getting the members of a class requires fetching the class from the heap.
-     * Doing this for too many classes will cause a large amount of allocations
-     * to be performed on the master process triggering the GC and slowing down
-     * redeclaration. Using the workers prevents this from occurring
-     *)
-    let classes_initial_count = List.length classes in
-    let t = Unix.gettimeofday () in
-    Hh_logger.log ~lvl "Getting elements of %d classes" classes_initial_count;
-    let elements =
-      if classes_initial_count < 10 then
-        Decl_class_elements.get_for_classes ~old classes
-      else
-        let classes_processed_count = ref 0 in
-        ServerProgress.send_percentage_progress
-          ~operation:"getting members of"
-          ~done_count:!classes_processed_count
-          ~total_count:classes_initial_count
-          ~unit:"classes"
-          ~extra:None;
-        MultiWorker.call
-          workers
-          ~job:(fun _ c ->
-            (Decl_class_elements.get_for_classes ~old c, List.length c))
-          ~merge:(merge_elements classes_initial_count classes_processed_count)
-          ~neutral:SMap.empty
-          ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
-    in
+  let classes = SSet.elements defs.FileInfo.n_classes in
+  (* Getting the members of a class requires fetching the class from the heap.
+   * Doing this for too many classes will cause a large amount of allocations
+   * to be performed on the master process triggering the GC and slowing down
+   * redeclaration. Using the workers prevents this from occurring
+   *)
+  let classes_initial_count = List.length classes in
+  let t = Unix.gettimeofday () in
+  Hh_logger.log ~lvl "Getting elements of %d classes" classes_initial_count;
+  let elements =
+    if classes_initial_count < 10 then
+      Decl_class_elements.get_for_classes ~old classes
+    else
+      let classes_processed_count = ref 0 in
+      ServerProgress.send_percentage_progress
+        ~operation:"getting members of"
+        ~done_count:!classes_processed_count
+        ~total_count:classes_initial_count
+        ~unit:"classes"
+        ~extra:None;
+      MultiWorker.call
+        workers
+        ~job:(fun _ c ->
+          (Decl_class_elements.get_for_classes ~old c, List.length c))
+        ~merge:(merge_elements classes_initial_count classes_processed_count)
+        ~neutral:SMap.empty
+        ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
+  in
 
-    let (_t : float) =
-      Hh_logger.log_duration ~lvl "Finished getting elements" t
-    in
-    elements
+  let (_t : float) =
+    Hh_logger.log_duration ~lvl "Finished getting elements" t
+  in
+  elements
 
 let invalidate_folded_classes_for_shallow_fanout
     ctx workers ~bucket_size ~get_classes_in_file changed_classes =
@@ -578,7 +564,7 @@ let invalidate_folded_classes_for_shallow_fanout
     |> Shallow_class_fanout.class_names_from_deps ~ctx ~get_classes_in_file
   in
   let get_elems n_classes =
-    get_elems ctx workers ~bucket_size FileInfo.{ empty_names with n_classes }
+    get_elems workers ~bucket_size FileInfo.{ empty_names with n_classes }
   in
   Decl_class_elements.remove_old_all (get_elems invalidated ~old:true);
   Decl_class_elements.remove_all (get_elems invalidated ~old:false);
@@ -614,7 +600,7 @@ let redo_type_decl
     Decl_utils.split_defs all_defs previously_oldified_defs
   in
   (* Oldify the remaining defs along with their elements *)
-  let get_elems = get_elems ctx workers ~bucket_size in
+  let get_elems = get_elems workers ~bucket_size in
   let current_elems = get_elems current_defs ~old:false in
   oldify_defs ctx current_defs current_elems ~collect_garbage:true;
 
@@ -635,21 +621,7 @@ let redo_type_decl
       parallel_redecl_compare_and_get_fanout ctx workers bucket_size defs fnl
   in
   let (changed, to_recheck) =
-    if shallow_decl_enabled ctx then (
-      let AffectedDeps.{ changed = changed'; mro_invalidated; needs_recheck } =
-        Shallow_decl_compare.compute_class_fanout ctx ~during_init ~defs fnl
-      in
-      let changed = DepSet.union changed changed' in
-      let to_recheck = DepSet.union to_recheck needs_recheck in
-      let mro_invalidated =
-        mro_invalidated
-        |> Naming_provider.get_files ctx
-        |> Relative_path.Set.fold ~init:SSet.empty ~f:(fun path acc ->
-               SSet.union acc (get_classes path))
-      in
-      Linearization_provider.remove_batch ctx mro_invalidated;
-      (changed, to_recheck)
-    ) else if force_shallow_decl_fanout_enabled ctx then (
+    if force_shallow_decl_fanout_enabled ctx then (
       let AffectedDeps.
             { changed = changed'; mro_invalidated = _; needs_recheck } =
         Shallow_decl_compare.compute_class_fanout ctx ~during_init ~defs fnl
@@ -700,7 +672,7 @@ let oldify_type_decl
   let (oldified_defs, current_defs) =
     Decl_utils.split_defs defs previously_oldified_defs
   in
-  let get_elems = get_elems ctx workers ~bucket_size in
+  let get_elems = get_elems workers ~bucket_size in
   (* Oldify things that are not oldified yet *)
   let current_elems = get_elems current_defs ~old:false in
   oldify_defs ctx current_defs current_elems ~collect_garbage;
@@ -727,5 +699,5 @@ let remove_old_defs
     ~(bucket_size : int)
     (workers : MultiWorker.worker list option)
     (names : FileInfo.names) : unit =
-  let elems = get_elems ctx workers ~bucket_size names ~old:true in
+  let elems = get_elems workers ~bucket_size names ~old:true in
   remove_old_defs ctx names elems

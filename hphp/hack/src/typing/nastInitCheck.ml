@@ -14,7 +14,6 @@ open Hh_prelude
 open Aast
 open Nast
 module DICheck = Decl_init_check
-module DeferredMembers = Typing_deferred_members
 module SN = Naming_special_names
 module Native = Typing_native
 
@@ -118,16 +117,6 @@ let filter_props_by_type env cls props =
   |> SMap.keys
   |> SSet.of_list
 
-let parent_props_set_during_cstr env (c : Shallow_decl_defs.shallow_class) :
-    SSet.t =
-  match DeferredMembers.parents env c with
-  | pc :: _ ->
-    (* All properties that don't have an explicit initialiser. *)
-    let (_, parent_props) = DeferredMembers.get_deferred_init_props env pc in
-    (* Filter properties whose type means they don't need initialising. *)
-    filter_props_by_type env (snd pc.Shallow_decl_defs.sc_name) parent_props
-  | [] -> SSet.empty
-
 (* Module initializing the environment
    Originally, every class member has 2 possible states,
    Vok  ==> when it is declared as optional, it is the job of the
@@ -157,14 +146,8 @@ module Env = struct
   }
 
   let rec make tenv c =
-    let ctx = Typing_env.get_ctx tenv in
     let (_, _, methods) = split_methods c.c_methods in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
-    let sc =
-      lazy
-        (assert (shallow_decl_enabled ctx);
-         Option.value_exn (Shallow_classes_provider.get ctx (snd c.c_name)))
-    in
 
     (* In Zoncolan, we don't support eviction. We don't support lazy reparsing of
        shallow decls. If we try and the shallow decl is not available, we'll crash
@@ -199,10 +182,7 @@ module Env = struct
       | None -> false
     in
     let (private_props, _) =
-      if shallow_decl_enabled ctx then
-        DeferredMembers.class_ tenv (Lazy.force sc)
-      else
-        (DICheck.private_deferred_init_props ~has_own_cstr c, SSet.empty)
+      (DICheck.private_deferred_init_props ~has_own_cstr c, SSet.empty)
     in
     let private_props = lookup_props tenv (snd c.c_name) private_props in
     (if Ast_defs.is_c_abstract c.c_kind && not has_own_cstr then
@@ -222,21 +202,13 @@ module Env = struct
           add_parent_props,
           add_parent,
           parent_cstr_props ) =
-      if shallow_decl_enabled ctx then
-        let sc = Lazy.force sc in
-        ( DeferredMembers.init_not_required_props sc,
-          DeferredMembers.trait_props tenv sc,
-          DeferredMembers.parent_props tenv sc,
-          DeferredMembers.parent tenv sc,
-          parent_props_set_during_cstr tenv sc )
-      else
-        let decl_env = tenv.Typing_env_types.decl_env in
-        ( DICheck.init_not_required_props c,
-          DICheck.trait_props ~get_class_add_dep decl_env c,
-          DICheck.parent_props ~get_class_add_dep decl_env c,
-          DICheck.parent ~get_class_add_dep decl_env c,
-          DICheck.parent_initialized_members ~get_class_add_dep decl_env c
-          |> filter_props_by_type tenv (snd c.c_name) )
+      let decl_env = tenv.Typing_env_types.decl_env in
+      ( DICheck.init_not_required_props c,
+        DICheck.trait_props ~get_class_add_dep decl_env c,
+        DICheck.parent_props ~get_class_add_dep decl_env c,
+        DICheck.parent ~get_class_add_dep decl_env c,
+        DICheck.parent_initialized_members ~get_class_add_dep decl_env c
+        |> filter_props_by_type tenv (snd c.c_name) )
     in
     let init_not_required_props = add_init_not_required_props SSet.empty in
     let props =
@@ -404,7 +376,7 @@ and stmt env acc st =
       (_, _, Call ((_, _, Class_const ((_, _, CIparent), (_, m))), _, el, _uel))
     when String.equal m SN.Members.__construct ->
     let acc = argument_list env acc el in
-    assign env acc DeferredMembers.parent_init_prop
+    assign env acc DICheck.parent_init_prop
   | Expr e ->
     if Typing_func_terminality.expression_exits env.tenv e then
       S.Top
@@ -739,7 +711,7 @@ let class_ tenv c =
         SMap.filter (fun k _ -> not (SSet.mem k inits)) env.props
       in
       if not (SMap.is_empty uninit_props) then
-        if SMap.mem DeferredMembers.parent_init_prop uninit_props then
+        if SMap.mem DICheck.parent_init_prop uninit_props then
           Errors.add_nast_check_error @@ Nast_check_error.No_construct_parent p
         else
           let class_uninit_props =

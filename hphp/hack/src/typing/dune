@@ -77,9 +77,7 @@
  (libraries
   core_kernel
   decl
-  decl_ancestors
   decl_counters
-  decl_inheritance
   decl_folded_class
   deferred_decl
   naming_provider
@@ -178,7 +176,6 @@
   typing_async
   typing_attributes
   typing_debug
-  typing_deferred_members
   typing_escape
   typing_expand
   typing_exts
@@ -240,7 +237,6 @@
   ancestor_route
   trait_reuse_check
   typing_extends
-  typing_inheritance
   typing_requirements
   typing_subtype_method
   typing_type_wellformedness)

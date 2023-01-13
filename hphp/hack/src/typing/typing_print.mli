@@ -122,7 +122,4 @@ val json_to_locl_ty :
   Hh_json.json ->
   (Typing_defs.locl_ty, Typing_defs.deserialization_error) result
 
-val set_deferred_member_inits :
-  (env -> Shallow_decl_defs.shallow_class -> SSet.t * SSet.t) -> unit
-
 val strip_ns : string -> string

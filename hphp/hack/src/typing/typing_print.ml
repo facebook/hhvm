@@ -53,9 +53,6 @@ type penv =
 let strip_ns id =
   id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
-let shallow_decl_enabled (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-
 (*****************************************************************************)
 (* Pretty-printer of the "full" type.                                        *)
 (* This is used in server/symbolTypeService and elsewhere                    *)
@@ -1809,15 +1806,6 @@ let json_to_locl_ty = Json.to_locl_ty
  *)
 (*****************************************************************************)
 
-let deferred_member_inits_ref :
-    (Typing_env_types.env -> Shallow_decl_defs.shallow_class -> SSet.t * SSet.t)
-    ref =
-  ref (fun _ _ -> failwith "deferred_member_inits_ref not initialized!")
-
-let set_deferred_member_inits f = deferred_member_inits_ref := f
-
-let deferred_member_inits x y = !deferred_member_inits_ref x y
-
 module PrintClass = struct
   let indent = "    "
 
@@ -2064,19 +2052,9 @@ module PrintClass = struct
     (fuel, str)
 
   let class_type ~fuel ctx c =
-    let tenv = Typing_env_types.empty ctx Relative_path.default ~droot:None in
     let tc_need_init = bool (Cls.need_init c) in
     let tc_abstract = bool (Cls.abstract c) in
-    let tc_deferred_init_members =
-      sset
-      @@
-      if shallow_decl_enabled ctx then
-        match Shallow_classes_provider.get ctx (Cls.name c) with
-        | Some cls -> snd (deferred_member_inits tenv cls)
-        | None -> SSet.empty
-      else
-        Cls.deferred_init_members c
-    in
+    let tc_deferred_init_members = sset @@ Cls.deferred_init_members c in
     let tc_kind = classish_kind (Cls.kind c) in
     let tc_name = Cls.name c in
     let (fuel, tc_tparams) = tparam_list ~fuel (Cls.tparams c) in

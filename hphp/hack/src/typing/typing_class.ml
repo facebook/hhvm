@@ -671,9 +671,6 @@ let check_enum_includes env cls =
                 !enum_constant_map))
   )
 
-let shallow_decl_enabled (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-
 let skip_hierarchy_checks (ctx : Provider_context.t) : bool =
   TypecheckerOptions.skip_hierarchy_checks (Provider_context.get_tcopt ctx)
 
@@ -1315,12 +1312,7 @@ let check_SupportDynamicType env c =
 
 (** Check proper usage of the __Override attribute. *)
 let check_override_keyword env c tc =
-  if
-    (not Ast_defs.(is_c_trait c.c_kind))
-    && (* These checks are only for eager mode. The same checks are performed
-          * for shallow mode in Typing_inheritance *)
-    not (shallow_decl_enabled (Env.get_ctx env))
-  then (
+  if not Ast_defs.(is_c_trait c.c_kind) then (
     let check_override ~is_static (id, ce) =
       if get_ce_superfluous_override ce then
         if String.equal ce.ce_origin (snd c.c_name) then
@@ -1574,8 +1566,6 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
       parents
     in
     let env = Typing_requirements.check_class env pc tc in
-    if shallow_decl_enabled (Env.get_ctx env) then
-      Typing_inheritance.check_class env pc tc;
     check_override_keyword env c tc;
     check_enum_includes env c;
     check_implements_or_extends_unique implements;

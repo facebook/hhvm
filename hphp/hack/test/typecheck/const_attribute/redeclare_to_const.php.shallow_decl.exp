@@ -1,4 +1,0 @@
-File "redeclare_to_const.php", line 5, characters 44-45:
-This property is `__Const` (Typing[4204])
-  File "redeclare_to_const.php", line 4, characters 25-26:
-  This property is not `__Const`

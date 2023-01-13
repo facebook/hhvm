@@ -107,13 +107,7 @@ let cache_decls ctx file decls =
   | Provider_backend.Analysis
   | Provider_backend.Shared_memory ->
     List.iter decls ~f:(function
-        | (name, Class decl) ->
-          Shallow_classes_heap.Classes.add name decl;
-          if
-            TypecheckerOptions.shallow_class_decl
-              (Provider_context.get_tcopt ctx)
-          then
-            Shallow_classes_heap.MemberFilters.add decl
+        | (name, Class decl) -> Shallow_classes_heap.Classes.add name decl
         | (name, Fun decl) -> Decl_store.((get ()).add_fun name decl)
         | (name, Typedef decl) -> Decl_store.((get ()).add_typedef name decl)
         | (name, Const decl) -> Decl_store.((get ()).add_gconst name decl)

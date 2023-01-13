@@ -3888,7 +3888,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="find overridden method from trait. It's arbitrary which one we pick. This test embodies current (alphabetical) implementation.",
+                comment="find overridden method from trait. It's arbitrary which one we pick. This test embodies the current implementation.",
                 method="textDocument/definition",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -3908,7 +3908,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="find overridden static method. It's arbitrary which one we pick. This test embodies current (alphabetical) implementation.",
+                comment="find overridden static method. It's arbitrary which one we pick. This test embodies the current implementation.",
                 method="textDocument/definition",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},

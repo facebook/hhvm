@@ -23,23 +23,3 @@ module Classes :
         (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (StringKey)
         (Class)
         (Capacity)
-
-module FilterCapacity : sig
-  val capacity : int
-end
-
-module Filter : SharedMem.Value with type t = BloomFilter.t
-
-module MemberFilters : sig
-  include module type of
-      SharedMem.HeapWithLocalCache
-        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
-        (Filter)
-        (FilterCapacity)
-
-  (**
-   * Computes a Bloom Filter of the name of the members in the shallow class
-   * and stores it in shared memory, using the name of the resptive class as
-   * the key *)
-  val add : shallow_class -> unit
-end

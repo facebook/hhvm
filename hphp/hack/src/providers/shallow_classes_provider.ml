@@ -86,18 +86,6 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_class decl name
 
-let get_member_filter (ctx : Provider_context.t) (name : string) :
-    BloomFilter.t option =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Pessimised_shared_memory _ -> failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
-  | Provider_backend.Shared_memory ->
-    Shallow_classes_heap.MemberFilters.get name
-  | Provider_backend.Analysis
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    None
-
 let get_batch (ctx : Provider_context.t) (names : SSet.t) :
     shallow_class option SMap.t =
   match Provider_context.get_backend ctx with
@@ -166,8 +154,7 @@ let oldify_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
     failwith "invalid"
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
-    Shallow_classes_heap.Classes.oldify_batch names;
-    Shallow_classes_heap.MemberFilters.oldify_batch names
+    Shallow_classes_heap.Classes.oldify_batch names
   | Provider_backend.Local_memory _ ->
     failwith "oldify_batch not implemented for Local_memory"
   | Provider_backend.Decl_service _ ->
@@ -180,8 +167,7 @@ let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
     failwith "invalid"
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
-    Shallow_classes_heap.Classes.remove_old_batch names;
-    Shallow_classes_heap.MemberFilters.remove_old_batch names
+    Shallow_classes_heap.Classes.remove_old_batch names
   | Provider_backend.Local_memory _ ->
     failwith "remove_old_batch not implemented for Local_memory"
   | Provider_backend.Decl_service _ ->
@@ -193,17 +179,14 @@ let remove_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   | Provider_backend.Analysis
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
-    Shallow_classes_heap.Classes.remove_batch names;
-    Shallow_classes_heap.MemberFilters.remove_batch names
+    Shallow_classes_heap.Classes.remove_batch names
   | Provider_backend.Local_memory _ ->
     failwith "remove_batch not implemented for Local_memory"
   | Provider_backend.Decl_service _ ->
     failwith "remove_batch not implemented for Decl_service"
 
 let local_changes_push_sharedmem_stack () : unit =
-  Shallow_classes_heap.Classes.LocalChanges.push_stack ();
-  Shallow_classes_heap.MemberFilters.LocalChanges.push_stack ()
+  Shallow_classes_heap.Classes.LocalChanges.push_stack ()
 
 let local_changes_pop_sharedmem_stack () : unit =
-  Shallow_classes_heap.Classes.LocalChanges.pop_stack ();
-  Shallow_classes_heap.MemberFilters.LocalChanges.pop_stack ()
+  Shallow_classes_heap.Classes.LocalChanges.pop_stack ()

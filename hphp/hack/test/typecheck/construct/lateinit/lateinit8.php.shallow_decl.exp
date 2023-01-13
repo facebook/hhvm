@@ -1,6 +1,0 @@
-File "lateinit8.php--file3.php", line 3, characters 23-23:
-Some members in class `D` are incompatible with those declared in type `C` (Typing[4282])
-  File "lateinit8.php--file1.php", line 4, characters 14-17:
-  Redeclared properties must be consistently declared `__LateInit`
-  File "lateinit8.php--file2.php", line 5, characters 14-17:
-  The property is declared `__LateInit` here

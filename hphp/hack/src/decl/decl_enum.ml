@@ -111,25 +111,3 @@ let rewrite_class name ~is_enum_class enum inner_ty ~get_ancestor consts =
           else
             { c with cc_type = ty })
         consts)
-
-(** Same as [rewrite_class], but for use when shallow_class_decl is enabled *)
-let rewrite_class_consts enum_kind =
-  Sequence.map ~f:(fun ((k, c) as pair) ->
-      match Lazy.force enum_kind with
-      | None -> pair
-      | Some { base = _; type_ = ty; constraint_ = _; interface = te_interface }
-        ->
-        let te_enum_class = Option.is_some te_interface in
-        (match get_node ty with
-        | Tmixed
-        | Tprim Tarraykey ->
-          pair
-        | _ ->
-          (* A special constant called "class" gets added, and we don't
-           * want to rewrite its type.
-           * Also for enum class, the type is set in the lowerer.
-           *)
-          if te_enum_class || String.equal k SN.Members.mClass then
-            pair
-          else
-            (k, { c with cc_type = ty })))

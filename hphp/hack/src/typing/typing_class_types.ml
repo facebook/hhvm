@@ -22,19 +22,6 @@ type inherited_members = {
     (Typing_defs.class_elt option * Typing_defs_core.consistent_kind) Lazy.t;
 }
 
-type lazy_class_type = {
-  lin_members: Decl_defs.mro_element list;
-  lin_ancestors: Decl_defs.mro_element list;
-  ih: inherited_members;
-  ancestors: Typing_defs_core.decl_ty Lazy_string_table.t;
-      (** Types of parents, interfaces, and traits *)
-  req_ancestor_names: unit Lazy_string_table.t;
-  all_req_extends_implements_requirements:
-    (Pos_or_decl.t * Typing_defs_core.decl_ty) Sequence.t;
-  all_req_class_requirements:
-    (Pos_or_decl.t * Typing_defs_core.decl_ty) Sequence.t;
-}
-
 type eager_members = {
   props: Typing_defs.class_elt String.Table.t;
   static_props: Typing_defs.class_elt String.Table.t;
@@ -57,7 +44,5 @@ as needed).
 In shallow decl, that view is constructed even more lazily,
 by iterating over the shallow representation of the class
 and its ancestors one at a time. *)
-type class_t =
-  | Lazy of Shallow_decl_defs.shallow_class * (lazy_class_type Lazy.t[@opaque])
-  | Eager of Decl_defs.decl_class_type * (eager_members[@opaque])
+type class_t = Eager of Decl_defs.decl_class_type * (eager_members[@opaque])
 [@@deriving show]

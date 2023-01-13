@@ -1152,6 +1152,7 @@ class mstch_enum : public mstch_base {
             {"enum:enum_type_legacy?", &mstch_enum::is_enum_type_legacy},
             {"enum:enum_type_open?", &mstch_enum::is_enum_type_open},
             {"enum:unused", &mstch_enum::unused_value},
+            {"enum:thrift_uri", &mstch_enum::thrift_uri},
         });
   }
 
@@ -1210,6 +1211,7 @@ class mstch_enum : public mstch_base {
 
     return false;
   }
+  mstch::node thrift_uri() { return enum_->uri(); }
 
  protected:
   const t_enum* enum_;

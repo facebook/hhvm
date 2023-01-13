@@ -115,6 +115,12 @@ impl ::fbthrift::GetTType for MyEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::MyEnum {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/no-legacy-apis/MyEnum"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum
 where
     P: ::fbthrift::ProtocolWriter,

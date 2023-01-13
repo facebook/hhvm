@@ -279,6 +279,12 @@ impl ::fbthrift::GetTType for MyEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::MyEnum {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/terse_write/MyEnum"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum
 where
     P: ::fbthrift::ProtocolWriter,

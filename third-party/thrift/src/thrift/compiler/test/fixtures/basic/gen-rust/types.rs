@@ -151,6 +151,12 @@ impl ::fbthrift::GetTType for MyEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::MyEnum {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/basic/MyEnum"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum
 where
     P: ::fbthrift::ProtocolWriter,
@@ -259,6 +265,12 @@ impl ::std::str::FromStr for HackEnum {
 
 impl ::fbthrift::GetTType for HackEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetUri for self::HackEnum {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/basic/HackEnum"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for HackEnum

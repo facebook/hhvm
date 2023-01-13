@@ -522,6 +522,12 @@ impl ::fbthrift::GetTType for has_bitwise_ops {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::has_bitwise_ops {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/has_bitwise_ops"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for has_bitwise_ops
 where
     P: ::fbthrift::ProtocolWriter,
@@ -632,6 +638,12 @@ impl ::fbthrift::GetTType for is_unscoped {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::is_unscoped {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/is_unscoped"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for is_unscoped
 where
     P: ::fbthrift::ProtocolWriter,
@@ -740,6 +752,12 @@ impl ::std::str::FromStr for MyForwardRefEnum {
 
 impl ::fbthrift::GetTType for MyForwardRefEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetUri for self::MyForwardRefEnum {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/MyForwardRefEnum"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for MyForwardRefEnum

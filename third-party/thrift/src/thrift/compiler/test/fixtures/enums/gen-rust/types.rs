@@ -142,6 +142,12 @@ impl ::fbthrift::GetTType for Metasyntactic {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::Metasyntactic {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/enums/Metasyntactic"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for Metasyntactic
 where
     P: ::fbthrift::ProtocolWriter,
@@ -276,6 +282,12 @@ impl ::fbthrift::GetTType for MyEnum1 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::MyEnum1 {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/enums/MyEnum1"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum1
 where
     P: ::fbthrift::ProtocolWriter,
@@ -390,6 +402,12 @@ impl ::std::str::FromStr for MyEnum2 {
 
 impl ::fbthrift::GetTType for MyEnum2 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetUri for self::MyEnum2 {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/enums/MyEnum2"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for MyEnum2
@@ -526,6 +544,12 @@ impl ::fbthrift::GetTType for MyEnum3 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::MyEnum3 {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/enums/MyEnum3"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum3
 where
     P: ::fbthrift::ProtocolWriter,
@@ -654,6 +678,12 @@ impl ::fbthrift::GetTType for MyEnum4 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::MyEnum4 {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/enums/MyEnum4"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyEnum4
 where
     P: ::fbthrift::ProtocolWriter,
@@ -776,6 +806,12 @@ impl ::fbthrift::GetTType for MyBitmaskEnum1 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::MyBitmaskEnum1 {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/enums/MyBitmaskEnum1"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for MyBitmaskEnum1
 where
     P: ::fbthrift::ProtocolWriter,
@@ -896,6 +932,12 @@ impl ::std::str::FromStr for MyBitmaskEnum2 {
 
 impl ::fbthrift::GetTType for MyBitmaskEnum2 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetUri for self::MyBitmaskEnum2 {
+    fn uri() -> &'static str {
+        "test.dev/fixtures/enums/MyBitmaskEnum2"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for MyBitmaskEnum2

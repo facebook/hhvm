@@ -573,6 +573,12 @@ impl ::fbthrift::GetTType for Color {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
 
+impl ::fbthrift::GetUri for self::Color {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/Color"
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for Color
 where
     P: ::fbthrift::ProtocolWriter,
@@ -681,6 +687,12 @@ impl ::std::str::FromStr for ThriftAdaptedEnum {
 
 impl ::fbthrift::GetTType for ThriftAdaptedEnum {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl ::fbthrift::GetUri for self::ThriftAdaptedEnum {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/ThriftAdaptedEnum"
+    }
 }
 
 impl<P> ::fbthrift::Serialize<P> for ThriftAdaptedEnum

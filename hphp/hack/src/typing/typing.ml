@@ -3868,12 +3868,9 @@ and expr_
         in
         make_result env p (Aast.Method_caller (pos_cname, meth_name)) ty
       | _ ->
-        (* This can happen if the method lives in PHP *)
-        make_result
-          env
-          p
-          (Aast.Method_caller (pos_cname, meth_name))
-          (Typing_utils.mk_tany env pos)))
+        (* Shouldn't happen *)
+        let (env, ty) = Env.fresh_type_error env pos in
+        make_result env p (Aast.Method_caller (pos_cname, meth_name)) ty))
   | FunctionPointer (FP_class_const (cid, meth), targs) ->
     let (env, _, ce, cty) = class_expr env [] cid in
     let (env, (fpty, tal)) =

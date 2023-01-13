@@ -41,8 +41,11 @@ struct State {
   Type mbase{TCell};
 };
 
-struct BlockInfo {
-  RegionDesc::BlockId blockID;
+template<typename NodeId>
+struct NodeInfo {
+  NodeId nodeId;
+  const GuardedLocations* preConds;
+  const PostConditions* postConds;
   State in;
   State out;
 };
@@ -62,12 +65,11 @@ std::string DEBUG_ONLY show(const State& state) {
   return ret;
 }
 
-State entry_state(const RegionDesc& region, std::vector<Type>* input) {
+State entry_state(const Func* func, std::vector<Type>* input = nullptr) {
   auto ret = State{};
   ret.initialized = true;
 
   if (input) ret.locals = *input;
-  auto const func = region.start().func();
   ret.locals.resize(func->numLocals(), TCell);
 
   return ret;
@@ -127,21 +129,20 @@ Type type_of(const State& state, Location l) {
   return type_of(const_cast<State&>(state), l);
 }
 
-bool preconds_may_pass(const RegionDesc::Block& block,
+template<typename NodeId>
+bool preconds_may_pass(char nodeSpec, const NodeInfo<NodeId>& binfo,
                        const State& state) {
   // Bail if any type is Bottom, which can only happen in unreachable paths.
   for (auto const& ty : state.locals) {
     if (ty == TBottom) return false;
   }
 
-  auto const& preConds = block.typePreConditions();
-
-  for (auto const& p : preConds) {
+  for (auto const& p : *binfo.preConds) {
     if (!is_tracked(p.location)) continue;
     auto const ty = type_of(state, p.location);
     if (!ty.maybe(p.type)) {
-      FTRACE(6, "  x B{}'s precond {} fails ({} is {})\n",
-             block.id(), show(p), show(p.location), ty);
+      FTRACE(6, "  x {}{}'s precond {} fails ({} is {})\n",
+             nodeSpec, binfo.nodeId, show(p), show(p.location), ty);
       return false;
     }
   }
@@ -149,7 +150,7 @@ bool preconds_may_pass(const RegionDesc::Block& block,
 }
 
 /*
- * PostConditions of a block are our local transfer functions.
+ * PostConditions of a node are our local transfer functions.
  *
  * Changed types are overwritten, while refined types are intersected
  * with the current type.
@@ -169,99 +170,145 @@ void apply_transfer_function(State& dst, const PostConditions& postConds) {
 
 //////////////////////////////////////////////////////////////////////
 
+template<typename NodeId>
+struct PruneArcs {
+  using Arc = std::pair<NodeId, NodeId>;
+
+  PruneArcs(char nodeSpec, uint32_t size)
+    : m_nodeSpec(nodeSpec), m_size(size), m_nodeInfos(size), m_workQ(size) {
+  }
+
+  void registerNode(uint32_t idx, NodeId id, const GuardedLocations& preConds,
+                    const PostConditions& postConds) {
+    m_nodeInfos[idx].nodeId = id;
+    m_nodeInfos[idx].preConds = &preConds;
+    m_nodeInfos[idx].postConds = &postConds;
+    m_nodeIdToIdx[id] = idx;
+  }
+
+  void addEntryNode(uint32_t idx, State entryState) {
+    m_nodeInfos[idx].in = std::move(entryState);
+    m_workQ.push(idx);
+  }
+
+  template<typename Succs>
+  void iterate(Succs succs) {
+    FTRACE(4, "Iterating:\n");
+    while (!m_workQ.empty()) {
+      auto const idx = m_workQ.pop();
+      auto& binfo = m_nodeInfos[idx];
+      FTRACE(4, "{}{}\n", m_nodeSpec, binfo.nodeId);
+
+      binfo.out = binfo.in;
+      apply_transfer_function(binfo.out, *binfo.postConds);
+
+      for (auto& succ : succs(binfo.nodeId)) {
+        auto const succIdx = nodeIdx(succ);
+        auto& succInfo = m_nodeInfos[succIdx];
+        if (preconds_may_pass(m_nodeSpec, succInfo, binfo.out)) {
+          if (merge_into(succInfo.in, binfo.out)) {
+            FTRACE(5, "  -> {}{}\n", m_nodeSpec, succInfo.nodeId);
+            m_workQ.push(succIdx);
+          }
+        }
+      }
+    }
+
+    FTRACE(2, "\nPostConds fixed point:\n{}\n",
+      [&] () -> std::string {
+        auto ret = std::string{};
+        for (auto& s : m_nodeInfos) {
+          folly::format(&ret, "{}{}:\n{}", m_nodeSpec, s.nodeId, show(s.in));
+        }
+        return ret;
+      }()
+    );
+  }
+
+  template<typename Succs>
+  std::vector<Arc> removableArcs(Succs succs) const {
+    // Return all edges that look like they will unconditionally fail type
+    // predictions.
+    auto removable = std::vector<Arc>{};
+
+    for (auto const& binfo : m_nodeInfos) {
+      for (auto& succ : succs(binfo.nodeId)) {
+        auto const& succInfo = m_nodeInfos[nodeIdx(succ)];
+        if (!binfo.in.initialized ||
+            !succInfo.in.initialized ||
+            !preconds_may_pass(m_nodeSpec, succInfo, binfo.out)) {
+          removable.emplace_back(binfo.nodeId, succInfo.nodeId);
+        }
+      }
+    }
+
+    return removable;
+  }
+
+  bool isUnreachable(uint32_t idx) const {
+    assertx(idx < m_size);
+    return !m_nodeInfos[idx].in.initialized;
+  }
+
+  NodeId nodeId(uint32_t idx) const {
+    assertx(idx < m_size);
+    return m_nodeInfos[idx].nodeId;
+  }
+
+  uint32_t nodeIdx(NodeId nodeId) const {
+    auto const iter = m_nodeIdToIdx.find(nodeId);
+    assertx(iter != end(m_nodeIdToIdx));
+    return iter->second;
+  }
+
+private:
+  char m_nodeSpec;
+  uint32_t m_size;
+  std::vector<NodeInfo<NodeId>> m_nodeInfos;
+  dataflow_worklist<uint32_t> m_workQ;
+
+  // Maps node ids to their indices.
+  jit::fast_map<NodeId, uint32_t> m_nodeIdToIdx;
+};
+
 }
+
+//////////////////////////////////////////////////////////////////////
 
 void region_prune_arcs(RegionDesc& region, std::vector<Type>* input) {
   FTRACE(4, "region_prune_arcs\n");
 
   region.sortBlocks();
-  auto const sortedBlocks = region.blocks();
+  auto const& blocks = region.blocks();
+  auto const numBlocks = blocks.size();
+  auto pruneArcs = PruneArcs<RegionDesc::BlockId>('B', numBlocks);
 
-  // Maps region block ids to their RPO ids.
-  auto blockToRPO = jit::fast_map<RegionDesc::BlockId,uint32_t>{};
-
-  auto blockInfos = std::vector<BlockInfo>(sortedBlocks.size());
-  auto workQ = dataflow_worklist<uint32_t>(sortedBlocks.size());
-  for (auto rpoID = uint32_t{0}; rpoID < sortedBlocks.size(); ++rpoID) {
-    auto const& b = sortedBlocks[rpoID];
-    auto& binfo = blockInfos[rpoID];
-    binfo.blockID = b->id();
-    blockToRPO[binfo.blockID] = rpoID;
+  for (auto idx = uint32_t{0}; idx < numBlocks; ++idx) {
+    auto const& b = blocks[idx];
+    pruneArcs.registerNode(
+      idx, b->id(), b->typePreConditions(), b->postConds());
     if (b->start() == region.start()) {
-      workQ.push(rpoID);
-      blockInfos[rpoID].in = entry_state(region, input);
+      pruneArcs.addEntryNode(idx, entry_state(region.start().func(), input));
     }
   }
 
-  FTRACE(4, "Iterating:\n");
-  do {
-    auto const rpoID = workQ.pop();
-    auto& binfo = blockInfos[rpoID];
-    FTRACE(4, "B{}\n", binfo.blockID);
+  auto const succs = [&](RegionDesc::BlockId id) { return region.succs(id); };
 
-    binfo.out = binfo.in;
-    apply_transfer_function(
-      binfo.out,
-      region.block(binfo.blockID)->postConds()
-    );
+  pruneArcs.iterate(succs);
 
-    for (auto& succ : region.succs(binfo.blockID)) {
-      auto const succRPO = blockToRPO.find(succ);
-      assertx(succRPO != end(blockToRPO));
-      auto& succInfo = blockInfos[succRPO->second];
-      if (preconds_may_pass(*region.block(succInfo.blockID), binfo.out)) {
-        if (merge_into(succInfo.in, binfo.out)) {
-          FTRACE(5, "  -> {}\n", succInfo.blockID);
-          workQ.push(succRPO->second);
-        }
-      }
-    }
-  } while (!workQ.empty());
-
-  FTRACE(2, "\nPostConds fixed point:\n{}\n",
-    [&] () -> std::string {
-      auto ret = std::string{};
-      for (auto& s : blockInfos) {
-        folly::format(&ret, "B{}:\n{}", s.blockID, show(s.in));
-      }
-      return ret;
-    }()
-  );
-
-  // Now remove any edge that looks like it will unconditionally fail type
-  // predictions, and completely remove any block that can't be reached.
-  using ArcIDs = std::pair<RegionDesc::BlockId,RegionDesc::BlockId>;
-  auto toRemove = std::vector<ArcIDs>{};
-  for (auto rpoID = uint32_t{0}; rpoID < sortedBlocks.size(); ++rpoID) {
-    auto const& binfo = blockInfos[rpoID];
-
-    for (auto& succ : region.succs(binfo.blockID)) {
-      auto const succRPO = blockToRPO.find(succ);
-      assertx(succRPO != end(blockToRPO));
-      auto const& succInfo = blockInfos[succRPO->second];
-      if (!binfo.in.initialized ||
-          !succInfo.in.initialized ||
-          !preconds_may_pass(*region.block(succInfo.blockID), binfo.out)) {
-        FTRACE(2, "Pruning arc: B{} -> B{}\n",
-               binfo.blockID,
-               succInfo.blockID);
-        toRemove.emplace_back(binfo.blockID, succInfo.blockID);
-      }
-    }
-
-    for (auto& r : toRemove) region.removeArc(r.first, r.second);
-    toRemove.clear();
+  for (auto& arc : pruneArcs.removableArcs(succs)) {
+    FTRACE(2, "Pruning arc: B{} -> B{}\n", arc.first, arc.second);
+    region.removeArc(arc.first, arc.second);
   }
 
-  // Get rid of the completely unreachable blocks, now that any arcs to/from
-  // them are gone.
-  for (auto rpoID = uint32_t{0}; rpoID < sortedBlocks.size(); ++rpoID) {
-    auto const& binfo = blockInfos[rpoID];
-    if (!binfo.in.initialized) {
-      FTRACE(2, "Pruning block: B{}\n", binfo.blockID);
-      region.deleteBlock(binfo.blockID);
+  for (auto idx = uint32_t{0}; idx < numBlocks; ++idx) {
+    if (pruneArcs.isUnreachable(idx)) {
+      auto const blockId = pruneArcs.nodeId(idx);
+      FTRACE(2, "Pruning block: B{}\n", blockId);
+      region.deleteBlock(blockId);
     }
   }
+
   FTRACE(2, "\n");
 }
 

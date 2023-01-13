@@ -2308,26 +2308,42 @@ let gen_sig ~loc ~path:_ (_rec_flag, tds) restart =
   in
   pass_module :: fns
 
-let args () =
-  let inner =
-    Ast_pattern.(
-      alt
-        (as__ @@ pexp_variant (string "Encode_as_variant") none
-        |> map1 ~f:(fun _ -> Restart.(Disallow Encode_as_variant)))
-        (as__ @@ pexp_variant (string "Encode_as_result") none
-        |> map1 ~f:(fun _ -> Restart.(Disallow Encode_as_result))))
+let restart_arg expr =
+  let err =
+    Error
+      "one of: `Allow, `Disallow `Encode_as_variant or `Disallow `Encode_as_result"
   in
-  let pat =
-    Ast_pattern.(
-      alt
-        (as__ @@ pexp_variant (string "Allow") none
-        |> map1 ~f:(fun _ -> Restart.Allow))
-        (pexp_variant (string "Disallow") (some inner)))
-  in
-  Deriving.Args.(empty +> arg "restart" pat)
+  match expr.pexp_desc with
+  | Pexp_variant ("Allow", None) -> Ok Restart.Allow
+  | Pexp_variant ("Disallow", Some inner) ->
+    (match inner.pexp_desc with
+    | Pexp_variant ("Encode_as_variant", None) ->
+      Ok Restart.(Disallow Encode_as_variant)
+    | Pexp_variant ("Encode_as_result", None) ->
+      Ok Restart.(Disallow Encode_as_result)
+    | _ -> err)
+  | _ -> err
 
-let transform =
-  Deriving.add
-    Names.transform_pfx
-    ~str_type_decl:Deriving.(Generator.make (args ()) gen_str)
-    ~sig_type_decl:Deriving.(Generator.make (args ()) gen_sig)
+let restart_opt options =
+  List.fold_left
+    (fun acc (name, expr) ->
+      if String.equal name "restart" then
+        match restart_arg expr with
+        | Ok restart -> Some restart
+        | Error err -> failwith err
+      else
+        acc)
+    None
+    options
+
+let () =
+  let loc = Location.none in
+  Ppx_deriving.(
+    register
+    @@ create
+         Names.transform_pfx
+         ~type_decl_str:(fun ~options ~path tds ->
+           gen_str ~loc ~path (Nonrecursive, tds) @@ restart_opt options)
+         ~type_decl_sig:(fun ~options ~path tds ->
+           gen_sig ~loc ~path (Nonrecursive, tds) @@ restart_opt options)
+         ())

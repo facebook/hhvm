@@ -3,6 +3,6 @@
  (wrapped false)
  (modules ppx_transform)
  (kind ppx_rewriter)
- (libraries ppxlib)
+ (libraries ppxlib ppx_deriving.api)
  (preprocess
    (pps ppxlib.metaquot)))

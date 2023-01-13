@@ -499,7 +499,7 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
     break;
   case CryptoMethod::ClientTLS:
     m_data->m_client = true;
-    smethod = TLSv1_client_method();
+    smethod = TLS_client_method();
     break;
   case CryptoMethod::ServerSSLv23:
     m_data->m_client = false;
@@ -542,7 +542,7 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
 
   case CryptoMethod::ServerTLS:
     m_data->m_client = false;
-    smethod = TLSv1_server_method();
+    smethod = TLS_server_method();
     break;
   default:
     return false;

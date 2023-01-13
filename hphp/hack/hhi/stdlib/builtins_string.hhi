@@ -436,5 +436,5 @@ function metaphone(
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 function parse_str(
   string $str,
-  inout $arr,
+  inout dynamic $arr,
 ): HH\FIXME\MISSING_RETURN_TYPE;

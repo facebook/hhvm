@@ -105,7 +105,7 @@ struct StaticMethodCache {
 
   static rds::Handle alloc(const StringData* cls,
                       const StringData* meth,
-                      const char* ctxName);
+                      const StringData* ctxName);
   static const Func* lookup(rds::Handle chand,
                             const NamedType* ne, const StringData* cls,
                             const StringData* meth, const Class* ctx,
@@ -118,7 +118,7 @@ struct StaticMethodFCache {
 
   static rds::Handle alloc(const StringData* cls,
                       const StringData* meth,
-                      const char* ctxName);
+                      const StringData* ctxName);
   static const Func* lookup(rds::Handle chand, const Class* cls,
                             const StringData* meth, const Class* ctx,
                             const Func* callerFunc);

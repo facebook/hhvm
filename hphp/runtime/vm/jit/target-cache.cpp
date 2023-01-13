@@ -430,33 +430,19 @@ handleStaticCall(const Class* cls, const StringData* name,
 // StaticMethodCache
 //
 
-static const StringData* mangleSmcName(const StringData* cls,
-                                       const StringData* meth,
-                                       const char* ctx) {
-  // Implementation detail of FCallClsMethodD/S: we use "C::M:ctx" as
-  // the key for invoking static method "M" on class "C". This
-  // composes such a key. "::" is semi-arbitrary, though whatever we
-  // choose must delimit possible class and method names, so we might
-  // as well ape the source syntax
-  return
-    makeStaticString(String(cls->data()) + String("::") +
-                     String(meth->data()) + String(":") +
-                     String(ctx));
-}
-
 rds::Handle StaticMethodCache::alloc(const StringData* clsName,
                                      const StringData* methName,
-                                     const char* ctxName) {
+                                     const StringData* ctxName) {
   return rds::bind<StaticMethodCache, rds::Mode::Normal>(
-    rds::StaticMethod { mangleSmcName(clsName, methName, ctxName) }
+    rds::StaticMethod { clsName, methName, ctxName }
   ).handle();
 }
 
 rds::Handle StaticMethodFCache::alloc(const StringData* clsName,
                                       const StringData* methName,
-                                      const char* ctxName) {
+                                      const StringData* ctxName) {
   return rds::bind<StaticMethodFCache, rds::Mode::Normal>(
-    rds::StaticMethodF { mangleSmcName(clsName, methName, ctxName) }
+    rds::StaticMethodF { clsName, methName, ctxName }
   ).handle();
 }
 

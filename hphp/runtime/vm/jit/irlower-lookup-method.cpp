@@ -163,8 +163,10 @@ void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-const char* ctxName(const Class* ctx) {
-  return ctx ? ctx->name()->data() : ":anonymous:";
+StaticString s_anonymous(":anonymous:");
+
+const StringData* ctxName(const Class* ctx) {
+  return ctx ? ctx->name() : s_anonymous.get();
 }
 
 }

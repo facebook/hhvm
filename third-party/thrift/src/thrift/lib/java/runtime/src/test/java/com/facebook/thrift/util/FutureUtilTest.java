@@ -16,13 +16,18 @@
 
 package com.facebook.thrift.util;
 
+import com.facebook.nifty.core.RequestContext;
+import com.facebook.nifty.core.RequestContexts;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
@@ -36,6 +41,25 @@ import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 public class FutureUtilTest {
+  @Test
+  public void testToMono() {
+    String s = String.valueOf(System.nanoTime());
+    RequestContext mock = Mockito.mock(RequestContext.class);
+    Mockito.when(mock.getRequestHeader()).thenReturn(ImmutableMap.of("message", s));
+    Mono<String> stringMono =
+        FutureUtil.toMono(this::string)
+            .contextWrite(context -> RequestContext.toContext(context, mock));
+
+    StepVerifier.create(stringMono).expectNext(s).verifyComplete();
+  }
+
+  private ListenableFuture<String> string() {
+    ListenableFuture<String> message =
+        MoreExecutors.newDirectExecutorService()
+            .submit(() -> RequestContexts.getCurrentContext().getRequestHeader().get("message"));
+    return message;
+  }
+
   @Test
   public void testShouldScheduleWorkOnDifferentThreadWithSynchronousFuture() {
     Scheduler myThread =

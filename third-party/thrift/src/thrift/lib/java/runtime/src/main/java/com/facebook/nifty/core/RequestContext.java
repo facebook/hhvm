@@ -18,6 +18,7 @@ package com.facebook.nifty.core;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import reactor.util.context.Context;
 import reactor.util.context.ContextView;
 
@@ -39,6 +40,10 @@ public interface RequestContext {
   Map<String, String> getRequestHeader();
 
   void setResponseHeader(String key, String value);
+
+  static Optional<RequestContext> tryContextView(ContextView contextView) {
+    return contextView.getOrEmpty(REQUEST_CONTEXT_KEY);
+  }
 
   static RequestContext fromContextView(ContextView contextView) {
     return contextView.get(REQUEST_CONTEXT_KEY);

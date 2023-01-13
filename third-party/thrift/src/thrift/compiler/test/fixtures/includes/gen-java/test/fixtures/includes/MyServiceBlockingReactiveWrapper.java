@@ -26,13 +26,18 @@ public class MyServiceBlockingReactiveWrapper
 
     @java.lang.Override
     public reactor.core.publisher.Mono<Void> query(final test.fixtures.includes.MyStruct s, final test.fixtures.includes.includes.Included i) {
-        reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>fromRunnable(() -> {
-                try {
-                    _delegate.query(s, i);
-                } catch (Throwable _e) {
-                    throw reactor.core.Exceptions.propagate(_e);
-                }
-            });
+        reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>create(_sink -> {
+            try {
+                reactor.util.context.ContextView _contextView = _sink.contextView();
+                com.facebook.nifty.core.RequestContext
+                    .tryContextView(_contextView)
+                    .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
+                _delegate.query(s, i);
+                _sink.success();
+            } catch (Throwable _e) {
+                throw reactor.core.Exceptions.propagate(_e);
+            }
+        });
 
         if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
             _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
@@ -43,13 +48,18 @@ public class MyServiceBlockingReactiveWrapper
 
     @java.lang.Override
     public reactor.core.publisher.Mono<Void> hasArgDocs(final test.fixtures.includes.MyStruct s, final test.fixtures.includes.includes.Included i) {
-        reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>fromRunnable(() -> {
-                try {
-                    _delegate.hasArgDocs(s, i);
-                } catch (Throwable _e) {
-                    throw reactor.core.Exceptions.propagate(_e);
-                }
-            });
+        reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>create(_sink -> {
+            try {
+                reactor.util.context.ContextView _contextView = _sink.contextView();
+                com.facebook.nifty.core.RequestContext
+                    .tryContextView(_contextView)
+                    .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
+                _delegate.hasArgDocs(s, i);
+                _sink.success();
+            } catch (Throwable _e) {
+                throw reactor.core.Exceptions.propagate(_e);
+            }
+        });
 
         if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
             _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());

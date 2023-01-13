@@ -26,13 +26,17 @@ public class FB303ServiceBlockingReactiveWrapper
 
     @java.lang.Override
     public reactor.core.publisher.Mono<test.fixtures.basic.ReservedKeyword> simpleRpc(final int intParameter) {
-        reactor.core.publisher.Mono<test.fixtures.basic.ReservedKeyword> _m =  reactor.core.publisher.Mono.fromSupplier(() -> {
-                try {
-                    return _delegate.simpleRpc(intParameter);
-                } catch (Throwable _e) {
-                    throw reactor.core.Exceptions.propagate(_e);
-                }
-            });
+        reactor.core.publisher.Mono<test.fixtures.basic.ReservedKeyword> _m = reactor.core.publisher.Mono.create(_sink -> {
+            try {
+                reactor.util.context.ContextView _contextView = _sink.contextView();
+                com.facebook.nifty.core.RequestContext
+                    .tryContextView(_contextView)
+                    .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
+                _sink.success(_delegate.simpleRpc(intParameter));
+            } catch (Throwable _e) {
+                _sink.error(_e);
+            }
+        });
 
         if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
             _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());

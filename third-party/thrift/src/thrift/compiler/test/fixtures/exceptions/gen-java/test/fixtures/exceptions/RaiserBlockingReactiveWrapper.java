@@ -26,13 +26,18 @@ public class RaiserBlockingReactiveWrapper
 
     @java.lang.Override
     public reactor.core.publisher.Mono<Void> doBland() {
-        reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>fromRunnable(() -> {
-                try {
-                    _delegate.doBland();
-                } catch (Throwable _e) {
-                    throw reactor.core.Exceptions.propagate(_e);
-                }
-            });
+        reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>create(_sink -> {
+            try {
+                reactor.util.context.ContextView _contextView = _sink.contextView();
+                com.facebook.nifty.core.RequestContext
+                    .tryContextView(_contextView)
+                    .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
+                _delegate.doBland();
+                _sink.success();
+            } catch (Throwable _e) {
+                throw reactor.core.Exceptions.propagate(_e);
+            }
+        });
 
         if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
             _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
@@ -43,13 +48,18 @@ public class RaiserBlockingReactiveWrapper
 
     @java.lang.Override
     public reactor.core.publisher.Mono<Void> doRaise() {
-        reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>fromRunnable(() -> {
-                try {
-                    _delegate.doRaise();
-                } catch (Throwable _e) {
-                    throw reactor.core.Exceptions.propagate(_e);
-                }
-            });
+        reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>create(_sink -> {
+            try {
+                reactor.util.context.ContextView _contextView = _sink.contextView();
+                com.facebook.nifty.core.RequestContext
+                    .tryContextView(_contextView)
+                    .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
+                _delegate.doRaise();
+                _sink.success();
+            } catch (Throwable _e) {
+                throw reactor.core.Exceptions.propagate(_e);
+            }
+        });
 
         if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
             _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
@@ -60,13 +70,17 @@ public class RaiserBlockingReactiveWrapper
 
     @java.lang.Override
     public reactor.core.publisher.Mono<String> get200() {
-        reactor.core.publisher.Mono<String> _m =  reactor.core.publisher.Mono.fromSupplier(() -> {
-                try {
-                    return _delegate.get200();
-                } catch (Throwable _e) {
-                    throw reactor.core.Exceptions.propagate(_e);
-                }
-            });
+        reactor.core.publisher.Mono<String> _m = reactor.core.publisher.Mono.create(_sink -> {
+            try {
+                reactor.util.context.ContextView _contextView = _sink.contextView();
+                com.facebook.nifty.core.RequestContext
+                    .tryContextView(_contextView)
+                    .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
+                _sink.success(_delegate.get200());
+            } catch (Throwable _e) {
+                _sink.error(_e);
+            }
+        });
 
         if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
             _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
@@ -77,13 +91,17 @@ public class RaiserBlockingReactiveWrapper
 
     @java.lang.Override
     public reactor.core.publisher.Mono<String> get500() {
-        reactor.core.publisher.Mono<String> _m =  reactor.core.publisher.Mono.fromSupplier(() -> {
-                try {
-                    return _delegate.get500();
-                } catch (Throwable _e) {
-                    throw reactor.core.Exceptions.propagate(_e);
-                }
-            });
+        reactor.core.publisher.Mono<String> _m = reactor.core.publisher.Mono.create(_sink -> {
+            try {
+                reactor.util.context.ContextView _contextView = _sink.contextView();
+                com.facebook.nifty.core.RequestContext
+                    .tryContextView(_contextView)
+                    .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
+                _sink.success(_delegate.get500());
+            } catch (Throwable _e) {
+                _sink.error(_e);
+            }
+        });
 
         if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
             _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());

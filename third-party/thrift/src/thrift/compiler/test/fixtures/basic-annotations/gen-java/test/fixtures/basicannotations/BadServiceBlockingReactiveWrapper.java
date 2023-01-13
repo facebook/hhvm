@@ -26,13 +26,17 @@ public class BadServiceBlockingReactiveWrapper
 
     @java.lang.Override
     public reactor.core.publisher.Mono<Integer> bar() {
-        reactor.core.publisher.Mono<Integer> _m =  reactor.core.publisher.Mono.fromSupplier(() -> {
-                try {
-                    return _delegate.bar();
-                } catch (Throwable _e) {
-                    throw reactor.core.Exceptions.propagate(_e);
-                }
-            });
+        reactor.core.publisher.Mono<Integer> _m = reactor.core.publisher.Mono.create(_sink -> {
+            try {
+                reactor.util.context.ContextView _contextView = _sink.contextView();
+                com.facebook.nifty.core.RequestContext
+                    .tryContextView(_contextView)
+                    .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
+                _sink.success(_delegate.bar());
+            } catch (Throwable _e) {
+                _sink.error(_e);
+            }
+        });
 
         if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
             _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
@@ -51,9 +55,14 @@ public class BadServiceBlockingReactiveWrapper
         @java.lang.Override
         public reactor.core.publisher.Mono<Void> foo() {
 
-             reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>fromRunnable(() -> {
+                reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>create(_sink -> {
                     try {
+                        reactor.util.context.ContextView _contextView = _sink.contextView();
+                        com.facebook.nifty.core.RequestContext
+                            .tryContextView(_contextView)
+                            .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
                         _delegateInteraction.foo();
+                        _sink.success();
                     } catch (Throwable _e) {
                         throw reactor.core.Exceptions.propagate(_e);
                     }

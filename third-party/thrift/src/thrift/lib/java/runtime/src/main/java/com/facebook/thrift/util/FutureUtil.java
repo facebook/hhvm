@@ -18,12 +18,15 @@ package com.facebook.thrift.util;
 
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
+import com.facebook.nifty.core.RequestContext;
+import com.facebook.nifty.core.RequestContexts;
 import com.facebook.thrift.client.ResponseWrapper;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
@@ -100,7 +103,12 @@ public final class FutureUtil {
   }
 
   public static <T> Mono<T> toMono(final Supplier<ListenableFuture<T>> futureSupplier) {
-    return Mono.fromSupplier(futureSupplier).flatMap(FutureUtil::toMono);
+    return Mono.deferContextual(
+        contextView -> {
+          Optional<RequestContext> requestContext = RequestContext.tryContextView(contextView);
+          requestContext.ifPresent(RequestContexts::setCurrentContext);
+          return FutureUtil.toMono(futureSupplier.get());
+        });
   }
 
   /**

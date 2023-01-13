@@ -47,7 +47,7 @@ function pcntl_wait(
 <<__PHPStdLib>>
 function pcntl_waitpid(
   int $pid,
-  inout $status,
+  inout ?int $status,
   int $options = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

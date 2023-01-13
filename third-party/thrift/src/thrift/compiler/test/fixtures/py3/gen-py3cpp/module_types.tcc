@@ -838,7 +838,7 @@ void AdaptedUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I16)) {
           this->set_best();
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, value_.best, _readState);
+          ::apache::thrift::op::decode<::apache::thrift::type::i16_t>(*iprot, value_.best);
           
         } else {
           _readState.skip(iprot);
@@ -868,7 +868,7 @@ uint32_t AdaptedUnion::serializedSize(Protocol_ const* prot_) const {
     case AdaptedUnion::Type::best:
     {
       xfer += prot_->serializedFieldSize("best", apache::thrift::protocol::T_I16, 1);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, value_.best);
+      xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::i16_t>(*prot_, value_.best);
       break;
     }
     case AdaptedUnion::Type::__EMPTY__:;
@@ -885,7 +885,7 @@ uint32_t AdaptedUnion::serializedSizeZC(Protocol_ const* prot_) const {
     case AdaptedUnion::Type::best:
     {
       xfer += prot_->serializedFieldSize("best", apache::thrift::protocol::T_I16, 1);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, value_.best);
+      xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::i16_t>(*prot_, value_.best);
       break;
     }
     case AdaptedUnion::Type::__EMPTY__:;
@@ -903,7 +903,7 @@ uint32_t AdaptedUnion::write(Protocol_* prot_) const {
     {
       constexpr int16_t kPrevFieldId = 0;
       xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I16, 1, kPrevFieldId>(*prot_, "best", false);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::write(*prot_, value_.best);
+      xfer += ::apache::thrift::op::encode<::apache::thrift::type::i16_t>(*prot_, value_.best);
       xfer += prot_->writeFieldEnd();
       break;
     }

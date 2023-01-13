@@ -532,7 +532,7 @@ void DirectlyAdapted::readNoXfer(Protocol_* iprot) {
   }
 _readField_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_field, _readState);
+    ::apache::thrift::op::decode<::apache::thrift::type::i32_t>(*iprot, this->__fbthrift_field_field);
     
   }
  this->__isset.set(0, true);
@@ -585,7 +585,7 @@ uint32_t DirectlyAdapted::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("DirectlyAdapted");
   {
     xfer += prot_->serializedFieldSize("field", apache::thrift::protocol::T_I32, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_field);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::i32_t>(*prot_, this->__fbthrift_field_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -597,7 +597,7 @@ uint32_t DirectlyAdapted::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("DirectlyAdapted");
   {
     xfer += prot_->serializedFieldSize("field", apache::thrift::protocol::T_I32, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_field);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::i32_t>(*prot_, this->__fbthrift_field_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -612,7 +612,7 @@ uint32_t DirectlyAdapted::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 1, kPrevFieldId>(*prot_, "field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::write(*prot_, this->__fbthrift_field_field);
+    xfer += ::apache::thrift::op::encode<::apache::thrift::type::i32_t>(*prot_, this->__fbthrift_field_field);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

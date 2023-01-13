@@ -2565,6 +2565,7 @@ and simplify_subtype_shape
                        pos = Reason.to_pos r_super;
                        decl_pos = field_pos;
                        name = printable_name;
+                       shape_lit_pos = None;
                      })
       in
       with_error ty_err_opt res
@@ -2586,6 +2587,12 @@ and simplify_subtype_shape
       in
       with_error ty_err_opt res
     | (`Absent, `Required _) ->
+      let shape_lit_pos =
+        match r_sub with
+        | Reason.Rshape_literal p -> Some p
+        | _ -> None
+      in
+
       let ty_err_opt =
         Option.map
           subtype_env.on_error
@@ -2598,6 +2605,7 @@ and simplify_subtype_shape
                        decl_pos = field_pos;
                        pos = Reason.to_pos r_sub;
                        name = printable_name;
+                       shape_lit_pos;
                      })
       in
       with_error ty_err_opt res

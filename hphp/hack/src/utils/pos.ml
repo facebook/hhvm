@@ -404,6 +404,14 @@ let rec shrink_to_start pos =
   | Pos_from_reason p -> Pos_from_reason (shrink_to_start p)
   | _ -> pos
 
+let rec shrink_to_end pos =
+  let pos = as_large_pos pos in
+  match pos with
+  | Pos_large { pos_file; pos_end; _ } ->
+    Pos_large { pos_file; pos_start = pos_end; pos_end }
+  | Pos_from_reason p -> Pos_from_reason (shrink_to_end p)
+  | _ -> pos
+
 let set_from_reason pos =
   match pos with
   | Pos_from_reason _ -> pos

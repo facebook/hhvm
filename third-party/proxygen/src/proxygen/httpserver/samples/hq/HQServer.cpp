@@ -78,12 +78,6 @@ class HQSessionController
 
   ~HQSessionController() override = default;
 
-  // Creates new HQDownstreamSession object, initialized with params_
-  proxygen::HQSession* createSession();
-
-  // Starts the newly created session. createSession must have been called.
-  void startSession(std::shared_ptr<quic::QuicSocket> /* sock */);
-
   void onDestroy(const proxygen::HTTPSessionBase& /* session*/) override;
 
   proxygen::HTTPTransactionHandler* getRequestHandler(
@@ -112,8 +106,6 @@ class HQSessionController
   // The owning session. NOTE: this must be a plain pointer to
   // avoid circular references
   proxygen::HQSession* session_{nullptr};
-  // Configuration params
-  const HQServerParams& params_;
   // Provider of HTTPTransactionHandler, owned by HQServerTransportFactory
   const HTTPTransactionHandlerProvider& httpTransactionHandlerProvider_;
   std::function<void(HQSession*)> onTransportReadyFn_;
@@ -163,21 +155,8 @@ HQSessionController::HQSessionController(
     const HQServerParams& params,
     const HTTPTransactionHandlerProvider& httpTransactionHandlerProvider,
     std::function<void(HQSession*)> onTransportReadyFn)
-    : params_(params),
-      httpTransactionHandlerProvider_(httpTransactionHandlerProvider),
+    : httpTransactionHandlerProvider_(httpTransactionHandlerProvider),
       onTransportReadyFn_(std::move(onTransportReadyFn)) {
-}
-
-HQSession* HQSessionController::createSession() {
-  wangle::TransportInfo tinfo;
-  session_ = new HQDownstreamSession(params_.txnTimeout, this, tinfo, this);
-  return session_;
-}
-
-void HQSessionController::startSession(std::shared_ptr<QuicSocket> sock) {
-  CHECK(session_);
-  session_->setSocket(std::move(sock));
-  session_->startNow();
 }
 
 void HQSessionController::onTransportReady(HTTPSessionBase* /*session*/) {

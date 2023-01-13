@@ -1024,11 +1024,11 @@ void pause_forever() {
 }
 
 bool is_constructor_name(const char* fn) {
-  auto len = strlen(fn);
+  auto const len = strlen(fn);
   const char construct[] = "__construct";
-  auto clen = sizeof(construct) - 1;
+  auto const clen = sizeof(construct) - 1;
 
-  if (len >= clen && !strcasecmp(fn + len - clen, construct)) {
+  if (len >= clen && !strcmp(fn + len - clen, construct)) {
     if (len == clen || (len > clen + 2 &&
                         fn[len - clen - 1] == ':' &&
                         fn[len - clen - 2] == ':')) {

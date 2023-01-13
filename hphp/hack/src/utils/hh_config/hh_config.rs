@@ -33,7 +33,10 @@ pub struct HhConfig {
 
 impl HhConfig {
     pub fn from_root(root: impl AsRef<Path>) -> std::io::Result<Self> {
-        let hhconfig_path = root.as_ref().join(FILE_PATH_RELATIVE_TO_ROOT);
+        Self::from_file(root.as_ref().join(FILE_PATH_RELATIVE_TO_ROOT))
+    }
+
+    pub fn from_file(hhconfig_path: impl AsRef<Path>) -> std::io::Result<Self> {
         let (hash, config) = ConfigFile::from_file_with_sha1(hhconfig_path)?;
         Ok(Self {
             hash,

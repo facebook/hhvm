@@ -47,36 +47,12 @@ let go
     ~(get_next : Relative_path.t list MultiWorker.Hh_bucket.next) :
     FileInfo.t Relative_path.Map.t =
   let acc =
-    match Provider_backend.get () with
-    | Provider_backend.Rust_provider_backend backend ->
-      (* Convert get_next to list so we can send it over the FFI boundary. *)
-      let files =
-        MultiWorker.call
-          None
-          ~job:(fun acc l -> l @ acc)
-          ~neutral:[]
-          ~merge:( @ )
-          ~next:get_next
-      in
-      let ctx_entry_contents =
-        Relative_path.Map.filter_map
-          (Provider_context.get_entries ctx)
-          ~f:(fun entry ->
-            let source_text = Ast_provider.compute_source_text ~entry in
-            Some (Full_fidelity_source_text.text source_text))
-      in
-      Rust_provider_backend.Decl.parallel_decl_parse
-        backend
-        files
-        ~cache_decls
-        ~ctx_entry_contents
-    | _ ->
-      worker_call.MultiWorker.f
-        workers
-        ~job:(fun init -> List.fold ~init ~f:(parse ctx ~trace ~cache_decls))
-        ~neutral:Relative_path.Map.empty
-        ~merge:Relative_path.Map.union
-        ~next:get_next
+    worker_call.MultiWorker.f
+      workers
+      ~job:(fun init -> List.fold ~init ~f:(parse ctx ~trace ~cache_decls))
+      ~neutral:Relative_path.Map.empty
+      ~merge:Relative_path.Map.union
+      ~next:get_next
   in
   Relative_path.Set.fold ide_files ~init:acc ~f:(fun fn acc ->
       parse ctx ~trace ~cache_decls acc fn)

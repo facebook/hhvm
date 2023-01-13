@@ -19,13 +19,6 @@ val push_local_changes : t -> unit
 val pop_local_changes : t -> unit
 
 module Decl : sig
-  val parallel_decl_parse :
-    t ->
-    cache_decls:bool ->
-    ctx_entry_contents:string Relative_path.Map.t ->
-    Relative_path.t list ->
-    FileInfo.t Relative_path.Map.t
-
   val direct_decl_parse_and_cache :
     t -> Relative_path.t -> string -> Direct_decl_parser.parsed_file_with_hashes
 

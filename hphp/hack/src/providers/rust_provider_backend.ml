@@ -288,18 +288,6 @@ module Decl = struct
       Decl_store.set (decl_store t)
     )
 
-  external parallel_decl_parse :
-    t ->
-    bool ->
-    string Relative_path.Map.t ->
-    Relative_path.t list ->
-    FileInfo.t Relative_path.Map.t
-    = "hh_rust_provider_backend_parallel_decl_parse"
-
-  let parallel_decl_parse t ~cache_decls ~ctx_entry_contents files =
-    set_decl_store t;
-    parallel_decl_parse t cache_decls ctx_entry_contents files
-
   external direct_decl_parse_and_cache :
     t -> Relative_path.t -> string -> Direct_decl_parser.parsed_file_with_hashes
     = "hh_rust_provider_backend_direct_decl_parse_and_cache"

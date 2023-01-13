@@ -187,10 +187,7 @@ TEST(StructPatchTest, Patch) {
   test::expectPatch(patch, val, expected1, expected2);
 
   // Make sure prior is being applied, if present.
-  (*std::move(patch).toThrift().patchPrior())
-      .toThrift()
-      .stringVal()
-      ->prepend("p");
+  patch.toThrift().patchPrior()->toThrift().stringVal()->prepend("p");
   expected1.stringVal() = "_phi_";
   expected2.stringVal() = "_p_phi__";
   test::expectPatch(patch, val, expected1, expected2);

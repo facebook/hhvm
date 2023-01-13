@@ -346,7 +346,7 @@ _readField_foo_field:
 _readField_adapted_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::op::decode<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>(::apache::thrift::field_id<4>{}, *this, *iprot, this->__fbthrift_field_adapted_field);
+    ::apache::thrift::op::decode<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>(*iprot, this->__fbthrift_field_adapted_field);
     _readState.afterSubobject(iprot);
     
   }
@@ -475,7 +475,7 @@ _readField_bar_field:
 _readField_adapted_list_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::op::decode<::apache::thrift::type::adapted<::FieldAdapter, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(::apache::thrift::field_id<12>{}, *this, *iprot, this->__fbthrift_field_adapted_list_field);
+    ::apache::thrift::op::decode<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<12>, OpEncodeStruct>>(*iprot, this->__fbthrift_field_adapted_list_field, *this);
     _readState.afterSubobject(iprot);
     
   }

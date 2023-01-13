@@ -796,15 +796,30 @@ struct Decode<type::adapted<Adapter, Tag>> {
           m = Adapter::fromThrift(std::move(orig));
         })(Tag{});
   }
+};
 
-  template <typename FieldId, class Struct, class Protocol, class U>
-  void operator()(FieldId, Struct& strct, Protocol& prot, U& m) const {
-    // TODO: optimize for inplace toThrift method
+template <typename Adapter, typename Tag, typename Struct, int16_t FieldId>
+struct Decode<
+    type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>> {
+  using field_adapted_tag =
+      type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>;
+  static_assert(type::is_concrete_v<field_adapted_tag>, "");
+
+  template <typename Protocol, typename U, typename AdapterT = Adapter>
+  constexpr adapt_detail::
+      if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct, void>
+      operator()(Protocol& prot, U& m, Struct&) const {
+    Decode<type::adapted<Adapter, Tag>>{}(prot, m);
+  }
+
+  template <typename Protocol, typename U, typename AdapterT = Adapter>
+  constexpr adapt_detail::
+      if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct, void>
+      operator()(Protocol& prot, U& m, Struct& strct) const {
+    // TODO(dokwon): in-place deserialization support for field adapter.
     type::native_type<Tag> orig;
     Decode<Tag>{}(prot, orig);
-    m = adapt_detail::
-        fromThriftField<Adapter, folly::to_underlying(FieldId::value)>(
-            std::move(orig), strct);
+    m = adapt_detail::fromThriftField<Adapter, FieldId>(std::move(orig), strct);
   }
 };
 

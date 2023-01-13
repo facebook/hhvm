@@ -21,7 +21,7 @@ _readState.beforeSubobject(iprot);
 auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_type%>>(<%#type:cpp_use_allocator?%>this->get_allocator()<%/type:cpp_use_allocator?%>);
 <%/field:cpp_ref?%>
 <%#struct:cpp_use_op_encode%>
-::apache::thrift::op::decode<<%field:type_tag%>>(<%#field:cpp_first_adapter%>::apache::thrift::field_id<<%field:key%>>{}, *this, <%/field:cpp_first_adapter%>*iprot, <% > module_types_tcc/member_or_ptr%>);
+::apache::thrift::op::decode<<% > field/tag%>>(*iprot, <% > module_types_tcc/member_or_ptr%><%#field:cpp_adapter%>, *this<%/field:cpp_adapter%>);
 <%/struct:cpp_use_op_encode%>
 <%^struct:cpp_use_op_encode%>
 <%#field:cpp_first_adapter%>

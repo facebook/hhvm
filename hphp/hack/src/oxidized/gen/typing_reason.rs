@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cfbc40180b16f9ddd54ae48db9354050>>
+// @generated SignedSource<<ec74d953d4b39ef913e05ab9d547edd2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -283,6 +283,8 @@ pub enum T_ {
     #[rust_to_ocaml(name = "Rlambda_param")]
     RlambdaParam(pos::Pos, Box<T_>),
     Rshape(pos::Pos, String),
+    #[rust_to_ocaml(name = "Rshape_literal")]
+    RshapeLiteral(pos::Pos),
     Renforceable(pos_or_decl::PosOrDecl),
     Rdestructure(pos::Pos),
     #[rust_to_ocaml(name = "Rkey_value_collection_key")]

@@ -137,6 +137,7 @@ type _ t_ =
   | Rcstr_on_generics : Pos_or_decl.t * pos_id -> 'phase t_
   | Rlambda_param : Pos.t * locl_phase t_ -> locl_phase t_
   | Rshape : Pos.t * string -> locl_phase t_
+  | Rshape_literal : Pos.t -> locl_phase t_
   | Renforceable : Pos_or_decl.t -> 'phase t_
   | Rdestructure : Pos.t -> locl_phase t_
   | Rkey_value_collection_key : Pos.t -> locl_phase t_
@@ -565,6 +566,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
         ^ Markdown_lite.md_codify fun_name
         ^ " expects a shape" );
     ]
+  | Rshape_literal _ -> [(p, prefix)]
   | Renforceable _ -> [(p, prefix ^ " because it is an unenforceable type")]
   | Rdestructure _ ->
     [(p, prefix ^ " resulting from a list destructuring assignment or a splat")]
@@ -691,6 +693,7 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rtype_variable_error p
   | Rlambda_param (p, _)
   | Rshape (p, _)
+  | Rshape_literal p
   | Rdestructure p
   | Rkey_value_collection_key p
   | Rsplice p
@@ -826,6 +829,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rcstr_on_generics _ -> "Rcstr_on_generics"
   | Rlambda_param _ -> "Rlambda_param"
   | Rshape _ -> "Rshape"
+  | Rshape_literal _ -> "Rshape_literal"
   | Renforceable _ -> "Renforceable"
   | Rdestructure _ -> "Rdestructure"
   | Rkey_value_collection_key _ -> "Rkey_value_collection_key"

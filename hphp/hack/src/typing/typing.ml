@@ -4949,7 +4949,7 @@ and expr_
       env
       p
       (Aast.Shape (List.map ~f:(fun (k, te, _) -> (k, te)) tfdm))
-      (mk (Reason.Rwitness p, Tshape (Closed_shape, fdm)))
+      (mk (Reason.Rshape_literal p, Tshape (Closed_shape, fdm)))
   | ET_Splice e ->
     Typing_env.with_in_expr_tree env false (fun env -> et_splice env p e)
   | EnumClassLabel (None, s) ->

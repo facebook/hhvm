@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<43bb4e5ce2acebde33a06a09d0c1b4de>>
+// @generated SignedSource<<57f4bf42370f255610f2487a623673ed>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -359,6 +359,9 @@ pub enum T_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Rshape(&'a (&'a pos::Pos<'a>, &'a str)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Rshape_literal")]
+    RshapeLiteral(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Renforceable(&'a pos_or_decl::PosOrDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

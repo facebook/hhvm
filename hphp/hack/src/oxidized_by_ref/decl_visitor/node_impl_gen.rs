@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3bfa6279c7d39dabdf16bd9d50f252da>>
+// @generated SignedSource<<3d344e6af7d8efe5091c5b148567e735>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -961,6 +961,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RcstrOnGenerics(ref __binding_0) => __binding_0.accept(v),
             T_::RlambdaParam(ref __binding_0) => __binding_0.accept(v),
             T_::Rshape(ref __binding_0) => __binding_0.accept(v),
+            T_::RshapeLiteral(ref __binding_0) => __binding_0.accept(v),
             T_::Renforceable(ref __binding_0) => __binding_0.accept(v),
             T_::Rdestructure(ref __binding_0) => __binding_0.accept(v),
             T_::RkeyValueCollectionKey(ref __binding_0) => __binding_0.accept(v),

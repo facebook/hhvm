@@ -116,6 +116,7 @@ struct
       Rcstr_on_generics (pos_or_decl p, positioned_id sid)
     | Rlambda_param (p, r) -> Rlambda_param (pos p, reason r)
     | Rshape (p, fun_name) -> Rshape (pos p, fun_name)
+    | Rshape_literal p -> Rshape_literal (pos p)
     | Renforceable p -> Renforceable (pos_or_decl p)
     | Rdestructure p -> Rdestructure (pos p)
     | Rkey_value_collection_key p -> Rkey_value_collection_key (pos p)

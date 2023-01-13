@@ -215,6 +215,7 @@ pub trait Reason:
                 }
                 OR::RlambdaParam(&(pos, r)) => RI::RlambdaParam(pos.into(), r.into()),
                 OR::Rshape(&(pos, s)) => RI::Rshape(pos.into(), Symbol::new(s)),
+                OR::RshapeLiteral(pos) => RI::RshapeLiteral(pos.into()),
                 OR::Renforceable(pos) => RI::Renforceable(pos.into()),
                 OR::Rdestructure(pos) => RI::Rdestructure(pos.into()),
                 OR::RkeyValueCollectionKey(pos) => RI::RkeyValueCollectionKey(pos.into()),
@@ -371,6 +372,7 @@ pub enum ReasonImpl<R, P> {
     RcstrOnGenerics(P, Positioned<TypeName, P>),
     RlambdaParam(P, R),
     Rshape(P, Symbol),
+    RshapeLiteral(P),
     Renforceable(P),
     Rdestructure(P),
     RkeyValueCollectionKey(P),
@@ -599,6 +601,7 @@ impl<'a> ToOxidized<'a> for BReason {
             RI::Rshape(pos, s) => {
                 OR::Rshape(arena.alloc((pos.to_oxidized(arena), s.to_oxidized(arena))))
             }
+            RI::RshapeLiteral(pos) => OR::RshapeLiteral(pos.to_oxidized(arena)),
             RI::Renforceable(pos) => OR::Renforceable(pos.to_oxidized(arena)),
             RI::Rdestructure(pos) => OR::Rdestructure(pos.to_oxidized(arena)),
             RI::RkeyValueCollectionKey(pos) => OR::RkeyValueCollectionKey(pos.to_oxidized(arena)),

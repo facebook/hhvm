@@ -2537,6 +2537,7 @@ and simplify_subtype_shape
   *)
   let simplify_subtype_shape_projection
       (r_sub, proj_sub) (r_super, proj_super) field_name res =
+    let field_pos = TShapeField.pos field_name in
     let printable_name = TUtils.get_printable_shape_field_name field_name in
     match (proj_sub, proj_super) with
     (***** "Successful" cases - 5 / 9 total cases *****)
@@ -2562,7 +2563,7 @@ and simplify_subtype_shape
                 @@ Secondary.Missing_field
                      {
                        pos = Reason.to_pos r_super;
-                       decl_pos = Reason.to_pos r_sub;
+                       decl_pos = field_pos;
                        name = printable_name;
                      })
       in
@@ -2577,7 +2578,7 @@ and simplify_subtype_shape
                 apply_reasons ~on_error
                 @@ Secondary.Required_field_is_optional
                      {
-                       pos = Reason.to_pos r_sub;
+                       pos = field_pos;
                        decl_pos = Reason.to_pos r_super;
                        name = printable_name;
                        def_pos = get_pos super_ty;
@@ -2594,7 +2595,7 @@ and simplify_subtype_shape
                 apply_reasons ~on_error
                 @@ Secondary.Missing_field
                      {
-                       decl_pos = Reason.to_pos r_super;
+                       decl_pos = field_pos;
                        pos = Reason.to_pos r_sub;
                        name = printable_name;
                      })

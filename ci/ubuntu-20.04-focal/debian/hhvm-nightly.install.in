@@ -1,0 +1,9 @@
+__PKGROOT__/bin/hackfmt __PKGROOT__/bin
+__PKGROOT__/bin/hh_client __PKGROOT__/bin
+__PKGROOT__/bin/hh_parse __PKGROOT__/bin
+__PKGROOT__/bin/hh_server __PKGROOT__/bin
+__PKGROOT__/bin/hhvm __PKGROOT__/bin
+__PKGROOT__/bin/hhvm-repo-mode __PKGROOT__/bin
+third-party/third_party_notices.txt __PKGROOT__/share/doc/hhvm
+debian/skeleton/usr/share/hhvm/ __PKGROOT__/share
+debian/skeleton/etc /

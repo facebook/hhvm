@@ -11082,24 +11082,29 @@ void make_local(IndexData& index) {
 
     for (auto const name : chunks) {
       if (auto const r = folly::get_optional(index.unitRefs, name)) {
-        if (!ids.emplace(r->id()).second) continue;
-        units.emplace_back(*r);
+        if (ids.emplace(r->id()).second) {
+          units.emplace_back(*r);
+        }
       }
       if (auto const r = folly::get_optional(index.classRefs, name)) {
-        if (!ids.emplace(r->id()).second) continue;
-        classes.emplace_back(*r);
+        if (ids.emplace(r->id()).second) {
+          classes.emplace_back(*r);
+        }
       }
       if (auto const r = folly::get_optional(index.classInfoRefs, name)) {
-        if (!ids.emplace(r->id()).second) continue;
-        classInfos.emplace_back(*r);
+        if (ids.emplace(r->id()).second) {
+          classInfos.emplace_back(*r);
+        }
       }
       if (auto const r = folly::get_optional(index.funcRefs, name)) {
-        if (!ids.emplace(r->id()).second) continue;
-        funcs.emplace_back(*r);
+        if (ids.emplace(r->id()).second) {
+          funcs.emplace_back(*r);
+        }
       }
       if (auto const r = folly::get_optional(nameToFuncFamilyGroup, name)) {
-        if (!ids.emplace(r->id()).second) continue;
-        funcFamilies.emplace_back(*r);
+        if (ids.emplace(r->id()).second) {
+          funcFamilies.emplace_back(*r);
+        }
       }
     }
 

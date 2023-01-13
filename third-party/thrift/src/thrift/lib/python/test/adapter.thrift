@@ -61,6 +61,12 @@ struct Foo {
   }
   7: list<AdaptedInt> adapted_list;
   8: Baz baz;
+  @python.Adapter{
+    name = "thrift.python.test.adapters.atoi.ItoaNestedListAdapter",
+    typeHint = "typing.Sequence[typing.Sequence[typing.Mapping[str, str]]]",
+  }
+  9: list<list<map<AdaptedInt, AdaptedInt>>> adapted_list_nested;
+  10: list<list<AdaptedInt>> int_list_list;
 }
 
 union Bar {

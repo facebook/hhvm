@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Mapping, Optional, Sequence
 
 from thrift.python.adapter import Adapter
 from thrift.python.types import Struct
@@ -59,3 +59,33 @@ class ItoaListAdapter(Adapter[Sequence[int], Sequence[str]]):
         transitive_annotation: Optional[Struct] = None,
     ) -> Sequence[int]:
         return [int(a) for a in adapted]
+
+
+class ItoaNestedListAdapter(
+    Adapter[
+        Sequence[Sequence[Mapping[int, int]]], Sequence[Sequence[Mapping[str, str]]]
+    ]
+):
+    @classmethod
+    def from_thrift(
+        cls,
+        original: Sequence[Sequence[Mapping[int, int]]],
+        *,
+        transitive_annotation: Optional[Struct] = None,
+    ) -> Sequence[Sequence[Mapping[str, str]]]:
+        return [
+            [{str(key): str(value) for key, value in j.items()} for j in i]
+            for i in original
+        ]
+
+    @classmethod
+    def to_thrift(
+        cls,
+        adapted: Sequence[Sequence[Mapping[str, str]]],
+        *,
+        transitive_annotation: Optional[Struct] = None,
+    ) -> Sequence[Sequence[Mapping[int, int]]]:
+        return [
+            [{int(key): int(value) for key, value in j.items()} for j in i]
+            for i in adapted
+        ]

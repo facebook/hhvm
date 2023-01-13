@@ -17,7 +17,11 @@ from __future__ import annotations
 
 import unittest
 
-from thrift.python.test.adapters.atoi import AtoiAdapter, ItoaListAdapter
+from thrift.python.test.adapters.atoi import (
+    AtoiAdapter,
+    ItoaListAdapter,
+    ItoaNestedListAdapter,
+)
 
 
 class AtoiAdapterTest(unittest.TestCase):
@@ -32,3 +36,10 @@ class ItoaListAdapterTest(unittest.TestCase):
         ints = [1, 10, 100, 1000]
         strs = ItoaListAdapter.from_thrift(ints)
         self.assertEqual(ints, ItoaListAdapter.to_thrift(strs))
+
+
+class ItoaNestedListAdapterTest(unittest.TestCase):
+    def test_round_trip(self) -> None:
+        ints = [[{1: 2}, {10: 11}], [{100: 123}], [{1000: 2200}]]
+        strs = ItoaNestedListAdapter.from_thrift(ints)
+        self.assertEqual(ints, ItoaNestedListAdapter.to_thrift(strs))

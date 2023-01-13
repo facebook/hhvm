@@ -147,19 +147,33 @@ class AdapterTest(unittest.TestCase):
 
     def test_adapted_type_in_containers(self) -> None:
         int_list = [1, 2, 3]
+        int_list_list = [[1, 2, 3], [4, 5, 6]]
         int_set = {4, 5, 6}
         int_to_datetime_map = {42: datetime.fromtimestamp(int(time.time()))}
         foo = Foo(
-            int_list=int_list, int_set=int_set, int_to_datetime_map=int_to_datetime_map
+            int_list=int_list,
+            int_set=int_set,
+            int_to_datetime_map=int_to_datetime_map,
+            int_list_list=int_list_list,
         )
         self.assertEqual(foo.int_list, int_list)
         self.assertEqual(foo.int_set, int_set)
         self.assertEqual(foo.int_to_datetime_map, int_to_datetime_map)
+        self.assertEqual(foo.int_list_list, int_list_list)
 
     def test_adapted_container_of_adapted_type(self) -> None:
         str_list = ["1", "1", "2", "3", "5", "8", "13"]
         foo = Foo(adapted_list=str_list)
         self.assertEqual(foo.adapted_list, str_list)
+
+    def test_adapted_nested_container_of_adapted_type(self) -> None:
+        str_list = [
+            [{"1": "2", "3": "4"}, {"1": "5"}],
+            [{"2": "6"}],
+            [{"3": "5"}, {"8": "13"}],
+        ]
+        foo = Foo(adapted_list_nested=str_list)
+        self.assertEqual(foo.adapted_list_nested, str_list)
 
     def test_directly_annotated(self) -> None:
         foo = Foo()

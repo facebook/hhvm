@@ -43,19 +43,19 @@ typedef id.ExternId PathSegmentId
 
 struct Path {
   1: list<PathSegmentId> path;
-}
+} (py3.hidden)
 
 // Represents serialized data of unmasked fields.
 union MaskedData {
   1: id.ValueId full;
   2: map<id.FieldId, MaskedData> (cpp.template = "folly::F14VectorMap") fields;
   3: map<id.ValueId, MaskedData> (cpp.template = "folly::F14VectorMap") values;
-}
+} (py3.hidden)
 
 struct EncodedValue {
   1: type.BaseType wireType;
   2: standard.ByteBuffer data;
-}
+} (py3.hidden)
 
 // MaskedData uses ValueId to get encodedValues and map keys from the lists.
 @cpp.UseOpEncode
@@ -64,4 +64,4 @@ struct MaskedProtocolData {
   2: MaskedData data;
   3: list<EncodedValue> values;
   4: list<Value> keys;
-}
+} (py3.hidden)

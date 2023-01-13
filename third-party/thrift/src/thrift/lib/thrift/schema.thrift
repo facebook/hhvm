@@ -40,12 +40,14 @@ include "thrift/lib/thrift/type.thrift"
 @thrift.v1alpha
 package "facebook.com/thrift/type"
 
+namespace py3 apache.thrift.type
+
 /**
  * An unordered set of value ids, that can contain *at most one* value of any type.
  * Values correspond to the struct StructuredAnnotation.
  */
 @thrift.Experimental // TODO(afuller): Adapt!
-typedef set<id.ValueId> AnnotationIds
+typedef set<id.ValueId> AnnotationIds (py3.hidden)
 
 /**
  * An instance of an annotation, applied to some definition.
@@ -54,7 +56,7 @@ struct StructuredAnnotation {
   1: string name;
   2: string uri;
   3: map<string, protocol.Value> fields;
-}
+} (py3.hidden)
 
 /**
  * An list of definition ids, in the order they were declared in the IDL/AST.
@@ -63,7 +65,7 @@ struct StructuredAnnotation {
  */
 // TODO(afuller): Add conformance tests to make sure this is true.
 @thrift.Experimental // TODO(afuller): Adapt!
-typedef list<id.DefinitionId> DefinitionIds
+typedef list<id.DefinitionId> DefinitionIds (py3.hidden)
 
 /**
  * An list of programs ids, in the order they were included in the IDL/AST.
@@ -72,7 +74,7 @@ typedef list<id.DefinitionId> DefinitionIds
  */
 // TODO(afuller): Add conformance tests to make sure this is true.
 @thrift.Experimental // TODO(afuller): Adapt!
-typedef list<id.ProgramId> IncludeIds
+typedef list<id.ProgramId> IncludeIds (py3.hidden)
 
 /**
  * A decoded URI.
@@ -95,10 +97,10 @@ struct DecodedUri {
 
   /** The fragment, if present. */
   6: string fragment;
-}
+} (py3.hidden)
 
 /** A list of parsed packages, accessible via a `PackageId`. */
-typedef list<DecodedUri> PackageList
+typedef list<DecodedUri> PackageList (py3.hidden)
 
 /**
  * The (pre)release state for a given definition/feature.
@@ -207,7 +209,7 @@ struct DefinitionAttrs {
 
   /** The release state associated with this definition. */
   5: ReleaseState releaseState;
-}
+} (py3.hidden)
 
 /**
  * A Thrift enum value.
@@ -229,7 +231,7 @@ struct EnumValue {
   // TODO(afuller): Consider adding support for specifying aliases by specifying
   // multiple definitions for the same value in the IDL.
   2: i32 value;
-}
+} (py3.hidden)
 
 /**
  * A Thrift enum.
@@ -247,7 +249,7 @@ struct Enum {
    * Changing the order of values is always backward compatible.
    */
   2: list<EnumValue> values;
-}
+} (py3.hidden)
 
 /** The field qualifier. */
 enum FieldQualifier {
@@ -293,7 +295,7 @@ struct Field {
    */
   // TODO(afuller): Document compatibility semantics, and add conformance tests.
   5: id.ValueId customDefault;
-}
+} (py3.hidden)
 
 /**
  * A container for the fields of a structured type (e.g. struct, union, exception).
@@ -303,7 +305,7 @@ struct Field {
 // TODO(afuller): Add native wrappers that provide O(1) access to fields by id,
 // name, type, etc.
 @thrift.Experimental // TODO: Adapt!
-typedef list<Field> Fields
+typedef list<Field> Fields (py3.hidden)
 
 /**
  * A Thrift struct.
@@ -321,7 +323,7 @@ struct Struct {
    * Changing the order of the fields is always backward compatible.
    */
   2: Fields fields;
-}
+} (py3.hidden)
 
 /**
  * A Thrift union.
@@ -339,7 +341,7 @@ struct Union {
    * Changing the order of the fields is always backward compatible.
    */
   2: Fields fields;
-}
+} (py3.hidden)
 
 /** The error kind. */
 enum ErrorKind {
@@ -396,7 +398,7 @@ struct Exception {
 
   /** The fault attribution of the exception. */
   5: ErrorBlame blame;
-}
+} (py3.hidden)
 
 /**
  * A container of exceptions.
@@ -404,7 +406,7 @@ struct Exception {
  * Changing the order of exceptions is always backward compatible.
  */
 @thrift.Experimental // TODO: Adapt!
-typedef list<Field> Exceptions
+typedef list<Field> Exceptions (py3.hidden)
 
 /**
  * A Thrift Param list. A param list is unnamed.
@@ -418,7 +420,7 @@ struct Paramlist {
    * Changing the order of the fields is always backward compatible.
    */
   1: Fields fields;
-}
+} (py3.hidden)
 
 /** The function qualifier. */
 enum FunctionQualifier {
@@ -441,7 +443,7 @@ struct Stream {
   1: type.Type payload;
   /** The exceptions from the stream. */
   2: Exceptions exceptions;
-}
+} (py3.hidden)
 
 /**
  * A Thrift sink type.
@@ -458,7 +460,7 @@ struct Sink {
   3: type.Type finalResponse;
   /** The exceptions from the server. */
   4: Exceptions serverExceptions;
-}
+} (py3.hidden)
 
 /**
  * A Thrift interaction.
@@ -476,7 +478,7 @@ struct Interaction {
    * Changing the order of the fields is always backward compatible.
    */
   2: Functions functions;
-}
+} (py3.hidden)
 
 /** A Thrift function return type. */
 union ReturnType {
@@ -487,10 +489,10 @@ union ReturnType {
   3: Sink sinkType;
   /** The interaction return type. */
   4: id.DefinitionId interactionType;
-}
+} (py3.hidden)
 
 /** A container of Thrift function return type. */
-typedef list<ReturnType> ReturnTypes
+typedef list<ReturnType> ReturnTypes (py3.hidden)
 
 /**
  * A Thrift function.
@@ -516,7 +518,7 @@ struct Function {
 
   /** The exceptions of the function. */
   5: Exceptions exceptions;
-}
+} (py3.hidden)
 
 /**
  * A container for the functions of a interface type (e.g. service and interaction).
@@ -524,7 +526,7 @@ struct Function {
  * Changing the order of fields is always backward compatible.
  */
 @thrift.Experimental // TODO: Adapt!
-typedef list<Function> Functions
+typedef list<Function> Functions (py3.hidden)
 
 /**
  * A Thrift service.
@@ -547,7 +549,7 @@ struct Service {
   @thrift.Deprecated
   @thrift.Box
   3: optional Service inheritedService;
-}
+} (py3.hidden)
 
 /**
  * A Thrift constant.
@@ -565,7 +567,7 @@ struct Const {
 
   /** The value the const is initialized to. */
   3: id.ValueId value;
-}
+} (py3.hidden)
 
 /**
  * A Thrift typedef.
@@ -579,7 +581,7 @@ struct Typedef {
 
   /** The underlying type. */
   2: type.Type type;
-}
+} (py3.hidden)
 
 /**
  * Any Thrift definition.
@@ -595,10 +597,10 @@ union Definition {
   6: Const constDef;
   7: Service serviceDef;
   8: Interaction interactionDef;
-}
+} (py3.hidden)
 
 /** A list of definitions (Structs, Enums, Services, etc), accessible by `DefinitionId`. */
-typedef list<Definition> DefinitionList
+typedef list<Definition> DefinitionList (py3.hidden)
 
 /**
  * A Thrift program.
@@ -641,10 +643,10 @@ struct Program {
   // TODO(afuller): Fix type resolution order bugs in the parser to make this
   // comment true in all cases.
   4: DefinitionIds definitions;
-}
+} (py3.hidden)
 
 /** A list of programs, accessible by `ProgramId`. */
-typedef list<Program> ProgramList
+typedef list<Program> ProgramList (py3.hidden)
 
 /**
  * A Thrift schema represented as a collection of Thrift programs and associated
@@ -670,4 +672,4 @@ struct Schema {
 
   /** The definitions, accessible by `DefinitionId`. */
   5: DefinitionList definitions;
-}
+} (py3.hidden)

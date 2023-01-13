@@ -1020,7 +1020,7 @@ class Collator {
 
   public function __construct(string $locale);
   public function asort(
-    inout $arr,
+    inout dynamic $arr,
     int $sort_flag = Collator::SORT_REGULAR,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function compare(
@@ -1043,7 +1043,7 @@ class Collator {
     inout $arr,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function sort(
-    inout $arr,
+    inout dynamic $arr,
     int $sort_flag = Collator::SORT_REGULAR,
   ): HH\FIXME\MISSING_RETURN_TYPE;
 }

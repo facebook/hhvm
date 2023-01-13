@@ -53,6 +53,15 @@ using FromThriftFieldType = decltype(Adapter::fromThriftField(
 template <typename Adapter, typename ThriftT, typename Struct>
 constexpr bool is_field_adapter_v =
     folly::is_detected_v<FromThriftFieldType, Adapter, ThriftT, Struct>;
+
+template <
+    typename Adapter,
+    int16_t FieldId,
+    typename ThriftT,
+    typename Struct,
+    typename R = FromThriftFieldIdType<Adapter, FieldId, ThriftT, Struct>>
+using if_field_adapter =
+    std::enable_if_t<is_field_adapter_v<Adapter, ThriftT, Struct>, R>;
 template <
     typename Adapter,
     typename ThriftT,
@@ -93,8 +102,8 @@ using if_not_clear_adapter =
 // Thrift object containing the field and the field ID as a second argument
 // to Adapter::fromThriftField.
 template <typename Adapter, int16_t FieldId, typename ThriftT, typename Struct>
-constexpr FromThriftFieldIdType<Adapter, FieldId, ThriftT, Struct>
-fromThriftField(ThriftT&& value, Struct& object) {
+constexpr if_field_adapter<Adapter, FieldId, ThriftT, Struct> fromThriftField(
+    ThriftT&& value, Struct& object) {
   return Adapter::fromThriftField(
       std::forward<ThriftT>(value), FieldContext<Struct, FieldId>{object});
 }

@@ -206,7 +206,7 @@ struct GetDefault<
 
   template <typename AdapterT = Adapter>
   const adapt_detail::
-      FromThriftFieldIdType<AdapterT, id, type::native_type<UTag>, Struct>&
+      if_field_adapter<AdapterT, id, type::native_type<UTag>, Struct>&
       operator()() const {
     return staticDefault([] {
       // TODO(afuller): Remove or move this logic to the adapter.
@@ -240,7 +240,7 @@ struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, id>> {
 
   template <typename AdapterT = Adapter>
   const adapt_detail::
-      FromThriftFieldIdType<AdapterT, id, type::native_type<UTag>, Struct>&
+      if_field_adapter<AdapterT, id, type::native_type<UTag>, Struct>&
       operator()() const {
     return staticDefault([] {
       // TODO(afuller): Remove or move this logic to the adapter.

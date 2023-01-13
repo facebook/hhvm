@@ -218,7 +218,7 @@ struct Create<
 
   template <typename AdapterT = Adapter>
   constexpr adapt_detail::
-      FromThriftFieldIdType<AdapterT, FieldId, type::native_type<Tag>, Struct>
+      if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct>
       operator()(Struct& object) const {
     auto obj = AdapterT::fromThriftField(
         Create<Tag>{}(), FieldContext<Struct, FieldId>{object});

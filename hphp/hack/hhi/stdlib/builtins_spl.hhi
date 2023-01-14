@@ -153,7 +153,7 @@ class SplFileObject
     string $enclosure = "\"",
     string $escape = "\\",
   ): varray<mixed>;
-  public function fgets();
+  public function fgets(): HH\FIXME\MISSING_RETURN_TYPE;
   public function fgetss(?string $allowable_tags = null): string;
   public function flock(int $operation, inout mixed $wouldblock): bool;
   public function fpassthru(): int;

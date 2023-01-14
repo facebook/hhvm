@@ -158,7 +158,7 @@ class DOMNode {
     ?darray<arraykey, mixed> $xpath = null,
     ?varray<mixed> $ns_prefixes = null,
   ): int;
-  public function getNodePath();
+  public function getNodePath(): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class DOMDocument extends DOMNode {

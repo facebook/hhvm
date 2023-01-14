@@ -28,7 +28,7 @@ class RegexIterator<Tv> extends FilterIterator<Tv> {
     int $preg_flags = 0,
   );
   public function accept(): bool;
-  public function getRegex();
+  public function getRegex(): HH\FIXME\MISSING_RETURN_TYPE;
   public function getMode(): int;
   public function getFlags(): int;
   public function getPregFlags(): int;

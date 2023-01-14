@@ -15,16 +15,20 @@ class IteratorIterator<Tv>
   public function __construct(Traversable<Tv> $iterator);
   public function getInnerIterator(): Iterator<Tv>;
   public function valid(): bool;
-  public function key();
+  public function key(): HH\FIXME\MISSING_RETURN_TYPE;
   public function current(): HH\FIXME\POISON_MARKER<Tv>;
   public function next(): void;
   public function rewind(): void;
   public function call__(
     HH\FIXME\MISSING_PARAM_TYPE $func,
     HH\FIXME\MISSING_PARAM_TYPE $params,
-  );
-  protected function _fetch(HH\FIXME\MISSING_PARAM_TYPE $check);
-  protected function _getPosition();
-  protected function _setPosition(HH\FIXME\MISSING_PARAM_TYPE $position);
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  protected function _fetch(
+    HH\FIXME\MISSING_PARAM_TYPE $check,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  protected function _getPosition(): HH\FIXME\MISSING_RETURN_TYPE;
+  protected function _setPosition(
+    HH\FIXME\MISSING_PARAM_TYPE $position,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 
 }

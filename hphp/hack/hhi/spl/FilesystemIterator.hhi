@@ -32,11 +32,11 @@ class FilesystemIterator extends DirectoryIterator {
     HH\FIXME\MISSING_PARAM_TYPE $flags = null,
   );
   public function current(): HH\FIXME\POISON_MARKER<SplFileInfo>;
-  public function getFlags();
-  public function key();
+  public function getFlags(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function key(): HH\FIXME\MISSING_RETURN_TYPE;
   public function next(): void;
   public function rewind(): void;
-  public function setFlags(int $flags);
+  public function setFlags(int $flags): HH\FIXME\MISSING_RETURN_TYPE;
   public function seek(int $position): void;
   public function __toString(): string;
 }

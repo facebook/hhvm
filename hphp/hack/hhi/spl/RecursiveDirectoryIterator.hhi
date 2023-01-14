@@ -23,7 +23,7 @@ class RecursiveDirectoryIterator
   public function hasChildren(): bool;
   // implementation can also return string or false
   public function getChildren(): HH\FIXME\POISON_MARKER<this>;
-  public function getSubPath();
-  public function getSubPathname();
+  public function getSubPath(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getSubPathname(): HH\FIXME\MISSING_RETURN_TYPE;
 
 }

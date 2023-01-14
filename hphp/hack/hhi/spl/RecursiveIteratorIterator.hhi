@@ -31,24 +31,28 @@ class RecursiveIteratorIterator<Tv> implements OuterIterator<Tv> {
   );
   public function getInnerIterator(): Iterator<Tv>;
   public function current(): Tv;
-  public function key();
+  public function key(): HH\FIXME\MISSING_RETURN_TYPE;
   public function next(): void;
   public function rewind(): void;
   public function valid(): bool;
-  public function beginChildren();
-  public function beginIteration();
-  public function callGetChildren();
-  public function callHasChildren();
-  public function endChildren();
-  public function endIteration();
-  public function getDepth();
-  public function getMaxDepth();
-  public function getSubIterator(HH\FIXME\MISSING_PARAM_TYPE $level = null);
-  public function nextElement();
-  public function setMaxDepth(HH\FIXME\MISSING_PARAM_TYPE $max_depth = -1);
+  public function beginChildren(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function beginIteration(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function callGetChildren(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function callHasChildren(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endChildren(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endIteration(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getDepth(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getMaxDepth(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getSubIterator(
+    HH\FIXME\MISSING_PARAM_TYPE $level = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function nextElement(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setMaxDepth(
+    HH\FIXME\MISSING_PARAM_TYPE $max_depth = -1,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function call__(
     HH\FIXME\MISSING_PARAM_TYPE $func,
     HH\FIXME\MISSING_PARAM_TYPE $params,
-  );
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 
 }

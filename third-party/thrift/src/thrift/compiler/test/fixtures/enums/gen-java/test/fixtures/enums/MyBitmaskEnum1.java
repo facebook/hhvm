@@ -44,6 +44,9 @@ public enum MyBitmaskEnum1 implements com.facebook.thrift.enums.BaseEnum, com.fa
         }
     }
 
+    static {
+      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("test.dev/fixtures/enums/MyBitmaskEnum1"), MyBitmaskEnum1.class, MyBitmaskEnum1::read0));
+    }
     public static com.facebook.thrift.payload.Reader<MyBitmaskEnum1> asReader() {
         return MyBitmaskEnum1::read0;
     }

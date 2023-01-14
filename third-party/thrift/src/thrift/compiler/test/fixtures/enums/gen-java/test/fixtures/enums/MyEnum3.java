@@ -50,6 +50,9 @@ public enum MyEnum3 implements com.facebook.thrift.enums.BaseEnum, com.facebook.
         }
     }
 
+    static {
+      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("test.dev/fixtures/enums/MyEnum3"), MyEnum3.class, MyEnum3::read0));
+    }
     public static com.facebook.thrift.payload.Reader<MyEnum3> asReader() {
         return MyEnum3::read0;
     }

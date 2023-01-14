@@ -47,6 +47,9 @@ public enum Metasyntactic implements com.facebook.thrift.enums.BaseEnum, com.fac
         }
     }
 
+    static {
+      com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(new com.facebook.thrift.type.UniversalName("test.dev/fixtures/enums/Metasyntactic"), Metasyntactic.class, Metasyntactic::read0));
+    }
     public static com.facebook.thrift.payload.Reader<Metasyntactic> asReader() {
         return Metasyntactic::read0;
     }

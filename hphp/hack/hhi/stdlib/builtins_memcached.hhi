@@ -149,13 +149,13 @@ class Memcached {
   public function getWithCasToken(
     HH\FIXME\MISSING_PARAM_TYPE $key,
     HH\FIXME\MISSING_PARAM_TYPE $cache_cb,
-    inout $cas_token,
+    inout HH\FIXME\MISSING_PARAM_TYPE $cas_token,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getByKeyWithCasToken(
     string $server_key,
     string $key,
     HH\FIXME\MISSING_PARAM_TYPE $cache_cb,
-    inout $cas_token,
+    inout HH\FIXME\MISSING_PARAM_TYPE $cas_token,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getDelayed(
     HH\FIXME\MISSING_PARAM_TYPE $keys,
@@ -179,13 +179,13 @@ class Memcached {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getMultiWithCasTokens(
     HH\FIXME\MISSING_PARAM_TYPE $keys,
-    inout $cas_tokens,
+    inout HH\FIXME\MISSING_PARAM_TYPE $cas_tokens,
     int $flags = 0,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getMultiByKeyWithCasTokens(
     string $server_key,
     HH\FIXME\MISSING_PARAM_TYPE $keys,
-    inout $cas_tokens,
+    inout HH\FIXME\MISSING_PARAM_TYPE $cas_tokens,
     int $flags = 0,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getOption(int $option): HH\FIXME\MISSING_RETURN_TYPE;

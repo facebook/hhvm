@@ -20,12 +20,12 @@ class SpoofChecker {
   public function __construct();
   public function isSuspicious(
     string $text,
-    inout $issuesFound,
+    inout HH\FIXME\MISSING_PARAM_TYPE $issuesFound,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function areConfusable(
     string $s1,
     string $s2,
-    inout $issuesFound,
+    inout HH\FIXME\MISSING_PARAM_TYPE $issuesFound,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function setAllowedLocales(
     string $localesList,

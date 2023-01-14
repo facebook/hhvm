@@ -1040,7 +1040,7 @@ class Collator {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function setStrength(int $strength): HH\FIXME\MISSING_RETURN_TYPE;
   public function sortWithSortKeys(
-    inout $arr,
+    inout HH\FIXME\MISSING_PARAM_TYPE $arr,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function sort(
     inout dynamic $arr,
@@ -1212,12 +1212,12 @@ class IntlDateFormatter {
   public function isLenient(): HH\FIXME\MISSING_RETURN_TYPE;
   public function localtime(
     string $string,
-    inout $position,
+    inout HH\FIXME\MISSING_PARAM_TYPE $position,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function parse(string $string): HH\FIXME\MISSING_RETURN_TYPE;
   public function parseWithPosition(
     string $string,
-    inout $position,
+    inout HH\FIXME\MISSING_PARAM_TYPE $position,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function setCalendar(
     HH\FIXME\MISSING_PARAM_TYPE $which,
@@ -1287,7 +1287,7 @@ class IntlTimeZone {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public static function getCanonicalID(
     string $zoneId,
-    inout $isSystemID,
+    inout HH\FIXME\MISSING_PARAM_TYPE $isSystemID,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getDSTSavings(): HH\FIXME\MISSING_RETURN_TYPE;
   public function getDisplayName(

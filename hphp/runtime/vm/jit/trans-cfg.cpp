@@ -190,6 +190,20 @@ TransCFG::Node::~Node() {
   }
 }
 
+void TransCFG::Node::removeInArc(Arc* arc) {
+  auto pos = std::find(m_inArcs.begin(), m_inArcs.end(), arc);
+  assertx(pos != m_inArcs.end());
+  *pos = m_inArcs.back();
+  m_inArcs.pop_back();
+}
+
+void TransCFG::Node::removeOutArc(Arc* arc) {
+  auto pos = std::find(m_outArcs.begin(), m_outArcs.end(), arc);
+  assertx(pos != m_outArcs.end());
+  *pos = m_outArcs.back();
+  m_outArcs.pop_back();
+}
+
 void TransCFG::addNode(TransID id, int64_t weight) {
   auto const idx = m_transIds.size();
   m_transIds.push_back(id);
@@ -218,6 +232,26 @@ void TransCFG::addArc(TransID srcId, TransID dstId, int64_t weight) {
   Arc* arc = new Arc(srcId, dstId, weight);
   m_nodeInfo[srcIdx].addOutArc(arc);
   m_nodeInfo[dstIdx].addInArc(arc);
+}
+
+void TransCFG::removeArc(TransID srcId, TransID dstId) {
+  assertx(hasNode(srcId));
+  assertx(hasNode(dstId));
+  auto const srcIdx = m_idToIdx[srcId];
+  auto const dstIdx = m_idToIdx[dstId];
+
+  Arc* toRemove = nullptr;
+  for (auto arc : m_nodeInfo[srcIdx].outArcs()) {
+    if (arc->dst() == dstId) {
+      toRemove = arc;
+      break;
+    }
+  }
+
+  assertx(toRemove != nullptr);
+  m_nodeInfo[srcIdx].removeOutArc(toRemove);
+  m_nodeInfo[dstIdx].removeInArc(toRemove);
+  delete toRemove;
 }
 
 bool TransCFG::hasArc(TransID srcId, TransID dstId) const {

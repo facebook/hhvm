@@ -15,11 +15,14 @@
 */
 #pragma once
 
+#include "hphp/runtime/base/types.h"
+
 #include <vector>
 
 namespace HPHP::jit {
 
 struct RegionDesc;
+struct TransCFG;
 struct Type;
 
 //////////////////////////////////////////////////////////////////////
@@ -30,6 +33,8 @@ struct Type;
  * that are completely unreachable after these arcs are removed.
  */
 void region_prune_arcs(RegionDesc& region, std::vector<Type>* input = nullptr);
+
+void trans_cfg_prune_arcs(TransCFG& cfg, const std::vector<TransID>& nodes);
 
 //////////////////////////////////////////////////////////////////////
 

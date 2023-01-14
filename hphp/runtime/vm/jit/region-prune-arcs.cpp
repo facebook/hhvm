@@ -24,8 +24,10 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/trans-cfg.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP::jit {
 
@@ -307,6 +309,74 @@ void region_prune_arcs(RegionDesc& region, std::vector<Type>* input) {
       FTRACE(2, "Pruning block: B{}\n", blockId);
       region.deleteBlock(blockId);
     }
+  }
+
+  FTRACE(2, "\n");
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void trans_cfg_prune_arcs(TransCFG& cfg, const std::vector<TransID>& nodes) {
+  FTRACE(4, "trans_cfg_prune_arcs\n");
+
+  if (nodes.size() == 0) return;
+
+  auto const numNodes = nodes.size();
+  auto pruneArcs = PruneArcs<TransID>('t', numNodes);
+
+  for (auto idx = uint32_t{0}; idx < numNodes; ++idx) {
+    auto const tid = nodes[idx];
+    auto const rec = profData()->transRec(tid);
+    assertx(rec->region()->blocks().size() == 1);
+    auto const& b = rec->region()->blocks()[0];
+    assertx(b->id() == tid);
+    pruneArcs.registerNode(idx, tid, b->typePreConditions(), b->postConds());
+  }
+
+  auto const anyState = entry_state(profData()->transRec(nodes[0])->func());
+
+  // Mark the node where the first translation will start as entry node.
+  pruneArcs.addEntryNode(0, anyState);
+
+  for (auto idx = uint32_t{0}; idx < numNodes; ++idx) {
+    auto const tid = nodes[idx];
+
+    // Mark all nodes without predecessors as entry nodes.
+    if (cfg.inArcs(tid).empty()) {
+      pruneArcs.addEntryNode(idx, anyState);
+    }
+
+    // Mark all successors of nodes that break region as entry nodes.
+    if (breaksRegion(profData()->transRec(tid)->lastSrcKey())) {
+      for (auto arc : cfg.outArcs(tid)) {
+        pruneArcs.addEntryNode(pruneArcs.nodeIdx(arc->dst()), anyState);
+      }
+    }
+  }
+
+  auto const succs = [&](TransID tid) {
+    std::vector<TransID> s;
+    for (auto arc : cfg.outArcs(tid)) s.emplace_back(arc->dst());
+    return s;
+  };
+
+  pruneArcs.iterate(succs);
+
+  // Keep marking unreachable nodes as entry nodes and continue iteration. These
+  // nodes were obviously reached during profiling, perhaps we are missing some
+  // info due to interpreting. These are the nodes where regionizeFunc() is
+  // likely to start new translations.
+  for (auto idx = uint32_t{0}; idx < numNodes; ++idx) {
+    if (pruneArcs.isUnreachable(idx)) {
+      pruneArcs.addEntryNode(idx, anyState);
+      pruneArcs.iterate(succs);
+      assertx(!pruneArcs.isUnreachable(idx));
+    }
+  }
+
+  for (auto& arc : pruneArcs.removableArcs(succs)) {
+    FTRACE(2, "Pruning arc: t{} -> t{}\n", arc.first, arc.second);
+    cfg.removeArc(arc.first, arc.second);
   }
 
   FTRACE(2, "\n");

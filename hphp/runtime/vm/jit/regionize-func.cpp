@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/region-prune-arcs.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -329,9 +330,7 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
     transCFGAnnot = cfgStream.str();
   }
 
-  auto arcs = cfg.arcs();
   auto nodes = cfg.nodes();
-
   std::sort(
     nodes.begin(),
     nodes.end(),
@@ -354,6 +353,10 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
       return tid1 < tid2;
     }
   );
+
+  trans_cfg_prune_arcs(cfg, nodes);
+
+  auto arcs = cfg.arcs();
 
   TransCFG::ArcPtrSet coveredArcs;
   TransIDSet coveredNodes;

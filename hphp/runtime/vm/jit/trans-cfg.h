@@ -65,6 +65,8 @@ struct TransCFG {
     const ArcPtrVec& outArcs()     const { return m_outArcs;         }
     void             addInArc (Arc* arc) { m_inArcs.push_back(arc);  }
     void             addOutArc(Arc* arc) { m_outArcs.push_back(arc); }
+    void             removeInArc(Arc* arc);
+    void             removeOutArc(Arc* arc);
    private:
     TransID   m_id;
     int64_t   m_weight;
@@ -87,6 +89,7 @@ struct TransCFG {
   bool                        hasNode(TransID id) const;
   void                        addArc(TransID srcId, TransID dstId,
                                      int64_t weight=0);
+  void                        removeArc(TransID srcId, TransID dstId);
   bool                        hasArc(TransID srcId, TransID dstId) const;
   void                        print(std::ostream& out,
                                     FuncId funcId,

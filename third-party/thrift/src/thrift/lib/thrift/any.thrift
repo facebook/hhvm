@@ -35,6 +35,10 @@ namespace py thrift.lib.thrift.any
  * Always contains enough information to deserialize the stored value,  if the
  * type/protocol are recognized.
  */
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.any.AnyAdapter",
+  typeClassName = "com.facebook.thrift.any.Any",
+}
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef any_rep.AnyStruct Any (thrift.uri = "")
 
@@ -43,6 +47,10 @@ typedef any_rep.AnyStruct Any (thrift.uri = "")
  * Unlike `Any`, `SemiAny` may not hold enough information to deserialized the
  * stored value.
  */
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.any.SemiAnyAdapter",
+  typeClassName = "com.facebook.thrift.any.SemiAny",
+}
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef any_rep.SemiAnyStruct SemiAny (thrift.uri = "")
 

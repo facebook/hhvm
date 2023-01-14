@@ -1145,6 +1145,7 @@ class cpp_mstch_struct : public mstch_struct {
             {"struct:extra_namespace", &cpp_mstch_struct::extra_namespace},
             {"struct:type_tag", &cpp_mstch_struct::type_tag},
             {"struct:cpp_use_op_encode", &cpp_mstch_struct::cpp_use_op_encode},
+            {"struct:patch?", &cpp_mstch_struct::patch},
         });
   }
   mstch::node fields_size() { return std::to_string(struct_->fields().size()); }
@@ -1618,6 +1619,12 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node any() {
     return struct_->uri() != "" &&
         !struct_->has_annotation("cpp.detail.no_any");
+  }
+
+  mstch::node patch() {
+    return !struct_->is_exception() &&
+        struct_->program()->inherit_annotation_or_null(
+            *struct_, kGeneratePatchUri) != nullptr;
   }
 
   std::shared_ptr<cpp2_generator_context> cpp_context_;

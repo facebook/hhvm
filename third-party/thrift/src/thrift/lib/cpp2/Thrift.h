@@ -145,6 +145,12 @@ struct struct_private_access {
 
   template <typename T>
   static constexpr auto __fbthrift_field_size_v = T::__fbthrift_field_size_v;
+
+  template <typename T>
+  static typename T::__fbthrift_patch_struct __fbthrift_patch_struct();
+
+  template <typename T>
+  using patch_struct = decltype(__fbthrift_patch_struct<T>());
 };
 //  TODO(dokwon): Remove all usage of struct_private_access and standardize on
 //  private_access.

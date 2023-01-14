@@ -30,6 +30,20 @@ namespace {
 
 using namespace test::patch;
 
+static_assert(test::same_type<
+              MyStructPatch,
+              ::apache::thrift::op::patch_type<type::struct_t<MyStruct>>>);
+
+static_assert(
+    test::same_type<MyStructPatch, ::apache::thrift::op::patch_type<MyStruct>>);
+
+static_assert(test::same_type<
+              MyUnionPatch,
+              ::apache::thrift::op::patch_type<type::union_t<MyUnion>>>);
+
+static_assert(
+    test::same_type<MyUnionPatch, ::apache::thrift::op::patch_type<MyUnion>>);
+
 static_assert(::apache::thrift::adapt_detail::has_inplace_toThrift<
               ::apache::thrift::op::detail::FieldPatchAdapter,
               MyStructFieldPatch>::value);

@@ -961,6 +961,7 @@ class MyData final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_patch_struct = MyDataPatchStruct;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::data1,
@@ -1165,6 +1166,7 @@ class InnerUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_patch_struct = InnerUnionPatchStruct;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::innerOption
@@ -1413,6 +1415,7 @@ class MyUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_patch_struct = MyUnionPatchStruct;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::option1,
@@ -1809,6 +1812,7 @@ class LateDefStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_patch_struct = LateDefStructPatchStruct;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
   >;
@@ -1900,6 +1904,7 @@ class MyStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_patch_struct = MyStructPatchStruct;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::boolVal,
@@ -3672,6 +3677,7 @@ class Recursive final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_patch_struct = RecursivePatchStruct;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::nodes
@@ -3815,6 +3821,7 @@ class Bar final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_patch_struct = BarPatchStruct;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::loop
@@ -3948,6 +3955,7 @@ class Loop final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
+  using __fbthrift_patch_struct = LoopPatchStruct;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::bar

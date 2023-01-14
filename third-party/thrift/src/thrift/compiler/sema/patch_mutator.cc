@@ -30,9 +30,6 @@ namespace thrift {
 namespace compiler {
 namespace {
 
-constexpr auto kGeneratePatchUri = "facebook.com/thrift/op/GeneratePatch";
-constexpr auto kAssignOnlyPatchUri = "facebook.com/thrift/op/AssignOnlyPatch";
-
 // TODO(afuller): Index all types by uri, and find them that way.
 const char* getPatchTypeName(t_base_type::type base_type) {
   switch (base_type) {

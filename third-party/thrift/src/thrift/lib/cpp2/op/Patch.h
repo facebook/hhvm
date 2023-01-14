@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/detail/Patch.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/thrift/gen-cpp2/patch_types.h>
@@ -50,6 +51,14 @@ DoublePatch patchType(type::double_t);
 op::StringPatch patchType(type::string_t);
 op::BinaryPatch patchType(type::binary_t);
 
+template <class T>
+StructPatch<::apache::thrift::detail::st::private_access::patch_struct<T>>
+    patchType(type::struct_t<T>);
+
+template <class T>
+UnionPatch<::apache::thrift::detail::st::private_access::patch_struct<T>>
+    patchType(type::union_t<T>);
+
 } // namespace detail
 
 /// The patch represenations for the base thrift types.
@@ -69,8 +78,8 @@ op::BinaryPatch patchType(type::binary_t);
 /// * I32Patch patch;
 /// * patch = 2;          // Equivalent to calling patch.assign(2).
 /// * patch.apply(value); // Sets value to 2;
-template <typename Tag>
-using patch_type = decltype(detail::patchType(Tag{}));
+template <typename T>
+using patch_type = decltype(detail::patchType(type::infer_tag<T>{}));
 
 } // namespace op
 } // namespace thrift

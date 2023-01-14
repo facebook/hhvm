@@ -203,6 +203,7 @@ module.exports = {
             'fb/languages/cpp/generated-code',
             'fb/languages/cpp/field-access',
             'fb/languages/cpp/isset-bitpacking',
+            'fb/languages/cpp/reflection',
             {
               type: 'category',
               label: 'CodeFrameworks',

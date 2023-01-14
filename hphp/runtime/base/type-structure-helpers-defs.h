@@ -47,7 +47,7 @@ const StaticString s_typevars("typevars");
 const StaticString s_typevar_types("typevar_types");
 const StaticString s_hh_this("HH\\this");
 const StaticString s_type_structure_non_existant_class(
-  "hh\\__internal\\type_structure_non_existant_class");
+  "HH\\__internal\\type_structure_non_existant_class");
 
 // Fixed error messages
 const StaticString s_reified_type_must_be_ts(

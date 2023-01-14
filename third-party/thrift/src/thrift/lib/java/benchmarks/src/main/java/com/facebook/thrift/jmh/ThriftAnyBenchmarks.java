@@ -16,11 +16,11 @@
 
 package com.facebook.thrift.jmh;
 
-import com.facebook.thrift.any.LazyAny;
+import com.facebook.thrift.any.Any;
 import com.facebook.thrift.protocol.ByteBufTProtocol;
-import com.facebook.thrift.test.any.Image;
-import com.facebook.thrift.test.any.Rectangle;
-import com.facebook.thrift.test.any.SolidColor;
+import com.facebook.thrift.test.thrift.any.Image;
+import com.facebook.thrift.test.thrift.any.Rectangle;
+import com.facebook.thrift.test.thrift.any.SolidColor;
 import com.facebook.thrift.util.SerializationProtocol;
 import com.facebook.thrift.util.SerializerUtil;
 import com.facebook.thrift.util.resources.RpcResources;
@@ -34,7 +34,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.infra.Blackhole;
 
-public class LazyAnyBenchmarks {
+public class ThriftAnyBenchmarks {
 
   private static final byte[] JPG_IMAGE = new byte[5000];
 
@@ -59,7 +59,7 @@ public class LazyAnyBenchmarks {
       this.byteBufTProtocols =
           SerializerUtil.toByteBufProtocol(getProtocol(protocol), this.rectangleBytes);
 
-      setupLazyAny();
+      setupAny();
     }
 
     ByteBuf target;
@@ -72,13 +72,13 @@ public class LazyAnyBenchmarks {
       rectangleBytes.release();
     }
 
-    private void setupLazyAny() {
-      LazyAny.Builder builder = new LazyAny.Builder(getCanvas(this.size));
+    private void setupAny() {
+      Any.Builder builder = new Any.Builder(getCanvas(this.size));
       if ("uri".equals(this.type)) {
         builder.useUri();
       }
 
-      LazyAny<SolidColor> canvas = builder.build();
+      Any<SolidColor> canvas = builder.build();
 
       Rectangle rectangle =
           new Rectangle.Builder().setWidth(10).setLen(20).setCanvas(canvas).build();
@@ -107,14 +107,14 @@ public class LazyAnyBenchmarks {
   }
 
   @Benchmark
-  public void benchmarkLazyAnySerialize(Input input) {
+  public void benchmarkAnySerialize(Input input) {
     input.target.clear();
-    LazyAny.Builder builder = new LazyAny.Builder(getCanvas(input.size));
+    Any.Builder builder = new Any.Builder(getCanvas(input.size));
     if ("uri".equals(input.type)) {
       builder.useUri();
     }
 
-    LazyAny<SolidColor> canvas = builder.build();
+    Any canvas = builder.build();
 
     Rectangle rectangle = new Rectangle.Builder().setWidth(10).setLen(20).setCanvas(canvas).build();
 
@@ -126,7 +126,7 @@ public class LazyAnyBenchmarks {
   }
 
   @Benchmark
-  public void benchmarkLazyAnyDeserialize(Input input) {
+  public void benchmarkAnyDeserialize(Input input) {
     input.rectangleBytes.markReaderIndex();
     Rectangle received = Rectangle.read0(input.byteBufTProtocols);
     if ("small".equals(input.size)) {

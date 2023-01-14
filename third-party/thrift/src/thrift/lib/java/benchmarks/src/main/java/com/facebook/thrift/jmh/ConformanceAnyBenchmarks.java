@@ -23,12 +23,11 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 
-public class AnyBenchmarks {
-
+public class ConformanceAnyBenchmarks {
   public static void main(String... args) throws Exception {
     Options opt =
         new OptionsBuilder()
-            .include(ThriftAnyBenchmarks.class.getSimpleName())
+            .include(ConformanceLazyAnyBenchmarks.class.getSimpleName())
             .mode(Mode.Throughput)
             .forks(1)
             .warmupIterations(20)
@@ -41,7 +40,6 @@ public class AnyBenchmarks {
                 "-Xmx4g",
                 "-Dio.netty.leakDetectionLevel=disabled",
                 "--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED",
-                "--add-opens=java.base/java.lang=ALL-UNNAMED",
                 "-Dio.netty.tryReflectionSetAccessible=true",
                 "-Dio.netty.buffer.checkBounds=false",
                 "-Dio.netty.buffer.checkAccessible=false",

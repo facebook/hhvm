@@ -60,6 +60,11 @@ class Wrap {
   using underlying_tag = Tag;
 
   Wrap() = default;
+  Wrap(const Wrap&) = default;
+  Wrap(Wrap&&) noexcept = default;
+  Wrap& operator=(const Wrap&) = default;
+  Wrap& operator=(Wrap&&) noexcept = default;
+
   explicit Wrap(const underlying_type& data) : data_(data) {}
   explicit Wrap(underlying_type&& data) noexcept : data_(std::move(data)) {}
 
@@ -126,6 +131,11 @@ class EqWrap : public Wrap<T, Tag>, public BaseDerived<Derived> {
 
  public:
   using Base::Base;
+
+  EqWrap(const EqWrap&) = default;
+  EqWrap(EqWrap&&) noexcept = default;
+  EqWrap& operator=(const EqWrap&) = default;
+  EqWrap& operator=(EqWrap&&) noexcept = default;
 
  protected:
   // Down-cast to access protected member.

@@ -172,17 +172,6 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     return op::get<Id>(*std::forward<U>(data).ensure());
   }
 
-  /**
-   * This function reset's the patch and merges it with another patch because
-   * simple assignment leads to deep copy resulting in great slowdown. Doing it
-   * via reset and merge is up to 30x faster in some extream cases.
-   */
-  template <typename T, typename U>
-  static void resetAndMerge(T& patch, U&& toMerge) {
-    patch.reset();
-    patch.merge(std::forward<U>(toMerge));
-  }
-
   template <typename Id>
   decltype(auto) patchPrior() {
     return (ensurePatchable(), getRawPatch<Id>(data_.patchPrior()));
@@ -338,8 +327,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
       }
 
       // Consume next.patchAfter.
-      resetAndMerge(
-          patchAfter<Id>(), *std::forward<U>(next).toThrift().patch()->get(id));
+      patchAfter<Id>() = *std::forward<U>(next).toThrift().patch()->get(id);
     });
   }
 
@@ -348,7 +336,6 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   using Base::data_;
   using Base::get;
   using Base::mergeAssignAndClear;
-  using Base::resetAndMerge;
 
   template <typename Id>
   decltype(auto) patchPrior() {
@@ -472,7 +459,7 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
         data_.ensure() = *std::forward<U>(next).toThrift().ensure();
       }
       // Consume next.patch.
-      resetAndMerge(*data_.patch(), *std::forward<U>(next).toThrift().patch());
+      data_.patch() = *std::forward<U>(next).toThrift().patch();
     }
   }
 
@@ -482,7 +469,6 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   using Base::ensurePatchable;
   using Base::mergeAssignAndClear;
   using Base::resetAnd;
-  using Base::resetAndMerge;
 
   template <typename U = T>
   Patch& ensureAnd(U&& _default) {

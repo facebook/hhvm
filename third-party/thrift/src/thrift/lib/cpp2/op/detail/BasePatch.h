@@ -61,6 +61,11 @@ class BasePatch : public type::detail::EqWrap<Derived, Patch> {
  public:
   using Base::Base;
 
+  BasePatch(const BasePatch&) = default;
+  BasePatch(BasePatch&&) noexcept = default;
+  BasePatch& operator=(const BasePatch&) = default;
+  BasePatch& operator=(BasePatch&&) noexcept = default;
+
   /// Applies patches to a Thrift value.
   // Automatically dereference non-optional fields.
   template <typename U>
@@ -119,6 +124,11 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
   using Base::assign;
   using Base::operator=;
   using Base::Base;
+
+  BaseAssignPatch(const BaseAssignPatch&) = default;
+  BaseAssignPatch(BaseAssignPatch&&) noexcept = default;
+  BaseAssignPatch& operator=(const BaseAssignPatch&) = default;
+  BaseAssignPatch& operator=(BaseAssignPatch&&) noexcept = default;
 
   /// Creates a new patch that replaces the existing value.
   template <typename U = value_type>
@@ -200,6 +210,11 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
   using Base::Base;
   using Base::operator=;
   using Base::apply;
+
+  BaseClearPatch(const BaseClearPatch&) = default;
+  BaseClearPatch(BaseClearPatch&&) noexcept = default;
+  BaseClearPatch& operator=(const BaseClearPatch&) = default;
+  BaseClearPatch& operator=(BaseClearPatch&&) noexcept = default;
 
   /// Creates a new patch that clears the value.
   FOLLY_NODISCARD static Derived createClear() {

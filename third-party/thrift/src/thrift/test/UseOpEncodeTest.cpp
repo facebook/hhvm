@@ -71,6 +71,7 @@ void testUseOpEncode() {
 
   // Make sure the fields are cleared
   ++*foo.field();
+  result.list_field()->push_back(test::TemplatedTestAdapter::fromThrift(foo));
   result.adapted_list_field()->value.push_back(
       test::TemplatedTestAdapter::fromThrift(foo));
   result.inplace_adapted_list_field()->value.push_back(

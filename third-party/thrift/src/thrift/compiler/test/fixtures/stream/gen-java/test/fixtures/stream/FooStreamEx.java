@@ -29,6 +29,9 @@ public final class FooStreamEx extends org.apache.thrift.TBaseException implemen
 
     private static final TStruct STRUCT_DESC = new TStruct("FooStreamEx");
 
+    static {
+    }
+
     @ThriftConstructor
     public FooStreamEx(
     ) {

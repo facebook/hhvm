@@ -27,7 +27,7 @@ import org.apache.thrift.conformance.StandardProtocol;
  * This a {@link LazyAny} that contains an unserialized struct. It will create an instance of Any
  * with serialized data when the getAny method is called.
  */
-public class UnserializedLazyAny<T> extends LazyAny<T> {
+class UnserializedLazyAny<T> extends LazyAny<T> {
   private final Object value;
 
   private final String customProtocol;

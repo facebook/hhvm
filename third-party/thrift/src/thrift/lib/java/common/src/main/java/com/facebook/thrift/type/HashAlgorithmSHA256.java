@@ -25,13 +25,16 @@ import java.security.NoSuchAlgorithmException;
 public class HashAlgorithmSHA256 implements HashAlgorithm {
   public static final HashAlgorithmSHA256 INSTANCE = new HashAlgorithmSHA256();
 
+  private static final int MIN_HASH_BYTES =
+      Integer.parseInt(System.getProperty("thrift.sha256.min.hash.bytes", String.valueOf("8")));
+
   private static final String THRIFT_SCHEME = "fbthrift://";
 
   private HashAlgorithmSHA256() {}
 
   @Override
   public int getMinHashBytes() {
-    return 8;
+    return MIN_HASH_BYTES;
   }
 
   @Override

@@ -32,6 +32,12 @@ public final class SinkException1 extends org.apache.thrift.TBaseException imple
     public static final int _REASON = 1;
     private static final TField REASON_FIELD_DESC = new TField("reason", TType.STRING, (short)1);
 
+    static {
+      NAMES_TO_IDS.put("reason", 1);
+      THRIFT_NAMES_TO_IDS.put("reason", 1);
+      FIELD_METADATA.put(1, REASON_FIELD_DESC);
+    }
+
     @ThriftConstructor
     public SinkException1(
         @com.facebook.swift.codec.ThriftField(value=1, name="reason", requiredness=Requiredness.NONE) final String reason

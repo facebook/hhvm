@@ -35,6 +35,15 @@ public final class ComplexFieldNames extends org.apache.thrift.TBaseException im
     public static final int _INTERNAL_ERROR_MESSAGE = 2;
     private static final TField INTERNAL_ERROR_MESSAGE_FIELD_DESC = new TField("internalErrorMessage", TType.STRING, (short)2);
 
+    static {
+      NAMES_TO_IDS.put("errorMessage", 1);
+      THRIFT_NAMES_TO_IDS.put("error_message", 1);
+      FIELD_METADATA.put(1, ERROR_MESSAGE_FIELD_DESC);
+      NAMES_TO_IDS.put("internalErrorMessage", 2);
+      THRIFT_NAMES_TO_IDS.put("internal_error_message", 2);
+      FIELD_METADATA.put(2, INTERNAL_ERROR_MESSAGE_FIELD_DESC);
+    }
+
     @ThriftConstructor
     public ComplexFieldNames(
         @com.facebook.swift.codec.ThriftField(value=1, name="error_message", requiredness=Requiredness.NONE) final String errorMessage,

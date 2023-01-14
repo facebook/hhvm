@@ -402,6 +402,10 @@ public abstract class ByteBufAbstractTSimpleJSONProtocol extends ByteBufTProtoco
         b = data[0];
       } while (skip && (b == WHITE_SPACE || b == TAB || b == NEW_LINE || b == CARRIAGE_RETURN));
     }
+
+    protected boolean bytesAvailable() {
+      return getByteBuf().readableBytes() > 0;
+    }
   }
 
   // Stack of nested contexts that we may be in
@@ -603,6 +607,9 @@ public abstract class ByteBufAbstractTSimpleJSONProtocol extends ByteBufTProtoco
   private String readJSONNumericChars() throws TException {
     StringBuilder strbld = new StringBuilder();
     while (true) {
+      if (!reader_.bytesAvailable()) {
+        break;
+      }
       byte ch = reader_.peek();
       if (!isJSONNumeric(ch)) {
         break;
@@ -638,14 +645,7 @@ public abstract class ByteBufAbstractTSimpleJSONProtocol extends ByteBufTProtoco
       context_.read();
       if (reader_.peek() == QUOTE[0]) {
         arr = readJSONString();
-        double dub;
-        dub = Double.parseDouble(arr.toString(StandardCharsets.UTF_8));
-        if (!context_.escapeNum() && !Double.isNaN(dub) && !Double.isInfinite(dub)) {
-          // Throw exception -- we should not be in a string in this case
-          throw new TProtocolException(
-              TProtocolException.INVALID_DATA, "Numeric data unexpectedly quoted");
-        }
-        return dub;
+        return Double.parseDouble(arr.toString(StandardCharsets.UTF_8));
       } else {
         if (context_.escapeNum()) {
           // This will throw - we should have had a quote if escapeNum == true
@@ -679,13 +679,7 @@ public abstract class ByteBufAbstractTSimpleJSONProtocol extends ByteBufTProtoco
         } catch (Exception e) {
           throw new TException(e);
         }
-        float flt = Float.parseFloat(s);
-        if (!context_.escapeNum() && !Float.isNaN(flt) && !Float.isInfinite(flt)) {
-          // Throw exception -- we should not be in a string in this case
-          throw new TProtocolException(
-              TProtocolException.INVALID_DATA, "Numeric data unexpectedly quoted");
-        }
-        return flt;
+        return Float.parseFloat(s);
       } else {
         if (context_.escapeNum()) {
           // This will throw - we should have had a quote if escapeNum == true

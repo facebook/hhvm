@@ -44,6 +44,9 @@ public final class TypeRegistry {
   private static final ConcurrentSkipListMap<ByteBuf, String> hashList =
       new ConcurrentSkipListMap<>();
 
+  /** Local cache for uri to Type map */
+  private static final Map<String, Type> uriCache = new ConcurrentHashMap<>();
+
   private static final String TYPE_LIST_PREFIX = "__fbthrift_TypeList_";
 
   private TypeRegistry() {}
@@ -153,6 +156,7 @@ public final class TypeRegistry {
 
     hashMap.put(type.getUniversalName().getHashBytes(), type);
     classMap.put(type.getClazz(), type);
+    uriCache.put(type.getUniversalName().getUri(), type);
 
     cache.clear();
   }
@@ -195,8 +199,9 @@ public final class TypeRegistry {
       throw new IllegalArgumentException("Prefix must be at least one byte, it is empty or null");
     }
 
-    if (cache.containsKey(prefix)) {
-      return cache.get(prefix);
+    Type type = cache.get(prefix);
+    if (type != null) {
+      return type;
     }
 
     ByteBuf key = hashMap.ceilingKey(prefix);
@@ -209,7 +214,7 @@ public final class TypeRegistry {
 
     ByteBuf nextKey = hashMap.higherKey(key);
     if (nextKey == null || !startsWith(nextKey, prefix)) {
-      Type type = hashMap.get(key);
+      type = hashMap.get(key);
       cache.put(prefix, type);
       return type;
     }
@@ -238,6 +243,21 @@ public final class TypeRegistry {
    */
   public static Type findByClass(Class clazz) {
     return classMap.get(clazz);
+  }
+
+  /**
+   * Find Type by given uri.
+   *
+   * @param uri Uri
+   * @return Type
+   */
+  public static Type findByUri(String uri) {
+    Type type = uriCache.get(uri);
+    if (type == null) {
+      // validate uri, if uri is not a valid uri, an exception is thrown.
+      new UniversalName(uri);
+    }
+    return type;
   }
 
   /**

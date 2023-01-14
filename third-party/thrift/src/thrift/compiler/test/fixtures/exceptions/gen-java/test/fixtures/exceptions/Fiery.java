@@ -32,6 +32,12 @@ public final class Fiery extends org.apache.thrift.TBaseException implements com
     public static final int _MESSAGE = 1;
     private static final TField MESSAGE_FIELD_DESC = new TField("message", TType.STRING, (short)1);
 
+    static {
+      NAMES_TO_IDS.put("message", 1);
+      THRIFT_NAMES_TO_IDS.put("message", 1);
+      FIELD_METADATA.put(1, MESSAGE_FIELD_DESC);
+    }
+
     @ThriftConstructor
     public Fiery(
         @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.REQUIRED) final String message

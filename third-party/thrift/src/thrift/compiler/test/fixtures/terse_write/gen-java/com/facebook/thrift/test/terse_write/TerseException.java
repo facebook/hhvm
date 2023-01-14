@@ -33,6 +33,9 @@ public final class TerseException extends org.apache.thrift.TBaseException imple
     private static final TField MSG_FIELD_DESC = new TField("msg", TType.STRING, (short)1);
 
     static {
+      NAMES_TO_IDS.put("msg", 1);
+      THRIFT_NAMES_TO_IDS.put("msg", 1);
+      FIELD_METADATA.put(1, MSG_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
         new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/TerseException"), 
         TerseException.class, TerseException::read0));

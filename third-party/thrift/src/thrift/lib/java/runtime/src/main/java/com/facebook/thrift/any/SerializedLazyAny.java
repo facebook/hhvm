@@ -18,8 +18,6 @@ package com.facebook.thrift.any;
 
 import com.facebook.thrift.type.Type;
 import com.facebook.thrift.type.TypeRegistry;
-import com.facebook.thrift.type.UniversalName;
-import com.facebook.thrift.type.UniversalNameCache;
 import com.facebook.thrift.util.SerializationProtocol;
 import com.facebook.thrift.util.SerializerUtil;
 import io.netty.buffer.ByteBufUtil;
@@ -32,7 +30,7 @@ import org.apache.thrift.protocol.TProtocol;
  * LazyAny implementation that contains serialized data. Will lazily deseralize the data to a struct
  * when a get method is called. The {@link LazyAnyAdapter} returns this implementation.
  */
-public class SerializedLazyAny<T> extends LazyAny<T> {
+class SerializedLazyAny<T> extends LazyAny<T> {
   private final Any any;
 
   private transient Object lazyValue;
@@ -90,7 +88,7 @@ public class SerializedLazyAny<T> extends LazyAny<T> {
       if (lazyValue == null) {
         Type type = null;
         if (any.getType() != null) {
-          type = findByType(any.getType());
+          type = TypeRegistry.findByUri(any.getType());
         }
 
         if (any.getTypeHashPrefixSha2256() != null) {
@@ -119,14 +117,5 @@ public class SerializedLazyAny<T> extends LazyAny<T> {
 
       return (T) lazyValue;
     }
-  }
-
-  Type findByType(String type) {
-    UniversalName universalName = UniversalNameCache.get(type);
-    if (universalName == null) {
-      universalName = new UniversalName(type);
-      UniversalNameCache.put(type, universalName);
-    }
-    return TypeRegistry.findByUniversalName(universalName);
   }
 }

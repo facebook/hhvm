@@ -16,8 +16,11 @@
 
 package org.apache.thrift.protocol;
 
+import com.facebook.thrift.protocol.ByteBufTBinaryProtocol;
+import com.facebook.thrift.protocol.ByteBufTCompactProtocol;
 import com.facebook.thrift.protocol.ByteBufTProtocol;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.util.ReferenceCountUtil;
 import java.nio.ByteBuffer;
@@ -143,7 +146,9 @@ public class TProtocolUtil {
   }
 
   public static ByteBuf readBinaryAsByteBuf(TProtocol protocol) {
-    if (protocol instanceof ByteBufTProtocol) {
+    if (protocol instanceof ByteBufTBinaryProtocol) {
+      return ((ByteBufTProtocol) protocol).readBinaryAsSlice();
+    } else if (protocol instanceof ByteBufTCompactProtocol) {
       return ((ByteBufTProtocol) protocol).readBinaryAsSlice();
     }
     return Unpooled.wrappedBuffer(protocol.readBinary());
@@ -154,20 +159,18 @@ public class TProtocolUtil {
   }
 
   public static void writeBinary(TProtocol protocol, ByteBuf buf) {
-    if (protocol instanceof ByteBufTProtocol) {
-      try {
+    try {
+      if (protocol instanceof ByteBufTBinaryProtocol) {
         ((ByteBufTProtocol) protocol).writeBinaryAsByteBuf(buf);
-      } finally {
-        if (buf.refCnt() > 0) {
-          ReferenceCountUtil.safeRelease(buf);
-        }
+      } else if (protocol instanceof ByteBufTCompactProtocol) {
+        ((ByteBufTProtocol) protocol).writeBinaryAsByteBuf(buf);
+      } else {
+        protocol.writeBinary(ByteBuffer.wrap(ByteBufUtil.getBytes(buf)));
       }
-    } else {
-      // fix:
-      // if bytebuf is not backed by an array, this would not work
-      //
-      // protocol.writeBinary(ByteBuffer.wrap(buf.array()));
-      protocol.writeBinary(buf.nioBuffer());
+    } finally {
+      if (buf.refCnt() > 0) {
+        ReferenceCountUtil.safeRelease(buf);
+      }
     }
   }
 

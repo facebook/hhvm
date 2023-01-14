@@ -35,6 +35,15 @@ public final class ReqXcep extends org.apache.thrift.TBaseException implements c
     public static final int _ERRORCODE = 2;
     private static final TField ERROR_CODE_FIELD_DESC = new TField("errorCode", TType.I32, (short)2);
 
+    static {
+      NAMES_TO_IDS.put("message", 1);
+      THRIFT_NAMES_TO_IDS.put("message", 1);
+      FIELD_METADATA.put(1, MESSAGE_FIELD_DESC);
+      NAMES_TO_IDS.put("errorCode", 2);
+      THRIFT_NAMES_TO_IDS.put("errorCode", 2);
+      FIELD_METADATA.put(2, ERROR_CODE_FIELD_DESC);
+    }
+
     @ThriftConstructor
     public ReqXcep(
         @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.REQUIRED) final String message,

@@ -35,6 +35,15 @@ public final class ExceptionWithStructuredAnnotation extends org.apache.thrift.T
     public static final int _ERROR_CODE = 2;
     private static final TField ERROR_CODE_FIELD_DESC = new TField("errorCode", TType.I32, (short)2);
 
+    static {
+      NAMES_TO_IDS.put("messageField", 1);
+      THRIFT_NAMES_TO_IDS.put("message_field", 1);
+      FIELD_METADATA.put(1, MESSAGE_FIELD_FIELD_DESC);
+      NAMES_TO_IDS.put("errorCode", 2);
+      THRIFT_NAMES_TO_IDS.put("error_code", 2);
+      FIELD_METADATA.put(2, ERROR_CODE_FIELD_DESC);
+    }
+
     @ThriftConstructor
     public ExceptionWithStructuredAnnotation(
         @com.facebook.swift.codec.ThriftField(value=1, name="message_field", requiredness=Requiredness.NONE) final String messageField,

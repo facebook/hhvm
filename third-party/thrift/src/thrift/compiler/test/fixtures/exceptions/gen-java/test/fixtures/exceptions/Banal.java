@@ -29,6 +29,9 @@ public final class Banal extends org.apache.thrift.TBaseException implements com
 
     private static final TStruct STRUCT_DESC = new TStruct("Banal");
 
+    static {
+    }
+
     @ThriftConstructor
     public Banal(
     ) {

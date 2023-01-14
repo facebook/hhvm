@@ -32,6 +32,12 @@ public final class Serious extends org.apache.thrift.TBaseException implements c
     public static final int _SONNET = 1;
     private static final TField SONNET_FIELD_DESC = new TField("sonnet", TType.STRING, (short)1);
 
+    static {
+      NAMES_TO_IDS.put("sonnet", 1);
+      THRIFT_NAMES_TO_IDS.put("sonnet", 1);
+      FIELD_METADATA.put(1, SONNET_FIELD_DESC);
+    }
+
     @ThriftConstructor
     public Serious(
         @com.facebook.swift.codec.ThriftField(value=1, name="sonnet", requiredness=Requiredness.OPTIONAL) final String sonnet

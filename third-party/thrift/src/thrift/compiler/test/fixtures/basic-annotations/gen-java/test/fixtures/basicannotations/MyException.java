@@ -29,6 +29,9 @@ public final class MyException extends org.apache.thrift.TBaseException implemen
 
     private static final TStruct STRUCT_DESC = new TStruct("MyException");
 
+    static {
+    }
+
     @ThriftConstructor
     public MyException(
     ) {

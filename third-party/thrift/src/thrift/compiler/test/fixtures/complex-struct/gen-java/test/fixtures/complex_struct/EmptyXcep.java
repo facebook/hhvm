@@ -29,6 +29,9 @@ public final class EmptyXcep extends org.apache.thrift.TBaseException implements
 
     private static final TStruct STRUCT_DESC = new TStruct("emptyXcep");
 
+    static {
+    }
+
     @ThriftConstructor
     public EmptyXcep(
     ) {

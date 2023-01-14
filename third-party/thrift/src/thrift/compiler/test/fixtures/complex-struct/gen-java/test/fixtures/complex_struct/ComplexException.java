@@ -47,6 +47,27 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
     public static final int _LSMAP = 6;
     private static final TField LS_MAP_FIELD_DESC = new TField("lsMap", TType.MAP, (short)6);
 
+    static {
+      NAMES_TO_IDS.put("message", 1);
+      THRIFT_NAMES_TO_IDS.put("message", 1);
+      FIELD_METADATA.put(1, MESSAGE_FIELD_DESC);
+      NAMES_TO_IDS.put("listStrings", 2);
+      THRIFT_NAMES_TO_IDS.put("listStrings", 2);
+      FIELD_METADATA.put(2, LIST_STRINGS_FIELD_DESC);
+      NAMES_TO_IDS.put("errorEnum", 3);
+      THRIFT_NAMES_TO_IDS.put("errorEnum", 3);
+      FIELD_METADATA.put(3, ERROR_ENUM_FIELD_DESC);
+      NAMES_TO_IDS.put("unionError", 4);
+      THRIFT_NAMES_TO_IDS.put("unionError", 4);
+      FIELD_METADATA.put(4, UNION_ERROR_FIELD_DESC);
+      NAMES_TO_IDS.put("structError", 5);
+      THRIFT_NAMES_TO_IDS.put("structError", 5);
+      FIELD_METADATA.put(5, STRUCT_ERROR_FIELD_DESC);
+      NAMES_TO_IDS.put("lsMap", 6);
+      THRIFT_NAMES_TO_IDS.put("lsMap", 6);
+      FIELD_METADATA.put(6, LS_MAP_FIELD_DESC);
+    }
+
     @ThriftConstructor
     public ComplexException(
         @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.NONE) final String message,

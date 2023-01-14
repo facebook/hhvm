@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package com.facebook.thrift.type;
+package com.facebook.thrift.any;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.facebook.thrift.adapter.TypeAdapter;
+import com.facebook.thrift.type_swift.AnyStruct;
 
-public class UniversalNameCache {
-  private static final Map<String, UniversalName> cache = new ConcurrentHashMap<>();
-
-  public static UniversalName get(String uri) {
-    return cache.get(uri);
+/** A {@link TypeAdapter} from serializing and deserialize a {@link AnyStruct} */
+public class AnyAdapter implements TypeAdapter<AnyStruct, Any> {
+  @Override
+  public Any fromThrift(AnyStruct anyStruct) {
+    return new SerializedAny(anyStruct);
   }
 
-  public static void put(String uri, UniversalName universalName) {
-    cache.put(uri, universalName);
+  @Override
+  public AnyStruct toThrift(Any any) {
+    if (any == null) {
+      return null;
+    }
+    return any.getAny();
   }
 }

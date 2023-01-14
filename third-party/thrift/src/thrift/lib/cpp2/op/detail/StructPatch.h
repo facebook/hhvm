@@ -113,6 +113,11 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   /// Corresponding FieldPatch of this struct patch.
   using patch_type = std::decay_t<decltype(*std::declval<Patch>().patch())>;
 
+  BaseEnsurePatch(const BaseEnsurePatch&) = default;
+  BaseEnsurePatch(BaseEnsurePatch&&) noexcept = default;
+  BaseEnsurePatch& operator=(const BaseEnsurePatch&) = default;
+  BaseEnsurePatch& operator=(BaseEnsurePatch&&) noexcept = default;
+
   /// Returns if the patch ensures the given field is set (explicitly or
   /// implicitly).
   template <typename Id>
@@ -153,6 +158,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
  protected:
   using Base::data_;
   using Base::hasAssign;
+  ~BaseEnsurePatch() = default;
 
   // Clears the field with the given id.
   template <typename Id>

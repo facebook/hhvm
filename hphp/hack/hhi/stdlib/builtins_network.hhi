@@ -106,35 +106,35 @@ function checkdnsrr(
 function dns_get_record(
   string $hostname,
   int $type,
-  inout $authns,
-  inout $addtl,
+  inout HH\FIXME\MISSING_PARAM_TYPE $authns,
+  inout HH\FIXME\MISSING_PARAM_TYPE $addtl,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function dns_get_mx(
   HH\FIXME\MISSING_PARAM_TYPE $hostname,
-  inout $mxhosts,
-  inout $weights,
+  inout HH\FIXME\MISSING_PARAM_TYPE $mxhosts,
+  inout HH\FIXME\MISSING_PARAM_TYPE $weights,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function getmxrr(
   string $hostname,
-  inout $mxhosts,
-  inout $weight,
+  inout HH\FIXME\MISSING_PARAM_TYPE $mxhosts,
+  inout HH\FIXME\MISSING_PARAM_TYPE $weight,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function fsockopen(
   string $hostname,
   int $port,
-  inout $errnum,
-  inout $errstr,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errnum,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errstr,
   float $timeout = 0.0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function pfsockopen(
   string $hostname,
   int $port,
-  inout $errnum,
-  inout $errstr,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errnum,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errstr,
   float $timeout = 0.0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -170,8 +170,8 @@ function get_http_request_size(): HH\FIXME\MISSING_RETURN_TYPE;
 function headers_sent(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function headers_sent_with_file_line(
-  inout $file,
-  inout $line,
+  inout HH\FIXME\MISSING_PARAM_TYPE $file,
+  inout HH\FIXME\MISSING_PARAM_TYPE $line,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function header_register_callback(

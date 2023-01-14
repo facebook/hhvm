@@ -205,7 +205,7 @@ function intl_is_failure(int $error_code): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function collator_asort(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
-  inout $arr,
+  inout HH\FIXME\MISSING_PARAM_TYPE $arr,
   int $sort_flag = Collator::SORT_REGULAR,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -257,12 +257,12 @@ function collator_set_strength(
 <<__PHPStdLib>>
 function collator_sort_with_sort_keys(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
-  inout $arr,
+  inout HH\FIXME\MISSING_PARAM_TYPE $arr,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function collator_sort(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
-  inout $arr,
+  inout HH\FIXME\MISSING_PARAM_TYPE $arr,
   int $sort_flag = Collator::SORT_REGULAR,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -351,13 +351,13 @@ function datefmt_is_lenient(
 function datefmt_localtime(
   HH\FIXME\MISSING_PARAM_TYPE $formatter,
   HH\FIXME\MISSING_PARAM_TYPE $string,
-  inout $position,
+  inout HH\FIXME\MISSING_PARAM_TYPE $position,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function datefmt_parse(
   HH\FIXME\MISSING_PARAM_TYPE $formatter,
   HH\FIXME\MISSING_PARAM_TYPE $string,
-  inout $position,
+  inout HH\FIXME\MISSING_PARAM_TYPE $position,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function datefmt_set_calendar(
@@ -694,7 +694,7 @@ function intltz_from_date_time_zone(
 <<__PHPStdLib>>
 function intltz_get_canonical_id(
   string $zoneId,
-  inout $isSystemID,
+  inout HH\FIXME\MISSING_PARAM_TYPE $isSystemID,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function intltz_get_display_name(
@@ -932,14 +932,14 @@ function numfmt_parse(
   HH\FIXME\MISSING_PARAM_TYPE $formatter,
   HH\FIXME\MISSING_PARAM_TYPE $string,
   HH\FIXME\MISSING_PARAM_TYPE $type,
-  inout $position,
+  inout HH\FIXME\MISSING_PARAM_TYPE $position,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function numfmt_parse_currency(
   HH\FIXME\MISSING_PARAM_TYPE $formatter,
   HH\FIXME\MISSING_PARAM_TYPE $string,
-  inout $currency,
-  inout $position,
+  inout HH\FIXME\MISSING_PARAM_TYPE $currency,
+  inout HH\FIXME\MISSING_PARAM_TYPE $position,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function numfmt_set_attribute(

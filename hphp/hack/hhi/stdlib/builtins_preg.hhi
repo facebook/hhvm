@@ -57,7 +57,7 @@ function preg_match_with_matches(
 function preg_match_with_matches_and_error(
   string $pattern,
   string $subject,
-  inout $matches,
+  inout HH\FIXME\MISSING_PARAM_TYPE $matches,
   inout ?int $error,
   int $flags = 0,
   int $offset = 0,
@@ -81,7 +81,7 @@ function preg_match_all_with_error(
 function preg_match_all_with_matches(
   string $pattern,
   string $subject,
-  inout $matches,
+  inout HH\FIXME\MISSING_PARAM_TYPE $matches,
   int $flags = 0,
   int $offset = 0,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -89,7 +89,7 @@ function preg_match_all_with_matches(
 function preg_match_all_with_matches_and_error(
   string $pattern,
   string $subject,
-  inout $matches,
+  inout HH\FIXME\MISSING_PARAM_TYPE $matches,
   inout ?int $error,
   int $flags = 0,
   int $offset = 0,

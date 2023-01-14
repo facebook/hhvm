@@ -25,7 +25,7 @@ function icu_match(
 function icu_match_with_matches(
   string $pattern,
   string $subject,
-  inout $matches,
+  inout HH\FIXME\MISSING_PARAM_TYPE $matches,
   int $flags = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

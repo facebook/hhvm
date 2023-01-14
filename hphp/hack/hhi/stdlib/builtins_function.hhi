@@ -26,7 +26,7 @@ namespace {
   function is_callable_with_name(
     HH\FIXME\MISSING_PARAM_TYPE $v,
     bool $syntax,
-    inout $name,
+    inout HH\FIXME\MISSING_PARAM_TYPE $name,
   )[]: bool;
   <<__Deprecated('Use direct invocation instead.')>>
   function call_user_func_array(

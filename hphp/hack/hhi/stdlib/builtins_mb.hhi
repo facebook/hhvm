@@ -51,7 +51,7 @@ function mb_convert_kana(
 function mb_convert_variables(
   string $to_encoding,
   HH\FIXME\MISSING_PARAM_TYPE $from_encoding,
-  inout $vars,
+  inout HH\FIXME\MISSING_PARAM_TYPE $vars,
   HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
@@ -136,7 +136,7 @@ function mb_ereg_search(
 function mb_ereg(
   HH\FIXME\MISSING_PARAM_TYPE $pattern,
   string $str,
-  inout $regs,
+  inout HH\FIXME\MISSING_PARAM_TYPE $regs,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_eregi_replace(
@@ -149,7 +149,7 @@ function mb_eregi_replace(
 function mb_eregi(
   HH\FIXME\MISSING_PARAM_TYPE $pattern,
   string $str,
-  inout $regs,
+  inout HH\FIXME\MISSING_PARAM_TYPE $regs,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_get_info(
@@ -179,7 +179,7 @@ function mb_output_handler(
 <<__PHPStdLib>>
 function mb_parse_str(
   string $encoded_string,
-  inout $result,
+  inout HH\FIXME\MISSING_PARAM_TYPE $result,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_preferred_mime_name(

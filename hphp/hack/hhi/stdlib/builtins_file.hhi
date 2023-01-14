@@ -130,7 +130,7 @@ function ftruncate(resource $handle, int $size): HH\FIXME\MISSING_RETURN_TYPE;
 function flock(
   resource $handle,
   int $operation,
-  inout $wouldblock,
+  inout HH\FIXME\MISSING_PARAM_TYPE $wouldblock,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function fputcsv(

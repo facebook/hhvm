@@ -139,7 +139,7 @@ function str_replace_with_count(
   HH\FIXME\MISSING_PARAM_TYPE $search,
   HH\FIXME\MISSING_PARAM_TYPE $replace,
   HH\FIXME\MISSING_PARAM_TYPE $subject,
-  inout $count,
+  inout HH\FIXME\MISSING_PARAM_TYPE $count,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>> // not pure: uses global locale for capitalization
 function str_ireplace(
@@ -152,7 +152,7 @@ function str_ireplace_with_count(
   HH\FIXME\MISSING_PARAM_TYPE $search,
   HH\FIXME\MISSING_PARAM_TYPE $replace,
   HH\FIXME\MISSING_PARAM_TYPE $subject,
-  inout $count,
+  inout HH\FIXME\MISSING_PARAM_TYPE $count,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function substr_replace(
@@ -425,7 +425,7 @@ function levenshtein(
 function similar_text(
   string $first,
   string $second,
-  inout $percent,
+  inout HH\FIXME\MISSING_PARAM_TYPE $percent,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function soundex(string $str)[]: HH\FIXME\MISSING_RETURN_TYPE;

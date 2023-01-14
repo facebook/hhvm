@@ -34,8 +34,8 @@ namespace {
   <<__PHPStdLib>>
   function pagelet_server_task_result(
     resource $task,
-    inout $headers,
-    inout $code,
+    inout HH\FIXME\MISSING_PARAM_TYPE $headers,
+    inout HH\FIXME\MISSING_PARAM_TYPE $code,
     int $timeout_ms = 0,
   ): string;
   <<__PHPStdLib>>
@@ -49,7 +49,7 @@ namespace {
   function xbox_task_result(
     resource $task,
     int $timeout_ms,
-    inout $ret,
+    inout HH\FIXME\MISSING_PARAM_TYPE $ret,
   ): int;
   <<__PHPStdLib>>
   function xbox_process_call_message(string $msg): mixed;

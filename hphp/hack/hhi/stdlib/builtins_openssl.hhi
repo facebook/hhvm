@@ -59,7 +59,7 @@ function openssl_csr_export_to_file(
 <<__PHPStdLib>>
 function openssl_csr_export(
   HH\FIXME\MISSING_PARAM_TYPE $csr,
-  inout $out,
+  inout HH\FIXME\MISSING_PARAM_TYPE $out,
   bool $notext = true,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -74,7 +74,7 @@ function openssl_csr_get_subject(
 <<__PHPStdLib>>
 function openssl_csr_new(
   HH\FIXME\MISSING_PARAM_TYPE $dn,
-  inout $privkey,
+  inout HH\FIXME\MISSING_PARAM_TYPE $privkey,
   HH\FIXME\MISSING_PARAM_TYPE $configargs = null,
   HH\FIXME\MISSING_PARAM_TYPE $extraattribs = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -92,7 +92,7 @@ function openssl_error_string(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function openssl_open(
   string $sealed_data,
-  inout $open_data,
+  inout HH\FIXME\MISSING_PARAM_TYPE $open_data,
   string $env_key,
   HH\FIXME\MISSING_PARAM_TYPE $priv_key_id,
 ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -107,7 +107,7 @@ function openssl_pkcs12_export_to_file(
 <<__PHPStdLib>>
 function openssl_pkcs12_export(
   HH\FIXME\MISSING_PARAM_TYPE $x509,
-  inout $out,
+  inout HH\FIXME\MISSING_PARAM_TYPE $out,
   HH\FIXME\MISSING_PARAM_TYPE $priv_key,
   string $pass,
   HH\FIXME\MISSING_PARAM_TYPE $args = null,
@@ -115,7 +115,7 @@ function openssl_pkcs12_export(
 <<__PHPStdLib>>
 function openssl_pkcs12_read(
   string $pkcs12,
-  inout $certs,
+  inout HH\FIXME\MISSING_PARAM_TYPE $certs,
   string $pass,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -163,7 +163,7 @@ function openssl_pkey_export_to_file(
 <<__PHPStdLib>>
 function openssl_pkey_export(
   HH\FIXME\MISSING_PARAM_TYPE $key,
-  inout $out,
+  inout HH\FIXME\MISSING_PARAM_TYPE $out,
   string $passphrase = "",
   HH\FIXME\MISSING_PARAM_TYPE $configargs = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -198,44 +198,44 @@ function openssl_pkey_new(
 <<__PHPStdLib>>
 function openssl_private_decrypt(
   string $data,
-  inout $decrypted,
+  inout HH\FIXME\MISSING_PARAM_TYPE $decrypted,
   HH\FIXME\MISSING_PARAM_TYPE $key,
   int $padding = OPENSSL_PKCS1_PADDING,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function openssl_private_encrypt(
   string $data,
-  inout $crypted,
+  inout HH\FIXME\MISSING_PARAM_TYPE $crypted,
   HH\FIXME\MISSING_PARAM_TYPE $key,
   int $padding = OPENSSL_PKCS1_PADDING,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function openssl_public_decrypt(
   string $data,
-  inout $decrypted,
+  inout HH\FIXME\MISSING_PARAM_TYPE $decrypted,
   HH\FIXME\MISSING_PARAM_TYPE $key,
   int $padding = OPENSSL_PKCS1_PADDING,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function openssl_public_encrypt(
   string $data,
-  inout $crypted,
+  inout HH\FIXME\MISSING_PARAM_TYPE $crypted,
   HH\FIXME\MISSING_PARAM_TYPE $key,
   int $padding = OPENSSL_PKCS1_PADDING,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function openssl_seal(
   string $data,
-  inout $sealed_data,
-  inout $env_keys,
+  inout HH\FIXME\MISSING_PARAM_TYPE $sealed_data,
+  inout HH\FIXME\MISSING_PARAM_TYPE $env_keys,
   varray<mixed> $pub_key_ids,
   string $method,
-  inout $iv,
+  inout HH\FIXME\MISSING_PARAM_TYPE $iv,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function openssl_sign(
   string $data,
-  inout $signature,
+  inout HH\FIXME\MISSING_PARAM_TYPE $signature,
   HH\FIXME\MISSING_PARAM_TYPE $priv_key_id,
   HH\FIXME\MISSING_PARAM_TYPE $signature_alg = OPENSSL_ALGO_SHA1,
 ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -267,7 +267,7 @@ function openssl_x509_export_to_file(
 <<__PHPStdLib>>
 function openssl_x509_export(
   HH\FIXME\MISSING_PARAM_TYPE $x509,
-  inout $output,
+  inout HH\FIXME\MISSING_PARAM_TYPE $output,
   bool $notext = true,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -284,7 +284,7 @@ function openssl_x509_read(
 <<__PHPStdLib>>
 function openssl_random_pseudo_bytes(
   int $length,
-  inout $crypto_strong,
+  inout HH\FIXME\MISSING_PARAM_TYPE $crypto_strong,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function openssl_cipher_iv_length(string $method): HH\FIXME\MISSING_RETURN_TYPE;
@@ -305,7 +305,7 @@ function openssl_encrypt_with_tag(
   string $password,
   int $options,
   string $iv,
-  inout $tag_out,
+  inout HH\FIXME\MISSING_PARAM_TYPE $tag_out,
   string $aad = "",
   int $tag_length = 16,
 ): HH\FIXME\MISSING_RETURN_TYPE;

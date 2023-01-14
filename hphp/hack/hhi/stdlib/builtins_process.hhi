@@ -70,17 +70,17 @@ function shell_exec(string $cmd): HH\FIXME\MISSING_RETURN_TYPE;
 function exec(
   string $command,
   inout $output,
-  inout $return_var,
+  inout HH\FIXME\MISSING_PARAM_TYPE $return_var,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function passthru(
   string $command,
-  inout $return_var,
+  inout HH\FIXME\MISSING_PARAM_TYPE $return_var,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function system(
   string $command,
-  inout $return_var,
+  inout HH\FIXME\MISSING_PARAM_TYPE $return_var,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function proc_open(

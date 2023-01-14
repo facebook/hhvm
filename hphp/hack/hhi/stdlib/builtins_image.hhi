@@ -670,7 +670,7 @@ function exif_tagname(int $index): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function exif_thumbnail(
   string $filename,
-  inout $width,
-  inout $height,
-  inout $imagetype,
+  inout HH\FIXME\MISSING_PARAM_TYPE $width,
+  inout HH\FIXME\MISSING_PARAM_TYPE $height,
+  inout HH\FIXME\MISSING_PARAM_TYPE $imagetype,
 ): HH\FIXME\MISSING_RETURN_TYPE;

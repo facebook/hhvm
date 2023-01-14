@@ -671,7 +671,7 @@ namespace {
   <<__PHPStdLib>>
   function curl_multi_info_read(
     resource $mh,
-    inout $msgs_in_queue,
+    inout HH\FIXME\MISSING_PARAM_TYPE $msgs_in_queue,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function curl_multi_close(resource $mh): \HH\FIXME\MISSING_RETURN_TYPE;

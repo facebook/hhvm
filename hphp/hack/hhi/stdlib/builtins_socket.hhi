@@ -176,7 +176,7 @@ function socket_create_pair(
   int $domain,
   int $type,
   int $protocol,
-  inout $fd,
+  inout HH\FIXME\MISSING_PARAM_TYPE $fd,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function socket_get_option(
@@ -187,14 +187,14 @@ function socket_get_option(
 <<__PHPStdLib>>
 function socket_getpeername(
   resource $socket,
-  inout $address,
-  inout $port,
+  inout HH\FIXME\MISSING_PARAM_TYPE $address,
+  inout HH\FIXME\MISSING_PARAM_TYPE $port,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function socket_getsockname(
   resource $socket,
-  inout $address,
-  inout $port,
+  inout HH\FIXME\MISSING_PARAM_TYPE $address,
+  inout HH\FIXME\MISSING_PARAM_TYPE $port,
 )[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function socket_set_block(resource $socket): HH\FIXME\MISSING_RETURN_TYPE {}
@@ -226,9 +226,9 @@ function socket_listen(
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function socket_select(
-  inout $read,
-  inout $write,
-  inout $except,
+  inout HH\FIXME\MISSING_PARAM_TYPE $read,
+  inout HH\FIXME\MISSING_PARAM_TYPE $write,
+  inout HH\FIXME\MISSING_PARAM_TYPE $except,
   HH\FIXME\MISSING_PARAM_TYPE $vtv_sec,
   int $tv_usec = 0,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
@@ -236,8 +236,8 @@ function socket_select(
 function socket_server(
   string $hostname,
   int $port,
-  inout $errnum,
-  inout $errstr,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errnum,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errstr,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function socket_accept(resource $socket): HH\FIXME\MISSING_RETURN_TYPE {}
@@ -272,18 +272,18 @@ function socket_sendto(
 <<__PHPStdLib>>
 function socket_recv(
   resource $socket,
-  inout $buf,
+  inout HH\FIXME\MISSING_PARAM_TYPE $buf,
   int $len,
   int $flags,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function socket_recvfrom(
   resource $socket,
-  inout $buf,
+  inout HH\FIXME\MISSING_PARAM_TYPE $buf,
   int $len,
   int $flags,
-  inout $name,
-  inout $port,
+  inout HH\FIXME\MISSING_PARAM_TYPE $name,
+  inout HH\FIXME\MISSING_PARAM_TYPE $port,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function socket_shutdown(

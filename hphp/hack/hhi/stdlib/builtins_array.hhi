@@ -228,11 +228,11 @@ function array_pad(
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_pop(
-  inout $array,
+  inout HH\FIXME\MISSING_PARAM_TYPE $array,
 )[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_push(
-  inout $array,
+  inout HH\FIXME\MISSING_PARAM_TYPE $array,
   HH\FIXME\MISSING_PARAM_TYPE $var,
   HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -259,9 +259,7 @@ function array_search(
   bool $strict = false,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function array_shift<T>(
-  inout T $array,
-)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function array_shift<T>(inout T $array)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_slice(
   HH\FIXME\MISSING_PARAM_TYPE $array,
@@ -290,9 +288,7 @@ function array_unshift<T>(
 <<__PHPStdLib>>
 function array_values<Tv>(Container<Tv> $input)[]: varray<Tv>;
 <<__PHPStdLib>>
-function shuffle<T>(
-  inout T $array,
-)[leak_safe]: void;
+function shuffle<T>(inout T $array)[leak_safe]: void;
 <<
   __Deprecated(
     'Use count(), it does the same thing as sizeof() in PHP and '.
@@ -429,11 +425,11 @@ function array_intersect_ukey(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function natsort(
-  inout $array,
+  inout HH\FIXME\MISSING_PARAM_TYPE $array,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function natcasesort(
-  inout $array,
+  inout HH\FIXME\MISSING_PARAM_TYPE $array,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function i18n_loc_get_default(): HH\FIXME\MISSING_RETURN_TYPE;

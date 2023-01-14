@@ -153,8 +153,8 @@ function stream_resolve_include_path(
 <<__PHPStdLib>>
 function stream_select(
   inout $read,
-  inout $write,
-  inout $except,
+  inout HH\FIXME\MISSING_PARAM_TYPE $write,
+  inout HH\FIXME\MISSING_PARAM_TYPE $except,
   HH\FIXME\MISSING_PARAM_TYPE $vtv_sec,
   int $tv_usec = 0,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -183,21 +183,21 @@ function set_file_buffer(
 function stream_socket_accept(
   resource $server_socket,
   float $timeout,
-  inout $peername,
+  inout HH\FIXME\MISSING_PARAM_TYPE $peername,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_socket_server(
   string $local_socket,
-  inout $errnum,
-  inout $errstr,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errnum,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errstr,
   int $flags = 0,
   HH\FIXME\MISSING_PARAM_TYPE $context = null,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_socket_client(
   string $remote_socket,
-  inout $errnum,
-  inout $errstr,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errnum,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errstr,
   float $timeout = 0.0,
   int $flags = 0,
   HH\FIXME\MISSING_PARAM_TYPE $context = null,
@@ -225,7 +225,7 @@ function stream_socket_recvfrom(
   resource $socket,
   int $length,
   int $flags,
-  inout $address,
+  inout HH\FIXME\MISSING_PARAM_TYPE $address,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_socket_sendto(

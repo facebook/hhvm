@@ -83,7 +83,7 @@ function ldap_unbind(resource $link): HH\FIXME\MISSING_RETURN_TYPE;
 function ldap_get_option(
   resource $link,
   int $option,
-  inout $retval,
+  inout HH\FIXME\MISSING_PARAM_TYPE $retval,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_set_option(
@@ -201,16 +201,16 @@ function ldap_next_reference(
 function ldap_parse_reference(
   resource $link,
   resource $result_entry,
-  inout $referrals,
+  inout HH\FIXME\MISSING_PARAM_TYPE $referrals,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_parse_result(
   resource $link,
   resource $result,
-  inout $errcode,
-  inout $matcheddn,
-  inout $errmsg,
-  inout $referrals,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errcode,
+  inout HH\FIXME\MISSING_PARAM_TYPE $matcheddn,
+  inout HH\FIXME\MISSING_PARAM_TYPE $errmsg,
+  inout HH\FIXME\MISSING_PARAM_TYPE $referrals,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_free_result(resource $result): HH\FIXME\MISSING_RETURN_TYPE;
@@ -237,8 +237,8 @@ function ldap_control_paged_result(
 function ldap_control_paged_result_response(
   resource $link,
   resource $result,
-  inout $cookie,
-  inout $estimated,
+  inout HH\FIXME\MISSING_PARAM_TYPE $cookie,
+  inout HH\FIXME\MISSING_PARAM_TYPE $estimated,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function ldap_escape(

@@ -75,14 +75,14 @@ function getrusage(int $who = 0): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function clock_getres(
   int $clk_id,
-  inout $sec,
-  inout $nsec,
+  inout HH\FIXME\MISSING_PARAM_TYPE $sec,
+  inout HH\FIXME\MISSING_PARAM_TYPE $nsec,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function clock_gettime(
   int $clk_id,
-  inout $sec,
-  inout $nsec,
+  inout HH\FIXME\MISSING_PARAM_TYPE $sec,
+  inout HH\FIXME\MISSING_PARAM_TYPE $nsec,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function clock_gettime_ns(int $clk_id)[leak_safe]: int;

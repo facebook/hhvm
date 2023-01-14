@@ -30,9 +30,9 @@ function msg_send(
 function msg_receive(
   resource $queue,
   int $desiredmsgtype,
-  inout $msgtype,
+  inout HH\FIXME\MISSING_PARAM_TYPE $msgtype,
   int $maxsize,
-  inout $message,
+  inout HH\FIXME\MISSING_PARAM_TYPE $message,
   bool $unserialize,
   int $flags,
   inout $errorcode,

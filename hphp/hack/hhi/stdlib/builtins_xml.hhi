@@ -54,8 +54,8 @@ function xml_parse(
 function xml_parse_into_struct(
   resource $parser,
   string $data,
-  inout $values,
-  inout $index,
+  inout HH\FIXME\MISSING_PARAM_TYPE $values,
+  inout HH\FIXME\MISSING_PARAM_TYPE $index,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xml_parser_create_ns(

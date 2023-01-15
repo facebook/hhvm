@@ -6,6 +6,7 @@ use analysis::PredecessorCatchMode;
 use analysis::PredecessorFlags;
 use analysis::Predecessors;
 use ir_core::func_builder::TransformInstr;
+use ir_core::func_builder::TransformState;
 use ir_core::instr::Special;
 use ir_core::instr::Terminator;
 use ir_core::instr::Tmp;
@@ -355,7 +356,13 @@ impl<'a> MakeSSA<'a> {
 }
 
 impl<'a> TransformInstr for MakeSSA<'a> {
-    fn apply(&mut self, _iid: InstrId, i: Instr, rw: &mut FuncBuilder<'_>) -> Instr {
+    fn apply(
+        &mut self,
+        _iid: InstrId,
+        i: Instr,
+        rw: &mut FuncBuilder<'_>,
+        _state: &mut TransformState,
+    ) -> Instr {
         let bid = rw.cur_bid();
 
         match i {

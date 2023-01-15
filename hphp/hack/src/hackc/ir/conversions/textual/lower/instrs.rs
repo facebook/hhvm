@@ -6,6 +6,7 @@
 use std::sync::Arc;
 
 use ir::func_builder::TransformInstr;
+use ir::func_builder::TransformState;
 use ir::instr::CallDetail;
 use ir::instr::CmpOp;
 use ir::instr::HasLoc;
@@ -13,6 +14,7 @@ use ir::instr::HasOperands;
 use ir::instr::Hhbc;
 use ir::instr::IteratorArgs;
 use ir::instr::Predicate;
+use ir::instr::Special;
 use ir::instr::Terminator;
 use ir::instr::Textual;
 use ir::BareThisOp;
@@ -278,7 +280,13 @@ impl LowerInstrs<'_> {
 }
 
 impl TransformInstr for LowerInstrs<'_> {
-    fn apply(&mut self, _iid: InstrId, instr: Instr, builder: &mut FuncBuilder<'_>) -> Instr {
+    fn apply(
+        &mut self,
+        iid: InstrId,
+        instr: Instr,
+        builder: &mut FuncBuilder<'_>,
+        state: &mut TransformState,
+    ) -> Instr {
         use hack::Builtin;
 
         if let Some(instr) = self.handle_with_builtin(builder, &instr) {
@@ -314,7 +322,7 @@ impl TransformInstr for LowerInstrs<'_> {
                         },
                     ..
                 },
-            ) => rewrite_nullsafe_call(builder, call),
+            ) => rewrite_nullsafe_call(iid, builder, call, state),
             Instr::Hhbc(Hhbc::BareThis(_op, loc)) => {
                 let this = builder.strings.intern_str("$this");
                 let lid = LocalId::Named(this);
@@ -450,7 +458,12 @@ impl TransformInstr for LowerInstrs<'_> {
     }
 }
 
-fn rewrite_nullsafe_call(builder: &mut FuncBuilder<'_>, mut call: Call) -> Instr {
+fn rewrite_nullsafe_call(
+    original_iid: InstrId,
+    builder: &mut FuncBuilder<'_>,
+    mut call: Call,
+    state: &mut TransformState,
+) -> Instr {
     // rewrite a call like `$a?->b()` into `$a ? $a->b() : null`
     call.detail = match call.detail {
         CallDetail::FCallObjMethod { .. } => CallDetail::FCallObjMethod {
@@ -463,23 +476,73 @@ fn rewrite_nullsafe_call(builder: &mut FuncBuilder<'_>, mut call: Call) -> Instr
         _ => unreachable!(),
     };
 
+    // We need to be careful about multi-return!
+    //   (ret, a, b) = obj?->call(inout a, inout b)
+    // ->
+    //   if (obj) {
+    //     (ret, a, b)
+    //   } else {
+    //     (null, a, b)
+    //   }
+
     let loc = call.loc;
     let obj = call.obj();
+    let num_rets = call.num_rets;
     let pred = builder.emit_hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::IsTypeNull), &[obj], loc);
-    let res = builder.emit_if_then_else(
-        pred,
-        loc,
-        |builder| {
-            // is null
-            builder.emit_constant(Constant::Null)
-        },
-        |builder| {
-            // is not null
-            builder.emit(Instr::Call(Box::new(call)))
-        },
-    );
 
-    Instr::copy(res)
+    // Need to customize the if/then/else because of multi-return.
+    let join_bid = builder.alloc_bid();
+    let null_bid = builder.alloc_bid();
+    let nonnull_bid = builder.alloc_bid();
+    builder.emit(Instr::jmp_op(
+        pred,
+        Predicate::NonZero,
+        null_bid,
+        nonnull_bid,
+        loc,
+    ));
+
+    // Null case - main value should be null. Inouts should be passed through.
+    builder.start_block(null_bid);
+    let mut args = Vec::with_capacity(num_rets as usize);
+    args.push(builder.emit_constant(Constant::Null));
+    if let Some(inouts) = call.inouts.as_ref() {
+        for inout_idx in inouts.iter() {
+            let op = call.operands[*inout_idx as usize];
+            args.push(op);
+        }
+    }
+    builder.emit(Instr::jmp_args(join_bid, &args, loc));
+
+    // Nonnull case - make call and pass Select values.
+    builder.start_block(nonnull_bid);
+    args.clear();
+    let iid = builder.emit(Instr::Call(Box::new(call)));
+    if num_rets > 1 {
+        for idx in 0..num_rets {
+            args.push(builder.emit(Instr::Special(Special::Select(iid, idx))));
+        }
+    } else {
+        args.push(iid);
+    }
+    builder.emit(Instr::jmp_args(join_bid, &args, loc));
+
+    // Join
+    builder.start_block(join_bid);
+    args.clear();
+    if num_rets > 1 {
+        // we need to swap out the original Select statements.
+        for idx in 0..num_rets {
+            let param = builder.alloc_param();
+            args.push(param);
+            state.rewrite_select_idx(original_iid, idx as usize, param);
+        }
+        Instr::tombstone()
+    } else {
+        let param = builder.alloc_param();
+        args.push(param);
+        Instr::copy(args[0])
+    }
 }
 
 fn iter_var_name(id: ir::IterId, strings: &ir::StringInterner) -> LocalId {

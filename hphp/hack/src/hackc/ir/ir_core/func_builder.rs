@@ -9,6 +9,7 @@ use hash::HashMap;
 
 use crate::func::SrcLoc;
 use crate::instr::HasOperands;
+use crate::instr::Hhbc;
 use crate::instr::Special;
 use crate::Block;
 use crate::BlockId;
@@ -191,8 +192,10 @@ impl<'a> FuncBuilder<'a> {
         self.cur_bid = bid;
         self.block_rewrite_stopped = false;
 
+        let mut state = TransformState::new();
+
         for iid in block_snapshot {
-            self.rewrite_instr(iid, transformer);
+            self.rewrite_instr(iid, transformer, &mut state);
 
             if self.block_rewrite_stopped {
                 break;
@@ -207,7 +210,12 @@ impl<'a> FuncBuilder<'a> {
         self.block_rewrite_stopped = true;
     }
 
-    fn rewrite_instr(&mut self, iid: InstrId, transformer: &mut dyn TransformInstr) {
+    fn rewrite_instr(
+        &mut self,
+        iid: InstrId,
+        transformer: &mut dyn TransformInstr,
+        state: &mut TransformState,
+    ) {
         // Temporarily steal from the func the instr we want to transform, so we
         // can manipulate it without borrowing the func. If we borrow it, we
         // wouldn't be able to create new instrs as part of the transformation.
@@ -220,8 +228,16 @@ impl<'a> FuncBuilder<'a> {
         // Snap through any relaced instrs to the real value.
         self.replace_operands(&mut instr);
 
+        let output = match instr {
+            Instr::Special(Special::Select(src, idx)) => {
+                let src = src.expect_instr("instr expected");
+                self.rewrite_select(iid, instr, src, idx, state)
+            }
+            _ => transformer.apply(iid, instr, self, state),
+        };
+
         // Apply the transformation and learn what to do with the result.
-        match transformer.apply(iid, instr, self) {
+        match output {
             Instr::Special(Special::Copy(value)) => {
                 // Do copy-propagation on the fly, emitting nothing to the block.
                 self.changed = true;
@@ -233,6 +249,41 @@ impl<'a> FuncBuilder<'a> {
                 self.func.blocks[self.cur_bid].iids.push(iid);
             }
         }
+    }
+
+    fn num_selects(instr: &Instr) -> u32 {
+        let num_rets = match instr {
+            Instr::Call(call) => call.num_rets,
+            Instr::Hhbc(Hhbc::ClassGetTS(..)) => 2,
+            Instr::MemberOp(ref op) => op.num_values() as u32,
+            _ => 1,
+        };
+        if num_rets > 1 { num_rets } else { 0 }
+    }
+
+    fn rewrite_select(
+        &mut self,
+        iid: InstrId,
+        instr: Instr,
+        src: InstrId,
+        idx: u32,
+        state: &mut TransformState,
+    ) -> Instr {
+        if let Some(dst) = state.select_mapping.get(&iid) {
+            // This acts like the Select was just replaced by Instr::copy().
+            return Instr::copy(*dst);
+        }
+
+        if iid == InstrId::from_usize(src.as_usize() + 1 + idx as usize) {
+            if idx < Self::num_selects(&self.func.instrs[src]) {
+                // If the rewriter didn't do anything interesting with the
+                // original Instr then we just want to keep the Select
+                // as-is.
+                return instr;
+            }
+        }
+
+        panic!("Un-rewritten Select: InstrId {iid:?} ({instr:?})");
     }
 
     /// If iid has been replaced with another InstrId, return that, else return vid.
@@ -324,5 +375,42 @@ pub trait TransformInstr {
     ///
     /// - Any other instr is recorded in func.instrs[iid] and iid is appended to
     ///   the current block being built up.
-    fn apply<'a>(&mut self, iid: InstrId, instr: Instr, builder: &mut FuncBuilder<'a>) -> Instr;
+    fn apply<'a>(
+        &mut self,
+        iid: InstrId,
+        instr: Instr,
+        builder: &mut FuncBuilder<'a>,
+        state: &mut TransformState,
+    ) -> Instr;
+}
+
+/// Helper for TransformInstr
+pub struct TransformState {
+    select_mapping: InstrIdMap<ValueId>,
+}
+
+impl TransformState {
+    fn new() -> Self {
+        TransformState {
+            select_mapping: Default::default(),
+        }
+    }
+
+    /// When rewriting an Instr that returns multiple values it is required to
+    /// call this function to rewrite the multiple return values.  The inputs to
+    /// this function are the InstrId of the Instr::Special(Special::Select(..)).
+    pub fn rewrite_select(&mut self, src: InstrId, dst: ValueId) {
+        assert!(!self.select_mapping.contains_key(&src));
+        self.select_mapping.insert(src, dst);
+    }
+
+    /// Like rewrite_select() this is used to note multiple return values - but
+    /// uses the InstrId of the original instruction (not the Select) and a
+    /// Select index.
+    pub fn rewrite_select_idx(&mut self, src_iid: InstrId, src_idx: usize, dst_vid: ValueId) {
+        self.rewrite_select(
+            InstrId::from_usize(src_iid.as_usize() + 1 + src_idx),
+            dst_vid,
+        );
+    }
 }

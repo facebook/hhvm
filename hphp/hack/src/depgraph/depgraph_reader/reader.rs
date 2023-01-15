@@ -192,18 +192,18 @@ pub struct NewDepGraph<'bytes> {
     /// One entry per entry in `deps`.
     deps_order: &'bytes [u32],
 
-    /// Indices in `edge_lists` for the serialized edge list for the corresponding `deps` entry.
-    /// One entry per entry in `deps`.
+    /// Indices in `adjacency_lists` for the serialized edge list for the corresponding `deps`
+    /// entry. One entry per entry in `deps`.
     ///
-    /// Each entry in this array must be left shifted by `adjacent_list_alignment_shift` before
-    /// being used as an index. This is to support `edge_lists` larger than 4GB.
+    /// Each entry in this array must be left shifted by `adjacency_list_alignment_shift` before
+    /// being used as an index. This is to support `adjacency_lists` larger than 4GB.
     unshifted_edge_list_offset: &'bytes [u32],
 
-    /// Amount to left-shift unshifted_edge_list_offset to get a byte index into `edge_lists`.
-    adjacent_list_alignment_shift: u8,
+    /// Amount to left-shift unshifted_edge_list_offset to get a byte index into `adjacency_lists`.
+    adjacency_list_alignment_shift: u8,
 
     /// Individually serialized edge lists. `NewHashList` knows how to deserialize.
-    edge_lists: &'bytes [u8],
+    adjacency_lists: &'bytes [u8],
 }
 
 impl<'bytes> NewDepGraph<'bytes> {
@@ -231,7 +231,7 @@ impl<'bytes> NewDepGraph<'bytes> {
         // Partition the file into its sections.
         let (deps_bytes, rest) = rest.split_at(num_deps * 8);
         let (deps_order_bytes, rest) = rest.split_at(num_deps * 4);
-        let (unshifted_edge_list_offset_bytes, edge_lists) = rest.split_at(num_deps * 4);
+        let (unshifted_edge_list_offset_bytes, adjacency_lists) = rest.split_at(num_deps * 4);
 
         // Widen some of the byte arrays to larger types.
         let deps: &[Dep] = bytemuck::cast_slice(deps_bytes);
@@ -243,8 +243,8 @@ impl<'bytes> NewDepGraph<'bytes> {
             deps,
             deps_order,
             unshifted_edge_list_offset,
-            adjacent_list_alignment_shift: header.adjacent_list_alignment_shift,
-            edge_lists,
+            adjacency_list_alignment_shift: header.adjacency_list_alignment_shift,
+            adjacency_lists,
         };
 
         Ok(result)
@@ -316,8 +316,8 @@ impl<'bytes> DepGraphTrait<'bytes> for NewDepGraph<'bytes> {
     }
 
     fn hash_list_for_id(&self, id: HashListId) -> HashList<'bytes> {
-        let start = (id.0 as usize) << self.adjacent_list_alignment_shift;
-        let bytes = &self.edge_lists[start..];
+        let start = (id.0 as usize) << self.adjacency_list_alignment_shift;
+        let bytes = &self.adjacency_lists[start..];
         HashList::New(NewHashList::new(bytes))
     }
 

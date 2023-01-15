@@ -78,7 +78,7 @@ pub struct UncompressedHeader {
     /// Each edge list is stored at an offset in its section such that this many low bits
     /// of the offset are zero. This allows section offsets to be stored in 32 bits even if
     /// there are more than 4GB of edge lists.
-    pub adjacent_list_alignment_shift: u8,
+    pub adjacency_list_alignment_shift: u8,
 
     pub _alignment_padding: [u8; 7],
 }

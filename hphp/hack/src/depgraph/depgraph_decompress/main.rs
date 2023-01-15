@@ -35,13 +35,13 @@ const IN_HEADER_SIZE: usize = std::mem::size_of::<CompressedHeader>();
 fn write_header(
     file: &File,
     num_deps: usize,
-    adjacent_list_alignment_shift: u8,
+    adjacency_list_alignment_shift: u8,
 ) -> std::io::Result<()> {
     let final_header = UncompressedHeader {
         magic: UncompressedHeader::MAGIC,
         version: UncompressedHeader::LATEST_VERSION,
         num_deps: num_deps as u64,
-        adjacent_list_alignment_shift,
+        adjacency_list_alignment_shift,
         _alignment_padding: Default::default(),
     };
 
@@ -412,9 +412,9 @@ fn decompress(in_path: &Path, out_path: &Path) -> std::io::Result<()> {
     );
 
     deps_status?;
-    let adjacent_list_alignment_shift = edges_status?;
+    let adjacency_list_alignment_shift = edges_status?;
 
-    write_header(&out_file, num_deps, adjacent_list_alignment_shift)
+    write_header(&out_file, num_deps, adjacency_list_alignment_shift)
 }
 
 fn main() -> std::io::Result<()> {

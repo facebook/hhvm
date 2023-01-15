@@ -450,7 +450,9 @@ void getFunctionPointers(const NativeFunctionInfo& info,
 
 /**
  * registerNativeFunc() and getNativeFunction() use a provided
- * FuncTable that is a case insensitive map of "name" to function pointer.
+ * FuncTable that is a case sensitive map of "name" to function pointer.
+ * We require case-correct symbols for the purpose of binding native impls
+ * to their PHP decls, regardless of how the language treats the symbols.
  *
  * Extensions should generally add items to this map using the HHVM_FE/ME
  * macros above. The function name (key) must be a static string.

@@ -26,8 +26,11 @@ struct FuncTable {
   NativeFunctionInfo get(const StringData* name) const;
   void dump() const;
  private:
+  // This is intentionally case sensitive despite classes and
+  // functions being case insensitive. Binding native impls to HNI
+  // decls is an internal HHVM operation and must be case-correct.
   hphp_hash_map<const StringData*, NativeFunctionInfo,
-                string_data_hash, string_data_isame> m_infos;
+                string_data_hash, string_data_same> m_infos;
 };
 
 }

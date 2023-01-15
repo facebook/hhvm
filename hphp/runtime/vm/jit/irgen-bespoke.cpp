@@ -1101,16 +1101,16 @@ getLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
   if (sk.op() != Op::FCallClsMethodD) return std::nullopt;
 
   auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
-  auto const func = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
+  auto const meth = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
 
   if (!cls->isame(s_HH_Shapes.get()) &&
       !cls->isame(s_HH_Readonly_Shapes.get())) {
     return std::nullopt;
   }
 
-  if (func->isame(s_at.get()))        return LayoutSensitiveCall::ShapesAt;
-  if (func->isame(s_idx.get()))       return LayoutSensitiveCall::ShapesIdx;
-  if (func->isame(s_keyExists.get())) return LayoutSensitiveCall::ShapesExists;
+  if (meth == s_at.get())        return LayoutSensitiveCall::ShapesAt;
+  if (meth == s_idx.get())       return LayoutSensitiveCall::ShapesIdx;
+  if (meth == s_keyExists.get()) return LayoutSensitiveCall::ShapesExists;
 
   return std::nullopt;
 }

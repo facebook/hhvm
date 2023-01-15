@@ -3546,11 +3546,12 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
     [&](const Class* cls, bool) -> SSATmp* {
       auto const callee = inst->extra<CallBuiltin>()->callee;
       if (cls->isCollectionClass()) {
-        if (callee->name()->isame(s_isEmpty.get())) {
+        auto const methName = callee->name();
+        if (methName == s_isEmpty.get()) {
           FTRACE(3, "simplifying collection: {}\n", callee->name()->data());
           return gen(env, ColIsEmpty, thiz);
         }
-        if (callee->name()->isame(s_count.get())) {
+        if (methName == s_count.get()) {
           FTRACE(3, "simplifying collection: {}\n", callee->name()->data());
           return gen(env, CountCollection, thiz);
         }
@@ -3565,13 +3566,13 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
           return gen(env, op, state, cns(env, whstate));
         };
         auto const methName = callee->name();
-        if (methName->isame(s_isFinished.get())) {
+        if (methName == s_isFinished.get()) {
           return genState(LteInt, int64_t{c_Awaitable::STATE_FAILED});
         }
-        if (methName->isame(s_isSucceeded.get())) {
+        if (methName == s_isSucceeded.get()) {
           return genState(EqInt, int64_t{c_Awaitable::STATE_SUCCEEDED});
         }
-        if (methName->isame(s_isFailed.get())) {
+        if (methName == s_isFailed.get()) {
           return genState(EqInt, int64_t{c_Awaitable::STATE_FAILED});
         }
       }

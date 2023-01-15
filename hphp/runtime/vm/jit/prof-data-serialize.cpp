@@ -1603,7 +1603,7 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
       (!func->isMethod() && func->isBuiltin() &&
       !func->isMethCaller())) {
     if (func == SystemLib::s_nullCtor) {
-      assertx(func->name()->isame(s_86ctor.get()));
+      assertx(func->name() == s_86ctor.get());
     }
     write_raw(ser, true);
     return write_string(ser, func->name());
@@ -1646,7 +1646,7 @@ Func* read_func(ProfDataDeserializer& ser) {
       auto const func = [&] () -> const Func* {
         if (builtin_func) {
           auto const name = read_string(ser);
-          if (name->isame(s_86ctor.get())) return SystemLib::s_nullCtor;
+          if (name->same(s_86ctor.get())) return SystemLib::s_nullCtor;
           return Func::lookup(name);
         }
         auto const id = read_raw<uint32_t>(ser);

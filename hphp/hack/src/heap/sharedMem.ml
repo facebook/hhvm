@@ -857,6 +857,7 @@ module type Heap = sig
 
   val mem_old : key -> bool
 
+  (** Equivalent to moving a set of entries (= key + value) to some heap of old entries. *)
   val oldify_batch : KeySet.t -> unit
 
   val revive_batch : KeySet.t -> unit
@@ -957,6 +958,7 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
 
   let mem_old x = WithLocalChanges.mem (old_hash_of_key x)
 
+  (** Equivalent to moving an entry (= key + value) to some heap of old entries. *)
   let oldify x =
     if mem x then
       WithLocalChanges.move (hash_of_key x) (old_hash_of_key x)
@@ -969,6 +971,7 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
       WithLocalChanges.move (old_hash_of_key x) (hash_of_key x)
     )
 
+  (** Equivalent to moving a set of entries (= key + value) to some heap of old entries. *)
   let oldify_batch xs =
     KeySet.iter
       begin
@@ -1269,6 +1272,7 @@ end = struct
       keys
       KeyMap.empty
 
+  (** Equivalent to moving a set of entries (= key + value) to some heap of old entries. *)
   let oldify_batch keys =
     Direct.oldify_batch keys;
     KeySet.iter Cache.remove keys

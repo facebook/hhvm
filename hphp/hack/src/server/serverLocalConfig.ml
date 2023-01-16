@@ -396,9 +396,6 @@ type t = {
   shallow_class_decl: bool;
       (** Look up class members lazily from shallow declarations instead of eagerly
       computing folded declarations representing the entire class type. *)
-  force_shallow_decl_fanout: bool;
-      (** Use fanout algorithm based solely on shallow decl comparison. This is the
-      default in shallow decl mode. Use this option if using folded decls. *)
   populate_member_heaps: bool;
       (** Populate the member signature heaps.
 
@@ -565,7 +562,6 @@ let default =
     load_decls_from_saved_state = false;
     idle_gc_slice = 0;
     shallow_class_decl = false;
-    force_shallow_decl_fanout = false;
     populate_member_heaps = true;
     fetch_remote_old_decls = false;
     use_hack_64_naming_table = true;
@@ -1032,13 +1028,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let force_shallow_decl_fanout =
-    bool_if_min_version
-      "force_shallow_decl_fanout"
-      ~default:default.force_shallow_decl_fanout
-      ~current_version
-      config
-  in
   let populate_member_heaps =
     bool_if_min_version
       "populate_member_heaps"
@@ -1259,14 +1248,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let fetch_remote_old_decls =
-    if fetch_remote_old_decls && not force_shallow_decl_fanout then (
-      Hh_logger.warn
-        "You have fetch_remote_old_decls=true but force_shallow_decl_fanout=false. This is incompatible. Turning off fetch_remote_old_decls";
-      false
-    ) else
-      fetch_remote_old_decls
-  in
   let workload_quantile =
     int_list_opt "workload_quantile" config >>= fun l ->
     match l with
@@ -1332,14 +1313,6 @@ let load_ fn ~silent ~current_version overrides =
     if rust_provider_backend && populate_member_heaps then (
       Hh_logger.warn
         "You have rust_provider_backend=true but populate_member_heaps=true. This is incompatible. Turning off rust_provider_backend";
-      false
-    ) else
-      rust_provider_backend
-  in
-  let rust_provider_backend =
-    if rust_provider_backend && not force_shallow_decl_fanout then (
-      Hh_logger.warn
-        "You have rust_provider_backend=true but force_shallow_decl_fanout=false. This is incompatible. Turning off rust_provider_backend";
       false
     ) else
       rust_provider_backend
@@ -1459,7 +1432,6 @@ let load_ fn ~silent ~current_version overrides =
     load_decls_from_saved_state;
     idle_gc_slice;
     shallow_class_decl;
-    force_shallow_decl_fanout;
     populate_member_heaps;
     fetch_remote_old_decls;
     use_hack_64_naming_table;
@@ -1532,7 +1504,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
   HackEventLogger.
     {
       longlived_workers = options.longlived_workers;
-      force_shallow_decl_fanout = options.force_shallow_decl_fanout;
       log_from_client_when_slow_monitor_connections =
         options.log_from_client_when_slow_monitor_connections;
       log_saved_state_age_and_distance =

@@ -81,7 +81,6 @@ let init
            ("rust_provider_backend", string_of_bool rust_provider_backend);
            ("shm_use_sharded_hashtbl", "true");
            ("shm_cache_size", string_of_int (60 * (1024 * 1024 * 1024)));
-           ("force_shallow_decl_fanout", "true");
            ("populate_member_heaps", "false");
          ]
         @ config server_args))

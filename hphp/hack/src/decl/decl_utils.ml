@@ -40,12 +40,13 @@ let unwrap_class_type ty =
     let p = Typing_reason.to_pos r in
     (r, (p, ""), [])
 
-(* Given sets A and B return a tuple (AnB, A\B), i.e split A into the part
- * that is common with B, and which is unique to A *)
+(** Given sets A and B return a tuple (AnB, A\B), i.e split A into the part
+    that is common with B, and which is unique to A *)
 let split_sets defs split_if_in_defs =
   SSet.partition (SSet.mem split_if_in_defs) defs
 
-(* Map split_sets over all sets in FileInfo *)
+(** Given name sets A and B return a tuple (AnB, A\B), i.e split A into the part
+    that is common with B, and which is unique to A *)
 let split_defs defs split_if_in_defs =
   FileInfo.(
     let (n_funs1, n_funs2) = split_sets defs.n_funs split_if_in_defs.n_funs in

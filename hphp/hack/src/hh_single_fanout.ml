@@ -17,7 +17,6 @@ let tcopt =
     GlobalOptions.default with
     GlobalOptions.tco_enable_modules = true;
     tco_allow_all_files_for_module_declarations = true;
-    tco_force_shallow_decl_fanout = true;
   }
 
 let popt =
@@ -107,8 +106,7 @@ let get_symbols_for_deps
 let compute_fanout ctx options (old_and_new_defs : Naming_table.defs_per_file) :
     Typing_deps.DepSet.t =
   let {
-    Decl_redecl_service.fanout =
-      { Decl_redecl_service.to_recheck; changed; to_redecl = _ };
+    Decl_redecl_service.fanout = { Decl_redecl_service.to_recheck; changed };
     _;
   } =
     Decl_redecl_service.redo_type_decl

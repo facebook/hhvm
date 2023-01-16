@@ -96,9 +96,6 @@ type t = {
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   tco_shallow_class_decl: bool;
-  (* Use shallow decl fanout algorithm while remaining to use folded decls
-     for typechecking *)
-  tco_force_shallow_decl_fanout: bool;
   (* Flag to fetch old decls from remote decl store *)
   tco_remote_old_decls_no_limit: bool;
   (* Don't limit amount of remote old decls fetched *)
@@ -373,7 +370,6 @@ val make :
   ?log_levels:int SMap.t ->
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_shallow_class_decl:bool ->
-  ?tco_force_shallow_decl_fanout:bool ->
   ?tco_remote_old_decls_no_limit:bool ->
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_populate_member_heaps:bool ->

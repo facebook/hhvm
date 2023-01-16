@@ -127,8 +127,6 @@ let log_levels t = t.GlobalOptions.log_levels
 
 let shallow_class_decl t = t.GlobalOptions.tco_shallow_class_decl
 
-let force_shallow_decl_fanout t = t.GlobalOptions.tco_force_shallow_decl_fanout
-
 let remote_old_decls_no_limit t = t.GlobalOptions.tco_remote_old_decls_no_limit
 
 let fetch_remote_old_decls t = t.GlobalOptions.tco_fetch_remote_old_decls

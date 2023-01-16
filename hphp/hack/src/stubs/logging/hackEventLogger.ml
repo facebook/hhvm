@@ -43,7 +43,6 @@ let serialize_globals () = Serialized_globals
 
 type rollout_flags = {
   longlived_workers: bool;
-  force_shallow_decl_fanout: bool;
   log_from_client_when_slow_monitor_connections: bool;
   log_saved_state_age_and_distance: bool;
   naming_sqlite_in_hack_64: bool;

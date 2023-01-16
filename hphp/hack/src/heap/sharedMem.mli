@@ -296,6 +296,7 @@ module type Heap = sig
 
   val mem_old : key -> bool
 
+  (** Equivalent to moving a set of entries (= key + value) to some heap of old entries. *)
   val oldify_batch : KeySet.t -> unit
 
   val revive_batch : KeySet.t -> unit

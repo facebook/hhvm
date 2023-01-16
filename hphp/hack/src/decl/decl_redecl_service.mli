@@ -15,8 +15,6 @@ type get_classes_in_file = Relative_path.t -> SSet.t
 type fanout = {
   changed: DepSet.t;
       (** The symbols that were changed compared to their old version. *)
-  to_redecl: DepSet.t;
-      (** The symbols which need to be re-declared, for the second phase of two-phase redecl. *)
   to_recheck: DepSet.t;
       (** The symbols which need to be re-typechecked as a result of the change. *)
 }
@@ -55,7 +53,6 @@ val oldify_type_decl :
   MultiWorker.worker list option ->
   get_classes_in_file ->
   bucket_size:int ->
-  previously_oldified_defs:FileInfo.names ->
   defs:FileInfo.names ->
   unit
 

@@ -27,18 +27,11 @@ end
 
 val get_extend_deps : Typing_deps_mode.t -> DepSet.elt -> DepSet.t -> DepSet.t
 
-val get_classes_deps :
-  ctx:Provider_context.t ->
-  Class.t option SMap.t ->
-  Class.t option SMap.t ->
-  SSet.t ->
-  (DepSet.t * DepSet.t * DepSet.t) * int
-
 val get_funs_deps :
   ctx:Provider_context.t ->
   Funs.value option SMap.t ->
   SSet.t ->
-  (DepSet.t * DepSet.t * DepSet.t) * int
+  (DepSet.t * DepSet.t) * int
 
 val get_types_deps :
   ctx:Provider_context.t ->
@@ -50,10 +43,10 @@ val get_gconsts_deps :
   ctx:Provider_context.t ->
   GConsts.value option SMap.t ->
   SSet.t ->
-  (DepSet.t * DepSet.t * DepSet.t) * int
+  (DepSet.t * DepSet.t) * int
 
 val get_modules_deps :
   ctx:Provider_context.t ->
   old_modules:Modules.value option SMap.t ->
   modules:SSet.t ->
-  (DepSet.t * DepSet.t * DepSet.t) * int
+  (DepSet.t * DepSet.t) * int

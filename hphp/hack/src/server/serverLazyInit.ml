@@ -641,14 +641,13 @@ let log_fanout_information to_recheck_deps files_to_recheck =
   the current versions of dirty files. This lets us check a smaller set of
   files than the set we'd check if old declarations were not available.
   To be used only when load_decls_from_saved_state is enabled. *)
-let get_files_to_undecl_and_recheck
+let get_files_to_recheck
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (old_naming_table : Naming_table.t)
     (new_defs_per_file : FileInfo.names Relative_path.Map.t)
     (defs_per_dirty_file : FileInfo.names Relative_path.Map.t)
-    (files_to_redeclare : Relative_path.Set.t) :
-    Relative_path.Set.t * Relative_path.Set.t =
+    (files_to_redeclare : Relative_path.Set.t) : Relative_path.Set.t =
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let defs_per_file_to_redeclare =
     Relative_path.Set.fold
@@ -683,13 +682,9 @@ let get_files_to_undecl_and_recheck
     ~bucket_size
     genv.workers
     get_old_and_new_classes
-    ~previously_oldified_defs:FileInfo.empty_names
     ~defs:dirty_names;
-  let {
-    Decl_redecl_service.fanout =
-      { Decl_redecl_service.to_redecl; to_recheck; _ };
-    _;
-  } =
+  let { Decl_redecl_service.fanout = { Decl_redecl_service.to_recheck; _ }; _ }
+      =
     Decl_redecl_service.redo_type_decl
       ~bucket_size
       ctx
@@ -700,13 +695,9 @@ let get_files_to_undecl_and_recheck
       ~defs:defs_per_file_to_redeclare
   in
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
-  let to_recheck_deps = Typing_deps.add_all_deps env.deps_mode to_redecl in
-  let to_recheck_deps = Typing_deps.DepSet.union to_recheck_deps to_recheck in
-  let files_to_undecl = Naming_provider.get_files ctx to_redecl in
-  let files_to_recheck = Naming_provider.get_files ctx to_recheck_deps in
-  log_fanout_information to_recheck_deps files_to_recheck;
-
-  (files_to_undecl, files_to_recheck)
+  let files_to_recheck = Naming_provider.get_files ctx to_recheck in
+  log_fanout_information to_recheck files_to_recheck;
+  files_to_recheck
 
 (* We start off with a list of files that have changed since the state was
  * saved (dirty_files), the naming table from the saved state (old_naming_table)
@@ -774,8 +765,8 @@ let type_check_dirty
   let local_deps =
     old_and_new_defs_in_files dirty_local_files_changed_hash |> names_to_deps
   in
-  let get_files_to_undecl_and_recheck files_to_redeclare =
-    get_files_to_undecl_and_recheck
+  let get_files_to_recheck files_to_redeclare =
+    get_files_to_recheck
       genv
       env
       old_naming_table
@@ -787,20 +778,20 @@ let type_check_dirty
          dirty_files_unchanged_hash)
       files_to_redeclare
   in
-  let (env, to_undecl, to_recheck) =
+  let (env, to_recheck) =
     if use_prechecked_files genv then
       (* Start with dirty files and fan-out of local changes only *)
-      let (to_undecl, to_recheck) =
+      let to_recheck =
         if
           genv.local_config.SLC.load_decls_from_saved_state
           || genv.local_config.SLC.fetch_remote_old_decls
         then
-          get_files_to_undecl_and_recheck dirty_local_files_changed_hash
+          get_files_to_recheck dirty_local_files_changed_hash
         else
           let deps = Typing_deps.add_all_deps env.deps_mode local_deps in
           let files = Naming_provider.get_files ctx deps in
           log_fanout_information deps files;
-          (Relative_path.Set.empty, files)
+          files
       in
       ( ServerPrecheckedFiles.set
           env
@@ -811,24 +802,23 @@ let type_check_dirty
                dirty_master_deps = master_deps;
                clean_local_deps = Typing_deps.(DepSet.make ());
              }),
-        to_undecl,
         to_recheck )
     else
       (* Start with full fan-out immediately *)
-      let (to_undecl, to_recheck) =
+      let to_recheck =
         if
           genv.local_config.SLC.load_decls_from_saved_state
           || genv.local_config.SLC.fetch_remote_old_decls
         then
-          get_files_to_undecl_and_recheck dirty_files_changed_hash
+          get_files_to_recheck dirty_files_changed_hash
         else
           let deps = Typing_deps.DepSet.union master_deps local_deps in
           let deps = Typing_deps.add_all_deps env.deps_mode deps in
           let files = Naming_provider.get_files ctx deps in
           log_fanout_information deps files;
-          (Relative_path.Set.empty, files)
+          files
       in
-      (env, to_undecl, to_recheck)
+      (env, to_recheck)
   in
   (* We still need to typecheck files whose declarations did not change *)
   let to_recheck =
@@ -860,27 +850,6 @@ let type_check_dirty
          ]);
     exit 0
   ) else
-    (* In case we saw that any hot decls had become invalid, we have to remove them.
-       Note: we don't need to do a full "redecl" of them since their fanout has
-       already been encompassed by to_recheck. *)
-    let names_to_undecl =
-      Relative_path.Set.fold
-        to_undecl
-        ~init:FileInfo.empty_names
-        ~f:(fun file acc ->
-          match Naming_table.get_file_info old_naming_table file with
-          | None -> acc
-          | Some info ->
-            let names = FileInfo.simplify info in
-            FileInfo.merge_names acc names)
-    in
-    let ctx = Provider_utils.ctx_from_server_env env in
-    Decl_redecl_service.remove_defs
-      ctx
-      names_to_undecl
-      SMap.empty
-      ~collect_garbage:false;
-
     let env = { env with changed_files = dirty_files_changed_hash } in
     let files_to_check =
       if

@@ -1561,7 +1561,6 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
       None
       get_classes
       ~bucket_size:1
-      ~previously_oldified_defs:FileInfo.empty_names
       ~defs
       ~collect_garbage:false;
 

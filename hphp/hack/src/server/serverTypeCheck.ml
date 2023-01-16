@@ -306,14 +306,6 @@ let parsing genv env to_check cgroup_steps =
 
   (env, defs_per_file, errors, failed_parsing)
 
-let diff_set_and_map_keys set map =
-  Relative_path.Map.fold map ~init:set ~f:(fun k _ acc ->
-      Relative_path.Set.remove acc k)
-
-let union_set_and_map_keys set map =
-  Relative_path.Map.fold map ~init:set ~f:(fun k _ acc ->
-      Relative_path.Set.add acc k)
-
 let get_interrupt_config genv env =
   MultiThreadedCall.{ handlers = env.interrupt_handlers genv; env }
 
@@ -341,25 +333,10 @@ module type CheckKindType = sig
     ctx:Provider_context.t ->
     Relative_path.Set.t
 
-  (* Returns a tuple: files to redecl now, files to redecl later *)
-  val get_defs_to_redecl_phase2 :
-    ServerEnv.genv ->
-    decl_defs:Naming_table.defs_per_file ->
-    naming_table:Naming_table.t ->
-    to_redecl_phase2:Relative_path.Set.t ->
-    env:ServerEnv.env ->
-    Naming_table.defs_per_file * Naming_table.defs_per_file
-
-  val get_to_recheck2_approximation :
-    to_redecl_phase2_deps:Typing_deps.DepSet.t ->
-    env:ServerEnv.env ->
-    ctx:Provider_context.t ->
-    Relative_path.Set.t
-
   (* Which files to typecheck, based on results of declaration phase *)
   val get_defs_to_recheck :
     reparsed:Relative_path.Set.t ->
-    phase_2_decl_defs:Naming_table.defs_per_file ->
+    defs_per_file:Naming_table.defs_per_file ->
     to_recheck:Relative_path.Set.t ->
     env:ServerEnv.env ->
     ctx:Provider_context.t ->
@@ -377,7 +354,6 @@ module type CheckKindType = sig
   val get_env_after_typing :
     old_env:ServerEnv.env ->
     errorl:Errors.t ->
-    needs_phase2_redecl:Relative_path.Set.t ->
     needs_recheck:Relative_path.Set.t ->
     ServerEnv.env
 
@@ -402,33 +378,9 @@ module FullCheckKind : CheckKindType = struct
       ~errors:env.errorl
       ~ctx
 
-  let get_defs_to_redecl_phase2
-      genv ~decl_defs ~naming_table ~to_redecl_phase2 ~env =
-    let defs_per_file =
-      ServerCheckUtils.extend_defs_per_file
-        genv
-        decl_defs
-        naming_table
-        to_redecl_phase2
-    in
-    (* Add decl fanout that was delayed by previous lazy checks to phase 2 *)
-    let defs_per_file =
-      ServerCheckUtils.extend_defs_per_file
-        genv
-        defs_per_file
-        naming_table
-        env.needs_phase2_redecl
-    in
-    (defs_per_file, Relative_path.Map.empty)
-
-  let get_to_recheck2_approximation ~to_redecl_phase2_deps:_ ~env:_ ~ctx:_ =
-    (* Full check is computing to_recheck2 set accurately, so there is no need
-     * to approximate anything *)
-    Relative_path.Set.empty
-
   let get_defs_to_recheck
       ~reparsed
-      ~phase_2_decl_defs
+      ~defs_per_file
       ~to_recheck
       ~env
       ~ctx
@@ -460,7 +412,7 @@ module FullCheckKind : CheckKindType = struct
     let to_recheck = Relative_path.Set.union env.needs_recheck to_recheck in
     let to_recheck =
       Relative_path.Set.union
-        (Relative_path.Set.of_list (Relative_path.Map.keys phase_2_decl_defs))
+        (Relative_path.Set.of_list (Relative_path.Map.keys defs_per_file))
         to_recheck
     in
     (to_recheck, Relative_path.Set.empty)
@@ -474,8 +426,7 @@ module FullCheckKind : CheckKindType = struct
       disk_needs_parsing = Relative_path.Set.empty;
     }
 
-  let get_env_after_typing
-      ~old_env ~errorl ~needs_phase2_redecl:_ ~needs_recheck =
+  let get_env_after_typing ~old_env ~errorl ~needs_recheck =
     let (full_check_status, remote) =
       if Relative_path.Set.is_empty needs_recheck then
         (Full_check_done, false)
@@ -492,7 +443,6 @@ module FullCheckKind : CheckKindType = struct
     {
       old_env with
       errorl;
-      needs_phase2_redecl = Relative_path.Set.empty;
       needs_recheck;
       full_check_status;
       remote;
@@ -523,52 +473,9 @@ module LazyCheckKind : CheckKindType = struct
       ~errors:env.errorl
       ~ctx
 
-  let get_defs_to_redecl_phase2
-      genv ~decl_defs ~naming_table ~to_redecl_phase2 ~env =
-    (* Do phase2 only for IDE files, delay the fanout until next full check *)
-    let (to_redecl_phase2_now, to_redecl_phase2_later) =
-      Relative_path.Set.partition (is_ide_file env) to_redecl_phase2
-    in
-    ( ServerCheckUtils.extend_defs_per_file
-        genv
-        decl_defs
-        naming_table
-        to_redecl_phase2_now,
-      ServerCheckUtils.extend_defs_per_file
-        genv
-        decl_defs
-        naming_table
-        to_redecl_phase2_later )
-
-  let get_related_files ctx dep =
-    let deps_mode = Provider_context.get_deps_mode ctx in
-    Typing_deps.(
-      add_typing_deps deps_mode (DepSet.singleton dep)
-      |> Naming_provider.get_files ctx)
-
-  let get_to_recheck2_approximation ~to_redecl_phase2_deps ~env ~ctx =
-    (* We didn't do the full fan-out from to_redecl_phase2_deps, so the
-     * to_recheck2 set might not be complete. We would recompute it during next
-     * full check, but if it contains files open in editor, we would like to
-     * recheck them sooner than that. We approximate it by taking all the
-     * possible dependencies of dependencies and preemptively rechecking them
-     * if they are open in the editor *)
-    if Typing_deps.DepSet.cardinal to_redecl_phase2_deps > 1000 then
-      (* inspecting tons of dependencies would take more time that just
-         * rechecking all relevant files. *)
-      Relative_path.Set.union
-        env.editor_open_files
-        (some_ide_diagnosed_files env)
-    else
-      Typing_deps.DepSet.fold
-        to_redecl_phase2_deps
-        ~init:Relative_path.Set.empty
-        ~f:(fun x acc -> Relative_path.Set.union acc @@ get_related_files ctx x)
-      |> Relative_path.Set.filter ~f:(is_ide_file env)
-
   let get_defs_to_recheck
       ~reparsed
-      ~phase_2_decl_defs
+      ~defs_per_file
       ~to_recheck
       ~env
       ~ctx
@@ -601,7 +508,7 @@ module LazyCheckKind : CheckKindType = struct
     in
     let to_recheck_now =
       Relative_path.Set.union
-        (Relative_path.Set.of_list (Relative_path.Map.keys phase_2_decl_defs))
+        (Relative_path.Set.of_list (Relative_path.Map.keys defs_per_file))
         to_recheck_now
     in
     (to_recheck_now, to_recheck_later)
@@ -614,8 +521,7 @@ module LazyCheckKind : CheckKindType = struct
       ide_needs_parsing = Relative_path.Set.empty;
     }
 
-  let get_env_after_typing ~old_env ~errorl ~needs_phase2_redecl ~needs_recheck
-      =
+  let get_env_after_typing ~old_env ~errorl ~needs_recheck =
     (* If it was started, it's still started, otherwise it needs starting *)
     let full_check_status =
       match old_env.full_check_status with
@@ -626,7 +532,6 @@ module LazyCheckKind : CheckKindType = struct
       old_env with
       errorl;
       ide_needs_parsing = Relative_path.Set.empty;
-      needs_phase2_redecl;
       needs_recheck;
       full_check_status;
     }
@@ -647,36 +552,6 @@ functor
   (CheckKind : CheckKindType)
   ->
   struct
-    let get_defs defs_per_file =
-      Relative_path.Map.fold
-        defs_per_file
-        ~f:
-          begin
-            (fun _ names1 names2 -> FileInfo.merge_names names1 names2)
-          end
-        ~init:FileInfo.empty_names
-
-    let get_oldified_defs env =
-      Relative_path.Set.fold
-        env.needs_phase2_redecl
-        ~f:
-          begin
-            fun path acc ->
-              match Naming_table.get_file_info env.naming_table path with
-              | None -> acc
-              | Some names -> FileInfo.(merge_names (simplify names) acc)
-          end
-        ~init:FileInfo.empty_names
-
-    let get_classes ~old_naming_table path =
-      match Naming_table.get_file_info old_naming_table path with
-      | None -> SSet.empty
-      | Some info ->
-        List.fold
-          info.FileInfo.classes
-          ~init:SSet.empty
-          ~f:(fun acc (_, cid, _) -> SSet.add acc cid)
-
     let get_classes_from_old_and_new ~new_naming_table ~old_naming_table path =
       let new_classes =
         match Naming_table.get_file_info new_naming_table path with
@@ -821,44 +696,32 @@ functor
       in
       { duplicate_name_errors; failed_naming; naming_table; telemetry }
 
-    type redecl_phase1_result = {
+    type redecl_result = {
       changed: Typing_deps.DepSet.t;
-      oldified_defs: FileInfo.names;
-      to_recheck1: Relative_path.Set.t;
-      to_recheck1_deps: Typing_deps.DepSet.t;
-      to_redecl_phase2_deps: Typing_deps.DepSet.t;
+      to_recheck: Relative_path.Set.t;
+      to_recheck_deps: Typing_deps.DepSet.t;
       old_decl_missing_count: int;
     }
 
-    let do_redecl_phase1
+    let do_redecl
         (genv : genv)
         (env : env)
         ~(defs_per_file : FileInfo.names Relative_path.Map.t)
         ~(naming_table : Naming_table.t)
-        ~(oldified_defs : FileInfo.names)
-        ~(cgroup_steps : CgroupProfiler.step_group) : redecl_phase1_result =
+        ~(cgroup_steps : CgroupProfiler.step_group) : redecl_result =
       let get_classes =
-        if genv.local_config.ServerLocalConfig.force_shallow_decl_fanout then
-          get_classes_from_old_and_new
-            ~new_naming_table:naming_table
-            ~old_naming_table:env.naming_table
-        else
-          get_classes ~old_naming_table:naming_table
+        get_classes_from_old_and_new
+          ~new_naming_table:naming_table
+          ~old_naming_table:env.naming_table
       in
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
-      let defs_to_redecl = get_defs defs_per_file in
       let ctx = Provider_utils.ctx_from_server_env env in
       let {
         Decl_redecl_service.errors = _;
-        fanout =
-          {
-            Decl_redecl_service.changed;
-            to_redecl = to_redecl_phase2_deps;
-            to_recheck = to_recheck1_deps;
-          };
+        fanout = { Decl_redecl_service.changed; to_recheck = to_recheck_deps };
         old_decl_missing_count;
       } =
-        CgroupProfiler.step_start_end cgroup_steps "redecl phase 1"
+        CgroupProfiler.step_start_end cgroup_steps "redecl"
         @@ fun _cgroup_step ->
         Decl_redecl_service.redo_type_decl
           ~bucket_size
@@ -866,167 +729,11 @@ functor
           ~during_init:false
           genv.workers
           get_classes
-          ~previously_oldified_defs:oldified_defs
+          ~previously_oldified_defs:FileInfo.empty_names
           ~defs:defs_per_file
       in
-      (* Things that were redeclared are no longer in old heap, so we substract
-       * defs_to_redecl from oldified_defs *)
-      let oldified_defs =
-        snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl
-      in
-      let to_recheck1 = Naming_provider.get_files ctx to_recheck1_deps in
-      {
-        changed;
-        oldified_defs;
-        to_recheck1;
-        to_recheck1_deps;
-        to_redecl_phase2_deps;
-        old_decl_missing_count;
-      }
-
-    type redecl_phase2_result = {
-      errors_after_phase2: Errors.t;
-      needs_phase2_redecl: Relative_path.Set.t;
-      to_recheck2: Relative_path.Set.t;
-      to_recheck2_deps: Typing_deps.DepSet.t;
-          (** Note that the intuitive property
-            [get_files to_recheck2_deps == to_recheck2] does NOT hold. That's
-            because in a lazy check, we might add files open in the IDE *)
-      time_errors_pushed: seconds_since_epoch option;
-      old_decl_missing_count: int;
-    }
-
-    let do_redecl_phase2
-        (genv : genv)
-        (env : env)
-        ~(errors : Errors.t)
-        ~(defs_per_file_redecl_phase2_now : FileInfo.names Relative_path.Map.t)
-        ~(naming_table : Naming_table.t)
-        ~(lazy_decl_later : FileInfo.names Relative_path.Map.t)
-        ~(oldified_defs : FileInfo.names)
-        ~(to_redecl_phase2_deps : Typing_deps.DepSet.t)
-        ~(cgroup_steps : CgroupProfiler.step_group) : redecl_phase2_result =
-      let get_classes =
-        if genv.local_config.ServerLocalConfig.force_shallow_decl_fanout then
-          get_classes_from_old_and_new
-            ~new_naming_table:naming_table
-            ~old_naming_table:env.naming_table
-        else
-          get_classes ~old_naming_table:naming_table
-      in
-      let ctx = Provider_utils.ctx_from_server_env env in
-      let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
-      let defs_to_oldify = get_defs lazy_decl_later in
-      Decl_redecl_service.oldify_type_decl
-        ctx
-        ~bucket_size
-        genv.workers
-        get_classes
-        ~previously_oldified_defs:oldified_defs
-        ~defs:defs_to_oldify;
-      let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
-      let {
-        Decl_redecl_service.errors = errorl';
-        fanout =
-          {
-            Decl_redecl_service.changed = _;
-            to_redecl = _;
-            to_recheck = to_recheck2_deps;
-          };
-        old_decl_missing_count;
-      } =
-        CgroupProfiler.step_start_end cgroup_steps "redecl phase 2"
-        @@ fun _cgroup_step ->
-        Decl_redecl_service.redo_type_decl
-          ~bucket_size
-          ctx
-          ~during_init:false
-          genv.workers
-          get_classes
-          ~previously_oldified_defs:oldified_defs
-          ~defs:defs_per_file_redecl_phase2_now
-      in
-      let (env, errors, time_errors_pushed) =
-        push_and_accumulate_errors
-          (env, errors)
-          errorl'
-          ~rechecked:
-            (defs_per_file_redecl_phase2_now
-            |> Relative_path.Map.keys
-            |> Relative_path.Set.of_list)
-          ~phase:Errors.Decl
-      in
-      let needs_phase2_redecl =
-        diff_set_and_map_keys
-          (* Redeclaration delayed before and now. *)
-          (union_set_and_map_keys env.needs_phase2_redecl lazy_decl_later)
-          (* Redeclarations completed now. *)
-          defs_per_file_redecl_phase2_now
-      in
-      let to_recheck2 = Naming_provider.get_files ctx to_recheck2_deps in
-      let to_recheck2 =
-        Relative_path.Set.union
-          to_recheck2
-          (CheckKind.get_to_recheck2_approximation
-             ~to_redecl_phase2_deps
-             ~env
-             ~ctx)
-      in
-      {
-        errors_after_phase2 = errors;
-        needs_phase2_redecl;
-        to_recheck2;
-        to_recheck2_deps;
-        time_errors_pushed;
-        old_decl_missing_count;
-      }
-
-    (** Merge the results of the two redecl phases by unioning all that's to recheck and redecl together. *)
-    let merge_redecl_results
-        ~(defs_per_file : FileInfo.names Relative_path.Map.t)
-        ~(defs_per_file_redecl_phase2_now : FileInfo.names Relative_path.Map.t)
-        ~(to_recheck1 : Relative_path.Set.t)
-        ~(to_recheck1_deps : Typing_deps.DepSet.t)
-        ~(to_recheck2 : Relative_path.Set.t)
-        ~(to_recheck2_deps : Typing_deps.DepSet.t)
-        ~(to_redecl_phase2 : Relative_path.Set.t)
-        ~(to_redecl_phase2_deps : Typing_deps.DepSet.t) :
-        Naming_table.defs_per_file
-        * Relative_path.Set.t
-        * Typing_deps.DepSet.t lazy_t =
-      let defs_per_file =
-        Relative_path.Map.union defs_per_file defs_per_file_redecl_phase2_now
-      in
-      (* I want to make sure the way we compute to_recheck in terms of files
-       * vs. in terms of toplevel symbol hashes does not diverge. Therefore,
-       * instead of duplicating the unioning logic, I put the logic in a
-       * polymorphic helper function *)
-      let calc_to_recheck
-          (type a)
-          ~(union : a -> a -> a)
-          ~(to_recheck1 : a)
-          ~(to_recheck2 : a)
-          ~(to_redecl_phase2 : a) =
-        let to_recheck = union to_recheck1 to_recheck2 in
-        let to_recheck = union to_recheck to_redecl_phase2 in
-        to_recheck
-      in
-      let to_recheck =
-        calc_to_recheck
-          ~union:Relative_path.Set.union
-          ~to_recheck1
-          ~to_recheck2
-          ~to_redecl_phase2
-      in
-      let to_recheck_deps =
-        lazy
-          (calc_to_recheck
-             ~union:Typing_deps.DepSet.union
-             ~to_recheck1:to_recheck1_deps
-             ~to_recheck2:to_recheck2_deps
-             ~to_redecl_phase2:to_redecl_phase2_deps)
-      in
-      (defs_per_file, to_recheck, to_recheck_deps)
+      let to_recheck = Naming_provider.get_files ctx to_recheck_deps in
+      { changed; to_recheck; to_recheck_deps; old_decl_missing_count }
 
     type type_checking_result = {
       env: ServerEnv.env;
@@ -1220,12 +927,6 @@ functor
         else
           env
       in
-      (* Files in env.needs_decl contain declarations which were not finished.
-       * They were only oldified, but we didn't run phase2 redeclarations for them
-       * which would compute new versions, compare them with old ones and remove
-       * the old ones. We'll use oldified_defs sets to track what is in the old
-       * heap as we progress with redeclaration *)
-      let oldified_defs = get_oldified_defs env in
       let (files_to_parse, stop_at_errors) = CheckKind.get_files_to_parse env in
       (* We need to do naming phase for files that failed naming in a previous cycle.
        * "Failed_naming" comes from duplicate name errors; the idea is that a change
@@ -1254,17 +955,11 @@ functor
 
       let telemetry =
         if CheckKind.is_full then (
-          let redecl_count =
-            Relative_path.Set.cardinal env.needs_phase2_redecl
-          in
           let check_count = Relative_path.Set.cardinal env.needs_recheck in
           Hh_logger.log
-            "Processing deferred type decl for %d file(s), deferred typechecking for %d file(s)"
-            redecl_count
+            "Processing deferred typechecking for %d file(s)"
             check_count;
-          telemetry
-          |> Telemetry.int_ ~key:"redecl_count" ~value:redecl_count
-          |> Telemetry.int_ ~key:"check_count" ~value:check_count
+          telemetry |> Telemetry.int_ ~key:"check_count" ~value:check_count
         ) else
           telemetry
       in
@@ -1383,204 +1078,48 @@ functor
       let defs_per_file = add_old_decls env.naming_table defs_per_file in
 
       let count = Relative_path.Map.cardinal defs_per_file in
-      let logstring =
-        Printf.sprintf "Type declaration (phase 1) for %d files" count
-      in
+      let logstring = Printf.sprintf "Type declaration for %d files" count in
       Hh_logger.log "Begin %s" logstring;
       Hh_logger.log
         "(Recomputing type declarations in changed files and determining immediate typechecking fanout)";
       let telemetry =
         telemetry
-        |> Telemetry.duration ~key:"redecl1_start" ~start_time
-        |> Telemetry.int_ ~key:"redecl1_file_count" ~value:count
+        |> Telemetry.duration ~key:"redecl_start" ~start_time
+        |> Telemetry.int_ ~key:"redecl_file_count" ~value:count
       in
 
-      (* Do phase 1 of redeclaration. Here we compare the old and new versions of
+      (* Compute fanout. Here we compare the old and new versions of
          the declarations defined in all changed files, and collect the set of
-         files which need to be re-typechecked as a consequence of those changes,
-         as well as the set of files whose folded class declarations must be
-         recomputed as a consequence of those changes (in phase 2).
-
-         When force_shallow_decl_fanout is enabled, there is no need to do phase 2--the
-         only source of class information needing recomputing is linearizations.
-         These are invalidated by Decl_redecl_service.redo_type_decl in phase 1,
-         and are lazily recomputed as needed. *)
-      let {
-        changed;
-        oldified_defs;
-        to_recheck1;
-        to_recheck1_deps;
-        to_redecl_phase2_deps;
-        old_decl_missing_count;
-      } =
-        do_redecl_phase1
-          genv
-          env
-          ~defs_per_file
-          ~naming_table
-          ~oldified_defs
-          ~cgroup_steps
+         files which need to be re-typechecked as a consequence of those changes. *)
+      let { changed; to_recheck; to_recheck_deps; old_decl_missing_count } =
+        do_redecl genv env ~defs_per_file ~naming_table ~cgroup_steps
       in
       let telemetry =
         telemetry
         |> Telemetry.int_
-             ~key:"phase_1_old_decl_missing_count"
+             ~key:"old_decl_missing_count"
              ~value:old_decl_missing_count
       in
 
-      let to_redecl_phase2 =
-        Naming_provider.get_files ctx to_redecl_phase2_deps
-      in
       let hs = SharedMem.SMTelemetry.heap_size () in
       HackEventLogger.first_redecl_end t hs;
       let t = Hh_logger.log_duration logstring t in
       let telemetry =
         telemetry
-        |> Telemetry.duration ~key:"redecl1_end" ~start_time
-        |> Telemetry.int_ ~key:"redecl1_end_heap_size" ~value:hs
+        |> Telemetry.duration ~key:"redecl_end" ~start_time
+        |> Telemetry.int_ ~key:"redecl_end_heap_size" ~value:hs
       in
 
-      ServerRevisionTracker.decl_changed
-        genv.ServerEnv.local_config
-        (Relative_path.Set.cardinal to_redecl_phase2);
       let telemetry =
         Telemetry.duration
           telemetry
-          ~key:"revtrack1_decl_changed_end"
+          ~key:"revtrack_decl_changed_end"
           ~start_time
       in
 
-      (* REDECL PHASE 2 ********************************************************)
-
-      (* For a full typecheck, we want to redeclare everything that needs
-         redeclaration (either because it was invalidated in phase 1, or because
-         it was invalidated by a previous lazy check). For a lazy check, we only
-         want to redeclare files open in the IDE, leaving everything else to be
-         lazily redeclared later. In either case, there's no need to attempt to
-         redeclare definitions in files with parse errors.
-
-         When shallow_class_decl is enabled, there is no need to do phase 2. *)
-      let telemetry =
-        Telemetry.duration telemetry ~key:"redecl2_now_start" ~start_time
-      in
-      let (defs_per_file_redecl_phase2_now, lazy_decl_later) =
-        CheckKind.get_defs_to_redecl_phase2
-          genv
-          ~decl_defs:defs_per_file
-          ~naming_table
-          ~to_redecl_phase2
-          ~env
-      in
-      let count = Relative_path.Map.cardinal defs_per_file_redecl_phase2_now in
-      let telemetry =
-        Telemetry.duration telemetry ~key:"redecl2_now_end" ~start_time
-      in
-      ServerProgress.send_progress
-        ~include_in_logs:false
-        "evaluating type declarations of %d files"
-        count;
-      let logstring =
-        Printf.sprintf "Type declaration (phase 2) for %d files" count
-      in
-      Hh_logger.log "Begin %s" logstring;
-      let telemetry =
-        telemetry
-        |> Telemetry.duration ~key:"redecl2_start" ~start_time
-        |> Telemetry.int_ ~key:"redecl2_count_now" ~value:count
-        |> Telemetry.int_
-             ~key:"redecl2_count_later"
-             ~value:(Relative_path.Map.cardinal lazy_decl_later)
-        |> Telemetry.bool_ ~key:"shallow" ~value:false
-        |> Telemetry.bool_ ~key:"direct_decl" ~value:true
-      in
-
-      (* Redeclare the set of files whose folded class decls needed to be
-         recomputed as a result of phase 1. Collect the set of files which need to
-         be re-typechecked because of changes between the old and new
-         declarations. We need not collect a set of files to redeclare (again)
-         because our to_redecl set from phase 1 included the transitive children
-         of changed classes.
-
-         When force_shallow_decl_fanout is enabled, there is no need to do phase 2. *)
-      let {
-        errors_after_phase2 = errors;
-        needs_phase2_redecl;
-        to_recheck2;
-        to_recheck2_deps;
-        time_errors_pushed;
-        old_decl_missing_count;
-      } =
-        if
-          TypecheckerOptions.force_shallow_decl_fanout
-            (Provider_context.get_tcopt ctx)
-        then
-          {
-            errors_after_phase2 = errors;
-            needs_phase2_redecl = Relative_path.Set.empty;
-            to_recheck2 = Relative_path.Set.empty;
-            to_recheck2_deps = Typing_deps.DepSet.make ();
-            time_errors_pushed = None;
-            old_decl_missing_count = 0;
-          }
-        else (
-          Hh_logger.log
-            "(Recomputing type declarations for descendants of changed classes and determining full typechecking fanout)";
-          Hh_logger.log
-            "Invalidating (but not recomputing) declarations in %d files"
-            (Relative_path.Map.cardinal lazy_decl_later);
-          do_redecl_phase2
-            genv
-            env
-            ~errors
-            ~defs_per_file_redecl_phase2_now
-            ~naming_table
-            ~lazy_decl_later
-            ~oldified_defs
-            ~to_redecl_phase2_deps
-            ~cgroup_steps
-        )
-      in
-      let telemetry =
-        telemetry
-        |> Telemetry.int_
-             ~key:"phase_2_old_decl_missing_count"
-             ~value:old_decl_missing_count
-      in
-      let telemetry =
-        Telemetry.duration telemetry ~key:"redecl2_end" ~start_time
-      in
-      let time_first_error =
-        Option.first_some time_first_error time_errors_pushed
-      in
-
-      let (defs_per_file, to_recheck, to_recheck_deps) =
-        merge_redecl_results
-          ~defs_per_file
-          ~defs_per_file_redecl_phase2_now
-          ~to_recheck1
-          ~to_recheck1_deps
-          ~to_recheck2
-          ~to_recheck2_deps
-          ~to_redecl_phase2
-          ~to_redecl_phase2_deps
-      in
-      let hs = SharedMem.SMTelemetry.heap_size () in
-      HackEventLogger.second_redecl_end t hs;
-      let t = Hh_logger.log_duration logstring t in
-      let telemetry =
-        telemetry
-        |> Telemetry.duration ~key:"redecl2_end2_merge" ~start_time
-        |> Telemetry.int_ ~key:"redecl2_end2_heap_size" ~value:hs
-      in
       ServerRevisionTracker.typing_changed
         genv.local_config
         (Relative_path.Set.cardinal to_recheck);
-      let telemetry =
-        Telemetry.duration
-          telemetry
-          ~key:"revtrack2_typing_changed_end"
-          ~start_time
-      in
 
       (* we use lazy here to avoid expensive string generation when logging
        * is not enabled *)
@@ -1596,7 +1135,7 @@ functor
                         string_
                         Typing_deps.(
                           List.map ~f:Dep.to_hex_string
-                          @@ DepSet.elements (Lazy.force to_recheck_deps)) );
+                          @@ DepSet.elements to_recheck_deps) );
                     ( "files",
                       array_
                         string_
@@ -1659,7 +1198,7 @@ functor
       let (files_to_check, lazy_check_later) =
         CheckKind.get_defs_to_recheck
           ~reparsed:files_to_parse
-          ~phase_2_decl_defs:defs_per_file
+          ~defs_per_file
           ~to_recheck
           ~env
           ~ctx
@@ -1843,7 +1382,6 @@ functor
         CheckKind.get_env_after_typing
           ~old_env:env
           ~errorl:errors
-          ~needs_phase2_redecl
           ~needs_recheck
       in
 

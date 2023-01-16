@@ -325,7 +325,7 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
         chunkLen = chunkMax;
 
         if (!_gd2ReadChunk(chunkIdx[chunkNum].offset, compBuf, chunkIdx[chunkNum].size, (char *) chunkBuf, &chunkLen, in)) {
-          GD2_DBG(php_gd_error("Error reading comproessed chunk"));
+          GD2_DBG(php_gd_error("Error reading compressed chunk"));
           goto fail2;
         }
 
@@ -565,7 +565,7 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 
         chunkLen = chunkMax;
         if (!_gd2ReadChunk (chunkIdx[chunkNum].offset, compBuf, chunkIdx[chunkNum].size, (char *)chunkBuf, &chunkLen, in)) {
-          php_gd_error("Error reading comproessed chunk");
+          php_gd_error("Error reading compressed chunk");
           goto fail2;
         }
         chunkPos = 0;

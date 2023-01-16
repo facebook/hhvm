@@ -18,12 +18,12 @@
 namespace HH\Lib\_Private\Native {
 
 /* These functions are marked NoDoc for docs.hhvm.com:
- * - they are not intenteded to be used directly, other than by the HSL
+ * - they are not intended to be used directly, other than by the HSL
  * - they should be moved to HH\Lib\_Private so the API is unstable.
  */
 
 /**
- * Generates pseudorandom integers using the Marsenne Twister algorithm. The
+ * Generates pseudorandom integers using the Mersenne Twister algorithm. The
  * result is NOT suitable for cryptographic purposes.
  *
  * @param int $min - The lowest value to be returned down to PHP_INT_MIN.

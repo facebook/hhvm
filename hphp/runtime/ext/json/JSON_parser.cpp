@@ -1299,7 +1299,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   auto reset_type = [&] { type = kInvalidDataType; };
 
   json->depth = depth;
-  // Since the stack is maintainined on a per request basis, for performance
+  // Since the stack is maintained on a per request basis, for performance
   // reasons, it only makes sense to expand if necessary and cycles are wasted
   // contracting. Calls with a depth other than default should be rare.
   if (depth > json->stack.size()) {

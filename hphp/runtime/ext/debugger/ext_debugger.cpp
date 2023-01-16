@@ -62,7 +62,7 @@ bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
     return false;
   }
 
-  // Try breaking into the VS Debug Extenstion, if available.
+  // Try breaking into the VS Debug Extension, if available.
   auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
   if (debugger != nullptr) {
     if (debugger->onHardBreak()) {

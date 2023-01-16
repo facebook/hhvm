@@ -100,7 +100,7 @@ const StaticString
   s_NAPTR("NAPTR"),
   s_IN("IN");
 
-static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store,
+static void php_parser(PDNS_RECORD pRec, int type_to_fetch, int store,
                         Array* subarray)
 {
   int type;
@@ -375,7 +375,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
         Array retval;
 
         if (pRec->Flags.S.Section == DnsSectionAnswer) {
-          php_parserr(pRec, type_to_fetch, store_results, &retval);
+          php_parser(pRec, type_to_fetch, store_results, &retval);
           if (!retval.empty() && store_results) {
             ret.append(retval);
           }
@@ -383,7 +383,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
 
         if (!authns.isNull() && pRec->Flags.S.Section == DnsSectionAuthority) {
 
-          php_parserr(pRec, type_to_fetch, 1, &retval);
+          php_parser(pRec, type_to_fetch, 1, &retval);
           if (!retval.empty()) {
             authns.append(retval);
           }
@@ -391,14 +391,14 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
 
         /* Stupid typo in PSDK 6.1, WinDNS.h(1258)... */
 #ifndef DnsSectionAdditional
-# ifdef DnsSectionAddtional
-#  define DnsSectionAdditional DnsSectionAddtional
+# ifdef DnsSectionAdditional
+#  define DnsSectionAdditional DnsSectionAdditional
 # else
 # define DnsSectionAdditional 3
 # endif
 #endif
         if (pRec->Flags.S.Section == DnsSectionAdditional) {
-          php_parserr(pRec, type_to_fetch, 1, &retval);
+          php_parser(pRec, type_to_fetch, 1, &retval);
           if (!retval.empty()) {
             addtl.append(retval);
           }

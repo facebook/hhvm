@@ -84,7 +84,7 @@ static mcrypt_data s_globals;
 
 static Variant php_mcrypt_do_crypt(const String& cipher, const String& key,
                                    const String& data, const String& mode,
-                                   const String& iv, bool dencrypt,
+                                   const String& iv, bool decrypt,
                                    char *name) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
@@ -172,7 +172,7 @@ static Variant php_mcrypt_do_crypt(const String& cipher, const String& key,
     raise_warning("Mcrypt initialisation failed");
     return false;
   }
-  if (dencrypt) {
+  if (decrypt) {
     mdecrypt_generic(td, data_s, data_size);
   } else {
     mcrypt_generic(td, data_s, data_size);
@@ -202,7 +202,7 @@ static req::ptr<MCrypt> get_valid_mcrypt_resource(const Resource& td) {
 }
 
 static Variant mcrypt_generic(const Resource& td, const String& data,
-                              bool dencrypt) {
+                              bool decrypt) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -234,7 +234,7 @@ static Variant mcrypt_generic(const Resource& td, const String& data,
     memcpy(data_s, data.data(), data.size());
   }
 
-  if (dencrypt) {
+  if (decrypt) {
     mdecrypt_generic(pm->m_td, data_s, data_size);
   } else {
     mcrypt_generic(pm->m_td, data_s, data_size);

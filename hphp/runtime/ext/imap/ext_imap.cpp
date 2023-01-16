@@ -206,7 +206,7 @@ static int _php_imap_address_size (ADDRESS *addresslist) {
 
   /*
    * rfc822_write_address_full() needs some extra space for '<>,', etc.
-   * for this perpouse we allocate additional PHP_IMAP_ADDRESS_SIZE_BUF bytes
+   * for this purpose we allocate additional PHP_IMAP_ADDRESS_SIZE_BUF bytes
    * by default this buffer is 10 bytes long
   */
   ret += (ret) ? num_ent*PHP_IMAP_ADDRESS_SIZE_BUF : 0;

@@ -1343,7 +1343,7 @@ class DOMXPath {
    * @param DOMNode $context - The optional contextnode can be specified for
    *   doing relative XPath queries. By default, the queries are relative to the
    *   root element.
-   * @param bool $registgerNodeNS - disable automatic registration of the
+   * @param bool $registerNodeNS - disable automatic registration of the
    *   context node.
    *
    * @return mixed - Returns a typed result if possible or a DOMNodeList
@@ -1362,7 +1362,7 @@ class DOMXPath {
    * @param DOMNode $context - The optional contextnode can be specified for
    *   doing relative XPath queries. By default, the queries are relative to the
    *   root element.
-   * @param bool $registgerNodeNS - disable automatic registration of the
+   * @param bool $registerNodeNS - disable automatic registration of the
    *   context node.
    *
    * @return mixed - Returns a DOMNodeList containing all nodes matching the

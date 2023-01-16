@@ -304,7 +304,7 @@ static void finalize_hmac_key(char *K, HashEnginePtr ops, void *context,
     K[i] ^= 0x6A;
   }
 
-  /* Feed this result into the outter hash */
+  /* Feed this result into the outer hash */
   ops->hash_init(context);
   ops->hash_update(context, (unsigned char *)K, ops->block_size);
   ops->hash_update(context, (unsigned char *)digest, ops->digest_size);

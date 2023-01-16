@@ -40,7 +40,7 @@ final class MapIterator<Tk as arraykey, Tv> implements HH\KeyedIterator<Tk, Tv> 
   public function rewind()[write_props]: void;
 }
 
-} // empty namesapce
+} // empty namespace
 namespace HH {
 
 /** An ordered dictionary-style collection.

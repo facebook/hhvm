@@ -57,8 +57,8 @@ typedef enum WebPResultType {
  *      3. p_Y/p_U/p_V : pointer to the Y/U/V data buffer (this routine will
  *                       allocate memory for the buffer, fill the buffer with
  *                       appropriate data and transfer owner ship of the buffer
- *                       to caller. Caller is reponsible for freeing the memory).
- *                       Note that the memory for Y, U, V buffers is alloacted
+ *                       to caller. Caller is responsible for freeing the memory).
+ *                       Note that the memory for Y, U, V buffers is allocated
  *                       in one chunk, hence one should call free(*p_Y) only.
  *                       Do not try to free the U and V buffers.
  *
@@ -164,7 +164,7 @@ void AdjustColorspaceBack(uint8* Y, uint8* U, uint8* V, int width, int height);
  *      1. data: the WebP data stream (array of bytes)
  *      2. data_size: count of bytes in the WebP data stream
  *
- * Outut:
+ * Output:
  *      width/height: width and height of the image
  *
  * Return: success/failure

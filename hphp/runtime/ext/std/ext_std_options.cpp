@@ -593,7 +593,7 @@ static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
 #ifdef RUSAGE_THREAD
     actual_who = RUSAGE_THREAD;
 #else
-    throw_not_supported(__func__, "RUSAGE_THREAD is not defined on this sytem");
+    throw_not_supported(__func__, "RUSAGE_THREAD is not defined on this system");
 #endif
     break;
   default:

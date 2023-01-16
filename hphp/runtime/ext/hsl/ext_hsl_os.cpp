@@ -207,7 +207,7 @@ void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, so
     throw_errno_exception( \
       EINVAL, \
       folly::sformat( \
-        "Esapected an instance of type {} for {}, got type {}", \
+        "Expected an instance of type {} for {}, got type {}", \
         (s_HSL_ ## sa).c_str(), \
         #af, \
         object->getClassName().c_str() \

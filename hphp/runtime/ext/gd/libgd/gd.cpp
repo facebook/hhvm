@@ -963,7 +963,7 @@ static void gdImageAntiAliasedApply (gdImagePtr im, int px, int py)
     return;
   }
 
-  /* Get the squares of the lengths of the segemnts AC and BC. */
+  /* Get the squares of the lengths of the segments AC and BC. */
   LAC_2 = (Ax_Cx * Ax_Cx) + (Ay_Cy * Ay_Cy);
   LBC_2 = (Bx_Cx * Bx_Cx) + (By_Cy * By_Cy);
 

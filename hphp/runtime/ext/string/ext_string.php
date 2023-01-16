@@ -900,7 +900,7 @@ function crc32(string $str)[]: int;
  *   and 22 base 64 digits from the alphabet "./0-9A-Za-z". Using characters
  *   outside of this range in the salt will cause crypt() to return a
  *   zero-length string. The two digit cost parameter is the base-2 logarithm of
- *   the iteration count for the underlying Blowfish-based hashing algorithmeter
+ *   the iteration count for the underlying Blowfish-based hashing algorithm
  *   and must be in range 04-31, values outside this range will cause crypt() to
  *   fail. CRYPT_SHA256 - SHA-256 hash with a sixteen character salt prefixed
  *   with $5$. If the salt string starts with 'rounds=<N>$', the numeric value
@@ -1536,7 +1536,7 @@ function substr_count(string $haystack,
  *   at the start'th position from the end of subject.
  * @param int $length - The length of the segment from subject to examine.  If
  *   length is given and is non-negative, then subject will be examined for
- *   length characters after the starting position.  If lengthis given and is
+ *   length characters after the starting position.  If length is given and is
  *   negative, then subject will be examined from the starting position up to
  *   length characters from the end of subject.
  *

@@ -175,7 +175,7 @@ static std::vector<std::string> certLoggingImpl(
     const std::vector<std::string>& extNames,
     am::ConnectOperation& op,
     bool validated) {
-  // Capture the certificare Common Name
+  // Capture the certificate Common Name
   std::string cn =
     folly::ssl::OpenSSLCertUtils::getCommonName(*cert).value_or("none");
   // Capture cert extension values for the extensions requested by the
@@ -1959,9 +1959,9 @@ folly::StringPiece AsyncMysqlRowBlock::getFieldAs(int64_t row,
     // HPHP::String.
     return m_row_block->getField<folly::StringPiece>(row, index);
   }
-  catch (std::range_error& excep) {
+  catch (std::range_error& except) {
     SystemLib::throwBadMethodCallExceptionObject(
-      std::string("Error during conversion: ") + excep.what());
+      std::string("Error during conversion: ") + except.what());
   }
 }
 
@@ -1976,9 +1976,9 @@ FieldType AsyncMysqlRowBlock::getFieldAs(int64_t row, const Variant& field) {
   try {
     return m_row_block->getField<FieldType>(row, index);
   }
-  catch (std::range_error& excep) {
+  catch (std::range_error& except) {
     SystemLib::throwBadMethodCallExceptionObject(
-      std::string("Error during conversion: ") + excep.what());
+      std::string("Error during conversion: ") + except.what());
   }
 }
 

@@ -137,7 +137,7 @@ void HHVM_METHOD(
     exceptionMetadata.declaredException_ref() = apache::thrift::PayloadDeclaredExceptionMetadata();
   } else if (ex_msg.isString()) {
     exceptionMetadataBase.what_utf8() = ex_msg.toString().c_str();
-    apache::thrift::PayloadAppUnknownExceptionMetdata aue;
+    apache::thrift::PayloadAppUnknownExceptionMetadata aue;
     aue.errorClassification().ensure().blame() =
         apache::thrift::ErrorBlame::CLIENT;
     exceptionMetadata.appUnknownException_ref() = std::move(aue);
@@ -243,7 +243,7 @@ Object HHVM_METHOD(RpcOptions, setShardId, const String& shard_id) {
   return Object(this_);
 }
 
-// TODO (partisan): Deprecate in favor of more clear for extrnal users setHeader
+// TODO (partisan): Deprecate in favor of more clear for external users setHeader
 Object HHVM_METHOD(RpcOptions, setWriteHeader, const String& key, const String& value) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   data->rpcOptions.setWriteHeader(std::string(key.c_str(), key.size()),

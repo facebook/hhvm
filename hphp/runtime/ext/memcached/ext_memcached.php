@@ -581,7 +581,7 @@ class Memcached {
                                  int $expiry = 0): mixed;
 
   /**
-   * Check if a persitent connection to memcache is being used.
+   * Check if a persistent connection to memcache is being used.
    *
    * @return bool - Returns true if Memcache instance uses a persistent
    * connection, false otherwise.

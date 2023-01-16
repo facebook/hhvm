@@ -325,7 +325,7 @@ string_val:
         formattable.setDate(VariantToMilliseconds(val));
         break;
       default:
-        // No context for arg, so make assupmtion based on value
+        // No context for arg, so make assumption based on value
         if (val.isDouble()) {
           formattable.setDouble(val.toDouble());
         } else if (val.isNull() || val.isBoolean() || val.isInteger()) {

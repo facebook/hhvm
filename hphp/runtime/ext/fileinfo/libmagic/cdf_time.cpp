@@ -104,7 +104,7 @@ cdf_timestamp_to_timespec(struct timeval *ts, cdf_timestamp_t t)
 #endif
   int rdays;
 
-  /* XXX 5.14 at least introdced 100 ns intervals, this is to do */
+  /* XXX 5.14 at least introduced 100 ns intervals, this is to do */
   /* Time interval, in microseconds */
   ts->tv_usec = (t % CDF_TIME_PREC) * CDF_TIME_PREC;
 

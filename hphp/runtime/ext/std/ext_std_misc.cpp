@@ -411,7 +411,7 @@ String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
   auto ptr = uniqid.mutableData();
   // StringData::capacity() returns the buffer size without the null
   // terminator. snprintf expects a the buffer capacity including room
-  // for the null terminator, writes the null termintor, and returns
+  // for the null terminator, writes the null terminator, and returns
   // the full length not counting the null terminator.
   auto capacity = uniqid.capacity() + 1;
   int64_t len;

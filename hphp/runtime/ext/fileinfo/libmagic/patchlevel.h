@@ -187,7 +187,7 @@
  * - netpbm magic and misc other image stuff [Bryan Henderson]
  *
  * Revision 1.32  2000/08/05 18:24:18  christos
- * Correct indianness detection in elf (Charles Hannum)
+ * Correct endianness detection in elf (Charles Hannum)
  * FreeBSD elf core support (Guy Harris)
  * Use gzip in systems that don't have uncompress (Anthon van der Neut)
  * Internationalization/EBCDIC support (Eric Fisher)
@@ -243,7 +243,7 @@
  * Elf64 fixes
  *
  * Revision 1.23  1997/11/05 16:03:37  christos
- * - correct elf prps offset for SunOS-2.5.1 [guy@netapp.com]
+ * - correct elf props offset for SunOS-2.5.1 [guy@netapp.com]
  * - handle 64 bit time_t's correctly [ewt@redhat.com]
  * - new mime style magic [clarosse@netvista.net]
  * - new TI calculator magic [rmcguire@freenet.columbus.oh.us]
@@ -347,7 +347,7 @@
  *
  * Revision 1.8  93/02/19  15:01:26  ian
  * Numerous changes from Guy Harris too numerous to mention but including
- * byte-order independance, fixing "old-style masking", etc. etc. A bugfix
+ * byte-order independence, fixing "old-style masking", etc. etc. A bugfix
  * for broken symlinks from martin@@d255s004.zfe.siemens.de.
  *
  * Revision 1.7  93/01/05  14:57:27  ian

@@ -180,7 +180,7 @@ function stream_get_line(resource $handle,
  *   filters that have been stacked onto this stream. Documentation on filters
  *   can be found in the Filters appendix.  mode (string) - the type of access
  *   required for this stream (see Table 1 of the fopen() reference)  seekable
- *   (bool) - whether the current stream can be seeked.  uri (string) - the
+ *   (bool) - whether the current stream can be sought.  uri (string) - the
  *   URI/filename associated with this stream.
  *
  */
@@ -393,7 +393,7 @@ function set_file_buffer(resource $stream, int $buffer): int;
  * @param resource $server_socket - The server socket to accept a connection
  *   from.
  * @param float $timeout - Override the default socket accept timeout. Time
- *   should be given in seconds. Negative value are interpretted as default
+ *   should be given in seconds. Negative value are interpreted as default
  *   timeout.
  * @param mixed $peername - Will be set to the name (address) of the client
  *   which connected, if included and available from the selected transport.
@@ -498,7 +498,7 @@ function stream_socket_client(string $remote_socket,
  * settings are established, cryptography can be turned on and off dynamically
  * by passing TRUE or FALSE in the enable parameter.
  *
- * @param resource $stream - The stream reszource.
+ * @param resource $stream - The stream resource.
  * @param bool $enable - Enable/disable cryptography on the stream.
  * @param int crypto_type - Setup encryption on the stream. Valid methods are:
  *   - STREAM_CRYPTO_SSLv2_CLIENT
@@ -519,7 +519,7 @@ function stream_socket_client(string $remote_socket,
  * @param resource $session_stream Seed the stream with settings from
  *   session_stream. CURRENTLY UNSUPPORTED IN HHVM.
  *
- * @returns mixed - Returns TRUE on success, FALSE if negoation has failed, or
+ * @returns mixed - Returns TRUE on success, FALSE if negotiation has failed, or
  *   0 if there isn't enough data and you should try again (only for
  *   non-blocking sockets).
  */

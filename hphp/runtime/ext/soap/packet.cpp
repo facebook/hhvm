@@ -45,7 +45,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
   assertx(return_value.asTypedValue()->m_type == KindOfUninit);
   return_value.asTypedValue()->m_type = KindOfNull;
 
-  /* Response for one-way opearation */
+  /* Response for one-way operation */
   if (buffer_size == 0) {
     return true;
   }

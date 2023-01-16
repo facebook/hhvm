@@ -14,7 +14,7 @@
 
 #include <folly/portability/Unistd.h>
 
-/* number of antialised colors for indexed bitmaps */
+/* number of antialiased colors for indexed bitmaps */
 /* overwrite Windows GDI define in case of windows build */
 #ifdef NUMCOLORS
 #undef NUMCOLORS
@@ -78,7 +78,7 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 
 /*
  * The character (space) used to separate alternate fonts in the
- * fontlist parameter to gdImageStringFT. 2.0.18: space was a oor choice for this.
+ * fontlist parameter to gdImageStringFT. 2.0.18: space was a poor choice for this.
  */
 #define LISTSEPARATOR ";"
 
@@ -428,7 +428,7 @@ static void *fontFetch (char **error, void *key)
     return NULL;
   }
 
-  /* FIXME - This mapping stuff is imcomplete - where is the spec? */
+  /* FIXME - This mapping stuff is incomplete - where is the spec? */
   /* EAM   - It's worse than that. It's pointless to match character encodings here.
    *         As currently written, the stored a->face->charmap only matches one of
    *         the actual charmaps and we cannot know at this stage if it is the right
@@ -698,7 +698,7 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
            */
           *pixel = (fg < 0) ? -fg : fg;
         } else {
-          /* find antialised color */
+          /* find antialiased color */
           tc_key.bgcolor = *pixel;
           tc_elem = (tweencolor_t *) gdCacheGet(tc_cache, &tc_key);
           *pixel = tc_elem->tweencolor;

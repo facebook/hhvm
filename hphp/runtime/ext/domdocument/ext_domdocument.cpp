@@ -1374,7 +1374,7 @@ static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) {
   if (tree == nullptr || ns == nullptr || ns->type != XML_NAMESPACE_DECL) {
     return nullptr;
   }
-  /* Code taken from libxml2 (2.6.20) xmlNewReconciliedNs
+  /* Code taken from libxml2 (2.6.20) xmlNewReconciledNs
    *
    * Find a close prefix which is not already in use.
    * Let's strip namespace prefixes longer than 20 chars!
@@ -1743,7 +1743,7 @@ static Variant domnode_nodename_read(const Object& obj) {
 static Variant domnode_nodevalue_read(const Object& obj) {
   CHECK_NODE(nodep);
   char *str = nullptr;
-  /* Access to Element node is implemented as a convience method */
+  /* Access to Element node is implemented as a convenience method */
   switch (nodep->type) {
   case XML_ATTRIBUTE_NODE:
   case XML_TEXT_NODE:
@@ -1771,7 +1771,7 @@ static Variant domnode_nodevalue_read(const Object& obj) {
 
 static void domnode_nodevalue_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_NODE(nodep);
-  /* Access to Element node is implemented as a convience method */
+  /* Access to Element node is implemented as a convenience method */
   switch (nodep->type) {
   case XML_ELEMENT_NODE:
   case XML_ATTRIBUTE_NODE:
@@ -5781,7 +5781,7 @@ void HHVM_METHOD(DOMNodeIterator, next) {
       }
       curnode = libxml_register_node(curnode->nodep()->next);
     } else {
-      /* Nav the tree evey time as this is LIVE */
+      /* Nav the tree every time as this is LIVE */
       xmlNodePtr basenode =
         data->m_objmap->getBaseNodeData()->nodep();
       if (!basenode) {

@@ -373,7 +373,7 @@ void IntlExtension::initUChar() {
 #include "hphp/runtime/ext/icu/ucharcategory-enum.h"
 #include "hphp/runtime/ext/icu/uchardirection-enum.h"
 #include "hphp/runtime/ext/icu/ublockcode-enum.h"
-  /* Smaller, self-destribing enums */
+  /* Smaller, self-describing enums */
 #include "hphp/runtime/ext/icu/uother-enum.h"
 
 #undef UPROPERTY

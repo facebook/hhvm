@@ -547,7 +547,7 @@ bool HHVM_FUNCTION(sem_remove,
   }
 
   if (semctl(sem_ptr->semid, 0, IPC_RMID, un) < 0) {
-    raise_warning("failed for SysV sempphore %d: %s",
+    raise_warning("failed for SysV semaphore %d: %s",
                     sem_identifier->getId(),
                     folly::errnoStr(errno).c_str());
     return false;

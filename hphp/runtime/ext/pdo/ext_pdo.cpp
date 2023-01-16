@@ -1757,7 +1757,7 @@ static bool do_fetch(sp_PDOStatement stmt,
     if (stmt->column_count != 2) {
       pdo_raise_impl_error(stmt->dbh, stmt, "HY000",
                            "PDO::FETCH_KEY_PAIR fetch mode requires the "
-                           "result set to contain extactly 2 columns.");
+                           "result set to contain exactly 2 columns.");
       return false;
     }
     if (!return_all) {

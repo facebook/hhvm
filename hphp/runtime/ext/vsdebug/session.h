@@ -110,7 +110,7 @@ private:
   ClientPreferences m_clientPreferences;
 
   // Support for breakpoints. Breakpoints are tied to a particular client
-  // sesson. When the client disconnects, its breakpoints disappear.
+  // session. When the client disconnects, its breakpoints disappear.
   BreakpointManager* m_breakpointMgr;
 
   // The "dummy" request thread is a hidden request that provides an execution

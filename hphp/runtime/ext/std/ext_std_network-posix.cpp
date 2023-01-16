@@ -175,7 +175,7 @@ const StaticString
   } \
 } while (0)
 
-static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
+static unsigned char *php_parser(unsigned char *cp, unsigned char* end,
                                   querybuf *answer,
                                   int type_to_fetch, bool store,
                                   Array &subarray) {
@@ -600,7 +600,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
     /* YAY! Our real answers! */
     while (an-- && cp && cp < end) {
       Array retval;
-      cp = php_parserr(cp, end, &answer, type_to_fetch, store_results, retval);
+      cp = php_parser(cp, end, &answer, type_to_fetch, store_results, retval);
       if (!retval.empty() && store_results) {
         ret.append(retval);
       }
@@ -615,7 +615,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
   /* List of Authoritative Name Servers */
   while (ns-- > 0 && cp && cp < end) {
     Array retval;
-    cp = php_parserr(cp, end, &answer, DNS_T_ANY, true, retval);
+    cp = php_parser(cp, end, &answer, DNS_T_ANY, true, retval);
     if (!retval.empty()) {
       authns.append(retval);
     }
@@ -624,7 +624,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
   /* Additional records associated with authoritative name servers */
   while (ar-- > 0 && cp && cp < end) {
     Array retval;
-    cp = php_parserr(cp, end, &answer, DNS_T_ANY, true, retval);
+    cp = php_parser(cp, end, &answer, DNS_T_ANY, true, retval);
     if (!retval.empty()) {
       addtl.append(retval);
     }

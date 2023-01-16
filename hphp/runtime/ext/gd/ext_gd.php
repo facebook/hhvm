@@ -21,7 +21,7 @@ function gd_info(): shape(
 
 /* The getimagesize() function will determine the size of any given image file
  * and return the dimensions along with the file type and a height/width text
- * string to be used inside a normal HTML IMG tag and the correspondant HTTP
+ * string to be used inside a normal HTML IMG tag and the correspondent HTTP
  * content type.  getimagesize() can also return some more information in
  * imageinfo parameter. Note that JPC and JP2 are capable of having components
  * with different bit depths. In this case, the value for "bits" is the
@@ -276,7 +276,7 @@ function imagecolorresolvealpha(resource $image,
                                 int $alpha): mixed;
 
 /* This sets the specified index in the palette to the specified color. This
- * is useful for creating flood-fill-like effects in palleted images without
+ * is useful for creating flood-fill-like effects in paletted images without
  * the overhead of performing the actual flood-fill.
  */
 <<__Native>>
@@ -824,7 +824,7 @@ function imagesavealpha(resource $image,
  * imagescale - Scale an image using the given new width and height.
  */
 <<__Native>>
-function imagescale(resource $img, int $newwidth, int $newheigh = -1,
+function imagescale(resource $img, int $newwidth, int $newheight = -1,
                                int $method = IMG_BILINEAR_FIXED): mixed;
 
 /* imagesetbrush() sets the brush image to be used by all line drawing

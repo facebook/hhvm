@@ -842,7 +842,7 @@ struct gfxinfo *php_handle_jpeg(const req::ptr<File>& file, Array& info) {
         result->width = php_read2(file);
         result->channels = file->getc();
         if (info.isNull() || length < 8) {
-          /* if we don't want an extanded info -> return */
+          /* if we don't want an extended info -> return */
           return result;
         }
         if (!file->seek(length - 8, SEEK_CUR)) {
@@ -874,7 +874,7 @@ struct gfxinfo *php_handle_jpeg(const req::ptr<File>& file, Array& info) {
     case M_APP15:
       if (!info.isNull()) {
         if (!php_read_APP(file, marker, info)) {
-          /* read all the app markes... */
+          /* read all the app markers... */
           return result;
         }
       } else {
@@ -950,7 +950,7 @@ static struct gfxinfo *php_handle_jpc(const req::ptr<File>& file) {
      "bit depth" answer somewhat problematic. For this implementation
      we'll use the highest depth encountered. */
 
-  /* Get the single byte that remains after the file type indentification */
+  /* Get the single byte that remains after the file type identification */
   first_marker_id = file->getc();
 
   /* Ensure that this marker is SIZ (as is mandated by the standard) */
@@ -982,7 +982,7 @@ static struct gfxinfo *php_handle_jpc(const req::ptr<File>& file) {
   }
 #endif
 
-  result->channels = php_read2(file); /* Csiz */
+  result->channels = php_read2(file); /* Csize */
   if (result->channels > 256) {
     IM_FREE(result);
     return nullptr;
@@ -991,7 +991,7 @@ static struct gfxinfo *php_handle_jpc(const req::ptr<File>& file) {
   /* Collect bit depth info */
   highest_bit_depth = bit_depth = 0;
   for (i = 0; i < result->channels; i++) {
-    bit_depth = file->getc(); /* Ssiz[i] */
+    bit_depth = file->getc(); /* Ssize[i] */
     bit_depth++;
     if (bit_depth > highest_bit_depth) {
       highest_bit_depth = bit_depth;
@@ -4235,14 +4235,14 @@ bool HHVM_FUNCTION(imagefilter, const Resource& res,
 bool HHVM_FUNCTION(imageflip, const Resource& image, int64_t mode /* = -1 */) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
-  if (mode == -1) mode = GD_FLIP_HORINZONTAL;
+  if (mode == -1) mode = GD_FLIP_HORIZONTAL;
 
   switch (mode) {
     case GD_FLIP_VERTICAL:
       gdImageFlipVertical(im);
       break;
 
-    case GD_FLIP_HORINZONTAL:
+    case GD_FLIP_HORIZONTAL:
       gdImageFlipHorizontal(im);
       break;
 
@@ -4276,7 +4276,7 @@ static int hphp_gdImageConvolution(gdImagePtr src, float filter[3][3],
     return 0;
   }
 
-  /* We need the orinal image with each safe neoghb. pixel */
+  /* We need the original image with each safe neoghb. pixel */
   srcback = gdImageCreateTrueColor (src->sx, src->sy);
   gdImageCopy(srcback, src,0,0,0,0,src->sx,src->sy);
 
@@ -4746,7 +4746,7 @@ Variant HHVM_FUNCTION(iptcparse, const String& iptcblock) {
 #define TAG_BITS_PER_SAMPLE             0x0102
 #define TAG_COMPRESSION                 0x0103
 #define TAG_PHOTOMETRIC_INTERPRETATION  0x0106
-#define TAG_TRESHHOLDING                0x0107
+#define TAG_THRESHOLDING                0x0107
 #define TAG_CELL_WIDTH                  0x0108
 #define TAG_CELL_HEIGHT                 0x0109
 #define TAG_FILL_ORDER                  0x010A
@@ -4759,7 +4759,7 @@ Variant HHVM_FUNCTION(iptcparse, const String& iptcblock) {
 #define TAG_SAMPLES_PER_PIXEL           0x0115
 #define TAG_ROWS_PER_STRIP              0x0116
 #define TAG_STRIP_BYTE_COUNTS           0x0117
-#define TAG_MIN_SAMPPLE_VALUE           0x0118
+#define TAG_MIN_SAMPLE_VALUE            0x0118
 #define TAG_MAX_SAMPLE_VALUE            0x0119
 #define TAG_X_RESOLUTION                0x011A
 #define TAG_Y_RESOLUTION                0x011B
@@ -5552,7 +5552,7 @@ static char *exif_get_sectionlist(int sectionlist) {
 /*
    This structure stores Exif header image elements in a simple manner
    Used to store camera data as extracted from the various ways that
-   it can be stored in a nexif header
+   it can be stored in an exif header
 */
 typedef struct {
   int type;
@@ -6214,7 +6214,7 @@ static int exif_process_string_raw(char **result, char *value,
 static int exif_process_string(char **result, char *value,
                                size_t byte_count) {
   /* we cannot use strlcpy - here the problem is that we cannot use strlen to
-   * determin length of string and we cannot use strlcpy with len=byte_count+1
+   * determine length of string and we cannot use strlcpy with len=byte_count+1
    * because then we might get into an EXCEPTION if we exceed an allocated
    * memory page...so we use php_strnlen in conjunction with memcpy and add
    * the NUL char.
@@ -6247,7 +6247,7 @@ exif_process_user_comment(image_info_type* /*ImageInfo*/, char** pszInfoPtr,
       ByteCount -= 8;
     } else
     if (!memcmp(szValuePtr, "JIS\0\0\0\0\0", 8)) {
-      /* JIS should be tanslated to MB or we leave it to the user */
+      /* JIS should be translated to MB or we leave it to the user */
       PHP_STRDUP(*pszEncoding, (const char*)szValuePtr);
       szValuePtr = szValuePtr+8;
       ByteCount -= 8;
@@ -6593,7 +6593,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
             if (ImageInfo->Copyright) IM_FREE(ImageInfo->Copyright);
             php_vspprintf(&ImageInfo->Copyright, 0, "%s, %s",
                           value_ptr, ImageInfo->CopyrightEditor);
-            /* format = TAG_FMT_UNDEFINED; this musn't be ASCII         */
+            /* format = TAG_FMT_UNDEFINED; this mustn't be ASCII        */
             /* but we are not supposed to change this                   */
             /* keep in mind that image_info does not store editor value */
           } else {
@@ -6682,7 +6682,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
         break;
 
       case TAG_SUBJECT_DISTANCE:
-        /* Inidcates the distacne the autofocus camera is focused to.
+        /* Indicates the distance the autofocus camera is focused to.
            Tends to be less accurate as distance increases. */
         REQUIRE_NON_EMPTY();
         ImageInfo->Distance =
@@ -6696,14 +6696,14 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
                                             ImageInfo->motorola_intel)) {
           case 1: ImageInfo->FocalplaneUnits = 25.4; break; /* inch */
           case 2:
-            /* According to the information I was using, 2 measn meters.
+            /* According to the information I was using, 2 means meters.
                But looking at the Cannon powershot's files, inches is the only
                sensible value. */
             ImageInfo->FocalplaneUnits = 25.4;
             break;
 
           case 3: ImageInfo->FocalplaneUnits = 10;   break;  /* centimeter */
-          case 4: ImageInfo->FocalplaneUnits = 1;    break;  /* milimeter  */
+          case 4: ImageInfo->FocalplaneUnits = 1;    break;  /* millimeter */
           case 5: ImageInfo->FocalplaneUnits = .001; break;  /* micrometer */
         }
         break;
@@ -6886,7 +6886,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo,
                            CharBuf, end, length/* -14*/, displacement,
                            SECTION_IFD0);
 
-  /* Compute the CCD width, in milimeters. */
+  /* Compute the CCD width, in millimeters. */
   if (ImageInfo->FocalplaneXRes != 0) {
     ImageInfo->CCDWidth = (float)(ImageInfo->ExifImageWidth *
       ImageInfo->FocalplaneUnits / ImageInfo->FocalplaneXRes);
@@ -6947,7 +6947,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo) {
   for(section=0;;section++) {
     // get marker byte, swallowing possible padding
     // some software does not count the length bytes of COM section
-    // one company doing so is very much envolved in JPEG...
+    // one company doing so is very much involved in JPEG...
     // so we accept too
     if (last_marker==M_COM && comment_correction) {
       comment_correction = 2;
@@ -7226,7 +7226,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo,
           CHECK_BUFFER_R(dir_entry+8, end, 4, 0);
           entry_offset =
             php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
-          /* if entry needs expading ifd cache and entry is at end of
+          /* if entry needs expanding ifd cache and entry is at end of
              current ifd cache. */
           /* otherwise there may be huge holes between two entries */
           if (entry_offset + entry_length > dir_offset + ifd_size &&
@@ -8349,7 +8349,7 @@ struct GdExtension final : Extension {
     /* GD2 image format types */
     HHVM_RC_INT(IMG_GD2_RAW, GD2_FMT_RAW);
     HHVM_RC_INT(IMG_GD2_COMPRESSED, GD2_FMT_COMPRESSED);
-    HHVM_RC_INT(IMG_FLIP_HORIZONTAL, GD_FLIP_HORINZONTAL);
+    HHVM_RC_INT(IMG_FLIP_HORIZONTAL, GD_FLIP_HORIZONTAL);
     HHVM_RC_INT(IMG_FLIP_VERTICAL, GD_FLIP_VERTICAL);
     HHVM_RC_INT(IMG_FLIP_BOTH, GD_FLIP_BOTH);
     HHVM_RC_INT(IMG_EFFECT_REPLACE, gdEffectReplace);

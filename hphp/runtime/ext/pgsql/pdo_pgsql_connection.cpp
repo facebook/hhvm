@@ -321,7 +321,7 @@ int PDOPgSqlConnection::getAttribute(int64_t attr, Variant &value){
         result << spid;
         result << "; Client Encoding: ";
         result << m_server->parameterStatus("client_encoding");
-        result << "; Is Superusser: ";
+        result << "; Is Superuser: ";
         result << m_server->parameterStatus("is_superuser");
         result << "; Session Authorization: ";
         result << m_server->parameterStatus("session_authorization");

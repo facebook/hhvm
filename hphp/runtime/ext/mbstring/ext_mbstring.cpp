@@ -2428,7 +2428,7 @@ Variant HHVM_FUNCTION(mb_strimwidth,
   string.len = str.size();
 
   if (start < 0 || start > str.size()) {
-    raise_warning("Start position is out of reange");
+    raise_warning("Start position is out of range");
     return false;
   }
 
@@ -4291,7 +4291,7 @@ bool HHVM_FUNCTION(mb_send_mail,
   const String extra_cmd = convertArg(opt_extra_cmd);
 
   /* initialize */
-  /* automatic allocateable buffer for additional header */
+  /* automatic allocatable buffer for additional header */
   mbfl_memory_device device;
   mbfl_memory_device_init(&device, 0, 0);
   mbfl_string orig_str, conv_str;
@@ -4300,9 +4300,9 @@ bool HHVM_FUNCTION(mb_send_mail,
 
   /* character-set, transfer-encoding */
   mbfl_no_encoding
-    tran_cs,  /* transfar text charset */
-    head_enc,  /* header transfar encoding */
-    body_enc;  /* body transfar encoding */
+    tran_cs,   /* transfer text charset */
+    head_enc,  /* header transfer encoding */
+    body_enc;  /* body transfer encoding */
   tran_cs = mbfl_no_encoding_utf8;
   head_enc = mbfl_no_encoding_base64;
   body_enc = mbfl_no_encoding_base64;

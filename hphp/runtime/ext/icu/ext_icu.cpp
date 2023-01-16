@@ -268,12 +268,12 @@ void normalizeToken(struct Token& token) {
   int32_t type = token.status;
 
   switch (type) {
-    // punctuations
+    // punctuation
     case 0: break;
     case 100: str = s_numMatcher->replaceAll(str, "X"); break;
     // words
     case 200: s_lctranslit->transliterate(str); break;
-    // katekana/hiragana
+    // katakana/hiragana
     case 300: s_lctranslit->transliterate(str); break;
     // ideographic
     case 400: s_lctranslit->transliterate(str); break;

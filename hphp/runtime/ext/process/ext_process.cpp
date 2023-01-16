@@ -318,7 +318,7 @@ static bool signalHandlersInited() {
 
 // This is called automatically in handle_request_surprise().  So if you are
 // using HHVM, you don't really need to call this.  Even if you do, chances are
-// that signal handlers are already called automatically before your invokation.
+// that signal handlers are already called automatically before your invocation.
 bool HHVM_FUNCTION(pcntl_signal_dispatch) {
   while (int signum = RID().getAndClearNextPendingSignal()) {
     if (signalHandlersInited() && g_signal_handlers->exists(signum)) {
@@ -396,7 +396,7 @@ bool HHVM_FUNCTION(pcntl_signal,
       raise_warning("Invalid value for handle argument specified");
       return false;
     }
-    // A null signal hanlder indicates SIG_IGN.
+    // A null signal handler indicates SIG_IGN.
     return HHVM_FN(pcntl_signal)(signo, init_null(), restart_syscalls);
   }
   if (!is_callable(handler) && !handler.isNull()) {

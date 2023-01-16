@@ -95,7 +95,7 @@ struct Frame {
    * Build a caller qualified name for a callee.
    *
    * For example, if A() is caller for B(), then it returns "A==>B".
-   * Recursive invokations are denoted with @<n> where n is the recursion
+   * Recursive invocations are denoted with @<n> where n is the recursion
    * depth.
    *
    * For example, "foo==>foo@1", and "foo@2==>foo@3" are examples of direct

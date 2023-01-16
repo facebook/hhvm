@@ -385,8 +385,8 @@ static void sortDependencies() {
   }
 
   if (UNLIKELY(!unresolved.empty())) {
-    // Alerts user to cirular dependency in extensions
-    // e.g. Unable to resovle dependencies for extension(s):
+    // Alerts user to circular dependency in extensions
+    // e.g. Unable to resolve dependencies for extension(s):
     //         A(depends: B) B(depends: C) C(depends: A)
 
     std::stringstream ss;

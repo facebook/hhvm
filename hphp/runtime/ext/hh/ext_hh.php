@@ -148,7 +148,7 @@ function serialize_memoize_param(mixed $param): arraykey;
 
 /**
  * Clear memoization data
- *  - if $cls is non-null, clear memoziation cache for $cls::$func,
+ *  - if $cls is non-null, clear memoization cache for $cls::$func,
  *    or for all static memoized methods if $func is null
  *  - if $cls is null, clear memoization cache for $func
  */
@@ -292,7 +292,7 @@ function get_files_with_coverage(): keyset<string>;
 /**
  * Extract coverage data for the file at path $file. The returned vector
  * contains a list of line numbers that were seen at least once while coverage
- * was enablgc_enabled for the file.
+ * was enablegc_enabled for the file.
  *
  * @return a list of covered line numbers
  */

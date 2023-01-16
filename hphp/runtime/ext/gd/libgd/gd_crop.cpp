@@ -93,7 +93,7 @@ printf("rect->x: %i\nrect->y: %i\nrect->width: %i\nrect->height: %i\n",
 
 /**
  * Function: gdImageAutoCrop
- *  Automatic croping of the src image using the given mode
+ *  Automatic cropping of the src image using the given mode
  *  (see <gdCropMode>)
  *
  *

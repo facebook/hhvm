@@ -41,7 +41,7 @@ function intl_is_failure(int $errorCode): bool;
  * @param string $domain - Domain to convert. In PHP 5 must be UTF-8 encoded.
  * @param int $options - Conversion options - combination of IDNA_* constants
  *                       (except IDNA_ERROR_* constants).
- * @param int $varaitn - Either INTL_IDNA_VARIANT_2003 for IDNA 2003 or
+ * @param int $variant - Either INTL_IDNA_VARIANT_2003 for IDNA 2003 or
  *                       INTL_IDNA_VARIANT_UTS46 for UTS #46.
  *
  * @return mixed - Domain name encoded in ASCII-compatible form

@@ -309,7 +309,7 @@ int64_t HHVM_FUNCTION(getrandmax) { return RAND_MAX;}
 // Note that MSVC's rand is actually thread-safe to begin with
 // so no changes are actually needed to make it so.
 // For APPLE and MSFT configurations the rand() would be kept as thread local
-// For Linux the RadomBuf structure is beeing moved to RDS
+// For Linux the RandomBuf structure is being moved to RDS
 #ifdef __APPLE__
 static bool s_rand_is_seeded = false;
 #elif defined(_MSC_VER)

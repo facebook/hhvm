@@ -449,7 +449,7 @@ Object HHVM_FUNCTION(hphp_create_object_without_constructor,
 Variant HHVM_FUNCTION(hphp_get_property, const Object& obj, const String& cls,
                                          const String& prop) {
   /* It's possible to get a ReflectionProperty for a property which
-   * no longer exists.  Silentyly fail to match PHP5 behavior
+   * no longer exists.  Silently fail to match PHP5 behavior
    */
   return obj->o_get(prop, false /* error */, cls);
 }

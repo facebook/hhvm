@@ -254,7 +254,7 @@ scryptenc_cpuperf(double * opps)
       break;
   } while (1);
 
-  /* Could how many scryps we can do before the next tick. */
+  /* Could how many scrypts we can do before the next tick. */
   if (getclocktime(&st))
     return 2;
   do {

@@ -161,7 +161,7 @@ class Memcache {
 
   /* Memcache::decrement() decrements value of the item by value. Similarly to
    * Memcache::increment(), current value of the item is being converted to
-   * numerical and after that value is substracted.  New item's value will not
+   * numerical and after that value is subtracted.  New item's value will not
    * be less than zero.  Do not use Memcache::decrement() with item, which was
    * stored compressed, because consequent call to Memcache::get() will fail.
    * Memcache::decrement() does not create an item if it didn't exist. Also you
@@ -564,7 +564,7 @@ function memcache_increment(Memcache $memcache,
 
 /* Memcache::decrement() decrements value of the item by value. Similarly to
  * Memcache::increment(), current value of the item is being converted to
- * numerical and after that value is substracted.  New item's value will not
+ * numerical and after that value is subtracted.  New item's value will not
  * be less than zero.  Do not use Memcache::decrement() with item, which was
  * stored compressed, because consequent call to Memcache::get() will fail.
  * Memcache::decrement() does not create an item if it didn't exist. Also you

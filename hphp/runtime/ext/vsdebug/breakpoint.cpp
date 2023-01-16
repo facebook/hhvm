@@ -30,7 +30,7 @@ namespace VSDEBUG {
 // remain installed on in-progress requests that have not called back into the
 // debugger yet. If a new client connects and installs new breakpoints, and the
 // IDs were reused for the new session, we won't be able to tell if a request
-// hit a bp for the previous debugger client, and we'll overactively re-hit.
+// hit a bp for the previous debugger client, and we'll overactivity re-hit.
 static int g_nextBreakpointId {0};
 
 Breakpoint::Breakpoint(
@@ -731,7 +731,7 @@ void BreakpointManager::onRequestShutdown(request_id_t requestId) {
   }
 }
 
-bool BreakpointManager::isBreakConditionSatisified(
+bool BreakpointManager::isBreakConditionSatisfied(
   DebuggerRequestInfo* ri,
   Breakpoint* bp
 ) {

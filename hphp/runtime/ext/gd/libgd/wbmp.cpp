@@ -54,7 +54,7 @@ getmbi (int (*getin) (void *in), void *in)
 
 /* putmbi
    ** ------
-   ** Put a multibyte intgerer in some kind of output stream
+   ** Put a multibyte integer in some kind of output stream
    ** I work here with a function pointer, to make it as generic
    ** as possible. Look at this function as an iterator on the
    ** mbi integers it spits out.

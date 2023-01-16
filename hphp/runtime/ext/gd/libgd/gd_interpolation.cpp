@@ -112,7 +112,7 @@ typedef struct
 {
    double *Weights;  /* Normalized weights of neighboring pixels */
    int Left,Right;   /* Bounds of source pixels window */
-} ContributionType;  /* Contirbution information for a single pixel */
+} ContributionType;  /* Contribution information for a single pixel */
 
 typedef struct
 {
@@ -393,7 +393,7 @@ static double filter_hermite(const double x1)
   return 0.0;
 }
 
-/* Trangle filter, default radius 1 */
+/* Triangle filter, default radius 1 */
 static double filter_triangle(const double x1)
 {
   const double x = x1 < 0.0 ? -x1 : x1;
@@ -1046,7 +1046,7 @@ gdImagePtr Scale(const gdImagePtr src, const unsigned int src_width, const unsig
 }
 
 /*
-  BilinearFixed, BicubicFixed and nearest implementations are rewamped versions of the implementation in CBitmapEx
+  BilinearFixed, BicubicFixed and nearest implementations are revamped versions of the implementation in CBitmapEx
   http://www.codeproject.com/Articles/29121/CBitmapEx-Free-C-Bitmap-Manipulation-Class
   Integer only implementation, good to have for common usages like pre scale very large
   images before using another interpolation methods for the last step.
@@ -1166,7 +1166,7 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
           f_b1, f_b2, f_b3, f_b4,
           f_a1, f_a2, f_a3, f_a4;
 
-      /* zero for the background color, nothig gets outside anyway */
+      /* zero for the background color, nothing gets outside anyway */
       pixel1 = getPixelOverflowPalette(im, n, m, 0);
       pixel2 = getPixelOverflowPalette(im, n + 1, m, 0);
       pixel3 = getPixelOverflowPalette(im, n, m + 1, 0);

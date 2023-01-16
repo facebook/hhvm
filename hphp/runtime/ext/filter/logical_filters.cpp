@@ -452,7 +452,7 @@ bad_url:
 Variant php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) {
   /*
    * The regex below is based on a regex by Michael Rushton.
-   * However, it is not identical.  I changed it to only consider routeable
+   * However, it is not identical.  I changed it to only consider routable
    * addresses as valid.  Michael's regex considers a@b a valid address
    * which conflicts with section 2.3.5 of RFC 5321 which states that:
    *

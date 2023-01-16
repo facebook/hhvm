@@ -591,7 +591,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
   }
 
   if (!im->trueColor) {
-    /* Oy veh. Remap the PNG palette to put the entries with interesting alpha channel
+    /* Oy vey. Remap the PNG palette to put the entries with interesting alpha channel
      * values first. This minimizes the size of the tRNS chunk and thus the size
      * of the PNG file as a whole.
      */

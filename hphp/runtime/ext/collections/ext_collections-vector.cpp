@@ -315,7 +315,7 @@ void c_Vector::resize(uint32_t sz, const TypedValue* val) {
     m_size = 0;
   } else if (m_size > sz) {
     // If there were any objects in the part that's being resized away, their
-    // desctuctors may mutate this Vector (and need to see it in the fully
+    // destructors may mutate this Vector (and need to see it in the fully
     // resized state). The easiest way to do this is to copy the part we're
     // keeping into a new vec, swap them, and decref the old one.
     dropImmCopy();
@@ -347,7 +347,7 @@ void c_Vector::reverse() {
 
 void c_Vector::splice(int64_t startPos, int64_t endPos) {
   // If there were any objects in the part that's being spliced away, their
-  // desctuctors may mutate this Vector (and need to see it in the fully
+  // destructors may mutate this Vector (and need to see it in the fully
   // spliced state). The easiest way to do this is to copy the part we're
   // keeping into a new vec, swap them, and decref the old one.
   assertx(0 <= startPos && startPos < endPos && endPos <= m_size);

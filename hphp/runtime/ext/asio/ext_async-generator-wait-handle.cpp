@@ -213,7 +213,7 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
 
   switch (getState()) {
     case STATE_BLOCKED:
-      // we were already ran due to duplicit scheduling; the context will be
+      // we were already ran due to duplicate scheduling; the context will be
       // updated thru exitContext() call on the non-blocked wait handle we
       // recursively depend on
       decRefObj(this);

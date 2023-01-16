@@ -722,7 +722,7 @@ static bool extractFileTo(zip* zip, const std::string &file, std::string& to,
   auto clean_file = file;
   auto sep = std::string::npos;
   // Normally would just use std::string::rfind here, but if we want to be
-  // consistent between Windows and Linux, even if techincally Linux won't use
+  // consistent between Windows and Linux, even if technically Linux won't use
   // backslash for a separator, we are checking for both types.
   int idx = file.length() - 1;
   while (idx >= 0) {

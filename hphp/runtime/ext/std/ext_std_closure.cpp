@@ -209,7 +209,7 @@ ObjectData* createClosure(Class* cls) {
 
 // should never be called
 ATTRIBUTE_USED ATTRIBUTE_UNUSED EXTERNALLY_VISIBLE
-static void closuseInstanceReference(void) {
+static void closureInstanceReference(void) {
   // ensure c_Closure and ClosureHdr ptrs are scanned inside other types
   (void)type_scan::getIndexForMalloc<c_Closure>();
   (void)type_scan::getIndexForMalloc<ClosureHdr>();

@@ -590,7 +590,7 @@ final class AsyncMysqlConnection {
    * Returns whether or not the current connection is reusable.
    *
    * By default, the current connection is reusable by the pool. But if you call
-   * `setResuable(false)`, then the current connection will not be reusable by
+   * `setReusable(false)`, then the current connection will not be reusable by
    * the connection pool.
    *
    * @return - `true` if the connection is reusable; `false` otherwise.
@@ -712,7 +712,7 @@ class MySSLContextProvider {
   /**
    * Allows to disable TLS session resumption for the connections
    * created using this provider.
-   * The resumption is enabled by default. Disabling sesison resumption
+   * The resumption is enabled by default. Disabling session resumption
    * can be helpful in test scenarios. It allows to force full TLS
    * handshake for every newly created connection.
    *

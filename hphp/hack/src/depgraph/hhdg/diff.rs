@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates.
+// Copyright (c) Meta Platforms, Inc. and its affiliates.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
@@ -78,8 +78,7 @@ fn compare(dg1: &DepGraph<'_>, dg2: &DepGraph<'_>, prefix: &str, nodes: &Nodes) 
     num_different
 }
 
-fn main() -> Result<()> {
-    let opts = Opts::parse();
+pub(crate) fn run(opts: Opts) -> Result<usize> {
     let opener =
         DepGraphOpener::from_path(&opts.dg1).with_context(|| opts.dg1.display().to_string())?;
     let dg1 = (opener.open())
@@ -113,12 +112,7 @@ fn main() -> Result<()> {
         }
     }
 
-    let num_different = compare(&dg1, &dg2, "-", &nodes) + compare(&dg2, &dg1, "+", &nodes);
-
-    if num_different != 0 {
-        std::process::exit(1);
-    }
-    Ok(())
+    Ok(compare(&dg1, &dg2, "-", &nodes) + compare(&dg2, &dg1, "+", &nodes))
 }
 
 #[derive(Default)]

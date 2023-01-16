@@ -1920,9 +1920,10 @@ class HQSession
   // Buffer for datagrams waiting for a stream to be assigned to
   folly::EvictingCacheMap<
       quic::StreamId,
-      folly::small_vector<std::unique_ptr<folly::IOBuf>,
-                          kDefaultMaxBufferedDatagrams,
-                          folly::small_vector_policy::NoHeap>>
+      folly::small_vector<
+          std::unique_ptr<folly::IOBuf>,
+          kDefaultMaxBufferedDatagrams,
+          folly::small_vector_policy::policy_in_situ_only<true>>>
       datagramsBuffer_{kMaxStreamsWithBufferedDatagrams};
 
   // Buffer for priority updates without an active stream

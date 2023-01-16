@@ -77,7 +77,9 @@ using TokenQPair = std::pair<folly::StringPiece, double>;
 constexpr size_t kTokenPairVecDefaultSize = 8;
 #if !FOLLY_MOBILE
 using TokenPairVec =
-    folly::small_vector<TokenQPair, kTokenPairVecDefaultSize, uint16_t>;
+    folly::small_vector<TokenQPair,
+                        kTokenPairVecDefaultSize,
+                        folly::small_vector_policy::policy_size_type<uint16_t>>;
 #else
 using TokenPairVec = std::vector<TokenQPair>;
 #endif

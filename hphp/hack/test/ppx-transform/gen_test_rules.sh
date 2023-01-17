@@ -16,7 +16,7 @@ for filename in "$DIRECTORY"/test_*_embed_error.ml; do
  (action
    (progn
      (with-stdout-to %{targets} (run ./%{pp} --impl %{input} -o %{targets}))
-     (bash \"arc f %{targets}\")
+     (bash \"arc f %{targets} > /dev/null 2>&1\")
    )
  )
 )

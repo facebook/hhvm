@@ -224,7 +224,7 @@ void parse_suffixes(Query* res, const json_ref& query) {
   res->dedup_results = true;
   // Suffix queries are defined as being case insensitive
   res->glob_flags = WM_CASEFOLD;
-  res->glob_tree = folly::make_unique<GlobTree>("", 0);
+  res->glob_tree = make_unique<GlobTree>("", 0);
 
   for (auto& ele : suffixArray) {
     if (!ele.isString()) {

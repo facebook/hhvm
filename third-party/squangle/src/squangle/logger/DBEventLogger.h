@@ -39,6 +39,7 @@ enum class OperationType {
   TestDatabase,
   Reset,
   ChangeUser,
+  ThriftQuery,
 };
 
 class EnumHelper {
@@ -82,6 +83,8 @@ class EnumHelper {
         return "Reset";
       case OperationType::ChangeUser:
         return "ChangeUser";
+      case OperationType::ThriftQuery:
+        return "ThriftQuery";
     }
     return "(should not happen)";
   }

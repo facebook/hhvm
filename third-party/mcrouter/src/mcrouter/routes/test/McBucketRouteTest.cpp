@@ -159,6 +159,7 @@ TEST(McBucketRouteTest, checkParams) {
   EXPECT_EQ(params[1], folly::to<std::string>("total_buckets=", total));
   EXPECT_EQ(params[2], folly::to<std::string>("bucketize_until=", until));
   EXPECT_EQ(params[3], folly::to<std::string>("salt="));
-  EXPECT_EQ(params[4], folly::to<std::string>("keyspace=", keyspace));
+  EXPECT_EQ(
+      params[4], folly::to<std::string>("bucketization_keyspace=", keyspace));
 }
 } // namespace facebook::memcache::mcrouter

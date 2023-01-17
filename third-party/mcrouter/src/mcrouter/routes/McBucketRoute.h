@@ -58,7 +58,7 @@ class McBucketRoute {
 
   std::string routeName() const {
     return fmt::format(
-        "bucketize|total_buckets={}|bucketize_until={}|salt={}|keyspace={}",
+        "bucketize|total_buckets={}|bucketize_until={}|salt={}|bucketization_keyspace={}",
         totalBuckets_,
         bucketizeUntil_,
         salt_,

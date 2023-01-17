@@ -15,7 +15,6 @@ type env = {
   log_inference_constraints: bool;
   silent: bool;
   exit_on_failure: bool;
-  ai_mode: string option;
   ignore_hh_version: bool;
   save_64bit: string option;
   save_human_readable_64bit_dep_map: string option;

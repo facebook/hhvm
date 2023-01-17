@@ -412,7 +412,6 @@ type _ t =
   | DELETE_CHECKPOINT : string -> bool t
   | STATS : Stats.t t
   | FORMAT : ServerFormatTypes.action -> ServerFormatTypes.result t
-  | AI_QUERY : string -> string t
   | DUMP_FULL_FIDELITY_PARSE : string -> string t
   | OPEN_FILE : string * string -> unit t
   | CLOSE_FILE : string -> unit t

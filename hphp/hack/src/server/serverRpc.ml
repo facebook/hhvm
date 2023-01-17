@@ -377,7 +377,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       { Lsp.DocumentFormatting.tabSize = 2; insertSpaces = true }
     in
     (env, ServerFormat.go ~content from to_ legacy_format_options)
-  | AI_QUERY _ -> (env, "Ai_query is deprecated")
   | DUMP_FULL_FIDELITY_PARSE file -> (env, FullFidelityParseService.go file)
   | OPEN_FILE (path, contents) ->
     let predeclare = genv.local_config.ServerLocalConfig.predeclare_ide in

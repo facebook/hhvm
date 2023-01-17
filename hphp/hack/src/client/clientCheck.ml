@@ -106,7 +106,6 @@ let connect ?(use_priority_pipe = false) args =
     watchman_debug_logging;
     log_inference_constraints;
     remote;
-    ai_mode;
     show_spinner;
     ignore_hh_version;
     save_64bit;
@@ -147,7 +146,6 @@ let connect ?(use_priority_pipe = false) args =
           local_config
             .ServerLocalConfig.log_from_client_when_slow_monitor_connections;
         remote;
-        ai_mode;
         progress_callback =
           Option.some_if show_spinner (ClientConnect.tty_progress_reporter ());
         do_post_handoff_handshake = true;
@@ -892,10 +890,6 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
         rpc args @@ Rpc.FORMAT (content, from, to_)
       in
       ClientFormat.go result args.output_json;
-      Lwt.return (Exit_status.No_error, telemetry)
-    | MODE_AI_QUERY json ->
-      let%lwt (results, telemetry) = rpc args @@ Rpc.AI_QUERY json in
-      ClientAiQuery.go results;
       Lwt.return (Exit_status.No_error, telemetry)
     | MODE_FULL_FIDELITY_PARSE file ->
       (* We can cheaply do this on the client today, but we might want to

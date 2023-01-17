@@ -31,7 +31,6 @@ type env = {
   log_inference_constraints: bool;
   log_on_slow_monitor_connect: bool;
   remote: bool;
-  ai_mode: string option;
   progress_callback: (string option -> unit) option;
   do_post_handoff_handshake: bool;
   ignore_hh_version: bool;
@@ -443,7 +442,6 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
           log_inference_constraints;
           log_on_slow_monitor_connect = _;
           remote = _;
-          ai_mode;
           progress_callback = _;
           do_post_handoff_handshake = _;
           ignore_hh_version;
@@ -471,7 +469,6 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
               log_inference_constraints;
               silent = false;
               exit_on_failure = false;
-              ai_mode;
               ignore_hh_version;
               save_64bit;
               save_human_readable_64bit_dep_map;

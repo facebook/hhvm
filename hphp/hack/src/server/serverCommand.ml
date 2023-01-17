@@ -25,10 +25,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | REMOVE_DEAD_UNSAFE_CASTS -> true (* needs same information as STATUS *)
   | REWRITE_LAMBDA_PARAMETERS _ -> true
   | REWRITE_TYPE_PARAMS_TYPE _ -> true
-  (* some Ai stuff - calls to those will likely never be interleaved with IDE
-   * file sync commands (and resulting small checks), but putting it here just
-   * to be safe *)
-  | AI_QUERY _ -> true
   (* Finding references/implementations uses global dependency table *)
   | FIND_REFS _ -> true
   | GO_TO_IMPL _ -> true

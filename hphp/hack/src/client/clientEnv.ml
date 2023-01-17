@@ -14,7 +14,6 @@ type refactor_mode =
   | Unspecified
 
 type client_mode =
-  | MODE_AI_QUERY of string
   | MODE_AUTO_COMPLETE
   | MODE_BIGCODE of string
   | MODE_COLORING of string
@@ -83,7 +82,6 @@ type client_mode =
   | MODE_DEPS_IN_AT_POS_BATCH of string list
 
 type client_check_env = {
-  ai_mode: string option;
   autostart: bool;
   config: (string * string) list;
   custom_hhi_path: string option;
@@ -117,7 +115,6 @@ type client_check_env = {
 }
 
 let mode_to_string = function
-  | MODE_AI_QUERY _ -> "MODE_AI_QUERY"
   | MODE_AUTO_COMPLETE -> "MODE_AUTO_COMPLETE"
   | MODE_BIGCODE _ -> "MODE_BIGCODE"
   | MODE_COLORING _ -> "MODE_COLORING"

@@ -544,7 +544,6 @@
     hhMonitorInformant_sig
     hhServerMonitor
     hhServerMonitorConfig
-    serverAiInit
     serverCommand
     serverCommandLwt
     serverEagerInit

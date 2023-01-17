@@ -57,8 +57,7 @@ let save_state
     let result = SaveStateService.save_state genv env output_filename in
     Some result
 
-let post_init genv (env, t) =
-  let (env, _t) = ServerAiInit.ai_check genv env.naming_table env t in
+let post_init genv (env, _t) =
   (* Configure symbol index settings *)
   ServerProgress.send_progress "updating search index...";
   let namespace_map = ParserOptions.auto_namespace_map env.tcopt in

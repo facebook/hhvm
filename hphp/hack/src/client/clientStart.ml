@@ -32,7 +32,6 @@ type env = {
   log_inference_constraints: bool;
   silent: bool;
   exit_on_failure: bool;
-  ai_mode: string option;
   ignore_hh_version: bool;
   save_64bit: string option;
   save_human_readable_64bit_dep_map: string option;
@@ -85,7 +84,6 @@ let start_server (env : env) =
     log_inference_constraints;
     silent;
     exit_on_failure;
-    ai_mode;
     ignore_hh_version;
     save_64bit;
     save_human_readable_64bit_dep_map;
@@ -111,11 +109,6 @@ let start_server (env : env) =
            [| option; Printf.sprintf "%s=%s" key value |])
     |> Array.concat
   in
-  let ai_options =
-    match ai_mode with
-    | Some ai -> [| "--ai"; ai |]
-    | None -> [||]
-  in
   let hh_server = get_hhserver () in
   let hh_server_args =
     Array.concat
@@ -140,7 +133,6 @@ let start_server (env : env) =
           [| "--log-inference-constraints" |]
         else
           [||]);
-        ai_options;
         (* If the client starts up a server monitor process, the output of that
          * bootup is passed to this FD - so this FD needs to be threaded
          * through the server monitor process then to the typechecker process.

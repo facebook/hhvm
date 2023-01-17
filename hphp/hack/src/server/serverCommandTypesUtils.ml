@@ -45,7 +45,6 @@ let debug_describe_t : type a. a t -> string = function
   | SAVE_STATE _ -> "SAVE_STATE"
   | STATS -> "STATS"
   | FORMAT _ -> "FORMAT"
-  | AI_QUERY _ -> "AI_QUERY"
   | DUMP_FULL_FIDELITY_PARSE _ -> "DUMP_FULL_FIDELITY_PARSE"
   | OPEN_FILE _ -> "OPEN_FILE"
   | CLOSE_FILE _ -> "CLOSE_FILE"

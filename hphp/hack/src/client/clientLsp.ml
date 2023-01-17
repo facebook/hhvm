@@ -1183,7 +1183,6 @@ let start_server ~(env : env) (root : Path.t) : unit =
       no_load = false;
       watchman_debug_logging = false;
       log_inference_constraints = false;
-      ai_mode = None;
       silent = true;
       exit_on_failure = false;
       ignore_hh_version = false;
@@ -1228,8 +1227,6 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       log_on_slow_monitor_connect = false;
       (* Only used when running hh from terminal *)
       remote = false;
-      (* irrelevant *)
-      ai_mode = None;
       (* only relevant when autostart=true *)
       progress_callback = None;
       (* we're fast! *)

@@ -23,7 +23,6 @@ type env = {
   log_inference_constraints: bool;
   log_on_slow_monitor_connect: bool;
   remote: bool;
-  ai_mode: string option;
   progress_callback: (string option -> unit) option;
   do_post_handoff_handshake: bool;
   ignore_hh_version: bool;

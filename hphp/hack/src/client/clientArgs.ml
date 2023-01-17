@@ -111,7 +111,6 @@ let parse_without_command options usage command =
  * there, but keep what's there up to date please. *)
 let parse_check_args cmd =
   (* arg parse output refs *)
-  let ai_mode = ref None in
   let autostart = ref true in
   let config = ref [] in
   let custom_telemetry_data = ref [] in
@@ -192,17 +191,6 @@ let parse_check_args cmd =
   let options =
     [
       (* Please keep these sorted in the alphabetical order *)
-      ( "--ai",
-        Arg.String
-          (fun s ->
-            ai_mode :=
-              Some
-                (ignore (Ai_options.prepare ~server:true s);
-                 s)),
-        " run AI module with provided options" );
-      ( "--ai-query",
-        Arg.String (fun x -> set_mode (MODE_AI_QUERY x)),
-        (* Send an AI query *) "" );
       Common_argspecs.allow_non_opt_build allow_non_opt_build;
       ( "--auto-complete",
         Arg.Unit (fun () -> set_mode MODE_AUTO_COMPLETE),
@@ -857,7 +845,6 @@ let parse_check_args cmd =
   in
   CCheck
     {
-      ai_mode = !ai_mode;
       autostart = !autostart;
       config = !config;
       custom_hhi_path = !custom_hhi_path;
@@ -905,7 +892,6 @@ let parse_start_env command =
   let log_inference_constraints = ref false in
   let no_load = ref false in
   let watchman_debug_logging = ref false in
-  let ai_mode = ref None in
   let ignore_hh_version = ref false in
   let saved_state_ignore_hhconfig = ref false in
   let prechecked = ref None in
@@ -922,7 +908,6 @@ let parse_start_env command =
   let options =
     [
       (* Please keep these sorted in the alphabetical order *)
-      ("--ai", Arg.String (fun x -> ai_mode := Some x), " run ai with options ");
       Common_argspecs.allow_non_opt_build allow_non_opt_build;
       Common_argspecs.config config;
       Common_argspecs.custom_hhi_path custom_hhi_path;
@@ -962,8 +947,7 @@ let parse_start_env command =
       exit 1
   in
   {
-    ClientStart.ai_mode = !ai_mode;
-    config = !config;
+    ClientStart.config = !config;
     custom_hhi_path = !custom_hhi_path;
     custom_telemetry_data = !custom_telemetry_data;
     exit_on_failure = true;

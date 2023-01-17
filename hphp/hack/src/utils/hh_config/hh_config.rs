@@ -157,6 +157,18 @@ impl HhConfig {
                 "log_levels" => {
                     go.log_levels = parse_json(&value);
                 }
+                "allow_all_locations_for_type_constant_in_enum_class" => {
+                    go.tco_allow_all_locations_for_type_constant_in_enum_class = parse_json(&value);
+                }
+                "allowed_locations_for_type_constant_in_enum_class" => {
+                    go.tco_allowed_locations_for_type_constant_in_enum_class = parse_svec(&value);
+                }
+                "const_default_func_args" => {
+                    go.po_const_default_func_args = parse_json(&value);
+                }
+                "const_default_lambda_args" => {
+                    go.po_const_default_lambda_args = parse_json(&value);
+                }
                 _ => c.unknown.push((key, value)),
             }
         }

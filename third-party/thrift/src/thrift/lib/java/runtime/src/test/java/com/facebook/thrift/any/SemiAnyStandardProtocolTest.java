@@ -21,8 +21,11 @@ import static org.junit.Assert.*;
 import com.facebook.thrift.standard_type.StandardProtocol;
 import com.facebook.thrift.standard_type.TypeName;
 import com.facebook.thrift.standard_type.Void;
+import com.facebook.thrift.test.thrift.any.TestStruct;
 import com.facebook.thrift.type_swift.ProtocolUnion;
 import com.facebook.thrift.type_swift.TypeStruct;
+import com.facebook.thrift.util.SerializationProtocolUtil;
+import com.facebook.thrift.util.SerializerUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -230,34 +233,32 @@ public class SemiAnyStandardProtocolTest {
     assertEquals(type, any.getAny().getType());
   }
 
-  //  @Test
-  //  public void testSemiAnyAdapter() {
-  //    SemiAny<List<Integer>> any = createSemiAny(Arrays.asList(5, 6, 7), Integer.class);
-  //    TestStruct st = new TestStruct.Builder().setSemianyField(any).build();
-  //
-  //    byte[] bytes =
-  //        SerializerUtil.toByteArray(st, SerializationProtocolUtil.getProtocol(standardProtocol));
-  //    TestStruct received =
-  //        SerializerUtil.fromByteArray(
-  //            TestStruct.asReader(), bytes,
-  // SerializationProtocolUtil.getProtocol(standardProtocol));
-  //    assertArrayEquals(
-  //        new Integer[] {5, 6, 7}, ((List<Integer>) received.getSemianyField().get()).toArray());
-  //  }
-  //
-  //  @Test
-  //  public void testSemiAnyAdapterPromoteToAny() {
-  //    SemiAny<List<Integer>> semiAny = createSemiAny(Arrays.asList(5, 6, 7), Integer.class);
-  //    TestStruct st = new TestStruct.Builder().setSemianyField(semiAny).build();
-  //
-  //    byte[] bytes =
-  //        SerializerUtil.toByteArray(st, SerializationProtocolUtil.getProtocol(standardProtocol));
-  //    TestStruct received =
-  //        SerializerUtil.fromByteArray(
-  //            TestStruct.asReader(), bytes,
-  // SerializationProtocolUtil.getProtocol(standardProtocol));
-  //    Any<List<Integer>> any = received.getSemianyField().promote();
-  //
-  //    assertArrayEquals(new Integer[] {5, 6, 7}, any.get().toArray());
-  //  }
+  @Test
+  public void testSemiAnyAdapter() {
+    SemiAny<List<Integer>> any = createSemiAny(Arrays.asList(5, 6, 7), Integer.class);
+    TestStruct st = new TestStruct.Builder().setSemianyField(any).build();
+
+    byte[] bytes =
+        SerializerUtil.toByteArray(st, SerializationProtocolUtil.getProtocol(standardProtocol));
+    TestStruct received =
+        SerializerUtil.fromByteArray(
+            TestStruct.asReader(), bytes, SerializationProtocolUtil.getProtocol(standardProtocol));
+    assertArrayEquals(
+        new Integer[] {5, 6, 7}, ((List<Integer>) received.getSemianyField().get()).toArray());
+  }
+
+  @Test
+  public void testSemiAnyAdapterPromoteToAny() {
+    SemiAny<List<Integer>> semiAny = createSemiAny(Arrays.asList(5, 6, 7), Integer.class);
+    TestStruct st = new TestStruct.Builder().setSemianyField(semiAny).build();
+
+    byte[] bytes =
+        SerializerUtil.toByteArray(st, SerializationProtocolUtil.getProtocol(standardProtocol));
+    TestStruct received =
+        SerializerUtil.fromByteArray(
+            TestStruct.asReader(), bytes, SerializationProtocolUtil.getProtocol(standardProtocol));
+    Any<List<Integer>> any = received.getSemianyField().promote();
+
+    assertArrayEquals(new Integer[] {5, 6, 7}, any.get().toArray());
+  }
 }

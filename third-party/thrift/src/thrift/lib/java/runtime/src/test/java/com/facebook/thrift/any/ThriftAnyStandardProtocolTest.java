@@ -29,6 +29,7 @@ import com.facebook.thrift.test.thrift.any.TestUnion;
 import com.facebook.thrift.type_swift.AnyStruct;
 import com.facebook.thrift.type_swift.TypeStruct;
 import com.facebook.thrift.util.SerializationProtocol;
+import com.facebook.thrift.util.SerializationProtocolUtil;
 import com.facebook.thrift.util.SerializerUtil;
 import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
@@ -590,18 +591,17 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  //  @Test
-  //  public void testAnyAdapter() {
-  //    Any<List<Integer>> any = createAny(Arrays.asList(5, 6, 7), Integer.class);
-  //    TestStruct st = new TestStruct.Builder().setAnyField(any).build();
-  //
-  //    byte[] bytes =
-  //        SerializerUtil.toByteArray(st, SerializationProtocolUtil.getProtocol(standardProtocol));
-  //    TestStruct received =
-  //        SerializerUtil.fromByteArray(
-  //            TestStruct.asReader(), bytes,
-  // SerializationProtocolUtil.getProtocol(standardProtocol));
-  //    assertArrayEquals(
-  //        new Integer[] {5, 6, 7}, ((List<Integer>) received.getAnyField().get()).toArray());
-  //  }
+  @Test
+  public void testAnyAdapter() {
+    Any<List<Integer>> any = createAny(Arrays.asList(5, 6, 7), Integer.class);
+    TestStruct st = new TestStruct.Builder().setAnyField(any).build();
+
+    byte[] bytes =
+        SerializerUtil.toByteArray(st, SerializationProtocolUtil.getProtocol(standardProtocol));
+    TestStruct received =
+        SerializerUtil.fromByteArray(
+            TestStruct.asReader(), bytes, SerializationProtocolUtil.getProtocol(standardProtocol));
+    assertArrayEquals(
+        new Integer[] {5, 6, 7}, ((List<Integer>) received.getAnyField().get()).toArray());
+  }
 }

@@ -337,6 +337,7 @@ type t = {
   tco_populate_dead_unsafe_cast_heap: bool;
   po_disallow_static_constants_in_default_func_args: bool;
   tco_load_hack_64_distc_saved_state: bool;
+  tco_ide_should_use_hack_64_distc: bool;
 }
 [@@deriving eq, show]
 
@@ -477,6 +478,7 @@ val make :
   ?tco_populate_dead_unsafe_cast_heap:bool ->
   ?po_disallow_static_constants_in_default_func_args:bool ->
   ?tco_load_hack_64_distc_saved_state:bool ->
+  ?tco_ide_should_use_hack_64_distc:bool ->
   unit ->
   t
 

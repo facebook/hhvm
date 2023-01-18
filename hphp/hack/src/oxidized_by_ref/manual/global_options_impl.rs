@@ -146,6 +146,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_populate_dead_unsafe_cast_heap: false,
     po_disallow_static_constants_in_default_func_args: false,
     tco_load_hack_64_distc_saved_state: false,
+    tco_ide_should_use_hack_64_distc: false,
 };
 
 impl GlobalOptions<'static> {

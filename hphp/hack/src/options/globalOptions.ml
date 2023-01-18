@@ -165,6 +165,7 @@ type t = {
   tco_populate_dead_unsafe_cast_heap: bool;
   po_disallow_static_constants_in_default_func_args: bool;
   tco_load_hack_64_distc_saved_state: bool;
+  tco_ide_should_use_hack_64_distc: bool;
 }
 [@@deriving eq, show]
 
@@ -307,6 +308,7 @@ let default =
     tco_populate_dead_unsafe_cast_heap = false;
     po_disallow_static_constants_in_default_func_args = false;
     tco_load_hack_64_distc_saved_state = false;
+    tco_ide_should_use_hack_64_distc = false;
   }
 
 let make
@@ -481,6 +483,8 @@ let make
       default.po_disallow_static_constants_in_default_func_args)
     ?(tco_load_hack_64_distc_saved_state =
       default.tco_load_hack_64_distc_saved_state)
+    ?(tco_ide_should_use_hack_64_distc =
+      default.tco_ide_should_use_hack_64_distc)
     () =
   {
     tco_experimental_features;
@@ -620,6 +624,7 @@ let make
     tco_populate_dead_unsafe_cast_heap;
     po_disallow_static_constants_in_default_func_args;
     tco_load_hack_64_distc_saved_state;
+    tco_ide_should_use_hack_64_distc;
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier

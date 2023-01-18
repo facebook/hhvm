@@ -68,6 +68,7 @@ type rollout_flags = {
   use_server_revision_tracker_v2: bool;
   rust_provider_backend: bool;
   load_hack_64_distc_saved_state: bool;
+  ide_should_use_hack_64_distc: bool;
 }
 
 let flush () = ()

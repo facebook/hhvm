@@ -320,3 +320,6 @@ let populate_dead_unsafe_cast_heap t =
 
 let load_hack_64_distc_saved_state t =
   t.GlobalOptions.tco_load_hack_64_distc_saved_state
+
+let ide_should_use_hack_64_distc t =
+  t.GlobalOptions.tco_ide_should_use_hack_64_distc

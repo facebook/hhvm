@@ -220,6 +220,22 @@ exception TerseException {
 } (message = 'msg')
 
 @thrift.TerseWrite
+struct ThreeLevelTerseStructs {
+  1: TerseStructs field1;
+  2: TerseStructs field2;
+  3: TerseStructs field3;
+  4: TerseStructs field4;
+  5: TerseStructs field5;
+
+  // disable field id packing
+  101: TerseStructs field6;
+  102: TerseStructs field7;
+  103: TerseStructs field8;
+  104: TerseStructs field9;
+  105: TerseStructs field10;
+}
+
+@thrift.TerseWrite
 struct TerseStructs {
   1: MyStruct field1;
   2: MyStruct field2;

@@ -196,7 +196,17 @@ class CompactProtocolWriter : public detail::ProtocolBase {
     int16_t fieldId;
   } booleanField_;
 
-  std::stack<int16_t, folly::small_vector<int16_t, 10>> lastField_;
+ private:
+  struct LastFieldTracker {
+    int16_t lastFieldId;
+    int16_t lastWrittenFieldId;
+  };
+
+  // Due to serialization optimiztion for a terse struct, we need to keep track
+  // of both lastFieldId and lastWrittenFieldId when serializing nested
+  // terse struct.
+  std::stack<LastFieldTracker, folly::small_vector<LastFieldTracker, 10>>
+      lastField_;
   int16_t lastFieldId_{-1};
   int16_t lastWrittenFieldId_{-1};
 

@@ -109,13 +109,16 @@ inline uint32_t CompactProtocolWriter::writeStructBegin(
     const char* /* name */) {
   descend();
 
-  lastField_.push(lastFieldId_);
+  lastField_.push({lastFieldId_, lastWrittenFieldId_});
   lastFieldId_ = 0;
+  lastWrittenFieldId_ = 0;
   return 0;
 }
 
 inline uint32_t CompactProtocolWriter::writeStructEnd() {
-  lastFieldId_ = lastField_.top();
+  const auto& stored = lastField_.top();
+  lastFieldId_ = stored.lastFieldId;
+  lastWrittenFieldId_ = stored.lastWrittenFieldId;
   lastField_.pop();
 
   ascend();

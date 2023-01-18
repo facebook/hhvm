@@ -722,4 +722,52 @@ using Serializers = ::testing::Types<
 INSTANTIATE_TYPED_TEST_CASE_P(
     TerseWriteTest, TerseWriteSerializerTests, Serializers);
 
+// Test CompactProtocol's bookkeeping of previously serialized field id for
+// multiple-level nested fields.
+TEST(TerseWriteTest, CompactProtocolFieldIds) {
+  terse_write::ThreeLevelTerseStructs obj;
+
+  obj.field1()->field1()->field1() = 1;
+  obj.field3()->field2()->field1() = 2;
+  obj.field5()->field3()->field1() = 3;
+  obj.field6()->field1()->field1() = 4;
+  obj.field8()->field2()->field1() = 5;
+  obj.field10()->field3()->field1() = 6;
+
+  std::string objs = CompactSerializer::serialize<std::string>(obj);
+  terse_write::ThreeLevelTerseStructs objd;
+  CompactSerializer::deserialize(objs, objd);
+
+  EXPECT_EQ(*objd.field1()->field1()->field1(), 1);
+  EXPECT_TRUE(apache::thrift::empty(*objd.field1()->field2()));
+  EXPECT_TRUE(apache::thrift::empty(*objd.field1()->field3()));
+
+  EXPECT_TRUE(apache::thrift::empty(*objd.field2()));
+
+  EXPECT_TRUE(apache::thrift::empty(*objd.field3()->field1()));
+  EXPECT_EQ(*objd.field3()->field2()->field1(), 2);
+  EXPECT_TRUE(apache::thrift::empty(*objd.field3()->field3()));
+
+  EXPECT_TRUE(apache::thrift::empty(*objd.field4()));
+
+  EXPECT_TRUE(apache::thrift::empty(*objd.field5()->field1()));
+  EXPECT_TRUE(apache::thrift::empty(*objd.field5()->field2()));
+  EXPECT_EQ(*objd.field5()->field3()->field1(), 3);
+
+  EXPECT_EQ(*objd.field6()->field1()->field1(), 4);
+  EXPECT_TRUE(apache::thrift::empty(*objd.field6()->field2()));
+  EXPECT_TRUE(apache::thrift::empty(*objd.field6()->field3()));
+
+  EXPECT_TRUE(apache::thrift::empty(*objd.field7()));
+
+  EXPECT_TRUE(apache::thrift::empty(*objd.field8()->field1()));
+  EXPECT_EQ(*objd.field8()->field2()->field1(), 5);
+  EXPECT_TRUE(apache::thrift::empty(*objd.field8()->field3()));
+
+  EXPECT_TRUE(apache::thrift::empty(*objd.field9()));
+
+  EXPECT_TRUE(apache::thrift::empty(*objd.field10()->field1()));
+  EXPECT_TRUE(apache::thrift::empty(*objd.field10()->field2()));
+  EXPECT_EQ(*objd.field10()->field3()->field1(), 6);
+}
 } // namespace apache::thrift::test

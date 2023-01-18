@@ -9,7 +9,7 @@ $x = getFoo();
 =$x::$fooStaticProp;
 =Foo::$fooStaticProp;
 =Foo::$fooStatic();
-=$cls="foo";
+=$cls="Foo";
 =$cls::fooStatic();
 set bac on
 =new Foo();

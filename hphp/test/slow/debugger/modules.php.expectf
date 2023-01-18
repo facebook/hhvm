@@ -50,8 +50,8 @@ Stack trace:
 #0 (1): include()
 #1 (): include()
 #2 {main}
-=$cls="foo";
-"foo"
+=$cls="Foo";
+"Foo"
 =$cls::fooStatic();
 Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from outside of a module is not allowed' in :1
 Stack trace:

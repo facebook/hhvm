@@ -17,11 +17,11 @@
 include "module0.thrift"
 
 typedef string Plate
-typedef string State
+typedef string State (go.newtype)
 typedef i32 Year
 typedef list<string> Drivers
 typedef module0.Accessory Accessory
-typedef module0.PartName PartName
+typedef module0.PartName PartName (go.name = "CarPartName")
 
 struct Automobile {
   1: Plate plate;

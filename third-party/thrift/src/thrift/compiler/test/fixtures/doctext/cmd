@@ -1,3 +1,4 @@
 mstch_cpp2 src/module.thrift
+mstch_go src/module.thrift
 mstch_rust src/module.thrift
 hack src/module.thrift

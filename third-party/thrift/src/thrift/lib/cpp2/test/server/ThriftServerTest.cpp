@@ -3971,48 +3971,55 @@ class HeaderOrRocketCompression
         : underlyingProcessor_(std::move(underlyingProcessor)),
           compression_(compression) {}
     void processSerializedRequest(
-        ResponseChannelRequest::UniquePtr req,
-        SerializedRequest&& serializedRequest,
-        protocol::PROTOCOL_TYPES prot,
-        Cpp2RequestContext* ctx,
-        folly::EventBase* eb,
-        concurrency::ThreadManager* tm) override {
-      ADD_FAILURE() << "processSerializedRequest should not be called if "
-                    << "processSerializedCompressedRequest is implemented";
-      underlyingProcessor_->processSerializedRequest(
-          std::move(req), std::move(serializedRequest), prot, ctx, eb, tm);
-    }
-
-    void processSerializedCompressedRequestWithMetadata(
-        apache::thrift::ResponseChannelRequest::UniquePtr req,
-        apache::thrift::SerializedCompressedRequest&& serializedRequest,
-        const apache::thrift::AsyncProcessorFactory::MethodMetadata&,
-        apache::thrift::protocol::PROTOCOL_TYPES prot,
-        apache::thrift::Cpp2RequestContext* ctx,
-        folly::EventBase* eb,
-        apache::thrift::concurrency::ThreadManager* tm) override {
-      // check that SerializedCompressedRequest has expected compression
-      EXPECT_EQ(compression_, serializedRequest.getCompressionAlgorithm());
-      underlyingProcessor_->processSerializedCompressedRequest(
-          std::move(req), std::move(serializedRequest), prot, ctx, eb, tm);
+        ResponseChannelRequest::UniquePtr,
+        SerializedRequest&&,
+        protocol::PROTOCOL_TYPES,
+        Cpp2RequestContext*,
+        folly::EventBase*,
+        concurrency::ThreadManager*) override {
+      // This will be removed when processSerializedRequest is removed
+      // from AsyncProcessor
+      LOG(FATAL) << "processSerializedRequest shouldn't be called";
     }
 
     void processSerializedCompressedRequest(
+        ResponseChannelRequest::UniquePtr,
+        SerializedCompressedRequest&&,
+        protocol::PROTOCOL_TYPES,
+        Cpp2RequestContext*,
+        folly::EventBase*,
+        concurrency::ThreadManager*) override {
+      // This will be removed when processSerializedCompressedRequest is removed
+      // from AsyncProcessor
+      LOG(FATAL) << "processSerializedCompressedRequest shouldn't be called";
+    }
+
+    void executeRequest(
+        ServerRequest&&,
+        const AsyncProcessorFactory::MethodMetadata&) override {
+      LOG(FATAL) << "executeRequest shouldn't be called in this test";
+    }
+
+    void processSerializedCompressedRequestWithMetadata(
         ResponseChannelRequest::UniquePtr req,
         SerializedCompressedRequest&& serializedRequest,
+        const AsyncProcessorFactory::MethodMetadata& methodMetadata,
         protocol::PROTOCOL_TYPES prot,
         Cpp2RequestContext* ctx,
         folly::EventBase* eb,
         concurrency::ThreadManager* tm) override {
-      processSerializedCompressedRequestWithMetadata(
+      // check that SerializedCompressedRequest has expected compression
+      EXPECT_EQ(compression_, serializedRequest.getCompressionAlgorithm());
+      underlyingProcessor_->processSerializedCompressedRequestWithMetadata(
           std::move(req),
           std::move(serializedRequest),
-          apache::thrift::AsyncProcessorFactory::MethodMetadata(),
+          methodMetadata,
           prot,
           ctx,
           eb,
           tm);
     }
+
     std::unique_ptr<AsyncProcessor> underlyingProcessor_;
     CompressionAlgorithm compression_;
   };
@@ -4023,40 +4030,54 @@ class HeaderOrRocketCompression
         std::unique_ptr<AsyncProcessor> underlyingProcessor)
         : underlyingProcessor_(std::move(underlyingProcessor)) {}
 
+    void processSerializedRequest(
+        ResponseChannelRequest::UniquePtr,
+        SerializedRequest&&,
+        protocol::PROTOCOL_TYPES,
+        Cpp2RequestContext*,
+        folly::EventBase*,
+        concurrency::ThreadManager*) override {
+      // This will be removed when processSerializedRequest is removed
+      // from AsyncProcessor
+      LOG(FATAL) << "processSerializedRequest shouldn't be called";
+    }
+
+    void processSerializedCompressedRequest(
+        ResponseChannelRequest::UniquePtr,
+        SerializedCompressedRequest&&,
+        protocol::PROTOCOL_TYPES,
+        Cpp2RequestContext*,
+        folly::EventBase*,
+        concurrency::ThreadManager*) override {
+      // This will be removed when processSerializedCompressedRequest is removed
+      // from AsyncProcessor
+      LOG(FATAL) << "processSerializedCompressedRequest shouldn't be called";
+    }
+
+    void executeRequest(
+        ServerRequest&&,
+        const AsyncProcessorFactory::MethodMetadata&) override {
+      LOG(FATAL) << "executeRequest shouldn't be called in this test";
+    }
+
     void processSerializedCompressedRequestWithMetadata(
-        apache::thrift::ResponseChannelRequest::UniquePtr req,
-        apache::thrift::SerializedCompressedRequest&& serializedRequest,
-        const apache::thrift::AsyncProcessorFactory::MethodMetadata&,
-        apache::thrift::protocol::PROTOCOL_TYPES prot,
-        apache::thrift::Cpp2RequestContext* ctx,
+        ResponseChannelRequest::UniquePtr req,
+        SerializedCompressedRequest&& serializedRequest,
+        const AsyncProcessorFactory::MethodMetadata& methodMetadata,
+        protocol::PROTOCOL_TYPES prot,
+        Cpp2RequestContext* ctx,
         folly::EventBase* eb,
-        apache::thrift::concurrency::ThreadManager* tm) override {
-      underlyingProcessor_->processSerializedRequest(
+        concurrency::ThreadManager* tm) override {
+      underlyingProcessor_->processSerializedCompressedRequestWithMetadata(
           std::move(req),
-          std::move(serializedRequest).uncompress(),
+          std::move(serializedRequest),
+          methodMetadata,
           prot,
           ctx,
           eb,
           tm);
     }
 
-    void processSerializedRequest(
-        ResponseChannelRequest::UniquePtr req,
-        SerializedRequest&& serializedRequest,
-        protocol::PROTOCOL_TYPES prot,
-        Cpp2RequestContext* ctx,
-        folly::EventBase* eb,
-        concurrency::ThreadManager* tm) override {
-      processSerializedCompressedRequestWithMetadata(
-          std::move(req),
-          apache::thrift::SerializedCompressedRequest(
-              std::move(serializedRequest)),
-          apache::thrift::AsyncProcessorFactory::MethodMetadata(),
-          prot,
-          ctx,
-          eb,
-          tm);
-    }
     std::unique_ptr<AsyncProcessor> underlyingProcessor_;
   };
 
@@ -4067,6 +4088,24 @@ class HeaderOrRocketCompression
         apache::thrift::ServiceHandler<TestService>* iface,
         CompressionAlgorithm compression)
         : TestInterface::ProcessorType(iface), compression_(compression) {}
+
+    void processSerializedCompressedRequest(
+        ResponseChannelRequest::UniquePtr,
+        SerializedCompressedRequest&&,
+        protocol::PROTOCOL_TYPES,
+        Cpp2RequestContext*,
+        folly::EventBase*,
+        concurrency::ThreadManager*) override {
+      // This will be removed when processSerializedCompressedRequest is removed
+      // from AsyncProcessor
+      LOG(FATAL) << "processSerializedCompressedRequest shouldn't be called";
+    }
+
+    void executeRequest(
+        ServerRequest&&,
+        const AsyncProcessorFactory::MethodMetadata&) override {
+      LOG(FATAL) << "executeRequest shouldn't be called in this test";
+    }
 
     void processSerializedCompressedRequestWithMetadata(
         apache::thrift::ResponseChannelRequest::UniquePtr req,
@@ -4080,23 +4119,6 @@ class HeaderOrRocketCompression
       EXPECT_EQ(compression_, serializedRequest.getCompressionAlgorithm());
       TestInterface::ProcessorType::processSerializedCompressedRequest(
           std::move(req), std::move(serializedRequest), prot, ctx, eb, tm);
-    }
-
-    void processSerializedCompressedRequest(
-        ResponseChannelRequest::UniquePtr req,
-        SerializedCompressedRequest&& serializedRequest,
-        protocol::PROTOCOL_TYPES prot,
-        Cpp2RequestContext* ctx,
-        folly::EventBase* eb,
-        concurrency::ThreadManager* tm) override {
-      processSerializedCompressedRequestWithMetadata(
-          std::move(req),
-          std::move(serializedRequest),
-          apache::thrift::AsyncProcessorFactory::MethodMetadata(),
-          prot,
-          ctx,
-          eb,
-          tm);
     }
 
     CompressionAlgorithm compression_;
@@ -4124,9 +4146,15 @@ class HeaderOrRocketCompression
     }
 
     CreateMethodMetadataResult createMethodMetadata() override {
-      // TODO(praihan) Restore the default implementation once we have migrated
-      // the processor implementation.
-      return {};
+      // We want to return WildcardMethodMetadataMap here because default
+      // implementation will return MethodMetadataMap and requests will be
+      // routed to executeRequest rather than to
+      // processSerializedCompressedRequestWithMetadata. This test relies on
+      // routing requests to processSerializedCompressedRequestWithMetadata.
+      WildcardMethodMetadataMap wildcardMap;
+      wildcardMap.wildcardMetadata = std::make_shared<WildcardMethodMetadata>();
+      wildcardMap.knownMethods = {};
+      return wildcardMap;
     }
 
     ProcessorImplementation processorImplementation_;

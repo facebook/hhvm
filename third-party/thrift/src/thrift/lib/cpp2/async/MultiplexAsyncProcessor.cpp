@@ -113,11 +113,6 @@ MultiplexAsyncProcessorFactory::CompositionMetadata computeCompositionMetadata(
         compositionMetadata.firstWildcardLike =
             MultiplexAsyncProcessorFactory::CompositionMetadata::Wildcard{
                 sourceIndex, wildcardMetadataMap->wildcardMetadata};
-      } else {
-        DCHECK(std::holds_alternative<
-               AsyncProcessorFactory::MetadataNotImplemented>(metadataResult));
-        compositionMetadata.firstWildcardLike = MultiplexAsyncProcessorFactory::
-            CompositionMetadata::WildcardNoMetadata{sourceIndex};
       }
       break;
     }

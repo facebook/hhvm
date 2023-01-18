@@ -238,38 +238,24 @@ class AsyncProcessorFactory {
     MethodMetadataMap knownMethods;
   };
 
-  /**
-   * The API is not implemented (legacy).
-   */
-  using MetadataNotImplemented = std::monostate;
-
-  using CreateMethodMetadataResult = std::variant<
-      MetadataNotImplemented,
-      MethodMetadataMap,
-      WildcardMethodMetadataMap>;
+  using CreateMethodMetadataResult =
+      std::variant<MethodMetadataMap, WildcardMethodMetadataMap>;
   /**
    * This function enumerates the list of methods supported by the
    * AsyncProcessor returned by getProcessor(), if possible. The return value
    * represents one of the following states:
-   *   1. This API is not supported / implemented. (Will be removed soon)
-   *   2. This API is supported and there is a static list of known methods.
+   *   1. This API is supported and there is a static list of known methods.
    *      This applies to all generated AsyncProcessors.
-   *   3. This API is supported but the complete set of methods is not known or
+   *   2. This API is supported but the complete set of methods is not known or
    *      is not enumerable (e.g. all method names supported). This applies, for
    *      example, to AsyncProcessors that proxy to external services.
    *
-   * If returning (1), AsyncProcessor::processSerializedCompressedRequest MUST
-   * be implemented instead of
-   * AsyncProcessor::processSerializedCompressedRequestWithMetadata. Override
-   * the latter only if returning (2) or (3). The metadata API is effectively
-   * bypassed as a result.
-   *
-   * If returning (2), Thrift server will lookup the method metadata in the map.
+   * If returning (1), Thrift server will lookup the method metadata in the map.
    * If the method name is not found, a not-found error will be sent and
    * getProcessor will not be called. Any metadata passed to the processor will
    * always be a reference from the map.
    *
-   * If returning (3), Thrift server will lookup the method metadata in the map.
+   * If returning (2), Thrift server will lookup the method metadata in the map.
    * If the method name is not found, Thrift will pass a WildcardMethodMetadata
    * object instead (kWildcardMethodMetadata). Any metadata passed to the
    * processor will always be a reference from the map (or be

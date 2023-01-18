@@ -382,10 +382,6 @@ Cpp2Worker::PerServiceMetadata::findMethod(std::string_view methodName) const {
     }
     return MetadataFound{*wildcard->wildcardMetadata};
   }
-  if (std::holds_alternative<AsyncProcessorFactory::MetadataNotImplemented>(
-          methods_)) {
-    return MetadataNotImplemented{};
-  }
 
   LOG(FATAL) << "Invalid CreateMethodMetadataResult from service";
   folly::assume_unreachable();
@@ -549,18 +545,6 @@ void Cpp2Worker::dispatchRequest(
             eb,
             tm);
       }
-    } else if (std::holds_alternative<
-                   PerServiceMetadata::MetadataNotImplemented>(
-                   methodMetadataResult)) {
-      // The AsyncProcessorFactory does not implement createMethodMetadata
-      // so we need to fallback to processSerializedCompressedRequest.
-      processor->processSerializedCompressedRequest(
-          std::move(request),
-          std::move(serializedCompressedRequest),
-          protocolId,
-          cpp2ReqCtx,
-          eb,
-          tm);
     } else if (std::holds_alternative<PerServiceMetadata::MetadataNotFound>(
                    methodMetadataResult)) {
       std::string_view methodName = cpp2ReqCtx->getMethodName();

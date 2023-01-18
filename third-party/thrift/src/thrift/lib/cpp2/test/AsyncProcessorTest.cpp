@@ -183,17 +183,6 @@ class AsyncProcessorMethodResolutionTestP
 };
 } // namespace
 
-TEST_P(AsyncProcessorMethodResolutionTestP, CreateMethodMetadataNotSupported) {
-  auto service = std::make_shared<ChildHandlerWithMetadata>(
-      [](auto&&) -> CreateMethodMetadataResult { return {}; });
-  auto runner = makeServer(service);
-  auto client = makeClientFor<ChildAsyncClient>(*runner);
-
-  // Recursive method resolution in action
-  EXPECT_EQ(client->semifuture_parentMethod1().get(), 42);
-  EXPECT_EQ(client->semifuture_childMethod2().get(), "hello");
-}
-
 TEST_P(AsyncProcessorMethodResolutionTestP, EmptyMap) {
   auto service = std::make_shared<ChildHandlerWithMetadata>(
       [](auto&&) -> MethodMetadataMap { return {}; });

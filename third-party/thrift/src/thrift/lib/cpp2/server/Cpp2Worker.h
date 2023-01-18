@@ -178,10 +178,6 @@ class Cpp2Worker : public IOWorkerContext,
     }
 
     /**
-     * AsyncProcessorFactory::createMethodMetadata is not implemented.
-     */
-    using MetadataNotImplemented = std::monostate;
-    /**
      * The service metadata contained an entry for the provided method name.
      * Otherwise, if the metadata is WildcardMethodMetadataMap, then this is a
      * reference to a WildcardMethodMetadata object.
@@ -201,8 +197,7 @@ class Cpp2Worker : public IOWorkerContext,
     /**
      * The result type of findMethod() below.
      */
-    using FindMethodResult =
-        std::variant<MetadataNotImplemented, MetadataFound, MetadataNotFound>;
+    using FindMethodResult = std::variant<MetadataFound, MetadataNotFound>;
     /**
      * Looks up the provided method name in the metadata map.
      *
@@ -211,9 +206,6 @@ class Cpp2Worker : public IOWorkerContext,
      *
      * This returns MetadataNotFound iff no valid metadata exists. That means
      * that an unknown method error should be sent.
-     *
-     * This returns MetadataNotImplemented iff the service does not support the
-     * createMethodMetadata() API.
      */
     FindMethodResult findMethod(std::string_view methodName) const;
 

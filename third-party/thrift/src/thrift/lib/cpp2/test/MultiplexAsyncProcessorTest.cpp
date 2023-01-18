@@ -40,7 +40,6 @@ using namespace ::testing;
 
 using MethodMetadata = AsyncProcessorFactory::MethodMetadata;
 using MethodMetadataMap = AsyncProcessorFactory::MethodMetadataMap;
-using MetadataNotImplemented = AsyncProcessorFactory::MetadataNotImplemented;
 using WildcardMethodMetadataMap =
     AsyncProcessorFactory::WildcardMethodMetadataMap;
 using CreateMethodMetadataResult =
@@ -345,9 +344,6 @@ class WildcardThrowsInternalError : public TProcessorFactory {
     auto metadataResult = TProcessorFactory::createMethodMetadata();
     return folly::variant_match(
         metadataResult,
-        [](MetadataNotImplemented) -> WildcardMethodMetadataMap {
-          return WildcardMethodMetadataMap{};
-        },
         [](MethodMetadataMap& knownMethods) -> WildcardMethodMetadataMap {
           return WildcardMethodMetadataMap{
               std::make_shared<
@@ -456,10 +452,6 @@ class WildcardThrowsInternalError : public TProcessorFactory {
   MessageVariant message_;
 };
 
-template <typename TProcessorFactory>
-class WithUnimplementedMethodMetadata : public TProcessorFactory {
-  CreateMethodMetadataResult createMethodMetadata() override { return {}; }
-};
 } // namespace
 
 TEST_F(MultiplexAsyncProcessorServerTest, BasicWildcard) {
@@ -517,22 +509,6 @@ TEST_F(MultiplexAsyncProcessorServerTest, WildcardConflicts) {
   EXPECT_THAT(
       [&] { client3->semifuture_six().get(); },
       ThrowsMessage<TApplicationException>("WildcardConflicts"));
-}
-
-TEST_F(MultiplexAsyncProcessorServerTest, UnimplementedMetadataActsAsWildcard) {
-  auto runner = runMultiplexedServices(
-      {std::make_shared<WithUnimplementedMethodMetadata<FirstHandler>>(),
-       std::make_shared<SecondHandler>()});
-
-  auto client1 = runner->newClient<FirstAsyncClient>();
-  auto client2 = runner->newClient<SecondAsyncClient>();
-
-  EXPECT_EQ(client1->semifuture_one().get(), 1);
-  EXPECT_EQ(client1->semifuture_two().get(), 2);
-
-  EXPECT_THAT(
-      [&] { client2->semifuture_three().get(); },
-      ThrowsMessage<TApplicationException>("Method name three not found"));
 }
 
 namespace {

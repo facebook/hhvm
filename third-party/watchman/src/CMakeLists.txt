@@ -615,7 +615,6 @@ watchman/UserDir.cpp
 watchman/WatchmanConfig.cpp
 watchman/fs/WinDirHandle.cpp
 watchman/bser.cpp
-watchman/launchd.cpp
 watchman/listener-user.cpp
 watchman/listener.cpp
 watchman/main.cpp

@@ -69,14 +69,6 @@ static FileDescriptor get_listener_unix_domain_socket(const char* path) {
 #endif
   FileDescriptor listener_fd;
 
-#ifdef __APPLE__
-  listener_fd = w_get_listener_socket_from_launchd();
-  if (listener_fd) {
-    logf(ERR, "Using socket from launchd as listening socket\n");
-    return listener_fd;
-  }
-#endif
-
   struct sockaddr_un un {};
   if (strlen(path) >= sizeof(un.sun_path) - 1) {
     logf(ERR, "{}: path is too long\n", path);

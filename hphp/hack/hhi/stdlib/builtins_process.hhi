@@ -41,7 +41,7 @@ function pcntl_signal(
 
 <<__PHPStdLib>>
 function pcntl_wait(
-  inout $status,
+  inout ?int $status,
   int $options = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -69,7 +69,7 @@ function shell_exec(string $cmd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function exec(
   string $command,
-  inout $output,
+  inout dynamic $output,
   inout HH\FIXME\MISSING_PARAM_TYPE $return_var,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -86,7 +86,7 @@ function system(
 function proc_open(
   string $cmd,
   darray<int, mixed> $descriptorspec,
-  inout $pipes,
+  inout ?vec_or_dict<resource> $pipes,
   HH\FIXME\MISSING_PARAM_TYPE $cwd = null,
   HH\FIXME\MISSING_PARAM_TYPE $env = null,
   HH\FIXME\MISSING_PARAM_TYPE $other_options = null,

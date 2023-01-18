@@ -1236,6 +1236,7 @@ function exec_with_stack(string $cmd): ?string {
                     dict[0 => vec['pipe', 'r'],
                           1 => vec['pipe', 'w'],
                           2 => vec['pipe', 'w']], inout $pipes);
+  $pipes as nonnull;
   fclose($pipes[0]);
   $s = '';
   $all_selects_failed=true;
@@ -1260,6 +1261,7 @@ function exec_with_stack(string $cmd): ?string {
     }
     $all_selects_failed=false;
     if ($available === 0) continue;
+    $read as nonnull;
     foreach ($read as $pipe) {
       $t = fread($pipe, 4096);
       if ($t === false) continue;
@@ -2041,6 +2043,7 @@ final class Status {
       'stty -a', $descriptorspec, inout $pipes, null, null,
       dict['suppress_errors' => true]
     );
+    $pipes as nonnull;
     $stty = stream_get_contents($pipes[1]);
     proc_close($process);
     return $stty;
@@ -2575,6 +2578,7 @@ function skipif_should_skip_test(
     );
   }
 
+  $pipes as nonnull;
   fclose($pipes[0]);
   $output = trim(stream_get_contents($pipes[1]));
   fclose($pipes[1]);
@@ -2747,7 +2751,7 @@ function generate_diff(
     $r = $w;
   } else {
     if (preg_match_with_matches('/^\((.*)\)\{(\d+)\}$/s', $wanted_re, inout $m)) {
-      $t = explode("\n", $m[1]);
+      $t = explode("\n", $m[1] as string);
       $r = vec[];
       $w2 = vec[];
       for ($i = 0; $i < (int)$m[2]; $i++) {
@@ -2892,6 +2896,7 @@ function run_config_cli(
     return null;
   }
 
+  $pipes as nonnull;
   fclose($pipes[0]);
   $output = stream_get_contents($pipes[1]);
   $output = trim($output);
@@ -3953,7 +3958,7 @@ function main(vec<string> $argv): int {
     while (count($children) && $printer_pid !== 0) {
       $status = null;
       $pid = pcntl_wait(inout $status);
-      if (pcntl_wifexited($status)) {
+      if (pcntl_wifexited($status as nonnull)) {
         $bad_end = pcntl_wexitstatus($status) !== 0;
       } else if (pcntl_wifsignaled($status)) {
         $bad_end = true;

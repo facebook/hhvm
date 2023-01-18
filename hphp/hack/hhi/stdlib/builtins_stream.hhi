@@ -152,7 +152,7 @@ function stream_resolve_include_path(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_select(
-  inout $read,
+  inout ?vec_or_dict<resource> $read,
   inout HH\FIXME\MISSING_PARAM_TYPE $write,
   inout HH\FIXME\MISSING_PARAM_TYPE $except,
   HH\FIXME\MISSING_PARAM_TYPE $vtv_sec,

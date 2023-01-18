@@ -49,7 +49,7 @@ function preg_match_with_error(
 function preg_match_with_matches(
   string $pattern,
   string $subject,
-  inout $matches,
+  inout dynamic $matches,
   int $flags = 0,
   int $offset = 0,
 )[]: int;

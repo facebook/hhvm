@@ -10,7 +10,6 @@ use ocamlrep::rc::RcOc;
 use crate::errors::*;
 use crate::message::Message;
 use crate::pos::Pos;
-use crate::pos_or_decl::PosOrDecl;
 use crate::quickfix::Edit;
 use crate::quickfix::QfPos;
 use crate::quickfix::Quickfix;
@@ -62,20 +61,18 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for UserError<PP, P> {
     fn cmp(&self, other: &Self) -> Ordering {
         let Self {
             code: self_code,
-            claim: self_claim,
+            claim: Message(self_pos, self_msg),
             reasons: self_reasons,
             quickfixes: _,
             is_fixmed: _,
         } = self;
         let Self {
             code: other_code,
-            claim: other_claim,
+            claim: Message(other_pos, other_msg),
             reasons: other_reasons,
             quickfixes: _,
             is_fixmed: _,
         } = other;
-        let Message(self_pos, self_msg) = self_claim;
-        let Message(other_pos, other_msg) = other_claim;
         // The primary sort order is by file of the claim (main message).
         self_pos
             .cmp_file(other_pos)
@@ -95,55 +92,6 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for UserError<PP, P> {
 impl<PP: Ord + FileOrd, P: Ord + FileOrd> PartialOrd for UserError<PP, P> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
-    }
-}
-
-impl UserError<Pos, PosOrDecl> {
-    /// Return a struct with a `std::fmt::Display` implementation that displays
-    /// the error in the Errors.Plain format produced by OCaml Errors.to_string.
-    pub fn display_plain(&self) -> DisplayPlain<'_> {
-        DisplayPlain(self)
-    }
-}
-
-pub struct DisplayPlain<'a>(&'a UserError<Pos, PosOrDecl>);
-
-impl<'a> std::fmt::Display for DisplayPlain<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let UserError {
-            code,
-            claim,
-            reasons,
-            quickfixes: _,
-            is_fixmed: _,
-        } = self.0;
-        let Message(pos, msg) = claim;
-        let code = DisplayErrorCode(*code);
-        write!(f, "{}\n{} ({})", pos.string(), msg, code)?;
-        for Message(pos, msg) in reasons.iter() {
-            write!(f, "\n  {}\n  {}", pos.string(), msg)?;
-        }
-        Ok(())
-    }
-}
-
-fn error_kind(error_code: ErrorCode) -> &'static str {
-    match error_code / 1000 {
-        1 => "Parsing",
-        2 => "Naming",
-        3 => "NastCheck",
-        4 => "Typing",
-        5 => "Lint",
-        8 => "Init",
-        _ => "Other",
-    }
-}
-
-struct DisplayErrorCode(ErrorCode);
-
-impl std::fmt::Display for DisplayErrorCode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}[{:04}]", error_kind(self.0), self.0)
     }
 }
 

@@ -15,6 +15,7 @@ use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use relative_path::Prefix;
 use relative_path::RelativePath;
+use relative_path::RelativePathCtx;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -414,21 +415,30 @@ impl Pos {
     /// Returns a struct implementing Display which produces the same format as
     /// `Pos.string` in OCaml.
     pub fn string(&self) -> PosString<'_> {
-        PosString(self)
+        PosString(self, None)
+    }
+
+    pub fn absolute<'a>(&'a self, ctx: &'a RelativePathCtx) -> PosString<'a> {
+        PosString(self, Some(ctx))
     }
 }
 
 /// This struct has an impl of Display which produces the same format as
 /// `Pos.string` in OCaml.
-pub struct PosString<'a>(&'a Pos);
+pub struct PosString<'a>(&'a Pos, Option<&'a RelativePathCtx>);
 
 impl std::fmt::Display for PosString<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let (line, start, end) = self.0.info_pos();
+        let Self(pos, ctx) = self;
+        let path = match ctx {
+            Some(ctx) => pos.filename().to_absolute(ctx),
+            None => pos.filename().path().to_owned(),
+        };
+        let (line, start, end) = pos.info_pos();
         write!(
             f,
             "File {:?}, line {}, characters {}-{}:",
-            self.0.filename().path(),
+            path.display(),
             line,
             start,
             end
@@ -483,6 +493,25 @@ mod tests {
                 (0, 0, 0)
             )
             .is_none(),
+        );
+    }
+
+    #[test]
+    fn test_pos_absolute() {
+        let ctx = RelativePathCtx {
+            dummy: PathBuf::from("dummy"),
+            ..Default::default()
+        };
+        assert_eq!(
+            Pos::make_none().absolute(&ctx).to_string(),
+            r#"File "dummy/", line 0, characters 0-0:"#
+        );
+        let path = RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a.php")));
+        assert_eq!(
+            Pos::from_lnum_bol_offset(path, (5, 100, 117), (5, 100, 142))
+                .absolute(&ctx)
+                .to_string(),
+            r#"File "dummy/a.php", line 5, characters 18-42:"#
         );
     }
 

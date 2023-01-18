@@ -1,0 +1,133 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  This tempalte defined the client type/functions for a thrift service.
+
+}}
+type {{service:go_name}}ChannelClient struct {
+    {{#service:extends?}}
+    {{#service:extends}}
+    // Inherited/extended service
+    *{{service:go_qualified_name}}ChannelClient
+    {{/service:extends}}
+    {{/service:extends?}}
+    ch thrift.RequestChannel
+}
+// Compile time interface enforcer
+var _ {{service:go_name}} = &{{service:go_name}}ChannelClient{}
+
+func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) *{{service:go_name}}ChannelClient {
+    return &{{service:go_name}}ChannelClient{
+        {{#service:extends?}}
+        {{#service:extends}}
+        {{service:go_name}}ChannelClient: {{service:go_package_alias_prefix}}New{{service:go_name}}ChannelClient(channel),
+        {{/service:extends}}
+        {{/service:extends?}}
+        ch: channel,
+    }
+}
+
+func (c *{{service:go_name}}ChannelClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *{{service:go_name}}ChannelClient) IsOpen() bool {
+    return c.ch.IsOpen()
+}
+
+func (c *{{service:go_name}}ChannelClient) Open() error {
+    return c.ch.Open()
+}
+
+{{! COMPAT: backwards compatibility - remove once all code is migrated to ChannelClient. }}
+// Deprecated: Use {{service:go_name}}ChannelClient instead.
+type {{service:go_name}}Client struct {
+    {{#service:extends?}}
+    {{#service:extends}}
+    // Inherited/extended service
+    *{{service:go_qualified_name}}Client
+    {{/service:extends}}
+    {{/service:extends?}}
+    chClient *{{service:go_name}}ChannelClient
+}
+// Compile time interface enforcer
+var _ {{service:go_name}}ClientInterface = &{{service:go_name}}Client{}
+
+{{! COMPAT: backwards compatibility - remove once all code is migrated to ChannelClient. }}
+// Deprecated: Use New{{service:go_name}}ChannelClient() instead.
+func New{{service:go_name}}Client(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *{{service:go_name}}Client {
+    return &{{service:go_name}}Client{
+        {{#service:extends?}}
+        {{#service:extends}}
+        {{service:go_name}}Client: {{service:go_package_alias_prefix}}New{{service:go_name}}Client(t, iprot, oprot),
+        {{/service:extends}}
+        {{/service:extends?}}
+        chClient: New{{service:go_name}}ChannelClient(
+            thrift.NewSerialChannel(iprot),
+        ),
+    }
+}
+
+func (c *{{service:go_name}}Client) Close() error {
+    return c.chClient.Close()
+}
+
+func (c *{{service:go_name}}Client) IsOpen() bool {
+    return c.chClient.IsOpen()
+}
+
+func (c *{{service:go_name}}Client) Open() error {
+    return c.chClient.Open()
+}
+
+// Deprecated: Use {{service:go_name}}ChannelClient instead.
+type {{service:go_name}}ThreadsafeClient = {{service:go_name}}Client
+
+// Deprecated: Use New{{service:go_name}}ChannelClient() instead.
+func New{{service:go_name}}ThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *{{service:go_name}}ThreadsafeClient {
+    return New{{service:go_name}}Client(t, iprot, oprot)
+}
+
+{{#service:functions}}
+{{#function:go_supported?}}
+
+func (c *{{service:go_name}}ChannelClient) {{> svc/func_signature}} {
+    in := &req{{service:go_name}}{{function:go_name}}{
+        {{#function:args}}
+        {{#field:type}}
+        {{field:go_name}}: {{field:go_arg_name}},
+        {{/field:type}}
+        {{/function:args}}
+    }
+    out := newResp{{service:go_name}}{{function:go_name}}()
+    err := c.ch.Call(ctx, "{{function:name}}", in, out)
+    return {{^function:void?}}out.Value, {{/function:void?}}err
+}
+
+func (c *{{service:go_name}}Client) {{> svc/func_signature_no_ctx}} {
+    return c.chClient.{{function:go_name}}(nil{{!
+      }}{{function:comma}}{{#function:args}}{{field:go_arg_name}}{{^last?}}, {{/last?}}{{/function:args}})
+}
+
+{{/function:go_supported?}}
+{{/service:functions}}
+
+{{#service:req_resp_structs}}
+{{> types/struct}}
+
+{{/service:req_resp_structs}}

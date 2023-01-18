@@ -1,0 +1,156 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  This tempalte defined the client type/functions for a thrift service.
+
+}}
+
+type {{service:go_name}}Processor struct {
+    {{#service:extends?}}
+    {{#service:extends}}
+    // Inherited/extended processor
+    *{{service:go_qualified_name}}Processor
+    {{/service:extends}}
+    {{/service:extends?}}
+    {{^service:extends?}}
+    processorMap       map[string]{{service:proc_func_interface}}
+    functionServiceMap map[string]string
+    handler            {{service:go_name}}
+    {{/service:extends?}}
+}
+// Compile time interface enforcer
+var _ thrift.Processor{{#service:use_context?}}Context{{/service:use_context?}} = &{{service:go_name}}Processor{}
+
+{{^service:extends?}}
+func (p *{{service:go_name}}Processor) AddToProcessorMap(key string, processor {{service:proc_func_interface}}) {
+    p.processorMap[key] = processor
+}
+
+func (p *{{service:go_name}}Processor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *{{service:go_name}}Processor) GetProcessorFunction{{#service:use_context?}}Context{{/service:use_context?}}{{!
+  }}(key string) (processor {{service:proc_func_interface}}, err error) {
+    if processor, ok := p.processorMap[key]; ok {
+        return processor, nil
+    }
+    return nil, nil
+}
+
+func (p *{{service:go_name}}Processor) ProcessorMap() map[string]{{service:proc_func_interface}} {
+    return p.processorMap
+}
+
+func (p *{{service:go_name}}Processor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
+}
+{{/service:extends?}}
+
+func New{{service:go_name}}Processor(handler {{service:go_name}}) *{{service:go_name}}Processor {
+    p := &{{service:go_name}}Processor{
+    {{#service:extends?}}
+    {{#service:extends}}
+        {{service:go_package_alias_prefix}}New{{service:go_name}}Processor(handler),
+    {{/service:extends}}
+    {{/service:extends?}}
+    {{^service:extends?}}
+        handler:            handler,
+        processorMap:       make(map[string]{{service:proc_func_interface}}),
+        functionServiceMap: make(map[string]string),
+    {{/service:extends?}}
+    }
+    {{#service:functions}}
+    {{#function:go_supported?}}
+    p.AddToProcessorMap("{{function:name}}", &{{> svc/proc_func_name}}{handler: handler})
+    {{/function:go_supported?}}
+    {{/service:functions}}
+    {{#service:functions}}
+    {{#function:go_supported?}}
+    p.AddToFunctionServiceMap("{{function:name}}", "{{service:go_name}}")
+    {{/function:go_supported?}}
+    {{/service:functions}}
+
+    return p
+}
+
+{{#service:functions}}
+{{#function:go_supported?}}
+
+type {{> svc/proc_func_name}} struct {
+    handler {{service:go_name}}
+}
+// Compile time interface enforcer
+var _ {{service:proc_func_interface}} = &{{> svc/proc_func_name}}{}
+
+func (p *{{> svc/proc_func_name}}) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReq{{service:go_name}}{{function:go_name}}()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    if _, ok := result.(thrift.ApplicationException); ok {
+        messageType = thrift.EXCEPTION
+    }
+    if err2 = oprot.WriteMessageBegin("{{function:go_name}}", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *{{> svc/proc_func_name}}) {{!
+  }}Run{{#service:use_context?}}Context{{/service:use_context?}}{{!
+  }}({{#service:use_context?}}ctx context.Context, {{/service:use_context?}}reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    {{#function:args?}}
+    args := reqStruct.(*req{{service:go_name}}{{function:go_name}})
+    {{/function:args?}}
+    result := newResp{{service:go_name}}{{function:go_name}}()
+    if {{^function:void?}}retval, {{/function:void?}}err := p.handler.{{function:go_name}}({{!
+        }}{{#service:use_context?}}ctx{{function:comma}}{{/service:use_context?}}{{!
+        }}{{#function:args}}{{!
+        }}args.{{field:go_name}}{{!
+        }}{{^last?}}, {{/last?}}{{!
+        }}{{/function:args}}{{!
+        }}); err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing {{function:go_name}}: " + err.Error(), err)
+        return x, x
+    }{{^function:void?}} else {
+        result.Value = retval
+    }
+    {{/function:void?}}
+
+    return result, nil
+}
+
+{{/function:go_supported?}}
+{{/service:functions}}

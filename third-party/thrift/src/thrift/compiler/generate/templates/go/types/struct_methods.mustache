@@ -1,0 +1,106 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  Creates the following methods for Thrift structs:
+  Get*, Set*, IsSet*, writeField, readField
+
+}}{{!
+
+  Get method.
+
+}}{{#struct:fields}}
+func (x *{{struct:go_name}}) Get{{field:go_name}}() {{> types/field_type}} {
+    return x.{{field:go_name}}
+}
+
+{{/struct:fields}}{{!
+
+  Set method.
+
+}}{{#struct:fields}}
+func (x *{{struct:go_name}}) Set{{field:go_name}}({{!
+  }}{{field:go_arg_name}} {{#field:type}}{{> common/type}}{{/field:type}}) *{{struct:go_name}} {
+    x.{{field:go_name}} = {{#field:pointer?}}&{{/field:pointer?}}{{field:go_arg_name}}
+    return x
+}
+
+{{/struct:fields}}{{!
+
+  IsSet method.
+
+}}{{#struct:fields}}
+{{#field:nilable?}}
+func (x *{{struct:go_name}}) IsSet{{field:go_name}}() bool {
+    return x.{{field:go_name}} != nil
+}
+{{/field:nilable?}}
+
+{{/struct:fields}}{{!
+
+  writeField method.
+
+}}{{#struct:fields}}
+func (x *{{struct:go_name}}) writeField{{field:key_str}}(p thrift.Protocol) error {  // {{field:go_name}}
+    {{#field:nilable?}}
+    if !x.IsSet{{field:go_name}}() {
+        return nil
+    }
+
+    {{/field:nilable?}}
+    if err := p.WriteFieldBegin("{{field:name}}", {{#field:type}}{{> common/ttype}}{{/field:type}}, {{field:key}}); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := {{#field:pointer?}}*{{/field:pointer?}}x.Get{{field:go_name}}()
+    {{#field:type}}
+    {{> codec/encode}}
+    {{/field:type}}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+{{/struct:fields}}{{!
+
+  readField method.
+
+}}{{#struct:fields}}
+func (x *{{struct:go_name}}) readField{{field:key_str}}(p thrift.Protocol) error {  // {{field:go_name}}
+    {{#field:type}}
+    {{> codec/decode}}
+    {{/field:type}}
+
+    x.Set{{field:go_name}}(result)
+    return nil
+}
+
+{{/struct:fields}}{{!
+
+Error
+}}{{#struct:exception?}}
+func (x *{{struct:go_name}}) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+func (x *{{struct:go_name}}) Error() string {
+    return x.String()
+}
+
+{{/struct:exception?}}

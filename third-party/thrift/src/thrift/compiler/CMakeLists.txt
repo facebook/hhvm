@@ -87,6 +87,7 @@ add_library(
   gen/cpp/type_resolver.cc
 
   lib/cpp2/util.cc
+  lib/go/util.cc
   lib/java/util.cc
 )
 target_link_libraries(

@@ -5190,9 +5190,14 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
     expand_expected_and_get_node ~strip_supportdyn:true env expected
   in
   match eexpected with
-  | _ when env.in_support_dynamic_type_method_check ->
-    (* When we're in a dynamic pass of a function (or closure) don't type inner closures
-     * at all, simply assign them a dynamic type. *)
+  | _
+  (* When we're in a dynamic pass of a function (or closure) don't type inner closures
+   * at all, simply assign them a dynamic type.
+   * Exception: we're checking an expression tree. Even in the dynamic pass,
+   * maketree_with_type_param needs the lambda to be typed precisely.
+   *)
+    when env.in_support_dynamic_type_method_check
+         && not (Env.is_in_expr_tree env) ->
     make_result env p Aast.Omitted (MakeType.dynamic (Reason.Rwitness p))
   | Some (_pos, _ur, supportdyn, ty, Tfun expected_ft) ->
     (* First check that arities match up *)

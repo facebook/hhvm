@@ -24,7 +24,7 @@ function msg_send(
   HH\FIXME\MISSING_PARAM_TYPE $message,
   bool $serialize,
   bool $blocking,
-  inout $errorcode,
+  inout ?int $errorcode,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function msg_receive(
@@ -35,7 +35,7 @@ function msg_receive(
   inout HH\FIXME\MISSING_PARAM_TYPE $message,
   bool $unserialize,
   int $flags,
-  inout $errorcode,
+  inout ?int $errorcode,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function msg_remove_queue(resource $queue): HH\FIXME\MISSING_RETURN_TYPE;

@@ -39,12 +39,12 @@ function apc_store_with_pure_sleep(
 <<__PHPStdLib>>
 function apc_fetch(
   HH\FIXME\MISSING_PARAM_TYPE $key,
-  inout $success,
+  inout ?bool $success,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_fetch_with_pure_wakeup(
   HH\FIXME\MISSING_PARAM_TYPE $key,
-  inout $success,
+  inout ?bool $success,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function apc_delete(
@@ -63,13 +63,13 @@ function apc_sma_info(bool $limited = false): HH\FIXME\MISSING_RETURN_TYPE {}
 function apc_inc(
   string $key,
   int $step,
-  inout $success,
+  inout ?bool $success,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_dec(
   string $key,
   int $step,
-  inout $success,
+  inout ?bool $success,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_cas(

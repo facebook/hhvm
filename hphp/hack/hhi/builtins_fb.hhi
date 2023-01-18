@@ -43,7 +43,7 @@ namespace {
   <<__PHPStdLib>>
   function fb_unserialize(
     HH\FIXME\MISSING_PARAM_TYPE $thing,
-    inout $success,
+    inout ?bool $success,
     int $options = 0,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
@@ -54,8 +54,8 @@ namespace {
   <<__PHPStdLib>>
   function fb_compact_unserialize(
     HH\FIXME\MISSING_PARAM_TYPE $thing,
-    inout $success,
-    inout $errcode,
+    inout ?bool $success,
+    inout ?int $errcode,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_intercept2(
@@ -69,7 +69,7 @@ namespace {
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_utf8ize(
-    inout $input,
+    inout string $input,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_utf8_strlen(string $input)[]: \HH\FIXME\MISSING_RETURN_TYPE;

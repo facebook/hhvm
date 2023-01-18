@@ -282,6 +282,11 @@ let load_saved_state
             |> Provider_context.get_tcopt
             |> TypecheckerOptions.use_manifold_cython_client
           in
+          let ide_should_use_hack_64_distc =
+            ctx
+            |> Provider_context.get_tcopt
+            |> TypecheckerOptions.ide_should_use_hack_64_distc
+          in
           let env : Saved_state_loader.env =
             {
               use_manifold_cython_client;
@@ -290,13 +295,58 @@ let load_saved_state
             }
           in
           let%lwt result =
-            State_loader_lwt.load
-              ~env
-              ~progress_callback:(fun _ -> ())
-              ~watchman_opts:
-                Saved_state_loader.Watchman_options.{ root; sockname = None }
-              ~ignore_hh_version
-              ~saved_state_type:Saved_state_loader.Naming_table
+            if ide_should_use_hack_64_distc then
+              let%lwt result =
+                State_loader_lwt.load
+                  ~env
+                  ~progress_callback:(fun _ -> ())
+                  ~watchman_opts:
+                    Saved_state_loader.Watchman_options.
+                      { root; sockname = None }
+                  ~ignore_hh_version
+                  ~saved_state_type:
+                    (Saved_state_loader.Naming_and_dep_table_distc
+                       { naming_sqlite = true })
+              in
+              match result with
+              | Ok
+                  {
+                    Saved_state_loader.main_artifacts;
+                    changed_files;
+                    manifold_path;
+                    corresponding_rev;
+                    mergebase_rev;
+                    is_cached;
+                    additional_info = _;
+                  } ->
+                let main_artifacts =
+                  {
+                    Saved_state_loader.Naming_table_info.naming_table_path =
+                      main_artifacts
+                        .Saved_state_loader.Naming_and_dep_table_info
+                         .naming_sqlite_table_path;
+                  }
+                in
+                Lwt.return
+                  (Ok
+                     {
+                       Saved_state_loader.main_artifacts;
+                       additional_info = ();
+                       manifold_path;
+                       changed_files;
+                       corresponding_rev;
+                       mergebase_rev;
+                       is_cached;
+                     })
+              | Error e -> Lwt.return (Error e)
+            else
+              State_loader_lwt.load
+                ~env
+                ~progress_callback:(fun _ -> ())
+                ~watchman_opts:
+                  Saved_state_loader.Watchman_options.{ root; sockname = None }
+                ~ignore_hh_version
+                ~saved_state_type:Saved_state_loader.Naming_table
           in
           Lwt.return result
       in

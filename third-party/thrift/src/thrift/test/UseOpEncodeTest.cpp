@@ -54,6 +54,7 @@ void testUseOpEncode() {
   original.nested_field().emplace()[1] = original.list_field().value();
   original.bar_field().emplace().list_field() = original.list_field().value();
 
+  auto adaptedBar = test::TemplatedTestAdapter::fromThrift(Bar{});
   auto adaptedInt = test::TemplatedTestAdapter::fromThrift(1);
   original.adapted_int_field() = adaptedInt;
   original.list_int_field().emplace().push_back(adaptedInt);
@@ -61,6 +62,8 @@ void testUseOpEncode() {
   original.buf_ref() = {folly::IOBuf::wrapBufferAsValue("hi", 2)};
   original.adapted_list_field()->value.push_back(adaptedFoo);
   original.inplace_adapted_list_field()->value.push_back(adaptedFoo);
+  original.nested_map_field().emplace()[adaptedFoo] = {
+      {adaptedBar, adaptedInt}};
 
   original.write(&writer);
 
@@ -83,6 +86,7 @@ void testUseOpEncode() {
   // Test whether field adapter is used
   EXPECT_EQ(result.adapted_list_field()->fieldId, 14);
   EXPECT_EQ(*result.adapted_list_field()->meta, "some metadata");
+  EXPECT_EQ(result.nested_map_field()[adaptedFoo][adaptedBar], adaptedInt);
 }
 
 TEST(UseOpEncodeTest, UseOpEncode) {

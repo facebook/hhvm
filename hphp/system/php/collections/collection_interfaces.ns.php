@@ -67,7 +67,7 @@ interface ConstVector<+Tv>
   // TODO(T121423772) This interface should get the methods seen in
   // `hphp/hack/hhi/collections/interfaces.hhi:ConstVector`
 
-  public function toVArray(): varray<Tv>;
+  public function toVArray()[]: varray<Tv>;
 
 }
 

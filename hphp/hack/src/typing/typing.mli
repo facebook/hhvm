@@ -85,7 +85,7 @@ val with_special_coeffects :
 val triple_to_pair :
   Typing_env_types.env * 'a * 'b -> Typing_env_types.env * ('a * 'b)
 
-val function_dynamically_callable :
+val check_function_dynamically_callable :
   this_class:Decl_provider.Class.t option ->
   Typing_env_types.env ->
   Aast_defs.sid option ->

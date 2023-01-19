@@ -102,18 +102,23 @@ let check_property_sound_for_dynamic_write
   ) else
     None
 
+let function_parameters_safe_for_dynamic ~this_class env params_decl_ty =
+  List.for_all params_decl_ty ~f:(fun dtyopt ->
+      match dtyopt with
+      | Some dty ->
+        (* If a parameter isn't enforceable, but is just typed as dynamic,
+           the method will still be safe to call via a receiver expression of type
+           dynamic. *)
+        Typing_enforceability.is_enforceable ~this_class env dty
+        || is_dynamic_decl env dty
+        (* If a parameter isn't typed (e.g. for a lambda), we might infer
+         * a non-SDT type for it and so need to check again under dynamic *)
+      | None -> false)
+
 let sound_dynamic_interface_check ~this_class env params_decl_ty ret_locl_ty =
   (* 1. check if all the parameters of the method are enforceable *)
   let enforceable_params =
-    List.for_all params_decl_ty ~f:(fun dtyopt ->
-        match dtyopt with
-        | Some dty ->
-          (* If a parameter isn't enforceable, but is just typed as dynamic,
-             the method will still be safe to call via a receiver expression of type
-             dynamic. *)
-          Typing_enforceability.is_enforceable ~this_class env dty
-          || is_dynamic_decl env dty
-        | None -> true)
+    function_parameters_safe_for_dynamic ~this_class env params_decl_ty
   in
   let coercible_return_type =
     (* 2. check if the return type is coercible *)
@@ -132,6 +137,7 @@ let sound_dynamic_interface_check_from_fun_ty ~this_class env fun_ty =
          ~ety_env:empty_expand_env
          ~this_class
          env
+         ~supportdyn:false
          ~hint_pos:Pos.none
          ~explicit:(Some fun_ty.ft_ret.et_type)
          ~default:None)

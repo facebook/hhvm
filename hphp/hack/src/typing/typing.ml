@@ -5037,81 +5037,65 @@ and class_const ?(incl_tc = false) env p (cid, mid) =
   in
   make_result env p (Aast.Class_const (ce, mid)) const_ty
 
-and function_dynamically_callable
-    ~this_class env f_name f params_decl_ty ret_locl_ty =
+(* Here the body of a function or lambda is typechecked again to ensure it is safe
+ * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
+ * The code below must be kept in sync with with the fun_def checks.
+ *)
+and check_function_dynamically_callable
+    ~this_class:_ env f_name f params_decl_ty ret_locl_ty =
   let env = { env with in_support_dynamic_type_method_check = true } in
-  (* If any of the parameters doesn't have an explicit hint, then we have
-   * to treat this is non-enforceable and therefore not dynamically callable
-   * based purely on the signature *)
-  let interface_check =
-    List.for_all f.f_params ~f:(fun param ->
-        Option.is_some (snd param.param_type_hint))
-    && Typing_dynamic.sound_dynamic_interface_check
-         ~this_class
-         env
-         params_decl_ty
-         ret_locl_ty
+  Typing_log.log_sd_pass env f.f_span;
+  let make_dynamic pos =
+    Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
   in
-  let function_body_check () =
-    Typing_log.log_sd_pass env f.f_span;
-    (* Here the body of the function is typechecked again to ensure it is safe
-     * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
-     * The code below must be kept in sync with with the fun_def checks.
-     *)
-    let make_dynamic pos =
-      Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
-    in
-    let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
-    let hint_pos =
-      match f.f_ret with
-      | (_, None) ->
-        (match f_name with
-        | Some (pos, _) ->
-          (* We don't have a return hint, highlight the function name instead. *)
-          pos
-        | None ->
-          (* Anonymos function, just use the position of the whole function. *)
-          f.f_span)
-      | (_, Some (pos, _)) -> pos
-    in
-    let dynamic_return_info =
-      Typing_return.make_info
-        hint_pos
-        f.f_fun_kind
-        f.f_user_attributes
-        env
-        (MakeType.unenforced dynamic_return_ty)
-    in
-    let (env, param_tys) =
-      Typing_param.make_param_local_tys
-        ~dynamic_mode:true
-        env
-        params_decl_ty
-        f.f_params
-    in
-    let (env, _) = bind_params env f.f_ctxs param_tys f.f_params in
-    let (pos, name) =
-      match f_name with
-      | Some n -> n
-      | None -> (f.f_span, ";anonymous")
-    in
-
-    let env = set_tyvars_variance_in_callable env dynamic_return_ty param_tys in
-    let disable =
-      Naming_attributes.mem
-        SN.UserAttributes.uaDisableTypecheckerInternal
-        f.f_user_attributes
-    in
-
-    Errors.try_
-      (fun () ->
-        let (_ : env * Tast.stmt list) =
-          fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind
-        in
-        ())
-      (fun error -> Errors.function_is_not_dynamically_callable name error)
+  let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
+  let hint_pos =
+    match f.f_ret with
+    | (_, None) ->
+      (match f_name with
+      | Some (pos, _) ->
+        (* We don't have a return hint, highlight the function name instead. *)
+        pos
+      | None ->
+        (* Anonymos function, just use the position of the whole function. *)
+        f.f_span)
+    | (_, Some (pos, _)) -> pos
   in
-  if not interface_check then function_body_check ()
+  let dynamic_return_info =
+    Typing_return.make_info
+      hint_pos
+      f.f_fun_kind
+      f.f_user_attributes
+      env
+      (MakeType.unenforced dynamic_return_ty)
+  in
+  let (env, param_tys) =
+    Typing_param.make_param_local_tys
+      ~dynamic_mode:true
+      env
+      params_decl_ty
+      f.f_params
+  in
+  let (env, _) = bind_params env f.f_ctxs param_tys f.f_params in
+  let (pos, name) =
+    match f_name with
+    | Some n -> n
+    | None -> (f.f_span, ";anonymous")
+  in
+  let env = set_tyvars_variance_in_callable env dynamic_return_ty param_tys in
+  let disable =
+    Naming_attributes.mem
+      SN.UserAttributes.uaDisableTypecheckerInternal
+      f.f_user_attributes
+  in
+
+  Errors.try_
+    (fun () ->
+      let (_ : env * Tast.stmt list) =
+        fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind
+      in
+      ())
+    (fun error -> Errors.function_is_not_dynamically_callable name error)
 
 and lambda ~is_anon ~closure_class_name ?expected p env f idl =
   (* This is the function type as declared on the lambda itself.
@@ -5736,12 +5720,33 @@ and closure_make
       (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
   in
   let this_class = Env.get_self_class env in
+  let params_decl_ty =
+    List.map decl_ft.ft_params ~f:(fun { fp_type = { et_type; _ }; _ } ->
+        match get_node et_type with
+        | Tany _ -> None
+        | _ -> Some et_type)
+  in
+  (* Do we need to re-check the body of the lambda under dynamic assumptions? *)
+  let sdt_dynamic_check_required =
+    support_dynamic_type
+    && not
+         (Typing_dynamic.function_parameters_safe_for_dynamic
+            ~this_class
+            env
+            params_decl_ty)
+  in
+  (* We wrap result type in supportdyn if it's explicit and dynamic check isn't required.
+   * This is an easy way to ensure that the return values support dynamic. *)
+  let wrap_return_supportdyn =
+    support_dynamic_type && not sdt_dynamic_check_required
+  in
   let (env, hret) =
     Typing_return.make_return_type
       ~ety_env
       ~this_class
       ~is_toplevel:false
       env
+      ~supportdyn:wrap_return_supportdyn
       ~hint_pos
       ~explicit:decl_ty
       ~default:ret_ty
@@ -5768,23 +5773,35 @@ and closure_make
     else
       Typing_return.fun_implicit_return env lambda_pos hret.et_type f.f_fun_kind
   in
+  (* For an SDT lambda that doesn't have a second check under dynamic assumptions,
+   * and with an inferred return type, we must check that the return type supports dynamic *)
+  let env =
+    if
+      support_dynamic_type
+      && (not sdt_dynamic_check_required)
+      && not wrap_return_supportdyn
+    then (
+      let (env, ty_err_opt) =
+        SubType.sub_type
+          ~coerce:(Some Typing_logic.CoerceToDynamic)
+          env
+          hret.et_type
+          (MakeType.dynamic
+             (Reason.Rsupport_dynamic_type (Pos_or_decl.of_raw_pos hint_pos)))
+        @@ Some (Typing_error.Reasons_callback.unify_error_at hint_pos)
+      in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
+      env
+    ) else
+      env
+  in
   let has_readonly = Env.get_readonly env in
   let env =
     Typing_env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
   in
   let (env, tparams) = List.map_env env f.f_tparams ~f:type_param in
-  let params_decl_ty =
-    List.map decl_ft.ft_params ~f:(fun { fp_type = { et_type; _ }; _ } ->
-        match get_node et_type with
-        | Tany _ -> None
-        | _ -> Some et_type)
-  in
-  if
-    TypecheckerOptions.enable_sound_dynamic
-      (Provider_context.get_tcopt (Env.get_ctx env))
-    && support_dynamic_type
-  then
-    function_dynamically_callable
+  if sdt_dynamic_check_required then
+    check_function_dynamically_callable
       ~this_class
       sound_dynamic_check_saved_env
       None
@@ -5902,7 +5919,7 @@ and expression_tree env p et =
         expr env et_virtualized_expr ~allow_awaitable:false)
   in
 
-  (* If the virtualized expression is pessimised, we should strip off the like type *)
+  (* If the virtualized expression is pessimised, we should strip off like types *)
   let ty_virtual = Typing_utils.strip_dynamic env ty_virtual in
 
   (* Given the runtime expression:

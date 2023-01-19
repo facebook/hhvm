@@ -132,6 +132,7 @@ let force_return_kind ~is_toplevel env p ety =
 let make_return_type
     ~ety_env
     ~this_class
+    ~supportdyn
     env
     ~hint_pos
     ~(explicit : decl_ty option)
@@ -142,6 +143,15 @@ let make_return_type
       match default with
       | None -> make_fresh_return_type env hint_pos
       | Some ty -> (env, ty)
+    in
+    let (env, ty) =
+      if supportdyn then
+        TUtils.make_supportdyn
+          (Reason.Rsupport_dynamic_type (Pos_or_decl.of_raw_pos hint_pos))
+          env
+          ty
+      else
+        (env, ty)
     in
     (env, MakeType.unenforced ty)
   | Some ty ->
@@ -223,6 +233,16 @@ let make_return_type
           Typing_phase.localize ~ety_env env dty
         in
         Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        (* If type doesn't already support dynamic then wrap it if supportdyn=true *)
+        let (env, et_type) =
+          if supportdyn then
+            TUtils.make_supportdyn
+              (Reason.Rsupport_dynamic_type (get_pos et_type))
+              env
+              et_type
+          else
+            (env, et_type)
+        in
         (* If return type t is enforced we permit values of type ~t to be returned *)
         let ety =
           Typing_utils.make_like_if_enforced env { et_enforced; et_type }
@@ -250,10 +270,23 @@ let make_return_type
     | _ -> localize ~wrap:false env ty)
 
 let make_return_type
-    ~ety_env ~this_class ?(is_toplevel = true) env ~hint_pos ~explicit ~default
-    =
+    ~ety_env
+    ~this_class
+    ?(is_toplevel = true)
+    ~supportdyn
+    env
+    ~hint_pos
+    ~explicit
+    ~default =
   let (env, ty) =
-    make_return_type ~ety_env ~this_class env ~hint_pos ~explicit ~default
+    make_return_type
+      ~ety_env
+      ~this_class
+      env
+      ~supportdyn
+      ~hint_pos
+      ~explicit
+      ~default
   in
   force_return_kind ~is_toplevel env hint_pos ty
 

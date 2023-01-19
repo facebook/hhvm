@@ -125,7 +125,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
   in
   if not interface_check then method_body_check ()
 
-let method_return env cls m ret_decl_ty =
+let method_return ~supportdyn env cls m ret_decl_ty =
   let hint_pos =
     match snd m.m_ret with
     | Some (hint_pos, _) -> hint_pos
@@ -146,6 +146,7 @@ let method_return env cls m ret_decl_ty =
       ~ety_env
       ~this_class:(Some cls)
       env
+      ~supportdyn
       ~hint_pos
       ~explicit:ret_decl_ty
       ~default:default_ty
@@ -228,8 +229,38 @@ let method_def ~is_disposable env cls m =
   let (ret_decl_ty, params_decl_ty) =
     merge_decl_header_with_hints ~params:m.m_params ~ret:m.m_ret decl_header env
   in
+  (* Is sound dynamic enabled, and the function not a constructor
+   * and marked <<__SupportDynamicType>> explicitly or implicitly? *)
+  let sdt_method =
+    TypecheckerOptions.enable_sound_dynamic
+      (Provider_context.get_tcopt (Env.get_ctx env))
+    && (not env.inside_constructor)
+    && Env.get_support_dynamic_type env
+  in
+  (* Does the body of the method need to be checked again under
+   * dynamic assumptions? Note that if there are generic parameters
+   * then the check would be done under different assumptions for
+   * generics from the normal check, so we play safe and require
+   * the second check.
+   *)
+  let sdt_dynamic_check_required =
+    sdt_method
+    && not
+         (List.is_empty (Cls.tparams cls)
+         && Typing_dynamic.function_parameters_safe_for_dynamic
+              ~this_class:(Some cls)
+              env
+              params_decl_ty)
+  in
   let env = Env.set_fn_kind env m.m_fun_kind in
-  let (env, return) = method_return env cls m ret_decl_ty in
+  let (env, return) =
+    method_return
+      ~supportdyn:(sdt_method && not sdt_dynamic_check_required)
+      env
+      cls
+      m
+      ret_decl_ty
+  in
   let sound_dynamic_check_saved_env = env in
   let (env, param_tys) =
     Typing_param.make_param_local_tys
@@ -283,17 +314,7 @@ let method_def ~is_disposable env cls m =
   let (env, e1) = Typing_solver.close_tyvars_and_solve env in
   let (env, e2) = Typing_solver.solve_all_unsolved_tyvars env in
 
-  (* if the enclosing class method is annotated with
-   * <<__SupportDynamicType>>, check that the method is dynamically callable.
-   * TODO: consider making private methods non-SDT. *)
-  let check_support_dynamic_type =
-    (not env.inside_constructor) && Env.get_support_dynamic_type env
-  in
-  if
-    TypecheckerOptions.enable_sound_dynamic
-      (Provider_context.get_tcopt (Env.get_ctx env))
-    && check_support_dynamic_type
-  then
+  if sdt_dynamic_check_required then
     method_dynamically_callable
       sound_dynamic_check_saved_env
       cls

@@ -84,6 +84,12 @@ let fun_def ctx fd :
     else
       env
   in
+  (* Is sound dynamic enabled, and the function marked <<__SupportDynamicType>> explicitly or implicitly? *)
+  let sdt_function =
+    TypecheckerOptions.enable_sound_dynamic
+      (Provider_context.get_tcopt (Env.get_ctx env))
+    && Env.get_support_dynamic_type env
+  in
   List.iter ~f:Errors.add_typing_error @@ Typing_type_wellformedness.fun_ env f;
   Typing_env.make_depend_on_current_module env;
   let (env, ty_err_opt) =
@@ -103,6 +109,15 @@ let fun_def ctx fd :
     | (_, None) -> fst fd.fd_name
     | (_, Some (pos, _)) -> pos
   in
+  (* Do we need to check the body of the function again, under dynamic assumptions? *)
+  let sdt_dynamic_check_required =
+    sdt_function
+    && not
+         (Typing_dynamic.function_parameters_safe_for_dynamic
+            ~this_class:None
+            env
+            params_decl_ty)
+  in
   let ety_env =
     empty_expand_env_with_on_error
       (Typing_error.Reasons_callback.invalid_type_hint hint_pos)
@@ -112,6 +127,7 @@ let fun_def ctx fd :
       ~ety_env
       ~this_class:None
       env
+      ~supportdyn:(sdt_function && not sdt_dynamic_check_required)
       ~hint_pos
       ~explicit:return_decl_ty
       ~default:None
@@ -173,20 +189,14 @@ let fun_def ctx fd :
   let (env, tparams) = List.map_env env f.f_tparams ~f:Typing.type_param in
   let (env, e1) = Typing_solver.close_tyvars_and_solve env in
   let (env, e2) = Typing_solver.solve_all_unsolved_tyvars env in
-
-  if
-    TypecheckerOptions.enable_sound_dynamic
-      (Provider_context.get_tcopt (Env.get_ctx env))
-    && Env.get_support_dynamic_type env
-  then
-    Typing.function_dynamically_callable
+  if sdt_dynamic_check_required then
+    Typing.check_function_dynamically_callable
       ~this_class:None
       sound_dynamic_check_saved_env
       (Some fd.fd_name)
       f
       params_decl_ty
       return_ty.et_type;
-
   let fun_ =
     {
       Aast.f_annotation = Env.save local_tpenv env;

@@ -32,6 +32,8 @@ val make_return_type :
   ety_env:Typing_defs.expand_env ->
   this_class:Decl_provider.Class.t option ->
   ?is_toplevel:bool ->
+  (* Wrap return type with supportdyn, used when checking SDT functions and methods *)
+  supportdyn:bool ->
   env ->
   (* Position of return type hint, or function name, if absent *)
   hint_pos:Ast_defs.pos ->

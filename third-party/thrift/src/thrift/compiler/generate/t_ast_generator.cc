@@ -152,6 +152,12 @@ void t_ast_generator::generate_program() {
             intern_value(std::make_unique<t_const_value>(inc))));
       }
     }
+
+    for (const auto& [lang, langNamespace] : program.namespaces()) {
+      info.namespaces()[lang] = static_cast<type::ValueId>(
+          intern_value(std::make_unique<t_const_value>(langNamespace)));
+    }
+
     // TODO: rest of sourceInfo
     ast.sources()[program_id] = std::move(info);
 

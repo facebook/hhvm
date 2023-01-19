@@ -45,6 +45,11 @@ struct SourceInfo {
    * Per-language include statements.
    */
   3: map<string, list<id.ValueId>> languageIncludes;
+
+  /**
+   * Per-language namespace.
+   */
+  4: map<string, id.ValueId> namespaces;
 }
 
 // A thrift schema that corresponds to one or more thrift files.

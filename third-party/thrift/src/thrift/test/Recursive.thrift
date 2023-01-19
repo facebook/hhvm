@@ -19,6 +19,8 @@ include "thrift/test/Recursive2.thrift"
 
 namespace cpp2 apache.thrift.test
 
+cpp_include "folly/sorted_vector_types.h"
+
 struct RecTree {
   1: list<RecTree> children;
   2: i16 item;

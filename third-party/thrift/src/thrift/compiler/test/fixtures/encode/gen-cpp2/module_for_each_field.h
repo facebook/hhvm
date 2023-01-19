@@ -30,6 +30,15 @@ struct ForEachField<::facebook::thrift::test::Bar> {
 };
 
 template <>
+struct ForEachField<::facebook::thrift::test::Baz> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).list_field_ref()...);
+    f(1, static_cast<T&&>(t).nested_list_field_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::facebook::thrift::test::OpEncodeStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

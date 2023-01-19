@@ -17,6 +17,8 @@ namespace thrift {
 namespace ident {
 struct field;
 struct list_field;
+struct list_field;
+struct nested_list_field;
 struct int_field;
 struct enum_field;
 struct foo_field;
@@ -38,6 +40,14 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field);
 #ifndef APACHE_THRIFT_ACCESSOR_list_field
 #define APACHE_THRIFT_ACCESSOR_list_field
 APACHE_THRIFT_DEFINE_ACCESSOR(list_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_list_field
+#define APACHE_THRIFT_ACCESSOR_list_field
+APACHE_THRIFT_DEFINE_ACCESSOR(list_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_nested_list_field
+#define APACHE_THRIFT_ACCESSOR_nested_list_field
+APACHE_THRIFT_DEFINE_ACCESSOR(nested_list_field);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_int_field
 #define APACHE_THRIFT_ACCESSOR_int_field
@@ -155,6 +165,7 @@ extern const _Enum_EnumMapFactory::ValuesToNamesMapType _Enum_VALUES_TO_NAMES;
 namespace facebook { namespace thrift { namespace test {
 class Foo;
 class Bar;
+class Baz;
 class OpEncodeStruct;
 }}} // facebook::thrift::test
 // END forward_declare
@@ -455,6 +466,204 @@ class Bar final  {
 
 template <class Protocol_>
 unsigned long Bar::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class Baz final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::list_field,
+    ::apache::thrift::ident::nested_list_field
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>,
+    ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = Baz;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  Baz() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  Baz(apache::thrift::FragileConstructor, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_field__arg, ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>> nested_list_field__arg);
+
+  Baz(Baz&&) noexcept;
+
+  Baz(const Baz& src);
+
+
+  Baz& operator=(Baz&&) noexcept;
+  Baz& operator=(const Baz& src);
+ private:
+  ::std::vector<::facebook::thrift::test::AdaptedFoo> __fbthrift_field_list_field;
+ private:
+  ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>> __fbthrift_field_nested_list_field;
+ private:
+  apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const Baz&) const;
+  bool operator<(const Baz&) const;
+
+  template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field_ref() const& {
+    return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field_ref() & {
+    return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field() const& {
+    return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field() & {
+    return {this->__fbthrift_field_list_field, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field() && {
+    return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> nested_list_field_ref() const& {
+    return {this->__fbthrift_field_nested_list_field, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> nested_list_field_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_nested_list_field), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> nested_list_field_ref() & {
+    return {this->__fbthrift_field_nested_list_field, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> nested_list_field_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_nested_list_field), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> nested_list_field() const& {
+    return {this->__fbthrift_field_nested_list_field, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> nested_list_field() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_nested_list_field), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> nested_list_field() & {
+    return {this->__fbthrift_field_nested_list_field, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> nested_list_field() && {
+    return {static_cast<T&&>(this->__fbthrift_field_nested_list_field), __isset.at(1), __isset.bit(1)};
+  }
+  const ::std::vector<::facebook::thrift::test::AdaptedFoo>& get_list_field() const&;
+  ::std::vector<::facebook::thrift::test::AdaptedFoo> get_list_field() &&;
+
+  template <typename T_Baz_list_field_struct_setter = ::std::vector<::facebook::thrift::test::AdaptedFoo>>
+  [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
+  ::std::vector<::facebook::thrift::test::AdaptedFoo>& set_list_field(T_Baz_list_field_struct_setter&& list_field_) {
+    list_field_ref() = std::forward<T_Baz_list_field_struct_setter>(list_field_);
+    return __fbthrift_field_list_field;
+  }
+  const ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>& get_nested_list_field() const&;
+  ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>> get_nested_list_field() &&;
+
+  template <typename T_Baz_nested_list_field_struct_setter = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  [[deprecated("Use `FOO.nested_list_field_ref() = BAR;` instead of `FOO.set_nested_list_field(BAR);`")]]
+  ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>& set_nested_list_field(T_Baz_nested_list_field_struct_setter&& nested_list_field_) {
+    nested_list_field_ref() = std::forward<T_Baz_nested_list_field_struct_setter>(nested_list_field_);
+    return __fbthrift_field_nested_list_field;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<Baz>;
+  friend void swap(Baz& a, Baz& b);
+};
+
+template <class Protocol_>
+unsigned long Baz::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

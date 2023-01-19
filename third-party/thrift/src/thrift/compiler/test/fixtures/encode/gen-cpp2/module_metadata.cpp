@@ -88,6 +88,31 @@ StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.Baz", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_Baz = res.first->second;
+  module_Baz.name() = "module.Baz";
+  module_Baz.is_union() = false;
+  static const auto* const
+  module_Baz_fields = new std::array<EncodedThriftField, 2>{{
+    {1, "list_field", false, std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::apache::thrift::test::TemplatedTestAdapter)")}}).cv_struct_ref(), })), std::vector<ThriftConstStruct>{}},
+    {2, "nested_list_field", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::apache::thrift::test::TemplatedTestAdapter)")}}).cv_struct_ref(), }))), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_Baz_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_Baz.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::OpEncodeStruct>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.OpEncodeStruct", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

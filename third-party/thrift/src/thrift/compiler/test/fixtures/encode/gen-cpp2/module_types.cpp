@@ -228,6 +228,127 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::facebook::thrift::test::Baz>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::Baz>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace facebook { namespace thrift { namespace test {
+
+const char* Baz::__fbthrift_thrift_uri() {
+  return "facebook.com/thrift/test/Baz";
+}
+
+const folly::StringPiece Baz::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<Baz>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+Baz::Baz(const Baz&) = default;
+Baz& Baz::operator=(const Baz&) = default;
+Baz::Baz(FOLLY_MAYBE_UNUSED Baz&& other) noexcept :
+    __fbthrift_field_list_field(std::move(other.__fbthrift_field_list_field)),
+    __fbthrift_field_nested_list_field(std::move(other.__fbthrift_field_nested_list_field)),
+    __isset(other.__isset) {
+}
+
+Baz& Baz::operator=(FOLLY_MAYBE_UNUSED Baz&& other) noexcept {
+    this->__fbthrift_field_list_field = std::move(other.__fbthrift_field_list_field);
+    this->__fbthrift_field_nested_list_field = std::move(other.__fbthrift_field_nested_list_field);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+Baz::Baz(apache::thrift::FragileConstructor, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_field__arg, ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>> nested_list_field__arg) :
+    __fbthrift_field_list_field(std::move(list_field__arg)),
+    __fbthrift_field_nested_list_field(std::move(nested_list_field__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+}
+
+
+void Baz::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_list_field.clear();
+  this->__fbthrift_field_nested_list_field.clear();
+  __isset = {};
+}
+
+void Baz::__fbthrift_clear_terse_fields() {
+}
+
+bool Baz::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool Baz::operator==(FOLLY_MAYBE_UNUSED const Baz& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.list_field_ref() == rhs.list_field_ref())) {
+    return false;
+  }
+  if (!(lhs.nested_list_field_ref() == rhs.nested_list_field_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool Baz::operator<(FOLLY_MAYBE_UNUSED const Baz& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::facebook::thrift::test::AdaptedFoo>& Baz::get_list_field() const& {
+  return __fbthrift_field_list_field;
+}
+
+::std::vector<::facebook::thrift::test::AdaptedFoo> Baz::get_list_field() && {
+  return std::move(__fbthrift_field_list_field);
+}
+
+const ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>& Baz::get_nested_list_field() const& {
+  return __fbthrift_field_nested_list_field;
+}
+
+::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>> Baz::get_nested_list_field() && {
+  return std::move(__fbthrift_field_nested_list_field);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED Baz& a, FOLLY_MAYBE_UNUSED Baz& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_list_field, b.__fbthrift_field_list_field);
+  swap(a.__fbthrift_field_nested_list_field, b.__fbthrift_field_nested_list_field);
+  swap(a.__isset, b.__isset);
+}
+
+template void Baz::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t Baz::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t Baz::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t Baz::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void Baz::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t Baz::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t Baz::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t Baz::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // facebook::thrift::test
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::facebook::thrift::test::OpEncodeStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,

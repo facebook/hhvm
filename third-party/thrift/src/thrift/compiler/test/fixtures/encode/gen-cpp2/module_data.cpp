@@ -65,6 +65,27 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::thrift::test::Baz>::fields_names = {{
+  "list_field",
+  "nested_list_field",
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::Baz>::fields_ids = {{
+  1,
+  2,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::test::Baz>::fields_types = {{
+  TType::T_LIST,
+  TType::T_LIST,
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::thrift::test::Baz>::storage_names = {{
+  "__fbthrift_field_list_field",
+  "__fbthrift_field_nested_list_field",
+}};
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::Baz>::isset_indexes = {{
+  0,
+  1,
+}};
+
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_names = {{
   "int_field",
   "enum_field",

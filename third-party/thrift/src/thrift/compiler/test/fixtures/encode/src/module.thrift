@@ -32,6 +32,11 @@ struct Bar {
   1: list<AdaptedFoo> list_field;
 }
 
+struct Baz {
+  1: list<AdaptedFoo> list_field;
+  2: list<list<AdaptedFoo>> nested_list_field;
+}
+
 enum Enum {
   first = 1,
   second = 2,

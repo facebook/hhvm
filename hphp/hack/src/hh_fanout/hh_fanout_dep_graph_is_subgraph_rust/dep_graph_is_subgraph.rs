@@ -8,7 +8,6 @@ use std::io;
 
 use depgraph_reader::Dep;
 use depgraph_reader::DepGraph;
-use depgraph_reader::DepGraphOpener;
 use log::info;
 use ocamlrep_ocamlpool::ocaml_ffi;
 
@@ -17,7 +16,7 @@ struct MissingEdge {
     dependency: Dep,
 }
 
-fn find_missing_edge(sub_graph: &DepGraph<'_>, super_graph: &DepGraph<'_>) -> Option<MissingEdge> {
+fn find_missing_edge(sub_graph: &DepGraph, super_graph: &DepGraph) -> Option<MissingEdge> {
     // TODO: This could be much faster.
     //
     // 1. Use rayon.
@@ -54,12 +53,10 @@ fn main(sub_graph: OsString, super_graph: OsString) -> io::Result<()> {
     );
 
     info!("Opening sub-graph at {:?}", sub_graph);
-    let sub_opener = DepGraphOpener::from_path(&sub_graph)?;
-    let sub_graph = sub_opener.open().unwrap();
+    let sub_graph = DepGraph::from_path(&sub_graph)?;
 
     info!("Opening super-graph at {:?}", super_graph);
-    let super_opener = DepGraphOpener::from_path(&super_graph)?;
-    let super_graph = super_opener.open().unwrap();
+    let super_graph = DepGraph::from_path(&super_graph)?;
 
     match find_missing_edge(&sub_graph, &super_graph) {
         None => println!("OK"),

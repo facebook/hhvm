@@ -13,7 +13,6 @@ use anyhow::Result;
 use clap::Parser;
 use depgraph_reader::Dep;
 use depgraph_reader::DepGraph;
-use depgraph_reader::DepGraphOpener;
 use hash::DashMap;
 use hash::HashSet;
 use rayon::prelude::*;
@@ -35,7 +34,7 @@ pub struct Opts {
 /// Report nodes and edges in dg1 but not in dg2.
 ///
 /// Returns the total number of differences found.
-fn compare(dg1: &DepGraph<'_>, dg2: &DepGraph<'_>, prefix: &str, nodes: &Nodes) -> usize {
+fn compare(dg1: &DepGraph, dg2: &DepGraph, prefix: &str, nodes: &Nodes) -> usize {
     let mut num_different = 0;
 
     // list nodes in dg1 that are not in dg2
@@ -79,16 +78,8 @@ fn compare(dg1: &DepGraph<'_>, dg2: &DepGraph<'_>, prefix: &str, nodes: &Nodes) 
 }
 
 pub(crate) fn run(opts: Opts) -> Result<usize> {
-    let opener =
-        DepGraphOpener::from_path(&opts.dg1).with_context(|| opts.dg1.display().to_string())?;
-    let dg1 = (opener.open())
-        .map_err(|s| anyhow::anyhow!("could not open: {s}"))
-        .with_context(|| opts.dg1.display().to_string())?;
-    let opener =
-        DepGraphOpener::from_path(&opts.dg2).with_context(|| opts.dg2.display().to_string())?;
-    let dg2 = (opener.open())
-        .map_err(|s| anyhow::anyhow!("could not open: {s}"))
-        .with_context(|| opts.dg2.display().to_string())?;
+    let dg1 = DepGraph::from_path(&opts.dg1).with_context(|| opts.dg1.display().to_string())?;
+    let dg2 = DepGraph::from_path(&opts.dg2).with_context(|| opts.dg2.display().to_string())?;
     let nodes = Nodes::default();
 
     if !opts.depmaps.is_empty() {

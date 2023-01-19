@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use depgraph_reader::Dep;
+use depgraph_reader::DepGraph;
 
 #[derive(Debug)]
 enum Error {
@@ -65,7 +66,7 @@ fn add_edges<T: Ord + Clone>(es: &mut Vec<(T, T)>, k: T, vs: &std::collections::
 /// Retrieve the adjacency list for `k` in `g`.
 ///
 /// This is the analog of `value_vertex` for 64-bit depgraphs.
-fn hashes(g: &depgraph_reader::DepGraph<'_>, k: Dep) -> std::collections::BTreeSet<Dep> {
+fn hashes(g: &DepGraph, k: Dep) -> std::collections::BTreeSet<Dep> {
     match g.hash_list_for(k) {
         None => std::collections::BTreeSet::new(),
         Some(hashes) => g.hash_list_hashes(hashes).collect(),
@@ -74,8 +75,7 @@ fn hashes(g: &depgraph_reader::DepGraph<'_>, k: Dep) -> std::collections::BTreeS
 
 /// Print an ASCII representation of a 64-bit depgraph to stdout.
 fn dump_depgraph64(file: &str, dependency_hash: Option<Dep>, hex_dump: bool) -> Result<()> {
-    let o = depgraph_reader::DepGraphOpener::from_path(file)?;
-    let dg = o.open().map_err(Error::DepgraphError)?;
+    let dg = DepGraph::from_path(file)?;
     let () = dg.validate_hash_lists().map_err(Error::DepgraphError)?;
 
     let print_edges_for_key = |key: Dep| {
@@ -107,11 +107,11 @@ fn comp_depgraph64(
     control_file: &str,
     hex_dump: bool,
 ) -> Result<()> {
-    let l_opener = depgraph_reader::DepGraphOpener::from_path(test_file)?;
-    let r_opener = depgraph_reader::DepGraphOpener::from_path(control_file)?;
     let mut num_edges_missing = 0;
+    let l_depgraph = DepGraph::from_path(test_file)?;
+    let r_depgraph = DepGraph::from_path(control_file)?;
+
     match (|| {
-        let (l_depgraph, r_depgraph) = (l_opener.open()?, r_opener.open()?);
         let ((), ()) = (
             l_depgraph.validate_hash_lists()?,
             r_depgraph.validate_hash_lists()?,

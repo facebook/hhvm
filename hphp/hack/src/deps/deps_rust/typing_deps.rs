@@ -9,7 +9,6 @@ use std::io::Write;
 use dep_graph_delta::DepGraphDelta;
 pub use depgraph_reader::Dep;
 use depgraph_reader::DepGraph;
-use depgraph_reader::DepGraphOpener;
 use hash::HashSet;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
@@ -32,20 +31,6 @@ fn _static_assert() {
     // forth between OCaml's native integer type and Rust's u64.
     let _ = [(); 0 - (!(8 == std::mem::size_of::<usize>()) as usize)];
 }
-
-/// A structure wrapping the memory-mapped dependency graph.
-/// Each worker will itself lazily (or eagerly upon request)
-/// open a memory-mapping to the dependency graph.
-///
-/// It's an option, because custom mode might be enabled without
-/// an existing saved-state.
-static DEP_GRAPH: OnceCell<Option<UnsafeDepGraph>> = OnceCell::new();
-
-/// The dependency graph delta.
-///
-/// Even though this is only used in a single-threaded context (from OCaml)
-/// we wrap it in a `Mutex` to ensure safety.
-static DEP_GRAPH_DELTA: OnceCell<Mutex<DepGraphDelta>> = OnceCell::new();
 
 /// Which dependency graph format are we using?
 #[derive(FromOcamlRep, ToOcamlRep)]
@@ -96,7 +81,7 @@ impl RawTypingDepsMode {
     /// # Safety
     ///
     /// Only safe if the OCaml pointer underlying `self` is still valid!
-    /// You should not use this method if the OCaml runtime has had a change
+    /// You should not use this method if the OCaml runtime has had a chance
     /// to run between obtaining `self` and calling this method!
     unsafe fn to_rust(self) -> Result<TypingDepsMode, FromError> {
         let value: Value<'_> = Value::from_bits(self.0);
@@ -104,55 +89,32 @@ impl RawTypingDepsMode {
     }
 }
 
-/// We wrap the dependency graph in an unsafe structure.
+/// Load the graph using the given mode.
 ///
-/// We need to do this, because we want to store both the
-/// mmap and the dependency graph that references it in a
-/// global variable.
-pub struct UnsafeDepGraph {
-    /// The opener contains the open mmap.
-    _do_not_reference_opener: DepGraphOpener,
-    /// The actual dependency graph references the opener above,
-    /// as such we must make sure that the dependency graph
-    /// does NOT outlive the opener.
+/// The mode is only used on the first call, to establish some global state, and
+/// then ignored for future calls.
+///
+/// # Safety
+///
+/// The pointer to the dependency graph mode should still be pointing
+/// to a valid OCaml object.
+fn load_global_dep_graph(mode: RawTypingDepsMode) -> Result<Option<&'static DepGraph>, String> {
+    /// A structure wrapping the memory-mapped dependency graph.
+    /// Each worker will itself lazily (or eagerly upon request)
+    /// open a memory-mapping to the dependency graph.
     ///
-    /// The lifetime on this is a LIE.
-    _do_not_reference_depgraph: DepGraph<'static>,
-}
+    /// It's an option, because custom mode might be enabled without
+    /// an existing saved-state.
+    static DEP_GRAPH: OnceCell<Option<DepGraph>> = OnceCell::new();
 
-impl UnsafeDepGraph {
-    pub fn new(opener: DepGraphOpener) -> Result<Self, String> {
-        let depgraph: DepGraph<'_> = opener.open()?;
+    let depgraph: &'static Option<DepGraph> =
+        DEP_GRAPH.get_or_try_init::<_, String>(move || {
+            // # Safety
+            //
+            // The pointer to the dependency graph mode should still be pointing
+            // to a valid OCaml object.
+            let mode = unsafe { mode.to_rust().unwrap() };
 
-        // Safety:
-        //
-        // We cast a bounded lifetime to a static lifetime. This is
-        // of course a lie. However, using the API of UnsafeDepGraph,
-        // we make sure that any reference to `depgraph` will not
-        // outlive the opener.
-        let depgraph: DepGraph<'static> = unsafe { std::mem::transmute(depgraph) };
-        Ok(Self {
-            _do_not_reference_opener: opener,
-            _do_not_reference_depgraph: depgraph,
-        })
-    }
-
-    /// Return a reference to the depgraph.
-    ///
-    /// The returned depgraph cannot outlive `self`.
-    pub fn depgraph(&self) -> &DepGraph<'_> {
-        &self._do_not_reference_depgraph
-    }
-
-    /// Load the graph using the given mode.
-    ///
-    /// # Safety
-    ///
-    /// The pointer to the dependency graph mode should still be pointing
-    /// to a valid OCaml object.
-    pub unsafe fn load(mode: RawTypingDepsMode) -> Result<Option<&'static UnsafeDepGraph>, String> {
-        let depgraph = DEP_GRAPH.get_or_try_init::<_, String>(|| {
-            let mode = mode.to_rust().unwrap();
             match mode {
                 TypingDepsMode::InMemoryMode(None)
                 | TypingDepsMode::SaveToDiskMode {
@@ -169,9 +131,8 @@ impl UnsafeDepGraph {
                     new_edges_dir: _,
                     human_readable_dep_map_dir: _,
                 } => {
-                    let opener = DepGraphOpener::from_path(&depgraph_fn)
+                    let depgraph = DepGraph::from_path(&depgraph_fn)
                         .map_err(|err| format!("could not open dep graph file: {:?}", err))?;
-                    let depgraph = UnsafeDepGraph::new(opener)?;
                     Ok(Some(depgraph))
                 }
                 TypingDepsMode::HhFanoutRustMode { hh_fanout: _ } => {
@@ -182,59 +143,63 @@ impl UnsafeDepGraph {
             }
         })?;
 
-        Ok(depgraph.as_ref())
-    }
+    Ok(depgraph.as_ref())
+}
 
-    /// Run the closure with the loaded dep graph. If the custom dep graph
-    /// mode was enabled without a saved-state, return the passed default
-    /// value.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the graph is not loaded, and custom mode was not enabled.
-    ///
-    /// Panics if the graph is not yet loaded, and opening
-    /// the graph results in an error.
-    ///
-    /// # Safety
-    ///
-    /// The pointer to the dependency graph mode should still be pointing
-    /// to a valid OCaml object.
-    pub unsafe fn with_default<F, R>(mode: RawTypingDepsMode, default: R, f: F) -> R
-    where
-        for<'a> F: FnOnce(&'a DepGraph<'a>) -> R,
-    {
-        match Self::load(mode).unwrap() {
-            None => default,
-            Some(g) => f(g.depgraph()),
-        }
-    }
+/// Run the closure with the loaded dep graph. If the custom dep graph
+/// mode was enabled without a saved-state, return the passed default
+/// value.
+///
+/// # Panics
+///
+/// Panics if the graph is not loaded, and custom mode was not enabled.
+///
+/// Panics if the graph is not yet loaded, and opening
+/// the graph results in an error.
+///
+/// # Safety
+///
+/// The pointer to the dependency graph mode should still be pointing
+/// to a valid OCaml object.
+pub fn dep_graph_with_default<F, R>(mode: RawTypingDepsMode, default: R, f: F) -> R
+where
+    F: FnOnce(&DepGraph) -> R,
+{
+    load_global_dep_graph(mode).unwrap().map_or(default, f)
+}
 
-    /// Run the closure with the loaded dep graph. If the custom dep graph
-    /// mode was enabled without a saved-state, the closure is run without
-    /// a dep graph.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the graph is not loaded, and custom mode was not enabled.
-    ///
-    /// Panics if the graph is not yet loaded, and opening
-    /// the graph results in an error.
-    ///
-    /// # Safety
-    ///
-    /// The pointer to the dependency graph mode should still be pointing
-    /// to a valid OCaml object.
-    pub unsafe fn with_option<F, R>(mode: RawTypingDepsMode, f: F) -> R
-    where
-        for<'a> F: FnOnce(Option<&'a DepGraph<'a>>) -> R,
-    {
-        let g = Self::load(mode).unwrap();
-        f(g.map(|g| g.depgraph()))
-    }
+/// Run the closure with the loaded dep graph. If the custom dep graph
+/// mode was enabled without a saved-state, the closure is run without
+/// a dep graph.
+///
+/// The mode is only used on the first call, to establish some global state, and
+/// then ignored for future calls.
+///
+/// # Panics
+///
+/// Panics if the graph is not loaded, and custom mode was not enabled.
+///
+/// Panics if the graph is not yet loaded, and opening
+/// the graph results in an error.
+///
+/// # Safety
+///
+/// The pointer to the dependency graph mode should still be pointing
+/// to a valid OCaml object.
+pub fn dep_graph_with_option<F, R>(mode: RawTypingDepsMode, f: F) -> R
+where
+    F: FnOnce(Option<&DepGraph>) -> R,
+{
+    f(load_global_dep_graph(mode).unwrap())
 }
 
 pub fn dep_graph_delta_with_cell<R>(f: impl FnOnce(&Mutex<DepGraphDelta>) -> R) -> R {
+    /// The dependency graph delta.
+    ///
+    /// Even though this is only used in a single-threaded context (from OCaml)
+    /// we wrap it in a `Mutex` to ensure safety.
+    static DEP_GRAPH_DELTA: OnceCell<Mutex<DepGraphDelta>> = OnceCell::new();
+
     f(DEP_GRAPH_DELTA.get_or_init(Default::default))
 }
 

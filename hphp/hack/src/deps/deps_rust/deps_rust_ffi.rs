@@ -13,9 +13,10 @@ use std::path::Path;
 use dep::Dep;
 use deps_rust::dep_graph_delta_with;
 use deps_rust::dep_graph_delta_with_mut;
+use deps_rust::dep_graph_with_default;
+use deps_rust::dep_graph_with_option;
 use deps_rust::DepSet;
 use deps_rust::RawTypingDepsMode;
-use deps_rust::UnsafeDepGraph;
 use deps_rust::VisitedSet;
 use hash::HashSet;
 use ocamlrep::Value;
@@ -148,11 +149,9 @@ ocaml_ffi! {
 ocaml_ffi! {
     fn hh_custom_dep_graph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
         // Safety: we don't call into OCaml again, so mode will remain valid.
-        unsafe {
-            UnsafeDepGraph::with_default(mode, false, move |g| {
-                g.dependent_dependency_edge_exists(dependent, dependency)
-            })
-        }
+        dep_graph_with_default(mode, false, move |g| {
+            g.dependent_dependency_edge_exists(dependent, dependency)
+        })
     }
 
     fn hh_custom_dep_graph_get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
@@ -165,27 +164,23 @@ ocaml_ffi! {
             }
         });
         // Safety: we don't call into OCaml again, so mode will remain valid.
-        unsafe {
-            UnsafeDepGraph::with_default(mode, (), |g| {
-                if let Some(hash_list) = g.hash_list_for(dep) {
-                    for hash in g.hash_list_hashes(hash_list) {
-                        deps.insert_mut(hash);
-                    }
+        dep_graph_with_default(mode, (), |g| {
+            if let Some(hash_list) = g.hash_list_for(dep) {
+                for hash in g.hash_list_hashes(hash_list) {
+                    deps.insert_mut(hash);
                 }
-            });
-        }
+            }
+        });
 
         Custom::from(DepSet::from(deps))
     }
 
     fn hh_custom_dep_graph_add_typing_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
         // Safety: we don't call into OCaml again, so mode will remain valid.
-        let mut s = unsafe {
-            UnsafeDepGraph::with_option(mode, |g| match g {
-                Some(g) => g.query_typing_deps_multi(&query),
-                None => query.clone(),
-            })
-        };
+        let mut s = dep_graph_with_option(mode, |g| match g {
+            Some(g) => g.query_typing_deps_multi(&query),
+            None => query.clone(),
+        });
         dep_graph_delta_with(|delta| {
             for dep in query.iter() {
                 if let Some(depies) = delta.get(*dep) {
@@ -276,29 +271,27 @@ ocaml_ffi! {
         let mut r = std::io::BufReader::new(f);
 
         // Safety: we don't call into OCaml again, so mode will remain valid.
-        unsafe {
-            UnsafeDepGraph::with_option(mode, move |g| {
-                dep_graph_delta_with_mut(|s| {
-                    let result = match g {
-                        Some(g) => {
-                            s.read_from(
-                                &mut r,
-                                |dependent, dependency| {
-                                    // Only add when it's not already in
-                                    // the graph!
-                                    !g.dependent_dependency_edge_exists(
-                                        dependent,
-                                        dependency,
-                                    )
-                                },
-                            )
-                        }
-                        None => s.read_from(&mut r, |_, _| true),
-                    };
-                    result.unwrap()
-                })
+        dep_graph_with_option(mode, move |g| {
+            dep_graph_delta_with_mut(|s| {
+                let result = match g {
+                    Some(g) => {
+                        s.read_from(
+                            &mut r,
+                            |dependent, dependency| {
+                                // Only add when it's not already in
+                                // the graph!
+                                !g.dependent_dependency_edge_exists(
+                                    dependent,
+                                    dependency,
+                                )
+                            },
+                        )
+                    }
+                    None => s.read_from(&mut r, |_, _| true),
+                };
+                result.unwrap()
             })
-        }
+        })
     }
 
     // Moves the source file to the destination directory.
@@ -345,7 +338,7 @@ unsafe fn get_extend_deps_visit(
             delta_deps.iter().copied().for_each(&mut handle_extends_dep);
         }
     });
-    UnsafeDepGraph::with_default(mode, (), |g| {
+    dep_graph_with_default(mode, (), |g| {
         if let Some(hash_list) = g.hash_list_for(extends_hash) {
             g.hash_list_hashes(hash_list)
                 .for_each(&mut handle_extends_dep);

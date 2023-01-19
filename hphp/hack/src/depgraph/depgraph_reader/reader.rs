@@ -5,68 +5,18 @@
 pub mod byteutils;
 pub mod compress;
 
+use std::fs::File;
 use std::iter::FusedIterator;
 use std::ops::Deref;
 use std::ops::Range;
 
 pub use dep::Dep;
+use memmap::Mmap;
 use rayon::iter::Either;
 use rayon::prelude::*;
 use rpds::HashTrieSet;
 
 use crate::compress::*;
-
-/// Use a `DepGraphOpener` to initialize a dependency graph from a file.
-///
-/// # Example
-///
-/// ```
-/// let opener = DepGraphOpener::from_path("/tmp/graph.bin").unwrap();
-/// let depgraph = opener.open().unwrap();
-/// ```
-pub struct DepGraphOpener {
-    mmap: memmap::Mmap,
-}
-
-impl DepGraphOpener {
-    /// Create a dependency graph opener given an open file handle.
-    ///
-    /// The file handle can be safely closed afterwards.
-    pub fn new(file: &std::fs::File) -> std::io::Result<Self> {
-        // Safety: we rely on the memmap library to provide safety.
-        let mmap = unsafe { memmap::Mmap::map(file) }?;
-        Ok(Self { mmap })
-    }
-
-    /// Create a dependency graph opener given a file path.
-    pub fn from_path<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<Self> {
-        let f = std::fs::OpenOptions::new().read(true).open(path)?;
-        Self::new(&f)
-    }
-
-    /// Return the underlying memory map.
-    pub fn mmap(&self) -> &memmap::Mmap {
-        &self.mmap
-    }
-
-    /// Open the dependency graph, or return an error description.
-    pub fn open(&self) -> Result<DepGraph<'_>, String> {
-        let in_bytes: &[u8] = &self.mmap;
-        if in_bytes.len() >= std::mem::size_of::<UncompressedHeader>() {
-            if let Ok(maybe_header) = bytemuck::try_from_bytes::<UncompressedHeader>(
-                &in_bytes[..std::mem::size_of::<UncompressedHeader>()],
-            ) {
-                // It's technically possible for the first four bytes of an old file
-                // to randomly be "HHDG", but the version won't look like a small number.
-                // By the time we get to a large version number we'll have deleted OldDepGraph.
-                if maybe_header.magic == UncompressedHeader::MAGIC && maybe_header.version < 100 {
-                    return Ok(DepGraph::New(NewDepGraph::new(in_bytes)?));
-                }
-            }
-        }
-        Ok(DepGraph::Old(OldDepGraph::from_mmap(&self.mmap)?))
-    }
-}
 
 /// An opaque token that identifies a hash list.
 ///
@@ -75,7 +25,7 @@ impl DepGraphOpener {
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct HashListId(u32);
 
-pub trait DepGraphTrait<'bytes> {
+pub trait DepGraphTrait {
     /// Make sure the database is not corrupt.
     ///
     /// If you got this far, the indexer and lookup table were
@@ -91,7 +41,7 @@ pub trait DepGraphTrait<'bytes> {
     ///
     /// Panics if the file is corrupt. Use `validate_hash_lists` when
     /// initializing the reader to avoid these panics.
-    fn hash_list_for(&self, hash: Dep) -> Option<HashList<'bytes>> {
+    fn hash_list_for(&self, hash: Dep) -> Option<HashList<'_>> {
         self.hash_list_id_for_dep(hash)
             .map(|id| self.hash_list_for_id(id))
     }
@@ -100,12 +50,12 @@ pub trait DepGraphTrait<'bytes> {
 
     fn hash_list_id_for_index(&self, index: u32) -> Option<HashListId>;
 
-    fn hash_list_for_id(&self, id: HashListId) -> HashList<'bytes>;
+    fn hash_list_for_id(&self, id: HashListId) -> HashList<'_>;
 
     /// Query the hash list for a given hash index.
     ///
     /// Returns `None` if there is no hash list related to the hash.
-    fn hash_list_for_index(&self, index: u32) -> Option<HashList<'bytes>> {
+    fn hash_list_for_index(&self, index: u32) -> Option<HashList<'_>> {
         self.hash_list_id_for_index(index)
             .map(|id| self.hash_list_for_id(id))
     }
@@ -115,17 +65,50 @@ pub trait DepGraphTrait<'bytes> {
     fn contains(&self, dep: Dep) -> bool;
 }
 
-pub enum DepGraph<'bytes> {
-    New(NewDepGraph<'bytes>),
-    Old(OldDepGraph<'bytes>),
+pub enum DepGraph {
+    New(NewDepGraph),
+    Old(OldDepGraph),
 }
 
-impl<'bytes> DepGraph<'bytes> {
+impl DepGraph {
+    /// Open the dependency graph, or return an error description.
+    pub fn from_mmap(mmap: Mmap) -> Result<DepGraph, String> {
+        let in_bytes: &[u8] = mmap.as_ref();
+        if in_bytes.len() >= std::mem::size_of::<UncompressedHeader>() {
+            if let Ok(maybe_header) = bytemuck::try_from_bytes::<UncompressedHeader>(
+                &in_bytes[..std::mem::size_of::<UncompressedHeader>()],
+            ) {
+                // It's technically possible for the first four bytes of an old file
+                // to randomly be "HHDG", but the version won't look like a small number.
+                // By the time we get to a large version number we'll have deleted OldDepGraph.
+                if maybe_header.magic == UncompressedHeader::MAGIC && maybe_header.version < 100 {
+                    return Ok(DepGraph::New(NewDepGraph::from_mmap(mmap)?));
+                }
+            }
+        }
+        Ok(DepGraph::Old(OldDepGraph::from_mmap(mmap)?))
+    }
+
+    /// Create a dependency graph opener given an open file handle.
+    ///
+    /// The file handle can be safely closed afterwards.
+    pub fn from_file(file: &std::fs::File) -> std::io::Result<Self> {
+        // Safety: we rely on the memmap library to provide safety.
+        let mmap = unsafe { Mmap::map(file) }?;
+        Self::from_mmap(mmap).map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
+    }
+
+    /// Create a dependency graph opener given a file path.
+    pub fn from_path<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<Self> {
+        let f = File::open(path)?;
+        Self::from_file(&f)
+    }
+
     /// Return an iterator over all hashes in a hash list.
-    pub fn hash_list_hashes(
-        &self,
-        hash_list: HashList<'bytes>,
-    ) -> impl Iterator<Item = Dep> + 'bytes {
+    pub fn hash_list_hashes<'a>(
+        &'a self,
+        hash_list: HashList<'a>,
+    ) -> impl Iterator<Item = Dep> + 'a {
         match (self, hash_list) {
             (DepGraph::New(dg), HashList::New(h)) => Either::Left(dg.hash_list_hashes(h)),
             (DepGraph::Old(dg), HashList::Old(h)) => Either::Right(dg.hash_list_hashes(h)),
@@ -169,8 +152,8 @@ impl<'bytes> DepGraph<'bytes> {
     }
 }
 
-impl<'bytes> Deref for DepGraph<'bytes> {
-    type Target = dyn DepGraphTrait<'bytes> + 'bytes + Send + Sync;
+impl Deref for DepGraph {
+    type Target = dyn DepGraphTrait + Send + Sync;
 
     fn deref(&self) -> &Self::Target {
         match self {
@@ -180,38 +163,46 @@ impl<'bytes> Deref for DepGraph<'bytes> {
     }
 }
 
-/// An open dependency graph.
-///
-/// The lifetime parameter represents the lifetime of the underlying
-/// raw byte array.
-pub struct NewDepGraph<'bytes> {
+/// An memory-mapped dependency graph.
+#[ouroboros::self_referencing]
+pub struct NewDepGraph {
+    /// The file holding the storage for this graph. Boxed for ouroboros.
+    storage: Box<Mmap>,
+
     /// All Deps in the graph. These are NOT sorted -- use `deps_order` if you need sorting.
-    deps: &'bytes [Dep],
+    #[borrows(storage)]
+    deps: &'this [Dep],
 
     /// Indices into `deps` providing sorted order, e.g. deps[deps_order[0]] is first.
     /// One entry per entry in `deps`.
-    deps_order: &'bytes [u32],
+    #[borrows(storage)]
+    deps_order: &'this [u32],
 
     /// Indices in `adjacency_lists` for the serialized edge list for the corresponding `deps`
     /// entry. One entry per entry in `deps`.
     ///
-    /// Each entry in this array must be left shifted by `adjacency_list_alignment_shift` before
-    /// being used as an index. This is to support `adjacency_lists` larger than 4GB.
-    unshifted_edge_list_offset: &'bytes [u32],
+    /// Each entry in this array must be left shifted by `adjacency_list_alignment_shift`
+    /// before being used as an index. This is to support `edge_lists` larger than 4GB.
+    #[borrows(storage)]
+    unshifted_edge_list_offset: &'this [u32],
 
     /// Amount to left-shift unshifted_edge_list_offset to get a byte index into `adjacency_lists`.
     adjacency_list_alignment_shift: u8,
 
     /// Individually serialized edge lists. `NewHashList` knows how to deserialize.
-    adjacency_lists: &'bytes [u8],
+    #[borrows(storage)]
+    adjacency_lists: &'this [u8],
 }
 
-impl<'bytes> NewDepGraph<'bytes> {
-    /// Initialize a dependency graph using the given byte array (which should be aligned
-    /// at least mod 8, as in a memory-mapped file).
-    fn new(data: &'bytes [u8]) -> Result<Self, String> {
-        let (header_bytes, rest) = data.split_at(std::mem::size_of::<UncompressedHeader>());
+impl NewDepGraph {
+    fn from_mmap(mmap: Mmap) -> Result<Self, String> {
+        let data: &[u8] = mmap.as_ref();
+        let hlen = std::mem::size_of::<UncompressedHeader>();
+        if data.len() < hlen {
+            return Err("Missing header".to_string());
+        }
 
+        let header_bytes = &data[..hlen];
         let header: &UncompressedHeader =
             bytemuck::try_from_bytes(header_bytes).map_err(|e| format!("{}", e))?;
         if header.magic != UncompressedHeader::MAGIC {
@@ -227,31 +218,26 @@ impl<'bytes> NewDepGraph<'bytes> {
         }
 
         let num_deps = header.num_deps as usize;
+        let adjacency_list_alignment_shift = header.adjacency_list_alignment_shift;
 
-        // Partition the file into its sections.
-        let (deps_bytes, rest) = rest.split_at(num_deps * 8);
-        let (deps_order_bytes, rest) = rest.split_at(num_deps * 4);
-        let (unshifted_edge_list_offset_bytes, adjacency_lists) = rest.split_at(num_deps * 4);
-
-        // Widen some of the byte arrays to larger types.
-        let deps: &[Dep] = bytemuck::cast_slice(deps_bytes);
-        let deps_order: &[u32] = bytemuck::cast_slice(deps_order_bytes);
-        let unshifted_edge_list_offset: &[u32] =
-            bytemuck::cast_slice(unshifted_edge_list_offset_bytes);
-
-        let result = Self {
-            deps,
-            deps_order,
-            unshifted_edge_list_offset,
-            adjacency_list_alignment_shift: header.adjacency_list_alignment_shift,
-            adjacency_lists,
+        let builder = NewDepGraphBuilder {
+            storage: Box::new(mmap),
+            deps_builder: |mmap: &Mmap| bytemuck::cast_slice(&mmap[hlen..hlen + num_deps * 8]),
+            deps_order_builder: |mmap: &Mmap| {
+                bytemuck::cast_slice(&mmap[hlen + num_deps * 8..hlen + num_deps * 12])
+            },
+            unshifted_edge_list_offset_builder: |mmap: &Mmap| {
+                bytemuck::cast_slice(&mmap[hlen + num_deps * 12..hlen + num_deps * 16])
+            },
+            adjacency_list_alignment_shift,
+            adjacency_lists_builder: |mmap: &Mmap| &mmap[hlen + num_deps * 16..],
         };
 
-        Ok(result)
+        Ok(builder.build())
     }
 
     /// Return `true` iff the given hash list contains the index for the given hash.
-    fn hash_list_contains(&self, hash_list: HashList<'bytes>, dep: Dep) -> bool {
+    fn hash_list_contains(&self, hash_list: HashList<'_>, dep: Dep) -> bool {
         if let Some(index) = self.get_index(dep) {
             hash_list.has_index(index)
         } else {
@@ -260,43 +246,51 @@ impl<'bytes> NewDepGraph<'bytes> {
     }
 
     /// Implementation helper for `DepGraph::hash_list_hashes`.
-    fn hash_list_hashes(
-        &self,
-        hash_list: NewHashList<'bytes>,
-    ) -> impl Iterator<Item = Dep> + 'bytes {
+    fn hash_list_hashes<'a>(
+        &'a self,
+        hash_list: NewHashList<'a>,
+    ) -> impl Iterator<Item = Dep> + 'a {
         hash_list
             .hash_indices()
-            .map(|index| self.deps[index as usize])
+            .map(|index| self.borrow_deps()[index as usize])
     }
 
     /// Returns the internal, physical order for a Dep, or None if not found.
     pub fn get_index(&self, dep: Dep) -> Option<u32> {
-        self.deps_order
-            .binary_search_by_key(&dep, |&i| self.deps[i as usize])
-            .map_or(None, |x| Some(self.deps_order[x]))
+        let deps = self.borrow_deps();
+        let deps_order = self.borrow_deps_order();
+        deps_order
+            .binary_search_by_key(&dep, move |&i| deps[i as usize])
+            .map_or(None, move |x| Some(deps_order[x]))
     }
 
     /// All unique dependency hashes in the graph, in sorted order.
     pub fn all_hashes(
         &self,
     ) -> impl DoubleEndedIterator<Item = Dep> + ExactSizeIterator + FusedIterator + '_ {
-        self.deps_order.iter().map(|&i| self.deps[i as usize])
+        let deps = self.borrow_deps();
+        self.borrow_deps_order()
+            .iter()
+            .map(move |&i| deps[i as usize])
     }
 
     /// All unique dependency hashes in the graph, in sorted order, in parallel.
     pub fn par_all_hashes(&self) -> impl IndexedParallelIterator<Item = Dep> + '_ {
-        self.deps_order.par_iter().map(|&i| self.deps[i as usize])
+        let deps = self.borrow_deps();
+        self.borrow_deps_order()
+            .par_iter()
+            .map(move |&i| deps[i as usize])
     }
 
     /// Returns all hashes in internal node order. More efficient than `par_all_hashes`.
     pub fn par_all_hashes_in_physical_order(
         &self,
     ) -> impl IndexedParallelIterator<Item = Dep> + '_ {
-        self.deps.par_iter().copied()
+        self.borrow_deps().par_iter().copied()
     }
 }
 
-impl<'bytes> DepGraphTrait<'bytes> for NewDepGraph<'bytes> {
+impl DepGraphTrait for NewDepGraph {
     fn validate_hash_lists(&self) -> Result<(), String> {
         // TODO: What to check here?
         Ok(())
@@ -311,13 +305,13 @@ impl<'bytes> DepGraphTrait<'bytes> for NewDepGraph<'bytes> {
         // It would be crazy to be asking about some random unknown index.
         // Once OldDepGraph is gone, make this infallible.
 
-        let id = HashListId(self.unshifted_edge_list_offset[index as usize]);
+        let id = HashListId(self.borrow_unshifted_edge_list_offset()[index as usize]);
         Some(id)
     }
 
-    fn hash_list_for_id(&self, id: HashListId) -> HashList<'bytes> {
-        let start = (id.0 as usize) << self.adjacency_list_alignment_shift;
-        let bytes = &self.adjacency_lists[start..];
+    fn hash_list_for_id(&self, id: HashListId) -> HashList<'_> {
+        let start = (id.0 as usize) << self.borrow_adjacency_list_alignment_shift();
+        let bytes = &self.borrow_adjacency_lists()[start..];
         HashList::New(NewHashList::new(bytes))
     }
 
@@ -334,41 +328,72 @@ impl<'bytes> DepGraphTrait<'bytes> for NewDepGraph<'bytes> {
     }
 }
 
-/// An open dependency graph.
-///
-/// The lifetime parameter represents the lifetime of the underlying
-/// raw byte array.
-pub struct OldDepGraph<'bytes> {
-    data: &'bytes [u8],
+/// An memory-mapped dependency graph.
+#[ouroboros::self_referencing]
+pub struct OldDepGraph {
+    /// The file holding the storage for this graph. Boxed for ouroboros.
+    storage: Box<Mmap>,
 
-    indexer: Indexer<'bytes>,
-    lookup_table: LookupTable<'bytes>,
+    #[borrows(storage)]
+    data: &'this [u8],
+
+    #[borrows(storage)]
+    #[covariant]
+    indexer: Indexer<'this>,
+
+    #[borrows(storage)]
+    #[covariant]
+    lookup_table: LookupTable<'this>,
 }
 
-impl<'bytes> OldDepGraph<'bytes> {
+impl OldDepGraph {
     /// Initialize a dependency graph using the byte array
     /// from a memory map.
-    fn from_mmap(mmap: &'bytes memmap::Mmap) -> Result<Self, String> {
-        let bytes = mmap.deref();
-        Self::new(bytes)
-    }
+    fn from_mmap(mmap: Mmap) -> Result<Self, String> {
+        let data = mmap.deref();
 
-    /// Initialize a dependency graph using the given byte array.
-    fn new(data: &'bytes [u8]) -> Result<Self, String> {
-        let header = OldHeader::new(data)?;
+        if data.len() < 4 * 2 {
+            return Err("not enough bytes to read header".to_string());
+        }
 
-        let s = Self {
-            data,
+        // Parse the header of the structure.
+        //
+        // Contains the offset to the indexer and the lookup table.
+        //
+        // Memory layout:
+        //
+        // ```txt
+        //           32 bits
+        //  +-----------------------+
+        //  |    indexer offset     |
+        //  +-----------------------+
+        //  |  lookup table offset  |
+        //  +-----------------------+
+        // ```
+        let indexer_offset = byteutils::read_u32_ne(data);
+        let lookup_table_offset = byteutils::read_u32_ne(&data[4..]);
 
-            indexer: header.indexer,
-            lookup_table: header.lookup_table,
+        let indexer_offset: usize = indexer_offset.try_into().unwrap();
+        let lookup_table_offset: usize = lookup_table_offset.try_into().unwrap();
+
+        let indexer_bytes = byteutils::subslice(data, indexer_offset.., "indexer_bytes")?;
+        let num_hashes = Indexer::new(indexer_bytes)?.len();
+
+        let builder = OldDepGraphBuilder {
+            storage: Box::new(mmap),
+            data_builder: |mmap: &Mmap| mmap.as_ref(),
+            indexer_builder: |mmap: &Mmap| Indexer::new(&mmap.as_ref()[indexer_offset..]).unwrap(),
+            lookup_table_builder: |mmap: &Mmap| {
+                LookupTable::new(&mmap.as_ref()[lookup_table_offset..], num_hashes).unwrap()
+            },
         };
-        Ok(s)
+
+        Ok(builder.build())
     }
 
     /// Return `true` iff the given hash list contains the index for the given hash.
-    fn hash_list_contains(&self, hash_list: HashList<'bytes>, hash: Dep) -> bool {
-        if let Some(index) = self.indexer.find(hash.into()) {
+    fn hash_list_contains(&self, hash_list: HashList<'_>, hash: Dep) -> bool {
+        if let Some(index) = self.borrow_indexer().find(hash.into()) {
             hash_list.has_index(index)
         } else {
             false
@@ -376,35 +401,41 @@ impl<'bytes> OldDepGraph<'bytes> {
     }
 
     /// Implementation helper for `DepGraph::hash_list_hashes`.
-    fn hash_list_hashes(
-        &self,
-        hash_list: OldHashList<'bytes>,
-    ) -> impl Iterator<Item = Dep> + ExactSizeIterator + FusedIterator + 'bytes {
+    fn hash_list_hashes<'a>(
+        &'a self,
+        hash_list: OldHashList<'a>,
+    ) -> impl Iterator<Item = Dep> + ExactSizeIterator + FusedIterator + 'a {
+        let indexer = self.borrow_indexer();
         hash_list
             .indices
             .iter()
-            .map(|&index| Dep::new(self.indexer.hashes[index as usize]))
+            .map(move |&index| Dep::new(indexer.hashes[index as usize]))
     }
 
     /// All unique dependency hashes in the graph.
     fn all_hashes(&self) -> impl DoubleEndedIterator<Item = Dep> + ExactSizeIterator + '_ {
-        self.indexer.hashes.iter().copied().map(Dep::new)
+        self.borrow_indexer().hashes.iter().copied().map(Dep::new)
     }
 
     /// All unique dependency hashes in the graph, in parallel.
     fn par_all_hashes(&self) -> impl IndexedParallelIterator<Item = Dep> + '_ {
-        self.indexer.hashes.par_iter().copied().map(Dep::new)
+        self.borrow_indexer()
+            .hashes
+            .par_iter()
+            .copied()
+            .map(Dep::new)
     }
 }
 
-impl<'bytes> DepGraphTrait<'bytes> for OldDepGraph<'bytes> {
+impl DepGraphTrait for OldDepGraph {
     fn validate_hash_lists(&self) -> Result<(), String> {
-        let len: usize = self.indexer.len();
+        let len: usize = self.borrow_indexer().len();
+        let lookup_table = self.borrow_lookup_table();
         for index in 0..len {
-            match self.lookup_table.get(index as u32) {
+            match lookup_table.get(index as u32) {
                 Some(list_offset) => {
                     let data = byteutils::subslice(
-                        self.data,
+                        self.borrow_data(),
                         list_offset as usize..,
                         "hash list data during validation",
                     )?;
@@ -424,7 +455,7 @@ impl<'bytes> DepGraphTrait<'bytes> for OldDepGraph<'bytes> {
     ///
     /// Panics if the file is corrupt. Use `validate_hash_lists` when
     /// initializing the reader to avoid these panics.
-    fn hash_list_for(&self, hash: Dep) -> Option<HashList<'bytes>> {
+    fn hash_list_for(&self, hash: Dep) -> Option<HashList<'_>> {
         self.hash_list_id_for_dep(hash)
             .map(|id| self.hash_list_for_id(id))
     }
@@ -434,18 +465,18 @@ impl<'bytes> DepGraphTrait<'bytes> for OldDepGraph<'bytes> {
     /// Unless you are interested in `HashList` identity, you want to call
     /// `hash_list_for` instead.
     fn hash_list_id_for_dep(&self, hash: Dep) -> Option<HashListId> {
-        let index = self.indexer.find(hash.into())?;
+        let index = self.borrow_indexer().find(hash.into())?;
         self.hash_list_id_for_index(index)
     }
 
     fn hash_list_id_for_index(&self, index: u32) -> Option<HashListId> {
-        Some(HashListId(self.lookup_table.get(index)?))
+        Some(HashListId(self.borrow_lookup_table().get(index)?))
     }
 
     /// Maps a `HashListId` to its `HashList`.
-    fn hash_list_for_id(&self, id: HashListId) -> HashList<'bytes> {
+    fn hash_list_for_id(&self, id: HashListId) -> HashList<'_> {
         let list_offset = id.0;
-        HashList::Old(OldHashList::new(&self.data[list_offset as usize..]).unwrap())
+        HashList::Old(OldHashList::new(&self.borrow_data()[list_offset as usize..]).unwrap())
     }
 
     /// Return whether the given dependent-to-dependency edge is in the graph.
@@ -457,52 +488,7 @@ impl<'bytes> DepGraphTrait<'bytes> for OldDepGraph<'bytes> {
     }
 
     fn contains(&self, dep: Dep) -> bool {
-        self.indexer.find(dep.into()).is_some()
-    }
-}
-
-/// The header of the structure.
-///
-/// Contains the offset to the indexer and the lookup table.
-///
-/// Memory layout:
-///
-/// ```txt
-///           32 bits
-///  +-----------------------+
-///  |    indexer offset     |
-///  +-----------------------+
-///  |  lookup table offset  |
-///  +-----------------------+
-/// ```
-struct OldHeader<'bytes> {
-    indexer: Indexer<'bytes>,
-    lookup_table: LookupTable<'bytes>,
-}
-
-impl<'bytes> OldHeader<'bytes> {
-    fn new(data: &'bytes [u8]) -> Result<Self, String> {
-        if data.len() < 4 * 2 {
-            return Err("not enough bytes to read header".to_string());
-        }
-
-        let indexer_offset = byteutils::read_u32_ne(data);
-        let lookup_table_offset = byteutils::read_u32_ne(&data[4..]);
-
-        let indexer_offset: usize = indexer_offset.try_into().unwrap();
-        let lookup_table_offset: usize = lookup_table_offset.try_into().unwrap();
-
-        let indexer_bytes = byteutils::subslice(data, indexer_offset.., "indexer_bytes")?;
-        let lookup_table_bytes =
-            byteutils::subslice(data, lookup_table_offset.., "lookup_table_bytes")?;
-
-        let indexer = Indexer::new(indexer_bytes)?;
-        let lookup_table = LookupTable::new(lookup_table_bytes, indexer.len())?;
-
-        Ok(OldHeader {
-            indexer,
-            lookup_table,
-        })
+        self.borrow_indexer().find(dep.into()).is_some()
     }
 }
 

@@ -3,13 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::fs::File;
 use std::path::Path;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 
 use depgraph_reader::DepGraph;
-use depgraph_reader::DepGraphOpener;
 use depgraph_writer::HashIndex;
 use depgraph_writer::MemDepGraph;
 use newtype::IdVec;
@@ -20,19 +18,10 @@ use crate::*;
 pub(crate) fn copy_node_order(m: &mut MemDepGraph, path: &Path) -> std::io::Result<()> {
     log::info!("Copying node order from existing file {}", path.display());
 
-    let opener = {
-        let file = File::open(path)?;
-        DepGraphOpener::new(&file)?
-    };
-    let old_dep_graph = match opener.open() {
-        Err(e) => {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::InvalidData,
-                format!("Unable to open {}: {}", path.display(), e),
-            ));
-        }
-        Ok(DepGraph::New(g)) => g,
-        Ok(DepGraph::Old(..)) => {
+    let dep_graph = DepGraph::from_path(path)?;
+    let old_dep_graph = match dep_graph {
+        DepGraph::New(g) => g,
+        DepGraph::Old(..) => {
             return Err(std::io::Error::new(
                 std::io::ErrorKind::InvalidData,
                 "Can only copy node ordering from new-format .hhdg files",
@@ -68,7 +57,6 @@ pub(crate) fn copy_node_order(m: &mut MemDepGraph, path: &Path) -> std::io::Resu
             Some(remap_ref)
         })
         .collect();
-    drop(opener);
 
     // Find all HashIndex values not in use.
     let available: Vec<HashIndex> = in_use

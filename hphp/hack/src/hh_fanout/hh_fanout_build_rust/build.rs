@@ -16,7 +16,6 @@ use depgraph_compress::OptimizeConfig;
 use depgraph_compress::WriteConfig;
 use depgraph_reader::Dep;
 use depgraph_reader::DepGraph;
-use depgraph_reader::DepGraphOpener;
 use depgraph_writer::HashIndex;
 use depgraph_writer::HashIndexSet;
 use depgraph_writer::HashListIndex;
@@ -332,7 +331,7 @@ impl Edges {
 
 /// Extend a collection of edges by adding all edges from the given
 /// dependency graph.
-fn extend_edges_from_dep_graph(all_edges: &Edges, graph: &DepGraph<'_>) {
+fn extend_edges_from_dep_graph(all_edges: &Edges, graph: &DepGraph) {
     graph.par_all_hashes().for_each(|dependency| {
         if let Some(hash_list) = graph.hash_list_for(dependency) {
             all_edges.register_many(dependency, graph.hash_list_hashes(hash_list));
@@ -393,8 +392,7 @@ pub fn build(
                 "Reading in edges from previous dependency graph at {:?}",
                 incremental
             );
-            let old_dep_graph_opener = DepGraphOpener::from_path(&incremental)?;
-            let old_dep_graph = old_dep_graph_opener.open().unwrap();
+            let old_dep_graph = DepGraph::from_path(&incremental)?;
             extend_edges_from_dep_graph(&all_edges, &old_dep_graph);
             info!("Done reading in old edges");
         }

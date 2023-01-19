@@ -5,7 +5,7 @@
 use std::collections::HashSet;
 use std::ffi::OsString;
 
-use depgraph_reader::DepGraphOpener;
+use depgraph_reader::DepGraph;
 use log::info;
 use ocamlrep_ocamlpool::ocaml_ffi;
 
@@ -15,8 +15,7 @@ fn main(dep_graph: OsString) {
     );
 
     info!("Opening dependency graph at {:?}", dep_graph);
-    let opener = DepGraphOpener::from_path(&dep_graph).unwrap();
-    let depgraph = opener.open().unwrap();
+    let depgraph = DepGraph::from_path(&dep_graph).unwrap();
 
     info!("Validating integrity of dependency graph");
     depgraph.validate_hash_lists().unwrap();

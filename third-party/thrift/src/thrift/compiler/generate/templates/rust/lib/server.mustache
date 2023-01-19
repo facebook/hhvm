@@ -56,6 +56,9 @@
             ::anyhow::bail!("{{service:name}}.{{function:name}} not implemented");
         }
     {{/function:starts_interaction?}}{{/service:rustFunctions}}
+    {{#service:interaction?}}
+        async fn on_termination(&self) {}
+    {{/service:interaction?}}
     }
 
     #[::async_trait::async_trait]
@@ -92,6 +95,11 @@
             (**self).{{function:rust_name}}()
         }
     {{/function:starts_interaction?}}{{/service:rustFunctions}}
+    {{#service:interaction?}}
+        async fn on_termination(&self) {
+            (**self).on_termination().await;
+        }
+    {{/service:interaction?}}
     }
 
     /// Processor for {{service:name}}'s methods.
@@ -454,6 +462,12 @@
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+            {{#service:interaction?}}
+            self.service.on_termination().await
+            {{/service:interaction?}}
+        }
     }
 
     #[::async_trait::async_trait]
@@ -538,6 +552,11 @@
             &[
 {{>lib/method_names}}
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 

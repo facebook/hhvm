@@ -4341,6 +4341,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -4410,6 +4413,11 @@ pub mod server {
                 // from FooService
                 "simple_rpc",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 
@@ -4671,6 +4679,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -4740,6 +4751,11 @@ pub mod server {
                 // from FB303Service
                 "simple_rpc",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 
@@ -6072,6 +6088,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -6150,6 +6169,11 @@ pub mod server {
                 "invalid_return_for_hack",
                 "rpc_skipped_codegen",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 
@@ -6532,6 +6556,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -6602,6 +6629,11 @@ pub mod server {
                 "getDataByKey0",
                 "getDataByKey1",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 

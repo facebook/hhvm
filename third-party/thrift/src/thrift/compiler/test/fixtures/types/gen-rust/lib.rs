@@ -1047,6 +1047,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -1117,6 +1120,11 @@ pub mod server {
                 "bounce_map",
                 "binary_keyed_map",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 

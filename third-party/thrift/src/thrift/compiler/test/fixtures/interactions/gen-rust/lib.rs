@@ -4488,6 +4488,7 @@ pub mod server {
                 ),
             ))
         }
+        async fn on_termination(&self) {}
     }
 
     #[::async_trait::async_trait]
@@ -4519,6 +4520,9 @@ pub mod server {
         ) -> ::std::result::Result<, crate::services::my_interaction::EncodeExn> {
             (**self).encode(
             ).await
+        }
+        async fn on_termination(&self) {
+            (**self).on_termination().await;
         }
     }
 
@@ -5041,6 +5045,10 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
+        }
     }
 
     #[::async_trait::async_trait]
@@ -5113,6 +5121,11 @@ pub mod server {
                 // they are always queried from the "main" processor.
             ]
         }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
+        }
     }
 
 
@@ -5159,6 +5172,7 @@ pub mod server {
                 ),
             ))
         }
+        async fn on_termination(&self) {}
     }
 
     #[::async_trait::async_trait]
@@ -5190,6 +5204,9 @@ pub mod server {
         ) -> ::std::result::Result<, crate::services::my_interaction_fast::EncodeExn> {
             (**self).encode(
             ).await
+        }
+        async fn on_termination(&self) {
+            (**self).on_termination().await;
         }
     }
 
@@ -5712,6 +5729,10 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
+        }
     }
 
     #[::async_trait::async_trait]
@@ -5784,6 +5805,11 @@ pub mod server {
                 // they are always queried from the "main" processor.
             ]
         }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
+        }
     }
 
 
@@ -5799,6 +5825,7 @@ pub mod server {
                 ),
             ))
         }
+        async fn on_termination(&self) {}
     }
 
     #[::async_trait::async_trait]
@@ -5811,6 +5838,9 @@ pub mod server {
         ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
             (**self).frobnicate(
             ).await
+        }
+        async fn on_termination(&self) {
+            (**self).on_termination().await;
         }
     }
 
@@ -6006,6 +6036,10 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
+        }
     }
 
     #[::async_trait::async_trait]
@@ -6077,6 +6111,11 @@ pub mod server {
                 // interaction's method names are never queried directly.
                 // they are always queried from the "main" processor.
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 
@@ -6767,6 +6806,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -6848,6 +6890,11 @@ pub mod server {
                 "MyInteractionFast.encode",
                 "SerialInteraction.frobnicate",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 

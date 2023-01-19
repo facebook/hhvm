@@ -121,6 +121,15 @@ where
     /// Return value includes inherited functions from parent thrift services,
     /// and interactions' functions.
     fn get_method_names(&self) -> &'static [&'static str];
+
+    /// Applies to interactions only
+    ///
+    /// Termination callback is invoked immediately as soon as the client's
+    /// termination signal is received. This differs to the interaction service
+    /// being dropped, which only happens when all outstanding requests and
+    /// streams have been completed. This is not invoked if the connection
+    /// closes without the signal being received.
+    async fn on_termination(&self);
 }
 
 #[async_trait]
@@ -164,6 +173,10 @@ where
     fn get_method_names(&self) -> &'static [&'static str] {
         (**self).get_method_names()
     }
+
+    async fn on_termination(&self) {
+        (**self).on_termination().await
+    }
 }
 
 #[async_trait]
@@ -206,6 +219,10 @@ where
 
     fn get_method_names(&self) -> &'static [&'static str] {
         (**self).get_method_names()
+    }
+
+    async fn on_termination(&self) {
+        (**self).on_termination().await
     }
 }
 
@@ -258,6 +275,9 @@ where
     > {
         bail!("Processor does not support interactions");
     }
+
+    /// See [ThriftService::on_termination] docs
+    async fn handle_on_termination(&self);
 }
 
 /// Null processor which implements no methods - it acts as the super for any service
@@ -333,6 +353,8 @@ where
     > {
         unimplemented!("NullServiceProcessor implements no interactions")
     }
+
+    async fn handle_on_termination(&self) {}
 }
 
 #[async_trait]
@@ -396,4 +418,6 @@ where
     fn get_method_names(&self) -> &'static [&'static str] {
         &[]
     }
+
+    async fn on_termination(&self) {}
 }

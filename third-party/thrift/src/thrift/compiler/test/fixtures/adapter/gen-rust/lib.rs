@@ -1454,6 +1454,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -1523,6 +1526,11 @@ pub mod server {
                 // from Service
                 "func",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 
@@ -1896,6 +1904,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -1966,6 +1977,11 @@ pub mod server {
                 "count",
                 "adaptedTypes",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 

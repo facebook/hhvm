@@ -1539,6 +1539,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -1608,6 +1611,11 @@ pub mod server {
                 // from MyRoot
                 "do_root",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 
@@ -1864,6 +1872,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -1938,6 +1949,11 @@ pub mod server {
                 // from MyNode
                 "do_mid",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 
@@ -2198,6 +2214,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -2276,6 +2295,11 @@ pub mod server {
                 // from MyLeaf
                 "do_leaf",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 

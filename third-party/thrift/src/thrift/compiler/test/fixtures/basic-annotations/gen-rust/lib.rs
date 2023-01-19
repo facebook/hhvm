@@ -4793,6 +4793,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -4868,6 +4871,11 @@ pub mod server {
                 "lobDataById",
                 "doNothing",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 
@@ -5232,6 +5240,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -5302,6 +5313,11 @@ pub mod server {
                 "ping",
                 "pong",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 
@@ -5558,6 +5574,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -5634,6 +5653,11 @@ pub mod server {
                 "pang",
             ]
         }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
+        }
     }
 
     /// Construct a new instance of a MyServicePrioChild service.
@@ -5682,6 +5706,7 @@ pub mod server {
                 ),
             ))
         }
+        async fn on_termination(&self) {}
     }
 
     #[::async_trait::async_trait]
@@ -5694,6 +5719,9 @@ pub mod server {
         ) -> ::std::result::Result<(), crate::services::bad_interaction::FooExn> {
             (**self).foo(
             ).await
+        }
+        async fn on_termination(&self) {
+            (**self).on_termination().await;
         }
     }
 
@@ -5889,6 +5917,10 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+            self.service.on_termination().await
+        }
     }
 
     #[::async_trait::async_trait]
@@ -5960,6 +5992,11 @@ pub mod server {
                 // interaction's method names are never queried directly.
                 // they are always queried from the "main" processor.
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 
@@ -6205,6 +6242,9 @@ pub mod server {
                 ),
             }
         }
+
+        async fn handle_on_termination(&self) {
+        }
     }
 
     #[::async_trait::async_trait]
@@ -6275,6 +6315,11 @@ pub mod server {
                 "bar",
                 "BadInteraction.foo",
             ]
+        }
+
+        async fn on_termination(&self) {
+            use ::fbthrift::{ServiceProcessor as _};
+            self.handle_on_termination().await
         }
     }
 

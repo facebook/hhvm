@@ -179,7 +179,7 @@ class AdapterTest(unittest.TestCase):
         foo = Foo()
         self.assertEqual(Baz, Wrapped[_fbthrift_unadapted_Baz])
         self.assertIsInstance(foo.baz, Wrapped)
-        self.assertIsInstance(foo.baz.obj, _fbthrift_unadapted_Baz)
+        self.assertIsInstance(foo.baz.value, _fbthrift_unadapted_Baz)
 
     def test_adapted_variable(self) -> None:
         self.assertEqual(NINETEEN_EIGHTY_FOUR, datetime(1984, 1, 1))

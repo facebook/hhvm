@@ -25,10 +25,10 @@ T = typing.TypeVar("T")
 
 
 class Wrapped(typing.Generic[T]):
-    __slots__ = ["obj"]
+    __slots__ = ["value"]
 
-    def __init__(self, obj: T) -> None:
-        self.obj: T = obj
+    def __init__(self, value: T) -> None:
+        self.value: T = value
 
 
 class Wrapper(Adapter[T, Wrapped[T]]):
@@ -39,7 +39,7 @@ class Wrapper(Adapter[T, Wrapped[T]]):
         *,
         transitive_annotation: typing.Optional[Struct] = None,
     ) -> Wrapped[T]:
-        return Wrapped(obj=original)
+        return Wrapped(value=original)
 
     @classmethod
     def to_thrift(
@@ -48,4 +48,4 @@ class Wrapper(Adapter[T, Wrapped[T]]):
         *,
         transitive_annotation: typing.Optional[Struct] = None,
     ) -> T:
-        return adapted.obj
+        return adapted.value

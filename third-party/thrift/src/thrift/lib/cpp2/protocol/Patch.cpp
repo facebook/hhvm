@@ -525,7 +525,9 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
 template <typename Id, typename F>
 void insertMask(Mask& mask, Id id, const Mask& next, const F& getIncludesRef) {
   if (mask != allMask() && next != noneMask()) {
-    getIncludesRef(mask).ensure()[id] = next;
+    Mask& current =
+        getIncludesRef(mask).ensure().emplace(id, noneMask()).first->second;
+    current = current | next;
   }
 }
 

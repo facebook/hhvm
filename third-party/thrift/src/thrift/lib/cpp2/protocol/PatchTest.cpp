@@ -923,6 +923,36 @@ TEST_F(PatchTest, Map) {
   }
 }
 
+TEST_F(PatchTest, EnsureAndPatchObject) {
+  // If field 1 doesn't exist, set it to an object that has field_2, whose
+  // value is 3
+  Value ensure;
+  ensure.emplace_object()[FieldId{1}]
+      .emplace_object()[FieldId{2}]
+      .emplace_i32() = 3;
+
+  // Assign 5 to field 1's field 4
+  Value fieldPatch;
+  fieldPatch.emplace_object()[FieldId{1}]
+      .emplace_object()[FieldId(op::PatchOp::PatchPrior)]
+      .emplace_object()[FieldId{4}]
+      .emplace_object()[FieldId(op::PatchOp::Assign)]
+      .emplace_i32() = 5;
+
+  auto patchObj = patchAddOperation(
+      makePatch(op::PatchOp::EnsureStruct, ensure),
+      op::PatchOp::PatchAfter,
+      fieldPatch);
+  auto masks = extractMaskFromPatch(patchObj);
+
+  // To ensure field 1, we need to read/write this field
+  Mask mask;
+  mask.includes_ref().emplace()[1] = allMask();
+
+  EXPECT_EQ(masks.read, mask);
+  EXPECT_EQ(masks.write, mask);
+}
+
 TEST_F(PatchTest, GeneratedMapPatch) {
   auto assignPatch = MapPatch::createAssign({{"a", "5"}, {"c", "6"}});
   auto patched = applyGeneratedPatch<type::map<type::string_t, type::string_t>>(

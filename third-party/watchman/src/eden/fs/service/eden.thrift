@@ -1014,6 +1014,16 @@ struct InodeEvent {
   8: PathString path;
 }
 
+struct TaskEvent {
+  1: TraceEventTimes times;
+  2: string name;
+  3: string threadName;
+  4: i64 threadId;
+  // Both duration and start are in microseconds (μs)
+  5: unsigned64 duration;
+  6: unsigned64 start;
+}
+
 /**
  * Parameters for the getRetroactiveInodeEvents() function.
  */
@@ -1289,6 +1299,8 @@ struct TracePoint {
   5: string name = "";
   // What event this trace point represents
   6: TracePointEvent event;
+  // Thread ID of where this block started
+  7: i64 threadId;
 }
 
 struct FaultDefinition {

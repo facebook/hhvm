@@ -90,6 +90,8 @@ struct StreamChangesSinceParams {
   2: eden.JournalPosition fromPosition;
 }
 
+struct TraceTaskEventsRequest {}
+
 /**
  * This Thrift service defines streaming functions. It is separate from
  * EdenService because older Thrift runtimes do not support Thrift streaming,
@@ -154,6 +156,12 @@ service StreamingEdenService extends eden.EdenService {
    * This includes start and end events for Inode Materializations and Loads
    */
   stream<eden.InodeEvent> traceInodeEvents(1: eden.PathString mountPoint);
+
+  /**
+   * (Debugging only) This returns a stream of events when they are
+   * finished processing.
+   */
+  stream<eden.TaskEvent> traceTaskEvents(1: TraceTaskEventsRequest request);
 
   /**
    * Returns a stream of changes since the given JournalPosition.

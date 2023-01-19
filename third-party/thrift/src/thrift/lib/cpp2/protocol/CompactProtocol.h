@@ -101,7 +101,7 @@ class CompactProtocolWriter : public detail::ProtocolBase {
   uint32_t writeStructEnd();
   inline uint32_t writeFieldBegin(
       const char* name, TType fieldType, int16_t fieldId) {
-    return writeFieldBegin(name, fieldType, fieldId, lastFieldId_);
+    return writeFieldBegin(name, fieldType, fieldId, state_.lastFieldId);
   }
   FOLLY_ALWAYS_INLINE uint32_t writeFieldBegin(
       const char* name, TType fieldType, int16_t fieldId, int16_t previousId);
@@ -197,18 +197,16 @@ class CompactProtocolWriter : public detail::ProtocolBase {
   } booleanField_;
 
  private:
-  struct LastFieldTracker {
-    int16_t lastFieldId;
-    int16_t lastWrittenFieldId;
+  struct State {
+    int16_t lastFieldId{-1};
+    int16_t lastWrittenFieldId{-1};
   };
 
   // Due to serialization optimiztion for a terse struct, we need to keep track
   // of both lastFieldId and lastWrittenFieldId when serializing nested
   // terse struct.
-  std::stack<LastFieldTracker, folly::small_vector<LastFieldTracker, 10>>
-      lastField_;
-  int16_t lastFieldId_{-1};
-  int16_t lastWrittenFieldId_{-1};
+  std::stack<State, folly::small_vector<State, 10>> lastField_;
+  State state_;
 
   uint32_t writeCollectionBegin(int8_t elemType, int32_t size);
   static void checkBinarySize(uint64_t size);

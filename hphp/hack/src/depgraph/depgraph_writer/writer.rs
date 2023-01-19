@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
@@ -59,11 +60,7 @@ impl MemDepGraph {
 /// Write the given `MemDepGraph` to disk.
 pub fn write_dep_graph(output: &Path, g: MemDepGraph) -> std::io::Result<()> {
     info!("Opening output file at {:?}", output);
-    let f = std::fs::OpenOptions::new()
-        .write(true)
-        .create(true)
-        .truncate(true)
-        .open(output)?;
+    let f = File::create(output)?;
 
     let num_deps = g.hashes.len() as u64;
     let header_size = 8;

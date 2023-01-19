@@ -18,9 +18,9 @@ package com.facebook.thrift.protocol;
 
 import com.facebook.thrift.util.Utf8Util;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TField;
@@ -251,11 +251,8 @@ public final class ByteBufTCompactProtocol extends ByteBufTProtocol {
   }
 
   public void writeString(String str) throws TException {
-    final int length = ByteBufUtil.utf8Bytes(str);
-    writeVarInt32(length);
-    if (length > 0) {
-      ByteBufUtil.reserveAndWriteUtf8(byteBuf, str, length);
-    }
+    byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+    getWritableBinaryAsByteBuf(bytes.length).writeBytes(bytes);
   }
 
   @Override

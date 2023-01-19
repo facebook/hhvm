@@ -47,21 +47,21 @@
 <%#struct:union?%>  <%/struct:union?%>    std::as_const(*this).__fbthrift_read_field_<%field:cpp_name%>();
 <%/field:lazy?%>
 <%^field:non_opt_cpp_ref?%>
-<%#struct:cpp_use_op_encode%>
+<%#field:use_op_encode?%>
 <%#struct:union?%>  <%/struct:union?%>    xfer += ::apache::thrift::op::encode<<%field:type_tag%>>(*prot_, <%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>);
-<%/struct:cpp_use_op_encode%>
-<%^struct:cpp_use_op_encode%>
+<%/field:use_op_encode?%>
+<%^field:use_op_encode?%>
 <%#struct:union?%>  <%/struct:union?%>    xfer += <% > module_types_tcc/pm%>::write(*prot_, <% > module_types_tcc/pm_value%>);
-<%/struct:cpp_use_op_encode%>
+<%/field:use_op_encode?%>
 <%/field:non_opt_cpp_ref?%>
 <%#field:non_opt_cpp_ref?%>
 <%#struct:union?%>  <%/struct:union?%>    if (<% > field/member%>) {
-<%#struct:cpp_use_op_encode%>
+<%#field:use_op_encode?%>
 <%#struct:union?%>  <%/struct:union?%>      xfer += ::apache::thrift::op::encode<<%field:type_tag%>>(*prot_, <%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>);
-<%/struct:cpp_use_op_encode%>
-<%^struct:cpp_use_op_encode%>
+<%/field:use_op_encode?%>
+<%^field:use_op_encode?%>
 <%#struct:union?%>  <%/struct:union?%>      xfer += <% > module_types_tcc/pm%>::write(*prot_, <% > module_types_tcc/pm_value%>);
-<%/struct:cpp_use_op_encode%>
+<%/field:use_op_encode?%>
 <%#type:resolves_to_container_or_enum?%>
 <%#struct:union?%>  <%/struct:union?%>    } else {
 <%#struct:union?%>  <%/struct:union?%>      xfer += prot_->write<% > module_types_tcc/struct_field_type%>Begin(<% > module_types_tcc/container_struct_type%>, 0);

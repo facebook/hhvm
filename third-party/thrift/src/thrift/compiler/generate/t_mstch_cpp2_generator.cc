@@ -1144,7 +1144,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::scoped_enum_as_union_type},
             {"struct:extra_namespace", &cpp_mstch_struct::extra_namespace},
             {"struct:type_tag", &cpp_mstch_struct::type_tag},
-            {"struct:cpp_use_op_encode", &cpp_mstch_struct::cpp_use_op_encode},
             {"struct:patch?", &cpp_mstch_struct::patch},
         });
   }
@@ -1474,13 +1473,6 @@ class cpp_mstch_struct : public mstch_struct {
     return cpp_context_->resolver().get_type_tag(*struct_);
   }
 
-  mstch::node cpp_use_op_encode() {
-    return (struct_->program() &&
-            struct_->program()->inherit_annotation_or_null(
-                *struct_, kCppUseOpEncodeUri)) ||
-        struct_->find_structured_annotation_or_null(kCppUseOpEncodeUri);
-  }
-
  protected:
   // Computes the alignment of field on the target platform.
   // Returns max alignment if cannot compute the alignment.
@@ -1711,6 +1703,7 @@ class cpp_mstch_field : public mstch_field {
              &cpp_mstch_field::raw_string_or_binary},
             {"field:terse_struct?", &cpp_mstch_field::terse_struct},
             {"field:terse_not_struct?", &cpp_mstch_field::terse_not_struct},
+            {"field:use_op_encode?", &cpp_mstch_field::use_op_encode},
         });
     register_has_option("field:deprecated_clear?", "deprecated_clear");
   }
@@ -2005,6 +1998,15 @@ class cpp_mstch_field : public mstch_field {
     return ((!ttype->is_struct() && !ttype->is_exception()) ||
             ttype->is_union()) &&
         field_->qualifier() == t_field_qualifier::terse;
+  }
+
+  mstch::node use_op_encode() {
+    assert(field_context_->strct);
+    const auto& strct = *field_context_->strct;
+    return (strct.program() &&
+            strct.program()->inherit_annotation_or_null(
+                strct, kCppUseOpEncodeUri)) ||
+        strct.find_structured_annotation_or_null(kCppUseOpEncodeUri);
   }
 
  private:

@@ -52,7 +52,7 @@ public class MyDataPatch implements TBase, java.io.Serializable, Cloneable {
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public final MyData ensure;
+  public final MyDataEnsureStruct ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    */
@@ -67,7 +67,7 @@ public class MyDataPatch implements TBase, java.io.Serializable, Cloneable {
       MyData assign,
       Boolean clear,
       MyDataFieldPatch patchPrior,
-      MyData ensure,
+      MyDataEnsureStruct ensure,
       MyDataFieldPatch patch) {
     this.assign = assign;
     this.clear = clear;
@@ -155,7 +155,7 @@ public class MyDataPatch implements TBase, java.io.Serializable, Cloneable {
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public MyData getEnsure() {
+  public MyDataEnsureStruct getEnsure() {
     return this.ensure;
   }
 
@@ -213,7 +213,7 @@ public class MyDataPatch implements TBase, java.io.Serializable, Cloneable {
     MyData tmp_assign = null;
     Boolean tmp_clear = null;
     MyDataFieldPatch tmp_patchPrior = null;
-    MyData tmp_ensure = null;
+    MyDataEnsureStruct tmp_ensure = null;
     MyDataFieldPatch tmp_patch = null;
     TField __field;
     iprot.readStructBegin();
@@ -248,7 +248,7 @@ public class MyDataPatch implements TBase, java.io.Serializable, Cloneable {
           break;
         case ENSURE:
           if (__field.type == TType.STRUCT) {
-            tmp_ensure = MyData.deserialize(iprot);
+            tmp_ensure = MyDataEnsureStruct.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }

@@ -128,9 +128,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   /// Returns if the patch modifies the given field.
   template <typename Id>
   bool modifies() const {
-    return hasAssign() || data_.clear() == true ||
-        // TODO(afuller): Consider adding op::getDefault to use instead.
-        getEnsure<Id>(data_) != op::get<Id>(op::getIntrinsicDefault<T>()) ||
+    return hasAssign() || data_.clear() == true || getEnsure<Id>(data_) ||
         !getRawPatch<Id>(data_.patchPrior()).empty() ||
         !getRawPatch<Id>(data_.patch()).empty();
   }
@@ -191,9 +189,15 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   void ensurePatchable() {
     if (data_.assign().has_value()) {
       // Ensure even unknown fields are cleared, and ensure is used as a
-      // complete replancement.
+      // complete replacement.
       *data_.clear() = true;
-      data_.ensure() = std::move(*data_.assign());
+      for_each_field_id<T>([&](auto id) { // ensure
+        auto&& field = op::get<>(id, *data_.assign());
+        if (!isAbsent(field) &&
+            !op::isEmpty<op::get_type_tag<decltype(id), T>>(*field)) {
+          op::get<>(id, *data_.ensure()) = *field;
+        }
+      });
       // Unset assign.
       data_.assign().reset();
     }
@@ -248,7 +252,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   void clear() {
     Base::clear();
     // Custom defaults must also be cleared.
-    op::clear<type::infer_tag<T>>(*data_.ensure());
+    op::clear<>(*data_.ensure());
   }
   template <typename Id>
   void clear() {
@@ -278,7 +282,13 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
 
     // Apply clear, patchPrior, and ensure.
     if (*data_.clear()) {
-      val = *data_.ensure(); // clear + ensure.
+      op::clear<type::infer_tag<T>>(val);
+      for_each_field_id<T>([&](auto id) { // ensure
+        auto&& defaultVal = op::get<>(id, *data_.ensure());
+        if (defaultVal) {
+          op::get<>(id, val) = *defaultVal;
+        }
+      });
     } else {
       data_.patchPrior()->apply(val); // patchPrior
       for_each_field_id<T>([&](auto id) { // ensure

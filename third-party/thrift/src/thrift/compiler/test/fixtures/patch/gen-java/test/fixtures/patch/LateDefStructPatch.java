@@ -28,7 +28,7 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.LateDefStruct assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
         @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE) final test.fixtures.patch.LateDefStructFieldPatch patchPrior,
-        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.LateDefStruct ensure,
+        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.LateDefStructEnsureStruct ensure,
         @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final test.fixtures.patch.LateDefStructFieldPatch patch
     ) {
         this.assign = assign;
@@ -52,7 +52,7 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
         private test.fixtures.patch.LateDefStruct assign = null;
         private boolean clear = false;
         private test.fixtures.patch.LateDefStructFieldPatch patchPrior = test.fixtures.patch.LateDefStructFieldPatch.defaultInstance();
-        private test.fixtures.patch.LateDefStruct ensure = null;
+        private test.fixtures.patch.LateDefStructEnsureStruct ensure = null;
         private test.fixtures.patch.LateDefStructFieldPatch patch = test.fixtures.patch.LateDefStructFieldPatch.defaultInstance();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
@@ -80,12 +80,12 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
         public test.fixtures.patch.LateDefStructFieldPatch getPatchPrior() { return patchPrior; }
     
             @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
-        public Builder setEnsure(test.fixtures.patch.LateDefStruct ensure) {
+        public Builder setEnsure(test.fixtures.patch.LateDefStructEnsureStruct ensure) {
             this.ensure = ensure;
             return this;
         }
     
-        public test.fixtures.patch.LateDefStruct getEnsure() { return ensure; }
+        public test.fixtures.patch.LateDefStructEnsureStruct getEnsure() { return ensure; }
     
             @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE)
         public Builder setPatch(test.fixtures.patch.LateDefStructFieldPatch patch) {
@@ -130,7 +130,7 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
         private final test.fixtures.patch.LateDefStructFieldPatch patchPrior;
     public static final int _PATCHPRIOR = 3;
     private static final TField PATCH_PRIOR_FIELD_DESC = new TField("patchPrior", TType.STRUCT, (short)3);
-        private final test.fixtures.patch.LateDefStruct ensure;
+        private final test.fixtures.patch.LateDefStructEnsureStruct ensure;
     public static final int _ENSURE = 5;
     private static final TField ENSURE_FIELD_DESC = new TField("ensure", TType.STRUCT, (short)5);
         private final test.fixtures.patch.LateDefStructFieldPatch patch;
@@ -174,7 +174,7 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
-    public test.fixtures.patch.LateDefStruct getEnsure() { return ensure; }
+    public test.fixtures.patch.LateDefStructEnsureStruct getEnsure() { return ensure; }
     
     
     @Nullable
@@ -262,7 +262,7 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
           break;
         case _ENSURE:
           if (__field.type == TType.STRUCT) {
-            test.fixtures.patch.LateDefStruct ensure = test.fixtures.patch.LateDefStruct.read0(oprot);
+            test.fixtures.patch.LateDefStructEnsureStruct ensure = test.fixtures.patch.LateDefStructEnsureStruct.read0(oprot);
             builder.setEnsure(ensure);
           } else {
             TProtocolUtil.skip(oprot, __field.type);

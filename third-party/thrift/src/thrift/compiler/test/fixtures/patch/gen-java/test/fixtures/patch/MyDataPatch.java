@@ -28,7 +28,7 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyData assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
         @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataFieldPatch patchPrior,
-        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.MyData ensure,
+        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.MyDataEnsureStruct ensure,
         @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataFieldPatch patch
     ) {
         this.assign = assign;
@@ -52,7 +52,7 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
         private test.fixtures.patch.MyData assign = null;
         private boolean clear = false;
         private test.fixtures.patch.MyDataFieldPatch patchPrior = test.fixtures.patch.MyDataFieldPatch.defaultInstance();
-        private test.fixtures.patch.MyData ensure = null;
+        private test.fixtures.patch.MyDataEnsureStruct ensure = null;
         private test.fixtures.patch.MyDataFieldPatch patch = test.fixtures.patch.MyDataFieldPatch.defaultInstance();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
@@ -80,12 +80,12 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
         public test.fixtures.patch.MyDataFieldPatch getPatchPrior() { return patchPrior; }
     
             @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
-        public Builder setEnsure(test.fixtures.patch.MyData ensure) {
+        public Builder setEnsure(test.fixtures.patch.MyDataEnsureStruct ensure) {
             this.ensure = ensure;
             return this;
         }
     
-        public test.fixtures.patch.MyData getEnsure() { return ensure; }
+        public test.fixtures.patch.MyDataEnsureStruct getEnsure() { return ensure; }
     
             @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE)
         public Builder setPatch(test.fixtures.patch.MyDataFieldPatch patch) {
@@ -130,7 +130,7 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
         private final test.fixtures.patch.MyDataFieldPatch patchPrior;
     public static final int _PATCHPRIOR = 3;
     private static final TField PATCH_PRIOR_FIELD_DESC = new TField("patchPrior", TType.STRUCT, (short)3);
-        private final test.fixtures.patch.MyData ensure;
+        private final test.fixtures.patch.MyDataEnsureStruct ensure;
     public static final int _ENSURE = 5;
     private static final TField ENSURE_FIELD_DESC = new TField("ensure", TType.STRUCT, (short)5);
         private final test.fixtures.patch.MyDataFieldPatch patch;
@@ -174,7 +174,7 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
-    public test.fixtures.patch.MyData getEnsure() { return ensure; }
+    public test.fixtures.patch.MyDataEnsureStruct getEnsure() { return ensure; }
     
     
     @Nullable
@@ -262,7 +262,7 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
           break;
         case _ENSURE:
           if (__field.type == TType.STRUCT) {
-            test.fixtures.patch.MyData ensure = test.fixtures.patch.MyData.read0(oprot);
+            test.fixtures.patch.MyDataEnsureStruct ensure = test.fixtures.patch.MyDataEnsureStruct.read0(oprot);
             builder.setEnsure(ensure);
           } else {
             TProtocolUtil.skip(oprot, __field.type);

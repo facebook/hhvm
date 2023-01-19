@@ -121,13 +121,20 @@ TEST(StructPatchTest, Assign) {
 }
 
 TEST(StructPatchTest, AssignSplit) {
-  auto patch = MyStructPatch::createAssign(testValue());
+  auto original = testValue();
+  auto patch = MyStructPatch::createAssign(original);
   // For the patch to break apart the assign and check the result;
   patch.patchIfSet<ident::optI64Val>();
   EXPECT_FALSE(patch.toThrift().assign().has_value());
   EXPECT_TRUE(*patch.toThrift().clear());
-  EXPECT_EQ(*patch.toThrift().ensure(), testValue());
-  test::expectPatch(patch, {}, testValue());
+  op::for_each_field_id<MyStruct>([&](auto id) {
+    if (auto&& field = op::get<>(id, *patch.toThrift().ensure())) {
+      EXPECT_TRUE((op::equal<op::get_type_tag<decltype(id), MyStruct>>(
+          *field, *op::get<>(id, original))))
+          << "for field id " << static_cast<int>(id.value);
+    }
+  });
+  test::expectPatch(patch, {}, original);
 }
 
 TEST(StructPatchTest, Clear) {
@@ -201,9 +208,9 @@ TEST(StructPatchTest, Patch) {
   test::expectPatch(patch, val, expected1, expected2);
 
   // Make sure prior is being applied, if present.
-  patch.toThrift().patchPrior()->toThrift().stringVal()->prepend("p");
-  expected1.stringVal() = "_phi_";
-  expected2.stringVal() = "_p_phi__";
+  patch.patch<ident::stringVal>().prepend("p");
+  expected1.stringVal() = "p_hi_";
+  expected2.stringVal() = "p_p_hi__";
   test::expectPatch(patch, val, expected1, expected2);
 
   patch.merge(MyStructPatch::createClear());

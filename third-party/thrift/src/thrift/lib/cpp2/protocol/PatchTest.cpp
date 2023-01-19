@@ -1538,7 +1538,7 @@ TEST_F(PatchTest, ApplyGeneratedPatchToSerializedData) {
 
   test::patch::MyStructPatch patch;
   patch.patchIfSet<ident::boolVal>() = !op::BoolPatch{};
-  patch.patchIfSet<ident::byteVal>() = original.byteVal();
+  patch.patch<ident::byteVal>() = original.byteVal();
   patch.patchIfSet<ident::i16Val>() += 2;
   patch.patchIfSet<ident::i32Val>() += 3;
   patch.patchIfSet<ident::i64Val>() += 4;

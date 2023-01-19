@@ -28,7 +28,7 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.Recursive assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
         @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE) final test.fixtures.patch.RecursiveFieldPatch patchPrior,
-        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.Recursive ensure,
+        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.RecursiveEnsureStruct ensure,
         @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final test.fixtures.patch.RecursiveFieldPatch patch
     ) {
         this.assign = assign;
@@ -52,7 +52,7 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
         private test.fixtures.patch.Recursive assign = null;
         private boolean clear = false;
         private test.fixtures.patch.RecursiveFieldPatch patchPrior = test.fixtures.patch.RecursiveFieldPatch.defaultInstance();
-        private test.fixtures.patch.Recursive ensure = null;
+        private test.fixtures.patch.RecursiveEnsureStruct ensure = null;
         private test.fixtures.patch.RecursiveFieldPatch patch = test.fixtures.patch.RecursiveFieldPatch.defaultInstance();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
@@ -80,12 +80,12 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
         public test.fixtures.patch.RecursiveFieldPatch getPatchPrior() { return patchPrior; }
     
             @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
-        public Builder setEnsure(test.fixtures.patch.Recursive ensure) {
+        public Builder setEnsure(test.fixtures.patch.RecursiveEnsureStruct ensure) {
             this.ensure = ensure;
             return this;
         }
     
-        public test.fixtures.patch.Recursive getEnsure() { return ensure; }
+        public test.fixtures.patch.RecursiveEnsureStruct getEnsure() { return ensure; }
     
             @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE)
         public Builder setPatch(test.fixtures.patch.RecursiveFieldPatch patch) {
@@ -130,7 +130,7 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
         private final test.fixtures.patch.RecursiveFieldPatch patchPrior;
     public static final int _PATCHPRIOR = 3;
     private static final TField PATCH_PRIOR_FIELD_DESC = new TField("patchPrior", TType.STRUCT, (short)3);
-        private final test.fixtures.patch.Recursive ensure;
+        private final test.fixtures.patch.RecursiveEnsureStruct ensure;
     public static final int _ENSURE = 5;
     private static final TField ENSURE_FIELD_DESC = new TField("ensure", TType.STRUCT, (short)5);
         private final test.fixtures.patch.RecursiveFieldPatch patch;
@@ -174,7 +174,7 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
-    public test.fixtures.patch.Recursive getEnsure() { return ensure; }
+    public test.fixtures.patch.RecursiveEnsureStruct getEnsure() { return ensure; }
     
     
     @Nullable
@@ -262,7 +262,7 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
           break;
         case _ENSURE:
           if (__field.type == TType.STRUCT) {
-            test.fixtures.patch.Recursive ensure = test.fixtures.patch.Recursive.read0(oprot);
+            test.fixtures.patch.RecursiveEnsureStruct ensure = test.fixtures.patch.RecursiveEnsureStruct.read0(oprot);
             builder.setEnsure(ensure);
           } else {
             TProtocolUtil.skip(oprot, __field.type);

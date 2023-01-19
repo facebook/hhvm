@@ -28,7 +28,7 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.Bar assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
         @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE) final test.fixtures.patch.BarFieldPatch patchPrior,
-        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.Bar ensure,
+        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.BarEnsureStruct ensure,
         @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final test.fixtures.patch.BarFieldPatch patch
     ) {
         this.assign = assign;
@@ -52,7 +52,7 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
         private test.fixtures.patch.Bar assign = null;
         private boolean clear = false;
         private test.fixtures.patch.BarFieldPatch patchPrior = test.fixtures.patch.BarFieldPatch.defaultInstance();
-        private test.fixtures.patch.Bar ensure = null;
+        private test.fixtures.patch.BarEnsureStruct ensure = null;
         private test.fixtures.patch.BarFieldPatch patch = test.fixtures.patch.BarFieldPatch.defaultInstance();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
@@ -80,12 +80,12 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
         public test.fixtures.patch.BarFieldPatch getPatchPrior() { return patchPrior; }
     
             @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
-        public Builder setEnsure(test.fixtures.patch.Bar ensure) {
+        public Builder setEnsure(test.fixtures.patch.BarEnsureStruct ensure) {
             this.ensure = ensure;
             return this;
         }
     
-        public test.fixtures.patch.Bar getEnsure() { return ensure; }
+        public test.fixtures.patch.BarEnsureStruct getEnsure() { return ensure; }
     
             @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE)
         public Builder setPatch(test.fixtures.patch.BarFieldPatch patch) {
@@ -130,7 +130,7 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
         private final test.fixtures.patch.BarFieldPatch patchPrior;
     public static final int _PATCHPRIOR = 3;
     private static final TField PATCH_PRIOR_FIELD_DESC = new TField("patchPrior", TType.STRUCT, (short)3);
-        private final test.fixtures.patch.Bar ensure;
+        private final test.fixtures.patch.BarEnsureStruct ensure;
     public static final int _ENSURE = 5;
     private static final TField ENSURE_FIELD_DESC = new TField("ensure", TType.STRUCT, (short)5);
         private final test.fixtures.patch.BarFieldPatch patch;
@@ -174,7 +174,7 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
-    public test.fixtures.patch.Bar getEnsure() { return ensure; }
+    public test.fixtures.patch.BarEnsureStruct getEnsure() { return ensure; }
     
     
     @Nullable
@@ -262,7 +262,7 @@ public final class BarPatch implements com.facebook.thrift.payload.ThriftSeriali
           break;
         case _ENSURE:
           if (__field.type == TType.STRUCT) {
-            test.fixtures.patch.Bar ensure = test.fixtures.patch.Bar.read0(oprot);
+            test.fixtures.patch.BarEnsureStruct ensure = test.fixtures.patch.BarEnsureStruct.read0(oprot);
             builder.setEnsure(ensure);
           } else {
             TProtocolUtil.skip(oprot, __field.type);

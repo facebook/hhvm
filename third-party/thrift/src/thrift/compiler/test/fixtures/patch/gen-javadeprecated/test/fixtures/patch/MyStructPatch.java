@@ -52,7 +52,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public MyStruct ensure;
+  public MyStructEnsureStruct ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    */
@@ -78,7 +78,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
     tmpMetaDataMap.put(PATCHPRIOR, new FieldMetaData("patchPrior", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, MyStructFieldPatch.class)));
     tmpMetaDataMap.put(ENSURE, new FieldMetaData("ensure", TFieldRequirementType.DEFAULT, 
-        new StructMetaData(TType.STRUCT, MyStruct.class)));
+        new StructMetaData(TType.STRUCT, MyStructEnsureStruct.class)));
     tmpMetaDataMap.put(PATCH, new FieldMetaData("patch", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, MyStructFieldPatch.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
@@ -94,7 +94,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
   public MyStructPatch(
       boolean clear,
       MyStructFieldPatch patchPrior,
-      MyStruct ensure,
+      MyStructEnsureStruct ensure,
       MyStructFieldPatch patch) {
     this();
     this.clear = clear;
@@ -108,7 +108,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
       MyStruct assign,
       boolean clear,
       MyStructFieldPatch patchPrior,
-      MyStruct ensure,
+      MyStructEnsureStruct ensure,
       MyStructFieldPatch patch) {
     this();
     this.assign = assign;
@@ -123,7 +123,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
     private MyStruct assign;
     private boolean clear;
     private MyStructFieldPatch patchPrior;
-    private MyStruct ensure;
+    private MyStructEnsureStruct ensure;
     private MyStructFieldPatch patch;
 
     BitSet __optional_isset = new BitSet(1);
@@ -147,7 +147,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
       return this;
     }
 
-    public Builder setEnsure(final MyStruct ensure) {
+    public Builder setEnsure(final MyStructEnsureStruct ensure) {
       this.ensure = ensure;
       return this;
     }
@@ -301,14 +301,14 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public MyStruct getEnsure() {
+  public MyStructEnsureStruct getEnsure() {
     return this.ensure;
   }
 
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public MyStructPatch setEnsure(MyStruct ensure) {
+  public MyStructPatch setEnsure(MyStructEnsureStruct ensure) {
     this.ensure = ensure;
     return this;
   }
@@ -388,7 +388,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
       if (__value == null) {
         unsetEnsure();
       } else {
-        setEnsure((MyStruct)__value);
+        setEnsure((MyStructEnsureStruct)__value);
       }
       break;
 
@@ -547,7 +547,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
           break;
         case ENSURE:
           if (__field.type == TType.STRUCT) {
-            this.ensure = new MyStruct();
+            this.ensure = new MyStructEnsureStruct();
             this.ensure.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);

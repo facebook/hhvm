@@ -52,7 +52,7 @@ public class LateDefStructPatch implements TBase, java.io.Serializable, Cloneabl
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public final LateDefStruct ensure;
+  public final LateDefStructEnsureStruct ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    */
@@ -67,7 +67,7 @@ public class LateDefStructPatch implements TBase, java.io.Serializable, Cloneabl
       LateDefStruct assign,
       Boolean clear,
       LateDefStructFieldPatch patchPrior,
-      LateDefStruct ensure,
+      LateDefStructEnsureStruct ensure,
       LateDefStructFieldPatch patch) {
     this.assign = assign;
     this.clear = clear;
@@ -155,7 +155,7 @@ public class LateDefStructPatch implements TBase, java.io.Serializable, Cloneabl
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public LateDefStruct getEnsure() {
+  public LateDefStructEnsureStruct getEnsure() {
     return this.ensure;
   }
 
@@ -213,7 +213,7 @@ public class LateDefStructPatch implements TBase, java.io.Serializable, Cloneabl
     LateDefStruct tmp_assign = null;
     Boolean tmp_clear = null;
     LateDefStructFieldPatch tmp_patchPrior = null;
-    LateDefStruct tmp_ensure = null;
+    LateDefStructEnsureStruct tmp_ensure = null;
     LateDefStructFieldPatch tmp_patch = null;
     TField __field;
     iprot.readStructBegin();
@@ -248,7 +248,7 @@ public class LateDefStructPatch implements TBase, java.io.Serializable, Cloneabl
           break;
         case ENSURE:
           if (__field.type == TType.STRUCT) {
-            tmp_ensure = LateDefStruct.deserialize(iprot);
+            tmp_ensure = LateDefStructEnsureStruct.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }

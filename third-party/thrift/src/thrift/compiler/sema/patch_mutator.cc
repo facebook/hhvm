@@ -309,7 +309,10 @@ void generate_struct_patch(
     // Add a 'field patch' and 'struct patch' using it.
     auto& generator = patch_generator::get_for(ctx, mctx);
     generator.add_struct_patch(
-        *annot, node, generator.add_field_patch(*annot, node));
+        *annot,
+        node,
+        generator.add_ensure_struct(*annot, node),
+        generator.add_field_patch(*annot, node));
   }
 }
 
@@ -353,6 +356,16 @@ const t_const& patch_generator::get_field_annotation(
   return annot;
 }
 
+t_struct& patch_generator::add_ensure_struct(
+    const t_const& annot, t_structured& orig) {
+  StructGen gen{
+      annot, gen_suffix_struct(annot, orig, "EnsureStruct"), program_};
+  for (const auto& field : orig.fields_id_order()) {
+    box(gen.field(field->id(), field->type(), field->name()));
+  }
+  return gen;
+}
+
 t_struct& patch_generator::add_field_patch(
     const t_const& annot, t_structured& orig) {
   // Resolve (and maybe create) all the field patch types, strictly before
@@ -393,7 +406,10 @@ t_struct& patch_generator::add_union_patch(
 }
 
 t_struct& patch_generator::add_struct_patch(
-    const t_const& annot, t_struct& value_type, t_type_ref patch_type) {
+    const t_const& annot,
+    t_struct& value_type,
+    t_type_ref ensure_type,
+    t_type_ref patch_type) {
   PatchGen gen{
       {annot, gen_suffix_struct(annot, value_type, "Patch"), program_}};
   gen.assign(value_type);
@@ -403,7 +419,7 @@ t_struct& patch_generator::add_struct_patch(
     return gen;
   }
   gen.patchPrior(patch_type);
-  gen.ensureStruct(value_type);
+  gen.ensureStruct(ensure_type);
   gen.patchAfter(patch_type);
   gen.set_adapter("StructPatchAdapter");
   return gen;

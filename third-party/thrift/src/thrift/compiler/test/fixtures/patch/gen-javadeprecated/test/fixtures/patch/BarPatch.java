@@ -52,7 +52,7 @@ public class BarPatch implements TBase, java.io.Serializable, Cloneable {
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public Bar ensure;
+  public BarEnsureStruct ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    */
@@ -78,7 +78,7 @@ public class BarPatch implements TBase, java.io.Serializable, Cloneable {
     tmpMetaDataMap.put(PATCHPRIOR, new FieldMetaData("patchPrior", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, BarFieldPatch.class)));
     tmpMetaDataMap.put(ENSURE, new FieldMetaData("ensure", TFieldRequirementType.DEFAULT, 
-        new StructMetaData(TType.STRUCT, Bar.class)));
+        new StructMetaData(TType.STRUCT, BarEnsureStruct.class)));
     tmpMetaDataMap.put(PATCH, new FieldMetaData("patch", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, BarFieldPatch.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
@@ -94,7 +94,7 @@ public class BarPatch implements TBase, java.io.Serializable, Cloneable {
   public BarPatch(
       boolean clear,
       BarFieldPatch patchPrior,
-      Bar ensure,
+      BarEnsureStruct ensure,
       BarFieldPatch patch) {
     this();
     this.clear = clear;
@@ -108,7 +108,7 @@ public class BarPatch implements TBase, java.io.Serializable, Cloneable {
       Bar assign,
       boolean clear,
       BarFieldPatch patchPrior,
-      Bar ensure,
+      BarEnsureStruct ensure,
       BarFieldPatch patch) {
     this();
     this.assign = assign;
@@ -123,7 +123,7 @@ public class BarPatch implements TBase, java.io.Serializable, Cloneable {
     private Bar assign;
     private boolean clear;
     private BarFieldPatch patchPrior;
-    private Bar ensure;
+    private BarEnsureStruct ensure;
     private BarFieldPatch patch;
 
     BitSet __optional_isset = new BitSet(1);
@@ -147,7 +147,7 @@ public class BarPatch implements TBase, java.io.Serializable, Cloneable {
       return this;
     }
 
-    public Builder setEnsure(final Bar ensure) {
+    public Builder setEnsure(final BarEnsureStruct ensure) {
       this.ensure = ensure;
       return this;
     }
@@ -301,14 +301,14 @@ public class BarPatch implements TBase, java.io.Serializable, Cloneable {
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public Bar getEnsure() {
+  public BarEnsureStruct getEnsure() {
     return this.ensure;
   }
 
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public BarPatch setEnsure(Bar ensure) {
+  public BarPatch setEnsure(BarEnsureStruct ensure) {
     this.ensure = ensure;
     return this;
   }
@@ -388,7 +388,7 @@ public class BarPatch implements TBase, java.io.Serializable, Cloneable {
       if (__value == null) {
         unsetEnsure();
       } else {
-        setEnsure((Bar)__value);
+        setEnsure((BarEnsureStruct)__value);
       }
       break;
 
@@ -492,7 +492,7 @@ public class BarPatch implements TBase, java.io.Serializable, Cloneable {
           break;
         case ENSURE:
           if (__field.type == TType.STRUCT) {
-            this.ensure = new Bar();
+            this.ensure = new BarEnsureStruct();
             this.ensure.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);

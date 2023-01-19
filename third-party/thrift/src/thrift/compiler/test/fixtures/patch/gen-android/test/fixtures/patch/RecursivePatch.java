@@ -52,7 +52,7 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public final Recursive ensure;
+  public final RecursiveEnsureStruct ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    */
@@ -67,7 +67,7 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
       Recursive assign,
       Boolean clear,
       RecursiveFieldPatch patchPrior,
-      Recursive ensure,
+      RecursiveEnsureStruct ensure,
       RecursiveFieldPatch patch) {
     this.assign = assign;
     this.clear = clear;
@@ -155,7 +155,7 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
   /**
    * Initialize fields, using the given defaults. Applies third.
    */
-  public Recursive getEnsure() {
+  public RecursiveEnsureStruct getEnsure() {
     return this.ensure;
   }
 
@@ -213,7 +213,7 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
     Recursive tmp_assign = null;
     Boolean tmp_clear = null;
     RecursiveFieldPatch tmp_patchPrior = null;
-    Recursive tmp_ensure = null;
+    RecursiveEnsureStruct tmp_ensure = null;
     RecursiveFieldPatch tmp_patch = null;
     TField __field;
     iprot.readStructBegin();
@@ -248,7 +248,7 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
           break;
         case ENSURE:
           if (__field.type == TType.STRUCT) {
-            tmp_ensure = Recursive.deserialize(iprot);
+            tmp_ensure = RecursiveEnsureStruct.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }

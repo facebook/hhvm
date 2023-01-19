@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_86e6916e implements TypeList {
+public class __fbthrift_TypeList_3027b24c implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -24,12 +24,14 @@ public class __fbthrift_TypeList_86e6916e implements TypeList {
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/Recursive", "test.fixtures.patch.Recursive"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/Bar", "test.fixtures.patch.Bar"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/Loop", "test.fixtures.patch.Loop"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataEnsureStruct", "test.fixtures.patch.MyDataEnsureStruct"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataFieldPatch", "test.fixtures.patch.MyDataFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataPatch", "test.fixtures.patch.MyDataPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/InnerUnionFieldPatch", "test.fixtures.patch.InnerUnionFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/InnerUnionPatch", "test.fixtures.patch.InnerUnionPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnionFieldPatch", "test.fixtures.patch.MyUnionFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnionPatch", "test.fixtures.patch.MyUnionPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructEnsureStruct", "test.fixtures.patch.MyStructEnsureStruct"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField10Patch", "test.fixtures.patch.MyStructField10Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField23Patch", "test.fixtures.patch.MyStructField23Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField26Patch", "test.fixtures.patch.MyStructField26Patch"));
@@ -41,13 +43,17 @@ public class __fbthrift_TypeList_86e6916e implements TypeList {
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField30Patch1", "test.fixtures.patch.MyStructField30Patch1"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldPatch", "test.fixtures.patch.MyStructFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructPatch", "test.fixtures.patch.MyStructPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStructEnsureStruct", "test.fixtures.patch.LateDefStructEnsureStruct"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStructFieldPatch", "test.fixtures.patch.LateDefStructFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStructPatch", "test.fixtures.patch.LateDefStructPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/RecursiveEnsureStruct", "test.fixtures.patch.RecursiveEnsureStruct"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/RecursiveField1Patch", "test.fixtures.patch.RecursiveField1Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/RecursiveFieldPatch", "test.fixtures.patch.RecursiveFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/RecursivePatch", "test.fixtures.patch.RecursivePatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/BarEnsureStruct", "test.fixtures.patch.BarEnsureStruct"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/BarFieldPatch", "test.fixtures.patch.BarFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/BarPatch", "test.fixtures.patch.BarPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LoopEnsureStruct", "test.fixtures.patch.LoopEnsureStruct"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LoopFieldPatch", "test.fixtures.patch.LoopFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LoopPatch", "test.fixtures.patch.LoopPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyEnum", "test.fixtures.patch.MyEnum"));

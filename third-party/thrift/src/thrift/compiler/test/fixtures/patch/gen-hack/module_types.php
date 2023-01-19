@@ -2849,6 +2849,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ),
     5 => shape(
       'var' => 'ensure',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyDataEnsureStruct::class,
     ),
@@ -2875,7 +2876,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patch' => ?\fixtures\patch\MyDataFieldPatch,
   );
 
-  const int STRUCTURAL_ID = 3548704386113370042;
+  const int STRUCTURAL_ID = 6681566696455846921;
   /**
    * Assigns to a (set) value.
    * 
@@ -2946,6 +2947,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   public function clearTerseFields()[write_props]: void {
     $this->clear = false;
     $this->patchPrior = null;
+    $this->ensure = null;
     $this->patch = null;
   }
 
@@ -3268,6 +3270,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ),
     4 => shape(
       'var' => 'ensure',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\InnerUnion::class,
     ),
@@ -3294,7 +3297,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patch' => ?\fixtures\patch\InnerUnionFieldPatch,
   );
 
-  const int STRUCTURAL_ID = 6528134776313981910;
+  const int STRUCTURAL_ID = 1915469083935775747;
   /**
    * Assigns to a (set) value.
    * 
@@ -3365,6 +3368,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   public function clearTerseFields()[write_props]: void {
     $this->clear = false;
     $this->patchPrior = null;
+    $this->ensure = null;
     $this->patch = null;
   }
 
@@ -3784,6 +3788,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ),
     4 => shape(
       'var' => 'ensure',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyUnion::class,
     ),
@@ -3810,7 +3815,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patch' => ?\fixtures\patch\MyUnionFieldPatch,
   );
 
-  const int STRUCTURAL_ID = 1985033581554149800;
+  const int STRUCTURAL_ID = 366391298232838551;
   /**
    * Assigns to a (set) value.
    * 
@@ -3881,6 +3886,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   public function clearTerseFields()[write_props]: void {
     $this->clear = false;
     $this->patchPrior = null;
+    $this->ensure = null;
     $this->patch = null;
   }
 
@@ -10378,6 +10384,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ),
     5 => shape(
       'var' => 'ensure',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyStructEnsureStruct::class,
     ),
@@ -10404,7 +10411,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patch' => ?\fixtures\patch\MyStructFieldPatch,
   );
 
-  const int STRUCTURAL_ID = 801885874044948683;
+  const int STRUCTURAL_ID = 4511200792980121828;
   /**
    * Assigns to a (set) value.
    * 
@@ -10475,6 +10482,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   public function clearTerseFields()[write_props]: void {
     $this->clear = false;
     $this->patchPrior = null;
+    $this->ensure = null;
     $this->patch = null;
   }
 
@@ -10825,6 +10833,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ),
     5 => shape(
       'var' => 'ensure',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\LateDefStructEnsureStruct::class,
     ),
@@ -10851,7 +10860,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patch' => ?\fixtures\patch\LateDefStructFieldPatch,
   );
 
-  const int STRUCTURAL_ID = 5494957896289751117;
+  const int STRUCTURAL_ID = 7451843861964737914;
   /**
    * Assigns to a (set) value.
    * 
@@ -10922,6 +10931,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   public function clearTerseFields()[write_props]: void {
     $this->clear = false;
     $this->patchPrior = null;
+    $this->ensure = null;
     $this->patch = null;
   }
 
@@ -11581,6 +11591,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ),
     5 => shape(
       'var' => 'ensure',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\RecursiveEnsureStruct::class,
     ),
@@ -11607,7 +11618,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patch' => ?\fixtures\patch\RecursiveFieldPatch,
   );
 
-  const int STRUCTURAL_ID = 1154144766604237485;
+  const int STRUCTURAL_ID = 6789107174916351346;
   /**
    * Assigns to a (set) value.
    * 
@@ -11678,6 +11689,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   public function clearTerseFields()[write_props]: void {
     $this->clear = false;
     $this->patchPrior = null;
+    $this->ensure = null;
     $this->patch = null;
   }
 
@@ -12135,6 +12147,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ),
     5 => shape(
       'var' => 'ensure',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\BarEnsureStruct::class,
     ),
@@ -12161,7 +12174,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patch' => ?\fixtures\patch\BarFieldPatch,
   );
 
-  const int STRUCTURAL_ID = 4954598264992235995;
+  const int STRUCTURAL_ID = 7143245533174072229;
   /**
    * Assigns to a (set) value.
    * 
@@ -12232,6 +12245,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   public function clearTerseFields()[write_props]: void {
     $this->clear = false;
     $this->patchPrior = null;
+    $this->ensure = null;
     $this->patch = null;
   }
 

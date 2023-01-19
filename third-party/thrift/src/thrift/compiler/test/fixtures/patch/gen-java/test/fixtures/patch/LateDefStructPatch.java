@@ -28,7 +28,7 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.LateDefStruct assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
         @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE) final test.fixtures.patch.LateDefStructFieldPatch patchPrior,
-        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.LateDefStructEnsureStruct ensure,
+        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.TERSE) final test.fixtures.patch.LateDefStructEnsureStruct ensure,
         @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final test.fixtures.patch.LateDefStructFieldPatch patch
     ) {
         this.assign = assign;
@@ -43,7 +43,7 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
       this.assign = null;
       this.clear = false;
       this.patchPrior = test.fixtures.patch.LateDefStructFieldPatch.defaultInstance();
-      this.ensure = null;
+      this.ensure = test.fixtures.patch.LateDefStructEnsureStruct.defaultInstance();
       this.patch = test.fixtures.patch.LateDefStructFieldPatch.defaultInstance();
     }
     
@@ -52,7 +52,7 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
         private test.fixtures.patch.LateDefStruct assign = null;
         private boolean clear = false;
         private test.fixtures.patch.LateDefStructFieldPatch patchPrior = test.fixtures.patch.LateDefStructFieldPatch.defaultInstance();
-        private test.fixtures.patch.LateDefStructEnsureStruct ensure = null;
+        private test.fixtures.patch.LateDefStructEnsureStruct ensure = test.fixtures.patch.LateDefStructEnsureStruct.defaultInstance();
         private test.fixtures.patch.LateDefStructFieldPatch patch = test.fixtures.patch.LateDefStructFieldPatch.defaultInstance();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
@@ -79,7 +79,7 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.LateDefStructFieldPatch getPatchPrior() { return patchPrior; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.TERSE)
         public Builder setEnsure(test.fixtures.patch.LateDefStructEnsureStruct ensure) {
             this.ensure = ensure;
             return this;
@@ -173,7 +173,7 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.TERSE)
     public test.fixtures.patch.LateDefStructEnsureStruct getEnsure() { return ensure; }
     
     
@@ -311,11 +311,16 @@ public final class LateDefStructPatch implements com.facebook.thrift.payload.Thr
         } else {
           p.rollback(structStart);
         }    
-      if (ensure != null) {
+      java.util.Objects.requireNonNull(ensure, "ensure must not be null");
+      structStart = p.mark();
         oprot.writeFieldBegin(ENSURE_FIELD_DESC);
+        pos = p.mark();
         this.ensure.write0(oprot);
-        oprot.writeFieldEnd();
-      }
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
       java.util.Objects.requireNonNull(patch, "patch must not be null");
       structStart = p.mark();
         oprot.writeFieldBegin(PATCH_FIELD_DESC);

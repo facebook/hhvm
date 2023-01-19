@@ -28,7 +28,7 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyData assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
         @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataFieldPatch patchPrior,
-        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.MyDataEnsureStruct ensure,
+        @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataEnsureStruct ensure,
         @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataFieldPatch patch
     ) {
         this.assign = assign;
@@ -43,7 +43,7 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
       this.assign = null;
       this.clear = false;
       this.patchPrior = test.fixtures.patch.MyDataFieldPatch.defaultInstance();
-      this.ensure = null;
+      this.ensure = test.fixtures.patch.MyDataEnsureStruct.defaultInstance();
       this.patch = test.fixtures.patch.MyDataFieldPatch.defaultInstance();
     }
     
@@ -52,7 +52,7 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
         private test.fixtures.patch.MyData assign = null;
         private boolean clear = false;
         private test.fixtures.patch.MyDataFieldPatch patchPrior = test.fixtures.patch.MyDataFieldPatch.defaultInstance();
-        private test.fixtures.patch.MyDataEnsureStruct ensure = null;
+        private test.fixtures.patch.MyDataEnsureStruct ensure = test.fixtures.patch.MyDataEnsureStruct.defaultInstance();
         private test.fixtures.patch.MyDataFieldPatch patch = test.fixtures.patch.MyDataFieldPatch.defaultInstance();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
@@ -79,7 +79,7 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
     
         public test.fixtures.patch.MyDataFieldPatch getPatchPrior() { return patchPrior; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.TERSE)
         public Builder setEnsure(test.fixtures.patch.MyDataEnsureStruct ensure) {
             this.ensure = ensure;
             return this;
@@ -173,7 +173,7 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.TERSE)
     public test.fixtures.patch.MyDataEnsureStruct getEnsure() { return ensure; }
     
     
@@ -311,11 +311,16 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
         } else {
           p.rollback(structStart);
         }    
-      if (ensure != null) {
+      java.util.Objects.requireNonNull(ensure, "ensure must not be null");
+      structStart = p.mark();
         oprot.writeFieldBegin(ENSURE_FIELD_DESC);
+        pos = p.mark();
         this.ensure.write0(oprot);
-        oprot.writeFieldEnd();
-      }
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
       java.util.Objects.requireNonNull(patch, "patch must not be null");
       structStart = p.mark();
         oprot.writeFieldBegin(PATCH_FIELD_DESC);

@@ -390,7 +390,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
   -1,
   -1,
   -1,
-  0,
+  -1,
   -1,
 }};
 
@@ -442,7 +442,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
   -1,
   -1,
   -1,
-  0,
+  -1,
   -1,
 }};
 
@@ -504,7 +504,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
   -1,
   -1,
   -1,
-  0,
+  -1,
   -1,
 }};
 
@@ -1201,7 +1201,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
   -1,
   -1,
   -1,
-  0,
+  -1,
   -1,
 }};
 
@@ -1259,7 +1259,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
   -1,
   -1,
   -1,
-  0,
+  -1,
   -1,
 }};
 
@@ -1348,7 +1348,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
   -1,
   -1,
   -1,
-  0,
+  -1,
   -1,
 }};
 
@@ -1416,7 +1416,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
   -1,
   -1,
   -1,
-  0,
+  -1,
   -1,
 }};
 

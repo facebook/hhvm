@@ -552,7 +552,6 @@
             "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
             "key" : 5,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyDataEnsureStruct"
@@ -647,7 +646,6 @@
             "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
             "key" : 4,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "InnerUnion"
@@ -761,7 +759,6 @@
             "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
             "key" : 4,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyUnion"
@@ -2109,7 +2106,6 @@
             "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
             "key" : 5,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructEnsureStruct"
@@ -2198,7 +2194,6 @@
             "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
             "key" : 5,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "LateDefStructEnsureStruct"
@@ -2354,7 +2349,6 @@
             "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
             "key" : 5,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "RecursiveEnsureStruct"
@@ -2466,7 +2460,6 @@
             "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
             "key" : 5,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BarEnsureStruct"

@@ -9061,7 +9061,7 @@ MyDataPatch.thrift_spec = (
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [MyDataFieldPatch, MyDataFieldPatch.thrift_spec, False], None, 3, ), # 3
   None, # 4
-  (5, TType.STRUCT, 'ensure', [MyDataEnsureStruct, MyDataEnsureStruct.thrift_spec, False], None, 2, ), # 5
+  (5, TType.STRUCT, 'ensure', [MyDataEnsureStruct, MyDataEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [MyDataFieldPatch, MyDataFieldPatch.thrift_spec, False], None, 3, ), # 6
 )
 
@@ -9122,7 +9122,7 @@ InnerUnionPatch.thrift_spec = (
   (1, TType.STRUCT, 'assign', [InnerUnion, InnerUnion.thrift_spec, True], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [InnerUnionFieldPatch, InnerUnionFieldPatch.thrift_spec, False], None, 3, ), # 3
-  (4, TType.STRUCT, 'ensure', [InnerUnion, InnerUnion.thrift_spec, True], None, 2, ), # 4
+  (4, TType.STRUCT, 'ensure', [InnerUnion, InnerUnion.thrift_spec, True], None, 3, ), # 4
   None, # 5
   (6, TType.STRUCT, 'patch', [InnerUnionFieldPatch, InnerUnionFieldPatch.thrift_spec, False], None, 3, ), # 6
 )
@@ -9190,7 +9190,7 @@ MyUnionPatch.thrift_spec = (
   (1, TType.STRUCT, 'assign', [MyUnion, MyUnion.thrift_spec, True], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [MyUnionFieldPatch, MyUnionFieldPatch.thrift_spec, False], None, 3, ), # 3
-  (4, TType.STRUCT, 'ensure', [MyUnion, MyUnion.thrift_spec, True], None, 2, ), # 4
+  (4, TType.STRUCT, 'ensure', [MyUnion, MyUnion.thrift_spec, True], None, 3, ), # 4
   None, # 5
   (6, TType.STRUCT, 'patch', [MyUnionFieldPatch, MyUnionFieldPatch.thrift_spec, False], None, 3, ), # 6
 )
@@ -9805,7 +9805,7 @@ MyStructPatch.thrift_spec = (
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [MyStructFieldPatch, MyStructFieldPatch.thrift_spec, False], None, 3, ), # 3
   None, # 4
-  (5, TType.STRUCT, 'ensure', [MyStructEnsureStruct, MyStructEnsureStruct.thrift_spec, False], None, 2, ), # 5
+  (5, TType.STRUCT, 'ensure', [MyStructEnsureStruct, MyStructEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [MyStructFieldPatch, MyStructFieldPatch.thrift_spec, False], None, 3, ), # 6
 )
 
@@ -9862,7 +9862,7 @@ LateDefStructPatch.thrift_spec = (
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [LateDefStructFieldPatch, LateDefStructFieldPatch.thrift_spec, False], None, 3, ), # 3
   None, # 4
-  (5, TType.STRUCT, 'ensure', [LateDefStructEnsureStruct, LateDefStructEnsureStruct.thrift_spec, False], None, 2, ), # 5
+  (5, TType.STRUCT, 'ensure', [LateDefStructEnsureStruct, LateDefStructEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [LateDefStructFieldPatch, LateDefStructFieldPatch.thrift_spec, False], None, 3, ), # 6
 )
 
@@ -9971,7 +9971,7 @@ RecursivePatch.thrift_spec = (
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [RecursiveFieldPatch, RecursiveFieldPatch.thrift_spec, False], None, 3, ), # 3
   None, # 4
-  (5, TType.STRUCT, 'ensure', [RecursiveEnsureStruct, RecursiveEnsureStruct.thrift_spec, False], None, 2, ), # 5
+  (5, TType.STRUCT, 'ensure', [RecursiveEnsureStruct, RecursiveEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [RecursiveFieldPatch, RecursiveFieldPatch.thrift_spec, False], None, 3, ), # 6
 )
 
@@ -10057,7 +10057,7 @@ BarPatch.thrift_spec = (
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [BarFieldPatch, BarFieldPatch.thrift_spec, False], None, 3, ), # 3
   None, # 4
-  (5, TType.STRUCT, 'ensure', [BarEnsureStruct, BarEnsureStruct.thrift_spec, False], None, 2, ), # 5
+  (5, TType.STRUCT, 'ensure', [BarEnsureStruct, BarEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [BarFieldPatch, BarFieldPatch.thrift_spec, False], None, 3, ), # 6
 )
 

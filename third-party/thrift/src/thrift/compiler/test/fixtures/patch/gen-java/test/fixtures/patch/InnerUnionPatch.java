@@ -28,7 +28,7 @@ public final class InnerUnionPatch implements com.facebook.thrift.payload.Thrift
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.InnerUnion assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
         @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE) final test.fixtures.patch.InnerUnionFieldPatch patchPrior,
-        @com.facebook.swift.codec.ThriftField(value=4, name="ensure", requiredness=Requiredness.NONE) final test.fixtures.patch.InnerUnion ensure,
+        @com.facebook.swift.codec.ThriftField(value=4, name="ensure", requiredness=Requiredness.TERSE) final test.fixtures.patch.InnerUnion ensure,
         @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final test.fixtures.patch.InnerUnionFieldPatch patch
     ) {
         this.assign = assign;
@@ -43,7 +43,7 @@ public final class InnerUnionPatch implements com.facebook.thrift.payload.Thrift
       this.assign = null;
       this.clear = false;
       this.patchPrior = test.fixtures.patch.InnerUnionFieldPatch.defaultInstance();
-      this.ensure = null;
+      this.ensure = test.fixtures.patch.InnerUnion.defaultInstance();
       this.patch = test.fixtures.patch.InnerUnionFieldPatch.defaultInstance();
     }
     
@@ -52,7 +52,7 @@ public final class InnerUnionPatch implements com.facebook.thrift.payload.Thrift
         private test.fixtures.patch.InnerUnion assign = null;
         private boolean clear = false;
         private test.fixtures.patch.InnerUnionFieldPatch patchPrior = test.fixtures.patch.InnerUnionFieldPatch.defaultInstance();
-        private test.fixtures.patch.InnerUnion ensure = null;
+        private test.fixtures.patch.InnerUnion ensure = test.fixtures.patch.InnerUnion.defaultInstance();
         private test.fixtures.patch.InnerUnionFieldPatch patch = test.fixtures.patch.InnerUnionFieldPatch.defaultInstance();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
@@ -79,7 +79,7 @@ public final class InnerUnionPatch implements com.facebook.thrift.payload.Thrift
     
         public test.fixtures.patch.InnerUnionFieldPatch getPatchPrior() { return patchPrior; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="ensure", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=4, name="ensure", requiredness=Requiredness.TERSE)
         public Builder setEnsure(test.fixtures.patch.InnerUnion ensure) {
             this.ensure = ensure;
             return this;
@@ -173,7 +173,7 @@ public final class InnerUnionPatch implements com.facebook.thrift.payload.Thrift
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=4, name="ensure", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=4, name="ensure", requiredness=Requiredness.TERSE)
     public test.fixtures.patch.InnerUnion getEnsure() { return ensure; }
     
     
@@ -311,11 +311,16 @@ public final class InnerUnionPatch implements com.facebook.thrift.payload.Thrift
         } else {
           p.rollback(structStart);
         }    
-      if (ensure != null) {
+      java.util.Objects.requireNonNull(ensure, "ensure must not be null");
+      structStart = p.mark();
         oprot.writeFieldBegin(ENSURE_FIELD_DESC);
+        pos = p.mark();
         this.ensure.write0(oprot);
-        oprot.writeFieldEnd();
-      }
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
       java.util.Objects.requireNonNull(patch, "patch must not be null");
       structStart = p.mark();
         oprot.writeFieldBegin(PATCH_FIELD_DESC);

@@ -711,7 +711,7 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             5,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataEnsureStruct),  # typeinfo
             None,  # default value
@@ -823,7 +823,7 @@ class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             4,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnion),  # typeinfo
             None,  # default value
@@ -951,7 +951,7 @@ class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             4,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
             None,  # default value
@@ -2239,7 +2239,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             5,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructEnsureStruct),  # typeinfo
             None,  # default value
@@ -2375,7 +2375,7 @@ class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             5,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(LateDefStructEnsureStruct),  # typeinfo
             None,  # default value
@@ -2575,7 +2575,7 @@ class RecursivePatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             5,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(RecursiveEnsureStruct),  # typeinfo
             None,  # default value
@@ -2727,7 +2727,7 @@ class BarPatch(metaclass=_fbthrift_python_types.StructMeta):
         ),
         (
             5,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(BarEnsureStruct),  # typeinfo
             None,  # default value

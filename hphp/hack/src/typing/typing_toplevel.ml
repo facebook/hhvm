@@ -181,9 +181,8 @@ let fun_def ctx fd :
   begin
     match hint_of_type_hint f.f_ret with
     | None ->
-      if not @@ Env.is_hhi env then
-        Errors.add_typing_error
-          Typing_error.(primary @@ Primary.Expecting_return_type_hint pos)
+      Errors.add_typing_error
+        Typing_error.(primary @@ Primary.Expecting_return_type_hint pos)
     | Some _ -> ()
   end;
   let (env, tparams) = List.map_env env f.f_tparams ~f:Typing.type_param in

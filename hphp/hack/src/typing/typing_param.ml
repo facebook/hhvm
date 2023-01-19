@@ -27,11 +27,9 @@ let enforce_param_not_disposable env param ty =
         Typing_error.Primary.Invalid_disposable_hint
           { pos = param.param_pos; class_name = Utils.strip_ns class_name })
 
-let check_param_has_hint env param =
+let check_param_has_hint param =
   let prim_err_opt =
-    if Env.is_hhi env then
-      None
-    else if Option.is_none (hint_of_type_hint param.param_type_hint) then
+    if Option.is_none (hint_of_type_hint param.param_type_hint) then
       Some
         (if param.param_is_variadic then
           Typing_error.Primary.Expecting_type_hint_variadic param.param_pos
@@ -85,7 +83,7 @@ let check_param_has_hint env param =
  *)
 let make_param_local_ty ~dynamic_mode env decl_hint param =
   (* Don't check (again) for existence of hint in dynamic mode *)
-  if not dynamic_mode then check_param_has_hint env param;
+  if not dynamic_mode then check_param_has_hint param;
   match decl_hint with
   | None -> (env, None)
   | Some hint ->

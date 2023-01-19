@@ -303,9 +303,8 @@ let method_def ~is_disposable env cls m =
     | None when String.equal method_name SN.Members.__construct ->
       Some (pos, Hprim Tvoid)
     | None ->
-      if not @@ Env.is_hhi env then
-        Errors.add_typing_error
-          Typing_error.(primary @@ Primary.Expecting_return_type_hint pos);
+      Errors.add_typing_error
+        Typing_error.(primary @@ Primary.Expecting_return_type_hint pos);
       None
     | Some _ -> hint_of_type_hint m.m_ret
   in
@@ -1083,8 +1082,7 @@ let class_var_def ~is_static cls env cv =
       cv.cv_user_attributes
   in
 
-  (if (not (Env.is_hhi env)) && Option.is_none (hint_of_type_hint cv.cv_type)
-  then
+  (if Option.is_none (hint_of_type_hint cv.cv_type) then
     let vis =
       match cv.cv_visibility with
       | Public -> `public

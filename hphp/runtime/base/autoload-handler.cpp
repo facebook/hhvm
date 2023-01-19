@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/repo-global-data.h"

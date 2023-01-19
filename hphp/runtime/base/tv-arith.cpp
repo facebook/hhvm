@@ -25,13 +25,11 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/double-to-int64.h"
-#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
-#include "hphp/util/overflow.h"
 
 namespace HPHP {
 

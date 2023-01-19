@@ -95,11 +95,12 @@ NOTE: The Thrift compiler currently allows Unix style comments (`## comment`).  
 
 ## **The Thrift File**
 
-The Thrift file starts with include statements followed by namespace directives and then followed by a sequence of constant definitions, type definitions, and service definitions.
+The Thrift file starts with include statements followed by an optional package and optional namespace directives and then followed by a sequence of constant definitions, type definitions, and service definitions.
 
 ```
 ThriftFile ::=
   IncludeStatement*
+  PackageDeclaration*
   NamespaceDirective*
   ( TypeDefinition
   | ConstantDefinition
@@ -112,6 +113,9 @@ The following example illustrates concepts introduced so far:
 // Allows the definitions in SearchTypes.thrift to be used here qualified with the
 // prefix "SearchTypes.".
 include "common/if/SearchTypes.thrift"
+
+// Prefix for universal name of each element type
+package "facebook.com/peoplesearch"
 
 // Directs the compiler to generate C++ code inside the namespace "::facebook::peoplesearch::cpp2",
 // and to generate Java code inside the package "com.facebook.peoplesearch".
@@ -173,6 +177,26 @@ struct PeopleSearchResponse {
 Includes should not create a circular dependency between files.  So `A.thrift` cannot include itself, and cannot include `B.thrift` if `B.thrift` includes `A.thrift`.  Including multiple files with a common ancestor is okay - so `A.thrift` can include `B.thrift` and `C.thrift` when both `B.thrift` and `C.thrift` include `D.thrift`.
 
 NOTE: Includes are more like Python imports rather than a textual copy as in C/C++ includes. If `A.thrift` includes `B.thrift` and `B.thrift` includes `C.thrift`, then `A.thrift` can not access `C` unless it also includes `C.thrift`.
+
+---
+
+## **Package Declaration**
+A package declaration defines the default [Universal Name](../definition/universal-name.md) prefix and optional annotations, under which all definitions in the program are declared:
+
+```
+PackageDeclaration:
+    {Annotations}
+    package "Domain/Identifier{/Identifier}";
+```
+
+For example:
+
+```
+package "test.dev/testing"
+
+ // Has the universal name "test.dev/testing/MyInt".
+typedef int MyInt
+```
 
 ---
 

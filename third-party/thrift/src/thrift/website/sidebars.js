@@ -99,6 +99,7 @@ module.exports = {
           },
           items: [
             "spec/definition/interface",
+            "spec/definition/universal-name",
             "spec/definition/program",
             "spec/definition/data",
             "spec/definition/exception",
@@ -147,6 +148,7 @@ module.exports = {
 
         // Released features:
         'fb/features/serialization',
+        'features/universal-name',
         {
           type: 'category',
           label: 'Streaming',
@@ -523,6 +525,7 @@ module.exports = {
             'contributions/conformance/testsuite/server-rpc',
           ]
         },
+        'contributions/universal-name',
         {
           type: 'category',
           label: 'Documentation',

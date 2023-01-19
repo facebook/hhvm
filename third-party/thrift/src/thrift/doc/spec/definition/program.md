@@ -7,21 +7,9 @@ state: experimental
 A program consists of:
 
 1. optional [includes](#includes),
-1. the [package](#package) for the program,
-1. optional [namespace](#namespaces) overrides, and
-1. [definitions](#definitions).
-
-## Universal Names
-
-A Universal Name uniquely identifies a Thrift [definition](index.md), regardless of which program it is defined in. It **must** be a valid [URI](https://tools.ietf.org/html/rfc3986) that meets the following criteria:
-
-- **Must not** have a scheme; "fbthrift://" is implied.
-- **Must** include a domain name as the 'authority', with at least 2 domain labels.
-- **Must** include a path (with at least 2 path segments for a definition).
-- **Must not** have a query or a fragment.
-- **Must** be in the following canonical/normalized form:
-  - Domain name labels **must** be lowercase ASCII letters, numbers, -, or _.
-  - Path segments **must** be ASCII letters, numbers, -, or _.
+2. optional [package](#package) for the program,
+3. optional [namespace](#namespaces) overrides, and
+4. [definitions](#definitions).
 
 ## Includes
 
@@ -38,7 +26,7 @@ IncludeDeclaration:
 
 ## Package
 
-A package declaration defines the default [Universal Name](#universal-names) and optional annotations, under which all [definitions](#definitions) in the program are declared:
+A package declaration defines the default [Universal Name](universal-name.md) prefix and optional annotations, under which all [definitions](#definitions) in the program are declared:
 
 ```
 PackageDeclaration:
@@ -93,25 +81,8 @@ namespace java.swift com.domain.path.to.file
 
 ## Definitions
 
-[Definitions](../index.md) **may** have an unstructured annotation `thrift.uri` as an [Universal Name](#universal-names). It **must** be globally unique. If a [Universal Name](#universal-names) is not specified, one will be generated using a package `{package}/{identifier}`. For example,
+Definitions can be sequence of [constant definitions](../idl/idl-reference#constant-definitions), [type definitions](../idl/idl-reference#type-definitions), and [service definitions](../idl/idl-reference#services).
 
-```
-package "example.com/path/to/file"
-
-struct Foo {
-  1: i32 field;
-}
-```
-
-This is equivalent to
-
-```
-package "example.com/path/to/file"
-
-struct Foo {
-  1: i32 field;
-} (thrift.uri = "example.com/path/to/file/Foo")
-```
 
 ## Abstract Syntax Tree (AST)
 

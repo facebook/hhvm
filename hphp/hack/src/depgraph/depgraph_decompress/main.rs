@@ -393,7 +393,7 @@ fn decompress(in_path: &Path, out_path: &Path) -> std::io::Result<()> {
     // we don't know their sizes yet.
     let edges_index_offset = out_header_size + deps_size + deps_order_size;
     let out_file_size = edges_index_offset + edge_map_size;
-    let out_file = OpenOptions::new().create(true).write(true).open(out_path)?;
+    let out_file = File::create(out_path)?;
     out_file.set_len(out_file_size as u64)?;
 
     // Write out the deps and edges sections in parallel.

@@ -8,6 +8,7 @@
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::ffi::OsString;
+use std::fs::File;
 use std::path::Path;
 
 use dep::Dep;
@@ -248,12 +249,13 @@ ocaml_ffi! {
     fn hh_custom_dep_graph_save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
         let f = std::fs::OpenOptions::new()
             .create(true)
-            .write(true)
             .append(true)
             .open(&dest).unwrap();
-        let mut w = std::io::BufWriter::new(f);
         let hashes_added = dep_graph_delta_with(move |s| {
-            s.write_to(&mut w).unwrap()
+            let mut w = std::io::BufWriter::new(f);
+            let hashes_added = s.write_to(&mut w).unwrap();
+            w.into_inner().unwrap();
+            hashes_added
         });
 
         if reset_state_after_saving {
@@ -265,9 +267,7 @@ ocaml_ffi! {
     }
 
     fn hh_custom_dep_graph_load_delta(mode: RawTypingDepsMode, source: OsString) -> usize {
-        let f = std::fs::OpenOptions::new()
-            .read(true)
-            .open(&source).unwrap();
+        let f = File::open(&source).unwrap();
         let mut r = std::io::BufReader::new(f);
 
         // Safety: we don't call into OCaml again, so mode will remain valid.

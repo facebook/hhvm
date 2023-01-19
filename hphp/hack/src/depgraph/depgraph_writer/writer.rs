@@ -62,6 +62,7 @@ pub fn write_dep_graph(output: &Path, g: MemDepGraph) -> std::io::Result<()> {
     let f = std::fs::OpenOptions::new()
         .write(true)
         .create(true)
+        .truncate(true)
         .open(output)?;
 
     let num_deps = g.hashes.len() as u64;

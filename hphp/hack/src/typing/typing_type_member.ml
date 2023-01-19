@@ -10,6 +10,7 @@
 open Hh_prelude
 open Typing_defs
 module Env = Typing_env
+module TySet = Typing_set
 
 type type_member =
   | Error of Typing_error.t option
@@ -77,30 +78,33 @@ let lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id =
   end
 
 let lookup_class_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
-  let ulist = Typing_utils.union_list ~approx_cancel_neg:false in
-  let ilist = Typing_utils.intersect_list in
-  let combine env ~f = function
-    | [] -> (env, None)
-    | bounds ->
-      let (env, ty) = f env Reason.Rnone bounds in
-      (env, Some ty)
+  let (combine_lower, combine_upper) =
+    let dedup_then ~f tys =
+      let ts = TySet.of_list tys in
+      if TySet.is_empty ts then
+        None
+      else
+        Some (f (TySet.elements ts))
+    in
+    ( dedup_then ~f:(Typing_make_type.union Reason.Rnone),
+      dedup_then ~f:(Typing_make_type.intersection Reason.Rnone) )
   in
-  let (env, refined_type_member) =
+  let refined_type_member =
     match exact with
     | Nonexact cr -> begin
       match Class_refinement.get_type_ref type_id cr with
-      | Some (TRexact ty) -> (env, Exact ty)
+      | Some (TRexact ty) -> Exact ty
       | Some (TRloose { tr_lower; tr_upper }) ->
-        let (env, lower) = combine ~f:ulist env tr_lower in
-        let (env, upper) = combine ~f:ilist env tr_upper in
+        let lower = combine_lower tr_lower in
+        let upper = combine_upper tr_upper in
         (* FIXME(refinements): The position is pointing at
          * the class when we would like to point in the
          * refinement. *)
         let name = (fst cls_id, snd type_id) in
-        (env, Abstract { name; lower; upper })
-      | None -> (env, Error None)
+        Abstract { name; lower; upper }
+      | None -> Error None
     end
-    | _ -> (env, Error None)
+    | _ -> Error None
   in
   match refined_type_member with
   | Exact _ -> (env, refined_type_member)
@@ -115,8 +119,8 @@ let lookup_class_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
     | (env, Abstract { name = cls_name; lower = cls_lower; upper = cls_upper })
       ->
       let to_list b1 b2 = List.filter_map ~f:Fn.id [b1; b2] in
-      let (env, lower) = combine ~f:ulist env (to_list mem_lower cls_lower) in
-      let (env, upper) = combine ~f:ilist env (to_list mem_upper cls_upper) in
+      let lower = combine_lower (to_list mem_lower cls_lower) in
+      let upper = combine_upper (to_list mem_upper cls_upper) in
       (env, Abstract { name = cls_name; lower; upper }))
   | _ -> lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id
 

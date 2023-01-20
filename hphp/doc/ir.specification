@@ -2587,7 +2587,7 @@ To string conversions:
 
   Change the state of the Generator object which has frame pointer S0.
 
-| LdContArValue, DParam(InitCell), S(FramePtr), PRc
+| LdContArValue, DParam(InitCell), S(FramePtr), NF
 
   Loads 'value' from the Generator object ActRec of which is S0.
 
@@ -2596,7 +2596,7 @@ To string conversions:
   Stores 'value' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
-| LdContArKey, DParam(InitCell), S(FramePtr), PRc
+| LdContArKey, DParam(InitCell), S(FramePtr), NF
 
   Loads 'key' from the Generator object ActRec of which is S0.
 

@@ -7,6 +7,7 @@
 use std::path::Path;
 use std::path::PathBuf;
 
+use dep::Dep;
 use ocamlrep_custom::Custom;
 
 #[cfg(fbcode_build)]
@@ -48,10 +49,14 @@ ocamlrep_ocamlpool::ocaml_ffi! {
     }
 
     // Each edge is a tuple of (dependency, dependent).
-    fn hh_fanout_ffi_add_idep_batch(hh_fanout: Custom<HhFanoutRustFfi>, edges: Vec<(u64, u64)>) {
-        use hh24_types::DepGraphEdge;
+    fn hh_fanout_ffi_add_idep_batch(hh_fanout: Custom<HhFanoutRustFfi>, edges: Vec<(Dep, Dep)>) {
+        // TODO: the conversion of Vec<(Dep, Dep)> to DepGraphEdge probably
+        // isn't too efficient. The construction of the Rust Vec from OCaml list
+        // might also be inefficient. Left for later optimization.
         if let Err(err) = hh_fanout.0.borrow_mut().commit_edges(
-            edges.into_iter().map(|(dependency, dependent)| DepGraphEdge::from_u64(dependency, dependent)).collect()
+            edges.into_iter().map(|(dependency, dependent)| hh24_types::DepGraphEdge {
+                dependency: hh24_types::DependencyHash(dependency.into()),
+                dependent: hh24_types::ToplevelSymbolHash::from_u64(dependent.into()) }).collect()
         ) {
             eprintln!("Error: {err}");
             todo!("deal with hh errors like checksum mismatch");
@@ -69,7 +74,7 @@ ocamlrep_ocamlpool::ocaml_ffi! {
     fn hh_fanout_ffi_make_hhdg_builder(_builder_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
         unimplemented!()
     }
-    fn hh_fanout_ffi_add_idep_batch(_hh_fanout: Custom<HhFanoutRustFfi>, _edges: Vec<(u64, u64)>) {
+    fn hh_fanout_ffi_add_idep_batch(_hh_fanout: Custom<HhFanoutRustFfi>, _edges: Vec<(Dep, Dep)>) {
         unimplemented!()
     }
 }

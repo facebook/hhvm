@@ -11,6 +11,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
+dep = { path = "../../../depgraph/cargo/dep" }
 hh24_types = { path = "../../../utils/hh24_types" }
 hh_slog = { path = "../../../utils/hh_slog/cargo/hh_slog" }
 ocamlrep_custom = { path = "../../../ocamlrep_custom" }

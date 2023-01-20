@@ -752,6 +752,12 @@ module HhFanout : sig
 
   val flush_edges : Hh_fanout_rust_ffi_externs.hh_fanout_rust_ffi -> unit
 end = struct
+  (* The list is of (dependency, dependent). This was moved from `hh_fanout_rust_ffi_externs` so that it could have access to `Dep.t` *)
+  external commit_edges :
+    Hh_fanout_rust_ffi_externs.hh_fanout_rust_ffi ->
+    (Dep.t * Dep.t) list ->
+    unit = "hh_fanout_ffi_add_idep_batch"
+
   let discovered_deps_batch : (CustomGraph.dep_edge, unit) Hashtbl.t =
     Hashtbl.create 1000
 
@@ -765,7 +771,7 @@ end = struct
         discovered_deps_batch
         []
     in
-    Hh_fanout_rust_ffi_externs.commit_edges hh_fanout_ffi edges;
+    commit_edges hh_fanout_ffi edges;
     Hashtbl.clear discovered_deps_batch
 
   let add_idep hh_fanout_ffi dependent dependency =

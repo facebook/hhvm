@@ -2287,6 +2287,7 @@ dependencies = [
 name = "hh_fanout_rust_ffi"
 version = "0.0.0"
 dependencies = [
+ "dep",
  "hh24_types",
  "hh_slog",
  "ocamlrep_custom",

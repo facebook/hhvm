@@ -76,11 +76,7 @@ let collection r ty = class_type r SN.Collections.cCollection [ty]
 let spliceable r ty1 ty2 ty3 =
   class_type r SN.Classes.cSpliceable [ty1; ty2; ty3]
 
-let varray_or_darray r kty vty = mk (r, Tvec_or_dict (kty, vty))
-
-let varray r ty = vec r ty
-
-let darray r kty vty = dict r kty vty
+let vec_or_dict r kty vty = mk (r, Tvec_or_dict (kty, vty))
 
 let int r = prim_type r Nast.Tint
 

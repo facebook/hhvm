@@ -44,13 +44,6 @@ val remove_key :
   ('a, 'b) Aast.expr ->
   Typing_env_types.env * Typing_reason.locl_phase Typing_defs.ty
 
-val to_array :
-  Typing_env_types.env ->
-  Pos.t ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_phase Typing_defs.ty ->
-  Type_mapper.result
-
 val to_dict :
   Typing_env_types.env ->
   Pos.t ->

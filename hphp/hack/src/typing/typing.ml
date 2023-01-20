@@ -1861,18 +1861,14 @@ let safely_refine_is_array env ty p pred_name arg_expr =
       let array_ty =
         let tk = MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)) in
         let tv = tfresh in
-        MakeType.varray_or_darray r tk tv
+        MakeType.vec_or_dict r tk tv
       in
       (* This is the refined type of e inside the branch *)
       let hint_ty =
         match ty with
         | PHPArray -> array_ty
-        | HackDictOrDArray ->
-          MakeType.union
-            r
-            [MakeType.dict r tarrkey tfresh; MakeType.darray r tarrkey tfresh]
-        | HackVecOrVArray ->
-          MakeType.union r [MakeType.vec r tfresh; MakeType.varray r tfresh]
+        | HackDictOrDArray -> MakeType.dict r tarrkey tfresh
+        | HackVecOrVArray -> MakeType.vec r tfresh
       in
       let (_, arg_pos, _) = arg_expr in
       let (env, refined_ty) =
@@ -3488,7 +3484,7 @@ and expr_
           array_value,
           false,
           (fun th elements -> Aast.ValCollection ((p, Vec), th, elements)),
-          (fun value_ty -> MakeType.varray (Reason.Rwitness p) value_ty),
+          (fun value_ty -> MakeType.vec (Reason.Rwitness p) value_ty),
           None )
       | _ ->
         (* The parent match makes this case impossible *)
@@ -3542,7 +3538,7 @@ and expr_
         ( get_kvc_inst env p Dict,
           name,
           (fun th pairs -> Aast.KeyValCollection ((p, Dict), th, pairs)),
-          (fun k v -> MakeType.darray (Reason.Rwitness p) k v) )
+          (fun k v -> MakeType.dict (Reason.Rwitness p) k v) )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"
@@ -5495,7 +5491,7 @@ and closure_bind_variadic env vparam variadic_ty =
   Option.iter ty_err_opt ~f:Errors.add_typing_error;
   let r = Reason.Rvar_param_from_decl pos in
   let arr_values = mk (r, get_node ty) in
-  let ty = MakeType.varray r arr_values in
+  let ty = MakeType.vec r arr_values in
   let (env, t_variadic) = bind_param env (Some ty, vparam) in
   (env, t_variadic)
 
@@ -7027,7 +7023,6 @@ and dispatch_call
                     MakeType.dynamic r;
                     MakeType.dict r tmixed tmixed;
                     MakeType.keyset r tmixed;
-                    MakeType.darray r tmixed tmixed;
                   ] )
           in
           let reason =
@@ -7224,21 +7219,10 @@ and dispatch_call
               (env, res)
           end
           | _ -> (env, res))
-    (* Special function `Shapes::toArray` *)
-    | to_array when String.equal to_array SN.Shapes.toArray ->
-      overload_function
-        p
-        env
-        class_id
-        method_id
-        el
-        unpacked_element
-        (fun env _ res _el tel ->
-          match tel with
-          | [(_, (shape_ty, _, _))] -> Typing_shapes.to_array env p shape_ty res
-          | _ -> (env, res))
-    (* Special function `Shapes::toDict` *)
-    | to_dict when String.equal to_dict SN.Shapes.toDict ->
+    (* Special functions `Shapes::toDict` and `Shapes::toArray` *)
+    | to_dict
+      when String.equal to_dict SN.Shapes.toDict
+           || String.equal to_dict SN.Shapes.toArray ->
       overload_function
         p
         env

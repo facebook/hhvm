@@ -425,18 +425,6 @@ let to_collection env pos shape_ty res return_type =
   in
   mapper#on_type (Type_mapper.fresh_env env) shape_ty
 
-let to_array env pos shape_ty res =
-  let ((env, e1), shape_ty) =
-    Typing_solver.expand_type_and_solve
-      ~description_of_expected:"a shape"
-      env
-      pos
-      shape_ty
-  in
-  Option.iter ~f:Errors.add_typing_error e1;
-  to_collection env pos shape_ty res (fun env r key value ->
-      make_locl_like_type env (MakeType.darray r key value))
-
 let to_dict env pos shape_ty res =
   let ((env, e1), shape_ty) =
     Typing_solver.expand_type_and_solve

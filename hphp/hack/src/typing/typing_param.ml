@@ -133,10 +133,10 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
       match get_node ty with
       | t when param.param_is_variadic ->
         (* when checking the body of a function with a variadic
-         * argument, "f(C ...$args)", $args is a varray<C> *)
+         * argument, "f(C ...$args)", $args is a vec<C> *)
         let r = Reason.Rvar_param param.param_pos in
         let arr_values = mk (r, t) in
-        MakeType.varray r arr_values
+        MakeType.vec r arr_values
       | _ -> ty
     in
     (* We do not permit hints to implement IDisposable or IAsyncDisposable *)

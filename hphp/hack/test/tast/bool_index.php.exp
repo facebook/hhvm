@@ -1,0 +1,61 @@
+Errors:
+  [4:3-11] You are trying to access an element of this container but the container could be `null`. 
+  [3:15-20] This is what makes me believe it can be `null`.
+  [5:3-9] You are trying to access an element of this container but the container could be `null`. 
+  [3:15-20] This is what makes me believe it can be `null`.
+  [6:3-9] You are trying to access an element of this container but the container could be `null`. 
+  [3:15-20] This is what makes me believe it can be `null`.
+  [7:3-9] You are trying to access an element of this container but the container could be `null`. 
+  [3:15-20] This is what makes me believe it can be `null`.
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
+      fd_fun =
+      { f_span = [3:1-8:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid))));
+        f_tparams = [{ tp_variance = Invariant; tp_name = ([3:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+        f_where_constraints = [];
+        f_params =
+        [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:15-20], Hmixed))); 
+           param_is_variadic = false; param_pos = [3:21-23]; param_name = "$m"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None };
+          { param_annotation = (T); param_type_hint = ((T), (Some ([3:25-26], (Habstr ("T", []))))); 
+            param_is_variadic = false; param_pos = [3:27-29]; param_name = "$t"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = (nonnull); param_type_hint = ((nonnull), (Some ([3:31-38], Hnonnull))); 
+            param_is_variadic = false; param_pos = [3:39-41]; param_name = "$n"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-12],
+            (Expr
+               ((nothing), [4:3-11],
+                (Array_get (((mixed), [4:3-5], (Hole (((mixed), [4:3-5], (Lvar ([4:3-5], $m))), (mixed), (KeyedContainer<nothing, nothing>), Typing))), (Some ((bool), [4:6-10], True)))))));
+            ([5:3-10],
+             (Expr
+                ((nothing), [5:3-9],
+                 (Array_get (((mixed), [5:3-5], (Hole (((mixed), [5:3-5], (Lvar ([5:3-5], $m))), (mixed), (KeyedContainer<(arraykey & T), nothing>), Typing))),
+                    (Some ((T), [5:6-8], (Lvar ([5:6-8], $t)))))))));
+            ([6:3-10],
+             (Expr
+                ((nothing), [6:3-9],
+                 (Array_get (((mixed), [6:3-5], (Hole (((mixed), [6:3-5], (Lvar ([6:3-5], $m))), (mixed), (KeyedContainer<arraykey, nothing>), Typing))),
+                    (Some ((nonnull), [6:6-8], (Lvar ([6:6-8], $n)))))))));
+            ([7:3-10],
+             (Expr
+                ((nothing), [7:3-9],
+                 (Array_get (((mixed), [7:3-5], (Hole (((mixed), [7:3-5], (Lvar ([7:3-5], $m))), (mixed), (KeyedContainer<arraykey, nothing>), Typing))),
+                    (Some ((mixed), [7:6-8], (Lvar ([7:6-8], $m)))))))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None })

@@ -366,20 +366,24 @@ let rec array_get
             e2
             ty2
         else
+          let arraykey = MakeType.arraykey Reason.none in
           let mixed = MakeType.mixed Reason.none in
           (* If our non-null type, ty, is a subtype of `KeyedContainer`
              use it in the hole, otherwise suggest KeyedContainer *)
-          let ty_expected =
+          let (env, ty_expected) =
             if
               SubType.is_sub_type
                 env
                 ty
-                (MakeType.keyed_container Reason.none mixed mixed)
+                (MakeType.keyed_container Reason.none arraykey mixed)
             then
-              ty
+              (env, ty)
             else
               let nothing = MakeType.nothing Reason.none in
-              MakeType.keyed_container Reason.none ty2 nothing
+              let (env, ty2) =
+                Typing_intersection.intersect env ~r:Reason.Rnone arraykey ty2
+              in
+              (env, MakeType.keyed_container Reason.none ty2 nothing)
           in
           Errors.add_typing_error
             Typing_error.(
@@ -819,8 +823,12 @@ let rec array_get
           error_array env expr_pos ty1;
           let (env, res_ty) = err_witness env expr_pos in
           let ty_nothing = Typing_make_type.nothing Reason.none in
+          let (env, ty_key) =
+            MakeType.arraykey Reason.none
+            |> Typing_intersection.intersect ~r:Reason.Rnone env ty2
+          in
           let ty_keyedcontainer =
-            Typing_make_type.(keyed_container Reason.none ty2 ty_nothing)
+            Typing_make_type.(keyed_container Reason.none ty_key ty_nothing)
           in
           (env, (res_ty, Error (ty1, ty_keyedcontainer), Ok ty2))
       end
@@ -840,8 +848,12 @@ let rec array_get
         error_array env expr_pos ty1;
         let (env, res_ty) = err_witness env expr_pos in
         let ty_nothing = Typing_make_type.nothing Reason.none in
+        let (env, ty_key) =
+          MakeType.arraykey Reason.none
+          |> Typing_intersection.intersect ~r:Reason.Rnone env ty2
+        in
         let ty_keyedcontainer =
-          Typing_make_type.(keyed_container Reason.none ty2 ty_nothing)
+          Typing_make_type.(keyed_container Reason.none ty_key ty_nothing)
         in
         (env, (res_ty, Error (ty1, ty_keyedcontainer), Ok ty2))
       (* Type-check array access as though it is the method
@@ -851,7 +863,11 @@ let rec array_get
        *)
       | Tvar _ ->
         let (env, value) = Env.fresh_type env expr_pos in
-        let keyed_container = MakeType.keyed_container r ty2 value in
+        let (env, ty_key) =
+          MakeType.arraykey Reason.none
+          |> Typing_intersection.intersect ~r:Reason.Rnone env ty2
+        in
+        let keyed_container = MakeType.keyed_container r ty_key value in
         let (env, arr_ty_err_opt) =
           SubType.sub_type env ty1 keyed_container
           @@ Some

@@ -42,7 +42,8 @@ Errors:
          f_readonly_ret = None; f_ret = ((int), (Some ([7:34-37], (Hprim Tint)))); 
          f_tparams = []; f_where_constraints = [];
          f_params =
-         [{ param_annotation = (KeyedContainer<mixed, nothing>); param_type_hint = ((KeyedContainer<mixed, nothing>), None); 
+         [{ param_annotation = (KeyedContainer<(mixed & arraykey), nothing>); 
+            param_type_hint = ((KeyedContainer<(mixed & arraykey), nothing>), None); 
             param_is_variadic = false; param_pos = [7:24-26]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
@@ -54,7 +55,9 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([8:3-17], (Return (Some ((nothing), [8:10-16], (Array_get (((KeyedContainer<mixed, nothing>), [8:10-12], (Lvar ([8:10-12], $x))), (Some ((mixed), [8:13-15], (Lvar ([8:13-15], $i))))))))))
+           [([8:3-17],
+             (Return
+                (Some ((nothing), [8:10-16], (Array_get (((KeyedContainer<(mixed & arraykey), nothing>), [8:10-12], (Lvar ([8:10-12], $x))), (Some ((mixed), [8:13-15], (Lvar ([8:13-15], $i))))))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

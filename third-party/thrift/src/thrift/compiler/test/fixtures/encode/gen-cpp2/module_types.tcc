@@ -309,8 +309,7 @@ void Baz::readNoXfer(Protocol_* iprot) {
 _readField_list_field:
   {
     _readState.beforeSubobject(iprot);
-    this->__fbthrift_field_list_field = ::std::vector<::facebook::thrift::test::AdaptedFoo>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::facebook::thrift::test::Foo>>::readWithContext(*iprot, this->__fbthrift_field_list_field, _readState);
+    ::apache::thrift::op::decode<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*iprot, this->__fbthrift_field_list_field);
     _readState.afterSubobject(iprot);
     
   }
@@ -326,8 +325,7 @@ _readField_list_field:
 _readField_nested_list_field:
   {
     _readState.beforeSubobject(iprot);
-    this->__fbthrift_field_nested_list_field = ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::vector<::std::vector<::facebook::thrift::test::Foo>>>::readWithContext(*iprot, this->__fbthrift_field_nested_list_field, _readState);
+    ::apache::thrift::op::decode<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*iprot, this->__fbthrift_field_nested_list_field);
     _readState.afterSubobject(iprot);
     
   }
@@ -389,11 +387,11 @@ uint32_t Baz::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("Baz");
   {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::facebook::thrift::test::Foo>>::serializedSize<false>(*prot_, this->__fbthrift_field_list_field);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_field);
   }
   {
     xfer += prot_->serializedFieldSize("nested_list_field", apache::thrift::protocol::T_LIST, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::vector<::std::vector<::facebook::thrift::test::Foo>>>::serializedSize<false>(*prot_, this->__fbthrift_field_nested_list_field);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*prot_, this->__fbthrift_field_nested_list_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -405,11 +403,11 @@ uint32_t Baz::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("Baz");
   {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::facebook::thrift::test::Foo>>::serializedSize<false>(*prot_, this->__fbthrift_field_list_field);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_field);
   }
   {
     xfer += prot_->serializedFieldSize("nested_list_field", apache::thrift::protocol::T_LIST, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::vector<::std::vector<::facebook::thrift::test::Foo>>>::serializedSize<false>(*prot_, this->__fbthrift_field_nested_list_field);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*prot_, this->__fbthrift_field_nested_list_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -424,14 +422,14 @@ uint32_t Baz::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 1, kPrevFieldId>(*prot_, "list_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::facebook::thrift::test::Foo>>::write(*prot_, this->__fbthrift_field_list_field);
+    xfer += ::apache::thrift::op::encode<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_field);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 1;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 2, kPrevFieldId>(*prot_, "nested_list_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::vector<::std::vector<::facebook::thrift::test::Foo>>>::write(*prot_, this->__fbthrift_field_nested_list_field);
+    xfer += ::apache::thrift::op::encode<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*prot_, this->__fbthrift_field_nested_list_field);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

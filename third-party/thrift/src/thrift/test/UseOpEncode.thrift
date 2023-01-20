@@ -26,7 +26,6 @@ struct Foo {
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef Foo AdaptedFoo
 
-@cpp.UseOpEncode
 struct Bar {
   1: list<AdaptedFoo> list_field;
 }

@@ -853,6 +853,44 @@ class cpp_mstch_function : public mstch_function {
   }
 };
 
+bool needs_op_encode(const t_type& type);
+
+bool check_container_needs_op_encode(const t_type& type) {
+  const auto* true_type = type.get_true_type();
+  if (auto container = dynamic_cast<const t_list*>(true_type)) {
+    return needs_op_encode(*container->elem_type());
+  } else if (auto container = dynamic_cast<const t_set*>(true_type)) {
+    return needs_op_encode(*container->elem_type());
+  } else if (auto container = dynamic_cast<const t_map*>(true_type)) {
+    return needs_op_encode(*container->key_type()) ||
+        needs_op_encode(*container->val_type());
+  }
+  return false;
+}
+
+bool needs_op_encode(const t_type& type) {
+  return (type.program() &&
+          type.program()->inherit_annotation_or_null(
+              type, kCppUseOpEncodeUri)) ||
+      t_typedef::get_first_structured_annotation_or_null(
+             &type, kCppUseOpEncodeUri) ||
+      gen::cpp::type_resolver::find_first_adapter(type) ||
+      check_container_needs_op_encode(type);
+}
+
+// Enable `@cpp.UseOpEncode` for following fields:
+// - A package is annotated with `@cpp.UseOpEncode`
+// - A parent struct is annotated with `@cpp.UseOpEncode`
+// - A container has a key or element type marked with `@cpp.UseOpEncode`
+// - A container has an adapted key or element type.
+bool needs_op_encode(const t_field& field, const t_struct& strct) {
+  return (strct.program() &&
+          strct.program()->inherit_annotation_or_null(
+              strct, kCppUseOpEncodeUri)) ||
+      strct.find_structured_annotation_or_null(kCppUseOpEncodeUri) ||
+      check_container_needs_op_encode(*field.type());
+}
+
 class cpp_mstch_type : public mstch_type {
  public:
   cpp_mstch_type(
@@ -1029,14 +1067,7 @@ class cpp_mstch_type : public mstch_type {
     }
     return name;
   }
-  mstch::node use_op_encode() {
-    return (type_->program() &&
-            type_->program()->inherit_annotation_or_null(
-                *type_, kCppUseOpEncodeUri)) ||
-        t_typedef::get_first_structured_annotation_or_null(
-               type_, kCppUseOpEncodeUri) ||
-        gen::cpp::type_resolver::find_first_adapter(*type_);
-  }
+  mstch::node use_op_encode() { return needs_op_encode(*type_); }
 
  private:
   std::shared_ptr<cpp2_generator_context> cpp_context_;
@@ -2002,11 +2033,7 @@ class cpp_mstch_field : public mstch_field {
 
   mstch::node use_op_encode() {
     assert(field_context_->strct);
-    const auto& strct = *field_context_->strct;
-    return (strct.program() &&
-            strct.program()->inherit_annotation_or_null(
-                strct, kCppUseOpEncodeUri)) ||
-        strct.find_structured_annotation_or_null(kCppUseOpEncodeUri);
+    return needs_op_encode(*field_, *field_context_->strct);
   }
 
  private:

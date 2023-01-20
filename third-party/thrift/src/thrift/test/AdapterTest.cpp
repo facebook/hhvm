@@ -860,6 +860,26 @@ TEST(AdaptTest, Constants) {
   EXPECT_EQ(basic::adapter_constants::container_of_adapted()[2].value, 3);
 }
 
+TEST(AdaptTest, ContainerWithAdaptedElement) {
+  basic::ContainerWithAdaptedElement obj{};
+
+  obj.list_field().ensure().push_back({1});
+  obj.set_field().ensure().insert({2});
+  obj.map_field1().ensure().emplace(Wrapper<int8_t>{3}, 3);
+  obj.map_field2().ensure().emplace(4, Wrapper<int8_t>{4});
+  obj.map_field3().ensure().emplace(Wrapper<int8_t>{5}, Wrapper<int8_t>{5});
+
+  auto serialized = CompactSerializer::serialize<std::string>(obj);
+  basic::ContainerWithAdaptedElement obj2{};
+  CompactSerializer::deserialize(serialized, obj2);
+
+  EXPECT_EQ(obj2.list_field()[0].value, 1);
+  EXPECT_EQ(obj2.set_field()->count({2}), 1);
+  EXPECT_EQ(obj2.map_field1()->at({3}), 3);
+  EXPECT_EQ(obj2.map_field2()->at(4).value, 4);
+  EXPECT_EQ(obj2.map_field3()->at({5}).value, 5);
+}
+
 static_assert(
     std::is_same_v<
         folly::remove_cvref_t<decltype(basic::adapter_constants::timeout())>,

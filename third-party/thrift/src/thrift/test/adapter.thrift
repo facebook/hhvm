@@ -282,7 +282,18 @@ const MoveOnly nested_adapted = {"ptr": {}};
 
 const list<AdaptedByte> container_of_adapted = [1, 2, 3];
 
-@cpp.UseOpEncode
 struct ContainerOfAdaptedWithDefault {
   1: list<AdaptedByte> container_of_adapted = [1, 2, 3];
+}
+
+struct ContainerWithAdaptedElement {
+  1: list<AdaptedByte> list_field;
+  2: set<AdaptedByte> set_field;
+  3: map<AdaptedByte, byte> map_field1;
+  4: map<byte, AdaptedByte> map_field2;
+  5: map<AdaptedByte, AdaptedByte> map_field3;
+}
+
+struct NestedContainerOfAdapted {
+  1: list<list<AdaptedByte>> container;
 }

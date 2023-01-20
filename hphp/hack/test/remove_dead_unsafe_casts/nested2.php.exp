@@ -3,8 +3,8 @@
 function takes_int(int $_): void {}
 
 function f(int $i): void {
-  takes_int(($i)); // Redundant
-  1 + (($i) + 2); // Redundant
+  takes_int($i); // Redundant
+  1 + ($i + 2); // Redundant
 }
 
 Typechecking after the codemod... (no output after this is good news)

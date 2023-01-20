@@ -5,7 +5,7 @@ function foo(arraykey $x): int {
 }
 
 function bar(string $x): num {
-  return (foo(($x)));
+  return foo($x);
 }
 
 Typechecking after the codemod... (no output after this is good news)

@@ -8,13 +8,13 @@ class C {
 }
 
 function redundant_unsafe_casts(string $str, shape('a' => int, 'b' => bool) $s): void {
-  ($str);
-  ($s);
-  ($s);
-  ($s);
-  ($s);
-  ($s);
-  ($s);
+  $str;
+  $s;
+  $s;
+  $s;
+  $s;
+  $s;
+  $s;
 }
 
 Typechecking after the codemod... (no output after this is good news)

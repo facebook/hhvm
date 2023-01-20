@@ -193,12 +193,12 @@ class TestFreshInit(common_tests.CommonTests):
 
                 function foo(?string $s): ?string {
                   takes_string(\HH\FIXME\UNSAFE_CAST<?string, string>($s)); // Not redundant
-                  ($s); // Redundant
-                  if (($s) === 'test') { // Redundant
+                  $s; // Redundant
+                  if ($s === 'test') { // Redundant
                     print "hello";
                     return \HH\FIXME\UNSAFE_CAST<?string, string>($s); // Not redundant
                   } else {
-                    return ($s); // Redundant
+                    return $s; // Redundant
                   }
                 }
             """,

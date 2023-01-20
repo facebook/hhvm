@@ -1,19 +1,19 @@
 <?hh
 
 function both_redundant1(string $str): void {
-  (($str));
+  $str;
 }
 
 function both_redundant2(string $str): void {
-  (($str));
+  $str;
 }
 
 function outer_redundant(arraykey $str): void {
-  (HH\FIXME\UNSAFE_CAST<arraykey, string>($str));
+  HH\FIXME\UNSAFE_CAST<arraykey, string>($str);
 }
 
 function inner_redundant(string $str): void {
-  HH\FIXME\UNSAFE_CAST<string, int>(($str));
+  HH\FIXME\UNSAFE_CAST<string, int>($str);
 }
 
 Typechecking after the codemod... (no output after this is good news)

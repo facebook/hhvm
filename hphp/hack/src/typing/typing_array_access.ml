@@ -379,7 +379,7 @@ let rec array_get
               ty
             else
               let nothing = MakeType.nothing Reason.none in
-              MakeType.keyed_container Reason.none nothing nothing
+              MakeType.keyed_container Reason.none ty2 nothing
           in
           Errors.add_typing_error
             Typing_error.(

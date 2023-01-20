@@ -62,7 +62,7 @@ pub(crate) fn write_function(
     trace!("Convert Function {}", function.name.as_bstr(&state.strings));
 
     let func = lower::lower_func(function.func, None, Arc::clone(&state.strings));
-    ir::verify::verify_func(&func, &Default::default(), &state.strings)?;
+    ir::verify::verify_func(&func, &Default::default(), &state.strings);
 
     write_func(
         txf,

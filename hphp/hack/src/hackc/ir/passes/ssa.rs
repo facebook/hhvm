@@ -230,7 +230,7 @@ impl<'a> MakeSSA<'a> {
                 panic!(
                     "Local variable may be used uninitialized by '{}' in\n{}",
                     print::FmtInstr(func, self.strings, get_local_iid),
-                    print::DisplayFunc(func, true, self.strings),
+                    print::DisplayFunc::new(func, true, self.strings),
                 );
             };
 
@@ -474,7 +474,7 @@ mod test {
             builder.emit(Instr::simple_call(id, &[value], loc));
             builder.emit(Instr::ret(null, loc));
         });
-        verify::verify_func(&func, &Default::default(), &strings).unwrap();
+        verify::verify_func(&func, &Default::default(), &strings);
         assert!(is_ssa(&func));
         let res = run(&mut func, &strings);
         assert!(!res);
@@ -499,7 +499,7 @@ mod test {
             builder.emit(Instr::simple_call(id, &[value], loc));
             builder.emit(Instr::ret(null, loc));
         });
-        verify::verify_func(&func, &Default::default(), &strings).unwrap();
+        verify::verify_func(&func, &Default::default(), &strings);
         assert!(!is_ssa(&func));
         let res = run(&mut func, &strings);
         assert!(res);
@@ -596,7 +596,7 @@ mod test {
             builder.emit(Instr::simple_call(id, &[value0, value1, value2], loc));
             builder.emit(Instr::ret(null, loc));
         });
-        verify::verify_func(&func, &Default::default(), &strings).unwrap();
+        verify::verify_func(&func, &Default::default(), &strings);
         assert!(!is_ssa(&func));
         let res = run(&mut func, &strings);
         assert!(res);

@@ -157,6 +157,18 @@ impl ValueId {
     }
 }
 
+impl From<InstrId> for ValueId {
+    fn from(iid: InstrId) -> ValueId {
+        Self::from_instr(iid)
+    }
+}
+
+impl From<ConstantId> for ValueId {
+    fn from(cid: ConstantId) -> ValueId {
+        Self::from_constant(cid)
+    }
+}
+
 // A 'FullInstrId' can be used with match but takes more memory than
 // ValueId. Note that the Constant and Instr variants will never contain
 // ConstantId::NONE or InstrId::NONE.

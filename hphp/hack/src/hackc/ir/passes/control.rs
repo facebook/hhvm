@@ -351,7 +351,7 @@ mod test {
         func.params.push(mk_param("x", BlockId(1), &strings));
         *func.instr_mut(InstrId(1)) = Instr::enter(BlockId(2), ir_core::LocId::NONE);
 
-        eprintln!("FUNC:\n{}", print::DisplayFunc(&func, true, &strings));
+        eprintln!("FUNC:\n{}", print::DisplayFunc::new(&func, true, &strings));
 
         let changed = super::run(&mut func);
         assert!(changed);

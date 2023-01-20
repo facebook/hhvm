@@ -7,6 +7,8 @@ pub mod formatters;
 pub mod print;
 pub mod util;
 
+use std::fmt;
+
 pub use formatters::FmtBid;
 pub use formatters::FmtEnforceableType;
 pub use formatters::FmtInstr;
@@ -16,9 +18,11 @@ pub use formatters::FmtLocId;
 pub use formatters::FmtRawBid;
 pub use formatters::FmtRawVid;
 pub use formatters::FmtVid;
+use ir_core::BlockId;
 use ir_core::Func;
 use ir_core::InstrId;
 use ir_core::InstrIdSet;
+use ir_core::StringInterner;
 pub use print::print_unit;
 pub use util::FmtEscapedString;
 pub use util::FmtOption;
@@ -27,17 +31,37 @@ pub use util::FmtSep;
 
 // This isn't used by the print crate but is useful for code that wants to print
 // a Func for debugging purposes.
-pub struct DisplayFunc<'a, 'b>(
-    pub &'b Func<'a>,
-    /* verbose */ pub bool,
-    pub &'b ir_core::string_intern::StringInterner,
-);
+pub struct DisplayFunc<'a, 'b> {
+    pub func: &'b Func<'a>,
+    /* verbose */ pub verbose: bool,
+    pub strings: &'b StringInterner,
+    pub f_pre_block: Option<&'b dyn Fn(&mut dyn fmt::Write, BlockId) -> fmt::Result>,
+    pub f_pre_instr: Option<&'b dyn Fn(&mut dyn fmt::Write, InstrId) -> fmt::Result>,
+}
 
-impl std::fmt::Display for DisplayFunc<'_, '_> {
-    fn fmt(&self, w: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let DisplayFunc(func, verbose, strings) = *self;
+impl<'a, 'b> DisplayFunc<'a, 'b> {
+    pub fn new(func: &'b Func<'a>, verbose: bool, strings: &'b StringInterner) -> Self {
+        DisplayFunc {
+            func,
+            verbose,
+            strings,
+            f_pre_block: None,
+            f_pre_instr: None,
+        }
+    }
+}
+
+impl fmt::Display for DisplayFunc<'_, '_> {
+    fn fmt(&self, w: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let DisplayFunc {
+            func,
+            verbose,
+            strings,
+            f_pre_block,
+            f_pre_instr,
+        } = *self;
         writeln!(w, "func {} {{", formatters::FmtFuncParams(func, strings))?;
-        print::print_func_body(w, func, verbose, strings)?;
+        print::print_func_body(w, func, verbose, strings, f_pre_block, f_pre_instr)?;
         writeln!(w, "}}")?;
 
         if verbose {

@@ -346,7 +346,7 @@ impl ClassState<'_, '_, '_> {
                 Some(method_info),
                 Arc::clone(&self.unit_state.strings),
             );
-            ir::verify::verify_func(&func, &Default::default(), &self.unit_state.strings)?;
+            ir::verify::verify_func(&func, &Default::default(), &self.unit_state.strings);
             func
         };
 

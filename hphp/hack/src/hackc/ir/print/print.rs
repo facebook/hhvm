@@ -495,6 +495,8 @@ pub(crate) fn print_func_body(
     func: &Func<'_>,
     verbose: bool,
     strings: &StringInterner,
+    f_pre_block: Option<&dyn Fn(&mut dyn Write, BlockId) -> Result>,
+    f_pre_instr: Option<&dyn Fn(&mut dyn Write, InstrId) -> Result>,
 ) -> Result {
     if let Some(doc_comment) = func.doc_comment.as_ref() {
         writeln!(w, "  .doc {}", FmtQuotedStr(doc_comment))?;
@@ -560,6 +562,10 @@ pub(crate) fn print_func_body(
 
         writeln!(w, ":")?;
 
+        if let Some(f_pre_block) = f_pre_block.as_ref() {
+            f_pre_block(w, bid)?;
+        }
+
         match block.tcid {
             TryCatchId::None => {}
             TryCatchId::Try(id) => writeln!(w, "  .try_id {}", id.as_usize())?,
@@ -567,6 +573,9 @@ pub(crate) fn print_func_body(
         }
 
         for iid in block.iids() {
+            if let Some(f_pre_instr) = f_pre_instr.as_ref() {
+                f_pre_instr(w, iid)?;
+            }
             let instr = func.instr(iid);
             if crate::print::print_instr(w, &mut ctx, func, iid, instr)? {
                 writeln!(w)?;
@@ -617,7 +626,7 @@ fn print_function(
     print_function_flags(w, f.flags)?;
     print_attributes(w, &f.attributes, strings)?;
     print_coeffects(w, &f.coeffects)?;
-    print_func_body(w, &f.func, verbose, strings)?;
+    print_func_body(w, &f.func, verbose, strings, None, None)?;
     writeln!(w, "}}")?;
     writeln!(w)
 }
@@ -1778,7 +1787,7 @@ fn print_method(
     print_method_flags(w, method.flags)?;
     print_attributes(w, &method.attributes, strings)?;
     print_coeffects(w, &method.coeffects)?;
-    print_func_body(w, &method.func, verbose, strings)?;
+    print_func_body(w, &method.func, verbose, strings, None, None)?;
     writeln!(w, "}}")?;
     writeln!(w)
 }

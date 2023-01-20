@@ -34,7 +34,7 @@ pub(crate) fn convert_function<'a>(
 
     let span = ir::SrcLoc::from_span(filename, &src.span);
     let func = convert_body(unit, filename, &src.body, span, unit_state);
-    ir::verify::verify_func(&func, &Default::default(), &unit.strings).unwrap();
+    ir::verify::verify_func(&func, &Default::default(), &unit.strings);
 
     let attributes = src
         .attributes
@@ -67,7 +67,7 @@ pub(crate) fn convert_method<'a>(
 
     let span = ir::SrcLoc::from_span(filename, &src.span);
     let func = convert_body(unit, filename, &src.body, span, unit_state);
-    ir::verify::verify_func(&func, &Default::default(), &unit.strings).unwrap();
+    ir::verify::verify_func(&func, &Default::default(), &unit.strings);
 
     let attributes = src
         .attributes
@@ -204,10 +204,10 @@ fn convert_body<'a>(
 
     trace!(
         "FUNC:\n{}",
-        ir::print::DisplayFunc(&func, true, &unit.strings)
+        ir::print::DisplayFunc::new(&func, true, &unit.strings)
     );
 
-    ir::verify::verify_func(&func, &Default::default(), &unit.strings).unwrap();
+    ir::verify::verify_func(&func, &Default::default(), &unit.strings);
 
     func
 }

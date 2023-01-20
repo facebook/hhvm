@@ -19,14 +19,14 @@ pub(crate) fn lower_func<'a>(
 ) -> Func<'a> {
     trace!(
         "Before Lower: {}",
-        ir::print::DisplayFunc(&func, true, &strings)
+        ir::print::DisplayFunc::new(&func, true, &strings)
     );
 
     // Start by 'unasync'ing the Func.
     ir::passes::unasync(&mut func);
     trace!(
         "After unasync: {}",
-        ir::print::DisplayFunc(&func, true, &strings)
+        ir::print::DisplayFunc::new(&func, true, &strings)
     );
 
     let mut builder = FuncBuilder::with_func(func, Arc::clone(&strings));
@@ -45,7 +45,7 @@ pub(crate) fn lower_func<'a>(
 
     trace!(
         "After Lower: {}",
-        ir::print::DisplayFunc(&func, true, &strings)
+        ir::print::DisplayFunc::new(&func, true, &strings)
     );
 
     func

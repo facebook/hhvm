@@ -41,7 +41,10 @@ pub(crate) fn convert_func<'a>(
     // Compute liveness and implicit block parameters.
 
     trace!("-------------------- IR");
-    trace!("{}", ir::print::DisplayFunc(&func, true, &strings.interner));
+    trace!(
+        "{}",
+        ir::print::DisplayFunc::new(&func, true, &strings.interner)
+    );
     trace!("--------------------");
 
     // Start by inserting stack pushes and pops (which are normally not in the
@@ -51,7 +54,7 @@ pub(crate) fn convert_func<'a>(
 
     trace!(
         "-- after pushes:\n{}",
-        ir::print::DisplayFunc(&func, true, &strings.interner)
+        ir::print::DisplayFunc::new(&func, true, &strings.interner)
     );
 
     // Now emit the instructions.

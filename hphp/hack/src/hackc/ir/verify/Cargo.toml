@@ -9,7 +9,6 @@ path = "lib.rs"
 
 [dependencies]
 analysis = { path = "../analysis" }
-anyhow = "1.0.65"
 ir_core = { path = "../ir_core" }
 itertools = "0.10.3"
 print = { path = "../print" }

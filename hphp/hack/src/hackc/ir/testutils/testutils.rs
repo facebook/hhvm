@@ -235,8 +235,8 @@ pub fn assert_func_struct_eq<'a>(func_a: &Func<'a>, func_b: &Func<'a>, strings: 
         panic!(
             "Function mismatch: {}\n{}\n{}",
             e,
-            print::DisplayFunc(func_a, true, strings),
-            print::DisplayFunc(func_b, true, strings)
+            print::DisplayFunc::new(func_a, true, strings),
+            print::DisplayFunc::new(func_b, true, strings)
         );
     }
 }

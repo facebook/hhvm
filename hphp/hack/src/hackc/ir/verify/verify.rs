@@ -7,6 +7,7 @@
 //! that the required invariants still hold true.
 
 use std::collections::hash_map::Entry;
+use std::fmt::Display;
 
 use analysis::PredecessorFlags;
 use analysis::Predecessors;
@@ -27,12 +28,9 @@ use ir_core::InstrId;
 use ir_core::InstrIdSet;
 use ir_core::ValueId;
 use itertools::Itertools;
-use print::DisplayFunc;
 use print::FmtBid;
 use print::FmtRawVid;
 use print::FmtVid;
-
-type Result<T = ()> = anyhow::Result<T>;
 
 /// Flags controlling the details of verification.
 #[derive(Default)]
@@ -49,7 +47,7 @@ macro_rules! check {
     ($self:expr, $cond:expr, $($why:expr),+ $(,)? ) => {{
         let pred = $cond;
         if (!pred) {
-            return Err($self.check_failed(&format!($($why),+)));
+            $self.check_failed(&format!($($why),+));
         }
     }}
 }
@@ -77,7 +75,24 @@ struct VerifyFunc<'a, 'b> {
 
 impl<'a, 'b> VerifyFunc<'a, 'b> {
     fn new(func: &'b Func<'a>, flags: &'b Flags, strings: &'b StringInterner) -> Self {
-        let predecessors = analysis::compute_predecessor_blocks(func, PredecessorFlags::default());
+        // Catch unwind so we can print the function before continuing the
+        // panic.
+        let predecessors = std::panic::catch_unwind(|| {
+            analysis::compute_predecessor_blocks(func, PredecessorFlags::default())
+        });
+        let predecessors = match predecessors {
+            Ok(predecessors) => predecessors,
+            Err(e) => {
+                Self::report_func_error(
+                    "compute_predecessor_blocks panic'd",
+                    func,
+                    None,
+                    None,
+                    strings,
+                );
+                std::panic::resume_unwind(e);
+            }
+        };
         VerifyFunc {
             dominated_iids: Default::default(),
             func,
@@ -87,19 +102,57 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
         }
     }
 
-    fn raw_check_failed(func: &Func<'_>, why: &str, strings: &StringInterner) -> anyhow::Error {
-        panic!(
-            "VERIFY FAILED: {}\n{}",
+    fn report_func_error(
+        why: &str,
+        func: &Func<'_>,
+        predecessors: Option<&Predecessors>,
+        dominated_iids: Option<&BlockIdMap<InstrIdSet>>,
+        strings: &StringInterner,
+    ) {
+        eprintln!("VERIFY FAILED: {why}");
+        use print::FmtSep;
+
+        let f_pre_block = |w: &mut dyn std::fmt::Write, bid| {
+            if let Some(pds) = predecessors.as_ref().and_then(|p| p.get(&bid)) {
+                writeln!(
+                    w,
+                    "  Predecessor BlockIds: [{}]",
+                    FmtSep::comma(pds.iter().sorted(), |w, bid| FmtBid(func, *bid, true,)
+                        .fmt(w))
+                )?;
+            }
+            if let Some(dids) = dominated_iids.as_ref().and_then(|d| d.get(&bid)) {
+                writeln!(
+                    w,
+                    "  Dominator InstrIds: [{}]",
+                    FmtSep::comma(dids.iter().sorted(), |w, vid| FmtVid(
+                        func,
+                        (*vid).into(),
+                        true,
+                        strings
+                    )
+                    .fmt(w))
+                )?;
+            }
+            Ok(())
+        };
+        let mut df = print::DisplayFunc::new(func, true, strings);
+        df.f_pre_block = Some(&f_pre_block);
+        eprintln!("{}", df);
+    }
+
+    fn check_failed(&self, why: &str) -> ! {
+        Self::report_func_error(
             why,
-            DisplayFunc(func, true, strings)
+            self.func,
+            Some(&self.predecessors),
+            Some(&self.dominated_iids),
+            self.strings,
         );
+        panic!("VERIFY FAILED: {}", why);
     }
 
-    fn check_failed(&self, why: &str) -> anyhow::Error {
-        Self::raw_check_failed(self.func, why, self.strings)
-    }
-
-    fn verify_block(&mut self, bid: BlockId, block: &Block) -> Result {
+    fn verify_block(&mut self, bid: BlockId, block: &Block) {
         check!(
             self,
             block.is_terminated(self.func),
@@ -153,7 +206,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                 iid_idx,
                 self.func.instr(iid),
                 &mut dominated_iids,
-            )?;
+            );
         }
 
         // Push the dominated IIDs into the successors.
@@ -184,8 +237,6 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                 }
             }
         }
-
-        Ok(())
     }
 
     fn push_dominated_iids(&mut self, bid: BlockId, dominated_iids: &InstrIdSet) {
@@ -199,8 +250,8 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
         }
     }
 
-    fn verify_func_body(&mut self) -> Result {
-        self.verify_func_unique_iids()?;
+    fn verify_func_body(&mut self) {
+        self.verify_func_unique_iids();
 
         // Check that the body blocks are in strict RPO order.
         let rpo = analysis::compute_rpo(self.func);
@@ -220,12 +271,11 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
         );
 
         for bid in self.func.block_ids() {
-            self.verify_block(bid, self.func.block(bid))?;
+            self.verify_block(bid, self.func.block(bid));
         }
-        Ok(())
     }
 
-    fn verify_func_unique_iids(&self) -> Result {
+    fn verify_func_unique_iids(&self) {
         // InstrIds should never be used twice (although zero times is valid for
         // dead InstrIds).
         let mut seen = InstrIdSet::default();
@@ -237,7 +287,6 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                 iid
             );
         }
-        Ok(())
     }
 
     fn verify_operand(
@@ -246,7 +295,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
         op_vid: ValueId,
         op_idx: usize,
         dominated_iids: &InstrIdSet,
-    ) -> Result {
+    ) {
         match op_vid.full() {
             FullInstrId::Constant(cid) => {
                 check!(
@@ -278,31 +327,24 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                 match op_instr.unwrap() {
                     Instr::Special(Special::Tombstone) => {
                         // We should never see a tombstone as part of the graph.
-                        return Err(check_failed!(
+                        check_failed!(
                             self,
                             "iid {} operand {} ({})is a tombstone",
                             src_iid,
                             op_idx,
                             FmtVid(self.func, op_vid, true, self.strings)
-                        ));
+                        );
                     }
                     _ => {}
                 }
             }
             FullInstrId::None => {
-                return Err(check_failed!(
-                    self,
-                    "iid {} operand {} is none",
-                    src_iid,
-                    op_idx
-                ));
+                check_failed!(self, "iid {} operand {} is none", src_iid, op_idx);
             }
         }
-
-        Ok(())
     }
 
-    fn verify_block_args(&self, iid: InstrId, bid: BlockId, args: usize) -> Result {
+    fn verify_block_args(&self, iid: InstrId, bid: BlockId, args: usize) {
         // Make sure that the target block is expecting the args.
         let expected_args = self.func.block(bid).params.len();
         check!(
@@ -310,13 +352,13 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
             expected_args == args,
             "iid {iid} is a jump with {args} args to block {bid} expecting {expected_args} args",
         );
-
-        Ok(())
     }
 
-    fn verify_selects(&self, n: usize, block: &Block, iid: InstrId, iid_idx: usize) -> Result {
+    fn verify_selects(&self, n: usize, block: &Block, iid: InstrId, iid_idx: usize) {
         for i in 1..=n {
-            let select_iid = *block.iids.get(iid_idx + i).ok_or_else(|| {
+            let select_iid = if let Some(iid) = block.iids.get(iid_idx + i) {
+                *iid
+            } else {
                 check_failed!(
                     self,
                     "iid {} returns {} values but block doesn't contain enough iids (only followed by {})",
@@ -324,7 +366,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                     n,
                     i - 1
                 )
-            })?;
+            };
 
             check!(
                 self,
@@ -338,8 +380,6 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                 i - 1
             );
         }
-
-        Ok(())
     }
 
     fn verify_select(
@@ -349,7 +389,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
         prev_vid: Option<ValueId>,
         target_vid: ValueId,
         idx: u32,
-    ) -> Result {
+    ) {
         // The select instruction must follow either another select for the
         // same target or the target it's selecting from.
         check!(
@@ -366,30 +406,26 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
             match *prev_instr {
                 Instr::Special(Special::Select(prev_target, prev_idx)) => {
                     if prev_target != target_vid {
-                        return Err(check_failed!(
+                        check_failed!(
                             self,
                             "iid {} select with target {} follows a select with a different target instr {}",
                             iid,
                             FmtRawVid(target_vid),
                             FmtRawVid(prev_target)
-                        ));
+                        );
                     }
                     if prev_idx + 1 != idx {
-                        return Err(check_failed!(
+                        check_failed!(
                             self,
                             "iid {} select with index {} follows a non-contiguous select index {}",
                             iid,
                             idx,
                             prev_idx
-                        ));
+                        );
                     }
                 }
                 _ => {
-                    return Err(check_failed!(
-                        self,
-                        "iid {} select is not contiguous with its target",
-                        iid
-                    ));
+                    check_failed!(self, "iid {} select is not contiguous with its target", iid);
                 }
             }
         } else {
@@ -403,16 +439,14 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                 _ => false,
             };
             if !expects_select {
-                return Err(check_failed!(
+                check_failed!(
                     self,
                     "iid {} select follows non-selectable instr {:?}",
                     iid,
                     prev_instr
-                ));
+                );
             }
         }
-
-        Ok(())
     }
 
     fn verify_instr(
@@ -422,10 +456,10 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
         iid_idx: usize,
         instr: &Instr,
         dominated_iids: &mut InstrIdSet,
-    ) -> Result {
+    ) {
         // Ensure that all operands exist.
         for (op_idx, op_vid) in instr.operands().iter().copied().enumerate() {
-            self.verify_operand(iid, op_vid, op_idx, dominated_iids)?;
+            self.verify_operand(iid, op_vid, op_idx, dominated_iids);
         }
 
         dominated_iids.insert(iid);
@@ -455,24 +489,24 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
         match *instr {
             Instr::Call(ref call) => {
                 if call.num_rets > 1 {
-                    self.verify_selects(call.num_rets as usize, block, iid, iid_idx)?;
+                    self.verify_selects(call.num_rets as usize, block, iid, iid_idx);
                 }
             }
             Instr::Hhbc(Hhbc::ClassGetTS(..)) => {
-                self.verify_selects(2, block, iid, iid_idx)?;
+                self.verify_selects(2, block, iid, iid_idx);
             }
             Instr::MemberOp(ref op) => {
                 let num_rets = op.num_values();
                 if num_rets > 1 {
-                    self.verify_selects(num_rets, block, iid, iid_idx)?;
+                    self.verify_selects(num_rets, block, iid, iid_idx);
                 }
             }
             Instr::Terminator(Terminator::CallAsync(_, targets)) => {
-                self.verify_block_args(iid, targets[0], 1)?;
-                self.verify_block_args(iid, targets[1], 1)?;
+                self.verify_block_args(iid, targets[0], 1);
+                self.verify_block_args(iid, targets[1], 1);
             }
             Instr::Terminator(Terminator::Enter(bid, _) | Terminator::Jmp(bid, _)) => {
-                self.verify_block_args(iid, bid, 0)?;
+                self.verify_block_args(iid, bid, 0);
             }
             Instr::Terminator(Terminator::JmpArgs(bid, ref vids, _)) => {
                 check!(
@@ -481,24 +515,20 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                     "iid {} is JmpArgs with no args!",
                     iid
                 );
-                self.verify_block_args(iid, bid, vids.len())?;
+                self.verify_block_args(iid, bid, vids.len());
             }
             Instr::Terminator(Terminator::JmpOp { targets, .. }) => {
-                self.verify_block_args(iid, targets[0], 0)?;
-                self.verify_block_args(iid, targets[1], 0)?;
+                self.verify_block_args(iid, targets[0], 0);
+                self.verify_block_args(iid, targets[1], 0);
             }
             Instr::Terminator(
                 Terminator::IterInit(ref args, _) | Terminator::IterNext(ref args),
             ) => {
-                self.verify_block_args(iid, args.targets[0], 0)?;
-                self.verify_block_args(iid, args.targets[1], 0)?;
+                self.verify_block_args(iid, args.targets[0], 0);
+                self.verify_block_args(iid, args.targets[1], 0);
             }
             Instr::Special(Special::Param) => {
-                return Err(check_failed!(
-                    self,
-                    "Param iid {} shouldn't be in block instrs",
-                    iid
-                ));
+                check_failed!(self, "Param iid {} shouldn't be in block instrs", iid);
             }
             Instr::Special(Special::IrToBc(IrToBc::PushConstant(vid))) => {
                 check!(
@@ -509,20 +539,18 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                 );
             }
             Instr::Special(Special::Select(target_vid, idx)) => {
-                self.verify_select(iid, iid_idx, prev_vid, target_vid, idx)?;
+                self.verify_select(iid, iid_idx, prev_vid, target_vid, idx);
             }
             Instr::Special(Special::Tombstone) => {
                 // We should never see a tombstone as part of the graph.
-                return Err(check_failed!(self, "iid {} is a tombstone", iid));
+                check_failed!(self, "iid {} is a tombstone", iid);
             }
             _ => {}
         }
-
-        Ok(())
     }
 }
 
-pub fn verify_func(func: &Func<'_>, flags: &Flags, strings: &StringInterner) -> Result {
+pub fn verify_func(func: &Func<'_>, flags: &Flags, strings: &StringInterner) {
     let mut verify = VerifyFunc::new(func, flags, strings);
-    verify.verify_func_body()
+    verify.verify_func_body();
 }

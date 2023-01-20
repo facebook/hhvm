@@ -66,7 +66,7 @@ impl Block {
         self.iids
             .last()
             .copied()
-            .unwrap_or_else(|| panic!("malformed block"))
+            .unwrap_or_else(|| panic!("malformed block - empty block"))
     }
 
     /// Assign the name to the Block and return the Block.

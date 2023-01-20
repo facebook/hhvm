@@ -491,7 +491,12 @@ impl ProfileAcc {
 
         // The # of files that failed are sum of error_histogram's values' usize field
         if !self.error_histogram.is_empty() {
-            println!("{}/{} files passed", total - self.num_failed(), total);
+            println!(
+                "{}/{} files passed ({:.1}%)",
+                total - self.num_failed(),
+                total,
+                (100.0 - (self.num_failed() * 100) as f64 / total as f64)
+            );
             println!("Failure histogram:");
             for (k, v) in self
                 .error_histogram

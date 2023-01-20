@@ -5199,7 +5199,6 @@ name = "verify"
 version = "0.0.0"
 dependencies = [
  "analysis",
- "anyhow",
  "ir_core",
  "itertools 0.10.5",
  "print",

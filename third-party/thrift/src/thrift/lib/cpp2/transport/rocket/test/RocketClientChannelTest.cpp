@@ -38,30 +38,12 @@
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
-#include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
-#include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/TestUtil.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 THRIFT_FLAG_DECLARE_bool(rocket_client_rocket_skip_protocol_key);
 
 using namespace apache::thrift;
-
-namespace apache::thrift::detail {
-
-std::unique_ptr<folly::IOBuf> makeFrameworkMetadataHook(
-    const RpcOptions&, folly::dynamic&) {
-  return folly::IOBuf::copyBuffer("some_content");
-}
-
-THRIFT_PLUGGABLE_FUNC_SET(
-    std::unique_ptr<folly::IOBuf>,
-    makeFrameworkMetadata,
-    const RpcOptions& rpcOptions,
-    folly::dynamic& logMessages) {
-  return makeFrameworkMetadataHook(rpcOptions, logMessages);
-}
-} // namespace apache::thrift::detail
 
 namespace {
 class Handler : public apache::thrift::ServiceHandler<test::TestService> {
@@ -70,8 +52,6 @@ class Handler : public apache::thrift::ServiceHandler<test::TestService> {
       int64_t size) final {
     lastTimeoutMsec_ =
         getConnectionContext()->getHeader()->getClientTimeout().count();
-    frameworkMetadata_ = getRequestContext()->getFrameworkMetadata();
-
     return folly::makeSemiFuture()
         .delayed(std::chrono::milliseconds(sleepDelayMsec_))
         .defer([size](auto&&) {
@@ -80,6 +60,8 @@ class Handler : public apache::thrift::ServiceHandler<test::TestService> {
   }
 
   folly::SemiFuture<folly::Unit> semifuture_noResponse(int64_t) final {
+    lastTimeoutMsec_ =
+        getConnectionContext()->getHeader()->getClientTimeout().count();
     return folly::makeSemiFuture();
   }
 
@@ -115,14 +97,9 @@ class Handler : public apache::thrift::ServiceHandler<test::TestService> {
   int32_t getLastTimeoutMsec() const { return lastTimeoutMsec_; }
   void setSleepDelayMs(int32_t delay) { sleepDelayMsec_ = delay; }
 
-  folly::Optional<folly::IOBuf>& getFrameworkMetadata() {
-    return frameworkMetadata_;
-  }
-
  private:
   int32_t lastTimeoutMsec_{-1};
   int32_t sleepDelayMsec_{0};
-  folly::Optional<folly::IOBuf> frameworkMetadata_;
 };
 
 class RocketClientChannelTest : public testing::Test {
@@ -146,19 +123,6 @@ class RocketClientChannelTest : public testing::Test {
   ScopedServerInterfaceThread runner_{handler_};
 };
 } // namespace
-
-TEST_F(RocketClientChannelTest, SyncThriftFrameworkMetadataPropagated) {
-  folly::EventBase evb;
-  auto client = makeClient(evb);
-
-  RpcOptions opts;
-  std::string response;
-  client.sync_sendResponse(opts, response, 123);
-  EXPECT_EQ("123", response);
-
-  auto frameworkMetadata = handler_->getFrameworkMetadata();
-  EXPECT_TRUE(frameworkMetadata);
-}
 
 TEST_F(RocketClientChannelTest, RocketSkipProtocolKey) {
   THRIFT_FLAG_SET_MOCK(rocket_client_rocket_skip_protocol_key, true);

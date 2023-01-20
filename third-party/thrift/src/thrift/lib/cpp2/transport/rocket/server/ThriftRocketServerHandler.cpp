@@ -588,10 +588,6 @@ void ThriftRocketServerHandler::handleRequestCommon(
     cpp2ReqCtx->setInteractionId(*interactionCreate->interactionId_ref());
   }
 
-  if (auto frameworkMetadata = metadata.frameworkMetadata_ref()) {
-    cpp2ReqCtx->setFrameworkMetadata(**frameworkMetadata);
-  }
-
   auto serializedCompressedRequest = SerializedCompressedRequest(
       std::move(data),
       metadata.crc32c_ref()

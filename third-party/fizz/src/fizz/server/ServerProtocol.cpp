@@ -2030,6 +2030,7 @@ static SemiFuture<Optional<WriteToSocket>> generateTicket(
   resumptionSecret = state.keyScheduler()->getResumptionSecret(
       folly::range(resumptionMasterSecret), ticketNonce->coalesce());
 
+  auto ticketAgeAdd = state.context()->getFactory()->makeTicketAgeAdd();
   ResumptionState resState;
   resState.version = *state.version();
   resState.cipher = *state.cipher();
@@ -2037,7 +2038,7 @@ static SemiFuture<Optional<WriteToSocket>> generateTicket(
   resState.serverCert = state.serverCert();
   resState.clientCert = state.clientCert();
   resState.alpn = state.alpn();
-  resState.ticketAgeAdd = state.context()->getFactory()->makeTicketAgeAdd();
+  resState.ticketAgeAdd = ticketAgeAdd;
   resState.ticketIssueTime = state.context()->getClock().getCurrentTime();
   resState.appToken = std::move(appToken);
   resState.handshakeTime = *state.handshakeTime();
@@ -2046,9 +2047,7 @@ static SemiFuture<Optional<WriteToSocket>> generateTicket(
   return runOnCallerIfComplete(
       state.executor(),
       std::move(ticketFuture),
-      [&state,
-       ticketAgeAdd = resState.ticketAgeAdd,
-       ticketNonce = std::move(ticketNonce)](
+      [&state, ticketAgeAdd, ticketNonce = std::move(ticketNonce)](
           Optional<std::pair<Buf, std::chrono::seconds>> ticket) mutable
       -> Optional<WriteToSocket> {
         if (!ticket) {

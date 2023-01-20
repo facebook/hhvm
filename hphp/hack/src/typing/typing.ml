@@ -2904,7 +2904,7 @@ and case_list parent_locals ty env switch_pos cl dfl =
           SN.Classes.cHH_BuiltinEnum
           [MakeType.mixed Reason.Rnone]
       in
-      Typing_subtype.is_sub_type_for_coercion env ty top_type
+      Typing_subtype.is_sub_type_for_union env ty top_type
     in
     (* register that the runtime may throw in case we cannot prove
        that the switch is exhaustive *)

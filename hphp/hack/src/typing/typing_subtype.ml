@@ -4305,17 +4305,6 @@ let is_sub_type_for_union env ?(coerce = None) ty1 ty2 =
     ty2
   = Some true
 
-let is_sub_type_for_coercion env ty1 ty2 =
-  let ( = ) = Option.equal Bool.equal in
-  is_sub_type_alt
-    ~require_completeness:false
-    ~no_top_bottom:false
-    ~coerce:(Some TL.CoerceFromDynamic)
-    env
-    ty1
-    ty2
-  = Some true
-
 let is_sub_type_ignore_generic_params env ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
@@ -4793,7 +4782,6 @@ let set_fun_refs () =
     sub_type_with_dynamic_as_bottom;
   Typing_utils.add_constraint_ref := add_constraint;
   Typing_utils.is_sub_type_ref := is_sub_type;
-  Typing_utils.is_sub_type_for_coercion_ref := is_sub_type_for_coercion;
   Typing_utils.is_sub_type_for_union_ref := is_sub_type_for_union;
   Typing_utils.is_sub_type_for_union_i_ref := is_sub_type_for_union_i;
   Typing_utils.is_sub_type_ignore_generic_params_ref :=

@@ -82,9 +82,6 @@ let (is_sub_type_ref : is_sub_type_type ref) =
 
 let is_sub_type x = !is_sub_type_ref x
 
-let (is_sub_type_for_coercion_ref : is_sub_type_type ref) =
-  ref (not_implemented "is_sub_type_for_coercion")
-
 let (is_sub_type_for_union_ref : (env -> locl_ty -> locl_ty -> bool) ref) =
   ref (not_implemented "is_sub_type_for_union")
 

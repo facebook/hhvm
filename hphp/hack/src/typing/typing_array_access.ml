@@ -38,8 +38,7 @@ let error_array env p ty =
              pos = p;
              decl_pos = get_pos ty;
              ty_name = lazy (Typing_print.error env ty);
-           });
-  err_witness env p
+           })
 
 let error_const_mutation env p ty =
   Errors.add_typing_error
@@ -817,12 +816,13 @@ let rec array_get
           in
           (env, (ty, err_res_arr, err_res_idx))
         | _ ->
-          let (env, ty1) = error_array env expr_pos ty1 in
+          error_array env expr_pos ty1;
+          let (env, res_ty) = err_witness env expr_pos in
           let ty_nothing = Typing_make_type.nothing Reason.none in
           let ty_keyedcontainer =
             Typing_make_type.(keyed_container Reason.none ty2 ty_nothing)
           in
-          (env, (ty1, Error (ty1, ty_keyedcontainer), Ok ty2))
+          (env, (res_ty, Error (ty1, ty_keyedcontainer), Ok ty2))
       end
       | Tunapplied_alias _ ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
@@ -837,12 +837,13 @@ let rec array_get
       | Tintersection _
       | Taccess _
       | Tneg _ ->
-        let (env, ty1) = error_array env expr_pos ty1 in
+        error_array env expr_pos ty1;
+        let (env, res_ty) = err_witness env expr_pos in
         let ty_nothing = Typing_make_type.nothing Reason.none in
         let ty_keyedcontainer =
           Typing_make_type.(keyed_container Reason.none ty2 ty_nothing)
         in
-        (env, (ty1, Error (ty1, ty_keyedcontainer), Ok ty2))
+        (env, (res_ty, Error (ty1, ty_keyedcontainer), Ok ty2))
       (* Type-check array access as though it is the method
        * array_get<Tk,Tv>(KeyedContainer<Tk,Tv> $array, Tk $key): Tv
        * (We can already force Tk to be the type of the key argument because

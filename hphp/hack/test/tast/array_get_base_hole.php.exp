@@ -1,0 +1,50 @@
+Errors:
+  [4:3-8] You are trying to access an element of this container but the container could be `null`. 
+  [3:15-20] This is what makes me believe it can be `null`.
+  [5:3-8] This is not an object of type `KeyedContainer`, this is a nonnull value
+  [3:25-32] Definition is here
+  [6:3-8] This is not an object of type `KeyedContainer`, this is a value of generic type T
+  [3:37-38] Definition is here
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
+      fd_fun =
+      { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid))));
+        f_tparams = [{ tp_variance = Invariant; tp_name = ([3:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+        f_where_constraints = [];
+        f_params =
+        [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:15-20], Hmixed))); 
+           param_is_variadic = false; param_pos = [3:21-23]; param_name = "$m"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None };
+          { param_annotation = (nonnull); param_type_hint = ((nonnull), (Some ([3:25-32], Hnonnull))); 
+            param_is_variadic = false; param_pos = [3:33-35]; param_name = "$n"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = (T); param_type_hint = ((T), (Some ([3:37-38], (Habstr ("T", []))))); 
+            param_is_variadic = false; param_pos = [3:39-41]; param_name = "$t"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-9],
+            (Expr
+               ((nothing), [4:3-8],
+                (Array_get (((mixed), [4:3-5], (Hole (((mixed), [4:3-5], (Lvar ([4:3-5], $m))), (mixed), (KeyedContainer<nothing, nothing>), Typing))), (Some ((int), [4:6-7], (Int "0"))))))));
+            ([5:3-9],
+             (Expr
+                ((nothing), [5:3-8],
+                 (Array_get (((nonnull), [5:3-5], (Hole (((nonnull), [5:3-5], (Lvar ([5:3-5], $n))), (nonnull), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [5:6-7], (Int "0"))))))));
+            ([6:3-9],
+             (Expr ((nothing), [6:3-8], (Array_get (((T), [6:3-5], (Hole (((T), [6:3-5], (Lvar ([6:3-5], $t))), (T), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [6:6-7], (Int "0"))))))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None })

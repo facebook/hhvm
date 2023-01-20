@@ -1214,6 +1214,12 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
 
   auto cipher = negotiateCipher(chlo, state.context()->getSupportedCiphers());
 
+  if (state.cipher().has_value() && cipher != *state.cipher()) {
+    throw FizzException(
+        "cipher mismatch with previous negotiation",
+        AlertDescription::illegal_parameter);
+  }
+
   verifyCookieState(cookieState, *version, cipher);
 
   auto resStateResult = getResumptionState(
@@ -1283,12 +1289,6 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             pskType,
             std::move(state.handshakeContext()),
             version);
-
-        if (state.cipher().has_value() && cipher != *state.cipher()) {
-          throw FizzException(
-              "cipher mismatch with previous negotiation",
-              AlertDescription::illegal_parameter);
-        }
 
         auto alpn = negotiateAlpn(chlo, folly::none, *state.context());
 

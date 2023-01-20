@@ -5,8 +5,13 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "lint.rs"
+path = "lint_rust.rs"
 
 [dependencies]
+arena_deserializer = { path = "../arena_deserializer" }
+arena_trait = { path = "../../arena_trait" }
+eq_modulo_pos = { path = "../eq_modulo_pos" }
+no_pos_hash = { path = "../no_pos_hash" }
 ocamlrep = { path = "../../ocamlrep" }
-oxidized = { path = "../../oxidized" }
+rc_pos = { path = "../rust/pos" }
+serde = { version = "1.0.136", features = ["derive", "rc"] }

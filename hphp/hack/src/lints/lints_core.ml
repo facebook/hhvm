@@ -6,7 +6,7 @@
  *
  *)
 
-(* These severity levels are based on those provided by Arcanist. "Advice"
+(** These severity levels are based on those provided by Arcanist. "Advice"
  * means notify the user of the lint without requiring confirmation if the lint
  * is benign; "Warning" will raise a confirmation prompt if the lint applies to
  * a line that was changed in the given diff; and "Error" will always raise a
@@ -22,18 +22,15 @@ let string_of_severity = function
   | Lint_warning -> "warning"
   | Lint_advice -> "advice"
 
-(* IMPORTANT: be sure to keep this type definition in sync with
- * LintError in src/utils/lint/lint.rs
- *)
 type 'pos t = {
   code: int;
   severity: severity;
   pos: 'pos; [@opaque]
   message: string;
-  (* Normally, lint warnings and lint advice only get shown by arcanist if the
-   * lines they are raised on overlap with lines changed in a diff. This
-   * flag bypasses that behavior *)
   bypass_changed_lines: bool;
+      (** Normally, lint warnings and lint advice only get shown by arcanist if the
+       * lines they are raised on overlap with lines changed in a diff. This
+       * flag bypasses that behavior *)
   autofix: (string * Pos.t) option;
 }
 [@@deriving show]

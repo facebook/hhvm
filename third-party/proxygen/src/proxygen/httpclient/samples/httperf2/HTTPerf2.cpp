@@ -298,6 +298,10 @@ ClientRunner::ClientRunner(HTTPerfStats& parentStats,
       quicPskCache_(std::make_shared<quic::BasicQuicPskCache>()) {
   attachEventBase(&eventBase_);
 
+  if (remainingClients_ == 0) {
+    remainingClients_ = 0x7fffffff;
+  }
+
   ticketSSLParams_.first.reset(new folly::SSLContext());
   ticketSSLParams_.first->setOptions(SSL_OP_NO_COMPRESSION);
   if (FLAGS_ciphers.length() > 0) {

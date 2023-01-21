@@ -178,6 +178,10 @@ struct FBUnserializer : private FBSerializeBase {
   bool done() const {
     return p_ == end_;
   }
+  // Current position in the serialized buffer
+  const char* position() const {
+    return p_;
+  }
  private:
   void need(size_t n) const;
 
@@ -188,4 +192,3 @@ struct FBUnserializer : private FBSerializeBase {
 }
 
 #include "FBSerialize-inl.h"
-

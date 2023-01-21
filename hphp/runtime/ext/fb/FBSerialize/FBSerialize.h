@@ -168,6 +168,8 @@ struct FBUnserializer : private FBSerializeBase {
   typename V::VectorType unserializeVector(size_t depth);
   typename V::VectorType unserializeList(size_t depth);
   typename V::SetType unserializeSet(size_t depth);
+  // Skip over next bool/int/double/str/struct value
+  void skipNext();
   // read the next map but don't unserialze it (for lazy or delay
   // unserialization)
   folly::StringPiece getSerializedMap();

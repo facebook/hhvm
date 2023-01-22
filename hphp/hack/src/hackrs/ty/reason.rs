@@ -110,6 +110,7 @@ pub trait Reason:
             use ReasonImpl as RI;
             match reason {
                 OR::Rnone => RI::Rnone,
+                OR::RmissingClass(pos) => RI::RmissingClass(pos.into()),
                 OR::Rwitness(pos) => RI::Rwitness(pos.into()),
                 OR::RwitnessFromDecl(pos) => RI::RwitnessFromDecl(pos.into()),
                 OR::Ridx(&(pos, r)) => RI::Ridx(pos.into(), r.into()),
@@ -389,6 +390,7 @@ pub enum ReasonImpl<R, P> {
     RdynamicPartialEnforcement(P, Symbol, R),
     RrigidTvarEscape(P, Symbol, Symbol, R),
     RopaqueTypeFromModule(P, Symbol, R),
+    RmissingClass(P),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -633,6 +635,7 @@ impl<'a> ToOxidized<'a> for BReason {
                 s1.to_oxidized(arena),
                 r.to_oxidized(arena),
             ))),
+            RI::RmissingClass(pos) => OR::RmissingClass(pos.to_oxidized(arena)),
         }
     }
 }

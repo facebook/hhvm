@@ -136,6 +136,7 @@ struct
       Rrigid_tvar_escape (pos p, v, w, reason r)
     | Ropaque_type_from_module (p, m, r) ->
       Ropaque_type_from_module (pos_or_decl p, m, reason r)
+    | Rmissing_class p -> Rmissing_class (pos p)
 
   let rec ty t =
     let (p, x) = deref t in

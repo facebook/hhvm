@@ -160,6 +160,7 @@ type _ t_ =
   | Ropaque_type_from_module :
       Pos_or_decl.t * string * locl_phase t_
       -> locl_phase t_
+  | Rmissing_class : Pos.t -> locl_phase t_
 
 type t = locl_phase t_
 
@@ -609,6 +610,8 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
       ^ module_
       ^ ", which is opaque outside of the module." )
     :: to_string "The type originated from here" r_orig
+  | Rmissing_class p ->
+    [(Pos_or_decl.of_raw_pos p, prefix ^ " because class was missing")]
 
 and to_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
@@ -714,6 +717,7 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rdynamic_coercion r -> to_raw_pos r
   | Rdynamic_partial_enforcement (p, _, _) -> p
   | Ropaque_type_from_module (p, _, _) -> p
+  | Rmissing_class p -> Pos_or_decl.of_raw_pos p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -846,6 +850,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rdynamic_partial_enforcement _ -> "Rdynamic_partial_enforcement"
   | Rrigid_tvar_escape _ -> "Rrigid_tvar_escape"
   | Ropaque_type_from_module _ -> "Ropaque_type_from_module"
+  | Rmissing_class _ -> "Rmissing_class"
 
 let pp fmt r =
   let pos = to_raw_pos r in

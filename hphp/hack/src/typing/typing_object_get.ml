@@ -555,7 +555,7 @@ and obj_get_concrete_class
     on_error : internal_result =
   match Env.get_class env class_name with
   | None ->
-    let (env, ty) = Env.fresh_type_error env id_pos in
+    let ty = MakeType.nothing (Reason.Rmissing_class id_pos) in
     ( env,
       None,
       (ty, []),

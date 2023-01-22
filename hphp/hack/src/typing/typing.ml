@@ -1734,7 +1734,7 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
         reason
         tparams_with_new_names
         tyl_fresh
-    | None -> Env.fresh_type_error env ivar_pos
+    | None -> (env, MakeType.nothing (Reason.Rmissing_class ivar_pos))
   end
   | (Ttuple ivar_tyl, Ttuple hint_tyl)
     when Int.equal (List.length ivar_tyl) (List.length hint_tyl) ->
@@ -4897,7 +4897,7 @@ and expr_
     let txml = Aast.Xml (sid, typed_attrs, tchildren) in
     (match class_info with
     | None ->
-      let (env, ty) = Env.fresh_type_error env p in
+      let ty = MakeType.nothing (Reason.Rmissing_class p) in
       make_result env p txml ty
     | Some _ -> make_result env p txml obj)
   | Shape fdm ->
@@ -7718,7 +7718,7 @@ and class_get_inner
     let class_ = Env.get_class env c in
     (match class_ with
     | None ->
-      let (env, ty) = Env.fresh_type_error env p in
+      let ty = MakeType.nothing (Reason.Rmissing_class p) in
       (env, (ty, []), dflt_rval_err)
     | Some class_ ->
       (* TODO akenn: Should we move this to the class_get original call? *)

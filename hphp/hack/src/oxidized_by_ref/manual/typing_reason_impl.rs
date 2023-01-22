@@ -112,7 +112,8 @@ impl<'a> Reason<'a> {
             | RinterpOperand(p)
             | RsupportDynamicType(p)
             | RdynamicPartialEnforcement((p, _, _))
-            | RrigidTvarEscape((p, _, _, _)) => Some(p),
+            | RrigidTvarEscape((p, _, _, _))
+            | RmissingClass(p) => Some(p),
             RlostInfo((_, r, _))
             | Rinstantiate((_, _, r))
             | Rtypeconst((r, _, _, _))

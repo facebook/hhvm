@@ -563,10 +563,14 @@ void insertFieldsToMask(
   };
 
   if (const auto* obj = patchFields.if_object()) {
+    auto getIncludesObjRef = [&](Mask& mask) { return mask.includes_ref(); };
     for (const auto& [id, value] : *obj) {
-      insertNextMask(masks, value, id, id, recursive, [&](Mask& mask) {
-        return mask.includes_ref();
-      });
+      // Object patch can get here only for ensure or patch* operations
+      // both require reading existing value to know if/how given operations
+      // can/should be applied. Hence always generate allMask() read mask for
+      // them.
+      insertMask(masks.read, id, allMask(), getIncludesObjRef);
+      insertNextMask(masks, value, id, id, recursive, getIncludesObjRef);
     }
   } else if (const auto* map = patchFields.if_map()) {
     for (const auto& [key, value] : *map) {

@@ -1071,7 +1071,7 @@ TEST_F(PatchTest, Struct) {
   }
 
   // PatchPrior
-  auto applyFieldPatchTest = [&](auto op, auto expected, bool isRead) {
+  auto applyFieldPatchTest = [&](auto op, auto expected) {
     Value fieldPatchValue;
     fieldPatchValue.objectValue_ref() = makePatch(
         op, asValueStruct<type::list<type::i32_t>>(std::vector<int>{3, 2, 1}));
@@ -1087,11 +1087,7 @@ TEST_F(PatchTest, Struct) {
             .ensure()[1]);
 
     auto masks = extractMaskFromPatch(patchObj);
-    if (isRead) {
-      EXPECT_EQ(masks.read, masks.write);
-    } else {
-      EXPECT_EQ(masks.read, noneMask());
-    }
+    EXPECT_EQ(masks.read, masks.write);
 
     Mask expectedMask;
     expectedMask.includes_ref().emplace()[1] = allMask();
@@ -1099,15 +1095,12 @@ TEST_F(PatchTest, Struct) {
   };
 
   applyFieldPatchTest(
-      op::PatchOp::Assign,
-      patchValue.objectValue_ref()->members().ensure()[1],
-      false);
+      op::PatchOp::Assign, patchValue.objectValue_ref()->members().ensure()[1]);
 
   applyFieldPatchTest(
       op::PatchOp::Put,
       asValueStruct<type::list<type::i32_t>>(
-          std::vector<int>{1, 2, 3, 3, 2, 1}),
-      true);
+          std::vector<int>{1, 2, 3, 3, 2, 1}));
 
   // Ensure and Patch
   {
@@ -1568,7 +1561,7 @@ TEST_F(PatchTest, ApplyGeneratedPatchToSerializedData) {
 
   test::patch::MyStructPatch patch;
   patch.patchIfSet<ident::boolVal>() = !op::BoolPatch{};
-  patch.patch<ident::byteVal>() = original.byteVal();
+  patch.patchIfSet<ident::byteVal>() = original.byteVal();
   patch.patchIfSet<ident::i16Val>() += 2;
   patch.patchIfSet<ident::i32Val>() += 3;
   patch.patchIfSet<ident::i64Val>() += 4;

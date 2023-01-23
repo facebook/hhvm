@@ -200,8 +200,8 @@ public final class RpcClientUtils {
         sslProvider = SslProvider.OPENSSL;
       }
 
-      return SslContextBuilder.forServer(
-              new FileInputStream(certFile), new FileInputStream(keyFile))
+      return SslContextBuilder.forClient()
+          .keyManager(new FileInputStream(certFile), new FileInputStream(keyFile))
           .sslProvider(sslProvider)
           .trustManager(new FileInputStream(caFile))
           .sessionCacheSize(sessionCacheSize)

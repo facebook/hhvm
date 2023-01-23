@@ -176,7 +176,7 @@ public class RpcClientUtilsTest {
   public void tesSslContext() {
     SslContext context =
         RpcClientUtils.getSslContext(new ThriftClientConfig(), new InetSocketAddress(0));
-    assertTrue(context.isServer());
+    assertTrue(context.isClient());
   }
 
   @Test
@@ -184,7 +184,7 @@ public class RpcClientUtilsTest {
     SslContext context =
         RpcClientUtils.getSslContext(
             new ThriftClientConfig().setEnableJdkSsl(true), new InetSocketAddress(0));
-    assertTrue(context.isServer());
+    assertTrue(context.isClient());
   }
 
   @Test

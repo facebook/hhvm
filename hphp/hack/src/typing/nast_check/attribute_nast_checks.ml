@@ -30,6 +30,25 @@ let check_soft_internal_without_internal
     @@ Nast_check_error.Soft_internal_without_internal pos
   | _ -> ()
 
+let check_soft_internal_on_param fp =
+  match
+    find_attribute SN.UserAttributes.uaSoftInternal fp.param_user_attributes
+  with
+  | Some { ua_name = (pos, attr_name); _ } -> begin
+    match fp.param_visibility with
+    | Some Internal -> ()
+    | Some _ ->
+      Errors.add_nast_check_error
+      @@ Nast_check_error.Soft_internal_without_internal pos
+    | None ->
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Wrong_expression_kind_builtin_attribute
+               { expr_kind = "a parameter"; pos; attr_name })
+  end
+  | _ -> ()
+
 let check_attribute_arity attrs attr_name arg_spec =
   let attr = Naming_attributes.find attr_name attrs in
   let prim_err_opt =
@@ -162,7 +181,8 @@ let handler =
           check_attribute_arity
             fp.param_user_attributes
             SN.UserAttributes.uaCanCall
-            (`Exact 0))
+            (`Exact 0);
+          check_soft_internal_on_param fp)
         params
 
     method! at_fun_def _env fd =
@@ -192,6 +212,7 @@ let handler =
         m.m_user_attributes;
       check_deprecated_static m.m_user_attributes;
       check_duplicate_memoize m.m_user_attributes;
+      List.iter check_soft_internal_on_param m.m_params;
       (* Ban variadic arguments on memoized methods. *)
       if
         has_attribute "__Memoize" m.m_user_attributes

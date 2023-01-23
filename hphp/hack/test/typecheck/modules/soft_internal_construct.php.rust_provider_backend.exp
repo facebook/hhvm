@@ -1,0 +1,4 @@
+File "soft_internal_construct.php--use.php", line 7, characters 7-20:
+The `__SoftInternal` attribute cannot be used on a parameter. (Typing[4231])
+File "soft_internal_construct.php--use.php", line 9, characters 25-38:
+The `__SoftInternal` attribute cannot be used on a parameter. (Typing[4231])

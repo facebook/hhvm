@@ -71,11 +71,10 @@ let set_up_global_environment (env : env) ~(deps_mode : Typing_deps_mode.t) :
 
 let load_saved_state ~(env : env) : saved_state_result Lwt.t =
   let genv = create_global_env env in
-  let manifold_api_key =
-    genv.ServerEnv.local_config.ServerLocalConfig.saved_state_manifold_api_key
-  in
-  let use_manifold_cython_client =
-    genv.ServerEnv.local_config.ServerLocalConfig.use_manifold_cython_client
+  let saved_state_env =
+    ServerLocalConfig.make_saved_state_env
+      ~log_saved_state_age_and_distance:false
+      genv.ServerEnv.local_config
   in
   let%lwt (naming_table_path, naming_table_changed_files) =
     match env.naming_table_path with
@@ -83,14 +82,7 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
     | None ->
       let%lwt naming_table_saved_state =
         State_loader_lwt.load
-          ~env:
-            {
-              log_saved_state_age_and_distance = false;
-              Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
-              use_manifold_cython_client =
-                genv.ServerEnv.local_config
-                  .ServerLocalConfig.use_manifold_cython_client;
-            }
+          ~env:saved_state_env
           ~progress_callback:(fun _ -> ())
           ~watchman_opts:
             Saved_state_loader.Watchman_options.
@@ -123,12 +115,7 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
     | None ->
       let%lwt dep_table_saved_state =
         State_loader_lwt.load
-          ~env:
-            {
-              log_saved_state_age_and_distance = false;
-              Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
-              use_manifold_cython_client;
-            }
+          ~env:saved_state_env
           ~progress_callback:(fun _ -> ())
           ~watchman_opts:
             Saved_state_loader.Watchman_options.

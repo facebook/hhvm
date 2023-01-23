@@ -106,6 +106,19 @@ type ('main_artifacts, 'additional_info) load_result = {
 
 type load_error = string
 
+let make_env ?log_saved_state_age_and_distance (tcopt : TypecheckerOptions.t) :
+    env =
+  {
+    log_saved_state_age_and_distance =
+      Option.value
+        log_saved_state_age_and_distance
+        ~default:(TypecheckerOptions.log_saved_state_age_and_distance tcopt);
+    saved_state_manifold_api_key =
+      TypecheckerOptions.saved_state_manifold_api_key tcopt;
+    use_manifold_cython_client =
+      TypecheckerOptions.use_manifold_cython_client tcopt;
+  }
+
 (* Please do not throw an exception here; it breaks hack for open source users *)
 let short_user_message_of_error _ =
   "Saved states are not supported in this build."

@@ -267,32 +267,13 @@ let load_saved_state
               is_cached = true;
             }
         | None ->
-          let log_saved_state_age_and_distance =
-            ctx
-            |> Provider_context.get_tcopt
-            |> TypecheckerOptions.log_saved_state_age_and_distance
-          in
-          let manifold_api_key =
-            ctx
-            |> Provider_context.get_tcopt
-            |> TypecheckerOptions.saved_state_manifold_api_key
-          in
-          let use_manifold_cython_client =
-            ctx
-            |> Provider_context.get_tcopt
-            |> TypecheckerOptions.use_manifold_cython_client
-          in
           let ide_should_use_hack_64_distc =
             ctx
             |> Provider_context.get_tcopt
             |> TypecheckerOptions.ide_should_use_hack_64_distc
           in
-          let env : Saved_state_loader.env =
-            {
-              use_manifold_cython_client;
-              log_saved_state_age_and_distance;
-              Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
-            }
+          let env =
+            Saved_state_loader.make_env (Provider_context.get_tcopt ctx)
           in
           let%lwt result =
             if ide_should_use_hack_64_distc then

@@ -282,21 +282,14 @@ let make_remote_server_api
         Ok (naming_table, dep_table_path)
 
     let download_naming_and_dep_table_from_saved_state
-        (manifold_api_key : string option)
-        (manifold_path : string)
-        ~(use_manifold_cython_client : bool) :
+        (env : Saved_state_loader.env) (manifold_path : string) :
         (Naming_table.t * Path.t, string) result =
       let target_path = "/tmp/hh_server/" ^ Random_id.short_string () in
       Disk.mkdir_p target_path;
 
       let naming_table_future =
         State_loader_futures.download_and_unpack_saved_state_from_manifold
-          ~env:
-            {
-              Saved_state_loader.log_saved_state_age_and_distance = false;
-              Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
-              Saved_state_loader.use_manifold_cython_client;
-            }
+          ~env
           ~progress_callback:(fun _ -> ())
           ~saved_state_type:
             (Saved_state_loader.Naming_and_dep_table { naming_sqlite = true })
@@ -468,18 +461,14 @@ let make_remote_server_api
       download_naming_table_for_full_init_helper ~naming_table_base ~nonce
 
     let download_naming_and_dep_table
-        ~(manifold_api_key : string option)
-        ~(use_manifold_cython_client : bool)
+        (env : Saved_state_loader.env)
         ~(nonce : Int64.t)
         (saved_state_manifold_path : string option) :
         naming_table * string option =
       match saved_state_manifold_path with
       | Some path ->
         let download_result =
-          download_naming_and_dep_table_from_saved_state
-            manifold_api_key
-            path
-            ~use_manifold_cython_client
+          download_naming_and_dep_table_from_saved_state env path
         in
         (match download_result with
         | Ok (naming_table, dep_table) ->
@@ -510,20 +499,14 @@ let make_remote_server_api
         Ok contents
 
     let download_shallow_decls_saved_state
-        (manifold_api_key : string option)
-        (manifold_path : string)
-        (use_manifold_cython_client : bool) : (string I64Map.t, string) result =
+        (env : Saved_state_loader.env) (manifold_path : string) :
+        (string I64Map.t, string) result =
       let target_path = "/tmp/hh_server/" ^ Random_id.short_string () in
       Disk.mkdir_p target_path;
 
       let shallow_decls_future =
         State_loader_futures.download_and_unpack_saved_state_from_manifold
-          ~env:
-            {
-              Saved_state_loader.log_saved_state_age_and_distance = false;
-              Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
-              Saved_state_loader.use_manifold_cython_client;
-            }
+          ~env
           ~progress_callback:(fun _ -> ())
           ~saved_state_type:Saved_state_loader.Shallow_decls
           ~manifold_path
@@ -587,14 +570,8 @@ let make_remote_server_api
               SMap.add name (Some decl) acc)
           decl_name_and_hashes
 
-    let fetch_remote_decls_from_saved_state
-        manifold_api_key manifold_path use_manifold_cython_client classnames =
-      match
-        download_shallow_decls_saved_state
-          manifold_api_key
-          manifold_path
-          use_manifold_cython_client
-      with
+    let fetch_remote_decls_from_saved_state env manifold_path classnames =
+      match download_shallow_decls_saved_state env manifold_path with
       | Ok shallow_decls_download_result ->
         let _ =
           Hh_logger.log
@@ -649,11 +626,10 @@ let make_remote_server_api
 
     let fetch_and_cache_remote_decls
         ~ctx
+        ~(env : Saved_state_loader.env)
         (naming_table_opt : naming_table)
         ~(from_saved_state : bool)
-        (manifold_api_key : string option)
-        (manifold_path : string)
-        (use_manifold_cython_client : bool) =
+        ~(manifold_path : string) =
       match naming_table_opt with
       | None -> ()
       | Some naming_table ->
@@ -675,11 +651,7 @@ let make_remote_server_api
         in
         let remotely_fetched_decls =
           if from_saved_state then
-            fetch_remote_decls_from_saved_state
-              manifold_api_key
-              manifold_path
-              use_manifold_cython_client
-              classnames
+            fetch_remote_decls_from_saved_state env manifold_path classnames
           else
             fetch_remote_decls_from_remote_old_decl_service classnames
         in

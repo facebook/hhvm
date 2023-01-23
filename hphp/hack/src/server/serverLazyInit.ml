@@ -295,17 +295,8 @@ let download_and_load_state_exn
   let (progress_naming_table_load, progress_dep_table_load) =
     (ref None, ref None)
   in
-  let log_saved_state_age_and_distance =
-    genv.local_config.ServerLocalConfig.log_saved_state_age_and_distance
-  in
   let env : Saved_state_loader.env =
-    {
-      log_saved_state_age_and_distance;
-      Saved_state_loader.saved_state_manifold_api_key =
-        genv.local_config.ServerLocalConfig.saved_state_manifold_api_key;
-      use_manifold_cython_client =
-        genv.local_config.ServerLocalConfig.use_manifold_cython_client;
-    }
+    ServerLocalConfig.make_saved_state_env genv.local_config
   in
   (* TODO(hverr): Support the ignore_hhconfig flag, how to do this with Watchman? *)
   let _ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig genv.options in

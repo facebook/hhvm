@@ -1548,3 +1548,23 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       load_hack_64_distc_saved_state = options.load_hack_64_distc_saved_state;
       ide_should_use_hack_64_distc = options.ide_should_use_hack_64_distc;
     }
+
+let make_saved_state_env
+    ?log_saved_state_age_and_distance
+    ?(saved_state_manifold_api_key : string option)
+    ?use_manifold_cython_client
+    (config : t) : Saved_state_loader.env =
+  {
+    Saved_state_loader.log_saved_state_age_and_distance =
+      Option.value
+        log_saved_state_age_and_distance
+        ~default:config.log_saved_state_age_and_distance;
+    saved_state_manifold_api_key =
+      Option.first_some
+        saved_state_manifold_api_key
+        config.saved_state_manifold_api_key;
+    use_manifold_cython_client =
+      Option.value
+        use_manifold_cython_client
+        ~default:config.use_manifold_cython_client;
+  }

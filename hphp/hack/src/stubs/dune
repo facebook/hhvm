@@ -97,6 +97,7 @@
   future
   naming
   relative_path
+  state_loader_stubs
   sys_utils)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
@@ -113,7 +114,10 @@
  (name state_loader_stubs)
  (wrapped false)
  (modules saved_state_loader state_loader_futures state_loader_lwt)
- (libraries hg server_monitor)
+ (libraries
+  hg
+  server_monitor
+  typechecker_options)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 

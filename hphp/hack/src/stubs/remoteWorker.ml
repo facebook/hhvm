@@ -21,8 +21,7 @@ module type RemoteServerApi = sig
     (naming_table, string) result
 
   val download_naming_and_dep_table :
-    manifold_api_key:string option ->
-    use_manifold_cython_client:bool ->
+    Saved_state_loader.env ->
     nonce:Int64.t ->
     string option ->
     naming_table * string option
@@ -33,11 +32,10 @@ module type RemoteServerApi = sig
 
   val fetch_and_cache_remote_decls :
     ctx:Provider_context.t ->
+    env:Saved_state_loader.env ->
     naming_table ->
     from_saved_state:bool ->
-    string option ->
-    string ->
-    bool ->
+    manifold_path:string ->
     unit
 
   (* Called by the worker to type check a list of files.

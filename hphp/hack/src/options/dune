@@ -72,6 +72,7 @@
  (name typechecker_options)
  (wrapped false)
  (modules typecheckerOptions)
- (libraries global_options)
+ (libraries
+  global_options)
  (preprocess
   (pps ppx_deriving.std)))

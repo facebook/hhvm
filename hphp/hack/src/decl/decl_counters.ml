@@ -29,7 +29,6 @@ type origin =
 
 type subdecl_kind =
   (* Shallow *)
-  | Shallow_decl
   | Abstract
   | Final
   | Const
@@ -48,7 +47,6 @@ type subdecl_kind =
   | Decl_errors
   | Support_dynamic_type
   (* Lazy *)
-  | Linearization
   | Construct
   | Need_init
   | Get_ancestor of string [@printer (fun fmt _s -> fprintf fmt "Get_ancestor")]
@@ -86,8 +84,6 @@ type subdecl_kind =
   | SProps
   | Methods
   | SMethods
-  | All_inherited_methods
-  | All_inherited_smethods
   | Overridden_method
   (* Misc *)
   | Deferred_init_members
@@ -121,7 +117,6 @@ let subdecl_member_name (subdecl_kind : subdecl_kind) : string option =
 
 let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   match subdecl_kind with
-  | Shallow_decl
   | Abstract
   | Final
   | Const
@@ -140,7 +135,6 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Decl_errors
   | Support_dynamic_type ->
     "shallow"
-  | Linearization
   | Construct
   | Need_init
   | Get_ancestor _
@@ -175,8 +169,6 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | SProps
   | Methods
   | SMethods
-  | All_inherited_methods
-  | All_inherited_smethods
   | Overridden_method ->
     "eager"
   | Deferred_init_members -> "misc"

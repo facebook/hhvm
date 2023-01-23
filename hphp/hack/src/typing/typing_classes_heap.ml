@@ -45,12 +45,6 @@ let get (ctx : Provider_context.t) (class_name : string) declare_folded_class :
   make_eager_class_type ctx class_name declare_folded_class
 
 module ApiShallow = struct
-  let shallow_decl (decl, t, _ctx) =
-    (* Looks only at the immediate shallow decl *)
-    Decl_counters.count_subdecl decl Decl_counters.Shallow_decl @@ fun () ->
-    match t with
-    | _ -> failwith "shallow_class_decl is disabled"
-
   let abstract (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Abstract @@ fun () ->
     let (c, _) = t in
@@ -345,11 +339,6 @@ module ApiLazy = struct
 end
 
 module ApiEager = struct
-  let linearization (decl, t, _ctx) kind : Decl_defs.mro_element list =
-    Decl_counters.count_subdecl decl Decl_counters.Linearization @@ fun () ->
-    match (t, kind) with
-    | (_, _) -> failwith "shallow_class_decl is disabled"
-
   let all_ancestor_req_names (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestor_req_names
     @@ fun () ->
@@ -423,18 +412,6 @@ module ApiEager = struct
     SMap.bindings c.Decl_defs.dc_smethods
     |> List.map ~f:(fun (id, elt) ->
            (id, Decl_class.lookup_static_method_type_lazy ctx c id elt))
-
-  let all_inherited_methods (decl, t, _ctx) _id =
-    Decl_counters.count_subdecl decl Decl_counters.All_inherited_methods
-    @@ fun () ->
-    match t with
-    | _ -> failwith "shallow_class_decl is disabled"
-
-  let all_inherited_smethods (decl, t, _ctx) _id =
-    Decl_counters.count_subdecl decl Decl_counters.All_inherited_smethods
-    @@ fun () ->
-    match t with
-    | _ -> failwith "shallow_class_decl is disabled"
 
   let overridden_method (decl, t, ctx) ~method_name ~is_static ~get_class =
     let open Option.Monad_infix in

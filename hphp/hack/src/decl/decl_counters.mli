@@ -32,7 +32,6 @@ type origin =
 
 type subdecl_kind =
   (* Shallow *)
-  | Shallow_decl
   | Abstract
   | Final
   | Const
@@ -51,7 +50,6 @@ type subdecl_kind =
   | Decl_errors
   | Support_dynamic_type
   (* Lazy *)
-  | Linearization
   | Construct
   | Need_init
   | Get_ancestor of string
@@ -85,8 +83,6 @@ type subdecl_kind =
   | SProps
   | Methods
   | SMethods
-  | All_inherited_methods
-  | All_inherited_smethods
   | Overridden_method
   (* Misc *)
   | Deferred_init_members

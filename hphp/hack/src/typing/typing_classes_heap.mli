@@ -43,9 +43,6 @@ module Api : sig
 
   val need_init : t -> bool
 
-  val linearization :
-    t -> Decl_defs.linearization_kind -> Decl_defs.mro_element list
-
   val abstract : t -> bool
 
   val final : t -> bool
@@ -161,18 +158,6 @@ module Api : sig
 
   val smethods : t -> (string * class_elt) list
 
-  (** The following functions return _all_ class member declarations defined in or
-      inherited by this class with the given member name, including ones which
-      were overridden, for purposes such as override checking. The list is ordered
-      in reverse with respect to the linearization (so members defined in more
-      derived classes occur later in the list).
-
-      To be used only when {!ServerLocalConfig.shallow_class_decl} is enabled.
-      Raises [Failure] if used when shallow_class_decl is not enabled. *)
-  val all_inherited_methods : t -> string -> class_elt list
-
-  val all_inherited_smethods : t -> string -> class_elt list
-
   (** Return the enforceability of the typeconst with the given name. A
       typeconst is enforceable if it was declared with the <<__Enforceable>>
       attribute, or if it overrides some ancestor typeconst with that attribute.
@@ -183,12 +168,6 @@ module Api : sig
       differ between legacy and shallow decl due to the perf cost in shallow). *)
   val get_typeconst_enforceability :
     t -> string -> (Pos_or_decl.t * bool) option
-
-  (** Return the shallow declaration for the given class.
-
-      To be used only when {!ServerLocalConfig.shallow_class_decl} is enabled.
-      Raises [Failure] if used when shallow_class_decl is not enabled. *)
-  val shallow_decl : t -> Shallow_decl_defs.shallow_class
 
   val valid_newable_class : t -> bool
 

@@ -96,6 +96,28 @@ func NewMyServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, opr
     return NewMyServiceClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceClientProtocol(prot thrift.Protocol) *MyServiceClient {
+  return NewMyServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceThreadsafeClientProtocol(prot thrift.Protocol) *MyServiceClient {
+  return NewMyServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewMyServiceClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceThreadsafeClient {
+  return NewMyServiceClientFactory(t, pf)
+}
+
 
 func (c *MyServiceChannelClient) Query(ctx context.Context, s *module.MyStruct, i *includes.Included) error {
     in := &reqMyServiceQuery{

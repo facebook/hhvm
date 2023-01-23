@@ -98,6 +98,28 @@ func NewRaiserThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot 
     return NewRaiserClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewRaiserChannelClient() instead.
+func NewRaiserClientProtocol(prot thrift.Protocol) *RaiserClient {
+  return NewRaiserClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewRaiserChannelClient() instead.
+func NewRaiserThreadsafeClientProtocol(prot thrift.Protocol) *RaiserClient {
+  return NewRaiserClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewRaiserChannelClient() instead.
+func NewRaiserClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *RaiserClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewRaiserClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewRaiserChannelClient() instead.
+func NewRaiserThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *RaiserThreadsafeClient {
+  return NewRaiserClientFactory(t, pf)
+}
+
 
 func (c *RaiserChannelClient) DoBland(ctx context.Context) error {
     in := &reqRaiserDoBland{

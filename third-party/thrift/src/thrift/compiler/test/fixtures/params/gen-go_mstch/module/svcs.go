@@ -98,6 +98,28 @@ func NewNestedContainersThreadsafeClient(t thrift.Transport, iprot thrift.Protoc
     return NewNestedContainersClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewNestedContainersChannelClient() instead.
+func NewNestedContainersClientProtocol(prot thrift.Protocol) *NestedContainersClient {
+  return NewNestedContainersClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewNestedContainersChannelClient() instead.
+func NewNestedContainersThreadsafeClientProtocol(prot thrift.Protocol) *NestedContainersClient {
+  return NewNestedContainersClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewNestedContainersChannelClient() instead.
+func NewNestedContainersClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *NestedContainersClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewNestedContainersClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewNestedContainersChannelClient() instead.
+func NewNestedContainersThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *NestedContainersThreadsafeClient {
+  return NewNestedContainersClientFactory(t, pf)
+}
+
 
 func (c *NestedContainersChannelClient) MapList(ctx context.Context, foo map[int32][]int32) error {
     in := &reqNestedContainersMapList{

@@ -90,6 +90,28 @@ func NewMyRootThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot 
     return NewMyRootClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewMyRootChannelClient() instead.
+func NewMyRootClientProtocol(prot thrift.Protocol) *MyRootClient {
+  return NewMyRootClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyRootChannelClient() instead.
+func NewMyRootThreadsafeClientProtocol(prot thrift.Protocol) *MyRootClient {
+  return NewMyRootClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyRootChannelClient() instead.
+func NewMyRootClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyRootClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewMyRootClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewMyRootChannelClient() instead.
+func NewMyRootThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyRootThreadsafeClient {
+  return NewMyRootClientFactory(t, pf)
+}
+
 
 func (c *MyRootChannelClient) DoRoot(ctx context.Context) error {
     in := &reqMyRootDoRoot{
@@ -426,6 +448,28 @@ func NewMyNodeThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot 
     return NewMyNodeClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewMyNodeChannelClient() instead.
+func NewMyNodeClientProtocol(prot thrift.Protocol) *MyNodeClient {
+  return NewMyNodeClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyNodeChannelClient() instead.
+func NewMyNodeThreadsafeClientProtocol(prot thrift.Protocol) *MyNodeClient {
+  return NewMyNodeClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyNodeChannelClient() instead.
+func NewMyNodeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyNodeClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewMyNodeClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewMyNodeChannelClient() instead.
+func NewMyNodeThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyNodeThreadsafeClient {
+  return NewMyNodeClientFactory(t, pf)
+}
+
 
 func (c *MyNodeChannelClient) DoMid(ctx context.Context) error {
     in := &reqMyNodeDoMid{
@@ -735,6 +779,28 @@ type MyLeafThreadsafeClient = MyLeafClient
 // Deprecated: Use NewMyLeafChannelClient() instead.
 func NewMyLeafThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyLeafThreadsafeClient {
     return NewMyLeafClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewMyLeafChannelClient() instead.
+func NewMyLeafClientProtocol(prot thrift.Protocol) *MyLeafClient {
+  return NewMyLeafClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyLeafChannelClient() instead.
+func NewMyLeafThreadsafeClientProtocol(prot thrift.Protocol) *MyLeafClient {
+  return NewMyLeafClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyLeafChannelClient() instead.
+func NewMyLeafClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyLeafClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewMyLeafClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewMyLeafChannelClient() instead.
+func NewMyLeafThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyLeafThreadsafeClient {
+  return NewMyLeafClientFactory(t, pf)
 }
 
 

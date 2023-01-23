@@ -114,6 +114,28 @@ func NewGetEntityThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, opr
     return NewGetEntityClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewGetEntityChannelClient() instead.
+func NewGetEntityClientProtocol(prot thrift.Protocol) *GetEntityClient {
+  return NewGetEntityClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewGetEntityChannelClient() instead.
+func NewGetEntityThreadsafeClientProtocol(prot thrift.Protocol) *GetEntityClient {
+  return NewGetEntityClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewGetEntityChannelClient() instead.
+func NewGetEntityClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *GetEntityClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewGetEntityClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewGetEntityChannelClient() instead.
+func NewGetEntityThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *GetEntityThreadsafeClient {
+  return NewGetEntityClientFactory(t, pf)
+}
+
 
 func (c *GetEntityChannelClient) GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error) {
     in := &reqGetEntityGetEntity{

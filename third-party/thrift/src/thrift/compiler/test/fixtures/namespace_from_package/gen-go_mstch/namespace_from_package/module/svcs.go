@@ -90,6 +90,28 @@ func NewTestServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, o
     return NewTestServiceClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewTestServiceChannelClient() instead.
+func NewTestServiceClientProtocol(prot thrift.Protocol) *TestServiceClient {
+  return NewTestServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewTestServiceChannelClient() instead.
+func NewTestServiceThreadsafeClientProtocol(prot thrift.Protocol) *TestServiceClient {
+  return NewTestServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewTestServiceChannelClient() instead.
+func NewTestServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *TestServiceClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewTestServiceClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewTestServiceChannelClient() instead.
+func NewTestServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *TestServiceThreadsafeClient {
+  return NewTestServiceClientFactory(t, pf)
+}
+
 
 func (c *TestServiceChannelClient) Init(ctx context.Context, int1 int64) (int64, error) {
     in := &reqTestServiceInit{

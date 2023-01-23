@@ -104,6 +104,28 @@ func NewMyServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, opr
     return NewMyServiceClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceClientProtocol(prot thrift.Protocol) *MyServiceClient {
+  return NewMyServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceThreadsafeClientProtocol(prot thrift.Protocol) *MyServiceClient {
+  return NewMyServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewMyServiceClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceThreadsafeClient {
+  return NewMyServiceClientFactory(t, pf)
+}
+
 
 func (c *MyServiceChannelClient) Ping(ctx context.Context) error {
     in := &reqMyServicePing{
@@ -2141,6 +2163,28 @@ func NewMyServicePrioParentThreadsafeClient(t thrift.Transport, iprot thrift.Pro
     return NewMyServicePrioParentClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewMyServicePrioParentChannelClient() instead.
+func NewMyServicePrioParentClientProtocol(prot thrift.Protocol) *MyServicePrioParentClient {
+  return NewMyServicePrioParentClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyServicePrioParentChannelClient() instead.
+func NewMyServicePrioParentThreadsafeClientProtocol(prot thrift.Protocol) *MyServicePrioParentClient {
+  return NewMyServicePrioParentClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyServicePrioParentChannelClient() instead.
+func NewMyServicePrioParentClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServicePrioParentClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewMyServicePrioParentClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewMyServicePrioParentChannelClient() instead.
+func NewMyServicePrioParentThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServicePrioParentThreadsafeClient {
+  return NewMyServicePrioParentClientFactory(t, pf)
+}
+
 
 func (c *MyServicePrioParentChannelClient) Ping(ctx context.Context) error {
     in := &reqMyServicePrioParentPing{
@@ -2684,6 +2728,28 @@ func NewMyServicePrioChildThreadsafeClient(t thrift.Transport, iprot thrift.Prot
     return NewMyServicePrioChildClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewMyServicePrioChildChannelClient() instead.
+func NewMyServicePrioChildClientProtocol(prot thrift.Protocol) *MyServicePrioChildClient {
+  return NewMyServicePrioChildClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyServicePrioChildChannelClient() instead.
+func NewMyServicePrioChildThreadsafeClientProtocol(prot thrift.Protocol) *MyServicePrioChildClient {
+  return NewMyServicePrioChildClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyServicePrioChildChannelClient() instead.
+func NewMyServicePrioChildClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServicePrioChildClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewMyServicePrioChildClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewMyServicePrioChildChannelClient() instead.
+func NewMyServicePrioChildThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServicePrioChildThreadsafeClient {
+  return NewMyServicePrioChildClientFactory(t, pf)
+}
+
 
 func (c *MyServicePrioChildChannelClient) Pang(ctx context.Context) error {
     in := &reqMyServicePrioChildPang{
@@ -2983,6 +3049,28 @@ type BadServiceThreadsafeClient = BadServiceClient
 // Deprecated: Use NewBadServiceChannelClient() instead.
 func NewBadServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *BadServiceThreadsafeClient {
     return NewBadServiceClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewBadServiceChannelClient() instead.
+func NewBadServiceClientProtocol(prot thrift.Protocol) *BadServiceClient {
+  return NewBadServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewBadServiceChannelClient() instead.
+func NewBadServiceThreadsafeClientProtocol(prot thrift.Protocol) *BadServiceClient {
+  return NewBadServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewBadServiceChannelClient() instead.
+func NewBadServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *BadServiceClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewBadServiceClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewBadServiceChannelClient() instead.
+func NewBadServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *BadServiceThreadsafeClient {
+  return NewBadServiceClientFactory(t, pf)
 }
 
 

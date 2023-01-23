@@ -96,6 +96,28 @@ func NewFinderThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot 
     return NewFinderClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewFinderChannelClient() instead.
+func NewFinderClientProtocol(prot thrift.Protocol) *FinderClient {
+  return NewFinderClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewFinderChannelClient() instead.
+func NewFinderThreadsafeClientProtocol(prot thrift.Protocol) *FinderClient {
+  return NewFinderClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewFinderChannelClient() instead.
+func NewFinderClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FinderClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewFinderClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewFinderChannelClient() instead.
+func NewFinderThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FinderThreadsafeClient {
+  return NewFinderClientFactory(t, pf)
+}
+
 
 func (c *FinderChannelClient) ByPlate(ctx context.Context, plate Plate) (*Automobile, error) {
     in := &reqFinderByPlate{

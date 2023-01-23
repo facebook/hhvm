@@ -94,6 +94,28 @@ func NewCThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrif
     return NewCClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewCChannelClient() instead.
+func NewCClientProtocol(prot thrift.Protocol) *CClient {
+  return NewCClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewCChannelClient() instead.
+func NewCThreadsafeClientProtocol(prot thrift.Protocol) *CClient {
+  return NewCClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewCChannelClient() instead.
+func NewCClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *CClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewCClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewCChannelClient() instead.
+func NewCThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *CThreadsafeClient {
+  return NewCClientFactory(t, pf)
+}
+
 
 func (c *CChannelClient) F(ctx context.Context) error {
     in := &reqCF{

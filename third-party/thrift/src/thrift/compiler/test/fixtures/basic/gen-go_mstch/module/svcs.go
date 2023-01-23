@@ -92,6 +92,28 @@ func NewFooServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, op
     return NewFooServiceClient(t, iprot, oprot)
 }
 
+// Deprecated: Use NewFooServiceChannelClient() instead.
+func NewFooServiceClientProtocol(prot thrift.Protocol) *FooServiceClient {
+  return NewFooServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewFooServiceChannelClient() instead.
+func NewFooServiceThreadsafeClientProtocol(prot thrift.Protocol) *FooServiceClient {
+  return NewFooServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewFooServiceChannelClient() instead.
+func NewFooServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FooServiceClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewFooServiceClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewFooServiceChannelClient() instead.
+func NewFooServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FooServiceThreadsafeClient {
+  return NewFooServiceClientFactory(t, pf)
+}
+
 
 func (c *FooServiceChannelClient) SimpleRPC(ctx context.Context) error {
     in := &reqFooServiceSimpleRPC{
@@ -414,6 +436,28 @@ type FB303ServiceThreadsafeClient = FB303ServiceClient
 // Deprecated: Use NewFB303ServiceChannelClient() instead.
 func NewFB303ServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *FB303ServiceThreadsafeClient {
     return NewFB303ServiceClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewFB303ServiceChannelClient() instead.
+func NewFB303ServiceClientProtocol(prot thrift.Protocol) *FB303ServiceClient {
+  return NewFB303ServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewFB303ServiceChannelClient() instead.
+func NewFB303ServiceThreadsafeClientProtocol(prot thrift.Protocol) *FB303ServiceClient {
+  return NewFB303ServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewFB303ServiceChannelClient() instead.
+func NewFB303ServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FB303ServiceClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewFB303ServiceClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewFB303ServiceChannelClient() instead.
+func NewFB303ServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *FB303ServiceThreadsafeClient {
+  return NewFB303ServiceClientFactory(t, pf)
 }
 
 
@@ -869,6 +913,28 @@ type MyServiceThreadsafeClient = MyServiceClient
 // Deprecated: Use NewMyServiceChannelClient() instead.
 func NewMyServiceThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *MyServiceThreadsafeClient {
     return NewMyServiceClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceClientProtocol(prot thrift.Protocol) *MyServiceClient {
+  return NewMyServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceThreadsafeClientProtocol(prot thrift.Protocol) *MyServiceClient {
+  return NewMyServiceClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewMyServiceClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewMyServiceChannelClient() instead.
+func NewMyServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *MyServiceThreadsafeClient {
+  return NewMyServiceClientFactory(t, pf)
 }
 
 
@@ -3720,6 +3786,28 @@ type DbMixedStackArgumentsThreadsafeClient = DbMixedStackArgumentsClient
 // Deprecated: Use NewDbMixedStackArgumentsChannelClient() instead.
 func NewDbMixedStackArgumentsThreadsafeClient(t thrift.Transport, iprot thrift.Protocol, oprot thrift.Protocol) *DbMixedStackArgumentsThreadsafeClient {
     return NewDbMixedStackArgumentsClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewDbMixedStackArgumentsChannelClient() instead.
+func NewDbMixedStackArgumentsClientProtocol(prot thrift.Protocol) *DbMixedStackArgumentsClient {
+  return NewDbMixedStackArgumentsClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewDbMixedStackArgumentsChannelClient() instead.
+func NewDbMixedStackArgumentsThreadsafeClientProtocol(prot thrift.Protocol) *DbMixedStackArgumentsClient {
+  return NewDbMixedStackArgumentsClient(prot.Transport(), prot, prot)
+}
+
+// Deprecated: Use NewDbMixedStackArgumentsChannelClient() instead.
+func NewDbMixedStackArgumentsClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *DbMixedStackArgumentsClient {
+  iprot := pf.GetProtocol(t)
+  oprot := pf.GetProtocol(t)
+  return NewDbMixedStackArgumentsClient(t, iprot, oprot)
+}
+
+// Deprecated: Use NewDbMixedStackArgumentsChannelClient() instead.
+func NewDbMixedStackArgumentsThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) *DbMixedStackArgumentsThreadsafeClient {
+  return NewDbMixedStackArgumentsClientFactory(t, pf)
 }
 
 

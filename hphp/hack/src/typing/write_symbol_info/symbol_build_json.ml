@@ -347,11 +347,6 @@ let build_generic_xrefs_json (sym_pos : (Hh_json.json * Util.pos list) Seq.t) =
     Caml.Seq.fold_left
       (fun acc (target_json, pos_list) ->
         let sorted_pos = Caml.List.sort_uniq Util.compare_pos pos_list in
-        let first_pos =
-          match sorted_pos with
-          | hd :: _ -> hd
-          | [] -> Util.{ start = 0; length = 0 }
-        in
         let (rev_byte_spans, _) =
           List.fold
             sorted_pos
@@ -363,16 +358,16 @@ let build_generic_xrefs_json (sym_pos : (Hh_json.json * Util.pos list) Seq.t) =
         let byte_spans = List.rev rev_byte_spans in
         let xref =
           JSON_Object
-            [("target", target_json); ("ranges", JSON_Array byte_spans)]
+            [("ranges", JSON_Array byte_spans); ("target", target_json)]
         in
-        (first_pos, xref) :: acc)
+        xref :: acc)
       []
       sym_pos
   in
-  let sorted_xrefs =
-    List.sort ~compare:(fun (p, _) (p', _) -> Util.compare_pos p p') xrefs
-  in
-  JSON_Array (sorted_xrefs |> List.map ~f:snd)
+  (* there's no specified order for xref arrays, but it helps to avoid non-determinism
+     when diffing dbs *)
+  let sorted_xrefs = List.sort ~compare:Hh_json.JsonKey.compare xrefs in
+  JSON_Array sorted_xrefs
 
 let build_xrefs_json (fact_map : XRefs.fact_map) =
   let f (_fact_id, (json, pos_list)) =

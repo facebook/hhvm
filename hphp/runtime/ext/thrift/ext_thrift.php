@@ -90,9 +90,6 @@ final class RpcOptions implements IPureStringishObject {
   public function setInteractionId(InteractionId $interaction_id)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setFaultToInject(string $key, string $value)[write_props]: RpcOptions;
-
-  <<__Native>>
   public function setSerializedAuthProofs(string $serializedTokenData)[write_props]: RpcOptions;
 
   <<__Native>>

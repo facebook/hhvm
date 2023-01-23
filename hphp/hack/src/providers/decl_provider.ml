@@ -76,17 +76,7 @@ let get_class
     (class_name : type_key) : class_decl option =
   Decl_counters.count_decl ?tracing_info Decl_counters.Class class_name
   @@ fun counter ->
-  (* There's a confusing matrix of possibilities:
-     SHALLOW - in this case, the Typing_classes_heap.class_t we get back is
-       just a small shim that does memoization; further accessors on it
-       like "get_method" will lazily call Linearization_provider and Shallow_classes_provider
-       to get more information
-     EAGER - in this case, the Typing_classes_heap.class_t we get back is
-       an "folded" object which keeps an intire index of all members, although
-       those members are fetched lazily via Lazy.t.
-
-     and
-
+  (* There are several possibilities:
      LOCAL BACKEND - the class_t is cached in the local backend.
      SHAREDMEM BACKEND - the class_t is cached in the worker-local 'Cache' heap.
        Note that in the case of eager, the class_t is really just a fairly simple

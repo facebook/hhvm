@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<84da2a58d71a826699a02f5cafebca03>>
+// @generated SignedSource<<9eea375ef3b067ea41ff5d0109be7a63>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -107,34 +107,6 @@ pub enum SourceType {
 }
 impl TrivialDrop for SourceType {}
 arena_deserializer::impl_deserialize_in_arena!(SourceType);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (show, ord)")]
-#[repr(u8)]
-pub enum LinearizationKind {
-    #[rust_to_ocaml(name = "Member_resolution")]
-    MemberResolution,
-    #[rust_to_ocaml(name = "Ancestor_types")]
-    AncestorTypes,
-}
-impl TrivialDrop for LinearizationKind {}
-arena_deserializer::impl_deserialize_in_arena!(LinearizationKind);
 
 #[derive(
     Clone,

@@ -47,7 +47,6 @@ ast_defs::XhpEnumValue
 user_error::Severity
 decl_defs::ConditionTypeName
 decl_defs::DeclError
-decl_defs::LinearizationKind
 decl_defs::MethodReactivity
 decl_defs::SourceType
 decl_reference::DeclReference
@@ -110,7 +109,6 @@ oxidized::ast_defs::TypedefVisibility
 oxidized::ast_defs::Uop
 oxidized::ast_defs::Variance
 oxidized::ast_defs::Visibility
-oxidized::decl_defs::LinearizationKind
 oxidized::decl_defs::SourceType
 oxidized::file_info::Mode
 oxidized::file_info::NameType

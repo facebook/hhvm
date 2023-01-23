@@ -223,7 +223,6 @@ let get_telemetry (t : t) : Telemetry.t =
   | Provider_backend.Local_memory
       {
         Provider_backend.shallow_decl_cache;
-        linearization_cache;
         decl_cache;
         folded_class_cache;
         reverse_naming_table_delta;
@@ -239,9 +238,6 @@ let get_telemetry (t : t) : Telemetry.t =
     |> Folded_class_cache.get_telemetry
          folded_class_cache
          ~key:"folded_class_cache"
-    |> Linearization_cache.get_telemetry
-         linearization_cache
-         ~key:"linearization_cache"
     |> Reverse_naming_table_delta.get_telemetry
          reverse_naming_table_delta
          ~key:"reverse_naming_table_delta"
@@ -253,7 +249,6 @@ let reset_telemetry (t : t) : unit =
   | Provider_backend.Local_memory
       {
         Provider_backend.shallow_decl_cache;
-        linearization_cache;
         decl_cache;
         folded_class_cache;
         reverse_naming_table_delta = _;
@@ -262,7 +257,6 @@ let reset_telemetry (t : t) : unit =
       } ->
     Provider_backend.Decl_cache.reset_telemetry decl_cache;
     Provider_backend.Shallow_decl_cache.reset_telemetry shallow_decl_cache;
-    Provider_backend.Linearization_cache.reset_telemetry linearization_cache;
     Provider_backend.Folded_class_cache.reset_telemetry folded_class_cache;
     ()
   | _ -> ()

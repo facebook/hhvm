@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6421a893e3d10f66c786672cbe023b8a>>
+// @generated SignedSource<<743a9d84776af28d3fd7afa5564959a9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -78,7 +78,6 @@ pub struct SubstContext<'a> {
 impl<'a> TrivialDrop for SubstContext<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(SubstContext<'arena>);
 
-pub use oxidized::decl_defs::LinearizationKind;
 pub use oxidized::decl_defs::SourceType;
 
 #[derive(

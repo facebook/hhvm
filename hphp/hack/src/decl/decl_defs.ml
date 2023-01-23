@@ -7,7 +7,6 @@
  *
  *)
 
-open Hh_prelude
 open Typing_defs
 
 (** Exception representing not finding a class during decl *)
@@ -62,103 +61,6 @@ type source_type =
   | ReqExtends
   | ReqClass
 [@@deriving eq, show]
-
-(* Is this bit set in the flags? *)
-let is_set bit flags = not (Int.equal 0 (Int.bit_and bit flags))
-
-(* Set a single bit to a boolean value *)
-let set_bit bit value flags =
-  if value then
-    Int.bit_or bit flags
-  else
-    Int.bit_and (Int.bit_not bit) flags
-
-(* MRO element flags *)
-
-(** True if this element is included in the linearization (directly or
-    indirectly) because of a require extends relationship. *)
-let mro_via_req_extends = 1 lsl 1
-
-(** True if this element is included in the linearization (directly or
-    indirectly) because of a require implements relationship. *)
-let mro_via_req_impl = 1 lsl 2
-
-(** True if this element is included in the linearization because of any
-    XHP-attribute-inclusion relationship, and thus, the linearized class
-    inherits only the XHP attributes from this element. *)
-let mro_xhp_attrs_only = 1 lsl 3
-
-(** True if this element is included in the linearization because of a
-    interface-implementation relationship, and thus, the linearized class
-    inherits only the class constants and type constants from this element. *)
-let mro_consts_only = 1 lsl 4
-
-(** True if this element is included in the linearization via an unbroken chain
-    of trait-use relationships, and thus, the linearized class inherits the
-    private members of this element (on account of the runtime behavior where
-    they are effectively copied into the linearized class). *)
-let mro_copy_private_members = 1 lsl 5
-
-(** True if this element is included in the linearization via an unbroken chain
-    of abstract classes, and thus, abstract type constants with default values
-    are inherited unchanged. When this flag is not set, a concrete class was
-    present in the chain. Since we convert abstract type constants with
-    defaults to concrete ones when they are included in a concrete class, any
-    type constant which 1) is abstract, 2) has a default, and 3) was inherited
-    from an ancestor with this flag not set, should be inherited as a concrete
-    type constant instead. *)
-let mro_passthrough_abstract_typeconst = 1 lsl 6
-
-(** True if this element is included in the linearization (directly or
-    indirectly) because of a require class relationship. *)
-let mro_via_req_class = 1 lsl 7
-
-type mro_element = {
-  mro_name: string;  (** The class's name *)
-  mro_use_pos: Pos_or_decl.t;
-      (** The position at which this element was directly included in the hierarchy.
-          If C extends B extends A, the use_pos of A in C's linearization will be the
-          position of the class name A in the line "class B extends A". *)
-  mro_ty_pos: Pos_or_decl.t;
-      (** Like mro_use_pos, but includes type arguments (if any). *)
-  mro_flags: int;
-      (** Bitflag which specifies in what contexts that element of the linearization should or
-          should not be used. *)
-  mro_type_args: decl_ty list;
-      (** The type arguments with which this ancestor class was instantiated. The
-          first class in the linearization (the one which was linearized) will have
-          an empty list here, even when it takes type parameters. *)
-  mro_cyclic: SSet.t option;
-      (** When this is [Some], this mro_element represents an attempt to include a
-          linearization within itself. We include these in the linearization for the
-          sake of error reporting (they will not occur in correct programs). The
-          SSet.t is the set of class names known to have been involved in the
-          inclusion of this class in the linearization. *)
-  mro_trait_reuse: string option;
-      (** When this is [Some], this mro_element represents the use of a trait which
-          was already used earlier in the linearization. Normally, we do not emit
-          duplicate mro_elements at all--we include these in the linearization only
-          for error detection. The string is the name of the class through which this
-          trait was most recently included (as a duplicate). *)
-  mro_required_at: Pos_or_decl.t option;
-      (** If this element is included in the linearization because it was directly
-          required by some ancestor, this will be [Some], and the position will be
-          the location where this requirement was most recently included into the
-          hierarchy. *)
-}
-[@@deriving eq, show]
-
-type lin = {
-  lin_member: mro_element list;
-  lin_ancestor: mro_element list;
-}
-
-type linearization = mro_element Sequence.t
-
-type linearization_kind =
-  | Member_resolution
-  | Ancestor_types
-[@@deriving show, ord]
 
 type decl_error =
   | Wrong_extend_kind of {

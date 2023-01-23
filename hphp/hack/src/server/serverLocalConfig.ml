@@ -369,7 +369,6 @@ type t = {
       (** whether clientLsp should use ranked autocomplete *)
   ide_max_num_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_max_num_shallow_decls: int;  (** tuning of clientIdeDaemon local cache *)
-  ide_max_num_linearizations: int;  (** tuning of clientIdeDaemon local cache *)
   ide_symbolindex_search_provider: string;
       (** like [symbolindex_search_provider] but for IDE *)
   predeclare_ide: bool;
@@ -550,7 +549,6 @@ let default =
     ide_ranked_autocomplete = false;
     ide_max_num_decls = 5000;
     ide_max_num_shallow_decls = 10000;
-    ide_max_num_linearizations = 10000;
     predeclare_ide = false;
     max_typechecker_worker_memory_mb = None;
     use_max_typechecker_worker_memory_for_decl_deferral = false;
@@ -944,12 +942,6 @@ let load_ fn ~silent ~current_version overrides =
     int_
       "ide_max_num_shallow_decls"
       ~default:default.ide_max_num_shallow_decls
-      config
-  in
-  let ide_max_num_linearizations =
-    int_
-      "ide_max_num_linearizations"
-      ~default:default.ide_max_num_linearizations
       config
   in
   let predeclare_ide =
@@ -1427,7 +1419,6 @@ let load_ fn ~silent ~current_version overrides =
     ide_ranked_autocomplete;
     ide_max_num_decls;
     ide_max_num_shallow_decls;
-    ide_max_num_linearizations;
     ide_symbolindex_search_provider;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
@@ -1524,7 +1515,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       fetch_remote_old_decls = options.fetch_remote_old_decls;
       ide_max_num_decls = options.ide_max_num_decls;
       ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;
-      ide_max_num_linearizations = options.ide_max_num_linearizations;
       max_bucket_size = options.max_bucket_size;
       max_workers = Option.value options.max_workers ~default:(-1);
       max_typechecker_worker_memory_mb =

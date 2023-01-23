@@ -72,7 +72,7 @@ concerning these data-structures:
 2. reverse-naming-table-delta-and-cache stored in local_memory
 3. entries with source text, stored in open_files
 3. cached ASTs and TASTs, stored in open_files
-4. shallow-decl-cache, folded-decl-cache, linearization-cache stored in local-memory
+4. shallow-decl-cache, folded-decl-cache stored in local-memory
 
 There are two concepts to understand.
 1. "Singleton context" (ctx). When processing IDE requests for a file, we create
@@ -95,11 +95,9 @@ The key algorithms which read from these data-structures are:
 3. Shallow_classes_provider.get_* will look it up in shallow-decl-cache, and otherwise
    will ask Naming_provider and Ast_provider for the AST, will compute shallow decl,
    and will store it in shallow-decl-cache
-4. Linearization_provider.get_* will look it up in linearization-cache. The
-   decl_provider reads and writes linearizations via the linearization_provider.
-5. Decl_provider.get_* will look it up in folded-decl-cache, computing it if
-   not there using shallow and linearization provider, and store it back in folded-decl-cache
-6. Tast_provider.compute* is only ever called on entries. It returns the cached
+4. Decl_provider.get_* will look it up in folded-decl-cache, computing it if
+   not there using shallow provider, and store it back in folded-decl-cache
+5. Tast_provider.compute* is only ever called on entries. It returns the cached
    TAST if present; otherwise, it runs normal type-checking-and-inference, relies
    upon all the other providers, and writes the answer back in the entry's TAST cache.
 
@@ -112,15 +110,14 @@ The invariants for forward and reverse naming tables:
    We might for instance read the naming-table and try to fetch a shallow
    decl from a file that doesn't even exist on disk any more.
 
-The invariants for AST, TAST, shallow, folded-decl and linearization caches:
+The invariants for AST, TAST, shallow, and folded-decl caches:
 1. AST, if present, reflects the AST of its entry's source text,
    and is a "full" AST (not decl-only), and has errors.
 2. TAST, if present, reflects the TAST of its entry's source text computed
    against the on-disk state of all other files
 3. Outside a quarantine, all entries in shallow cache are correct as of disk
    (at least as far as asynchronous file updates have been processed).
-4. Likewise, all entries in folded+linearization caches are correct as
-   of disk.
+4. Likewise, all entries in folded caches are correct as of disk.
 5. We only ever enter quarantine with respect to one single entry.
    For the duration of the quarantine, an AST for that entry,
    if present, is correct as of the entry's source text.
@@ -129,7 +126,7 @@ The invariants for AST, TAST, shallow, folded-decl and linearization caches:
    is present and contains those symbols.
 7. Any shallow decls not for the entry are correct as of disk.
 8. During quarantine, the shallow-decl of all other files is correct as of disk.
-9. The entry's TAST, along with every single decl and linearization,
+9. The entry's TAST, along with every single decl,
    are correct as of this entry's source text plus every other file off disk.
 
 Here are the algorithms we use that satisfy those invariants.
@@ -137,20 +134,19 @@ Here are the algorithms we use that satisfy those invariants.
    We use the forward-naming-table to find all "old" symbols that were
    defined in the file prior to the disk change, and invalidate those
    shallow decls (satisfying invariant 3). We invalidate all
-  folded+linearization caches (satisfying invariant 4). Invariant 1 is N/A.
+   folded caches (satisfying invariant 4). Invariant 1 is N/A.
 2. Upon an editor change to a file, we invalidate the entry's AST and TAST
    (satisfying invariant 1).
 3. Upon request for a TAST of a file, we create a singleton context for
    that entry, and enter quarantine as follows. We parse the file and
    cache its AST and invalidate shallow decls for all symbols inside
    this new AST (satisfying invariant 6). We invalidate all decls
-   and linearizations (satisfying invariant 9). Subsequent fetches,
+   (satisfying invariant 9). Subsequent fetches,
    thanks to the "key algorithms for reading these datastructures" (above)
    will only cache things in accordance with invariants 6,7,8,9.
 4. We leave quarantine as follows. We invalidate shallow decls for
    all symbols in the entry's AST; thanks to invariant 5, this will
-   fulfill invariant 3. We invalidate all decls and linearizations
-  (satisfying invariant 4).
+   fulfill invariant 3. We invalidate all decls (satisfying invariant 4).
 *)
 type istate = {
   icommon: common_state;
@@ -459,9 +455,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   Provider_backend.set_local_memory_backend
     ~max_num_decls:local_config.ServerLocalConfig.ide_max_num_decls
     ~max_num_shallow_decls:
-      local_config.ServerLocalConfig.ide_max_num_shallow_decls
-    ~max_num_linearizations:
-      local_config.ServerLocalConfig.ide_max_num_linearizations;
+      local_config.ServerLocalConfig.ide_max_num_shallow_decls;
   let local_memory =
     match Provider_backend.get () with
     | Provider_backend.Local_memory local_memory -> local_memory

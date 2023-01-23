@@ -38,11 +38,11 @@ let compare_member_change x y = ord_member_change x - ord_member_change y
    trait T { public abstract function f(): void; }
    class B extends A { use T; }
 
-   Then B inherits the concrete method A::f even though the trait T occurs first
-   in B's linearization--we use the fact that A::f is concrete and T::f is not
-   to choose which member to inherit in B. Since changes to the abstractness of
-   A::f or T::f can affect what appears in B's member collection, we categorize
-   these changes with Changed_inheritance.
+   Then B inherits the concrete method A::f even though trait methods normally
+   overwrite parent methods in folded methods tables--we use the fact that A::f
+   is concrete and T::f is not to choose which member to inherit in B. Since
+   changes to the abstractness of A::f or T::f can affect what appears in B's
+   member collection, we categorize these changes with Changed_inheritance.
 
    We must handle changes which affect descendants in this way differently from
    changes which do not because of how we record member dependencies in the

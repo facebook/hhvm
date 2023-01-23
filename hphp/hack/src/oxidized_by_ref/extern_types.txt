@@ -70,7 +70,6 @@ oxidized::ast_defs::TypedefVisibility
 oxidized::ast_defs::Uop
 oxidized::ast_defs::Variance
 oxidized::ast_defs::Visibility
-oxidized::decl_defs::LinearizationKind
 oxidized::decl_defs::SourceType
 oxidized::doc_comment::DocComment
 oxidized::error_codes::Init

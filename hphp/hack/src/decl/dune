@@ -90,14 +90,15 @@
  (libraries
   ast_provider
   decl_class_elements
+  decl_defs
   decl_enforceability
   decl_enum
   decl_env
   decl_fun_utils
   decl_init_check
+  decl_instantiate
   decl_pos_utils
   decl_store
-  decl_to_typing
   decl_utils
   naming
   procs_procs
@@ -282,13 +283,6 @@
  (name decl_subst)
  (modules decl_subst)
  (libraries decl_defs typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name decl_to_typing)
- (modules decl_to_typing)
- (libraries decl_defs decl_instantiate shallow_decl_defs typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 

@@ -188,9 +188,6 @@ let denylisted_types =
   [
     ("aast_defs", "LocalIdMap");
     ("aast_defs", "ByteString");
-    ("decl_defs", "Lin");
-    ("decl_defs", "Linearization");
-    ("decl_defs", "MroElement");
     ("errors", "FinalizedError");
     ("errors", "Marker");
     ("errors", "MarkedMessage");

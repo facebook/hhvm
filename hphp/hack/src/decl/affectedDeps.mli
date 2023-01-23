@@ -22,9 +22,9 @@ type t = {
       (** These classes either directly experienced some change to their
           inheritance hierarchy (e.g., an interface was added, or the extends
           clause was changed), or one of their ancestors did. Since the
-          hierarchy has changed, the member resolution order we have stored for
-          them is invalidated, and must be removed from the linearizations heap
-          (it will be lazily recomputed on demand). *)
+          hierarchy has changed, descendant classes may inherit different
+          members, so their folded decls must be invalidated (they'll be lazily
+          recomputed on demand). *)
   needs_recheck: DepSet.t;
       (** This set represents the dependents of the declarations which were
           changed. In order to detect all errors which may have resulted from

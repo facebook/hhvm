@@ -20,7 +20,6 @@ let invalidate_local_decl_caches_for_file
     Provider_backend.shallow_decl_cache;
     folded_class_cache;
     decl_cache;
-    linearization_cache;
     reverse_naming_table_delta = _;
     fixmes = _;
     naming_db_path_ref = _;
@@ -40,21 +39,19 @@ let invalidate_local_decl_caches_for_file
         shallow_decl_cache
         ~key:(Shallow_decl_cache_entry.Shallow_class_decl name));
 
-  (* Decl and linearization cache: we don't track fine-grained
-     dependencies, and therefore we should be evicting everything.
+  (* Decl cache: we don't track fine-grained dependencies, and therefore we
+     should be evicting everything.
 
-     It might be possible to do decl-diffing on shallow-decls and if
-     they're unchanged, then avoid invalidating the folded decls and
-     linearizations. That would be better in the case of just one
-     disk file change notification, but worse in the case of 5000
-     since it'd require getting shallow-decls on all of them just
+     It might be possible to do decl-diffing on shallow-decls and if they're
+     unchanged, then avoid invalidating the folded decls. That would be better
+     in the case of just one disk file change notification, but worse in the
+     case of 5000 since it'd require getting shallow-decls on all of them just
      to compare, even if they weren't actually needed.
 
-     I tried evicting everything but it was far too slow. That will
-     need to be fixed. But for now, let's settle for evicting
-     decls and linearizations which we know are affected. This way
-     at least the user has a fallback of opening relevant files in the
-     IDE to get their relevant decls+linearizations correct. *)
+     I tried evicting everything but it was far too slow. That will need to be
+     fixed. But for now, let's settle for evicting decls which we know are
+     affected. This way at least the user has a fallback of opening relevant
+     files in the IDE to get their relevant decls correct. *)
   let open Provider_backend.Decl_cache_entry in
   List.iter file_info.consts ~f:(fun (_, name, _) ->
       Decl_cache.remove decl_cache ~key:(Gconst_decl name));
@@ -67,10 +64,6 @@ let invalidate_local_decl_caches_for_file
       Folded_class_cache.remove
         folded_class_cache
         ~key:(Folded_class_cache_entry.Folded_class_decl name));
-  (* Linearizations are only keyed by class names *)
-  let open Provider_backend.Linearization_cache_entry in
-  List.iter file_info.classes ~f:(fun (_, name, _) ->
-      Linearization_cache.remove linearization_cache ~key:(Linearization name));
   ()
 
 let invalidate_local_decl_caches_for_entries
@@ -119,7 +112,6 @@ let respect_but_quarantine_unsaved_changes
         Ast_provider.local_changes_push_sharedmem_stack ();
         Decl_provider.local_changes_push_sharedmem_stack ();
         Shallow_classes_provider.local_changes_push_sharedmem_stack ();
-        Linearization_provider.local_changes_push_sharedmem_stack ();
         File_provider.local_changes_push_sharedmem_stack ();
         Fixme_provider.local_changes_push_sharedmem_stack ();
         Naming_provider.local_changes_push_sharedmem_stack ();
@@ -132,7 +124,6 @@ let respect_but_quarantine_unsaved_changes
            Rust_provider_backend, but member filters are not, so we still need
            to push/pop the sharedmem stack for member filters. *)
         Shallow_classes_provider.local_changes_push_sharedmem_stack ();
-        Linearization_provider.local_changes_push_sharedmem_stack ();
         Fixme_provider.local_changes_push_sharedmem_stack ();
         SharedMem.set_allow_hashtable_writes_by_current_process false
       | Provider_backend.Local_memory local ->
@@ -167,7 +158,6 @@ let respect_but_quarantine_unsaved_changes
         Ast_provider.local_changes_pop_sharedmem_stack ();
         Decl_provider.local_changes_pop_sharedmem_stack ();
         Shallow_classes_provider.local_changes_pop_sharedmem_stack ();
-        Linearization_provider.local_changes_pop_sharedmem_stack ();
         File_provider.local_changes_pop_sharedmem_stack ();
         Fixme_provider.local_changes_pop_sharedmem_stack ();
         Naming_provider.local_changes_pop_sharedmem_stack ();
@@ -178,7 +168,6 @@ let respect_but_quarantine_unsaved_changes
 
         Ast_provider.local_changes_pop_sharedmem_stack ();
         Shallow_classes_provider.local_changes_pop_sharedmem_stack ();
-        Linearization_provider.local_changes_pop_sharedmem_stack ();
         Fixme_provider.local_changes_pop_sharedmem_stack ();
         SharedMem.set_allow_hashtable_writes_by_current_process true;
         SharedMem.invalidate_local_caches ()

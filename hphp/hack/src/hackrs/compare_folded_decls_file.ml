@@ -69,7 +69,6 @@ let init ~enable_strict_const_semantics popt : Provider_context.t =
   File_provider.local_changes_push_sharedmem_stack ();
   Decl_provider.local_changes_push_sharedmem_stack ();
   Shallow_classes_provider.local_changes_push_sharedmem_stack ();
-  Linearization_provider.local_changes_push_sharedmem_stack ();
 
   ctx
 

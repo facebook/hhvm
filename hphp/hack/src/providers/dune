@@ -81,7 +81,6 @@
   rust_provider_backend_stubs
   shallow_classes_provider
   shallow_decl_defs
-  linearization_provider
   typedef_provider
   typing_heap)
  (preprocess
@@ -143,13 +142,6 @@
   remote_old_decl_client
   rust_provider_backend_stubs
   shallow_classes_heap)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name linearization_provider)
- (modules linearization_provider)
- (libraries provider_backend provider_context)
  (preprocess
   (pps ppx_deriving.std)))
 

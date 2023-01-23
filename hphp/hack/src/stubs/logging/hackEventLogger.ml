@@ -50,7 +50,6 @@ type rollout_flags = {
   fetch_remote_old_decls: bool;
   ide_max_num_decls: int;
   ide_max_num_shallow_decls: int;
-  ide_max_num_linearizations: int;
   max_bucket_size: int;
   max_typechecker_worker_memory_mb: int;
   max_workers: int;

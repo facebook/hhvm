@@ -56,7 +56,6 @@ ast_defs::TypedefVisibility
 ast_defs::Uop
 ast_defs::Variance
 ast_defs::Visibility
-decl_defs::LinearizationKind
 decl_defs::SourceType
 error_codes::Init
 error_codes::Naming

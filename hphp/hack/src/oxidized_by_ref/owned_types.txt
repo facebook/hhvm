@@ -2,7 +2,6 @@ aast_defs::Tprim
 aast::Tprim
 decl_defs::CollectionStyle
 decl_defs::ConsistentKind
-decl_defs::LinearizationKind
 decl_defs::SourceType
 decl_defs::XhpAttr
 ident::Ident

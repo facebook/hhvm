@@ -41,9 +41,9 @@ let get_minor_change_fanout
     lazy (Typing_deps.add_extend_deps mode changed)
   in
   let acc =
-    (* If positions affecting the linearization have changed, we need to update
-       positions in the linearization of this class and all its descendants.
-       We mark those linearizations as invalidated here. We don't need to
+    (* If positions have changed which are inherited by descendant folded
+       classes, we need to update positions in this class and all its
+       descendants. We mark them as invalidated here. We don't need to
        recheck the fanout of the invalidated classes--since only positions
        changed, there will be no change in the fanout except in the positions
        in error messages, and we recheck all files with errors anyway. *)

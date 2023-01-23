@@ -85,20 +85,6 @@ end
 
 module Folded_class_cache : module type of Cache (Folded_class_cache_entry)
 
-module Linearization_cache_entry : sig
-  type _ t = Linearization : string -> Decl_defs.lin t
-
-  type 'a key = 'a t
-
-  type 'a value = 'a
-
-  val get_size : key:'a key -> value:'a value -> int
-
-  val key_to_log_string : 'a key -> string
-end
-
-module Linearization_cache : module type of Cache (Linearization_cache_entry)
-
 (** A `fixme_map` associates:
     line number guarded by HH_FIXME =>
     error_node_number =>
@@ -182,7 +168,6 @@ type local_memory = {
       (** This contains top-level decls: functions, classish types, type aliases, global constants, etc.
         The classes in this cache correspond to Decl_provider.Cache used when we use the shared memory backend.
         The other top-level definitions correspond to Decl_heap.Typedefs/GConsts/Modules/etc. *)
-  linearization_cache: Linearization_cache.t;
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
       (** A map from symbol-name to pos. (1) It's used as a slowly updated
           authoritative place to look for symbols that have changed on disk since
@@ -236,10 +221,7 @@ val set_local_memory_backend_with_defaults_for_test : unit -> unit
 which reflects the status quo ante, a max size of 140mb in bytes rather than
 a max number. This will be removed shortly. *)
 val set_local_memory_backend :
-  max_num_decls:int ->
-  max_num_shallow_decls:int ->
-  max_num_linearizations:int ->
-  unit
+  max_num_decls:int -> max_num_shallow_decls:int -> unit
 
 val set_decl_service_backend :
   Decl_service_client.t -> TypecheckerOptions.t -> unit

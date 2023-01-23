@@ -73,21 +73,12 @@ let coerce_type_impl
       | _ ->
         Typing_utils.sub_type ~coerce env ty_have ty_expect.et_type on_error
   else
-    let complex_coercion =
-      TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
-    in
     let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
     let (env, ety_have) = Typing_env.expand_type env ty_have in
     match (get_node ety_have, get_node ety_expect) with
     | (_, Tdynamic) -> (env, None)
     | (Tdynamic, _) when is_expected_enforced -> (env, None)
     | _ when is_expected_enforced ->
-      Typing_utils.sub_type_with_dynamic_as_bottom
-        env
-        ty_have
-        ty_expect.et_type
-        on_error
-    | _ when Typing_utils.is_dynamic env ety_expect && complex_coercion ->
       Typing_utils.sub_type_with_dynamic_as_bottom
         env
         ty_have

@@ -254,7 +254,6 @@ let parse_options () =
   let strict_contexts = ref true in
   let like_casts = ref false in
   let simple_pessimize = ref 0.0 in
-  let complex_coercion = ref false in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
   let check_redundant_generics = ref false in
@@ -591,16 +590,12 @@ let parse_options () =
         Arg.Set_float simple_pessimize,
         " At coercion points, if a type is not enforceable, wrap it in like. Float argument 0.0 to 1.0 sets frequency"
       );
-      ( "--complex-coercion",
-        Arg.Set complex_coercion,
-        " Allows complex coercions that involve like types" );
       ( "--like-types-all",
         Arg.Unit
           (fun () ->
             set_bool_ like_type_hints ();
             set_bool_ like_casts ();
-            set_float_ simple_pessimize 1.0;
-            set_bool_ complex_coercion ()),
+            set_float_ simple_pessimize 1.0),
         " Enables all like types features" );
       ( "--naive-implicit-pess",
         Arg.Unit
@@ -970,7 +965,6 @@ let parse_options () =
       ~tco_coeffects_local:!local_coeffects
       ~tco_like_casts:!like_casts
       ~tco_simple_pessimize:!simple_pessimize
-      ~tco_complex_coercion:!complex_coercion
       ~log_levels:!log_levels
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
       ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints

@@ -171,8 +171,6 @@ let like_casts t = t.GlobalOptions.tco_like_casts
 
 let simple_pessimize t = t.GlobalOptions.tco_simple_pessimize
 
-let complex_coercion t = t.GlobalOptions.tco_complex_coercion
-
 let check_xhp_attribute t = t.GlobalOptions.tco_check_xhp_attribute
 
 let check_redundant_generics t = t.GlobalOptions.tco_check_redundant_generics

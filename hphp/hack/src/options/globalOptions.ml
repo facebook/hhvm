@@ -71,7 +71,6 @@ type t = {
   tco_strict_contexts: bool;
   tco_like_casts: bool;
   tco_simple_pessimize: float;
-  tco_complex_coercion: bool;
   tco_check_xhp_attribute: bool;
   tco_check_redundant_generics: bool;
   tco_disallow_unresolved_type_variables: bool;
@@ -214,7 +213,6 @@ let default =
     tco_strict_contexts = true;
     tco_like_casts = false;
     tco_simple_pessimize = 0.0;
-    tco_complex_coercion = false;
     tco_check_xhp_attribute = false;
     tco_check_redundant_generics = false;
     tco_disallow_unresolved_type_variables = false;
@@ -357,7 +355,6 @@ let make
     ?(tco_strict_contexts = default.tco_strict_contexts)
     ?(tco_like_casts = default.tco_like_casts)
     ?(tco_simple_pessimize = default.tco_simple_pessimize)
-    ?(tco_complex_coercion = default.tco_complex_coercion)
     ?(tco_check_xhp_attribute = default.tco_check_xhp_attribute)
     ?(tco_check_redundant_generics = default.tco_check_redundant_generics)
     ?(tco_disallow_unresolved_type_variables =
@@ -530,7 +527,6 @@ let make
     tco_strict_contexts;
     tco_like_casts;
     tco_simple_pessimize;
-    tco_complex_coercion;
     tco_check_xhp_attribute;
     tco_check_redundant_generics;
     tco_disallow_unresolved_type_variables;

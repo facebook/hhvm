@@ -126,8 +126,6 @@ type t = {
   (* A simpler form of pessimization, only wraps the outermost type in like
    * if the type is not enforceable *)
   tco_simple_pessimize: float;
-  (* Enables complex coercion interactions that involve like types *)
-  tco_complex_coercion: bool;
   (* static check xhp required attribute *)
   tco_check_xhp_attribute: bool;
   (* Check redundant generics in return types *)
@@ -383,7 +381,6 @@ val make :
   ?tco_strict_contexts:bool ->
   ?tco_like_casts:bool ->
   ?tco_simple_pessimize:float ->
-  ?tco_complex_coercion:bool ->
   ?tco_check_xhp_attribute:bool ->
   ?tco_check_redundant_generics:bool ->
   ?tco_disallow_unresolved_type_variables:bool ->

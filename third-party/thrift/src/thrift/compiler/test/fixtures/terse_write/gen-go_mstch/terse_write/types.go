@@ -4049,7 +4049,7 @@ func NewTerseStructWithCustomDefault() *TerseStructWithCustomDefault {
         SetShortField(2).
         SetIntField(3).
         SetLongField(4).
-        SetFloatField().
+        SetFloatField(5).
         SetDoubleField(6).
         SetStringField("7").
         SetBinaryField().

@@ -30,6 +30,10 @@
     }}{{#value:nonzero?}}true{{/value:nonzero?}}{{!
     }}{{^value:nonzero?}}false{{/value:nonzero?}}{{!
   }}{{/type:bool?}}{{!
+  }}{{#type:float?}}{{!
+    }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
+    }}{{#value:integer?}}{{value:integer_value}}.0{{/value:integer?}}{{!
+  }}{{/type:float?}}{{!
   }}{{#type:double?}}{{!
     }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
     }}{{#value:integer?}}{{value:integer_value}}.0{{/value:integer?}}{{!

@@ -402,7 +402,7 @@ module Modules = struct
   module CanonName = struct
     type t = string
 
-    let description = "Naming_ModulePos"
+    let description = "Naming_ModuleCanon"
   end
 
   module ModulePosHeap =

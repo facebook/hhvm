@@ -67,6 +67,7 @@ let tests =
     ("server_hover", run Test_server_hover.test);
     ("unbound_name", run Test_unbound_name.test);
     ("unbound_name_2", run Test_unbound_name_2.test);
+    ("unbound_name_3", run Test_unbound_name_3.test);
   ]
 
 let () = Runner_base.go tests

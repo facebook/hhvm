@@ -99,6 +99,11 @@ module GEnv = struct
       let (p, _) = get_const_full_pos ctx (pos, name) in
       Some p
     | None -> None
+
+  let module_pos ctx name =
+    match Naming_provider.get_module_pos ctx name with
+    | Some pos -> Some (fst @@ get_module_full_pos ctx (pos, name))
+    | None -> None
 end
 
 (** Given name-and-position [id], compared to the [canonical_id] name-and-position,
@@ -539,5 +544,8 @@ let ndecl_file_error_if_already_bound ctx fn fileinfo =
     in
     let failed =
       add_files_to_rename failed fileinfo.FileInfo.consts (GEnv.gconst_pos ctx)
+    in
+    let failed =
+      add_files_to_rename failed fileinfo.FileInfo.modules (GEnv.module_pos ctx)
     in
     (errors, failed)

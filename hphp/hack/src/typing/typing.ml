@@ -3439,7 +3439,20 @@ and expr_
       env
       e
   | Omitted ->
-    let ty = Typing_utils.mk_tany env p in
+    (* If an expression is omitted in an lvalue position, currently only
+     * possible in a list destructuring construct such as `list(,$x) = $y;`,
+     * we want to assign anything *to* the index of the omitted expression,
+     * so give it type `mixed`. If an expression is omitted in an rvalue position,
+     * currently only constant declarations (e.g. in hhi files), then we want
+     * to be to assign *from* the expression, so give it type `nothing`.
+     *)
+    let ty =
+      match valkind with
+      | `lvalue
+      | `lvalue_subexpr ->
+        MakeType.mixed (Reason.Rwitness p)
+      | `other -> MakeType.nothing (Reason.Rwitness p)
+    in
     make_result env p Aast.Omitted ty
   | Varray (th, el)
   | ValCollection (_, th, el) ->

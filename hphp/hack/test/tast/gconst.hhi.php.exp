@@ -12,7 +12,7 @@ Errors:
       cst_span = [3:1-18]; cst_emit_id = None });
   (Constant
      { cst_annotation = (); cst_mode = Mhhi; cst_name = ([4:11-13], "\\X2"); 
-       cst_type = (Some ([4:7-10], (Hprim Tint))); cst_value = ((_), [4:11-13], Omitted);
+       cst_type = (Some ([4:7-10], (Hprim Tint))); cst_value = ((nothing), [4:11-13], Omitted);
        cst_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -20,7 +20,7 @@ Errors:
        cst_span = [4:1-14]; cst_emit_id = None });
   (Constant
      { cst_annotation = (); cst_mode = Mhhi; cst_name = ([5:14-15], "\\Y"); 
-       cst_type = (Some ([5:7-13], (Hprim Tstring))); cst_value = ((_), [5:14-15], Omitted);
+       cst_type = (Some ([5:7-13], (Hprim Tstring))); cst_value = ((nothing), [5:14-15], Omitted);
        cst_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -29,7 +29,7 @@ Errors:
   (Constant
      { cst_annotation = (); cst_mode = Mhhi; cst_name = ([6:26-27], "\\Z"); 
        cst_type = (Some ([6:7-25], (Happly (([6:7-25], "\\FunctionCredential"), [])))); 
-       cst_value = ((_), [6:26-27], Omitted);
+       cst_value = ((nothing), [6:26-27], Omitted);
        cst_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

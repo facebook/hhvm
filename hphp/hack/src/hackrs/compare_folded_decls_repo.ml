@@ -62,13 +62,7 @@ let init (root : Path.t) (naming_table_path : string option) :
     ServerConfig.load ~silent:true ServerConfig.filename server_args
   in
   let popt = ServerConfig.parser_options server_config in
-  let tcopt =
-    {
-      popt with
-      GlobalOptions.tco_shallow_class_decl = false;
-      tco_higher_kinded_types = true;
-    }
-  in
+  let tcopt = { popt with GlobalOptions.tco_higher_kinded_types = true } in
   let ctx =
     Provider_context.empty_for_tool
       ~popt

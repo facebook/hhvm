@@ -58,7 +58,6 @@ type t = {
   allowed_fixme_codes_strict: ISet.t;
   log_levels: int SMap.t;
   po_disable_lval_as_an_expression: bool;
-  tco_shallow_class_decl: bool;
   tco_remote_old_decls_no_limit: bool;
   tco_fetch_remote_old_decls: bool;
   tco_populate_member_heaps: bool;
@@ -200,7 +199,6 @@ let default =
     allowed_fixme_codes_strict = ISet.empty;
     log_levels = SMap.empty;
     po_disable_lval_as_an_expression = true;
-    tco_shallow_class_decl = false;
     tco_remote_old_decls_no_limit = false;
     tco_fetch_remote_old_decls = false;
     tco_populate_member_heaps = true;
@@ -341,7 +339,6 @@ let make
     ?(log_levels = default.log_levels)
     ?(po_disable_lval_as_an_expression =
       default.po_disable_lval_as_an_expression)
-    ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
     ?(tco_remote_old_decls_no_limit = default.tco_remote_old_decls_no_limit)
     ?(tco_fetch_remote_old_decls = default.tco_fetch_remote_old_decls)
     ?(tco_populate_member_heaps = default.tco_populate_member_heaps)
@@ -514,7 +511,6 @@ let make
     tco_disallow_byref_calls;
     log_levels;
     po_disable_lval_as_an_expression;
-    tco_shallow_class_decl;
     tco_remote_old_decls_no_limit;
     tco_fetch_remote_old_decls;
     tco_populate_member_heaps;

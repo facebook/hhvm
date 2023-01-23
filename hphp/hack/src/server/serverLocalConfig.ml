@@ -392,9 +392,6 @@ type t = {
       server init. *)
   idle_gc_slice: int;
       (** Size of Gc.major_slice to be performed when server is idle. 0 to disable *)
-  shallow_class_decl: bool;
-      (** Look up class members lazily from shallow declarations instead of eagerly
-      computing folded declarations representing the entire class type. *)
   populate_member_heaps: bool;
       (** Populate the member signature heaps.
 
@@ -561,7 +558,6 @@ let default =
     store_decls_in_saved_state = false;
     load_decls_from_saved_state = false;
     idle_gc_slice = 0;
-    shallow_class_decl = false;
     populate_member_heaps = true;
     fetch_remote_old_decls = false;
     use_hack_64_naming_table = true;
@@ -1016,13 +1012,6 @@ let load_ fn ~silent ~current_version overrides =
   let idle_gc_slice =
     int_ "idle_gc_slice" ~default:default.idle_gc_slice config
   in
-  let shallow_class_decl =
-    bool_if_min_version
-      "shallow_class_decl"
-      ~default:default.shallow_class_decl
-      ~current_version
-      config
-  in
   let populate_member_heaps =
     bool_if_min_version
       "populate_member_heaps"
@@ -1432,7 +1421,6 @@ let load_ fn ~silent ~current_version overrides =
     store_decls_in_saved_state;
     load_decls_from_saved_state;
     idle_gc_slice;
-    shallow_class_decl;
     populate_member_heaps;
     fetch_remote_old_decls;
     use_hack_64_naming_table;

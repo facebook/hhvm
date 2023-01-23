@@ -41,7 +41,6 @@ impl Default for GlobalOptions {
             allowed_fixme_codes_strict: i_set::ISet::new(),
             log_levels: s_map::SMap::new(),
             po_disable_lval_as_an_expression: false, // true in ocaml
-            tco_shallow_class_decl: false,
             tco_remote_old_decls_no_limit: false,
             tco_fetch_remote_old_decls: false,
             tco_populate_member_heaps: true,

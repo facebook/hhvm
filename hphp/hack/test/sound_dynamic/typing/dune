@@ -60,54 +60,8 @@
    --error-format
    plain)))
 
-(rule
- (alias sound_dynamic_typing_shallow_decl_good)
- (deps
-  %{exe:../../../src/hh_single_type_check.exe}
-  %{project_root}/hack/test/verify.py
-  %{project_root}/hack/test/review.sh
-  (glob_files %{project_root}/hack/test/sound_dynamic/typing/HH_FLAGS)
-  (glob_files %{project_root}/hack/test/sound_dynamic/typing/*.good.php)
-  (glob_files %{project_root}/hack/test/sound_dynamic/typing/*.good.php.exp))
- (action
-  (run
-   %{project_root}/hack/test/verify.py
-   %{project_root}/hack/test/sound_dynamic/typing
-   --program
-   %{exe:../../../src/hh_single_type_check.exe}
-   --in-extension
-   .good.php
-   --flags
-   --enable-sound-dynamic-type
-   --shallow-class-decl)))
-
-(rule
- (alias sound_dynamic_typing_shallow_decl_bad)
- (deps
-  %{exe:../../../src/hh_single_type_check.exe}
-  %{project_root}/hack/test/verify.py
-  %{project_root}/hack/test/review.sh
-  (glob_files %{project_root}/hack/test/sound_dynamic/typing/HH_FLAGS)
-  (glob_files %{project_root}/hack/test/sound_dynamic/typing/*.bad.php)
-  (glob_files %{project_root}/hack/test/sound_dynamic/typing/*.bad.php.exp))
- (action
-  (run
-   %{project_root}/hack/test/verify.py
-   %{project_root}/hack/test/sound_dynamic/typing
-   --program
-   %{exe:../../../src/hh_single_type_check.exe}
-   --in-extension
-   .bad.php
-   --flags
-   --enable-sound-dynamic-type
-   --shallow-class-decl
-   --error-format
-   plain)))
-
 (alias
  (name runtest)
  (deps
   (alias sound_dynamic_typing_good)
-  (alias sound_dynamic_typing_bad)
-  (alias sound_dynamic_typing_shallow_decl_good)
-  (alias sound_dynamic_typing_shallow_decl_bad)))
+  (alias sound_dynamic_typing_bad)))

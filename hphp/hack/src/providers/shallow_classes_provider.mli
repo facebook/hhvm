@@ -10,9 +10,7 @@ open Shallow_decl_defs
 
 (** Return the shallow declaration of the class with the given name if it is
 present in the cache. Otherwise, compute it, store it in the cache, and
-return it.
-
-Raises [Failure] if [shallow_class_decl] is not enabled. *)
+return it. *)
 val get : Provider_context.t -> string -> shallow_class option
 
 val get_batch : Provider_context.t -> SSet.t -> shallow_class option SMap.t

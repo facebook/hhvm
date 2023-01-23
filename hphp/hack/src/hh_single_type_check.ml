@@ -242,7 +242,6 @@ let parse_options () =
   let set_bool x () = x := Some true in
   let set_bool_ x () = x := true in
   let set_float_ x f = x := f in
-  let shallow_class_decl = ref false in
   let rust_provider_backend = ref false in
   let skip_hierarchy_checks = ref false in
   let skip_tast_checks = ref false in
@@ -563,9 +562,6 @@ let parse_options () =
         Arg.Unit (set_bool disallow_byref_calls),
         " Disallow passing arguments by reference in any form [e.g. foo(&$bar)]"
       );
-      ( "--shallow-class-decl",
-        Arg.Set shallow_class_decl,
-        " Look up class members lazily from shallow declarations" );
       ( "--rust-provider-backend",
         Arg.Set rust_provider_backend,
         " Use the Rust implementation of Provider_backend (including decl-folding)"
@@ -955,7 +951,6 @@ let parse_options () =
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~tco_check_redundant_generics:!check_redundant_generics
-      ~tco_shallow_class_decl:!shallow_class_decl
       ~tco_skip_hierarchy_checks:!skip_hierarchy_checks
       ~tco_skip_tast_checks:!skip_tast_checks
       ~tco_like_type_hints:!like_type_hints

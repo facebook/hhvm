@@ -49,8 +49,6 @@ module Api : sig
 
   val const : t -> bool
 
-  (** To be used only when {!ServerLocalConfig.shallow_class_decl} is not enabled.
-      Raises [Failure] if used when shallow_class_decl is enabled. *)
   val deferred_init_members : t -> SSet.t
 
   val kind : t -> Ast_defs.classish_kind

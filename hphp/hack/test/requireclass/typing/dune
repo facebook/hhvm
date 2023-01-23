@@ -58,52 +58,8 @@
    --error-format
    plain)))
 
-(rule
- (alias requireclass_typing_shallow_decl_good)
- (deps
-  %{exe:../../../src/hh_single_type_check.exe}
-  %{project_root}/hack/test/verify.py
-  %{project_root}/hack/test/review.sh
-  (glob_files %{project_root}/hack/test/requireclass/typing/HH_FLAGS)
-  (glob_files %{project_root}/hack/test/requireclass/typing/*.good.php)
-  (glob_files %{project_root}/hack/test/requireclass/typing/*.good.php.exp))
- (action
-  (run
-   %{project_root}/hack/test/verify.py
-   %{project_root}/hack/test/requireclass/typing
-   --program
-   %{exe:../../../src/hh_single_type_check.exe}
-   --in-extension
-   .good.php
-   --flags
-   --shallow-class-decl)))
-
-(rule
- (alias requireclass_typing_shallow_decl_bad)
- (deps
-  %{exe:../../../src/hh_single_type_check.exe}
-  %{project_root}/hack/test/verify.py
-  %{project_root}/hack/test/review.sh
-  (glob_files %{project_root}/hack/test/requireclass/typing/HH_FLAGS)
-  (glob_files %{project_root}/hack/test/requireclass/typing/*.bad.php)
-  (glob_files %{project_root}/hack/test/requireclass/typing/*.bad.php.exp))
- (action
-  (run
-   %{project_root}/hack/test/verify.py
-   %{project_root}/hack/test/requireclass/typing
-   --program
-   %{exe:../../../src/hh_single_type_check.exe}
-   --in-extension
-   .bad.php
-   --flags
-   --shallow-class-decl
-   --error-format
-   plain)))
-
 (alias
  (name runtest)
  (deps
   (alias requireclass_typing_good)
-  (alias requireclass_typing_bad)
-  (alias requireclass_typing_shallow_decl_good)
-  (alias requireclass_typing_shallow_decl_bad)))
+  (alias requireclass_typing_bad)))

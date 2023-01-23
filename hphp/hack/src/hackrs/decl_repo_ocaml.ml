@@ -89,13 +89,7 @@ let init
     ServerConfig.load ~silent:true ServerConfig.filename server_args
   in
   let popt = ServerConfig.parser_options server_config in
-  let tcopt =
-    {
-      popt with
-      GlobalOptions.tco_shallow_class_decl = false;
-      tco_higher_kinded_types = true;
-    }
-  in
+  let tcopt = { popt with GlobalOptions.tco_higher_kinded_types = true } in
   if rust_provider_backend then Provider_backend.set_rust_backend popt;
   let ctx =
     Provider_context.empty_for_tool

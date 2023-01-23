@@ -54,9 +54,6 @@ let set_up_global_environment (env : env) ~(deps_mode : Typing_deps_mode.t) :
 
   let popt = ServerConfig.parser_options genv.ServerEnv.config in
   let tcopt = ServerConfig.typechecker_options genv.ServerEnv.config in
-  (* We need shallow class declarations so that we can invalidate individual
-     members in a class hierarchy. *)
-  let tcopt = { tcopt with GlobalOptions.tco_shallow_class_decl = true } in
 
   let (ctx, workers, _time_taken) =
     Batch_init.init

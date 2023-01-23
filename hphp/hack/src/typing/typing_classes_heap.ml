@@ -439,12 +439,7 @@ module Api = struct
   include ApiLazy
   include ApiEager
 
-  (* We cannot invoke [Typing_deferred_members.class_] here because it would be a
-     dependency cycle. Instead, we raise an exception. We should remove this
-     function (along with [Decl_init_check]) altogether when we delete legacy
-     class declaration, since [Typing_deferred_members] makes it obsolete. *)
   let deferred_init_members (decl, t, _ctx) =
-    (* Not applicable to shallow decl *)
     Decl_counters.count_subdecl decl Decl_counters.Deferred_init_members
     @@ fun () ->
     let (c, _) = t in

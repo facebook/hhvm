@@ -41,13 +41,7 @@ let init root popt : Provider_context.t =
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 SharedMem.default_config
   in
-  let tcopt =
-    {
-      popt with
-      GlobalOptions.tco_shallow_class_decl = true;
-      tco_higher_kinded_types = true;
-    }
-  in
+  let tcopt = { popt with GlobalOptions.tco_higher_kinded_types = true } in
   let ctx =
     Provider_context.empty_for_tool
       ~popt

@@ -17,9 +17,6 @@ module DICheck = Decl_init_check
 module SN = Naming_special_names
 module Native = Typing_native
 
-let shallow_decl_enabled (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-
 module SSetWTop = struct
   type t =
     | Top
@@ -260,57 +257,47 @@ let class_prop_pos class_name prop_name ctx : Pos_or_decl.t =
     | None -> Pos_or_decl.none
     | Some elt ->
       let member_origin = elt.Typing_defs.ce_origin in
-      if shallow_decl_enabled ctx then
-        match Shallow_classes_provider.get ctx member_origin with
-        | None -> Pos_or_decl.none
-        | Some sc ->
-          let prop =
-            List.find_exn sc.Shallow_decl_defs.sc_props ~f:(fun prop ->
-                String.equal (snd prop.Shallow_decl_defs.sp_name) prop_name)
-          in
-          fst prop.Shallow_decl_defs.sp_name
-      else
-        let get_class_by_name ctx x =
-          let open Option.Monad_infix in
-          Naming_provider.get_type_path ctx x >>= fun fn ->
-          Ast_provider.find_class_in_file ctx fn x
-        in
-        (match get_class_by_name ctx member_origin with
-        | None -> Pos_or_decl.none
-        | Some cls ->
-          (match
-             List.find cls.Aast.c_vars ~f:(fun cv ->
-                 String.equal (snd cv.Aast.cv_id) prop_name)
-           with
-          | None ->
-            (* We found the class prop's origin via Typing_defs.ce_origin, so we
-               *should* find the prop in the class. This is an invariant violation.
-            *)
-            HackEventLogger.invariant_violation_bug
-              ~desc:
-                ("nastInitCheck can't find expected class prop. class_name = "
-                ^ class_name
-                ^ "; member_origin = "
-                ^ member_origin
-                ^ "; prop_name = "
-                ^ prop_name)
-              ~path:Relative_path.default
-              ~pos:""
-              (Telemetry.create ());
-            Errors.add_typing_error
-              Typing_error.(
-                primary
-                @@ Primary.Internal_error
-                     {
-                       pos = Pos.none;
-                       msg =
-                         "Invariant violation:  please report this bug via the VSCode bug button. Expected to find prop_name "
-                         ^ prop_name
-                         ^ " in class "
-                         ^ member_origin;
-                     });
-            Pos_or_decl.none
-          | Some cv -> Pos_or_decl.of_raw_pos @@ fst cv.Aast.cv_id)))
+      let get_class_by_name ctx x =
+        let open Option.Monad_infix in
+        Naming_provider.get_type_path ctx x >>= fun fn ->
+        Ast_provider.find_class_in_file ctx fn x
+      in
+      (match get_class_by_name ctx member_origin with
+      | None -> Pos_or_decl.none
+      | Some cls ->
+        (match
+           List.find cls.Aast.c_vars ~f:(fun cv ->
+               String.equal (snd cv.Aast.cv_id) prop_name)
+         with
+        | None ->
+          (* We found the class prop's origin via Typing_defs.ce_origin, so we
+             *should* find the prop in the class. This is an invariant violation.
+          *)
+          HackEventLogger.invariant_violation_bug
+            ~desc:
+              ("nastInitCheck can't find expected class prop. class_name = "
+              ^ class_name
+              ^ "; member_origin = "
+              ^ member_origin
+              ^ "; prop_name = "
+              ^ prop_name)
+            ~path:Relative_path.default
+            ~pos:""
+            (Telemetry.create ());
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Internal_error
+                   {
+                     pos = Pos.none;
+                     msg =
+                       "Invariant violation:  please report this bug via the VSCode bug button. Expected to find prop_name "
+                       ^ prop_name
+                       ^ " in class "
+                       ^ member_origin;
+                   });
+          Pos_or_decl.none
+        | Some cv -> Pos_or_decl.of_raw_pos @@ fst cv.Aast.cv_id)))
 
 (**
  * Returns the set of properties initialized by the constructor.

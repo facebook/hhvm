@@ -179,13 +179,13 @@ func (x *TypeURI) GetTypeHashPrefixSha2256() ByteString {
     return x.TypeHashPrefixSha2256
 }
 
-func (x *TypeURI) SetURI(uri URI) *TypeURI {
-    x.URI = &uri
+func (x *TypeURI) SetURI(value URI) *TypeURI {
+    x.URI = &value
     return x
 }
 
-func (x *TypeURI) SetTypeHashPrefixSha2256(typeHashPrefixSha2256 ByteString) *TypeURI {
-    x.TypeHashPrefixSha2256 = typeHashPrefixSha2256
+func (x *TypeURI) SetTypeHashPrefixSha2256(value ByteString) *TypeURI {
+    x.TypeHashPrefixSha2256 = value
     return x
 }
 
@@ -417,88 +417,88 @@ func (x *TypeName) GetMapType() *Void {
     return x.MapType
 }
 
-func (x *TypeName) SetBoolType(boolType Void) *TypeName {
-    x.BoolType = &boolType
+func (x *TypeName) SetBoolType(value Void) *TypeName {
+    x.BoolType = &value
     return x
 }
 
-func (x *TypeName) SetByteType(byteType Void) *TypeName {
-    x.ByteType = &byteType
+func (x *TypeName) SetByteType(value Void) *TypeName {
+    x.ByteType = &value
     return x
 }
 
-func (x *TypeName) SetI16Type(i16Type Void) *TypeName {
-    x.I16Type = &i16Type
+func (x *TypeName) SetI16Type(value Void) *TypeName {
+    x.I16Type = &value
     return x
 }
 
-func (x *TypeName) SetI32Type(i32Type Void) *TypeName {
-    x.I32Type = &i32Type
+func (x *TypeName) SetI32Type(value Void) *TypeName {
+    x.I32Type = &value
     return x
 }
 
-func (x *TypeName) SetI64Type(i64Type Void) *TypeName {
-    x.I64Type = &i64Type
+func (x *TypeName) SetI64Type(value Void) *TypeName {
+    x.I64Type = &value
     return x
 }
 
-func (x *TypeName) SetFloatType(floatType Void) *TypeName {
-    x.FloatType = &floatType
+func (x *TypeName) SetFloatType(value Void) *TypeName {
+    x.FloatType = &value
     return x
 }
 
-func (x *TypeName) SetDoubleType(doubleType Void) *TypeName {
-    x.DoubleType = &doubleType
+func (x *TypeName) SetDoubleType(value Void) *TypeName {
+    x.DoubleType = &value
     return x
 }
 
-func (x *TypeName) SetStringType(stringType Void) *TypeName {
-    x.StringType = &stringType
+func (x *TypeName) SetStringType(value Void) *TypeName {
+    x.StringType = &value
     return x
 }
 
-func (x *TypeName) SetBinaryType(binaryType Void) *TypeName {
-    x.BinaryType = &binaryType
+func (x *TypeName) SetBinaryType(value Void) *TypeName {
+    x.BinaryType = &value
     return x
 }
 
-func (x *TypeName) SetEnumType(enumType TypeURI) *TypeName {
-    x.EnumType = &enumType
+func (x *TypeName) SetEnumType(value TypeURI) *TypeName {
+    x.EnumType = &value
     return x
 }
 
-func (x *TypeName) SetTypedefType(typedefType TypeURI) *TypeName {
-    x.TypedefType = &typedefType
+func (x *TypeName) SetTypedefType(value TypeURI) *TypeName {
+    x.TypedefType = &value
     return x
 }
 
-func (x *TypeName) SetStructType(structType TypeURI) *TypeName {
-    x.StructType = &structType
+func (x *TypeName) SetStructType(value TypeURI) *TypeName {
+    x.StructType = &value
     return x
 }
 
-func (x *TypeName) SetUnionType(unionType TypeURI) *TypeName {
-    x.UnionType = &unionType
+func (x *TypeName) SetUnionType(value TypeURI) *TypeName {
+    x.UnionType = &value
     return x
 }
 
-func (x *TypeName) SetExceptionType(exceptionType TypeURI) *TypeName {
-    x.ExceptionType = &exceptionType
+func (x *TypeName) SetExceptionType(value TypeURI) *TypeName {
+    x.ExceptionType = &value
     return x
 }
 
-func (x *TypeName) SetListType(listType Void) *TypeName {
-    x.ListType = &listType
+func (x *TypeName) SetListType(value Void) *TypeName {
+    x.ListType = &value
     return x
 }
 
-func (x *TypeName) SetSetType(setType Void) *TypeName {
-    x.SetType = &setType
+func (x *TypeName) SetSetType(value Void) *TypeName {
+    x.SetType = &value
     return x
 }
 
-func (x *TypeName) SetMapType(mapType Void) *TypeName {
-    x.MapType = &mapType
+func (x *TypeName) SetMapType(value Void) *TypeName {
+    x.MapType = &value
     return x
 }
 

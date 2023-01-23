@@ -32,8 +32,8 @@ func (x *Fields) GetInjectedField() string {
     return x.InjectedField
 }
 
-func (x *Fields) SetInjectedField(injectedField string) *Fields {
-    x.InjectedField = injectedField
+func (x *Fields) SetInjectedField(value string) *Fields {
+    x.InjectedField = value
     return x
 }
 
@@ -76,8 +76,8 @@ func NewFieldsBuilder() *FieldsBuilder {
     }
 }
 
-func (x *FieldsBuilder) InjectedField(injectedField string) *FieldsBuilder {
-    x.obj.InjectedField = injectedField
+func (x *FieldsBuilder) InjectedField(value string) *FieldsBuilder {
+    x.obj.InjectedField = value
     return x
 }
 
@@ -156,8 +156,8 @@ func (x *FieldsInjectedToEmptyStruct) GetInjectedField() string {
     return x.InjectedField
 }
 
-func (x *FieldsInjectedToEmptyStruct) SetInjectedField(injectedField string) *FieldsInjectedToEmptyStruct {
-    x.InjectedField = injectedField
+func (x *FieldsInjectedToEmptyStruct) SetInjectedField(value string) *FieldsInjectedToEmptyStruct {
+    x.InjectedField = value
     return x
 }
 
@@ -200,8 +200,8 @@ func NewFieldsInjectedToEmptyStructBuilder() *FieldsInjectedToEmptyStructBuilder
     }
 }
 
-func (x *FieldsInjectedToEmptyStructBuilder) InjectedField(injectedField string) *FieldsInjectedToEmptyStructBuilder {
-    x.obj.InjectedField = injectedField
+func (x *FieldsInjectedToEmptyStructBuilder) InjectedField(value string) *FieldsInjectedToEmptyStructBuilder {
+    x.obj.InjectedField = value
     return x
 }
 
@@ -285,13 +285,13 @@ func (x *FieldsInjectedToStruct) GetInjectedField() string {
     return x.InjectedField
 }
 
-func (x *FieldsInjectedToStruct) SetStringField(stringField string) *FieldsInjectedToStruct {
-    x.StringField = stringField
+func (x *FieldsInjectedToStruct) SetStringField(value string) *FieldsInjectedToStruct {
+    x.StringField = value
     return x
 }
 
-func (x *FieldsInjectedToStruct) SetInjectedField(injectedField string) *FieldsInjectedToStruct {
-    x.InjectedField = injectedField
+func (x *FieldsInjectedToStruct) SetInjectedField(value string) *FieldsInjectedToStruct {
+    x.InjectedField = value
     return x
 }
 
@@ -361,13 +361,13 @@ func NewFieldsInjectedToStructBuilder() *FieldsInjectedToStructBuilder {
     }
 }
 
-func (x *FieldsInjectedToStructBuilder) StringField(stringField string) *FieldsInjectedToStructBuilder {
-    x.obj.StringField = stringField
+func (x *FieldsInjectedToStructBuilder) StringField(value string) *FieldsInjectedToStructBuilder {
+    x.obj.StringField = value
     return x
 }
 
-func (x *FieldsInjectedToStructBuilder) InjectedField(injectedField string) *FieldsInjectedToStructBuilder {
-    x.obj.InjectedField = injectedField
+func (x *FieldsInjectedToStructBuilder) InjectedField(value string) *FieldsInjectedToStructBuilder {
+    x.obj.InjectedField = value
     return x
 }
 
@@ -469,23 +469,23 @@ func (x *FieldsInjectedWithIncludedStruct) GetInjectedUnstructuredAnnotationFiel
     return x.InjectedUnstructuredAnnotationField
 }
 
-func (x *FieldsInjectedWithIncludedStruct) SetStringField(stringField string) *FieldsInjectedWithIncludedStruct {
-    x.StringField = stringField
+func (x *FieldsInjectedWithIncludedStruct) SetStringField(value string) *FieldsInjectedWithIncludedStruct {
+    x.StringField = value
     return x
 }
 
-func (x *FieldsInjectedWithIncludedStruct) SetInjectedField(injectedField string) *FieldsInjectedWithIncludedStruct {
-    x.InjectedField = injectedField
+func (x *FieldsInjectedWithIncludedStruct) SetInjectedField(value string) *FieldsInjectedWithIncludedStruct {
+    x.InjectedField = value
     return x
 }
 
-func (x *FieldsInjectedWithIncludedStruct) SetInjectedStructuredAnnotationField(injectedStructuredAnnotationField string) *FieldsInjectedWithIncludedStruct {
-    x.InjectedStructuredAnnotationField = &injectedStructuredAnnotationField
+func (x *FieldsInjectedWithIncludedStruct) SetInjectedStructuredAnnotationField(value string) *FieldsInjectedWithIncludedStruct {
+    x.InjectedStructuredAnnotationField = &value
     return x
 }
 
-func (x *FieldsInjectedWithIncludedStruct) SetInjectedUnstructuredAnnotationField(injectedUnstructuredAnnotationField string) *FieldsInjectedWithIncludedStruct {
-    x.InjectedUnstructuredAnnotationField = &injectedUnstructuredAnnotationField
+func (x *FieldsInjectedWithIncludedStruct) SetInjectedUnstructuredAnnotationField(value string) *FieldsInjectedWithIncludedStruct {
+    x.InjectedUnstructuredAnnotationField = &value
     return x
 }
 
@@ -623,23 +623,23 @@ func NewFieldsInjectedWithIncludedStructBuilder() *FieldsInjectedWithIncludedStr
     }
 }
 
-func (x *FieldsInjectedWithIncludedStructBuilder) StringField(stringField string) *FieldsInjectedWithIncludedStructBuilder {
-    x.obj.StringField = stringField
+func (x *FieldsInjectedWithIncludedStructBuilder) StringField(value string) *FieldsInjectedWithIncludedStructBuilder {
+    x.obj.StringField = value
     return x
 }
 
-func (x *FieldsInjectedWithIncludedStructBuilder) InjectedField(injectedField string) *FieldsInjectedWithIncludedStructBuilder {
-    x.obj.InjectedField = injectedField
+func (x *FieldsInjectedWithIncludedStructBuilder) InjectedField(value string) *FieldsInjectedWithIncludedStructBuilder {
+    x.obj.InjectedField = value
     return x
 }
 
-func (x *FieldsInjectedWithIncludedStructBuilder) InjectedStructuredAnnotationField(injectedStructuredAnnotationField *string) *FieldsInjectedWithIncludedStructBuilder {
-    x.obj.InjectedStructuredAnnotationField = injectedStructuredAnnotationField
+func (x *FieldsInjectedWithIncludedStructBuilder) InjectedStructuredAnnotationField(value *string) *FieldsInjectedWithIncludedStructBuilder {
+    x.obj.InjectedStructuredAnnotationField = value
     return x
 }
 
-func (x *FieldsInjectedWithIncludedStructBuilder) InjectedUnstructuredAnnotationField(injectedUnstructuredAnnotationField *string) *FieldsInjectedWithIncludedStructBuilder {
-    x.obj.InjectedUnstructuredAnnotationField = injectedUnstructuredAnnotationField
+func (x *FieldsInjectedWithIncludedStructBuilder) InjectedUnstructuredAnnotationField(value *string) *FieldsInjectedWithIncludedStructBuilder {
+    x.obj.InjectedUnstructuredAnnotationField = value
     return x
 }
 

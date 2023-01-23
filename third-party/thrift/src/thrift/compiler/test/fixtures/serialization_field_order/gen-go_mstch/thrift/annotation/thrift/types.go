@@ -252,8 +252,8 @@ func (x *Deprecated) GetMessage() string {
     return x.Message
 }
 
-func (x *Deprecated) SetMessage(message string) *Deprecated {
-    x.Message = message
+func (x *Deprecated) SetMessage(value string) *Deprecated {
+    x.Message = value
     return x
 }
 
@@ -296,8 +296,8 @@ func NewDeprecatedBuilder() *DeprecatedBuilder {
     }
 }
 
-func (x *DeprecatedBuilder) Message(message string) *DeprecatedBuilder {
-    x.obj.Message = message
+func (x *DeprecatedBuilder) Message(value string) *DeprecatedBuilder {
+    x.obj.Message = value
     return x
 }
 
@@ -381,13 +381,13 @@ func (x *ReserveIds) GetIdRanges() map[int32]int32 {
     return x.IdRanges
 }
 
-func (x *ReserveIds) SetIds(ids []int32) *ReserveIds {
-    x.Ids = ids
+func (x *ReserveIds) SetIds(value []int32) *ReserveIds {
+    x.Ids = value
     return x
 }
 
-func (x *ReserveIds) SetIdRanges(idRanges map[int32]int32) *ReserveIds {
-    x.IdRanges = idRanges
+func (x *ReserveIds) SetIdRanges(value map[int32]int32) *ReserveIds {
+    x.IdRanges = value
     return x
 }
 
@@ -546,13 +546,13 @@ func NewReserveIdsBuilder() *ReserveIdsBuilder {
     }
 }
 
-func (x *ReserveIdsBuilder) Ids(ids []int32) *ReserveIdsBuilder {
-    x.obj.Ids = ids
+func (x *ReserveIdsBuilder) Ids(value []int32) *ReserveIdsBuilder {
+    x.obj.Ids = value
     return x
 }
 
-func (x *ReserveIdsBuilder) IdRanges(idRanges map[int32]int32) *ReserveIdsBuilder {
-    x.obj.IdRanges = idRanges
+func (x *ReserveIdsBuilder) IdRanges(value map[int32]int32) *ReserveIdsBuilder {
+    x.obj.IdRanges = value
     return x
 }
 
@@ -639,8 +639,8 @@ func (x *Legacy) GetMessage() string {
     return x.Message
 }
 
-func (x *Legacy) SetMessage(message string) *Legacy {
-    x.Message = message
+func (x *Legacy) SetMessage(value string) *Legacy {
+    x.Message = value
     return x
 }
 
@@ -683,8 +683,8 @@ func NewLegacyBuilder() *LegacyBuilder {
     }
 }
 
-func (x *LegacyBuilder) Message(message string) *LegacyBuilder {
-    x.obj.Message = message
+func (x *LegacyBuilder) Message(value string) *LegacyBuilder {
+    x.obj.Message = value
     return x
 }
 
@@ -764,8 +764,8 @@ func (x *RequiresBackwardCompatibility) GetFieldName() bool {
     return x.FieldName
 }
 
-func (x *RequiresBackwardCompatibility) SetFieldName(fieldName bool) *RequiresBackwardCompatibility {
-    x.FieldName = fieldName
+func (x *RequiresBackwardCompatibility) SetFieldName(value bool) *RequiresBackwardCompatibility {
+    x.FieldName = value
     return x
 }
 
@@ -808,8 +808,8 @@ func NewRequiresBackwardCompatibilityBuilder() *RequiresBackwardCompatibilityBui
     }
 }
 
-func (x *RequiresBackwardCompatibilityBuilder) FieldName(fieldName bool) *RequiresBackwardCompatibilityBuilder {
-    x.obj.FieldName = fieldName
+func (x *RequiresBackwardCompatibilityBuilder) FieldName(value bool) *RequiresBackwardCompatibilityBuilder {
+    x.obj.FieldName = value
     return x
 }
 
@@ -1777,8 +1777,8 @@ func (x *GenDefaultEnumValue) GetName() string {
     return x.Name
 }
 
-func (x *GenDefaultEnumValue) SetName(name string) *GenDefaultEnumValue {
-    x.Name = name
+func (x *GenDefaultEnumValue) SetName(value string) *GenDefaultEnumValue {
+    x.Name = value
     return x
 }
 
@@ -1821,8 +1821,8 @@ func NewGenDefaultEnumValueBuilder() *GenDefaultEnumValueBuilder {
     }
 }
 
-func (x *GenDefaultEnumValueBuilder) Name(name string) *GenDefaultEnumValueBuilder {
-    x.obj.Name = name
+func (x *GenDefaultEnumValueBuilder) Name(value string) *GenDefaultEnumValueBuilder {
+    x.obj.Name = value
     return x
 }
 
@@ -1901,8 +1901,8 @@ func (x *GenEnumSet) GetName() string {
     return x.Name
 }
 
-func (x *GenEnumSet) SetName(name string) *GenEnumSet {
-    x.Name = name
+func (x *GenEnumSet) SetName(value string) *GenEnumSet {
+    x.Name = value
     return x
 }
 
@@ -1945,8 +1945,8 @@ func NewGenEnumSetBuilder() *GenEnumSetBuilder {
     }
 }
 
-func (x *GenEnumSetBuilder) Name(name string) *GenEnumSetBuilder {
-    x.obj.Name = name
+func (x *GenEnumSetBuilder) Name(value string) *GenEnumSetBuilder {
+    x.obj.Name = value
     return x
 }
 
@@ -2321,8 +2321,8 @@ func (x *ExceptionMessage) GetField() string {
     return x.Field
 }
 
-func (x *ExceptionMessage) SetField(field string) *ExceptionMessage {
-    x.Field = field
+func (x *ExceptionMessage) SetField(value string) *ExceptionMessage {
+    x.Field = value
     return x
 }
 
@@ -2365,8 +2365,8 @@ func NewExceptionMessageBuilder() *ExceptionMessageBuilder {
     }
 }
 
-func (x *ExceptionMessageBuilder) Field(field string) *ExceptionMessageBuilder {
-    x.obj.Field = field
+func (x *ExceptionMessageBuilder) Field(value string) *ExceptionMessageBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -2445,8 +2445,8 @@ func (x *GenerateRuntimeSchema) GetName() string {
     return x.Name
 }
 
-func (x *GenerateRuntimeSchema) SetName(name string) *GenerateRuntimeSchema {
-    x.Name = name
+func (x *GenerateRuntimeSchema) SetName(value string) *GenerateRuntimeSchema {
+    x.Name = value
     return x
 }
 
@@ -2489,8 +2489,8 @@ func NewGenerateRuntimeSchemaBuilder() *GenerateRuntimeSchemaBuilder {
     }
 }
 
-func (x *GenerateRuntimeSchemaBuilder) Name(name string) *GenerateRuntimeSchemaBuilder {
-    x.obj.Name = name
+func (x *GenerateRuntimeSchemaBuilder) Name(value string) *GenerateRuntimeSchemaBuilder {
+    x.obj.Name = value
     return x
 }
 

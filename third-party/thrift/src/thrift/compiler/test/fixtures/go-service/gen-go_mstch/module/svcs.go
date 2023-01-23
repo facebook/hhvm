@@ -301,8 +301,8 @@ func (x *reqGetEntityGetEntity) GetR() *GetEntityRequest {
     return x.R
 }
 
-func (x *reqGetEntityGetEntity) SetR(r GetEntityRequest) *reqGetEntityGetEntity {
-    x.R = &r
+func (x *reqGetEntityGetEntity) SetR(value GetEntityRequest) *reqGetEntityGetEntity {
+    x.R = &value
     return x
 }
 
@@ -353,8 +353,8 @@ func newReqGetEntityGetEntityBuilder() *reqGetEntityGetEntityBuilder {
     }
 }
 
-func (x *reqGetEntityGetEntityBuilder) R(r *GetEntityRequest) *reqGetEntityGetEntityBuilder {
-    x.obj.R = r
+func (x *reqGetEntityGetEntityBuilder) R(value *GetEntityRequest) *reqGetEntityGetEntityBuilder {
+    x.obj.R = value
     return x
 }
 
@@ -2861,18 +2861,18 @@ func (x *reqGetEntityGetLegacyStuff) GetNumNeg2() int64 {
     return x.NumNeg2
 }
 
-func (x *reqGetEntityGetLegacyStuff) SetNumPos(numPos int64) *reqGetEntityGetLegacyStuff {
-    x.NumPos = numPos
+func (x *reqGetEntityGetLegacyStuff) SetNumPos(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumPos = value
     return x
 }
 
-func (x *reqGetEntityGetLegacyStuff) SetNumNeg1(numNeg1 int64) *reqGetEntityGetLegacyStuff {
-    x.NumNeg1 = numNeg1
+func (x *reqGetEntityGetLegacyStuff) SetNumNeg1(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumNeg1 = value
     return x
 }
 
-func (x *reqGetEntityGetLegacyStuff) SetNumNeg2(numNeg2 int64) *reqGetEntityGetLegacyStuff {
-    x.NumNeg2 = numNeg2
+func (x *reqGetEntityGetLegacyStuff) SetNumNeg2(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumNeg2 = value
     return x
 }
 
@@ -2969,18 +2969,18 @@ func newReqGetEntityGetLegacyStuffBuilder() *reqGetEntityGetLegacyStuffBuilder {
     }
 }
 
-func (x *reqGetEntityGetLegacyStuffBuilder) NumPos(numPos int64) *reqGetEntityGetLegacyStuffBuilder {
-    x.obj.NumPos = numPos
+func (x *reqGetEntityGetLegacyStuffBuilder) NumPos(value int64) *reqGetEntityGetLegacyStuffBuilder {
+    x.obj.NumPos = value
     return x
 }
 
-func (x *reqGetEntityGetLegacyStuffBuilder) NumNeg1(numNeg1 int64) *reqGetEntityGetLegacyStuffBuilder {
-    x.obj.NumNeg1 = numNeg1
+func (x *reqGetEntityGetLegacyStuffBuilder) NumNeg1(value int64) *reqGetEntityGetLegacyStuffBuilder {
+    x.obj.NumNeg1 = value
     return x
 }
 
-func (x *reqGetEntityGetLegacyStuffBuilder) NumNeg2(numNeg2 int64) *reqGetEntityGetLegacyStuffBuilder {
-    x.obj.NumNeg2 = numNeg2
+func (x *reqGetEntityGetLegacyStuffBuilder) NumNeg2(value int64) *reqGetEntityGetLegacyStuffBuilder {
+    x.obj.NumNeg2 = value
     return x
 }
 

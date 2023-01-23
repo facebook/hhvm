@@ -90,8 +90,8 @@ func (x *A) GetUselessField() int32 {
     return x.UselessField
 }
 
-func (x *A) SetUselessField(uselessField int32) *A {
-    x.UselessField = uselessField
+func (x *A) SetUselessField(value int32) *A {
+    x.UselessField = value
     return x
 }
 
@@ -134,8 +134,8 @@ func NewABuilder() *ABuilder {
     }
 }
 
-func (x *ABuilder) UselessField(uselessField int32) *ABuilder {
-    x.obj.UselessField = uselessField
+func (x *ABuilder) UselessField(value int32) *ABuilder {
+    x.obj.UselessField = value
     return x
 }
 
@@ -219,13 +219,13 @@ func (x *U) GetS() *string {
     return x.S
 }
 
-func (x *U) SetI(i int32) *U {
-    x.I = &i
+func (x *U) SetI(value int32) *U {
+    x.I = &value
     return x
 }
 
-func (x *U) SetS(s string) *U {
-    x.S = &s
+func (x *U) SetS(value string) *U {
+    x.S = &value
     return x
 }
 
@@ -377,8 +377,8 @@ func (x *Bang) GetMessage() string {
     return x.Message
 }
 
-func (x *Bang) SetMessage(message string) *Bang {
-    x.Message = message
+func (x *Bang) SetMessage(value string) *Bang {
+    x.Message = value
     return x
 }
 
@@ -429,8 +429,8 @@ func NewBangBuilder() *BangBuilder {
     }
 }
 
-func (x *BangBuilder) Message(message string) *BangBuilder {
-    x.obj.Message = message
+func (x *BangBuilder) Message(value string) *BangBuilder {
+    x.obj.Message = value
     return x
 }
 

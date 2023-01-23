@@ -196,48 +196,48 @@ func (x *MyStruct) GetNoHackCodegenField() string {
     return x.NoHackCodegenField
 }
 
-func (x *MyStruct) SetMyIntField(myIntField int64) *MyStruct {
-    x.MyIntField = myIntField
+func (x *MyStruct) SetMyIntField(value int64) *MyStruct {
+    x.MyIntField = value
     return x
 }
 
-func (x *MyStruct) SetMyStringField(myStringField string) *MyStruct {
-    x.MyStringField = myStringField
+func (x *MyStruct) SetMyStringField(value string) *MyStruct {
+    x.MyStringField = value
     return x
 }
 
-func (x *MyStruct) SetMyDataField(myDataField MyDataItem) *MyStruct {
-    x.MyDataField = &myDataField
+func (x *MyStruct) SetMyDataField(value MyDataItem) *MyStruct {
+    x.MyDataField = &value
     return x
 }
 
-func (x *MyStruct) SetMyEnum(myEnum MyEnum) *MyStruct {
-    x.MyEnum = myEnum
+func (x *MyStruct) SetMyEnum(value MyEnum) *MyStruct {
+    x.MyEnum = value
     return x
 }
 
-func (x *MyStruct) SetOneway(oneway bool) *MyStruct {
-    x.Oneway = oneway
+func (x *MyStruct) SetOneway(value bool) *MyStruct {
+    x.Oneway = value
     return x
 }
 
-func (x *MyStruct) SetReadonly(readonly bool) *MyStruct {
-    x.Readonly = readonly
+func (x *MyStruct) SetReadonly(value bool) *MyStruct {
+    x.Readonly = value
     return x
 }
 
-func (x *MyStruct) SetIdempotent(idempotent bool) *MyStruct {
-    x.Idempotent = idempotent
+func (x *MyStruct) SetIdempotent(value bool) *MyStruct {
+    x.Idempotent = value
     return x
 }
 
-func (x *MyStruct) SetFloatSet(floatSet []float32) *MyStruct {
-    x.FloatSet = floatSet
+func (x *MyStruct) SetFloatSet(value []float32) *MyStruct {
+    x.FloatSet = value
     return x
 }
 
-func (x *MyStruct) SetNoHackCodegenField(noHackCodegenField string) *MyStruct {
-    x.NoHackCodegenField = noHackCodegenField
+func (x *MyStruct) SetNoHackCodegenField(value string) *MyStruct {
+    x.NoHackCodegenField = value
     return x
 }
 
@@ -541,48 +541,48 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) MyIntField(myIntField int64) *MyStructBuilder {
-    x.obj.MyIntField = myIntField
+func (x *MyStructBuilder) MyIntField(value int64) *MyStructBuilder {
+    x.obj.MyIntField = value
     return x
 }
 
-func (x *MyStructBuilder) MyStringField(myStringField string) *MyStructBuilder {
-    x.obj.MyStringField = myStringField
+func (x *MyStructBuilder) MyStringField(value string) *MyStructBuilder {
+    x.obj.MyStringField = value
     return x
 }
 
-func (x *MyStructBuilder) MyDataField(myDataField *MyDataItem) *MyStructBuilder {
-    x.obj.MyDataField = myDataField
+func (x *MyStructBuilder) MyDataField(value *MyDataItem) *MyStructBuilder {
+    x.obj.MyDataField = value
     return x
 }
 
-func (x *MyStructBuilder) MyEnum(myEnum MyEnum) *MyStructBuilder {
-    x.obj.MyEnum = myEnum
+func (x *MyStructBuilder) MyEnum(value MyEnum) *MyStructBuilder {
+    x.obj.MyEnum = value
     return x
 }
 
-func (x *MyStructBuilder) Oneway(oneway bool) *MyStructBuilder {
-    x.obj.Oneway = oneway
+func (x *MyStructBuilder) Oneway(value bool) *MyStructBuilder {
+    x.obj.Oneway = value
     return x
 }
 
-func (x *MyStructBuilder) Readonly(readonly bool) *MyStructBuilder {
-    x.obj.Readonly = readonly
+func (x *MyStructBuilder) Readonly(value bool) *MyStructBuilder {
+    x.obj.Readonly = value
     return x
 }
 
-func (x *MyStructBuilder) Idempotent(idempotent bool) *MyStructBuilder {
-    x.obj.Idempotent = idempotent
+func (x *MyStructBuilder) Idempotent(value bool) *MyStructBuilder {
+    x.obj.Idempotent = value
     return x
 }
 
-func (x *MyStructBuilder) FloatSet(floatSet []float32) *MyStructBuilder {
-    x.obj.FloatSet = floatSet
+func (x *MyStructBuilder) FloatSet(value []float32) *MyStructBuilder {
+    x.obj.FloatSet = value
     return x
 }
 
-func (x *MyStructBuilder) NoHackCodegenField(noHackCodegenField string) *MyStructBuilder {
-    x.obj.NoHackCodegenField = noHackCodegenField
+func (x *MyStructBuilder) NoHackCodegenField(value string) *MyStructBuilder {
+    x.obj.NoHackCodegenField = value
     return x
 }
 
@@ -814,23 +814,23 @@ func (x *MyUnion) GetFloatSet() []float32 {
     return x.FloatSet
 }
 
-func (x *MyUnion) SetMyEnum(myEnum MyEnum) *MyUnion {
-    x.MyEnum = &myEnum
+func (x *MyUnion) SetMyEnum(value MyEnum) *MyUnion {
+    x.MyEnum = &value
     return x
 }
 
-func (x *MyUnion) SetMyStruct(myStruct MyStruct) *MyUnion {
-    x.MyStruct = &myStruct
+func (x *MyUnion) SetMyStruct(value MyStruct) *MyUnion {
+    x.MyStruct = &value
     return x
 }
 
-func (x *MyUnion) SetMyDataItem(myDataItem MyDataItem) *MyUnion {
-    x.MyDataItem = &myDataItem
+func (x *MyUnion) SetMyDataItem(value MyDataItem) *MyUnion {
+    x.MyDataItem = &value
     return x
 }
 
-func (x *MyUnion) SetFloatSet(floatSet []float32) *MyUnion {
-    x.FloatSet = floatSet
+func (x *MyUnion) SetFloatSet(value []float32) *MyUnion {
+    x.FloatSet = value
     return x
 }
 
@@ -1098,8 +1098,8 @@ func (x *ReservedKeyword) GetReservedField() int32 {
     return x.ReservedField
 }
 
-func (x *ReservedKeyword) SetReservedField(reservedField int32) *ReservedKeyword {
-    x.ReservedField = reservedField
+func (x *ReservedKeyword) SetReservedField(value int32) *ReservedKeyword {
+    x.ReservedField = value
     return x
 }
 
@@ -1142,8 +1142,8 @@ func NewReservedKeywordBuilder() *ReservedKeywordBuilder {
     }
 }
 
-func (x *ReservedKeywordBuilder) ReservedField(reservedField int32) *ReservedKeywordBuilder {
-    x.obj.ReservedField = reservedField
+func (x *ReservedKeywordBuilder) ReservedField(value int32) *ReservedKeywordBuilder {
+    x.obj.ReservedField = value
     return x
 }
 
@@ -1222,8 +1222,8 @@ func (x *UnionToBeRenamed) GetReservedField() *int32 {
     return x.ReservedField
 }
 
-func (x *UnionToBeRenamed) SetReservedField(reservedField int32) *UnionToBeRenamed {
-    x.ReservedField = &reservedField
+func (x *UnionToBeRenamed) SetReservedField(value int32) *UnionToBeRenamed {
+    x.ReservedField = &value
     return x
 }
 

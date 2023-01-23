@@ -120,8 +120,8 @@ func (x *reqMyServiceQuery) GetU() *MyUnion {
     return x.U
 }
 
-func (x *reqMyServiceQuery) SetU(u MyUnion) *reqMyServiceQuery {
-    x.U = &u
+func (x *reqMyServiceQuery) SetU(value MyUnion) *reqMyServiceQuery {
+    x.U = &value
     return x
 }
 
@@ -172,8 +172,8 @@ func newReqMyServiceQueryBuilder() *reqMyServiceQueryBuilder {
     }
 }
 
-func (x *reqMyServiceQueryBuilder) U(u *MyUnion) *reqMyServiceQueryBuilder {
-    x.obj.U = u
+func (x *reqMyServiceQueryBuilder) U(value *MyUnion) *reqMyServiceQueryBuilder {
+    x.obj.U = value
     return x
 }
 

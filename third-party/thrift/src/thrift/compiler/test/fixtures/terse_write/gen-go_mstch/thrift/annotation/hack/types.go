@@ -30,8 +30,8 @@ func (x *FieldWrapper) GetName() string {
     return x.Name
 }
 
-func (x *FieldWrapper) SetName(name string) *FieldWrapper {
-    x.Name = name
+func (x *FieldWrapper) SetName(value string) *FieldWrapper {
+    x.Name = value
     return x
 }
 
@@ -74,8 +74,8 @@ func NewFieldWrapperBuilder() *FieldWrapperBuilder {
     }
 }
 
-func (x *FieldWrapperBuilder) Name(name string) *FieldWrapperBuilder {
-    x.obj.Name = name
+func (x *FieldWrapperBuilder) Name(value string) *FieldWrapperBuilder {
+    x.obj.Name = value
     return x
 }
 
@@ -165,18 +165,18 @@ func (x *Wrapper) GetExtraNamespace() string {
     return x.ExtraNamespace
 }
 
-func (x *Wrapper) SetName(name string) *Wrapper {
-    x.Name = name
+func (x *Wrapper) SetName(value string) *Wrapper {
+    x.Name = value
     return x
 }
 
-func (x *Wrapper) SetUnderlyingName(underlyingName string) *Wrapper {
-    x.UnderlyingName = underlyingName
+func (x *Wrapper) SetUnderlyingName(value string) *Wrapper {
+    x.UnderlyingName = value
     return x
 }
 
-func (x *Wrapper) SetExtraNamespace(extraNamespace string) *Wrapper {
-    x.ExtraNamespace = extraNamespace
+func (x *Wrapper) SetExtraNamespace(value string) *Wrapper {
+    x.ExtraNamespace = value
     return x
 }
 
@@ -273,18 +273,18 @@ func NewWrapperBuilder() *WrapperBuilder {
     }
 }
 
-func (x *WrapperBuilder) Name(name string) *WrapperBuilder {
-    x.obj.Name = name
+func (x *WrapperBuilder) Name(value string) *WrapperBuilder {
+    x.obj.Name = value
     return x
 }
 
-func (x *WrapperBuilder) UnderlyingName(underlyingName string) *WrapperBuilder {
-    x.obj.UnderlyingName = underlyingName
+func (x *WrapperBuilder) UnderlyingName(value string) *WrapperBuilder {
+    x.obj.UnderlyingName = value
     return x
 }
 
-func (x *WrapperBuilder) ExtraNamespace(extraNamespace string) *WrapperBuilder {
-    x.obj.ExtraNamespace = extraNamespace
+func (x *WrapperBuilder) ExtraNamespace(value string) *WrapperBuilder {
+    x.obj.ExtraNamespace = value
     return x
 }
 
@@ -379,8 +379,8 @@ func (x *Adapter) GetName() string {
     return x.Name
 }
 
-func (x *Adapter) SetName(name string) *Adapter {
-    x.Name = name
+func (x *Adapter) SetName(value string) *Adapter {
+    x.Name = value
     return x
 }
 
@@ -423,8 +423,8 @@ func NewAdapterBuilder() *AdapterBuilder {
     }
 }
 
-func (x *AdapterBuilder) Name(name string) *AdapterBuilder {
-    x.obj.Name = name
+func (x *AdapterBuilder) Name(value string) *AdapterBuilder {
+    x.obj.Name = value
     return x
 }
 
@@ -503,8 +503,8 @@ func (x *SkipCodegen) GetReason() string {
     return x.Reason
 }
 
-func (x *SkipCodegen) SetReason(reason string) *SkipCodegen {
-    x.Reason = reason
+func (x *SkipCodegen) SetReason(value string) *SkipCodegen {
+    x.Reason = value
     return x
 }
 
@@ -547,8 +547,8 @@ func NewSkipCodegenBuilder() *SkipCodegenBuilder {
     }
 }
 
-func (x *SkipCodegenBuilder) Reason(reason string) *SkipCodegenBuilder {
-    x.obj.Reason = reason
+func (x *SkipCodegenBuilder) Reason(value string) *SkipCodegenBuilder {
+    x.obj.Reason = value
     return x
 }
 
@@ -632,13 +632,13 @@ func (x *Name) GetReason() string {
     return x.Reason
 }
 
-func (x *Name) SetName(name string) *Name {
-    x.Name = name
+func (x *Name) SetName(value string) *Name {
+    x.Name = value
     return x
 }
 
-func (x *Name) SetReason(reason string) *Name {
-    x.Reason = reason
+func (x *Name) SetReason(value string) *Name {
+    x.Reason = value
     return x
 }
 
@@ -708,13 +708,13 @@ func NewNameBuilder() *NameBuilder {
     }
 }
 
-func (x *NameBuilder) Name(name string) *NameBuilder {
-    x.obj.Name = name
+func (x *NameBuilder) Name(value string) *NameBuilder {
+    x.obj.Name = value
     return x
 }
 
-func (x *NameBuilder) Reason(reason string) *NameBuilder {
-    x.obj.Reason = reason
+func (x *NameBuilder) Reason(value string) *NameBuilder {
+    x.obj.Reason = value
     return x
 }
 
@@ -801,8 +801,8 @@ func (x *UnionEnumAttributes) GetAttributes() []string {
     return x.Attributes
 }
 
-func (x *UnionEnumAttributes) SetAttributes(attributes []string) *UnionEnumAttributes {
-    x.Attributes = attributes
+func (x *UnionEnumAttributes) SetAttributes(value []string) *UnionEnumAttributes {
+    x.Attributes = value
     return x
 }
 
@@ -881,8 +881,8 @@ func NewUnionEnumAttributesBuilder() *UnionEnumAttributesBuilder {
     }
 }
 
-func (x *UnionEnumAttributesBuilder) Attributes(attributes []string) *UnionEnumAttributesBuilder {
-    x.obj.Attributes = attributes
+func (x *UnionEnumAttributesBuilder) Attributes(value []string) *UnionEnumAttributesBuilder {
+    x.obj.Attributes = value
     return x
 }
 
@@ -961,8 +961,8 @@ func (x *StructTrait) GetName() string {
     return x.Name
 }
 
-func (x *StructTrait) SetName(name string) *StructTrait {
-    x.Name = name
+func (x *StructTrait) SetName(value string) *StructTrait {
+    x.Name = value
     return x
 }
 
@@ -1005,8 +1005,8 @@ func NewStructTraitBuilder() *StructTraitBuilder {
     }
 }
 
-func (x *StructTraitBuilder) Name(name string) *StructTraitBuilder {
-    x.obj.Name = name
+func (x *StructTraitBuilder) Name(value string) *StructTraitBuilder {
+    x.obj.Name = value
     return x
 }
 
@@ -1085,8 +1085,8 @@ func (x *Attributes) GetAttributes() []string {
     return x.Attributes
 }
 
-func (x *Attributes) SetAttributes(attributes []string) *Attributes {
-    x.Attributes = attributes
+func (x *Attributes) SetAttributes(value []string) *Attributes {
+    x.Attributes = value
     return x
 }
 
@@ -1165,8 +1165,8 @@ func NewAttributesBuilder() *AttributesBuilder {
     }
 }
 
-func (x *AttributesBuilder) Attributes(attributes []string) *AttributesBuilder {
-    x.obj.Attributes = attributes
+func (x *AttributesBuilder) Attributes(value []string) *AttributesBuilder {
+    x.obj.Attributes = value
     return x
 }
 

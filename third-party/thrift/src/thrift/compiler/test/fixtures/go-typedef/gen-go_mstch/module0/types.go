@@ -33,13 +33,13 @@ func (x *Accessory) GetName() string {
     return x.Name
 }
 
-func (x *Accessory) SetInventoryId(inventoryId int32) *Accessory {
-    x.InventoryId = inventoryId
+func (x *Accessory) SetInventoryId(value int32) *Accessory {
+    x.InventoryId = value
     return x
 }
 
-func (x *Accessory) SetName(name string) *Accessory {
-    x.Name = name
+func (x *Accessory) SetName(value string) *Accessory {
+    x.Name = value
     return x
 }
 
@@ -109,13 +109,13 @@ func NewAccessoryBuilder() *AccessoryBuilder {
     }
 }
 
-func (x *AccessoryBuilder) InventoryId(inventoryId int32) *AccessoryBuilder {
-    x.obj.InventoryId = inventoryId
+func (x *AccessoryBuilder) InventoryId(value int32) *AccessoryBuilder {
+    x.obj.InventoryId = value
     return x
 }
 
-func (x *AccessoryBuilder) Name(name string) *AccessoryBuilder {
-    x.obj.Name = name
+func (x *AccessoryBuilder) Name(value string) *AccessoryBuilder {
+    x.obj.Name = value
     return x
 }
 
@@ -207,13 +207,13 @@ func (x *PartName) GetName() string {
     return x.Name
 }
 
-func (x *PartName) SetInventoryId(inventoryId int32) *PartName {
-    x.InventoryId = inventoryId
+func (x *PartName) SetInventoryId(value int32) *PartName {
+    x.InventoryId = value
     return x
 }
 
-func (x *PartName) SetName(name string) *PartName {
-    x.Name = name
+func (x *PartName) SetName(value string) *PartName {
+    x.Name = value
     return x
 }
 
@@ -283,13 +283,13 @@ func NewPartNameBuilder() *PartNameBuilder {
     }
 }
 
-func (x *PartNameBuilder) InventoryId(inventoryId int32) *PartNameBuilder {
-    x.obj.InventoryId = inventoryId
+func (x *PartNameBuilder) InventoryId(value int32) *PartNameBuilder {
+    x.obj.InventoryId = value
     return x
 }
 
-func (x *PartNameBuilder) Name(name string) *PartNameBuilder {
-    x.obj.Name = name
+func (x *PartNameBuilder) Name(value string) *PartNameBuilder {
+    x.obj.Name = value
     return x
 }
 

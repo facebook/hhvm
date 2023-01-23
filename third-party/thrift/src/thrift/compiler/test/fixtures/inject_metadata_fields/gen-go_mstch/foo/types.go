@@ -40,18 +40,18 @@ func (x *Fields) GetInjectedUnstructuredAnnotationField() *string {
     return x.InjectedUnstructuredAnnotationField
 }
 
-func (x *Fields) SetInjectedField(injectedField string) *Fields {
-    x.InjectedField = injectedField
+func (x *Fields) SetInjectedField(value string) *Fields {
+    x.InjectedField = value
     return x
 }
 
-func (x *Fields) SetInjectedStructuredAnnotationField(injectedStructuredAnnotationField string) *Fields {
-    x.InjectedStructuredAnnotationField = &injectedStructuredAnnotationField
+func (x *Fields) SetInjectedStructuredAnnotationField(value string) *Fields {
+    x.InjectedStructuredAnnotationField = &value
     return x
 }
 
-func (x *Fields) SetInjectedUnstructuredAnnotationField(injectedUnstructuredAnnotationField string) *Fields {
-    x.InjectedUnstructuredAnnotationField = &injectedUnstructuredAnnotationField
+func (x *Fields) SetInjectedUnstructuredAnnotationField(value string) *Fields {
+    x.InjectedUnstructuredAnnotationField = &value
     return x
 }
 
@@ -162,18 +162,18 @@ func NewFieldsBuilder() *FieldsBuilder {
     }
 }
 
-func (x *FieldsBuilder) InjectedField(injectedField string) *FieldsBuilder {
-    x.obj.InjectedField = injectedField
+func (x *FieldsBuilder) InjectedField(value string) *FieldsBuilder {
+    x.obj.InjectedField = value
     return x
 }
 
-func (x *FieldsBuilder) InjectedStructuredAnnotationField(injectedStructuredAnnotationField *string) *FieldsBuilder {
-    x.obj.InjectedStructuredAnnotationField = injectedStructuredAnnotationField
+func (x *FieldsBuilder) InjectedStructuredAnnotationField(value *string) *FieldsBuilder {
+    x.obj.InjectedStructuredAnnotationField = value
     return x
 }
 
-func (x *FieldsBuilder) InjectedUnstructuredAnnotationField(injectedUnstructuredAnnotationField *string) *FieldsBuilder {
-    x.obj.InjectedUnstructuredAnnotationField = injectedUnstructuredAnnotationField
+func (x *FieldsBuilder) InjectedUnstructuredAnnotationField(value *string) *FieldsBuilder {
+    x.obj.InjectedUnstructuredAnnotationField = value
     return x
 }
 

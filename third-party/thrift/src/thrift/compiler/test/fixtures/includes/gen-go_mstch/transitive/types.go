@@ -29,8 +29,8 @@ func (x *Foo) GetA() int64 {
     return x.A
 }
 
-func (x *Foo) SetA(a int64) *Foo {
-    x.A = a
+func (x *Foo) SetA(value int64) *Foo {
+    x.A = value
     return x
 }
 
@@ -73,8 +73,8 @@ func NewFooBuilder() *FooBuilder {
     }
 }
 
-func (x *FooBuilder) A(a int64) *FooBuilder {
-    x.obj.A = a
+func (x *FooBuilder) A(value int64) *FooBuilder {
+    x.obj.A = value
     return x
 }
 

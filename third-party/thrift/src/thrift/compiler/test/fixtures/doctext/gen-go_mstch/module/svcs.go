@@ -293,18 +293,18 @@ func (x *reqCThing) GetC() []int32 {
     return x.C
 }
 
-func (x *reqCThing) SetA(a int32) *reqCThing {
-    x.A = a
+func (x *reqCThing) SetA(value int32) *reqCThing {
+    x.A = value
     return x
 }
 
-func (x *reqCThing) SetB(b string) *reqCThing {
-    x.B = b
+func (x *reqCThing) SetB(value string) *reqCThing {
+    x.B = value
     return x
 }
 
-func (x *reqCThing) SetC(c []int32) *reqCThing {
-    x.C = c
+func (x *reqCThing) SetC(value []int32) *reqCThing {
+    x.C = value
     return x
 }
 
@@ -437,18 +437,18 @@ func newReqCThingBuilder() *reqCThingBuilder {
     }
 }
 
-func (x *reqCThingBuilder) A(a int32) *reqCThingBuilder {
-    x.obj.A = a
+func (x *reqCThingBuilder) A(value int32) *reqCThingBuilder {
+    x.obj.A = value
     return x
 }
 
-func (x *reqCThingBuilder) B(b string) *reqCThingBuilder {
-    x.obj.B = b
+func (x *reqCThingBuilder) B(value string) *reqCThingBuilder {
+    x.obj.B = value
     return x
 }
 
-func (x *reqCThingBuilder) C(c []int32) *reqCThingBuilder {
-    x.obj.C = c
+func (x *reqCThingBuilder) C(value []int32) *reqCThingBuilder {
+    x.obj.C = value
     return x
 }
 

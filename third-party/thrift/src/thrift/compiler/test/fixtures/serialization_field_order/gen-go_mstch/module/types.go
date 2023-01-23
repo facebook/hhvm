@@ -40,18 +40,18 @@ func (x *Foo) GetField3() int32 {
     return x.Field3
 }
 
-func (x *Foo) SetField1(field1 int32) *Foo {
-    x.Field1 = field1
+func (x *Foo) SetField1(value int32) *Foo {
+    x.Field1 = value
     return x
 }
 
-func (x *Foo) SetField2(field2 int32) *Foo {
-    x.Field2 = field2
+func (x *Foo) SetField2(value int32) *Foo {
+    x.Field2 = value
     return x
 }
 
-func (x *Foo) SetField3(field3 int32) *Foo {
-    x.Field3 = field3
+func (x *Foo) SetField3(value int32) *Foo {
+    x.Field3 = value
     return x
 }
 
@@ -148,18 +148,18 @@ func NewFooBuilder() *FooBuilder {
     }
 }
 
-func (x *FooBuilder) Field1(field1 int32) *FooBuilder {
-    x.obj.Field1 = field1
+func (x *FooBuilder) Field1(value int32) *FooBuilder {
+    x.obj.Field1 = value
     return x
 }
 
-func (x *FooBuilder) Field2(field2 int32) *FooBuilder {
-    x.obj.Field2 = field2
+func (x *FooBuilder) Field2(value int32) *FooBuilder {
+    x.obj.Field2 = value
     return x
 }
 
-func (x *FooBuilder) Field3(field3 int32) *FooBuilder {
-    x.obj.Field3 = field3
+func (x *FooBuilder) Field3(value int32) *FooBuilder {
+    x.obj.Field3 = value
     return x
 }
 
@@ -264,18 +264,18 @@ func (x *Foo2) GetField3() int32 {
     return x.Field3
 }
 
-func (x *Foo2) SetField1(field1 int32) *Foo2 {
-    x.Field1 = field1
+func (x *Foo2) SetField1(value int32) *Foo2 {
+    x.Field1 = value
     return x
 }
 
-func (x *Foo2) SetField2(field2 int32) *Foo2 {
-    x.Field2 = field2
+func (x *Foo2) SetField2(value int32) *Foo2 {
+    x.Field2 = value
     return x
 }
 
-func (x *Foo2) SetField3(field3 int32) *Foo2 {
-    x.Field3 = field3
+func (x *Foo2) SetField3(value int32) *Foo2 {
+    x.Field3 = value
     return x
 }
 
@@ -372,18 +372,18 @@ func NewFoo2Builder() *Foo2Builder {
     }
 }
 
-func (x *Foo2Builder) Field1(field1 int32) *Foo2Builder {
-    x.obj.Field1 = field1
+func (x *Foo2Builder) Field1(value int32) *Foo2Builder {
+    x.obj.Field1 = value
     return x
 }
 
-func (x *Foo2Builder) Field2(field2 int32) *Foo2Builder {
-    x.obj.Field2 = field2
+func (x *Foo2Builder) Field2(value int32) *Foo2Builder {
+    x.obj.Field2 = value
     return x
 }
 
-func (x *Foo2Builder) Field3(field3 int32) *Foo2Builder {
-    x.obj.Field3 = field3
+func (x *Foo2Builder) Field3(value int32) *Foo2Builder {
+    x.obj.Field3 = value
     return x
 }
 

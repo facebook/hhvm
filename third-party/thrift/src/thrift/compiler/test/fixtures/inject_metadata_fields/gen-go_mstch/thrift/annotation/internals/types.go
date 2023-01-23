@@ -32,8 +32,8 @@ func (x *InjectMetadataFields) GetType() string {
     return x.Type
 }
 
-func (x *InjectMetadataFields) SetType(type_ string) *InjectMetadataFields {
-    x.Type = type_
+func (x *InjectMetadataFields) SetType(value string) *InjectMetadataFields {
+    x.Type = value
     return x
 }
 
@@ -76,8 +76,8 @@ func NewInjectMetadataFieldsBuilder() *InjectMetadataFieldsBuilder {
     }
 }
 
-func (x *InjectMetadataFieldsBuilder) Type(type_ string) *InjectMetadataFieldsBuilder {
-    x.obj.Type = type_
+func (x *InjectMetadataFieldsBuilder) Type(value string) *InjectMetadataFieldsBuilder {
+    x.obj.Type = value
     return x
 }
 

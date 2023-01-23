@@ -43,13 +43,13 @@ func (x *Included) GetMyTransitiveField() *transitive.Foo {
     return x.MyTransitiveField
 }
 
-func (x *Included) SetMyIntField(myIntField int64) *Included {
-    x.MyIntField = myIntField
+func (x *Included) SetMyIntField(value int64) *Included {
+    x.MyIntField = value
     return x
 }
 
-func (x *Included) SetMyTransitiveField(myTransitiveField transitive.Foo) *Included {
-    x.MyTransitiveField = &myTransitiveField
+func (x *Included) SetMyTransitiveField(value transitive.Foo) *Included {
+    x.MyTransitiveField = &value
     return x
 }
 
@@ -127,13 +127,13 @@ func NewIncludedBuilder() *IncludedBuilder {
     }
 }
 
-func (x *IncludedBuilder) MyIntField(myIntField int64) *IncludedBuilder {
-    x.obj.MyIntField = myIntField
+func (x *IncludedBuilder) MyIntField(value int64) *IncludedBuilder {
+    x.obj.MyIntField = value
     return x
 }
 
-func (x *IncludedBuilder) MyTransitiveField(myTransitiveField *transitive.Foo) *IncludedBuilder {
-    x.obj.MyTransitiveField = myTransitiveField
+func (x *IncludedBuilder) MyTransitiveField(value *transitive.Foo) *IncludedBuilder {
+    x.obj.MyTransitiveField = value
     return x
 }
 

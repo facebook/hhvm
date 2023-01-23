@@ -35,13 +35,13 @@ func (x *Adapter) GetTypeClassName() string {
     return x.TypeClassName
 }
 
-func (x *Adapter) SetAdapterClassName(adapterClassName string) *Adapter {
-    x.AdapterClassName = adapterClassName
+func (x *Adapter) SetAdapterClassName(value string) *Adapter {
+    x.AdapterClassName = value
     return x
 }
 
-func (x *Adapter) SetTypeClassName(typeClassName string) *Adapter {
-    x.TypeClassName = typeClassName
+func (x *Adapter) SetTypeClassName(value string) *Adapter {
+    x.TypeClassName = value
     return x
 }
 
@@ -111,13 +111,13 @@ func NewAdapterBuilder() *AdapterBuilder {
     }
 }
 
-func (x *AdapterBuilder) AdapterClassName(adapterClassName string) *AdapterBuilder {
-    x.obj.AdapterClassName = adapterClassName
+func (x *AdapterBuilder) AdapterClassName(value string) *AdapterBuilder {
+    x.obj.AdapterClassName = value
     return x
 }
 
-func (x *AdapterBuilder) TypeClassName(typeClassName string) *AdapterBuilder {
-    x.obj.TypeClassName = typeClassName
+func (x *AdapterBuilder) TypeClassName(value string) *AdapterBuilder {
+    x.obj.TypeClassName = value
     return x
 }
 
@@ -209,13 +209,13 @@ func (x *Wrapper) GetTypeClassName() string {
     return x.TypeClassName
 }
 
-func (x *Wrapper) SetWrapperClassName(wrapperClassName string) *Wrapper {
-    x.WrapperClassName = wrapperClassName
+func (x *Wrapper) SetWrapperClassName(value string) *Wrapper {
+    x.WrapperClassName = value
     return x
 }
 
-func (x *Wrapper) SetTypeClassName(typeClassName string) *Wrapper {
-    x.TypeClassName = typeClassName
+func (x *Wrapper) SetTypeClassName(value string) *Wrapper {
+    x.TypeClassName = value
     return x
 }
 
@@ -285,13 +285,13 @@ func NewWrapperBuilder() *WrapperBuilder {
     }
 }
 
-func (x *WrapperBuilder) WrapperClassName(wrapperClassName string) *WrapperBuilder {
-    x.obj.WrapperClassName = wrapperClassName
+func (x *WrapperBuilder) WrapperClassName(value string) *WrapperBuilder {
+    x.obj.WrapperClassName = value
     return x
 }
 
-func (x *WrapperBuilder) TypeClassName(typeClassName string) *WrapperBuilder {
-    x.obj.TypeClassName = typeClassName
+func (x *WrapperBuilder) TypeClassName(value string) *WrapperBuilder {
+    x.obj.TypeClassName = value
     return x
 }
 

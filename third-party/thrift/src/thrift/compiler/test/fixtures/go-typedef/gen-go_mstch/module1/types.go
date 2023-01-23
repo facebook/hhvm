@@ -75,38 +75,38 @@ func (x *Automobile) GetPartNames() map[int32]*CarPartName {
     return x.PartNames
 }
 
-func (x *Automobile) SetPlate(plate Plate) *Automobile {
-    x.Plate = plate
+func (x *Automobile) SetPlate(value Plate) *Automobile {
+    x.Plate = value
     return x
 }
 
-func (x *Automobile) SetPreviousPlate(previousPlate Plate) *Automobile {
-    x.PreviousPlate = &previousPlate
+func (x *Automobile) SetPreviousPlate(value Plate) *Automobile {
+    x.PreviousPlate = &value
     return x
 }
 
-func (x *Automobile) SetFirstPlate(firstPlate Plate) *Automobile {
-    x.FirstPlate = &firstPlate
+func (x *Automobile) SetFirstPlate(value Plate) *Automobile {
+    x.FirstPlate = &value
     return x
 }
 
-func (x *Automobile) SetYear(year Year) *Automobile {
-    x.Year = year
+func (x *Automobile) SetYear(value Year) *Automobile {
+    x.Year = value
     return x
 }
 
-func (x *Automobile) SetDrivers(drivers Drivers) *Automobile {
-    x.Drivers = drivers
+func (x *Automobile) SetDrivers(value Drivers) *Automobile {
+    x.Drivers = value
     return x
 }
 
-func (x *Automobile) SetAccessories(accessories []*Accessory) *Automobile {
-    x.Accessories = accessories
+func (x *Automobile) SetAccessories(value []*Accessory) *Automobile {
+    x.Accessories = value
     return x
 }
 
-func (x *Automobile) SetPartNames(partNames map[int32]*CarPartName) *Automobile {
-    x.PartNames = partNames
+func (x *Automobile) SetPartNames(value map[int32]*CarPartName) *Automobile {
+    x.PartNames = value
     return x
 }
 
@@ -452,38 +452,38 @@ func NewAutomobileBuilder() *AutomobileBuilder {
     }
 }
 
-func (x *AutomobileBuilder) Plate(plate Plate) *AutomobileBuilder {
-    x.obj.Plate = plate
+func (x *AutomobileBuilder) Plate(value Plate) *AutomobileBuilder {
+    x.obj.Plate = value
     return x
 }
 
-func (x *AutomobileBuilder) PreviousPlate(previousPlate *Plate) *AutomobileBuilder {
-    x.obj.PreviousPlate = previousPlate
+func (x *AutomobileBuilder) PreviousPlate(value *Plate) *AutomobileBuilder {
+    x.obj.PreviousPlate = value
     return x
 }
 
-func (x *AutomobileBuilder) FirstPlate(firstPlate *Plate) *AutomobileBuilder {
-    x.obj.FirstPlate = firstPlate
+func (x *AutomobileBuilder) FirstPlate(value *Plate) *AutomobileBuilder {
+    x.obj.FirstPlate = value
     return x
 }
 
-func (x *AutomobileBuilder) Year(year Year) *AutomobileBuilder {
-    x.obj.Year = year
+func (x *AutomobileBuilder) Year(value Year) *AutomobileBuilder {
+    x.obj.Year = value
     return x
 }
 
-func (x *AutomobileBuilder) Drivers(drivers Drivers) *AutomobileBuilder {
-    x.obj.Drivers = drivers
+func (x *AutomobileBuilder) Drivers(value Drivers) *AutomobileBuilder {
+    x.obj.Drivers = value
     return x
 }
 
-func (x *AutomobileBuilder) Accessories(accessories []*Accessory) *AutomobileBuilder {
-    x.obj.Accessories = accessories
+func (x *AutomobileBuilder) Accessories(value []*Accessory) *AutomobileBuilder {
+    x.obj.Accessories = value
     return x
 }
 
-func (x *AutomobileBuilder) PartNames(partNames map[int32]*CarPartName) *AutomobileBuilder {
-    x.obj.PartNames = partNames
+func (x *AutomobileBuilder) PartNames(value map[int32]*CarPartName) *AutomobileBuilder {
+    x.obj.PartNames = value
     return x
 }
 
@@ -615,13 +615,13 @@ func (x *MapKey) GetStrval() string {
     return x.Strval
 }
 
-func (x *MapKey) SetNum(num int64) *MapKey {
-    x.Num = num
+func (x *MapKey) SetNum(value int64) *MapKey {
+    x.Num = value
     return x
 }
 
-func (x *MapKey) SetStrval(strval string) *MapKey {
-    x.Strval = strval
+func (x *MapKey) SetStrval(value string) *MapKey {
+    x.Strval = value
     return x
 }
 
@@ -691,13 +691,13 @@ func NewMapKeyBuilder() *MapKeyBuilder {
     }
 }
 
-func (x *MapKeyBuilder) Num(num int64) *MapKeyBuilder {
-    x.obj.Num = num
+func (x *MapKeyBuilder) Num(value int64) *MapKeyBuilder {
+    x.obj.Num = value
     return x
 }
 
-func (x *MapKeyBuilder) Strval(strval string) *MapKeyBuilder {
-    x.obj.Strval = strval
+func (x *MapKeyBuilder) Strval(value string) *MapKeyBuilder {
+    x.obj.Strval = value
     return x
 }
 
@@ -784,8 +784,8 @@ func (x *MapContainer) GetMapval() map[*MapKey]string {
     return x.Mapval
 }
 
-func (x *MapContainer) SetMapval(mapval map[*MapKey]string) *MapContainer {
-    x.Mapval = mapval
+func (x *MapContainer) SetMapval(value map[*MapKey]string) *MapContainer {
+    x.Mapval = value
     return x
 }
 
@@ -882,8 +882,8 @@ func NewMapContainerBuilder() *MapContainerBuilder {
     }
 }
 
-func (x *MapContainerBuilder) Mapval(mapval map[*MapKey]string) *MapContainerBuilder {
-    x.obj.Mapval = mapval
+func (x *MapContainerBuilder) Mapval(value map[*MapKey]string) *MapContainerBuilder {
+    x.obj.Mapval = value
     return x
 }
 
@@ -967,13 +967,13 @@ func (x *Pair) GetCar() *Car {
     return x.Car
 }
 
-func (x *Pair) SetAutomobile(automobile Automobile) *Pair {
-    x.Automobile = &automobile
+func (x *Pair) SetAutomobile(value Automobile) *Pair {
+    x.Automobile = &value
     return x
 }
 
-func (x *Pair) SetCar(car Car) *Pair {
-    x.Car = &car
+func (x *Pair) SetCar(value Car) *Pair {
+    x.Car = &value
     return x
 }
 
@@ -1059,13 +1059,13 @@ func NewPairBuilder() *PairBuilder {
     }
 }
 
-func (x *PairBuilder) Automobile(automobile *Automobile) *PairBuilder {
-    x.obj.Automobile = automobile
+func (x *PairBuilder) Automobile(value *Automobile) *PairBuilder {
+    x.obj.Automobile = value
     return x
 }
 
-func (x *PairBuilder) Car(car *Car) *PairBuilder {
-    x.obj.Car = car
+func (x *PairBuilder) Car(value *Car) *PairBuilder {
+    x.obj.Car = value
     return x
 }
 
@@ -1157,13 +1157,13 @@ func (x *Collection) GetCars() []*Car {
     return x.Cars
 }
 
-func (x *Collection) SetAutomobiles(automobiles []*Automobile) *Collection {
-    x.Automobiles = automobiles
+func (x *Collection) SetAutomobiles(value []*Automobile) *Collection {
+    x.Automobiles = value
     return x
 }
 
-func (x *Collection) SetCars(cars []*Car) *Collection {
-    x.Cars = cars
+func (x *Collection) SetCars(value []*Car) *Collection {
+    x.Cars = value
     return x
 }
 
@@ -1307,13 +1307,13 @@ func NewCollectionBuilder() *CollectionBuilder {
     }
 }
 
-func (x *CollectionBuilder) Automobiles(automobiles []*Automobile) *CollectionBuilder {
-    x.obj.Automobiles = automobiles
+func (x *CollectionBuilder) Automobiles(value []*Automobile) *CollectionBuilder {
+    x.obj.Automobiles = value
     return x
 }
 
-func (x *CollectionBuilder) Cars(cars []*Car) *CollectionBuilder {
-    x.obj.Cars = cars
+func (x *CollectionBuilder) Cars(value []*Car) *CollectionBuilder {
+    x.obj.Cars = value
     return x
 }
 

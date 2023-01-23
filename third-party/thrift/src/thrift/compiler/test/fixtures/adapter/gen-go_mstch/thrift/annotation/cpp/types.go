@@ -178,8 +178,8 @@ func (x *Ref) GetType() RefType {
     return x.Type
 }
 
-func (x *Ref) SetType(type_ RefType) *Ref {
-    x.Type = type_
+func (x *Ref) SetType(value RefType) *Ref {
+    x.Type = value
     return x
 }
 
@@ -223,8 +223,8 @@ func NewRefBuilder() *RefBuilder {
     }
 }
 
-func (x *RefBuilder) Type(type_ RefType) *RefBuilder {
-    x.obj.Type = type_
+func (x *RefBuilder) Type(value RefType) *RefBuilder {
+    x.obj.Type = value
     return x
 }
 
@@ -304,8 +304,8 @@ func (x *Lazy) GetRef() bool {
     return x.Ref
 }
 
-func (x *Lazy) SetRef(ref bool) *Lazy {
-    x.Ref = ref
+func (x *Lazy) SetRef(value bool) *Lazy {
+    x.Ref = value
     return x
 }
 
@@ -348,8 +348,8 @@ func NewLazyBuilder() *LazyBuilder {
     }
 }
 
-func (x *LazyBuilder) Ref(ref bool) *LazyBuilder {
-    x.obj.Ref = ref
+func (x *LazyBuilder) Ref(value bool) *LazyBuilder {
+    x.obj.Ref = value
     return x
 }
 
@@ -522,28 +522,28 @@ func (x *Adapter) GetMoveOnly() bool {
     return x.MoveOnly
 }
 
-func (x *Adapter) SetName(name string) *Adapter {
-    x.Name = name
+func (x *Adapter) SetName(value string) *Adapter {
+    x.Name = value
     return x
 }
 
-func (x *Adapter) SetAdaptedType(adaptedType string) *Adapter {
-    x.AdaptedType = adaptedType
+func (x *Adapter) SetAdaptedType(value string) *Adapter {
+    x.AdaptedType = value
     return x
 }
 
-func (x *Adapter) SetUnderlyingName(underlyingName string) *Adapter {
-    x.UnderlyingName = underlyingName
+func (x *Adapter) SetUnderlyingName(value string) *Adapter {
+    x.UnderlyingName = value
     return x
 }
 
-func (x *Adapter) SetExtraNamespace(extraNamespace string) *Adapter {
-    x.ExtraNamespace = extraNamespace
+func (x *Adapter) SetExtraNamespace(value string) *Adapter {
+    x.ExtraNamespace = value
     return x
 }
 
-func (x *Adapter) SetMoveOnly(moveOnly bool) *Adapter {
-    x.MoveOnly = moveOnly
+func (x *Adapter) SetMoveOnly(value bool) *Adapter {
+    x.MoveOnly = value
     return x
 }
 
@@ -694,28 +694,28 @@ func NewAdapterBuilder() *AdapterBuilder {
     }
 }
 
-func (x *AdapterBuilder) Name(name string) *AdapterBuilder {
-    x.obj.Name = name
+func (x *AdapterBuilder) Name(value string) *AdapterBuilder {
+    x.obj.Name = value
     return x
 }
 
-func (x *AdapterBuilder) AdaptedType(adaptedType string) *AdapterBuilder {
-    x.obj.AdaptedType = adaptedType
+func (x *AdapterBuilder) AdaptedType(value string) *AdapterBuilder {
+    x.obj.AdaptedType = value
     return x
 }
 
-func (x *AdapterBuilder) UnderlyingName(underlyingName string) *AdapterBuilder {
-    x.obj.UnderlyingName = underlyingName
+func (x *AdapterBuilder) UnderlyingName(value string) *AdapterBuilder {
+    x.obj.UnderlyingName = value
     return x
 }
 
-func (x *AdapterBuilder) ExtraNamespace(extraNamespace string) *AdapterBuilder {
-    x.obj.ExtraNamespace = extraNamespace
+func (x *AdapterBuilder) ExtraNamespace(value string) *AdapterBuilder {
+    x.obj.ExtraNamespace = value
     return x
 }
 
-func (x *AdapterBuilder) MoveOnly(moveOnly bool) *AdapterBuilder {
-    x.obj.MoveOnly = moveOnly
+func (x *AdapterBuilder) MoveOnly(value bool) *AdapterBuilder {
+    x.obj.MoveOnly = value
     return x
 }
 
@@ -827,8 +827,8 @@ func (x *PackIsset) GetAtomic() bool {
     return x.Atomic
 }
 
-func (x *PackIsset) SetAtomic(atomic bool) *PackIsset {
-    x.Atomic = atomic
+func (x *PackIsset) SetAtomic(value bool) *PackIsset {
+    x.Atomic = value
     return x
 }
 
@@ -871,8 +871,8 @@ func NewPackIssetBuilder() *PackIssetBuilder {
     }
 }
 
-func (x *PackIssetBuilder) Atomic(atomic bool) *PackIssetBuilder {
-    x.obj.Atomic = atomic
+func (x *PackIssetBuilder) Atomic(value bool) *PackIssetBuilder {
+    x.obj.Atomic = value
     return x
 }
 
@@ -1252,13 +1252,13 @@ func (x *FieldInterceptor) GetNoinline() bool {
     return x.Noinline
 }
 
-func (x *FieldInterceptor) SetName(name string) *FieldInterceptor {
-    x.Name = name
+func (x *FieldInterceptor) SetName(value string) *FieldInterceptor {
+    x.Name = value
     return x
 }
 
-func (x *FieldInterceptor) SetNoinline(noinline bool) *FieldInterceptor {
-    x.Noinline = noinline
+func (x *FieldInterceptor) SetNoinline(value bool) *FieldInterceptor {
+    x.Noinline = value
     return x
 }
 
@@ -1328,13 +1328,13 @@ func NewFieldInterceptorBuilder() *FieldInterceptorBuilder {
     }
 }
 
-func (x *FieldInterceptorBuilder) Name(name string) *FieldInterceptorBuilder {
-    x.obj.Name = name
+func (x *FieldInterceptorBuilder) Name(value string) *FieldInterceptorBuilder {
+    x.obj.Name = value
     return x
 }
 
-func (x *FieldInterceptorBuilder) Noinline(noinline bool) *FieldInterceptorBuilder {
-    x.obj.Noinline = noinline
+func (x *FieldInterceptorBuilder) Noinline(value bool) *FieldInterceptorBuilder {
+    x.obj.Noinline = value
     return x
 }
 
@@ -1495,8 +1495,8 @@ func (x *EnumType) GetType() EnumUnderlyingType {
     return x.Type
 }
 
-func (x *EnumType) SetType(type_ EnumUnderlyingType) *EnumType {
-    x.Type = type_
+func (x *EnumType) SetType(value EnumUnderlyingType) *EnumType {
+    x.Type = value
     return x
 }
 
@@ -1540,8 +1540,8 @@ func NewEnumTypeBuilder() *EnumTypeBuilder {
     }
 }
 
-func (x *EnumTypeBuilder) Type(type_ EnumUnderlyingType) *EnumTypeBuilder {
-    x.obj.Type = type_
+func (x *EnumTypeBuilder) Type(value EnumUnderlyingType) *EnumTypeBuilder {
+    x.obj.Type = value
     return x
 }
 

@@ -33,9 +33,8 @@ func (x *{{struct:go_name}}) Get{{field:go_name}}() {{> types/field_type}} {
   Set method.
 
 }}{{#struct:fields}}
-func (x *{{struct:go_name}}) Set{{field:go_name}}({{!
-  }}{{field:go_arg_name}} {{#field:type}}{{> common/type}}{{/field:type}}) *{{struct:go_name}} {
-    x.{{field:go_name}} = {{#field:pointer?}}&{{/field:pointer?}}{{field:go_arg_name}}
+func (x *{{struct:go_name}}) Set{{field:go_name}}(value {{#field:type}}{{> common/type}}{{/field:type}}) *{{struct:go_name}} {
+    x.{{field:go_name}} = {{#field:pointer?}}&{{/field:pointer?}}value
     return x
 }
 

@@ -444,8 +444,8 @@ func (x *reqFB303ServiceSimpleRPC) GetIntParameter() int32 {
     return x.IntParameter
 }
 
-func (x *reqFB303ServiceSimpleRPC) SetIntParameter(intParameter int32) *reqFB303ServiceSimpleRPC {
-    x.IntParameter = intParameter
+func (x *reqFB303ServiceSimpleRPC) SetIntParameter(value int32) *reqFB303ServiceSimpleRPC {
+    x.IntParameter = value
     return x
 }
 
@@ -488,8 +488,8 @@ func newReqFB303ServiceSimpleRPCBuilder() *reqFB303ServiceSimpleRPCBuilder {
     }
 }
 
-func (x *reqFB303ServiceSimpleRPCBuilder) IntParameter(intParameter int32) *reqFB303ServiceSimpleRPCBuilder {
-    x.obj.IntParameter = intParameter
+func (x *reqFB303ServiceSimpleRPCBuilder) IntParameter(value int32) *reqFB303ServiceSimpleRPCBuilder {
+    x.obj.IntParameter = value
     return x
 }
 
@@ -1365,8 +1365,8 @@ func (x *reqMyServiceSink) GetSink() int64 {
     return x.Sink
 }
 
-func (x *reqMyServiceSink) SetSink(sink int64) *reqMyServiceSink {
-    x.Sink = sink
+func (x *reqMyServiceSink) SetSink(value int64) *reqMyServiceSink {
+    x.Sink = value
     return x
 }
 
@@ -1409,8 +1409,8 @@ func newReqMyServiceSinkBuilder() *reqMyServiceSinkBuilder {
     }
 }
 
-func (x *reqMyServiceSinkBuilder) Sink(sink int64) *reqMyServiceSinkBuilder {
-    x.obj.Sink = sink
+func (x *reqMyServiceSinkBuilder) Sink(value int64) *reqMyServiceSinkBuilder {
+    x.obj.Sink = value
     return x
 }
 
@@ -1566,13 +1566,13 @@ func (x *reqMyServicePutDataById) GetData() string {
     return x.Data
 }
 
-func (x *reqMyServicePutDataById) SetId(id int64) *reqMyServicePutDataById {
-    x.Id = id
+func (x *reqMyServicePutDataById) SetId(value int64) *reqMyServicePutDataById {
+    x.Id = value
     return x
 }
 
-func (x *reqMyServicePutDataById) SetData(data string) *reqMyServicePutDataById {
-    x.Data = data
+func (x *reqMyServicePutDataById) SetData(value string) *reqMyServicePutDataById {
+    x.Data = value
     return x
 }
 
@@ -1642,13 +1642,13 @@ func newReqMyServicePutDataByIdBuilder() *reqMyServicePutDataByIdBuilder {
     }
 }
 
-func (x *reqMyServicePutDataByIdBuilder) Id(id int64) *reqMyServicePutDataByIdBuilder {
-    x.obj.Id = id
+func (x *reqMyServicePutDataByIdBuilder) Id(value int64) *reqMyServicePutDataByIdBuilder {
+    x.obj.Id = value
     return x
 }
 
-func (x *reqMyServicePutDataByIdBuilder) Data(data string) *reqMyServicePutDataByIdBuilder {
-    x.obj.Data = data
+func (x *reqMyServicePutDataByIdBuilder) Data(value string) *reqMyServicePutDataByIdBuilder {
+    x.obj.Data = value
     return x
 }
 
@@ -1807,8 +1807,8 @@ func (x *reqMyServiceHasDataById) GetId() int64 {
     return x.Id
 }
 
-func (x *reqMyServiceHasDataById) SetId(id int64) *reqMyServiceHasDataById {
-    x.Id = id
+func (x *reqMyServiceHasDataById) SetId(value int64) *reqMyServiceHasDataById {
+    x.Id = value
     return x
 }
 
@@ -1851,8 +1851,8 @@ func newReqMyServiceHasDataByIdBuilder() *reqMyServiceHasDataByIdBuilder {
     }
 }
 
-func (x *reqMyServiceHasDataByIdBuilder) Id(id int64) *reqMyServiceHasDataByIdBuilder {
-    x.obj.Id = id
+func (x *reqMyServiceHasDataByIdBuilder) Id(value int64) *reqMyServiceHasDataByIdBuilder {
+    x.obj.Id = value
     return x
 }
 
@@ -2053,8 +2053,8 @@ func (x *reqMyServiceGetDataById) GetId() int64 {
     return x.Id
 }
 
-func (x *reqMyServiceGetDataById) SetId(id int64) *reqMyServiceGetDataById {
-    x.Id = id
+func (x *reqMyServiceGetDataById) SetId(value int64) *reqMyServiceGetDataById {
+    x.Id = value
     return x
 }
 
@@ -2097,8 +2097,8 @@ func newReqMyServiceGetDataByIdBuilder() *reqMyServiceGetDataByIdBuilder {
     }
 }
 
-func (x *reqMyServiceGetDataByIdBuilder) Id(id int64) *reqMyServiceGetDataByIdBuilder {
-    x.obj.Id = id
+func (x *reqMyServiceGetDataByIdBuilder) Id(value int64) *reqMyServiceGetDataByIdBuilder {
+    x.obj.Id = value
     return x
 }
 
@@ -2299,8 +2299,8 @@ func (x *reqMyServiceDeleteDataById) GetId() int64 {
     return x.Id
 }
 
-func (x *reqMyServiceDeleteDataById) SetId(id int64) *reqMyServiceDeleteDataById {
-    x.Id = id
+func (x *reqMyServiceDeleteDataById) SetId(value int64) *reqMyServiceDeleteDataById {
+    x.Id = value
     return x
 }
 
@@ -2343,8 +2343,8 @@ func newReqMyServiceDeleteDataByIdBuilder() *reqMyServiceDeleteDataByIdBuilder {
     }
 }
 
-func (x *reqMyServiceDeleteDataByIdBuilder) Id(id int64) *reqMyServiceDeleteDataByIdBuilder {
-    x.obj.Id = id
+func (x *reqMyServiceDeleteDataByIdBuilder) Id(value int64) *reqMyServiceDeleteDataByIdBuilder {
+    x.obj.Id = value
     return x
 }
 
@@ -2500,13 +2500,13 @@ func (x *reqMyServiceLobDataById) GetData() string {
     return x.Data
 }
 
-func (x *reqMyServiceLobDataById) SetId(id int64) *reqMyServiceLobDataById {
-    x.Id = id
+func (x *reqMyServiceLobDataById) SetId(value int64) *reqMyServiceLobDataById {
+    x.Id = value
     return x
 }
 
-func (x *reqMyServiceLobDataById) SetData(data string) *reqMyServiceLobDataById {
-    x.Data = data
+func (x *reqMyServiceLobDataById) SetData(value string) *reqMyServiceLobDataById {
+    x.Data = value
     return x
 }
 
@@ -2576,13 +2576,13 @@ func newReqMyServiceLobDataByIdBuilder() *reqMyServiceLobDataByIdBuilder {
     }
 }
 
-func (x *reqMyServiceLobDataByIdBuilder) Id(id int64) *reqMyServiceLobDataByIdBuilder {
-    x.obj.Id = id
+func (x *reqMyServiceLobDataByIdBuilder) Id(value int64) *reqMyServiceLobDataByIdBuilder {
+    x.obj.Id = value
     return x
 }
 
-func (x *reqMyServiceLobDataByIdBuilder) Data(data string) *reqMyServiceLobDataByIdBuilder {
-    x.obj.Data = data
+func (x *reqMyServiceLobDataByIdBuilder) Data(value string) *reqMyServiceLobDataByIdBuilder {
+    x.obj.Data = value
     return x
 }
 
@@ -3764,8 +3764,8 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) GetKey() string {
     return x.Key
 }
 
-func (x *reqDbMixedStackArgumentsGetDataByKey0) SetKey(key string) *reqDbMixedStackArgumentsGetDataByKey0 {
-    x.Key = key
+func (x *reqDbMixedStackArgumentsGetDataByKey0) SetKey(value string) *reqDbMixedStackArgumentsGetDataByKey0 {
+    x.Key = value
     return x
 }
 
@@ -3808,8 +3808,8 @@ func newReqDbMixedStackArgumentsGetDataByKey0Builder() *reqDbMixedStackArguments
     }
 }
 
-func (x *reqDbMixedStackArgumentsGetDataByKey0Builder) Key(key string) *reqDbMixedStackArgumentsGetDataByKey0Builder {
-    x.obj.Key = key
+func (x *reqDbMixedStackArgumentsGetDataByKey0Builder) Key(value string) *reqDbMixedStackArgumentsGetDataByKey0Builder {
+    x.obj.Key = value
     return x
 }
 
@@ -4017,8 +4017,8 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) GetKey() string {
     return x.Key
 }
 
-func (x *reqDbMixedStackArgumentsGetDataByKey1) SetKey(key string) *reqDbMixedStackArgumentsGetDataByKey1 {
-    x.Key = key
+func (x *reqDbMixedStackArgumentsGetDataByKey1) SetKey(value string) *reqDbMixedStackArgumentsGetDataByKey1 {
+    x.Key = value
     return x
 }
 
@@ -4061,8 +4061,8 @@ func newReqDbMixedStackArgumentsGetDataByKey1Builder() *reqDbMixedStackArguments
     }
 }
 
-func (x *reqDbMixedStackArgumentsGetDataByKey1Builder) Key(key string) *reqDbMixedStackArgumentsGetDataByKey1Builder {
-    x.obj.Key = key
+func (x *reqDbMixedStackArgumentsGetDataByKey1Builder) Key(value string) *reqDbMixedStackArgumentsGetDataByKey1Builder {
+    x.obj.Key = value
     return x
 }
 

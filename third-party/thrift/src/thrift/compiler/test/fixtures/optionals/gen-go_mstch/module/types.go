@@ -113,23 +113,23 @@ func (x *Color) GetAlpha() float64 {
     return x.Alpha
 }
 
-func (x *Color) SetRed(red float64) *Color {
-    x.Red = red
+func (x *Color) SetRed(value float64) *Color {
+    x.Red = value
     return x
 }
 
-func (x *Color) SetGreen(green float64) *Color {
-    x.Green = green
+func (x *Color) SetGreen(value float64) *Color {
+    x.Green = value
     return x
 }
 
-func (x *Color) SetBlue(blue float64) *Color {
-    x.Blue = blue
+func (x *Color) SetBlue(value float64) *Color {
+    x.Blue = value
     return x
 }
 
-func (x *Color) SetAlpha(alpha float64) *Color {
-    x.Alpha = alpha
+func (x *Color) SetAlpha(value float64) *Color {
+    x.Alpha = value
     return x
 }
 
@@ -253,23 +253,23 @@ func NewColorBuilder() *ColorBuilder {
     }
 }
 
-func (x *ColorBuilder) Red(red float64) *ColorBuilder {
-    x.obj.Red = red
+func (x *ColorBuilder) Red(value float64) *ColorBuilder {
+    x.obj.Red = value
     return x
 }
 
-func (x *ColorBuilder) Green(green float64) *ColorBuilder {
-    x.obj.Green = green
+func (x *ColorBuilder) Green(value float64) *ColorBuilder {
+    x.obj.Green = value
     return x
 }
 
-func (x *ColorBuilder) Blue(blue float64) *ColorBuilder {
-    x.obj.Blue = blue
+func (x *ColorBuilder) Blue(value float64) *ColorBuilder {
+    x.obj.Blue = value
     return x
 }
 
-func (x *ColorBuilder) Alpha(alpha float64) *ColorBuilder {
-    x.obj.Alpha = alpha
+func (x *ColorBuilder) Alpha(value float64) *ColorBuilder {
+    x.obj.Alpha = value
     return x
 }
 
@@ -393,28 +393,28 @@ func (x *Vehicle) GetHasAC() *bool {
     return x.HasAC
 }
 
-func (x *Vehicle) SetColor(color Color) *Vehicle {
-    x.Color = &color
+func (x *Vehicle) SetColor(value Color) *Vehicle {
+    x.Color = &value
     return x
 }
 
-func (x *Vehicle) SetLicensePlate(licensePlate string) *Vehicle {
-    x.LicensePlate = &licensePlate
+func (x *Vehicle) SetLicensePlate(value string) *Vehicle {
+    x.LicensePlate = &value
     return x
 }
 
-func (x *Vehicle) SetDescription(description string) *Vehicle {
-    x.Description = &description
+func (x *Vehicle) SetDescription(value string) *Vehicle {
+    x.Description = &value
     return x
 }
 
-func (x *Vehicle) SetName(name string) *Vehicle {
-    x.Name = &name
+func (x *Vehicle) SetName(value string) *Vehicle {
+    x.Name = &value
     return x
 }
 
-func (x *Vehicle) SetHasAC(hasAC bool) *Vehicle {
-    x.HasAC = &hasAC
+func (x *Vehicle) SetHasAC(value bool) *Vehicle {
+    x.HasAC = &value
     return x
 }
 
@@ -601,28 +601,28 @@ func NewVehicleBuilder() *VehicleBuilder {
     }
 }
 
-func (x *VehicleBuilder) Color(color *Color) *VehicleBuilder {
-    x.obj.Color = color
+func (x *VehicleBuilder) Color(value *Color) *VehicleBuilder {
+    x.obj.Color = value
     return x
 }
 
-func (x *VehicleBuilder) LicensePlate(licensePlate *string) *VehicleBuilder {
-    x.obj.LicensePlate = licensePlate
+func (x *VehicleBuilder) LicensePlate(value *string) *VehicleBuilder {
+    x.obj.LicensePlate = value
     return x
 }
 
-func (x *VehicleBuilder) Description(description *string) *VehicleBuilder {
-    x.obj.Description = description
+func (x *VehicleBuilder) Description(value *string) *VehicleBuilder {
+    x.obj.Description = value
     return x
 }
 
-func (x *VehicleBuilder) Name(name *string) *VehicleBuilder {
-    x.obj.Name = name
+func (x *VehicleBuilder) Name(value *string) *VehicleBuilder {
+    x.obj.Name = value
     return x
 }
 
-func (x *VehicleBuilder) HasAC(hasAC *bool) *VehicleBuilder {
-    x.obj.HasAC = hasAC
+func (x *VehicleBuilder) HasAC(value *bool) *VehicleBuilder {
+    x.obj.HasAC = value
     return x
 }
 
@@ -778,53 +778,53 @@ func (x *Person) GetVehicles() []*Vehicle {
     return x.Vehicles
 }
 
-func (x *Person) SetId(id PersonID) *Person {
-    x.Id = id
+func (x *Person) SetId(value PersonID) *Person {
+    x.Id = value
     return x
 }
 
-func (x *Person) SetName(name string) *Person {
-    x.Name = name
+func (x *Person) SetName(value string) *Person {
+    x.Name = value
     return x
 }
 
-func (x *Person) SetAge(age int16) *Person {
-    x.Age = &age
+func (x *Person) SetAge(value int16) *Person {
+    x.Age = &value
     return x
 }
 
-func (x *Person) SetAddress(address string) *Person {
-    x.Address = &address
+func (x *Person) SetAddress(value string) *Person {
+    x.Address = &value
     return x
 }
 
-func (x *Person) SetFavoriteColor(favoriteColor Color) *Person {
-    x.FavoriteColor = &favoriteColor
+func (x *Person) SetFavoriteColor(value Color) *Person {
+    x.FavoriteColor = &value
     return x
 }
 
-func (x *Person) SetFriends(friends []PersonID) *Person {
-    x.Friends = friends
+func (x *Person) SetFriends(value []PersonID) *Person {
+    x.Friends = value
     return x
 }
 
-func (x *Person) SetBestFriend(bestFriend PersonID) *Person {
-    x.BestFriend = &bestFriend
+func (x *Person) SetBestFriend(value PersonID) *Person {
+    x.BestFriend = &value
     return x
 }
 
-func (x *Person) SetPetNames(petNames map[Animal]string) *Person {
-    x.PetNames = petNames
+func (x *Person) SetPetNames(value map[Animal]string) *Person {
+    x.PetNames = value
     return x
 }
 
-func (x *Person) SetAfraidOfAnimal(afraidOfAnimal Animal) *Person {
-    x.AfraidOfAnimal = &afraidOfAnimal
+func (x *Person) SetAfraidOfAnimal(value Animal) *Person {
+    x.AfraidOfAnimal = &value
     return x
 }
 
-func (x *Person) SetVehicles(vehicles []*Vehicle) *Person {
-    x.Vehicles = vehicles
+func (x *Person) SetVehicles(value []*Vehicle) *Person {
+    x.Vehicles = value
     return x
 }
 
@@ -1274,53 +1274,53 @@ func NewPersonBuilder() *PersonBuilder {
     }
 }
 
-func (x *PersonBuilder) Id(id PersonID) *PersonBuilder {
-    x.obj.Id = id
+func (x *PersonBuilder) Id(value PersonID) *PersonBuilder {
+    x.obj.Id = value
     return x
 }
 
-func (x *PersonBuilder) Name(name string) *PersonBuilder {
-    x.obj.Name = name
+func (x *PersonBuilder) Name(value string) *PersonBuilder {
+    x.obj.Name = value
     return x
 }
 
-func (x *PersonBuilder) Age(age *int16) *PersonBuilder {
-    x.obj.Age = age
+func (x *PersonBuilder) Age(value *int16) *PersonBuilder {
+    x.obj.Age = value
     return x
 }
 
-func (x *PersonBuilder) Address(address *string) *PersonBuilder {
-    x.obj.Address = address
+func (x *PersonBuilder) Address(value *string) *PersonBuilder {
+    x.obj.Address = value
     return x
 }
 
-func (x *PersonBuilder) FavoriteColor(favoriteColor *Color) *PersonBuilder {
-    x.obj.FavoriteColor = favoriteColor
+func (x *PersonBuilder) FavoriteColor(value *Color) *PersonBuilder {
+    x.obj.FavoriteColor = value
     return x
 }
 
-func (x *PersonBuilder) Friends(friends []PersonID) *PersonBuilder {
-    x.obj.Friends = friends
+func (x *PersonBuilder) Friends(value []PersonID) *PersonBuilder {
+    x.obj.Friends = value
     return x
 }
 
-func (x *PersonBuilder) BestFriend(bestFriend *PersonID) *PersonBuilder {
-    x.obj.BestFriend = bestFriend
+func (x *PersonBuilder) BestFriend(value *PersonID) *PersonBuilder {
+    x.obj.BestFriend = value
     return x
 }
 
-func (x *PersonBuilder) PetNames(petNames map[Animal]string) *PersonBuilder {
-    x.obj.PetNames = petNames
+func (x *PersonBuilder) PetNames(value map[Animal]string) *PersonBuilder {
+    x.obj.PetNames = value
     return x
 }
 
-func (x *PersonBuilder) AfraidOfAnimal(afraidOfAnimal *Animal) *PersonBuilder {
-    x.obj.AfraidOfAnimal = afraidOfAnimal
+func (x *PersonBuilder) AfraidOfAnimal(value *Animal) *PersonBuilder {
+    x.obj.AfraidOfAnimal = value
     return x
 }
 
-func (x *PersonBuilder) Vehicles(vehicles []*Vehicle) *PersonBuilder {
-    x.obj.Vehicles = vehicles
+func (x *PersonBuilder) Vehicles(value []*Vehicle) *PersonBuilder {
+    x.obj.Vehicles = value
     return x
 }
 

@@ -140,18 +140,18 @@ func (x *reqServiceFunc) GetArg3() *Foo {
     return x.Arg3
 }
 
-func (x *reqServiceFunc) SetArg1(arg1 StringWithAdapter) *reqServiceFunc {
-    x.Arg1 = arg1
+func (x *reqServiceFunc) SetArg1(value StringWithAdapter) *reqServiceFunc {
+    x.Arg1 = value
     return x
 }
 
-func (x *reqServiceFunc) SetArg2(arg2 string) *reqServiceFunc {
-    x.Arg2 = arg2
+func (x *reqServiceFunc) SetArg2(value string) *reqServiceFunc {
+    x.Arg2 = value
     return x
 }
 
-func (x *reqServiceFunc) SetArg3(arg3 Foo) *reqServiceFunc {
-    x.Arg3 = &arg3
+func (x *reqServiceFunc) SetArg3(value Foo) *reqServiceFunc {
+    x.Arg3 = &value
     return x
 }
 
@@ -256,18 +256,18 @@ func newReqServiceFuncBuilder() *reqServiceFuncBuilder {
     }
 }
 
-func (x *reqServiceFuncBuilder) Arg1(arg1 StringWithAdapter) *reqServiceFuncBuilder {
-    x.obj.Arg1 = arg1
+func (x *reqServiceFuncBuilder) Arg1(value StringWithAdapter) *reqServiceFuncBuilder {
+    x.obj.Arg1 = value
     return x
 }
 
-func (x *reqServiceFuncBuilder) Arg2(arg2 string) *reqServiceFuncBuilder {
-    x.obj.Arg2 = arg2
+func (x *reqServiceFuncBuilder) Arg2(value string) *reqServiceFuncBuilder {
+    x.obj.Arg2 = value
     return x
 }
 
-func (x *reqServiceFuncBuilder) Arg3(arg3 *Foo) *reqServiceFuncBuilder {
-    x.obj.Arg3 = arg3
+func (x *reqServiceFuncBuilder) Arg3(value *Foo) *reqServiceFuncBuilder {
+    x.obj.Arg3 = value
     return x
 }
 
@@ -886,8 +886,8 @@ func (x *reqAdapterServiceAdaptedTypes) GetArg_() *HeapAllocated {
     return x.Arg_
 }
 
-func (x *reqAdapterServiceAdaptedTypes) SetArg_(arg HeapAllocated) *reqAdapterServiceAdaptedTypes {
-    x.Arg_ = &arg
+func (x *reqAdapterServiceAdaptedTypes) SetArg_(value HeapAllocated) *reqAdapterServiceAdaptedTypes {
+    x.Arg_ = &value
     return x
 }
 
@@ -938,8 +938,8 @@ func newReqAdapterServiceAdaptedTypesBuilder() *reqAdapterServiceAdaptedTypesBui
     }
 }
 
-func (x *reqAdapterServiceAdaptedTypesBuilder) Arg_(arg *HeapAllocated) *reqAdapterServiceAdaptedTypesBuilder {
-    x.obj.Arg_ = arg
+func (x *reqAdapterServiceAdaptedTypesBuilder) Arg_(value *HeapAllocated) *reqAdapterServiceAdaptedTypesBuilder {
+    x.obj.Arg_ = value
     return x
 }
 

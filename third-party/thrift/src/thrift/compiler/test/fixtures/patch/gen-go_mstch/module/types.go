@@ -97,13 +97,13 @@ func (x *MyData) GetData2() int32 {
     return x.Data2
 }
 
-func (x *MyData) SetData1(data1 string) *MyData {
-    x.Data1 = data1
+func (x *MyData) SetData1(value string) *MyData {
+    x.Data1 = value
     return x
 }
 
-func (x *MyData) SetData2(data2 int32) *MyData {
-    x.Data2 = data2
+func (x *MyData) SetData2(value int32) *MyData {
+    x.Data2 = value
     return x
 }
 
@@ -173,13 +173,13 @@ func NewMyDataBuilder() *MyDataBuilder {
     }
 }
 
-func (x *MyDataBuilder) Data1(data1 string) *MyDataBuilder {
-    x.obj.Data1 = data1
+func (x *MyDataBuilder) Data1(value string) *MyDataBuilder {
+    x.obj.Data1 = value
     return x
 }
 
-func (x *MyDataBuilder) Data2(data2 int32) *MyDataBuilder {
-    x.obj.Data2 = data2
+func (x *MyDataBuilder) Data2(value int32) *MyDataBuilder {
+    x.obj.Data2 = value
     return x
 }
 
@@ -266,8 +266,8 @@ func (x *InnerUnion) GetInnerOption() []byte {
     return x.InnerOption
 }
 
-func (x *InnerUnion) SetInnerOption(innerOption []byte) *InnerUnion {
-    x.InnerOption = innerOption
+func (x *InnerUnion) SetInnerOption(value []byte) *InnerUnion {
+    x.InnerOption = value
     return x
 }
 
@@ -387,18 +387,18 @@ func (x *MyUnion) GetOption3() *InnerUnion {
     return x.Option3
 }
 
-func (x *MyUnion) SetOption1(option1 string) *MyUnion {
-    x.Option1 = &option1
+func (x *MyUnion) SetOption1(value string) *MyUnion {
+    x.Option1 = &value
     return x
 }
 
-func (x *MyUnion) SetOption2(option2 int32) *MyUnion {
-    x.Option2 = &option2
+func (x *MyUnion) SetOption2(value int32) *MyUnion {
+    x.Option2 = &value
     return x
 }
 
-func (x *MyUnion) SetOption3(option3 InnerUnion) *MyUnion {
-    x.Option3 = &option3
+func (x *MyUnion) SetOption3(value InnerUnion) *MyUnion {
+    x.Option3 = &value
     return x
 }
 
@@ -738,153 +738,153 @@ func (x *MyStruct) GetMapMap() map[string]map[string]int32 {
     return x.MapMap
 }
 
-func (x *MyStruct) SetBoolVal(boolVal bool) *MyStruct {
-    x.BoolVal = boolVal
+func (x *MyStruct) SetBoolVal(value bool) *MyStruct {
+    x.BoolVal = value
     return x
 }
 
-func (x *MyStruct) SetByteVal(byteVal byte) *MyStruct {
-    x.ByteVal = byteVal
+func (x *MyStruct) SetByteVal(value byte) *MyStruct {
+    x.ByteVal = value
     return x
 }
 
-func (x *MyStruct) SetI16Val(i16Val int16) *MyStruct {
-    x.I16Val = i16Val
+func (x *MyStruct) SetI16Val(value int16) *MyStruct {
+    x.I16Val = value
     return x
 }
 
-func (x *MyStruct) SetI32Val(i32Val int32) *MyStruct {
-    x.I32Val = i32Val
+func (x *MyStruct) SetI32Val(value int32) *MyStruct {
+    x.I32Val = value
     return x
 }
 
-func (x *MyStruct) SetI64Val(i64Val int64) *MyStruct {
-    x.I64Val = i64Val
+func (x *MyStruct) SetI64Val(value int64) *MyStruct {
+    x.I64Val = value
     return x
 }
 
-func (x *MyStruct) SetFloatVal(floatVal float32) *MyStruct {
-    x.FloatVal = floatVal
+func (x *MyStruct) SetFloatVal(value float32) *MyStruct {
+    x.FloatVal = value
     return x
 }
 
-func (x *MyStruct) SetDoubleVal(doubleVal float64) *MyStruct {
-    x.DoubleVal = doubleVal
+func (x *MyStruct) SetDoubleVal(value float64) *MyStruct {
+    x.DoubleVal = value
     return x
 }
 
-func (x *MyStruct) SetStringVal(stringVal string) *MyStruct {
-    x.StringVal = stringVal
+func (x *MyStruct) SetStringVal(value string) *MyStruct {
+    x.StringVal = value
     return x
 }
 
-func (x *MyStruct) SetBinaryVal(binaryVal []byte) *MyStruct {
-    x.BinaryVal = binaryVal
+func (x *MyStruct) SetBinaryVal(value []byte) *MyStruct {
+    x.BinaryVal = value
     return x
 }
 
-func (x *MyStruct) SetEnumVal(enumVal MyEnum) *MyStruct {
-    x.EnumVal = enumVal
+func (x *MyStruct) SetEnumVal(value MyEnum) *MyStruct {
+    x.EnumVal = value
     return x
 }
 
-func (x *MyStruct) SetStructVal(structVal MyData) *MyStruct {
-    x.StructVal = &structVal
+func (x *MyStruct) SetStructVal(value MyData) *MyStruct {
+    x.StructVal = &value
     return x
 }
 
-func (x *MyStruct) SetUnionVal(unionVal MyUnion) *MyStruct {
-    x.UnionVal = &unionVal
+func (x *MyStruct) SetUnionVal(value MyUnion) *MyStruct {
+    x.UnionVal = &value
     return x
 }
 
-func (x *MyStruct) SetLateStructVal(lateStructVal LateDefStruct) *MyStruct {
-    x.LateStructVal = &lateStructVal
+func (x *MyStruct) SetLateStructVal(value LateDefStruct) *MyStruct {
+    x.LateStructVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptBoolVal(optBoolVal bool) *MyStruct {
-    x.OptBoolVal = &optBoolVal
+func (x *MyStruct) SetOptBoolVal(value bool) *MyStruct {
+    x.OptBoolVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptByteVal(optByteVal byte) *MyStruct {
-    x.OptByteVal = &optByteVal
+func (x *MyStruct) SetOptByteVal(value byte) *MyStruct {
+    x.OptByteVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptI16Val(optI16Val int16) *MyStruct {
-    x.OptI16Val = &optI16Val
+func (x *MyStruct) SetOptI16Val(value int16) *MyStruct {
+    x.OptI16Val = &value
     return x
 }
 
-func (x *MyStruct) SetOptI32Val(optI32Val int32) *MyStruct {
-    x.OptI32Val = &optI32Val
+func (x *MyStruct) SetOptI32Val(value int32) *MyStruct {
+    x.OptI32Val = &value
     return x
 }
 
-func (x *MyStruct) SetOptI64Val(optI64Val int64) *MyStruct {
-    x.OptI64Val = &optI64Val
+func (x *MyStruct) SetOptI64Val(value int64) *MyStruct {
+    x.OptI64Val = &value
     return x
 }
 
-func (x *MyStruct) SetOptFloatVal(optFloatVal float32) *MyStruct {
-    x.OptFloatVal = &optFloatVal
+func (x *MyStruct) SetOptFloatVal(value float32) *MyStruct {
+    x.OptFloatVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptDoubleVal(optDoubleVal float64) *MyStruct {
-    x.OptDoubleVal = &optDoubleVal
+func (x *MyStruct) SetOptDoubleVal(value float64) *MyStruct {
+    x.OptDoubleVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptStringVal(optStringVal string) *MyStruct {
-    x.OptStringVal = &optStringVal
+func (x *MyStruct) SetOptStringVal(value string) *MyStruct {
+    x.OptStringVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptBinaryVal(optBinaryVal []byte) *MyStruct {
-    x.OptBinaryVal = optBinaryVal
+func (x *MyStruct) SetOptBinaryVal(value []byte) *MyStruct {
+    x.OptBinaryVal = value
     return x
 }
 
-func (x *MyStruct) SetOptEnumVal(optEnumVal MyEnum) *MyStruct {
-    x.OptEnumVal = &optEnumVal
+func (x *MyStruct) SetOptEnumVal(value MyEnum) *MyStruct {
+    x.OptEnumVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptStructVal(optStructVal MyData) *MyStruct {
-    x.OptStructVal = &optStructVal
+func (x *MyStruct) SetOptStructVal(value MyData) *MyStruct {
+    x.OptStructVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptLateStructVal(optLateStructVal LateDefStruct) *MyStruct {
-    x.OptLateStructVal = &optLateStructVal
+func (x *MyStruct) SetOptLateStructVal(value LateDefStruct) *MyStruct {
+    x.OptLateStructVal = &value
     return x
 }
 
-func (x *MyStruct) SetOptListVal(optListVal []int16) *MyStruct {
-    x.OptListVal = optListVal
+func (x *MyStruct) SetOptListVal(value []int16) *MyStruct {
+    x.OptListVal = value
     return x
 }
 
-func (x *MyStruct) SetOptSetVal(optSetVal []string) *MyStruct {
-    x.OptSetVal = optSetVal
+func (x *MyStruct) SetOptSetVal(value []string) *MyStruct {
+    x.OptSetVal = value
     return x
 }
 
-func (x *MyStruct) SetOptMapVal(optMapVal map[string]string) *MyStruct {
-    x.OptMapVal = optMapVal
+func (x *MyStruct) SetOptMapVal(value map[string]string) *MyStruct {
+    x.OptMapVal = value
     return x
 }
 
-func (x *MyStruct) SetListMap(listMap []map[string]int32) *MyStruct {
-    x.ListMap = listMap
+func (x *MyStruct) SetListMap(value []map[string]int32) *MyStruct {
+    x.ListMap = value
     return x
 }
 
-func (x *MyStruct) SetMapMap(mapMap map[string]map[string]int32) *MyStruct {
-    x.MapMap = mapMap
+func (x *MyStruct) SetMapMap(value map[string]map[string]int32) *MyStruct {
+    x.MapMap = value
     return x
 }
 
@@ -2135,153 +2135,153 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) BoolVal(boolVal bool) *MyStructBuilder {
-    x.obj.BoolVal = boolVal
+func (x *MyStructBuilder) BoolVal(value bool) *MyStructBuilder {
+    x.obj.BoolVal = value
     return x
 }
 
-func (x *MyStructBuilder) ByteVal(byteVal byte) *MyStructBuilder {
-    x.obj.ByteVal = byteVal
+func (x *MyStructBuilder) ByteVal(value byte) *MyStructBuilder {
+    x.obj.ByteVal = value
     return x
 }
 
-func (x *MyStructBuilder) I16Val(i16Val int16) *MyStructBuilder {
-    x.obj.I16Val = i16Val
+func (x *MyStructBuilder) I16Val(value int16) *MyStructBuilder {
+    x.obj.I16Val = value
     return x
 }
 
-func (x *MyStructBuilder) I32Val(i32Val int32) *MyStructBuilder {
-    x.obj.I32Val = i32Val
+func (x *MyStructBuilder) I32Val(value int32) *MyStructBuilder {
+    x.obj.I32Val = value
     return x
 }
 
-func (x *MyStructBuilder) I64Val(i64Val int64) *MyStructBuilder {
-    x.obj.I64Val = i64Val
+func (x *MyStructBuilder) I64Val(value int64) *MyStructBuilder {
+    x.obj.I64Val = value
     return x
 }
 
-func (x *MyStructBuilder) FloatVal(floatVal float32) *MyStructBuilder {
-    x.obj.FloatVal = floatVal
+func (x *MyStructBuilder) FloatVal(value float32) *MyStructBuilder {
+    x.obj.FloatVal = value
     return x
 }
 
-func (x *MyStructBuilder) DoubleVal(doubleVal float64) *MyStructBuilder {
-    x.obj.DoubleVal = doubleVal
+func (x *MyStructBuilder) DoubleVal(value float64) *MyStructBuilder {
+    x.obj.DoubleVal = value
     return x
 }
 
-func (x *MyStructBuilder) StringVal(stringVal string) *MyStructBuilder {
-    x.obj.StringVal = stringVal
+func (x *MyStructBuilder) StringVal(value string) *MyStructBuilder {
+    x.obj.StringVal = value
     return x
 }
 
-func (x *MyStructBuilder) BinaryVal(binaryVal []byte) *MyStructBuilder {
-    x.obj.BinaryVal = binaryVal
+func (x *MyStructBuilder) BinaryVal(value []byte) *MyStructBuilder {
+    x.obj.BinaryVal = value
     return x
 }
 
-func (x *MyStructBuilder) EnumVal(enumVal MyEnum) *MyStructBuilder {
-    x.obj.EnumVal = enumVal
+func (x *MyStructBuilder) EnumVal(value MyEnum) *MyStructBuilder {
+    x.obj.EnumVal = value
     return x
 }
 
-func (x *MyStructBuilder) StructVal(structVal *MyData) *MyStructBuilder {
-    x.obj.StructVal = structVal
+func (x *MyStructBuilder) StructVal(value *MyData) *MyStructBuilder {
+    x.obj.StructVal = value
     return x
 }
 
-func (x *MyStructBuilder) UnionVal(unionVal *MyUnion) *MyStructBuilder {
-    x.obj.UnionVal = unionVal
+func (x *MyStructBuilder) UnionVal(value *MyUnion) *MyStructBuilder {
+    x.obj.UnionVal = value
     return x
 }
 
-func (x *MyStructBuilder) LateStructVal(lateStructVal *LateDefStruct) *MyStructBuilder {
-    x.obj.LateStructVal = lateStructVal
+func (x *MyStructBuilder) LateStructVal(value *LateDefStruct) *MyStructBuilder {
+    x.obj.LateStructVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptBoolVal(optBoolVal *bool) *MyStructBuilder {
-    x.obj.OptBoolVal = optBoolVal
+func (x *MyStructBuilder) OptBoolVal(value *bool) *MyStructBuilder {
+    x.obj.OptBoolVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptByteVal(optByteVal *byte) *MyStructBuilder {
-    x.obj.OptByteVal = optByteVal
+func (x *MyStructBuilder) OptByteVal(value *byte) *MyStructBuilder {
+    x.obj.OptByteVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptI16Val(optI16Val *int16) *MyStructBuilder {
-    x.obj.OptI16Val = optI16Val
+func (x *MyStructBuilder) OptI16Val(value *int16) *MyStructBuilder {
+    x.obj.OptI16Val = value
     return x
 }
 
-func (x *MyStructBuilder) OptI32Val(optI32Val *int32) *MyStructBuilder {
-    x.obj.OptI32Val = optI32Val
+func (x *MyStructBuilder) OptI32Val(value *int32) *MyStructBuilder {
+    x.obj.OptI32Val = value
     return x
 }
 
-func (x *MyStructBuilder) OptI64Val(optI64Val *int64) *MyStructBuilder {
-    x.obj.OptI64Val = optI64Val
+func (x *MyStructBuilder) OptI64Val(value *int64) *MyStructBuilder {
+    x.obj.OptI64Val = value
     return x
 }
 
-func (x *MyStructBuilder) OptFloatVal(optFloatVal *float32) *MyStructBuilder {
-    x.obj.OptFloatVal = optFloatVal
+func (x *MyStructBuilder) OptFloatVal(value *float32) *MyStructBuilder {
+    x.obj.OptFloatVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptDoubleVal(optDoubleVal *float64) *MyStructBuilder {
-    x.obj.OptDoubleVal = optDoubleVal
+func (x *MyStructBuilder) OptDoubleVal(value *float64) *MyStructBuilder {
+    x.obj.OptDoubleVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptStringVal(optStringVal *string) *MyStructBuilder {
-    x.obj.OptStringVal = optStringVal
+func (x *MyStructBuilder) OptStringVal(value *string) *MyStructBuilder {
+    x.obj.OptStringVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptBinaryVal(optBinaryVal []byte) *MyStructBuilder {
-    x.obj.OptBinaryVal = optBinaryVal
+func (x *MyStructBuilder) OptBinaryVal(value []byte) *MyStructBuilder {
+    x.obj.OptBinaryVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptEnumVal(optEnumVal *MyEnum) *MyStructBuilder {
-    x.obj.OptEnumVal = optEnumVal
+func (x *MyStructBuilder) OptEnumVal(value *MyEnum) *MyStructBuilder {
+    x.obj.OptEnumVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptStructVal(optStructVal *MyData) *MyStructBuilder {
-    x.obj.OptStructVal = optStructVal
+func (x *MyStructBuilder) OptStructVal(value *MyData) *MyStructBuilder {
+    x.obj.OptStructVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptLateStructVal(optLateStructVal *LateDefStruct) *MyStructBuilder {
-    x.obj.OptLateStructVal = optLateStructVal
+func (x *MyStructBuilder) OptLateStructVal(value *LateDefStruct) *MyStructBuilder {
+    x.obj.OptLateStructVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptListVal(optListVal []int16) *MyStructBuilder {
-    x.obj.OptListVal = optListVal
+func (x *MyStructBuilder) OptListVal(value []int16) *MyStructBuilder {
+    x.obj.OptListVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptSetVal(optSetVal []string) *MyStructBuilder {
-    x.obj.OptSetVal = optSetVal
+func (x *MyStructBuilder) OptSetVal(value []string) *MyStructBuilder {
+    x.obj.OptSetVal = value
     return x
 }
 
-func (x *MyStructBuilder) OptMapVal(optMapVal map[string]string) *MyStructBuilder {
-    x.obj.OptMapVal = optMapVal
+func (x *MyStructBuilder) OptMapVal(value map[string]string) *MyStructBuilder {
+    x.obj.OptMapVal = value
     return x
 }
 
-func (x *MyStructBuilder) ListMap(listMap []map[string]int32) *MyStructBuilder {
-    x.obj.ListMap = listMap
+func (x *MyStructBuilder) ListMap(value []map[string]int32) *MyStructBuilder {
+    x.obj.ListMap = value
     return x
 }
 
-func (x *MyStructBuilder) MapMap(mapMap map[string]map[string]int32) *MyStructBuilder {
-    x.obj.MapMap = mapMap
+func (x *MyStructBuilder) MapMap(value map[string]map[string]int32) *MyStructBuilder {
+    x.obj.MapMap = value
     return x
 }
 
@@ -2666,8 +2666,8 @@ func (x *Recursive) GetNodes() map[string]*Recursive {
     return x.Nodes
 }
 
-func (x *Recursive) SetNodes(nodes map[string]*Recursive) *Recursive {
-    x.Nodes = nodes
+func (x *Recursive) SetNodes(value map[string]*Recursive) *Recursive {
+    x.Nodes = value
     return x
 }
 
@@ -2764,8 +2764,8 @@ func NewRecursiveBuilder() *RecursiveBuilder {
     }
 }
 
-func (x *RecursiveBuilder) Nodes(nodes map[string]*Recursive) *RecursiveBuilder {
-    x.obj.Nodes = nodes
+func (x *RecursiveBuilder) Nodes(value map[string]*Recursive) *RecursiveBuilder {
+    x.obj.Nodes = value
     return x
 }
 
@@ -2844,8 +2844,8 @@ func (x *Bar) GetLoop() *Loop {
     return x.Loop
 }
 
-func (x *Bar) SetLoop(loop Loop) *Bar {
-    x.Loop = &loop
+func (x *Bar) SetLoop(value Loop) *Bar {
+    x.Loop = &value
     return x
 }
 
@@ -2896,8 +2896,8 @@ func NewBarBuilder() *BarBuilder {
     }
 }
 
-func (x *BarBuilder) Loop(loop *Loop) *BarBuilder {
-    x.obj.Loop = loop
+func (x *BarBuilder) Loop(value *Loop) *BarBuilder {
+    x.obj.Loop = value
     return x
 }
 
@@ -2976,8 +2976,8 @@ func (x *Loop) GetBar() *Bar {
     return x.Bar
 }
 
-func (x *Loop) SetBar(bar Bar) *Loop {
-    x.Bar = &bar
+func (x *Loop) SetBar(value Bar) *Loop {
+    x.Bar = &value
     return x
 }
 
@@ -3028,8 +3028,8 @@ func NewLoopBuilder() *LoopBuilder {
     }
 }
 
-func (x *LoopBuilder) Bar(bar *Bar) *LoopBuilder {
-    x.obj.Bar = bar
+func (x *LoopBuilder) Bar(value *Bar) *LoopBuilder {
+    x.obj.Bar = value
     return x
 }
 
@@ -3113,13 +3113,13 @@ func (x *MyDataEnsureStruct) GetData2() *int32 {
     return x.Data2
 }
 
-func (x *MyDataEnsureStruct) SetData1(data1 string) *MyDataEnsureStruct {
-    x.Data1 = &data1
+func (x *MyDataEnsureStruct) SetData1(value string) *MyDataEnsureStruct {
+    x.Data1 = &value
     return x
 }
 
-func (x *MyDataEnsureStruct) SetData2(data2 int32) *MyDataEnsureStruct {
-    x.Data2 = &data2
+func (x *MyDataEnsureStruct) SetData2(value int32) *MyDataEnsureStruct {
+    x.Data2 = &value
     return x
 }
 
@@ -3203,13 +3203,13 @@ func NewMyDataEnsureStructBuilder() *MyDataEnsureStructBuilder {
     }
 }
 
-func (x *MyDataEnsureStructBuilder) Data1(data1 *string) *MyDataEnsureStructBuilder {
-    x.obj.Data1 = data1
+func (x *MyDataEnsureStructBuilder) Data1(value *string) *MyDataEnsureStructBuilder {
+    x.obj.Data1 = value
     return x
 }
 
-func (x *MyDataEnsureStructBuilder) Data2(data2 *int32) *MyDataEnsureStructBuilder {
-    x.obj.Data2 = data2
+func (x *MyDataEnsureStructBuilder) Data2(value *int32) *MyDataEnsureStructBuilder {
+    x.obj.Data2 = value
     return x
 }
 
@@ -3301,13 +3301,13 @@ func (x *MyDataFieldPatch) GetData2() *patch.I32Patch {
     return x.Data2
 }
 
-func (x *MyDataFieldPatch) SetData1(data1 patch.StringPatch) *MyDataFieldPatch {
-    x.Data1 = &data1
+func (x *MyDataFieldPatch) SetData1(value patch.StringPatch) *MyDataFieldPatch {
+    x.Data1 = &value
     return x
 }
 
-func (x *MyDataFieldPatch) SetData2(data2 patch.I32Patch) *MyDataFieldPatch {
-    x.Data2 = &data2
+func (x *MyDataFieldPatch) SetData2(value patch.I32Patch) *MyDataFieldPatch {
+    x.Data2 = &value
     return x
 }
 
@@ -3393,13 +3393,13 @@ func NewMyDataFieldPatchBuilder() *MyDataFieldPatchBuilder {
     }
 }
 
-func (x *MyDataFieldPatchBuilder) Data1(data1 *patch.StringPatch) *MyDataFieldPatchBuilder {
-    x.obj.Data1 = data1
+func (x *MyDataFieldPatchBuilder) Data1(value *patch.StringPatch) *MyDataFieldPatchBuilder {
+    x.obj.Data1 = value
     return x
 }
 
-func (x *MyDataFieldPatchBuilder) Data2(data2 *patch.I32Patch) *MyDataFieldPatchBuilder {
-    x.obj.Data2 = data2
+func (x *MyDataFieldPatchBuilder) Data2(value *patch.I32Patch) *MyDataFieldPatchBuilder {
+    x.obj.Data2 = value
     return x
 }
 
@@ -3506,28 +3506,28 @@ func (x *MyDataPatch) GetPatch() *MyDataFieldPatch {
     return x.Patch
 }
 
-func (x *MyDataPatch) SetAssign(assign MyData) *MyDataPatch {
-    x.Assign = &assign
+func (x *MyDataPatch) SetAssign(value MyData) *MyDataPatch {
+    x.Assign = &value
     return x
 }
 
-func (x *MyDataPatch) SetClear(clear bool) *MyDataPatch {
-    x.Clear = clear
+func (x *MyDataPatch) SetClear(value bool) *MyDataPatch {
+    x.Clear = value
     return x
 }
 
-func (x *MyDataPatch) SetPatchPrior(patchPrior MyDataFieldPatch) *MyDataPatch {
-    x.PatchPrior = &patchPrior
+func (x *MyDataPatch) SetPatchPrior(value MyDataFieldPatch) *MyDataPatch {
+    x.PatchPrior = &value
     return x
 }
 
-func (x *MyDataPatch) SetEnsure(ensure MyDataEnsureStruct) *MyDataPatch {
-    x.Ensure = &ensure
+func (x *MyDataPatch) SetEnsure(value MyDataEnsureStruct) *MyDataPatch {
+    x.Ensure = &value
     return x
 }
 
-func (x *MyDataPatch) SetPatch(patch MyDataFieldPatch) *MyDataPatch {
-    x.Patch = &patch
+func (x *MyDataPatch) SetPatch(value MyDataFieldPatch) *MyDataPatch {
+    x.Patch = &value
     return x
 }
 
@@ -3710,28 +3710,28 @@ func NewMyDataPatchBuilder() *MyDataPatchBuilder {
     }
 }
 
-func (x *MyDataPatchBuilder) Assign(assign *MyData) *MyDataPatchBuilder {
-    x.obj.Assign = assign
+func (x *MyDataPatchBuilder) Assign(value *MyData) *MyDataPatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyDataPatchBuilder) Clear(clear bool) *MyDataPatchBuilder {
-    x.obj.Clear = clear
+func (x *MyDataPatchBuilder) Clear(value bool) *MyDataPatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *MyDataPatchBuilder) PatchPrior(patchPrior *MyDataFieldPatch) *MyDataPatchBuilder {
-    x.obj.PatchPrior = patchPrior
+func (x *MyDataPatchBuilder) PatchPrior(value *MyDataFieldPatch) *MyDataPatchBuilder {
+    x.obj.PatchPrior = value
     return x
 }
 
-func (x *MyDataPatchBuilder) Ensure(ensure *MyDataEnsureStruct) *MyDataPatchBuilder {
-    x.obj.Ensure = ensure
+func (x *MyDataPatchBuilder) Ensure(value *MyDataEnsureStruct) *MyDataPatchBuilder {
+    x.obj.Ensure = value
     return x
 }
 
-func (x *MyDataPatchBuilder) Patch(patch *MyDataFieldPatch) *MyDataPatchBuilder {
-    x.obj.Patch = patch
+func (x *MyDataPatchBuilder) Patch(value *MyDataFieldPatch) *MyDataPatchBuilder {
+    x.obj.Patch = value
     return x
 }
 
@@ -3842,8 +3842,8 @@ func (x *InnerUnionFieldPatch) GetInnerOption() *patch.BinaryPatch {
     return x.InnerOption
 }
 
-func (x *InnerUnionFieldPatch) SetInnerOption(innerOption patch.BinaryPatch) *InnerUnionFieldPatch {
-    x.InnerOption = &innerOption
+func (x *InnerUnionFieldPatch) SetInnerOption(value patch.BinaryPatch) *InnerUnionFieldPatch {
+    x.InnerOption = &value
     return x
 }
 
@@ -3894,8 +3894,8 @@ func NewInnerUnionFieldPatchBuilder() *InnerUnionFieldPatchBuilder {
     }
 }
 
-func (x *InnerUnionFieldPatchBuilder) InnerOption(innerOption *patch.BinaryPatch) *InnerUnionFieldPatchBuilder {
-    x.obj.InnerOption = innerOption
+func (x *InnerUnionFieldPatchBuilder) InnerOption(value *patch.BinaryPatch) *InnerUnionFieldPatchBuilder {
+    x.obj.InnerOption = value
     return x
 }
 
@@ -3994,28 +3994,28 @@ func (x *InnerUnionPatch) GetPatch() *InnerUnionFieldPatch {
     return x.Patch
 }
 
-func (x *InnerUnionPatch) SetAssign(assign InnerUnion) *InnerUnionPatch {
-    x.Assign = &assign
+func (x *InnerUnionPatch) SetAssign(value InnerUnion) *InnerUnionPatch {
+    x.Assign = &value
     return x
 }
 
-func (x *InnerUnionPatch) SetClear(clear bool) *InnerUnionPatch {
-    x.Clear = clear
+func (x *InnerUnionPatch) SetClear(value bool) *InnerUnionPatch {
+    x.Clear = value
     return x
 }
 
-func (x *InnerUnionPatch) SetPatchPrior(patchPrior InnerUnionFieldPatch) *InnerUnionPatch {
-    x.PatchPrior = &patchPrior
+func (x *InnerUnionPatch) SetPatchPrior(value InnerUnionFieldPatch) *InnerUnionPatch {
+    x.PatchPrior = &value
     return x
 }
 
-func (x *InnerUnionPatch) SetEnsure(ensure InnerUnion) *InnerUnionPatch {
-    x.Ensure = &ensure
+func (x *InnerUnionPatch) SetEnsure(value InnerUnion) *InnerUnionPatch {
+    x.Ensure = &value
     return x
 }
 
-func (x *InnerUnionPatch) SetPatch(patch InnerUnionFieldPatch) *InnerUnionPatch {
-    x.Patch = &patch
+func (x *InnerUnionPatch) SetPatch(value InnerUnionFieldPatch) *InnerUnionPatch {
+    x.Patch = &value
     return x
 }
 
@@ -4198,28 +4198,28 @@ func NewInnerUnionPatchBuilder() *InnerUnionPatchBuilder {
     }
 }
 
-func (x *InnerUnionPatchBuilder) Assign(assign *InnerUnion) *InnerUnionPatchBuilder {
-    x.obj.Assign = assign
+func (x *InnerUnionPatchBuilder) Assign(value *InnerUnion) *InnerUnionPatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *InnerUnionPatchBuilder) Clear(clear bool) *InnerUnionPatchBuilder {
-    x.obj.Clear = clear
+func (x *InnerUnionPatchBuilder) Clear(value bool) *InnerUnionPatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *InnerUnionPatchBuilder) PatchPrior(patchPrior *InnerUnionFieldPatch) *InnerUnionPatchBuilder {
-    x.obj.PatchPrior = patchPrior
+func (x *InnerUnionPatchBuilder) PatchPrior(value *InnerUnionFieldPatch) *InnerUnionPatchBuilder {
+    x.obj.PatchPrior = value
     return x
 }
 
-func (x *InnerUnionPatchBuilder) Ensure(ensure *InnerUnion) *InnerUnionPatchBuilder {
-    x.obj.Ensure = ensure
+func (x *InnerUnionPatchBuilder) Ensure(value *InnerUnion) *InnerUnionPatchBuilder {
+    x.obj.Ensure = value
     return x
 }
 
-func (x *InnerUnionPatchBuilder) Patch(patch *InnerUnionFieldPatch) *InnerUnionPatchBuilder {
-    x.obj.Patch = patch
+func (x *InnerUnionPatchBuilder) Patch(value *InnerUnionFieldPatch) *InnerUnionPatchBuilder {
+    x.obj.Patch = value
     return x
 }
 
@@ -4340,18 +4340,18 @@ func (x *MyUnionFieldPatch) GetOption3() *InnerUnionPatch {
     return x.Option3
 }
 
-func (x *MyUnionFieldPatch) SetOption1(option1 patch.StringPatch) *MyUnionFieldPatch {
-    x.Option1 = &option1
+func (x *MyUnionFieldPatch) SetOption1(value patch.StringPatch) *MyUnionFieldPatch {
+    x.Option1 = &value
     return x
 }
 
-func (x *MyUnionFieldPatch) SetOption2(option2 patch.I32Patch) *MyUnionFieldPatch {
-    x.Option2 = &option2
+func (x *MyUnionFieldPatch) SetOption2(value patch.I32Patch) *MyUnionFieldPatch {
+    x.Option2 = &value
     return x
 }
 
-func (x *MyUnionFieldPatch) SetOption3(option3 InnerUnionPatch) *MyUnionFieldPatch {
-    x.Option3 = &option3
+func (x *MyUnionFieldPatch) SetOption3(value InnerUnionPatch) *MyUnionFieldPatch {
+    x.Option3 = &value
     return x
 }
 
@@ -4472,18 +4472,18 @@ func NewMyUnionFieldPatchBuilder() *MyUnionFieldPatchBuilder {
     }
 }
 
-func (x *MyUnionFieldPatchBuilder) Option1(option1 *patch.StringPatch) *MyUnionFieldPatchBuilder {
-    x.obj.Option1 = option1
+func (x *MyUnionFieldPatchBuilder) Option1(value *patch.StringPatch) *MyUnionFieldPatchBuilder {
+    x.obj.Option1 = value
     return x
 }
 
-func (x *MyUnionFieldPatchBuilder) Option2(option2 *patch.I32Patch) *MyUnionFieldPatchBuilder {
-    x.obj.Option2 = option2
+func (x *MyUnionFieldPatchBuilder) Option2(value *patch.I32Patch) *MyUnionFieldPatchBuilder {
+    x.obj.Option2 = value
     return x
 }
 
-func (x *MyUnionFieldPatchBuilder) Option3(option3 *InnerUnionPatch) *MyUnionFieldPatchBuilder {
-    x.obj.Option3 = option3
+func (x *MyUnionFieldPatchBuilder) Option3(value *InnerUnionPatch) *MyUnionFieldPatchBuilder {
+    x.obj.Option3 = value
     return x
 }
 
@@ -4598,28 +4598,28 @@ func (x *MyUnionPatch) GetPatch() *MyUnionFieldPatch {
     return x.Patch
 }
 
-func (x *MyUnionPatch) SetAssign(assign MyUnion) *MyUnionPatch {
-    x.Assign = &assign
+func (x *MyUnionPatch) SetAssign(value MyUnion) *MyUnionPatch {
+    x.Assign = &value
     return x
 }
 
-func (x *MyUnionPatch) SetClear(clear bool) *MyUnionPatch {
-    x.Clear = clear
+func (x *MyUnionPatch) SetClear(value bool) *MyUnionPatch {
+    x.Clear = value
     return x
 }
 
-func (x *MyUnionPatch) SetPatchPrior(patchPrior MyUnionFieldPatch) *MyUnionPatch {
-    x.PatchPrior = &patchPrior
+func (x *MyUnionPatch) SetPatchPrior(value MyUnionFieldPatch) *MyUnionPatch {
+    x.PatchPrior = &value
     return x
 }
 
-func (x *MyUnionPatch) SetEnsure(ensure MyUnion) *MyUnionPatch {
-    x.Ensure = &ensure
+func (x *MyUnionPatch) SetEnsure(value MyUnion) *MyUnionPatch {
+    x.Ensure = &value
     return x
 }
 
-func (x *MyUnionPatch) SetPatch(patch MyUnionFieldPatch) *MyUnionPatch {
-    x.Patch = &patch
+func (x *MyUnionPatch) SetPatch(value MyUnionFieldPatch) *MyUnionPatch {
+    x.Patch = &value
     return x
 }
 
@@ -4802,28 +4802,28 @@ func NewMyUnionPatchBuilder() *MyUnionPatchBuilder {
     }
 }
 
-func (x *MyUnionPatchBuilder) Assign(assign *MyUnion) *MyUnionPatchBuilder {
-    x.obj.Assign = assign
+func (x *MyUnionPatchBuilder) Assign(value *MyUnion) *MyUnionPatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyUnionPatchBuilder) Clear(clear bool) *MyUnionPatchBuilder {
-    x.obj.Clear = clear
+func (x *MyUnionPatchBuilder) Clear(value bool) *MyUnionPatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *MyUnionPatchBuilder) PatchPrior(patchPrior *MyUnionFieldPatch) *MyUnionPatchBuilder {
-    x.obj.PatchPrior = patchPrior
+func (x *MyUnionPatchBuilder) PatchPrior(value *MyUnionFieldPatch) *MyUnionPatchBuilder {
+    x.obj.PatchPrior = value
     return x
 }
 
-func (x *MyUnionPatchBuilder) Ensure(ensure *MyUnion) *MyUnionPatchBuilder {
-    x.obj.Ensure = ensure
+func (x *MyUnionPatchBuilder) Ensure(value *MyUnion) *MyUnionPatchBuilder {
+    x.obj.Ensure = value
     return x
 }
 
-func (x *MyUnionPatchBuilder) Patch(patch *MyUnionFieldPatch) *MyUnionPatchBuilder {
-    x.obj.Patch = patch
+func (x *MyUnionPatchBuilder) Patch(value *MyUnionFieldPatch) *MyUnionPatchBuilder {
+    x.obj.Patch = value
     return x
 }
 
@@ -5079,153 +5079,153 @@ func (x *MyStructEnsureStruct) GetBoolVal() *bool {
     return x.BoolVal
 }
 
-func (x *MyStructEnsureStruct) SetMapMap(mapMap map[string]map[string]int32) *MyStructEnsureStruct {
-    x.MapMap = mapMap
+func (x *MyStructEnsureStruct) SetMapMap(value map[string]map[string]int32) *MyStructEnsureStruct {
+    x.MapMap = value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetListMap(listMap []map[string]int32) *MyStructEnsureStruct {
-    x.ListMap = listMap
+func (x *MyStructEnsureStruct) SetListMap(value []map[string]int32) *MyStructEnsureStruct {
+    x.ListMap = value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptMapVal(optMapVal map[string]string) *MyStructEnsureStruct {
-    x.OptMapVal = optMapVal
+func (x *MyStructEnsureStruct) SetOptMapVal(value map[string]string) *MyStructEnsureStruct {
+    x.OptMapVal = value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptSetVal(optSetVal []string) *MyStructEnsureStruct {
-    x.OptSetVal = optSetVal
+func (x *MyStructEnsureStruct) SetOptSetVal(value []string) *MyStructEnsureStruct {
+    x.OptSetVal = value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptListVal(optListVal []int16) *MyStructEnsureStruct {
-    x.OptListVal = optListVal
+func (x *MyStructEnsureStruct) SetOptListVal(value []int16) *MyStructEnsureStruct {
+    x.OptListVal = value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptLateStructVal(optLateStructVal LateDefStruct) *MyStructEnsureStruct {
-    x.OptLateStructVal = &optLateStructVal
+func (x *MyStructEnsureStruct) SetOptLateStructVal(value LateDefStruct) *MyStructEnsureStruct {
+    x.OptLateStructVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptStructVal(optStructVal MyData) *MyStructEnsureStruct {
-    x.OptStructVal = &optStructVal
+func (x *MyStructEnsureStruct) SetOptStructVal(value MyData) *MyStructEnsureStruct {
+    x.OptStructVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptEnumVal(optEnumVal MyEnum) *MyStructEnsureStruct {
-    x.OptEnumVal = &optEnumVal
+func (x *MyStructEnsureStruct) SetOptEnumVal(value MyEnum) *MyStructEnsureStruct {
+    x.OptEnumVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptBinaryVal(optBinaryVal []byte) *MyStructEnsureStruct {
-    x.OptBinaryVal = optBinaryVal
+func (x *MyStructEnsureStruct) SetOptBinaryVal(value []byte) *MyStructEnsureStruct {
+    x.OptBinaryVal = value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptStringVal(optStringVal string) *MyStructEnsureStruct {
-    x.OptStringVal = &optStringVal
+func (x *MyStructEnsureStruct) SetOptStringVal(value string) *MyStructEnsureStruct {
+    x.OptStringVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptDoubleVal(optDoubleVal float64) *MyStructEnsureStruct {
-    x.OptDoubleVal = &optDoubleVal
+func (x *MyStructEnsureStruct) SetOptDoubleVal(value float64) *MyStructEnsureStruct {
+    x.OptDoubleVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptFloatVal(optFloatVal float32) *MyStructEnsureStruct {
-    x.OptFloatVal = &optFloatVal
+func (x *MyStructEnsureStruct) SetOptFloatVal(value float32) *MyStructEnsureStruct {
+    x.OptFloatVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptI64Val(optI64Val int64) *MyStructEnsureStruct {
-    x.OptI64Val = &optI64Val
+func (x *MyStructEnsureStruct) SetOptI64Val(value int64) *MyStructEnsureStruct {
+    x.OptI64Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptI32Val(optI32Val int32) *MyStructEnsureStruct {
-    x.OptI32Val = &optI32Val
+func (x *MyStructEnsureStruct) SetOptI32Val(value int32) *MyStructEnsureStruct {
+    x.OptI32Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptI16Val(optI16Val int16) *MyStructEnsureStruct {
-    x.OptI16Val = &optI16Val
+func (x *MyStructEnsureStruct) SetOptI16Val(value int16) *MyStructEnsureStruct {
+    x.OptI16Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptByteVal(optByteVal byte) *MyStructEnsureStruct {
-    x.OptByteVal = &optByteVal
+func (x *MyStructEnsureStruct) SetOptByteVal(value byte) *MyStructEnsureStruct {
+    x.OptByteVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetOptBoolVal(optBoolVal bool) *MyStructEnsureStruct {
-    x.OptBoolVal = &optBoolVal
+func (x *MyStructEnsureStruct) SetOptBoolVal(value bool) *MyStructEnsureStruct {
+    x.OptBoolVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetLateStructVal(lateStructVal LateDefStruct) *MyStructEnsureStruct {
-    x.LateStructVal = &lateStructVal
+func (x *MyStructEnsureStruct) SetLateStructVal(value LateDefStruct) *MyStructEnsureStruct {
+    x.LateStructVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetUnionVal(unionVal MyUnion) *MyStructEnsureStruct {
-    x.UnionVal = &unionVal
+func (x *MyStructEnsureStruct) SetUnionVal(value MyUnion) *MyStructEnsureStruct {
+    x.UnionVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetStructVal(structVal MyData) *MyStructEnsureStruct {
-    x.StructVal = &structVal
+func (x *MyStructEnsureStruct) SetStructVal(value MyData) *MyStructEnsureStruct {
+    x.StructVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetEnumVal(enumVal MyEnum) *MyStructEnsureStruct {
-    x.EnumVal = &enumVal
+func (x *MyStructEnsureStruct) SetEnumVal(value MyEnum) *MyStructEnsureStruct {
+    x.EnumVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetBinaryVal(binaryVal []byte) *MyStructEnsureStruct {
-    x.BinaryVal = binaryVal
+func (x *MyStructEnsureStruct) SetBinaryVal(value []byte) *MyStructEnsureStruct {
+    x.BinaryVal = value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetStringVal(stringVal string) *MyStructEnsureStruct {
-    x.StringVal = &stringVal
+func (x *MyStructEnsureStruct) SetStringVal(value string) *MyStructEnsureStruct {
+    x.StringVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetDoubleVal(doubleVal float64) *MyStructEnsureStruct {
-    x.DoubleVal = &doubleVal
+func (x *MyStructEnsureStruct) SetDoubleVal(value float64) *MyStructEnsureStruct {
+    x.DoubleVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetFloatVal(floatVal float32) *MyStructEnsureStruct {
-    x.FloatVal = &floatVal
+func (x *MyStructEnsureStruct) SetFloatVal(value float32) *MyStructEnsureStruct {
+    x.FloatVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetI64Val(i64Val int64) *MyStructEnsureStruct {
-    x.I64Val = &i64Val
+func (x *MyStructEnsureStruct) SetI64Val(value int64) *MyStructEnsureStruct {
+    x.I64Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetI32Val(i32Val int32) *MyStructEnsureStruct {
-    x.I32Val = &i32Val
+func (x *MyStructEnsureStruct) SetI32Val(value int32) *MyStructEnsureStruct {
+    x.I32Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetI16Val(i16Val int16) *MyStructEnsureStruct {
-    x.I16Val = &i16Val
+func (x *MyStructEnsureStruct) SetI16Val(value int16) *MyStructEnsureStruct {
+    x.I16Val = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetByteVal(byteVal byte) *MyStructEnsureStruct {
-    x.ByteVal = &byteVal
+func (x *MyStructEnsureStruct) SetByteVal(value byte) *MyStructEnsureStruct {
+    x.ByteVal = &value
     return x
 }
 
-func (x *MyStructEnsureStruct) SetBoolVal(boolVal bool) *MyStructEnsureStruct {
-    x.BoolVal = &boolVal
+func (x *MyStructEnsureStruct) SetBoolVal(value bool) *MyStructEnsureStruct {
+    x.BoolVal = &value
     return x
 }
 
@@ -6539,153 +6539,153 @@ func NewMyStructEnsureStructBuilder() *MyStructEnsureStructBuilder {
     }
 }
 
-func (x *MyStructEnsureStructBuilder) MapMap(mapMap map[string]map[string]int32) *MyStructEnsureStructBuilder {
-    x.obj.MapMap = mapMap
+func (x *MyStructEnsureStructBuilder) MapMap(value map[string]map[string]int32) *MyStructEnsureStructBuilder {
+    x.obj.MapMap = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) ListMap(listMap []map[string]int32) *MyStructEnsureStructBuilder {
-    x.obj.ListMap = listMap
+func (x *MyStructEnsureStructBuilder) ListMap(value []map[string]int32) *MyStructEnsureStructBuilder {
+    x.obj.ListMap = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptMapVal(optMapVal map[string]string) *MyStructEnsureStructBuilder {
-    x.obj.OptMapVal = optMapVal
+func (x *MyStructEnsureStructBuilder) OptMapVal(value map[string]string) *MyStructEnsureStructBuilder {
+    x.obj.OptMapVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptSetVal(optSetVal []string) *MyStructEnsureStructBuilder {
-    x.obj.OptSetVal = optSetVal
+func (x *MyStructEnsureStructBuilder) OptSetVal(value []string) *MyStructEnsureStructBuilder {
+    x.obj.OptSetVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptListVal(optListVal []int16) *MyStructEnsureStructBuilder {
-    x.obj.OptListVal = optListVal
+func (x *MyStructEnsureStructBuilder) OptListVal(value []int16) *MyStructEnsureStructBuilder {
+    x.obj.OptListVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptLateStructVal(optLateStructVal *LateDefStruct) *MyStructEnsureStructBuilder {
-    x.obj.OptLateStructVal = optLateStructVal
+func (x *MyStructEnsureStructBuilder) OptLateStructVal(value *LateDefStruct) *MyStructEnsureStructBuilder {
+    x.obj.OptLateStructVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptStructVal(optStructVal *MyData) *MyStructEnsureStructBuilder {
-    x.obj.OptStructVal = optStructVal
+func (x *MyStructEnsureStructBuilder) OptStructVal(value *MyData) *MyStructEnsureStructBuilder {
+    x.obj.OptStructVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptEnumVal(optEnumVal *MyEnum) *MyStructEnsureStructBuilder {
-    x.obj.OptEnumVal = optEnumVal
+func (x *MyStructEnsureStructBuilder) OptEnumVal(value *MyEnum) *MyStructEnsureStructBuilder {
+    x.obj.OptEnumVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptBinaryVal(optBinaryVal []byte) *MyStructEnsureStructBuilder {
-    x.obj.OptBinaryVal = optBinaryVal
+func (x *MyStructEnsureStructBuilder) OptBinaryVal(value []byte) *MyStructEnsureStructBuilder {
+    x.obj.OptBinaryVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptStringVal(optStringVal *string) *MyStructEnsureStructBuilder {
-    x.obj.OptStringVal = optStringVal
+func (x *MyStructEnsureStructBuilder) OptStringVal(value *string) *MyStructEnsureStructBuilder {
+    x.obj.OptStringVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptDoubleVal(optDoubleVal *float64) *MyStructEnsureStructBuilder {
-    x.obj.OptDoubleVal = optDoubleVal
+func (x *MyStructEnsureStructBuilder) OptDoubleVal(value *float64) *MyStructEnsureStructBuilder {
+    x.obj.OptDoubleVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptFloatVal(optFloatVal *float32) *MyStructEnsureStructBuilder {
-    x.obj.OptFloatVal = optFloatVal
+func (x *MyStructEnsureStructBuilder) OptFloatVal(value *float32) *MyStructEnsureStructBuilder {
+    x.obj.OptFloatVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptI64Val(optI64Val *int64) *MyStructEnsureStructBuilder {
-    x.obj.OptI64Val = optI64Val
+func (x *MyStructEnsureStructBuilder) OptI64Val(value *int64) *MyStructEnsureStructBuilder {
+    x.obj.OptI64Val = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptI32Val(optI32Val *int32) *MyStructEnsureStructBuilder {
-    x.obj.OptI32Val = optI32Val
+func (x *MyStructEnsureStructBuilder) OptI32Val(value *int32) *MyStructEnsureStructBuilder {
+    x.obj.OptI32Val = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptI16Val(optI16Val *int16) *MyStructEnsureStructBuilder {
-    x.obj.OptI16Val = optI16Val
+func (x *MyStructEnsureStructBuilder) OptI16Val(value *int16) *MyStructEnsureStructBuilder {
+    x.obj.OptI16Val = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptByteVal(optByteVal *byte) *MyStructEnsureStructBuilder {
-    x.obj.OptByteVal = optByteVal
+func (x *MyStructEnsureStructBuilder) OptByteVal(value *byte) *MyStructEnsureStructBuilder {
+    x.obj.OptByteVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) OptBoolVal(optBoolVal *bool) *MyStructEnsureStructBuilder {
-    x.obj.OptBoolVal = optBoolVal
+func (x *MyStructEnsureStructBuilder) OptBoolVal(value *bool) *MyStructEnsureStructBuilder {
+    x.obj.OptBoolVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) LateStructVal(lateStructVal *LateDefStruct) *MyStructEnsureStructBuilder {
-    x.obj.LateStructVal = lateStructVal
+func (x *MyStructEnsureStructBuilder) LateStructVal(value *LateDefStruct) *MyStructEnsureStructBuilder {
+    x.obj.LateStructVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) UnionVal(unionVal *MyUnion) *MyStructEnsureStructBuilder {
-    x.obj.UnionVal = unionVal
+func (x *MyStructEnsureStructBuilder) UnionVal(value *MyUnion) *MyStructEnsureStructBuilder {
+    x.obj.UnionVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) StructVal(structVal *MyData) *MyStructEnsureStructBuilder {
-    x.obj.StructVal = structVal
+func (x *MyStructEnsureStructBuilder) StructVal(value *MyData) *MyStructEnsureStructBuilder {
+    x.obj.StructVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) EnumVal(enumVal *MyEnum) *MyStructEnsureStructBuilder {
-    x.obj.EnumVal = enumVal
+func (x *MyStructEnsureStructBuilder) EnumVal(value *MyEnum) *MyStructEnsureStructBuilder {
+    x.obj.EnumVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) BinaryVal(binaryVal []byte) *MyStructEnsureStructBuilder {
-    x.obj.BinaryVal = binaryVal
+func (x *MyStructEnsureStructBuilder) BinaryVal(value []byte) *MyStructEnsureStructBuilder {
+    x.obj.BinaryVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) StringVal(stringVal *string) *MyStructEnsureStructBuilder {
-    x.obj.StringVal = stringVal
+func (x *MyStructEnsureStructBuilder) StringVal(value *string) *MyStructEnsureStructBuilder {
+    x.obj.StringVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) DoubleVal(doubleVal *float64) *MyStructEnsureStructBuilder {
-    x.obj.DoubleVal = doubleVal
+func (x *MyStructEnsureStructBuilder) DoubleVal(value *float64) *MyStructEnsureStructBuilder {
+    x.obj.DoubleVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) FloatVal(floatVal *float32) *MyStructEnsureStructBuilder {
-    x.obj.FloatVal = floatVal
+func (x *MyStructEnsureStructBuilder) FloatVal(value *float32) *MyStructEnsureStructBuilder {
+    x.obj.FloatVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) I64Val(i64Val *int64) *MyStructEnsureStructBuilder {
-    x.obj.I64Val = i64Val
+func (x *MyStructEnsureStructBuilder) I64Val(value *int64) *MyStructEnsureStructBuilder {
+    x.obj.I64Val = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) I32Val(i32Val *int32) *MyStructEnsureStructBuilder {
-    x.obj.I32Val = i32Val
+func (x *MyStructEnsureStructBuilder) I32Val(value *int32) *MyStructEnsureStructBuilder {
+    x.obj.I32Val = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) I16Val(i16Val *int16) *MyStructEnsureStructBuilder {
-    x.obj.I16Val = i16Val
+func (x *MyStructEnsureStructBuilder) I16Val(value *int16) *MyStructEnsureStructBuilder {
+    x.obj.I16Val = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) ByteVal(byteVal *byte) *MyStructEnsureStructBuilder {
-    x.obj.ByteVal = byteVal
+func (x *MyStructEnsureStructBuilder) ByteVal(value *byte) *MyStructEnsureStructBuilder {
+    x.obj.ByteVal = value
     return x
 }
 
-func (x *MyStructEnsureStructBuilder) BoolVal(boolVal *bool) *MyStructEnsureStructBuilder {
-    x.obj.BoolVal = boolVal
+func (x *MyStructEnsureStructBuilder) BoolVal(value *bool) *MyStructEnsureStructBuilder {
+    x.obj.BoolVal = value
     return x
 }
 
@@ -7001,13 +7001,13 @@ func (x *MyStructField10Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField10Patch) SetAssign(assign MyEnum) *MyStructField10Patch {
-    x.Assign = &assign
+func (x *MyStructField10Patch) SetAssign(value MyEnum) *MyStructField10Patch {
+    x.Assign = &value
     return x
 }
 
-func (x *MyStructField10Patch) SetClear(clear bool) *MyStructField10Patch {
-    x.Clear = clear
+func (x *MyStructField10Patch) SetClear(value bool) *MyStructField10Patch {
+    x.Clear = value
     return x
 }
 
@@ -7085,13 +7085,13 @@ func NewMyStructField10PatchBuilder() *MyStructField10PatchBuilder {
     }
 }
 
-func (x *MyStructField10PatchBuilder) Assign(assign *MyEnum) *MyStructField10PatchBuilder {
-    x.obj.Assign = assign
+func (x *MyStructField10PatchBuilder) Assign(value *MyEnum) *MyStructField10PatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyStructField10PatchBuilder) Clear(clear bool) *MyStructField10PatchBuilder {
-    x.obj.Clear = clear
+func (x *MyStructField10PatchBuilder) Clear(value bool) *MyStructField10PatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
@@ -7183,13 +7183,13 @@ func (x *MyStructField23Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField23Patch) SetAssign(assign MyEnum) *MyStructField23Patch {
-    x.Assign = &assign
+func (x *MyStructField23Patch) SetAssign(value MyEnum) *MyStructField23Patch {
+    x.Assign = &value
     return x
 }
 
-func (x *MyStructField23Patch) SetClear(clear bool) *MyStructField23Patch {
-    x.Clear = clear
+func (x *MyStructField23Patch) SetClear(value bool) *MyStructField23Patch {
+    x.Clear = value
     return x
 }
 
@@ -7267,13 +7267,13 @@ func NewMyStructField23PatchBuilder() *MyStructField23PatchBuilder {
     }
 }
 
-func (x *MyStructField23PatchBuilder) Assign(assign *MyEnum) *MyStructField23PatchBuilder {
-    x.obj.Assign = assign
+func (x *MyStructField23PatchBuilder) Assign(value *MyEnum) *MyStructField23PatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyStructField23PatchBuilder) Clear(clear bool) *MyStructField23PatchBuilder {
-    x.obj.Clear = clear
+func (x *MyStructField23PatchBuilder) Clear(value bool) *MyStructField23PatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
@@ -7385,33 +7385,33 @@ func (x *MyStructField26Patch) GetAppend() []int16 {
     return x.Append
 }
 
-func (x *MyStructField26Patch) SetAssign(assign []int16) *MyStructField26Patch {
-    x.Assign = assign
+func (x *MyStructField26Patch) SetAssign(value []int16) *MyStructField26Patch {
+    x.Assign = value
     return x
 }
 
-func (x *MyStructField26Patch) SetClear(clear bool) *MyStructField26Patch {
-    x.Clear = clear
+func (x *MyStructField26Patch) SetClear(value bool) *MyStructField26Patch {
+    x.Clear = value
     return x
 }
 
-func (x *MyStructField26Patch) SetPatch(patch map[int32]*patch.I16Patch) *MyStructField26Patch {
-    x.Patch = patch
+func (x *MyStructField26Patch) SetPatch(value map[int32]*patch.I16Patch) *MyStructField26Patch {
+    x.Patch = value
     return x
 }
 
-func (x *MyStructField26Patch) SetRemove(remove []int16) *MyStructField26Patch {
-    x.Remove = remove
+func (x *MyStructField26Patch) SetRemove(value []int16) *MyStructField26Patch {
+    x.Remove = value
     return x
 }
 
-func (x *MyStructField26Patch) SetPrepend(prepend []int16) *MyStructField26Patch {
-    x.Prepend = prepend
+func (x *MyStructField26Patch) SetPrepend(value []int16) *MyStructField26Patch {
+    x.Prepend = value
     return x
 }
 
-func (x *MyStructField26Patch) SetAppend(append_ []int16) *MyStructField26Patch {
-    x.Append = append_
+func (x *MyStructField26Patch) SetAppend(value []int16) *MyStructField26Patch {
+    x.Append = value
     return x
 }
 
@@ -7787,33 +7787,33 @@ func NewMyStructField26PatchBuilder() *MyStructField26PatchBuilder {
     }
 }
 
-func (x *MyStructField26PatchBuilder) Assign(assign []int16) *MyStructField26PatchBuilder {
-    x.obj.Assign = assign
+func (x *MyStructField26PatchBuilder) Assign(value []int16) *MyStructField26PatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyStructField26PatchBuilder) Clear(clear bool) *MyStructField26PatchBuilder {
-    x.obj.Clear = clear
+func (x *MyStructField26PatchBuilder) Clear(value bool) *MyStructField26PatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *MyStructField26PatchBuilder) Patch(patch map[int32]*patch.I16Patch) *MyStructField26PatchBuilder {
-    x.obj.Patch = patch
+func (x *MyStructField26PatchBuilder) Patch(value map[int32]*patch.I16Patch) *MyStructField26PatchBuilder {
+    x.obj.Patch = value
     return x
 }
 
-func (x *MyStructField26PatchBuilder) Remove(remove []int16) *MyStructField26PatchBuilder {
-    x.obj.Remove = remove
+func (x *MyStructField26PatchBuilder) Remove(value []int16) *MyStructField26PatchBuilder {
+    x.obj.Remove = value
     return x
 }
 
-func (x *MyStructField26PatchBuilder) Prepend(prepend []int16) *MyStructField26PatchBuilder {
-    x.obj.Prepend = prepend
+func (x *MyStructField26PatchBuilder) Prepend(value []int16) *MyStructField26PatchBuilder {
+    x.obj.Prepend = value
     return x
 }
 
-func (x *MyStructField26PatchBuilder) Append(append_ []int16) *MyStructField26PatchBuilder {
-    x.obj.Append = append_
+func (x *MyStructField26PatchBuilder) Append(value []int16) *MyStructField26PatchBuilder {
+    x.obj.Append = value
     return x
 }
 
@@ -7947,23 +7947,23 @@ func (x *MyStructField27Patch) GetAdd() []string {
     return x.Add
 }
 
-func (x *MyStructField27Patch) SetAssign(assign []string) *MyStructField27Patch {
-    x.Assign = assign
+func (x *MyStructField27Patch) SetAssign(value []string) *MyStructField27Patch {
+    x.Assign = value
     return x
 }
 
-func (x *MyStructField27Patch) SetClear(clear bool) *MyStructField27Patch {
-    x.Clear = clear
+func (x *MyStructField27Patch) SetClear(value bool) *MyStructField27Patch {
+    x.Clear = value
     return x
 }
 
-func (x *MyStructField27Patch) SetRemove(remove []string) *MyStructField27Patch {
-    x.Remove = remove
+func (x *MyStructField27Patch) SetRemove(value []string) *MyStructField27Patch {
+    x.Remove = value
     return x
 }
 
-func (x *MyStructField27Patch) SetAdd(add []string) *MyStructField27Patch {
-    x.Add = add
+func (x *MyStructField27Patch) SetAdd(value []string) *MyStructField27Patch {
+    x.Add = value
     return x
 }
 
@@ -8195,23 +8195,23 @@ func NewMyStructField27PatchBuilder() *MyStructField27PatchBuilder {
     }
 }
 
-func (x *MyStructField27PatchBuilder) Assign(assign []string) *MyStructField27PatchBuilder {
-    x.obj.Assign = assign
+func (x *MyStructField27PatchBuilder) Assign(value []string) *MyStructField27PatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyStructField27PatchBuilder) Clear(clear bool) *MyStructField27PatchBuilder {
-    x.obj.Clear = clear
+func (x *MyStructField27PatchBuilder) Clear(value bool) *MyStructField27PatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *MyStructField27PatchBuilder) Remove(remove []string) *MyStructField27PatchBuilder {
-    x.obj.Remove = remove
+func (x *MyStructField27PatchBuilder) Remove(value []string) *MyStructField27PatchBuilder {
+    x.obj.Remove = value
     return x
 }
 
-func (x *MyStructField27PatchBuilder) Add(add []string) *MyStructField27PatchBuilder {
-    x.obj.Add = add
+func (x *MyStructField27PatchBuilder) Add(value []string) *MyStructField27PatchBuilder {
+    x.obj.Add = value
     return x
 }
 
@@ -8344,38 +8344,38 @@ func (x *MyStructField28Patch) GetPut() map[string]string {
     return x.Put
 }
 
-func (x *MyStructField28Patch) SetAssign(assign map[string]string) *MyStructField28Patch {
-    x.Assign = assign
+func (x *MyStructField28Patch) SetAssign(value map[string]string) *MyStructField28Patch {
+    x.Assign = value
     return x
 }
 
-func (x *MyStructField28Patch) SetClear(clear bool) *MyStructField28Patch {
-    x.Clear = clear
+func (x *MyStructField28Patch) SetClear(value bool) *MyStructField28Patch {
+    x.Clear = value
     return x
 }
 
-func (x *MyStructField28Patch) SetPatchPrior(patchPrior map[string]*patch.StringPatch) *MyStructField28Patch {
-    x.PatchPrior = patchPrior
+func (x *MyStructField28Patch) SetPatchPrior(value map[string]*patch.StringPatch) *MyStructField28Patch {
+    x.PatchPrior = value
     return x
 }
 
-func (x *MyStructField28Patch) SetAdd(add map[string]string) *MyStructField28Patch {
-    x.Add = add
+func (x *MyStructField28Patch) SetAdd(value map[string]string) *MyStructField28Patch {
+    x.Add = value
     return x
 }
 
-func (x *MyStructField28Patch) SetPatch(patch map[string]*patch.StringPatch) *MyStructField28Patch {
-    x.Patch = patch
+func (x *MyStructField28Patch) SetPatch(value map[string]*patch.StringPatch) *MyStructField28Patch {
+    x.Patch = value
     return x
 }
 
-func (x *MyStructField28Patch) SetRemove(remove []string) *MyStructField28Patch {
-    x.Remove = remove
+func (x *MyStructField28Patch) SetRemove(value []string) *MyStructField28Patch {
+    x.Remove = value
     return x
 }
 
-func (x *MyStructField28Patch) SetPut(put map[string]string) *MyStructField28Patch {
-    x.Put = put
+func (x *MyStructField28Patch) SetPut(value map[string]string) *MyStructField28Patch {
+    x.Put = value
     return x
 }
 
@@ -8883,38 +8883,38 @@ func NewMyStructField28PatchBuilder() *MyStructField28PatchBuilder {
     }
 }
 
-func (x *MyStructField28PatchBuilder) Assign(assign map[string]string) *MyStructField28PatchBuilder {
-    x.obj.Assign = assign
+func (x *MyStructField28PatchBuilder) Assign(value map[string]string) *MyStructField28PatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyStructField28PatchBuilder) Clear(clear bool) *MyStructField28PatchBuilder {
-    x.obj.Clear = clear
+func (x *MyStructField28PatchBuilder) Clear(value bool) *MyStructField28PatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *MyStructField28PatchBuilder) PatchPrior(patchPrior map[string]*patch.StringPatch) *MyStructField28PatchBuilder {
-    x.obj.PatchPrior = patchPrior
+func (x *MyStructField28PatchBuilder) PatchPrior(value map[string]*patch.StringPatch) *MyStructField28PatchBuilder {
+    x.obj.PatchPrior = value
     return x
 }
 
-func (x *MyStructField28PatchBuilder) Add(add map[string]string) *MyStructField28PatchBuilder {
-    x.obj.Add = add
+func (x *MyStructField28PatchBuilder) Add(value map[string]string) *MyStructField28PatchBuilder {
+    x.obj.Add = value
     return x
 }
 
-func (x *MyStructField28PatchBuilder) Patch(patch map[string]*patch.StringPatch) *MyStructField28PatchBuilder {
-    x.obj.Patch = patch
+func (x *MyStructField28PatchBuilder) Patch(value map[string]*patch.StringPatch) *MyStructField28PatchBuilder {
+    x.obj.Patch = value
     return x
 }
 
-func (x *MyStructField28PatchBuilder) Remove(remove []string) *MyStructField28PatchBuilder {
-    x.obj.Remove = remove
+func (x *MyStructField28PatchBuilder) Remove(value []string) *MyStructField28PatchBuilder {
+    x.obj.Remove = value
     return x
 }
 
-func (x *MyStructField28PatchBuilder) Put(put map[string]string) *MyStructField28PatchBuilder {
-    x.obj.Put = put
+func (x *MyStructField28PatchBuilder) Put(value map[string]string) *MyStructField28PatchBuilder {
+    x.obj.Put = value
     return x
 }
 
@@ -9066,33 +9066,33 @@ func (x *MyStructField29Patch) GetAppend() []map[string]int32 {
     return x.Append
 }
 
-func (x *MyStructField29Patch) SetAssign(assign []map[string]int32) *MyStructField29Patch {
-    x.Assign = assign
+func (x *MyStructField29Patch) SetAssign(value []map[string]int32) *MyStructField29Patch {
+    x.Assign = value
     return x
 }
 
-func (x *MyStructField29Patch) SetClear(clear bool) *MyStructField29Patch {
-    x.Clear = clear
+func (x *MyStructField29Patch) SetClear(value bool) *MyStructField29Patch {
+    x.Clear = value
     return x
 }
 
-func (x *MyStructField29Patch) SetPatch(patch map[int32]*MyStructField29Patch1) *MyStructField29Patch {
-    x.Patch = patch
+func (x *MyStructField29Patch) SetPatch(value map[int32]*MyStructField29Patch1) *MyStructField29Patch {
+    x.Patch = value
     return x
 }
 
-func (x *MyStructField29Patch) SetRemove(remove []map[string]int32) *MyStructField29Patch {
-    x.Remove = remove
+func (x *MyStructField29Patch) SetRemove(value []map[string]int32) *MyStructField29Patch {
+    x.Remove = value
     return x
 }
 
-func (x *MyStructField29Patch) SetPrepend(prepend []map[string]int32) *MyStructField29Patch {
-    x.Prepend = prepend
+func (x *MyStructField29Patch) SetPrepend(value []map[string]int32) *MyStructField29Patch {
+    x.Prepend = value
     return x
 }
 
-func (x *MyStructField29Patch) SetAppend(append_ []map[string]int32) *MyStructField29Patch {
-    x.Append = append_
+func (x *MyStructField29Patch) SetAppend(value []map[string]int32) *MyStructField29Patch {
+    x.Append = value
     return x
 }
 
@@ -9652,33 +9652,33 @@ func NewMyStructField29PatchBuilder() *MyStructField29PatchBuilder {
     }
 }
 
-func (x *MyStructField29PatchBuilder) Assign(assign []map[string]int32) *MyStructField29PatchBuilder {
-    x.obj.Assign = assign
+func (x *MyStructField29PatchBuilder) Assign(value []map[string]int32) *MyStructField29PatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyStructField29PatchBuilder) Clear(clear bool) *MyStructField29PatchBuilder {
-    x.obj.Clear = clear
+func (x *MyStructField29PatchBuilder) Clear(value bool) *MyStructField29PatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *MyStructField29PatchBuilder) Patch(patch map[int32]*MyStructField29Patch1) *MyStructField29PatchBuilder {
-    x.obj.Patch = patch
+func (x *MyStructField29PatchBuilder) Patch(value map[int32]*MyStructField29Patch1) *MyStructField29PatchBuilder {
+    x.obj.Patch = value
     return x
 }
 
-func (x *MyStructField29PatchBuilder) Remove(remove []map[string]int32) *MyStructField29PatchBuilder {
-    x.obj.Remove = remove
+func (x *MyStructField29PatchBuilder) Remove(value []map[string]int32) *MyStructField29PatchBuilder {
+    x.obj.Remove = value
     return x
 }
 
-func (x *MyStructField29PatchBuilder) Prepend(prepend []map[string]int32) *MyStructField29PatchBuilder {
-    x.obj.Prepend = prepend
+func (x *MyStructField29PatchBuilder) Prepend(value []map[string]int32) *MyStructField29PatchBuilder {
+    x.obj.Prepend = value
     return x
 }
 
-func (x *MyStructField29PatchBuilder) Append(append_ []map[string]int32) *MyStructField29PatchBuilder {
-    x.obj.Append = append_
+func (x *MyStructField29PatchBuilder) Append(value []map[string]int32) *MyStructField29PatchBuilder {
+    x.obj.Append = value
     return x
 }
 
@@ -9827,38 +9827,38 @@ func (x *MyStructField29Patch1) GetPut() map[string]int32 {
     return x.Put
 }
 
-func (x *MyStructField29Patch1) SetAssign(assign map[string]int32) *MyStructField29Patch1 {
-    x.Assign = assign
+func (x *MyStructField29Patch1) SetAssign(value map[string]int32) *MyStructField29Patch1 {
+    x.Assign = value
     return x
 }
 
-func (x *MyStructField29Patch1) SetClear(clear bool) *MyStructField29Patch1 {
-    x.Clear = clear
+func (x *MyStructField29Patch1) SetClear(value bool) *MyStructField29Patch1 {
+    x.Clear = value
     return x
 }
 
-func (x *MyStructField29Patch1) SetPatchPrior(patchPrior map[string]*patch.I32Patch) *MyStructField29Patch1 {
-    x.PatchPrior = patchPrior
+func (x *MyStructField29Patch1) SetPatchPrior(value map[string]*patch.I32Patch) *MyStructField29Patch1 {
+    x.PatchPrior = value
     return x
 }
 
-func (x *MyStructField29Patch1) SetAdd(add map[string]int32) *MyStructField29Patch1 {
-    x.Add = add
+func (x *MyStructField29Patch1) SetAdd(value map[string]int32) *MyStructField29Patch1 {
+    x.Add = value
     return x
 }
 
-func (x *MyStructField29Patch1) SetPatch(patch map[string]*patch.I32Patch) *MyStructField29Patch1 {
-    x.Patch = patch
+func (x *MyStructField29Patch1) SetPatch(value map[string]*patch.I32Patch) *MyStructField29Patch1 {
+    x.Patch = value
     return x
 }
 
-func (x *MyStructField29Patch1) SetRemove(remove []string) *MyStructField29Patch1 {
-    x.Remove = remove
+func (x *MyStructField29Patch1) SetRemove(value []string) *MyStructField29Patch1 {
+    x.Remove = value
     return x
 }
 
-func (x *MyStructField29Patch1) SetPut(put map[string]int32) *MyStructField29Patch1 {
-    x.Put = put
+func (x *MyStructField29Patch1) SetPut(value map[string]int32) *MyStructField29Patch1 {
+    x.Put = value
     return x
 }
 
@@ -10366,38 +10366,38 @@ func NewMyStructField29Patch1Builder() *MyStructField29Patch1Builder {
     }
 }
 
-func (x *MyStructField29Patch1Builder) Assign(assign map[string]int32) *MyStructField29Patch1Builder {
-    x.obj.Assign = assign
+func (x *MyStructField29Patch1Builder) Assign(value map[string]int32) *MyStructField29Patch1Builder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyStructField29Patch1Builder) Clear(clear bool) *MyStructField29Patch1Builder {
-    x.obj.Clear = clear
+func (x *MyStructField29Patch1Builder) Clear(value bool) *MyStructField29Patch1Builder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *MyStructField29Patch1Builder) PatchPrior(patchPrior map[string]*patch.I32Patch) *MyStructField29Patch1Builder {
-    x.obj.PatchPrior = patchPrior
+func (x *MyStructField29Patch1Builder) PatchPrior(value map[string]*patch.I32Patch) *MyStructField29Patch1Builder {
+    x.obj.PatchPrior = value
     return x
 }
 
-func (x *MyStructField29Patch1Builder) Add(add map[string]int32) *MyStructField29Patch1Builder {
-    x.obj.Add = add
+func (x *MyStructField29Patch1Builder) Add(value map[string]int32) *MyStructField29Patch1Builder {
+    x.obj.Add = value
     return x
 }
 
-func (x *MyStructField29Patch1Builder) Patch(patch map[string]*patch.I32Patch) *MyStructField29Patch1Builder {
-    x.obj.Patch = patch
+func (x *MyStructField29Patch1Builder) Patch(value map[string]*patch.I32Patch) *MyStructField29Patch1Builder {
+    x.obj.Patch = value
     return x
 }
 
-func (x *MyStructField29Patch1Builder) Remove(remove []string) *MyStructField29Patch1Builder {
-    x.obj.Remove = remove
+func (x *MyStructField29Patch1Builder) Remove(value []string) *MyStructField29Patch1Builder {
+    x.obj.Remove = value
     return x
 }
 
-func (x *MyStructField29Patch1Builder) Put(put map[string]int32) *MyStructField29Patch1Builder {
-    x.obj.Put = put
+func (x *MyStructField29Patch1Builder) Put(value map[string]int32) *MyStructField29Patch1Builder {
+    x.obj.Put = value
     return x
 }
 
@@ -10554,38 +10554,38 @@ func (x *MyStructField30Patch) GetPut() map[string]map[string]int32 {
     return x.Put
 }
 
-func (x *MyStructField30Patch) SetAssign(assign map[string]map[string]int32) *MyStructField30Patch {
-    x.Assign = assign
+func (x *MyStructField30Patch) SetAssign(value map[string]map[string]int32) *MyStructField30Patch {
+    x.Assign = value
     return x
 }
 
-func (x *MyStructField30Patch) SetClear(clear bool) *MyStructField30Patch {
-    x.Clear = clear
+func (x *MyStructField30Patch) SetClear(value bool) *MyStructField30Patch {
+    x.Clear = value
     return x
 }
 
-func (x *MyStructField30Patch) SetPatchPrior(patchPrior map[string]*MyStructField30Patch1) *MyStructField30Patch {
-    x.PatchPrior = patchPrior
+func (x *MyStructField30Patch) SetPatchPrior(value map[string]*MyStructField30Patch1) *MyStructField30Patch {
+    x.PatchPrior = value
     return x
 }
 
-func (x *MyStructField30Patch) SetAdd(add map[string]map[string]int32) *MyStructField30Patch {
-    x.Add = add
+func (x *MyStructField30Patch) SetAdd(value map[string]map[string]int32) *MyStructField30Patch {
+    x.Add = value
     return x
 }
 
-func (x *MyStructField30Patch) SetPatch(patch map[string]*MyStructField30Patch1) *MyStructField30Patch {
-    x.Patch = patch
+func (x *MyStructField30Patch) SetPatch(value map[string]*MyStructField30Patch1) *MyStructField30Patch {
+    x.Patch = value
     return x
 }
 
-func (x *MyStructField30Patch) SetRemove(remove []string) *MyStructField30Patch {
-    x.Remove = remove
+func (x *MyStructField30Patch) SetRemove(value []string) *MyStructField30Patch {
+    x.Remove = value
     return x
 }
 
-func (x *MyStructField30Patch) SetPut(put map[string]map[string]int32) *MyStructField30Patch {
-    x.Put = put
+func (x *MyStructField30Patch) SetPut(value map[string]map[string]int32) *MyStructField30Patch {
+    x.Put = value
     return x
 }
 
@@ -11231,38 +11231,38 @@ func NewMyStructField30PatchBuilder() *MyStructField30PatchBuilder {
     }
 }
 
-func (x *MyStructField30PatchBuilder) Assign(assign map[string]map[string]int32) *MyStructField30PatchBuilder {
-    x.obj.Assign = assign
+func (x *MyStructField30PatchBuilder) Assign(value map[string]map[string]int32) *MyStructField30PatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyStructField30PatchBuilder) Clear(clear bool) *MyStructField30PatchBuilder {
-    x.obj.Clear = clear
+func (x *MyStructField30PatchBuilder) Clear(value bool) *MyStructField30PatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *MyStructField30PatchBuilder) PatchPrior(patchPrior map[string]*MyStructField30Patch1) *MyStructField30PatchBuilder {
-    x.obj.PatchPrior = patchPrior
+func (x *MyStructField30PatchBuilder) PatchPrior(value map[string]*MyStructField30Patch1) *MyStructField30PatchBuilder {
+    x.obj.PatchPrior = value
     return x
 }
 
-func (x *MyStructField30PatchBuilder) Add(add map[string]map[string]int32) *MyStructField30PatchBuilder {
-    x.obj.Add = add
+func (x *MyStructField30PatchBuilder) Add(value map[string]map[string]int32) *MyStructField30PatchBuilder {
+    x.obj.Add = value
     return x
 }
 
-func (x *MyStructField30PatchBuilder) Patch(patch map[string]*MyStructField30Patch1) *MyStructField30PatchBuilder {
-    x.obj.Patch = patch
+func (x *MyStructField30PatchBuilder) Patch(value map[string]*MyStructField30Patch1) *MyStructField30PatchBuilder {
+    x.obj.Patch = value
     return x
 }
 
-func (x *MyStructField30PatchBuilder) Remove(remove []string) *MyStructField30PatchBuilder {
-    x.obj.Remove = remove
+func (x *MyStructField30PatchBuilder) Remove(value []string) *MyStructField30PatchBuilder {
+    x.obj.Remove = value
     return x
 }
 
-func (x *MyStructField30PatchBuilder) Put(put map[string]map[string]int32) *MyStructField30PatchBuilder {
-    x.obj.Put = put
+func (x *MyStructField30PatchBuilder) Put(value map[string]map[string]int32) *MyStructField30PatchBuilder {
+    x.obj.Put = value
     return x
 }
 
@@ -11419,38 +11419,38 @@ func (x *MyStructField30Patch1) GetPut() map[string]int32 {
     return x.Put
 }
 
-func (x *MyStructField30Patch1) SetAssign(assign map[string]int32) *MyStructField30Patch1 {
-    x.Assign = assign
+func (x *MyStructField30Patch1) SetAssign(value map[string]int32) *MyStructField30Patch1 {
+    x.Assign = value
     return x
 }
 
-func (x *MyStructField30Patch1) SetClear(clear bool) *MyStructField30Patch1 {
-    x.Clear = clear
+func (x *MyStructField30Patch1) SetClear(value bool) *MyStructField30Patch1 {
+    x.Clear = value
     return x
 }
 
-func (x *MyStructField30Patch1) SetPatchPrior(patchPrior map[string]*patch.I32Patch) *MyStructField30Patch1 {
-    x.PatchPrior = patchPrior
+func (x *MyStructField30Patch1) SetPatchPrior(value map[string]*patch.I32Patch) *MyStructField30Patch1 {
+    x.PatchPrior = value
     return x
 }
 
-func (x *MyStructField30Patch1) SetAdd(add map[string]int32) *MyStructField30Patch1 {
-    x.Add = add
+func (x *MyStructField30Patch1) SetAdd(value map[string]int32) *MyStructField30Patch1 {
+    x.Add = value
     return x
 }
 
-func (x *MyStructField30Patch1) SetPatch(patch map[string]*patch.I32Patch) *MyStructField30Patch1 {
-    x.Patch = patch
+func (x *MyStructField30Patch1) SetPatch(value map[string]*patch.I32Patch) *MyStructField30Patch1 {
+    x.Patch = value
     return x
 }
 
-func (x *MyStructField30Patch1) SetRemove(remove []string) *MyStructField30Patch1 {
-    x.Remove = remove
+func (x *MyStructField30Patch1) SetRemove(value []string) *MyStructField30Patch1 {
+    x.Remove = value
     return x
 }
 
-func (x *MyStructField30Patch1) SetPut(put map[string]int32) *MyStructField30Patch1 {
-    x.Put = put
+func (x *MyStructField30Patch1) SetPut(value map[string]int32) *MyStructField30Patch1 {
+    x.Put = value
     return x
 }
 
@@ -11958,38 +11958,38 @@ func NewMyStructField30Patch1Builder() *MyStructField30Patch1Builder {
     }
 }
 
-func (x *MyStructField30Patch1Builder) Assign(assign map[string]int32) *MyStructField30Patch1Builder {
-    x.obj.Assign = assign
+func (x *MyStructField30Patch1Builder) Assign(value map[string]int32) *MyStructField30Patch1Builder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyStructField30Patch1Builder) Clear(clear bool) *MyStructField30Patch1Builder {
-    x.obj.Clear = clear
+func (x *MyStructField30Patch1Builder) Clear(value bool) *MyStructField30Patch1Builder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *MyStructField30Patch1Builder) PatchPrior(patchPrior map[string]*patch.I32Patch) *MyStructField30Patch1Builder {
-    x.obj.PatchPrior = patchPrior
+func (x *MyStructField30Patch1Builder) PatchPrior(value map[string]*patch.I32Patch) *MyStructField30Patch1Builder {
+    x.obj.PatchPrior = value
     return x
 }
 
-func (x *MyStructField30Patch1Builder) Add(add map[string]int32) *MyStructField30Patch1Builder {
-    x.obj.Add = add
+func (x *MyStructField30Patch1Builder) Add(value map[string]int32) *MyStructField30Patch1Builder {
+    x.obj.Add = value
     return x
 }
 
-func (x *MyStructField30Patch1Builder) Patch(patch map[string]*patch.I32Patch) *MyStructField30Patch1Builder {
-    x.obj.Patch = patch
+func (x *MyStructField30Patch1Builder) Patch(value map[string]*patch.I32Patch) *MyStructField30Patch1Builder {
+    x.obj.Patch = value
     return x
 }
 
-func (x *MyStructField30Patch1Builder) Remove(remove []string) *MyStructField30Patch1Builder {
-    x.obj.Remove = remove
+func (x *MyStructField30Patch1Builder) Remove(value []string) *MyStructField30Patch1Builder {
+    x.obj.Remove = value
     return x
 }
 
-func (x *MyStructField30Patch1Builder) Put(put map[string]int32) *MyStructField30Patch1Builder {
-    x.obj.Put = put
+func (x *MyStructField30Patch1Builder) Put(value map[string]int32) *MyStructField30Patch1Builder {
+    x.obj.Put = value
     return x
 }
 
@@ -12261,153 +12261,153 @@ func (x *MyStructFieldPatch) GetBoolVal() *patch.BoolPatch {
     return x.BoolVal
 }
 
-func (x *MyStructFieldPatch) SetMapMap(mapMap MyStructField30Patch) *MyStructFieldPatch {
-    x.MapMap = &mapMap
+func (x *MyStructFieldPatch) SetMapMap(value MyStructField30Patch) *MyStructFieldPatch {
+    x.MapMap = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetListMap(listMap MyStructField29Patch) *MyStructFieldPatch {
-    x.ListMap = &listMap
+func (x *MyStructFieldPatch) SetListMap(value MyStructField29Patch) *MyStructFieldPatch {
+    x.ListMap = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptMapVal(optMapVal MyStructField28Patch) *MyStructFieldPatch {
-    x.OptMapVal = &optMapVal
+func (x *MyStructFieldPatch) SetOptMapVal(value MyStructField28Patch) *MyStructFieldPatch {
+    x.OptMapVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptSetVal(optSetVal MyStructField27Patch) *MyStructFieldPatch {
-    x.OptSetVal = &optSetVal
+func (x *MyStructFieldPatch) SetOptSetVal(value MyStructField27Patch) *MyStructFieldPatch {
+    x.OptSetVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptListVal(optListVal MyStructField26Patch) *MyStructFieldPatch {
-    x.OptListVal = &optListVal
+func (x *MyStructFieldPatch) SetOptListVal(value MyStructField26Patch) *MyStructFieldPatch {
+    x.OptListVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptLateStructVal(optLateStructVal LateDefStructPatch) *MyStructFieldPatch {
-    x.OptLateStructVal = &optLateStructVal
+func (x *MyStructFieldPatch) SetOptLateStructVal(value LateDefStructPatch) *MyStructFieldPatch {
+    x.OptLateStructVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptStructVal(optStructVal MyDataPatch) *MyStructFieldPatch {
-    x.OptStructVal = &optStructVal
+func (x *MyStructFieldPatch) SetOptStructVal(value MyDataPatch) *MyStructFieldPatch {
+    x.OptStructVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptEnumVal(optEnumVal MyStructField23Patch) *MyStructFieldPatch {
-    x.OptEnumVal = &optEnumVal
+func (x *MyStructFieldPatch) SetOptEnumVal(value MyStructField23Patch) *MyStructFieldPatch {
+    x.OptEnumVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptBinaryVal(optBinaryVal patch.BinaryPatch) *MyStructFieldPatch {
-    x.OptBinaryVal = &optBinaryVal
+func (x *MyStructFieldPatch) SetOptBinaryVal(value patch.BinaryPatch) *MyStructFieldPatch {
+    x.OptBinaryVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptStringVal(optStringVal patch.StringPatch) *MyStructFieldPatch {
-    x.OptStringVal = &optStringVal
+func (x *MyStructFieldPatch) SetOptStringVal(value patch.StringPatch) *MyStructFieldPatch {
+    x.OptStringVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptDoubleVal(optDoubleVal patch.DoublePatch) *MyStructFieldPatch {
-    x.OptDoubleVal = &optDoubleVal
+func (x *MyStructFieldPatch) SetOptDoubleVal(value patch.DoublePatch) *MyStructFieldPatch {
+    x.OptDoubleVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptFloatVal(optFloatVal patch.FloatPatch) *MyStructFieldPatch {
-    x.OptFloatVal = &optFloatVal
+func (x *MyStructFieldPatch) SetOptFloatVal(value patch.FloatPatch) *MyStructFieldPatch {
+    x.OptFloatVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptI64Val(optI64Val patch.I64Patch) *MyStructFieldPatch {
-    x.OptI64Val = &optI64Val
+func (x *MyStructFieldPatch) SetOptI64Val(value patch.I64Patch) *MyStructFieldPatch {
+    x.OptI64Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptI32Val(optI32Val patch.I32Patch) *MyStructFieldPatch {
-    x.OptI32Val = &optI32Val
+func (x *MyStructFieldPatch) SetOptI32Val(value patch.I32Patch) *MyStructFieldPatch {
+    x.OptI32Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptI16Val(optI16Val patch.I16Patch) *MyStructFieldPatch {
-    x.OptI16Val = &optI16Val
+func (x *MyStructFieldPatch) SetOptI16Val(value patch.I16Patch) *MyStructFieldPatch {
+    x.OptI16Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptByteVal(optByteVal patch.BytePatch) *MyStructFieldPatch {
-    x.OptByteVal = &optByteVal
+func (x *MyStructFieldPatch) SetOptByteVal(value patch.BytePatch) *MyStructFieldPatch {
+    x.OptByteVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetOptBoolVal(optBoolVal patch.BoolPatch) *MyStructFieldPatch {
-    x.OptBoolVal = &optBoolVal
+func (x *MyStructFieldPatch) SetOptBoolVal(value patch.BoolPatch) *MyStructFieldPatch {
+    x.OptBoolVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetLateStructVal(lateStructVal LateDefStructPatch) *MyStructFieldPatch {
-    x.LateStructVal = &lateStructVal
+func (x *MyStructFieldPatch) SetLateStructVal(value LateDefStructPatch) *MyStructFieldPatch {
+    x.LateStructVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetUnionVal(unionVal MyUnionPatch) *MyStructFieldPatch {
-    x.UnionVal = &unionVal
+func (x *MyStructFieldPatch) SetUnionVal(value MyUnionPatch) *MyStructFieldPatch {
+    x.UnionVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetStructVal(structVal MyDataPatch) *MyStructFieldPatch {
-    x.StructVal = &structVal
+func (x *MyStructFieldPatch) SetStructVal(value MyDataPatch) *MyStructFieldPatch {
+    x.StructVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetEnumVal(enumVal MyStructField10Patch) *MyStructFieldPatch {
-    x.EnumVal = &enumVal
+func (x *MyStructFieldPatch) SetEnumVal(value MyStructField10Patch) *MyStructFieldPatch {
+    x.EnumVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetBinaryVal(binaryVal patch.BinaryPatch) *MyStructFieldPatch {
-    x.BinaryVal = &binaryVal
+func (x *MyStructFieldPatch) SetBinaryVal(value patch.BinaryPatch) *MyStructFieldPatch {
+    x.BinaryVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetStringVal(stringVal patch.StringPatch) *MyStructFieldPatch {
-    x.StringVal = &stringVal
+func (x *MyStructFieldPatch) SetStringVal(value patch.StringPatch) *MyStructFieldPatch {
+    x.StringVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetDoubleVal(doubleVal patch.DoublePatch) *MyStructFieldPatch {
-    x.DoubleVal = &doubleVal
+func (x *MyStructFieldPatch) SetDoubleVal(value patch.DoublePatch) *MyStructFieldPatch {
+    x.DoubleVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetFloatVal(floatVal patch.FloatPatch) *MyStructFieldPatch {
-    x.FloatVal = &floatVal
+func (x *MyStructFieldPatch) SetFloatVal(value patch.FloatPatch) *MyStructFieldPatch {
+    x.FloatVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetI64Val(i64Val patch.I64Patch) *MyStructFieldPatch {
-    x.I64Val = &i64Val
+func (x *MyStructFieldPatch) SetI64Val(value patch.I64Patch) *MyStructFieldPatch {
+    x.I64Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetI32Val(i32Val patch.I32Patch) *MyStructFieldPatch {
-    x.I32Val = &i32Val
+func (x *MyStructFieldPatch) SetI32Val(value patch.I32Patch) *MyStructFieldPatch {
+    x.I32Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetI16Val(i16Val patch.I16Patch) *MyStructFieldPatch {
-    x.I16Val = &i16Val
+func (x *MyStructFieldPatch) SetI16Val(value patch.I16Patch) *MyStructFieldPatch {
+    x.I16Val = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetByteVal(byteVal patch.BytePatch) *MyStructFieldPatch {
-    x.ByteVal = &byteVal
+func (x *MyStructFieldPatch) SetByteVal(value patch.BytePatch) *MyStructFieldPatch {
+    x.ByteVal = &value
     return x
 }
 
-func (x *MyStructFieldPatch) SetBoolVal(boolVal patch.BoolPatch) *MyStructFieldPatch {
-    x.BoolVal = &boolVal
+func (x *MyStructFieldPatch) SetBoolVal(value patch.BoolPatch) *MyStructFieldPatch {
+    x.BoolVal = &value
     return x
 }
 
@@ -13473,153 +13473,153 @@ func NewMyStructFieldPatchBuilder() *MyStructFieldPatchBuilder {
     }
 }
 
-func (x *MyStructFieldPatchBuilder) MapMap(mapMap *MyStructField30Patch) *MyStructFieldPatchBuilder {
-    x.obj.MapMap = mapMap
+func (x *MyStructFieldPatchBuilder) MapMap(value *MyStructField30Patch) *MyStructFieldPatchBuilder {
+    x.obj.MapMap = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) ListMap(listMap *MyStructField29Patch) *MyStructFieldPatchBuilder {
-    x.obj.ListMap = listMap
+func (x *MyStructFieldPatchBuilder) ListMap(value *MyStructField29Patch) *MyStructFieldPatchBuilder {
+    x.obj.ListMap = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptMapVal(optMapVal *MyStructField28Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptMapVal = optMapVal
+func (x *MyStructFieldPatchBuilder) OptMapVal(value *MyStructField28Patch) *MyStructFieldPatchBuilder {
+    x.obj.OptMapVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptSetVal(optSetVal *MyStructField27Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptSetVal = optSetVal
+func (x *MyStructFieldPatchBuilder) OptSetVal(value *MyStructField27Patch) *MyStructFieldPatchBuilder {
+    x.obj.OptSetVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptListVal(optListVal *MyStructField26Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptListVal = optListVal
+func (x *MyStructFieldPatchBuilder) OptListVal(value *MyStructField26Patch) *MyStructFieldPatchBuilder {
+    x.obj.OptListVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptLateStructVal(optLateStructVal *LateDefStructPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptLateStructVal = optLateStructVal
+func (x *MyStructFieldPatchBuilder) OptLateStructVal(value *LateDefStructPatch) *MyStructFieldPatchBuilder {
+    x.obj.OptLateStructVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptStructVal(optStructVal *MyDataPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptStructVal = optStructVal
+func (x *MyStructFieldPatchBuilder) OptStructVal(value *MyDataPatch) *MyStructFieldPatchBuilder {
+    x.obj.OptStructVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptEnumVal(optEnumVal *MyStructField23Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptEnumVal = optEnumVal
+func (x *MyStructFieldPatchBuilder) OptEnumVal(value *MyStructField23Patch) *MyStructFieldPatchBuilder {
+    x.obj.OptEnumVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptBinaryVal(optBinaryVal *patch.BinaryPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptBinaryVal = optBinaryVal
+func (x *MyStructFieldPatchBuilder) OptBinaryVal(value *patch.BinaryPatch) *MyStructFieldPatchBuilder {
+    x.obj.OptBinaryVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptStringVal(optStringVal *patch.StringPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptStringVal = optStringVal
+func (x *MyStructFieldPatchBuilder) OptStringVal(value *patch.StringPatch) *MyStructFieldPatchBuilder {
+    x.obj.OptStringVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptDoubleVal(optDoubleVal *patch.DoublePatch) *MyStructFieldPatchBuilder {
-    x.obj.OptDoubleVal = optDoubleVal
+func (x *MyStructFieldPatchBuilder) OptDoubleVal(value *patch.DoublePatch) *MyStructFieldPatchBuilder {
+    x.obj.OptDoubleVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptFloatVal(optFloatVal *patch.FloatPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptFloatVal = optFloatVal
+func (x *MyStructFieldPatchBuilder) OptFloatVal(value *patch.FloatPatch) *MyStructFieldPatchBuilder {
+    x.obj.OptFloatVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptI64Val(optI64Val *patch.I64Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptI64Val = optI64Val
+func (x *MyStructFieldPatchBuilder) OptI64Val(value *patch.I64Patch) *MyStructFieldPatchBuilder {
+    x.obj.OptI64Val = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptI32Val(optI32Val *patch.I32Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptI32Val = optI32Val
+func (x *MyStructFieldPatchBuilder) OptI32Val(value *patch.I32Patch) *MyStructFieldPatchBuilder {
+    x.obj.OptI32Val = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptI16Val(optI16Val *patch.I16Patch) *MyStructFieldPatchBuilder {
-    x.obj.OptI16Val = optI16Val
+func (x *MyStructFieldPatchBuilder) OptI16Val(value *patch.I16Patch) *MyStructFieldPatchBuilder {
+    x.obj.OptI16Val = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptByteVal(optByteVal *patch.BytePatch) *MyStructFieldPatchBuilder {
-    x.obj.OptByteVal = optByteVal
+func (x *MyStructFieldPatchBuilder) OptByteVal(value *patch.BytePatch) *MyStructFieldPatchBuilder {
+    x.obj.OptByteVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) OptBoolVal(optBoolVal *patch.BoolPatch) *MyStructFieldPatchBuilder {
-    x.obj.OptBoolVal = optBoolVal
+func (x *MyStructFieldPatchBuilder) OptBoolVal(value *patch.BoolPatch) *MyStructFieldPatchBuilder {
+    x.obj.OptBoolVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) LateStructVal(lateStructVal *LateDefStructPatch) *MyStructFieldPatchBuilder {
-    x.obj.LateStructVal = lateStructVal
+func (x *MyStructFieldPatchBuilder) LateStructVal(value *LateDefStructPatch) *MyStructFieldPatchBuilder {
+    x.obj.LateStructVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) UnionVal(unionVal *MyUnionPatch) *MyStructFieldPatchBuilder {
-    x.obj.UnionVal = unionVal
+func (x *MyStructFieldPatchBuilder) UnionVal(value *MyUnionPatch) *MyStructFieldPatchBuilder {
+    x.obj.UnionVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) StructVal(structVal *MyDataPatch) *MyStructFieldPatchBuilder {
-    x.obj.StructVal = structVal
+func (x *MyStructFieldPatchBuilder) StructVal(value *MyDataPatch) *MyStructFieldPatchBuilder {
+    x.obj.StructVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) EnumVal(enumVal *MyStructField10Patch) *MyStructFieldPatchBuilder {
-    x.obj.EnumVal = enumVal
+func (x *MyStructFieldPatchBuilder) EnumVal(value *MyStructField10Patch) *MyStructFieldPatchBuilder {
+    x.obj.EnumVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) BinaryVal(binaryVal *patch.BinaryPatch) *MyStructFieldPatchBuilder {
-    x.obj.BinaryVal = binaryVal
+func (x *MyStructFieldPatchBuilder) BinaryVal(value *patch.BinaryPatch) *MyStructFieldPatchBuilder {
+    x.obj.BinaryVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) StringVal(stringVal *patch.StringPatch) *MyStructFieldPatchBuilder {
-    x.obj.StringVal = stringVal
+func (x *MyStructFieldPatchBuilder) StringVal(value *patch.StringPatch) *MyStructFieldPatchBuilder {
+    x.obj.StringVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) DoubleVal(doubleVal *patch.DoublePatch) *MyStructFieldPatchBuilder {
-    x.obj.DoubleVal = doubleVal
+func (x *MyStructFieldPatchBuilder) DoubleVal(value *patch.DoublePatch) *MyStructFieldPatchBuilder {
+    x.obj.DoubleVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) FloatVal(floatVal *patch.FloatPatch) *MyStructFieldPatchBuilder {
-    x.obj.FloatVal = floatVal
+func (x *MyStructFieldPatchBuilder) FloatVal(value *patch.FloatPatch) *MyStructFieldPatchBuilder {
+    x.obj.FloatVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) I64Val(i64Val *patch.I64Patch) *MyStructFieldPatchBuilder {
-    x.obj.I64Val = i64Val
+func (x *MyStructFieldPatchBuilder) I64Val(value *patch.I64Patch) *MyStructFieldPatchBuilder {
+    x.obj.I64Val = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) I32Val(i32Val *patch.I32Patch) *MyStructFieldPatchBuilder {
-    x.obj.I32Val = i32Val
+func (x *MyStructFieldPatchBuilder) I32Val(value *patch.I32Patch) *MyStructFieldPatchBuilder {
+    x.obj.I32Val = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) I16Val(i16Val *patch.I16Patch) *MyStructFieldPatchBuilder {
-    x.obj.I16Val = i16Val
+func (x *MyStructFieldPatchBuilder) I16Val(value *patch.I16Patch) *MyStructFieldPatchBuilder {
+    x.obj.I16Val = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) ByteVal(byteVal *patch.BytePatch) *MyStructFieldPatchBuilder {
-    x.obj.ByteVal = byteVal
+func (x *MyStructFieldPatchBuilder) ByteVal(value *patch.BytePatch) *MyStructFieldPatchBuilder {
+    x.obj.ByteVal = value
     return x
 }
 
-func (x *MyStructFieldPatchBuilder) BoolVal(boolVal *patch.BoolPatch) *MyStructFieldPatchBuilder {
-    x.obj.BoolVal = boolVal
+func (x *MyStructFieldPatchBuilder) BoolVal(value *patch.BoolPatch) *MyStructFieldPatchBuilder {
+    x.obj.BoolVal = value
     return x
 }
 
@@ -13950,28 +13950,28 @@ func (x *MyStructPatch) GetPatch() *MyStructFieldPatch {
     return x.Patch
 }
 
-func (x *MyStructPatch) SetAssign(assign MyStruct) *MyStructPatch {
-    x.Assign = &assign
+func (x *MyStructPatch) SetAssign(value MyStruct) *MyStructPatch {
+    x.Assign = &value
     return x
 }
 
-func (x *MyStructPatch) SetClear(clear bool) *MyStructPatch {
-    x.Clear = clear
+func (x *MyStructPatch) SetClear(value bool) *MyStructPatch {
+    x.Clear = value
     return x
 }
 
-func (x *MyStructPatch) SetPatchPrior(patchPrior MyStructFieldPatch) *MyStructPatch {
-    x.PatchPrior = &patchPrior
+func (x *MyStructPatch) SetPatchPrior(value MyStructFieldPatch) *MyStructPatch {
+    x.PatchPrior = &value
     return x
 }
 
-func (x *MyStructPatch) SetEnsure(ensure MyStructEnsureStruct) *MyStructPatch {
-    x.Ensure = &ensure
+func (x *MyStructPatch) SetEnsure(value MyStructEnsureStruct) *MyStructPatch {
+    x.Ensure = &value
     return x
 }
 
-func (x *MyStructPatch) SetPatch(patch MyStructFieldPatch) *MyStructPatch {
-    x.Patch = &patch
+func (x *MyStructPatch) SetPatch(value MyStructFieldPatch) *MyStructPatch {
+    x.Patch = &value
     return x
 }
 
@@ -14154,28 +14154,28 @@ func NewMyStructPatchBuilder() *MyStructPatchBuilder {
     }
 }
 
-func (x *MyStructPatchBuilder) Assign(assign *MyStruct) *MyStructPatchBuilder {
-    x.obj.Assign = assign
+func (x *MyStructPatchBuilder) Assign(value *MyStruct) *MyStructPatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *MyStructPatchBuilder) Clear(clear bool) *MyStructPatchBuilder {
-    x.obj.Clear = clear
+func (x *MyStructPatchBuilder) Clear(value bool) *MyStructPatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *MyStructPatchBuilder) PatchPrior(patchPrior *MyStructFieldPatch) *MyStructPatchBuilder {
-    x.obj.PatchPrior = patchPrior
+func (x *MyStructPatchBuilder) PatchPrior(value *MyStructFieldPatch) *MyStructPatchBuilder {
+    x.obj.PatchPrior = value
     return x
 }
 
-func (x *MyStructPatchBuilder) Ensure(ensure *MyStructEnsureStruct) *MyStructPatchBuilder {
-    x.obj.Ensure = ensure
+func (x *MyStructPatchBuilder) Ensure(value *MyStructEnsureStruct) *MyStructPatchBuilder {
+    x.obj.Ensure = value
     return x
 }
 
-func (x *MyStructPatchBuilder) Patch(patch *MyStructFieldPatch) *MyStructPatchBuilder {
-    x.obj.Patch = patch
+func (x *MyStructPatchBuilder) Patch(value *MyStructFieldPatch) *MyStructPatchBuilder {
+    x.obj.Patch = value
     return x
 }
 
@@ -14454,28 +14454,28 @@ func (x *LateDefStructPatch) GetPatch() *LateDefStructFieldPatch {
     return x.Patch
 }
 
-func (x *LateDefStructPatch) SetAssign(assign LateDefStruct) *LateDefStructPatch {
-    x.Assign = &assign
+func (x *LateDefStructPatch) SetAssign(value LateDefStruct) *LateDefStructPatch {
+    x.Assign = &value
     return x
 }
 
-func (x *LateDefStructPatch) SetClear(clear bool) *LateDefStructPatch {
-    x.Clear = clear
+func (x *LateDefStructPatch) SetClear(value bool) *LateDefStructPatch {
+    x.Clear = value
     return x
 }
 
-func (x *LateDefStructPatch) SetPatchPrior(patchPrior LateDefStructFieldPatch) *LateDefStructPatch {
-    x.PatchPrior = &patchPrior
+func (x *LateDefStructPatch) SetPatchPrior(value LateDefStructFieldPatch) *LateDefStructPatch {
+    x.PatchPrior = &value
     return x
 }
 
-func (x *LateDefStructPatch) SetEnsure(ensure LateDefStructEnsureStruct) *LateDefStructPatch {
-    x.Ensure = &ensure
+func (x *LateDefStructPatch) SetEnsure(value LateDefStructEnsureStruct) *LateDefStructPatch {
+    x.Ensure = &value
     return x
 }
 
-func (x *LateDefStructPatch) SetPatch(patch LateDefStructFieldPatch) *LateDefStructPatch {
-    x.Patch = &patch
+func (x *LateDefStructPatch) SetPatch(value LateDefStructFieldPatch) *LateDefStructPatch {
+    x.Patch = &value
     return x
 }
 
@@ -14658,28 +14658,28 @@ func NewLateDefStructPatchBuilder() *LateDefStructPatchBuilder {
     }
 }
 
-func (x *LateDefStructPatchBuilder) Assign(assign *LateDefStruct) *LateDefStructPatchBuilder {
-    x.obj.Assign = assign
+func (x *LateDefStructPatchBuilder) Assign(value *LateDefStruct) *LateDefStructPatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *LateDefStructPatchBuilder) Clear(clear bool) *LateDefStructPatchBuilder {
-    x.obj.Clear = clear
+func (x *LateDefStructPatchBuilder) Clear(value bool) *LateDefStructPatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *LateDefStructPatchBuilder) PatchPrior(patchPrior *LateDefStructFieldPatch) *LateDefStructPatchBuilder {
-    x.obj.PatchPrior = patchPrior
+func (x *LateDefStructPatchBuilder) PatchPrior(value *LateDefStructFieldPatch) *LateDefStructPatchBuilder {
+    x.obj.PatchPrior = value
     return x
 }
 
-func (x *LateDefStructPatchBuilder) Ensure(ensure *LateDefStructEnsureStruct) *LateDefStructPatchBuilder {
-    x.obj.Ensure = ensure
+func (x *LateDefStructPatchBuilder) Ensure(value *LateDefStructEnsureStruct) *LateDefStructPatchBuilder {
+    x.obj.Ensure = value
     return x
 }
 
-func (x *LateDefStructPatchBuilder) Patch(patch *LateDefStructFieldPatch) *LateDefStructPatchBuilder {
-    x.obj.Patch = patch
+func (x *LateDefStructPatchBuilder) Patch(value *LateDefStructFieldPatch) *LateDefStructPatchBuilder {
+    x.obj.Patch = value
     return x
 }
 
@@ -14790,8 +14790,8 @@ func (x *RecursiveEnsureStruct) GetNodes() map[string]*Recursive {
     return x.Nodes
 }
 
-func (x *RecursiveEnsureStruct) SetNodes(nodes map[string]*Recursive) *RecursiveEnsureStruct {
-    x.Nodes = nodes
+func (x *RecursiveEnsureStruct) SetNodes(value map[string]*Recursive) *RecursiveEnsureStruct {
+    x.Nodes = value
     return x
 }
 
@@ -14888,8 +14888,8 @@ func NewRecursiveEnsureStructBuilder() *RecursiveEnsureStructBuilder {
     }
 }
 
-func (x *RecursiveEnsureStructBuilder) Nodes(nodes map[string]*Recursive) *RecursiveEnsureStructBuilder {
-    x.obj.Nodes = nodes
+func (x *RecursiveEnsureStructBuilder) Nodes(value map[string]*Recursive) *RecursiveEnsureStructBuilder {
+    x.obj.Nodes = value
     return x
 }
 
@@ -14973,13 +14973,13 @@ func (x *RecursiveField1Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *RecursiveField1Patch) SetAssign(assign map[string]*Recursive) *RecursiveField1Patch {
-    x.Assign = assign
+func (x *RecursiveField1Patch) SetAssign(value map[string]*Recursive) *RecursiveField1Patch {
+    x.Assign = value
     return x
 }
 
-func (x *RecursiveField1Patch) SetClear(clear bool) *RecursiveField1Patch {
-    x.Clear = clear
+func (x *RecursiveField1Patch) SetClear(value bool) *RecursiveField1Patch {
+    x.Clear = value
     return x
 }
 
@@ -15103,13 +15103,13 @@ func NewRecursiveField1PatchBuilder() *RecursiveField1PatchBuilder {
     }
 }
 
-func (x *RecursiveField1PatchBuilder) Assign(assign map[string]*Recursive) *RecursiveField1PatchBuilder {
-    x.obj.Assign = assign
+func (x *RecursiveField1PatchBuilder) Assign(value map[string]*Recursive) *RecursiveField1PatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *RecursiveField1PatchBuilder) Clear(clear bool) *RecursiveField1PatchBuilder {
-    x.obj.Clear = clear
+func (x *RecursiveField1PatchBuilder) Clear(value bool) *RecursiveField1PatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
@@ -15196,8 +15196,8 @@ func (x *RecursiveFieldPatch) GetNodes() *RecursiveField1Patch {
     return x.Nodes
 }
 
-func (x *RecursiveFieldPatch) SetNodes(nodes RecursiveField1Patch) *RecursiveFieldPatch {
-    x.Nodes = &nodes
+func (x *RecursiveFieldPatch) SetNodes(value RecursiveField1Patch) *RecursiveFieldPatch {
+    x.Nodes = &value
     return x
 }
 
@@ -15248,8 +15248,8 @@ func NewRecursiveFieldPatchBuilder() *RecursiveFieldPatchBuilder {
     }
 }
 
-func (x *RecursiveFieldPatchBuilder) Nodes(nodes *RecursiveField1Patch) *RecursiveFieldPatchBuilder {
-    x.obj.Nodes = nodes
+func (x *RecursiveFieldPatchBuilder) Nodes(value *RecursiveField1Patch) *RecursiveFieldPatchBuilder {
+    x.obj.Nodes = value
     return x
 }
 
@@ -15348,28 +15348,28 @@ func (x *RecursivePatch) GetPatch() *RecursiveFieldPatch {
     return x.Patch
 }
 
-func (x *RecursivePatch) SetAssign(assign Recursive) *RecursivePatch {
-    x.Assign = &assign
+func (x *RecursivePatch) SetAssign(value Recursive) *RecursivePatch {
+    x.Assign = &value
     return x
 }
 
-func (x *RecursivePatch) SetClear(clear bool) *RecursivePatch {
-    x.Clear = clear
+func (x *RecursivePatch) SetClear(value bool) *RecursivePatch {
+    x.Clear = value
     return x
 }
 
-func (x *RecursivePatch) SetPatchPrior(patchPrior RecursiveFieldPatch) *RecursivePatch {
-    x.PatchPrior = &patchPrior
+func (x *RecursivePatch) SetPatchPrior(value RecursiveFieldPatch) *RecursivePatch {
+    x.PatchPrior = &value
     return x
 }
 
-func (x *RecursivePatch) SetEnsure(ensure RecursiveEnsureStruct) *RecursivePatch {
-    x.Ensure = &ensure
+func (x *RecursivePatch) SetEnsure(value RecursiveEnsureStruct) *RecursivePatch {
+    x.Ensure = &value
     return x
 }
 
-func (x *RecursivePatch) SetPatch(patch RecursiveFieldPatch) *RecursivePatch {
-    x.Patch = &patch
+func (x *RecursivePatch) SetPatch(value RecursiveFieldPatch) *RecursivePatch {
+    x.Patch = &value
     return x
 }
 
@@ -15552,28 +15552,28 @@ func NewRecursivePatchBuilder() *RecursivePatchBuilder {
     }
 }
 
-func (x *RecursivePatchBuilder) Assign(assign *Recursive) *RecursivePatchBuilder {
-    x.obj.Assign = assign
+func (x *RecursivePatchBuilder) Assign(value *Recursive) *RecursivePatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *RecursivePatchBuilder) Clear(clear bool) *RecursivePatchBuilder {
-    x.obj.Clear = clear
+func (x *RecursivePatchBuilder) Clear(value bool) *RecursivePatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *RecursivePatchBuilder) PatchPrior(patchPrior *RecursiveFieldPatch) *RecursivePatchBuilder {
-    x.obj.PatchPrior = patchPrior
+func (x *RecursivePatchBuilder) PatchPrior(value *RecursiveFieldPatch) *RecursivePatchBuilder {
+    x.obj.PatchPrior = value
     return x
 }
 
-func (x *RecursivePatchBuilder) Ensure(ensure *RecursiveEnsureStruct) *RecursivePatchBuilder {
-    x.obj.Ensure = ensure
+func (x *RecursivePatchBuilder) Ensure(value *RecursiveEnsureStruct) *RecursivePatchBuilder {
+    x.obj.Ensure = value
     return x
 }
 
-func (x *RecursivePatchBuilder) Patch(patch *RecursiveFieldPatch) *RecursivePatchBuilder {
-    x.obj.Patch = patch
+func (x *RecursivePatchBuilder) Patch(value *RecursiveFieldPatch) *RecursivePatchBuilder {
+    x.obj.Patch = value
     return x
 }
 
@@ -15684,8 +15684,8 @@ func (x *BarEnsureStruct) GetLoop() *Loop {
     return x.Loop
 }
 
-func (x *BarEnsureStruct) SetLoop(loop Loop) *BarEnsureStruct {
-    x.Loop = &loop
+func (x *BarEnsureStruct) SetLoop(value Loop) *BarEnsureStruct {
+    x.Loop = &value
     return x
 }
 
@@ -15736,8 +15736,8 @@ func NewBarEnsureStructBuilder() *BarEnsureStructBuilder {
     }
 }
 
-func (x *BarEnsureStructBuilder) Loop(loop *Loop) *BarEnsureStructBuilder {
-    x.obj.Loop = loop
+func (x *BarEnsureStructBuilder) Loop(value *Loop) *BarEnsureStructBuilder {
+    x.obj.Loop = value
     return x
 }
 
@@ -15816,8 +15816,8 @@ func (x *BarFieldPatch) GetLoop() *LoopPatch {
     return x.Loop
 }
 
-func (x *BarFieldPatch) SetLoop(loop LoopPatch) *BarFieldPatch {
-    x.Loop = &loop
+func (x *BarFieldPatch) SetLoop(value LoopPatch) *BarFieldPatch {
+    x.Loop = &value
     return x
 }
 
@@ -15868,8 +15868,8 @@ func NewBarFieldPatchBuilder() *BarFieldPatchBuilder {
     }
 }
 
-func (x *BarFieldPatchBuilder) Loop(loop *LoopPatch) *BarFieldPatchBuilder {
-    x.obj.Loop = loop
+func (x *BarFieldPatchBuilder) Loop(value *LoopPatch) *BarFieldPatchBuilder {
+    x.obj.Loop = value
     return x
 }
 
@@ -15968,28 +15968,28 @@ func (x *BarPatch) GetPatch() *BarFieldPatch {
     return x.Patch
 }
 
-func (x *BarPatch) SetAssign(assign Bar) *BarPatch {
-    x.Assign = &assign
+func (x *BarPatch) SetAssign(value Bar) *BarPatch {
+    x.Assign = &value
     return x
 }
 
-func (x *BarPatch) SetClear(clear bool) *BarPatch {
-    x.Clear = clear
+func (x *BarPatch) SetClear(value bool) *BarPatch {
+    x.Clear = value
     return x
 }
 
-func (x *BarPatch) SetPatchPrior(patchPrior BarFieldPatch) *BarPatch {
-    x.PatchPrior = &patchPrior
+func (x *BarPatch) SetPatchPrior(value BarFieldPatch) *BarPatch {
+    x.PatchPrior = &value
     return x
 }
 
-func (x *BarPatch) SetEnsure(ensure BarEnsureStruct) *BarPatch {
-    x.Ensure = &ensure
+func (x *BarPatch) SetEnsure(value BarEnsureStruct) *BarPatch {
+    x.Ensure = &value
     return x
 }
 
-func (x *BarPatch) SetPatch(patch BarFieldPatch) *BarPatch {
-    x.Patch = &patch
+func (x *BarPatch) SetPatch(value BarFieldPatch) *BarPatch {
+    x.Patch = &value
     return x
 }
 
@@ -16172,28 +16172,28 @@ func NewBarPatchBuilder() *BarPatchBuilder {
     }
 }
 
-func (x *BarPatchBuilder) Assign(assign *Bar) *BarPatchBuilder {
-    x.obj.Assign = assign
+func (x *BarPatchBuilder) Assign(value *Bar) *BarPatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *BarPatchBuilder) Clear(clear bool) *BarPatchBuilder {
-    x.obj.Clear = clear
+func (x *BarPatchBuilder) Clear(value bool) *BarPatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *BarPatchBuilder) PatchPrior(patchPrior *BarFieldPatch) *BarPatchBuilder {
-    x.obj.PatchPrior = patchPrior
+func (x *BarPatchBuilder) PatchPrior(value *BarFieldPatch) *BarPatchBuilder {
+    x.obj.PatchPrior = value
     return x
 }
 
-func (x *BarPatchBuilder) Ensure(ensure *BarEnsureStruct) *BarPatchBuilder {
-    x.obj.Ensure = ensure
+func (x *BarPatchBuilder) Ensure(value *BarEnsureStruct) *BarPatchBuilder {
+    x.obj.Ensure = value
     return x
 }
 
-func (x *BarPatchBuilder) Patch(patch *BarFieldPatch) *BarPatchBuilder {
-    x.obj.Patch = patch
+func (x *BarPatchBuilder) Patch(value *BarFieldPatch) *BarPatchBuilder {
+    x.obj.Patch = value
     return x
 }
 
@@ -16304,8 +16304,8 @@ func (x *LoopEnsureStruct) GetBar() *Bar {
     return x.Bar
 }
 
-func (x *LoopEnsureStruct) SetBar(bar Bar) *LoopEnsureStruct {
-    x.Bar = &bar
+func (x *LoopEnsureStruct) SetBar(value Bar) *LoopEnsureStruct {
+    x.Bar = &value
     return x
 }
 
@@ -16356,8 +16356,8 @@ func NewLoopEnsureStructBuilder() *LoopEnsureStructBuilder {
     }
 }
 
-func (x *LoopEnsureStructBuilder) Bar(bar *Bar) *LoopEnsureStructBuilder {
-    x.obj.Bar = bar
+func (x *LoopEnsureStructBuilder) Bar(value *Bar) *LoopEnsureStructBuilder {
+    x.obj.Bar = value
     return x
 }
 
@@ -16436,8 +16436,8 @@ func (x *LoopFieldPatch) GetBar() *BarPatch {
     return x.Bar
 }
 
-func (x *LoopFieldPatch) SetBar(bar BarPatch) *LoopFieldPatch {
-    x.Bar = &bar
+func (x *LoopFieldPatch) SetBar(value BarPatch) *LoopFieldPatch {
+    x.Bar = &value
     return x
 }
 
@@ -16488,8 +16488,8 @@ func NewLoopFieldPatchBuilder() *LoopFieldPatchBuilder {
     }
 }
 
-func (x *LoopFieldPatchBuilder) Bar(bar *BarPatch) *LoopFieldPatchBuilder {
-    x.obj.Bar = bar
+func (x *LoopFieldPatchBuilder) Bar(value *BarPatch) *LoopFieldPatchBuilder {
+    x.obj.Bar = value
     return x
 }
 
@@ -16573,13 +16573,13 @@ func (x *LoopPatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *LoopPatch) SetAssign(assign Loop) *LoopPatch {
-    x.Assign = &assign
+func (x *LoopPatch) SetAssign(value Loop) *LoopPatch {
+    x.Assign = &value
     return x
 }
 
-func (x *LoopPatch) SetClear(clear bool) *LoopPatch {
-    x.Clear = clear
+func (x *LoopPatch) SetClear(value bool) *LoopPatch {
+    x.Clear = value
     return x
 }
 
@@ -16657,13 +16657,13 @@ func NewLoopPatchBuilder() *LoopPatchBuilder {
     }
 }
 
-func (x *LoopPatchBuilder) Assign(assign *Loop) *LoopPatchBuilder {
-    x.obj.Assign = assign
+func (x *LoopPatchBuilder) Assign(value *Loop) *LoopPatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *LoopPatchBuilder) Clear(clear bool) *LoopPatchBuilder {
-    x.obj.Clear = clear
+func (x *LoopPatchBuilder) Clear(value bool) *LoopPatchBuilder {
+    x.obj.Clear = value
     return x
 }
 

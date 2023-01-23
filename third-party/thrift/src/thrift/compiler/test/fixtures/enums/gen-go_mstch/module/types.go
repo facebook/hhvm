@@ -594,23 +594,23 @@ func (x *SomeStruct) GetTags() []int32 {
     return x.Tags
 }
 
-func (x *SomeStruct) SetReasonable(reasonable Metasyntactic) *SomeStruct {
-    x.Reasonable = reasonable
+func (x *SomeStruct) SetReasonable(value Metasyntactic) *SomeStruct {
+    x.Reasonable = value
     return x
 }
 
-func (x *SomeStruct) SetFine(fine Metasyntactic) *SomeStruct {
-    x.Fine = fine
+func (x *SomeStruct) SetFine(value Metasyntactic) *SomeStruct {
+    x.Fine = value
     return x
 }
 
-func (x *SomeStruct) SetQuestionable(questionable Metasyntactic) *SomeStruct {
-    x.Questionable = questionable
+func (x *SomeStruct) SetQuestionable(value Metasyntactic) *SomeStruct {
+    x.Questionable = value
     return x
 }
 
-func (x *SomeStruct) SetTags(tags []int32) *SomeStruct {
-    x.Tags = tags
+func (x *SomeStruct) SetTags(value []int32) *SomeStruct {
+    x.Tags = value
     return x
 }
 
@@ -773,23 +773,23 @@ func NewSomeStructBuilder() *SomeStructBuilder {
     }
 }
 
-func (x *SomeStructBuilder) Reasonable(reasonable Metasyntactic) *SomeStructBuilder {
-    x.obj.Reasonable = reasonable
+func (x *SomeStructBuilder) Reasonable(value Metasyntactic) *SomeStructBuilder {
+    x.obj.Reasonable = value
     return x
 }
 
-func (x *SomeStructBuilder) Fine(fine Metasyntactic) *SomeStructBuilder {
-    x.obj.Fine = fine
+func (x *SomeStructBuilder) Fine(value Metasyntactic) *SomeStructBuilder {
+    x.obj.Fine = value
     return x
 }
 
-func (x *SomeStructBuilder) Questionable(questionable Metasyntactic) *SomeStructBuilder {
-    x.obj.Questionable = questionable
+func (x *SomeStructBuilder) Questionable(value Metasyntactic) *SomeStructBuilder {
+    x.obj.Questionable = value
     return x
 }
 
-func (x *SomeStructBuilder) Tags(tags []int32) *SomeStructBuilder {
-    x.obj.Tags = tags
+func (x *SomeStructBuilder) Tags(value []int32) *SomeStructBuilder {
+    x.obj.Tags = value
     return x
 }
 
@@ -919,23 +919,23 @@ func (x *MyStruct) GetMe1T2() MyEnum1 {
     return x.Me1T2
 }
 
-func (x *MyStruct) SetMe23(me23 MyEnum2) *MyStruct {
-    x.Me23 = me23
+func (x *MyStruct) SetMe23(value MyEnum2) *MyStruct {
+    x.Me23 = value
     return x
 }
 
-func (x *MyStruct) SetMe3N3(me3N3 MyEnum3) *MyStruct {
-    x.Me3N3 = me3N3
+func (x *MyStruct) SetMe3N3(value MyEnum3) *MyStruct {
+    x.Me3N3 = value
     return x
 }
 
-func (x *MyStruct) SetMe1T1(me1T1 MyEnum1) *MyStruct {
-    x.Me1T1 = me1T1
+func (x *MyStruct) SetMe1T1(value MyEnum1) *MyStruct {
+    x.Me1T1 = value
     return x
 }
 
-func (x *MyStruct) SetMe1T2(me1T2 MyEnum1) *MyStruct {
-    x.Me1T2 = me1T2
+func (x *MyStruct) SetMe1T2(value MyEnum1) *MyStruct {
+    x.Me1T2 = value
     return x
 }
 
@@ -1063,23 +1063,23 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) Me23(me23 MyEnum2) *MyStructBuilder {
-    x.obj.Me23 = me23
+func (x *MyStructBuilder) Me23(value MyEnum2) *MyStructBuilder {
+    x.obj.Me23 = value
     return x
 }
 
-func (x *MyStructBuilder) Me3N3(me3N3 MyEnum3) *MyStructBuilder {
-    x.obj.Me3N3 = me3N3
+func (x *MyStructBuilder) Me3N3(value MyEnum3) *MyStructBuilder {
+    x.obj.Me3N3 = value
     return x
 }
 
-func (x *MyStructBuilder) Me1T1(me1T1 MyEnum1) *MyStructBuilder {
-    x.obj.Me1T1 = me1T1
+func (x *MyStructBuilder) Me1T1(value MyEnum1) *MyStructBuilder {
+    x.obj.Me1T1 = value
     return x
 }
 
-func (x *MyStructBuilder) Me1T2(me1T2 MyEnum1) *MyStructBuilder {
-    x.obj.Me1T2 = me1T2
+func (x *MyStructBuilder) Me1T2(value MyEnum1) *MyStructBuilder {
+    x.obj.Me1T2 = value
     return x
 }
 

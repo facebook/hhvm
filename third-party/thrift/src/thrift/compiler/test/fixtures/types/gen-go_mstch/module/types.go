@@ -244,8 +244,8 @@ func (x *DecoratedStruct) GetField() string {
     return x.Field
 }
 
-func (x *DecoratedStruct) SetField(field string) *DecoratedStruct {
-    x.Field = field
+func (x *DecoratedStruct) SetField(value string) *DecoratedStruct {
+    x.Field = value
     return x
 }
 
@@ -288,8 +288,8 @@ func NewDecoratedStructBuilder() *DecoratedStructBuilder {
     }
 }
 
-func (x *DecoratedStructBuilder) Field(field string) *DecoratedStructBuilder {
-    x.obj.Field = field
+func (x *DecoratedStructBuilder) Field(value string) *DecoratedStructBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -403,43 +403,43 @@ func (x *ContainerStruct) GetFieldH() included.SomeMap {
     return x.FieldH
 }
 
-func (x *ContainerStruct) SetFieldA(fieldA []int32) *ContainerStruct {
-    x.FieldA = fieldA
+func (x *ContainerStruct) SetFieldA(value []int32) *ContainerStruct {
+    x.FieldA = value
     return x
 }
 
-func (x *ContainerStruct) SetFieldB(fieldB []int32) *ContainerStruct {
-    x.FieldB = fieldB
+func (x *ContainerStruct) SetFieldB(value []int32) *ContainerStruct {
+    x.FieldB = value
     return x
 }
 
-func (x *ContainerStruct) SetFieldC(fieldC []int32) *ContainerStruct {
-    x.FieldC = fieldC
+func (x *ContainerStruct) SetFieldC(value []int32) *ContainerStruct {
+    x.FieldC = value
     return x
 }
 
-func (x *ContainerStruct) SetFieldD(fieldD []int32) *ContainerStruct {
-    x.FieldD = fieldD
+func (x *ContainerStruct) SetFieldD(value []int32) *ContainerStruct {
+    x.FieldD = value
     return x
 }
 
-func (x *ContainerStruct) SetFieldE(fieldE []int32) *ContainerStruct {
-    x.FieldE = fieldE
+func (x *ContainerStruct) SetFieldE(value []int32) *ContainerStruct {
+    x.FieldE = value
     return x
 }
 
-func (x *ContainerStruct) SetFieldF(fieldF []int32) *ContainerStruct {
-    x.FieldF = fieldF
+func (x *ContainerStruct) SetFieldF(value []int32) *ContainerStruct {
+    x.FieldF = value
     return x
 }
 
-func (x *ContainerStruct) SetFieldG(fieldG map[int32]string) *ContainerStruct {
-    x.FieldG = fieldG
+func (x *ContainerStruct) SetFieldG(value map[int32]string) *ContainerStruct {
+    x.FieldG = value
     return x
 }
 
-func (x *ContainerStruct) SetFieldH(fieldH included.SomeMap) *ContainerStruct {
-    x.FieldH = fieldH
+func (x *ContainerStruct) SetFieldH(value included.SomeMap) *ContainerStruct {
+    x.FieldH = value
     return x
 }
 
@@ -993,43 +993,43 @@ func NewContainerStructBuilder() *ContainerStructBuilder {
     }
 }
 
-func (x *ContainerStructBuilder) FieldA(fieldA []int32) *ContainerStructBuilder {
-    x.obj.FieldA = fieldA
+func (x *ContainerStructBuilder) FieldA(value []int32) *ContainerStructBuilder {
+    x.obj.FieldA = value
     return x
 }
 
-func (x *ContainerStructBuilder) FieldB(fieldB []int32) *ContainerStructBuilder {
-    x.obj.FieldB = fieldB
+func (x *ContainerStructBuilder) FieldB(value []int32) *ContainerStructBuilder {
+    x.obj.FieldB = value
     return x
 }
 
-func (x *ContainerStructBuilder) FieldC(fieldC []int32) *ContainerStructBuilder {
-    x.obj.FieldC = fieldC
+func (x *ContainerStructBuilder) FieldC(value []int32) *ContainerStructBuilder {
+    x.obj.FieldC = value
     return x
 }
 
-func (x *ContainerStructBuilder) FieldD(fieldD []int32) *ContainerStructBuilder {
-    x.obj.FieldD = fieldD
+func (x *ContainerStructBuilder) FieldD(value []int32) *ContainerStructBuilder {
+    x.obj.FieldD = value
     return x
 }
 
-func (x *ContainerStructBuilder) FieldE(fieldE []int32) *ContainerStructBuilder {
-    x.obj.FieldE = fieldE
+func (x *ContainerStructBuilder) FieldE(value []int32) *ContainerStructBuilder {
+    x.obj.FieldE = value
     return x
 }
 
-func (x *ContainerStructBuilder) FieldF(fieldF []int32) *ContainerStructBuilder {
-    x.obj.FieldF = fieldF
+func (x *ContainerStructBuilder) FieldF(value []int32) *ContainerStructBuilder {
+    x.obj.FieldF = value
     return x
 }
 
-func (x *ContainerStructBuilder) FieldG(fieldG map[int32]string) *ContainerStructBuilder {
-    x.obj.FieldG = fieldG
+func (x *ContainerStructBuilder) FieldG(value map[int32]string) *ContainerStructBuilder {
+    x.obj.FieldG = value
     return x
 }
 
-func (x *ContainerStructBuilder) FieldH(fieldH included.SomeMap) *ContainerStructBuilder {
-    x.obj.FieldH = fieldH
+func (x *ContainerStructBuilder) FieldH(value included.SomeMap) *ContainerStructBuilder {
+    x.obj.FieldH = value
     return x
 }
 
@@ -1164,8 +1164,8 @@ func (x *CppTypeStruct) GetFieldA() []int32 {
     return x.FieldA
 }
 
-func (x *CppTypeStruct) SetFieldA(fieldA []int32) *CppTypeStruct {
-    x.FieldA = fieldA
+func (x *CppTypeStruct) SetFieldA(value []int32) *CppTypeStruct {
+    x.FieldA = value
     return x
 }
 
@@ -1244,8 +1244,8 @@ func NewCppTypeStructBuilder() *CppTypeStructBuilder {
     }
 }
 
-func (x *CppTypeStructBuilder) FieldA(fieldA []int32) *CppTypeStructBuilder {
-    x.obj.FieldA = fieldA
+func (x *CppTypeStructBuilder) FieldA(value []int32) *CppTypeStructBuilder {
+    x.obj.FieldA = value
     return x
 }
 
@@ -1324,8 +1324,8 @@ func (x *VirtualStruct) GetMyIntField() int64 {
     return x.MyIntField
 }
 
-func (x *VirtualStruct) SetMyIntField(myIntField int64) *VirtualStruct {
-    x.MyIntField = myIntField
+func (x *VirtualStruct) SetMyIntField(value int64) *VirtualStruct {
+    x.MyIntField = value
     return x
 }
 
@@ -1368,8 +1368,8 @@ func NewVirtualStructBuilder() *VirtualStructBuilder {
     }
 }
 
-func (x *VirtualStructBuilder) MyIntField(myIntField int64) *VirtualStructBuilder {
-    x.obj.MyIntField = myIntField
+func (x *VirtualStructBuilder) MyIntField(value int64) *VirtualStructBuilder {
+    x.obj.MyIntField = value
     return x
 }
 
@@ -1459,13 +1459,13 @@ func (x *MyStructWithForwardRefEnum) GetB() MyForwardRefEnum {
     return x.B
 }
 
-func (x *MyStructWithForwardRefEnum) SetA(a MyForwardRefEnum) *MyStructWithForwardRefEnum {
-    x.A = a
+func (x *MyStructWithForwardRefEnum) SetA(value MyForwardRefEnum) *MyStructWithForwardRefEnum {
+    x.A = value
     return x
 }
 
-func (x *MyStructWithForwardRefEnum) SetB(b MyForwardRefEnum) *MyStructWithForwardRefEnum {
-    x.B = b
+func (x *MyStructWithForwardRefEnum) SetB(value MyForwardRefEnum) *MyStructWithForwardRefEnum {
+    x.B = value
     return x
 }
 
@@ -1537,13 +1537,13 @@ func NewMyStructWithForwardRefEnumBuilder() *MyStructWithForwardRefEnumBuilder {
     }
 }
 
-func (x *MyStructWithForwardRefEnumBuilder) A(a MyForwardRefEnum) *MyStructWithForwardRefEnumBuilder {
-    x.obj.A = a
+func (x *MyStructWithForwardRefEnumBuilder) A(value MyForwardRefEnum) *MyStructWithForwardRefEnumBuilder {
+    x.obj.A = value
     return x
 }
 
-func (x *MyStructWithForwardRefEnumBuilder) B(b MyForwardRefEnum) *MyStructWithForwardRefEnumBuilder {
-    x.obj.B = b
+func (x *MyStructWithForwardRefEnumBuilder) B(value MyForwardRefEnum) *MyStructWithForwardRefEnumBuilder {
+    x.obj.B = value
     return x
 }
 
@@ -1635,13 +1635,13 @@ func (x *TrivialNumeric) GetB() bool {
     return x.B
 }
 
-func (x *TrivialNumeric) SetA(a int32) *TrivialNumeric {
-    x.A = a
+func (x *TrivialNumeric) SetA(value int32) *TrivialNumeric {
+    x.A = value
     return x
 }
 
-func (x *TrivialNumeric) SetB(b bool) *TrivialNumeric {
-    x.B = b
+func (x *TrivialNumeric) SetB(value bool) *TrivialNumeric {
+    x.B = value
     return x
 }
 
@@ -1711,13 +1711,13 @@ func NewTrivialNumericBuilder() *TrivialNumericBuilder {
     }
 }
 
-func (x *TrivialNumericBuilder) A(a int32) *TrivialNumericBuilder {
-    x.obj.A = a
+func (x *TrivialNumericBuilder) A(value int32) *TrivialNumericBuilder {
+    x.obj.A = value
     return x
 }
 
-func (x *TrivialNumericBuilder) B(b bool) *TrivialNumericBuilder {
-    x.obj.B = b
+func (x *TrivialNumericBuilder) B(value bool) *TrivialNumericBuilder {
+    x.obj.B = value
     return x
 }
 
@@ -1815,13 +1815,13 @@ func (x *TrivialNestedWithDefault) GetN() *TrivialNumeric {
     return x.N
 }
 
-func (x *TrivialNestedWithDefault) SetZ(z int32) *TrivialNestedWithDefault {
-    x.Z = z
+func (x *TrivialNestedWithDefault) SetZ(value int32) *TrivialNestedWithDefault {
+    x.Z = value
     return x
 }
 
-func (x *TrivialNestedWithDefault) SetN(n TrivialNumeric) *TrivialNestedWithDefault {
-    x.N = &n
+func (x *TrivialNestedWithDefault) SetN(value TrivialNumeric) *TrivialNestedWithDefault {
+    x.N = &value
     return x
 }
 
@@ -1899,13 +1899,13 @@ func NewTrivialNestedWithDefaultBuilder() *TrivialNestedWithDefaultBuilder {
     }
 }
 
-func (x *TrivialNestedWithDefaultBuilder) Z(z int32) *TrivialNestedWithDefaultBuilder {
-    x.obj.Z = z
+func (x *TrivialNestedWithDefaultBuilder) Z(value int32) *TrivialNestedWithDefaultBuilder {
+    x.obj.Z = value
     return x
 }
 
-func (x *TrivialNestedWithDefaultBuilder) N(n *TrivialNumeric) *TrivialNestedWithDefaultBuilder {
-    x.obj.N = n
+func (x *TrivialNestedWithDefaultBuilder) N(value *TrivialNumeric) *TrivialNestedWithDefaultBuilder {
+    x.obj.N = value
     return x
 }
 
@@ -1997,13 +1997,13 @@ func (x *ComplexString) GetB() map[string]int32 {
     return x.B
 }
 
-func (x *ComplexString) SetA(a string) *ComplexString {
-    x.A = a
+func (x *ComplexString) SetA(value string) *ComplexString {
+    x.A = value
     return x
 }
 
-func (x *ComplexString) SetB(b map[string]int32) *ComplexString {
-    x.B = b
+func (x *ComplexString) SetB(value map[string]int32) *ComplexString {
+    x.B = value
     return x
 }
 
@@ -2126,13 +2126,13 @@ func NewComplexStringBuilder() *ComplexStringBuilder {
     }
 }
 
-func (x *ComplexStringBuilder) A(a string) *ComplexStringBuilder {
-    x.obj.A = a
+func (x *ComplexStringBuilder) A(value string) *ComplexStringBuilder {
+    x.obj.A = value
     return x
 }
 
-func (x *ComplexStringBuilder) B(b map[string]int32) *ComplexStringBuilder {
-    x.obj.B = b
+func (x *ComplexStringBuilder) B(value map[string]int32) *ComplexStringBuilder {
+    x.obj.B = value
     return x
 }
 
@@ -2234,13 +2234,13 @@ func (x *ComplexNestedWithDefault) GetN() *ComplexString {
     return x.N
 }
 
-func (x *ComplexNestedWithDefault) SetZ(z string) *ComplexNestedWithDefault {
-    x.Z = z
+func (x *ComplexNestedWithDefault) SetZ(value string) *ComplexNestedWithDefault {
+    x.Z = value
     return x
 }
 
-func (x *ComplexNestedWithDefault) SetN(n ComplexString) *ComplexNestedWithDefault {
-    x.N = &n
+func (x *ComplexNestedWithDefault) SetN(value ComplexString) *ComplexNestedWithDefault {
+    x.N = &value
     return x
 }
 
@@ -2318,13 +2318,13 @@ func NewComplexNestedWithDefaultBuilder() *ComplexNestedWithDefaultBuilder {
     }
 }
 
-func (x *ComplexNestedWithDefaultBuilder) Z(z string) *ComplexNestedWithDefaultBuilder {
-    x.obj.Z = z
+func (x *ComplexNestedWithDefaultBuilder) Z(value string) *ComplexNestedWithDefaultBuilder {
+    x.obj.Z = value
     return x
 }
 
-func (x *ComplexNestedWithDefaultBuilder) N(n *ComplexString) *ComplexNestedWithDefaultBuilder {
-    x.obj.N = n
+func (x *ComplexNestedWithDefaultBuilder) N(value *ComplexString) *ComplexNestedWithDefaultBuilder {
+    x.obj.N = value
     return x
 }
 
@@ -2431,28 +2431,28 @@ func (x *MinPadding) GetTiny() byte {
     return x.Tiny
 }
 
-func (x *MinPadding) SetSmall(small byte) *MinPadding {
-    x.Small = small
+func (x *MinPadding) SetSmall(value byte) *MinPadding {
+    x.Small = value
     return x
 }
 
-func (x *MinPadding) SetBig(big int64) *MinPadding {
-    x.Big = big
+func (x *MinPadding) SetBig(value int64) *MinPadding {
+    x.Big = value
     return x
 }
 
-func (x *MinPadding) SetMedium(medium int16) *MinPadding {
-    x.Medium = medium
+func (x *MinPadding) SetMedium(value int16) *MinPadding {
+    x.Medium = value
     return x
 }
 
-func (x *MinPadding) SetBiggish(biggish int32) *MinPadding {
-    x.Biggish = biggish
+func (x *MinPadding) SetBiggish(value int32) *MinPadding {
+    x.Biggish = value
     return x
 }
 
-func (x *MinPadding) SetTiny(tiny byte) *MinPadding {
-    x.Tiny = tiny
+func (x *MinPadding) SetTiny(value byte) *MinPadding {
+    x.Tiny = value
     return x
 }
 
@@ -2603,28 +2603,28 @@ func NewMinPaddingBuilder() *MinPaddingBuilder {
     }
 }
 
-func (x *MinPaddingBuilder) Small(small byte) *MinPaddingBuilder {
-    x.obj.Small = small
+func (x *MinPaddingBuilder) Small(value byte) *MinPaddingBuilder {
+    x.obj.Small = value
     return x
 }
 
-func (x *MinPaddingBuilder) Big(big int64) *MinPaddingBuilder {
-    x.obj.Big = big
+func (x *MinPaddingBuilder) Big(value int64) *MinPaddingBuilder {
+    x.obj.Big = value
     return x
 }
 
-func (x *MinPaddingBuilder) Medium(medium int16) *MinPaddingBuilder {
-    x.obj.Medium = medium
+func (x *MinPaddingBuilder) Medium(value int16) *MinPaddingBuilder {
+    x.obj.Medium = value
     return x
 }
 
-func (x *MinPaddingBuilder) Biggish(biggish int32) *MinPaddingBuilder {
-    x.obj.Biggish = biggish
+func (x *MinPaddingBuilder) Biggish(value int32) *MinPaddingBuilder {
+    x.obj.Biggish = value
     return x
 }
 
-func (x *MinPaddingBuilder) Tiny(tiny byte) *MinPaddingBuilder {
-    x.obj.Tiny = tiny
+func (x *MinPaddingBuilder) Tiny(value byte) *MinPaddingBuilder {
+    x.obj.Tiny = value
     return x
 }
 
@@ -2755,28 +2755,28 @@ func (x *MinPaddingWithCustomType) GetTiny() byte {
     return x.Tiny
 }
 
-func (x *MinPaddingWithCustomType) SetSmall(small byte) *MinPaddingWithCustomType {
-    x.Small = small
+func (x *MinPaddingWithCustomType) SetSmall(value byte) *MinPaddingWithCustomType {
+    x.Small = value
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetBig(big int64) *MinPaddingWithCustomType {
-    x.Big = big
+func (x *MinPaddingWithCustomType) SetBig(value int64) *MinPaddingWithCustomType {
+    x.Big = value
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetMedium(medium int16) *MinPaddingWithCustomType {
-    x.Medium = medium
+func (x *MinPaddingWithCustomType) SetMedium(value int16) *MinPaddingWithCustomType {
+    x.Medium = value
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetBiggish(biggish int32) *MinPaddingWithCustomType {
-    x.Biggish = biggish
+func (x *MinPaddingWithCustomType) SetBiggish(value int32) *MinPaddingWithCustomType {
+    x.Biggish = value
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetTiny(tiny byte) *MinPaddingWithCustomType {
-    x.Tiny = tiny
+func (x *MinPaddingWithCustomType) SetTiny(value byte) *MinPaddingWithCustomType {
+    x.Tiny = value
     return x
 }
 
@@ -2927,28 +2927,28 @@ func NewMinPaddingWithCustomTypeBuilder() *MinPaddingWithCustomTypeBuilder {
     }
 }
 
-func (x *MinPaddingWithCustomTypeBuilder) Small(small byte) *MinPaddingWithCustomTypeBuilder {
-    x.obj.Small = small
+func (x *MinPaddingWithCustomTypeBuilder) Small(value byte) *MinPaddingWithCustomTypeBuilder {
+    x.obj.Small = value
     return x
 }
 
-func (x *MinPaddingWithCustomTypeBuilder) Big(big int64) *MinPaddingWithCustomTypeBuilder {
-    x.obj.Big = big
+func (x *MinPaddingWithCustomTypeBuilder) Big(value int64) *MinPaddingWithCustomTypeBuilder {
+    x.obj.Big = value
     return x
 }
 
-func (x *MinPaddingWithCustomTypeBuilder) Medium(medium int16) *MinPaddingWithCustomTypeBuilder {
-    x.obj.Medium = medium
+func (x *MinPaddingWithCustomTypeBuilder) Medium(value int16) *MinPaddingWithCustomTypeBuilder {
+    x.obj.Medium = value
     return x
 }
 
-func (x *MinPaddingWithCustomTypeBuilder) Biggish(biggish int32) *MinPaddingWithCustomTypeBuilder {
-    x.obj.Biggish = biggish
+func (x *MinPaddingWithCustomTypeBuilder) Biggish(value int32) *MinPaddingWithCustomTypeBuilder {
+    x.obj.Biggish = value
     return x
 }
 
-func (x *MinPaddingWithCustomTypeBuilder) Tiny(tiny byte) *MinPaddingWithCustomTypeBuilder {
-    x.obj.Tiny = tiny
+func (x *MinPaddingWithCustomTypeBuilder) Tiny(value byte) *MinPaddingWithCustomTypeBuilder {
+    x.obj.Tiny = value
     return x
 }
 
@@ -3074,23 +3074,23 @@ func (x *MyStruct) GetData() *MyDataItem {
     return x.Data
 }
 
-func (x *MyStruct) SetMyIntField(myIntField int64) *MyStruct {
-    x.MyIntField = myIntField
+func (x *MyStruct) SetMyIntField(value int64) *MyStruct {
+    x.MyIntField = value
     return x
 }
 
-func (x *MyStruct) SetMyStringField(myStringField string) *MyStruct {
-    x.MyStringField = myStringField
+func (x *MyStruct) SetMyStringField(value string) *MyStruct {
+    x.MyStringField = value
     return x
 }
 
-func (x *MyStruct) SetMajorVer(majorVer int64) *MyStruct {
-    x.MajorVer = majorVer
+func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
+    x.MajorVer = value
     return x
 }
 
-func (x *MyStruct) SetData(data MyDataItem) *MyStruct {
-    x.Data = &data
+func (x *MyStruct) SetData(value MyDataItem) *MyStruct {
+    x.Data = &value
     return x
 }
 
@@ -3222,23 +3222,23 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) MyIntField(myIntField int64) *MyStructBuilder {
-    x.obj.MyIntField = myIntField
+func (x *MyStructBuilder) MyIntField(value int64) *MyStructBuilder {
+    x.obj.MyIntField = value
     return x
 }
 
-func (x *MyStructBuilder) MyStringField(myStringField string) *MyStructBuilder {
-    x.obj.MyStringField = myStringField
+func (x *MyStructBuilder) MyStringField(value string) *MyStructBuilder {
+    x.obj.MyStringField = value
     return x
 }
 
-func (x *MyStructBuilder) MajorVer(majorVer int64) *MyStructBuilder {
-    x.obj.MajorVer = majorVer
+func (x *MyStructBuilder) MajorVer(value int64) *MyStructBuilder {
+    x.obj.MajorVer = value
     return x
 }
 
-func (x *MyStructBuilder) Data(data *MyDataItem) *MyStructBuilder {
-    x.obj.Data = data
+func (x *MyStructBuilder) Data(value *MyDataItem) *MyStructBuilder {
+    x.obj.Data = value
     return x
 }
 
@@ -3415,8 +3415,8 @@ func (x *Renaming) GetFoo() int64 {
     return x.Foo
 }
 
-func (x *Renaming) SetFoo(foo int64) *Renaming {
-    x.Foo = foo
+func (x *Renaming) SetFoo(value int64) *Renaming {
+    x.Foo = value
     return x
 }
 
@@ -3459,8 +3459,8 @@ func NewRenamingBuilder() *RenamingBuilder {
     }
 }
 
-func (x *RenamingBuilder) Foo(foo int64) *RenamingBuilder {
-    x.obj.Foo = foo
+func (x *RenamingBuilder) Foo(value int64) *RenamingBuilder {
+    x.obj.Foo = value
     return x
 }
 
@@ -3544,13 +3544,13 @@ func (x *AnnotatedTypes) GetListField() included.SomeListOfTypeMap {
     return x.ListField
 }
 
-func (x *AnnotatedTypes) SetBinaryField(binaryField TBinary) *AnnotatedTypes {
-    x.BinaryField = binaryField
+func (x *AnnotatedTypes) SetBinaryField(value TBinary) *AnnotatedTypes {
+    x.BinaryField = value
     return x
 }
 
-func (x *AnnotatedTypes) SetListField(listField included.SomeListOfTypeMap) *AnnotatedTypes {
-    x.ListField = listField
+func (x *AnnotatedTypes) SetListField(value included.SomeListOfTypeMap) *AnnotatedTypes {
+    x.ListField = value
     return x
 }
 
@@ -3709,13 +3709,13 @@ func NewAnnotatedTypesBuilder() *AnnotatedTypesBuilder {
     }
 }
 
-func (x *AnnotatedTypesBuilder) BinaryField(binaryField TBinary) *AnnotatedTypesBuilder {
-    x.obj.BinaryField = binaryField
+func (x *AnnotatedTypesBuilder) BinaryField(value TBinary) *AnnotatedTypesBuilder {
+    x.obj.BinaryField = value
     return x
 }
 
-func (x *AnnotatedTypesBuilder) ListField(listField included.SomeListOfTypeMap) *AnnotatedTypesBuilder {
-    x.obj.ListField = listField
+func (x *AnnotatedTypesBuilder) ListField(value included.SomeListOfTypeMap) *AnnotatedTypesBuilder {
+    x.obj.ListField = value
     return x
 }
 
@@ -3807,13 +3807,13 @@ func (x *ForwardUsageRoot) GetForwardUsageByRef() *ForwardUsageByRef {
     return x.ForwardUsageByRef
 }
 
-func (x *ForwardUsageRoot) SetForwardUsageStruct(forwardUsageStruct ForwardUsageStruct) *ForwardUsageRoot {
-    x.ForwardUsageStruct = &forwardUsageStruct
+func (x *ForwardUsageRoot) SetForwardUsageStruct(value ForwardUsageStruct) *ForwardUsageRoot {
+    x.ForwardUsageStruct = &value
     return x
 }
 
-func (x *ForwardUsageRoot) SetForwardUsageByRef(forwardUsageByRef ForwardUsageByRef) *ForwardUsageRoot {
-    x.ForwardUsageByRef = &forwardUsageByRef
+func (x *ForwardUsageRoot) SetForwardUsageByRef(value ForwardUsageByRef) *ForwardUsageRoot {
+    x.ForwardUsageByRef = &value
     return x
 }
 
@@ -3899,13 +3899,13 @@ func NewForwardUsageRootBuilder() *ForwardUsageRootBuilder {
     }
 }
 
-func (x *ForwardUsageRootBuilder) ForwardUsageStruct(forwardUsageStruct *ForwardUsageStruct) *ForwardUsageRootBuilder {
-    x.obj.ForwardUsageStruct = forwardUsageStruct
+func (x *ForwardUsageRootBuilder) ForwardUsageStruct(value *ForwardUsageStruct) *ForwardUsageRootBuilder {
+    x.obj.ForwardUsageStruct = value
     return x
 }
 
-func (x *ForwardUsageRootBuilder) ForwardUsageByRef(forwardUsageByRef *ForwardUsageByRef) *ForwardUsageRootBuilder {
-    x.obj.ForwardUsageByRef = forwardUsageByRef
+func (x *ForwardUsageRootBuilder) ForwardUsageByRef(value *ForwardUsageByRef) *ForwardUsageRootBuilder {
+    x.obj.ForwardUsageByRef = value
     return x
 }
 
@@ -3992,8 +3992,8 @@ func (x *ForwardUsageStruct) GetFoo() *ForwardUsageRoot {
     return x.Foo
 }
 
-func (x *ForwardUsageStruct) SetFoo(foo ForwardUsageRoot) *ForwardUsageStruct {
-    x.Foo = &foo
+func (x *ForwardUsageStruct) SetFoo(value ForwardUsageRoot) *ForwardUsageStruct {
+    x.Foo = &value
     return x
 }
 
@@ -4044,8 +4044,8 @@ func NewForwardUsageStructBuilder() *ForwardUsageStructBuilder {
     }
 }
 
-func (x *ForwardUsageStructBuilder) Foo(foo *ForwardUsageRoot) *ForwardUsageStructBuilder {
-    x.obj.Foo = foo
+func (x *ForwardUsageStructBuilder) Foo(value *ForwardUsageRoot) *ForwardUsageStructBuilder {
+    x.obj.Foo = value
     return x
 }
 
@@ -4124,8 +4124,8 @@ func (x *ForwardUsageByRef) GetFoo() *ForwardUsageRoot {
     return x.Foo
 }
 
-func (x *ForwardUsageByRef) SetFoo(foo ForwardUsageRoot) *ForwardUsageByRef {
-    x.Foo = &foo
+func (x *ForwardUsageByRef) SetFoo(value ForwardUsageRoot) *ForwardUsageByRef {
+    x.Foo = &value
     return x
 }
 
@@ -4176,8 +4176,8 @@ func NewForwardUsageByRefBuilder() *ForwardUsageByRefBuilder {
     }
 }
 
-func (x *ForwardUsageByRefBuilder) Foo(foo *ForwardUsageRoot) *ForwardUsageByRefBuilder {
-    x.obj.Foo = foo
+func (x *ForwardUsageByRefBuilder) Foo(value *ForwardUsageRoot) *ForwardUsageByRefBuilder {
+    x.obj.Foo = value
     return x
 }
 
@@ -4256,8 +4256,8 @@ func (x *IncompleteMap) GetField() map[int32]*IncompleteMapDep {
     return x.Field
 }
 
-func (x *IncompleteMap) SetField(field map[int32]*IncompleteMapDep) *IncompleteMap {
-    x.Field = field
+func (x *IncompleteMap) SetField(value map[int32]*IncompleteMapDep) *IncompleteMap {
+    x.Field = value
     return x
 }
 
@@ -4354,8 +4354,8 @@ func NewIncompleteMapBuilder() *IncompleteMapBuilder {
     }
 }
 
-func (x *IncompleteMapBuilder) Field(field map[int32]*IncompleteMapDep) *IncompleteMapBuilder {
-    x.obj.Field = field
+func (x *IncompleteMapBuilder) Field(value map[int32]*IncompleteMapDep) *IncompleteMapBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -4508,8 +4508,8 @@ func (x *CompleteMap) GetField() map[int32]*CompleteMapDep {
     return x.Field
 }
 
-func (x *CompleteMap) SetField(field map[int32]*CompleteMapDep) *CompleteMap {
-    x.Field = field
+func (x *CompleteMap) SetField(value map[int32]*CompleteMapDep) *CompleteMap {
+    x.Field = value
     return x
 }
 
@@ -4606,8 +4606,8 @@ func NewCompleteMapBuilder() *CompleteMapBuilder {
     }
 }
 
-func (x *CompleteMapBuilder) Field(field map[int32]*CompleteMapDep) *CompleteMapBuilder {
-    x.obj.Field = field
+func (x *CompleteMapBuilder) Field(value map[int32]*CompleteMapDep) *CompleteMapBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -4760,8 +4760,8 @@ func (x *IncompleteList) GetField() []*IncompleteListDep {
     return x.Field
 }
 
-func (x *IncompleteList) SetField(field []*IncompleteListDep) *IncompleteList {
-    x.Field = field
+func (x *IncompleteList) SetField(value []*IncompleteListDep) *IncompleteList {
+    x.Field = value
     return x
 }
 
@@ -4841,8 +4841,8 @@ func NewIncompleteListBuilder() *IncompleteListBuilder {
     }
 }
 
-func (x *IncompleteListBuilder) Field(field []*IncompleteListDep) *IncompleteListBuilder {
-    x.obj.Field = field
+func (x *IncompleteListBuilder) Field(value []*IncompleteListDep) *IncompleteListBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -4995,8 +4995,8 @@ func (x *CompleteList) GetField() []*CompleteListDep {
     return x.Field
 }
 
-func (x *CompleteList) SetField(field []*CompleteListDep) *CompleteList {
-    x.Field = field
+func (x *CompleteList) SetField(value []*CompleteListDep) *CompleteList {
+    x.Field = value
     return x
 }
 
@@ -5076,8 +5076,8 @@ func NewCompleteListBuilder() *CompleteListBuilder {
     }
 }
 
-func (x *CompleteListBuilder) Field(field []*CompleteListDep) *CompleteListBuilder {
-    x.obj.Field = field
+func (x *CompleteListBuilder) Field(value []*CompleteListDep) *CompleteListBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -5230,8 +5230,8 @@ func (x *AdaptedList) GetField() []*AdaptedListDep {
     return x.Field
 }
 
-func (x *AdaptedList) SetField(field []*AdaptedListDep) *AdaptedList {
-    x.Field = field
+func (x *AdaptedList) SetField(value []*AdaptedListDep) *AdaptedList {
+    x.Field = value
     return x
 }
 
@@ -5311,8 +5311,8 @@ func NewAdaptedListBuilder() *AdaptedListBuilder {
     }
 }
 
-func (x *AdaptedListBuilder) Field(field []*AdaptedListDep) *AdaptedListBuilder {
-    x.obj.Field = field
+func (x *AdaptedListBuilder) Field(value []*AdaptedListDep) *AdaptedListBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -5391,8 +5391,8 @@ func (x *AdaptedListDep) GetField() *AdaptedList {
     return x.Field
 }
 
-func (x *AdaptedListDep) SetField(field AdaptedList) *AdaptedListDep {
-    x.Field = &field
+func (x *AdaptedListDep) SetField(value AdaptedList) *AdaptedListDep {
+    x.Field = &value
     return x
 }
 
@@ -5443,8 +5443,8 @@ func NewAdaptedListDepBuilder() *AdaptedListDepBuilder {
     }
 }
 
-func (x *AdaptedListDepBuilder) Field(field *AdaptedList) *AdaptedListDepBuilder {
-    x.obj.Field = field
+func (x *AdaptedListDepBuilder) Field(value *AdaptedList) *AdaptedListDepBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -5523,8 +5523,8 @@ func (x *DependentAdaptedList) GetField() []*DependentAdaptedListDep {
     return x.Field
 }
 
-func (x *DependentAdaptedList) SetField(field []*DependentAdaptedListDep) *DependentAdaptedList {
-    x.Field = field
+func (x *DependentAdaptedList) SetField(value []*DependentAdaptedListDep) *DependentAdaptedList {
+    x.Field = value
     return x
 }
 
@@ -5604,8 +5604,8 @@ func NewDependentAdaptedListBuilder() *DependentAdaptedListBuilder {
     }
 }
 
-func (x *DependentAdaptedListBuilder) Field(field []*DependentAdaptedListDep) *DependentAdaptedListBuilder {
-    x.obj.Field = field
+func (x *DependentAdaptedListBuilder) Field(value []*DependentAdaptedListDep) *DependentAdaptedListBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -5684,8 +5684,8 @@ func (x *DependentAdaptedListDep) GetField() *int16 {
     return x.Field
 }
 
-func (x *DependentAdaptedListDep) SetField(field int16) *DependentAdaptedListDep {
-    x.Field = &field
+func (x *DependentAdaptedListDep) SetField(value int16) *DependentAdaptedListDep {
+    x.Field = &value
     return x
 }
 
@@ -5735,8 +5735,8 @@ func NewDependentAdaptedListDepBuilder() *DependentAdaptedListDepBuilder {
     }
 }
 
-func (x *DependentAdaptedListDepBuilder) Field(field *int16) *DependentAdaptedListDepBuilder {
-    x.obj.Field = field
+func (x *DependentAdaptedListDepBuilder) Field(value *int16) *DependentAdaptedListDepBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -5845,38 +5845,38 @@ func (x *AllocatorAware) GetAaShared() int32 {
     return x.AaShared
 }
 
-func (x *AllocatorAware) SetAaList(aaList []int32) *AllocatorAware {
-    x.AaList = aaList
+func (x *AllocatorAware) SetAaList(value []int32) *AllocatorAware {
+    x.AaList = value
     return x
 }
 
-func (x *AllocatorAware) SetAaSet(aaSet []int32) *AllocatorAware {
-    x.AaSet = aaSet
+func (x *AllocatorAware) SetAaSet(value []int32) *AllocatorAware {
+    x.AaSet = value
     return x
 }
 
-func (x *AllocatorAware) SetAaMap(aaMap map[int32]int32) *AllocatorAware {
-    x.AaMap = aaMap
+func (x *AllocatorAware) SetAaMap(value map[int32]int32) *AllocatorAware {
+    x.AaMap = value
     return x
 }
 
-func (x *AllocatorAware) SetAaString(aaString string) *AllocatorAware {
-    x.AaString = aaString
+func (x *AllocatorAware) SetAaString(value string) *AllocatorAware {
+    x.AaString = value
     return x
 }
 
-func (x *AllocatorAware) SetNotAContainer(notAContainer int32) *AllocatorAware {
-    x.NotAContainer = notAContainer
+func (x *AllocatorAware) SetNotAContainer(value int32) *AllocatorAware {
+    x.NotAContainer = value
     return x
 }
 
-func (x *AllocatorAware) SetAaUnique(aaUnique int32) *AllocatorAware {
-    x.AaUnique = aaUnique
+func (x *AllocatorAware) SetAaUnique(value int32) *AllocatorAware {
+    x.AaUnique = value
     return x
 }
 
-func (x *AllocatorAware) SetAaShared(aaShared int32) *AllocatorAware {
-    x.AaShared = aaShared
+func (x *AllocatorAware) SetAaShared(value int32) *AllocatorAware {
+    x.AaShared = value
     return x
 }
 
@@ -6206,38 +6206,38 @@ func NewAllocatorAwareBuilder() *AllocatorAwareBuilder {
     }
 }
 
-func (x *AllocatorAwareBuilder) AaList(aaList []int32) *AllocatorAwareBuilder {
-    x.obj.AaList = aaList
+func (x *AllocatorAwareBuilder) AaList(value []int32) *AllocatorAwareBuilder {
+    x.obj.AaList = value
     return x
 }
 
-func (x *AllocatorAwareBuilder) AaSet(aaSet []int32) *AllocatorAwareBuilder {
-    x.obj.AaSet = aaSet
+func (x *AllocatorAwareBuilder) AaSet(value []int32) *AllocatorAwareBuilder {
+    x.obj.AaSet = value
     return x
 }
 
-func (x *AllocatorAwareBuilder) AaMap(aaMap map[int32]int32) *AllocatorAwareBuilder {
-    x.obj.AaMap = aaMap
+func (x *AllocatorAwareBuilder) AaMap(value map[int32]int32) *AllocatorAwareBuilder {
+    x.obj.AaMap = value
     return x
 }
 
-func (x *AllocatorAwareBuilder) AaString(aaString string) *AllocatorAwareBuilder {
-    x.obj.AaString = aaString
+func (x *AllocatorAwareBuilder) AaString(value string) *AllocatorAwareBuilder {
+    x.obj.AaString = value
     return x
 }
 
-func (x *AllocatorAwareBuilder) NotAContainer(notAContainer int32) *AllocatorAwareBuilder {
-    x.obj.NotAContainer = notAContainer
+func (x *AllocatorAwareBuilder) NotAContainer(value int32) *AllocatorAwareBuilder {
+    x.obj.NotAContainer = value
     return x
 }
 
-func (x *AllocatorAwareBuilder) AaUnique(aaUnique int32) *AllocatorAwareBuilder {
-    x.obj.AaUnique = aaUnique
+func (x *AllocatorAwareBuilder) AaUnique(value int32) *AllocatorAwareBuilder {
+    x.obj.AaUnique = value
     return x
 }
 
-func (x *AllocatorAwareBuilder) AaShared(aaShared int32) *AllocatorAwareBuilder {
-    x.obj.AaShared = aaShared
+func (x *AllocatorAwareBuilder) AaShared(value int32) *AllocatorAwareBuilder {
+    x.obj.AaShared = value
     return x
 }
 
@@ -6364,8 +6364,8 @@ func (x *AllocatorAware2) GetNotAContainer() int32 {
     return x.NotAContainer
 }
 
-func (x *AllocatorAware2) SetNotAContainer(notAContainer int32) *AllocatorAware2 {
-    x.NotAContainer = notAContainer
+func (x *AllocatorAware2) SetNotAContainer(value int32) *AllocatorAware2 {
+    x.NotAContainer = value
     return x
 }
 
@@ -6408,8 +6408,8 @@ func NewAllocatorAware2Builder() *AllocatorAware2Builder {
     }
 }
 
-func (x *AllocatorAware2Builder) NotAContainer(notAContainer int32) *AllocatorAware2Builder {
-    x.obj.NotAContainer = notAContainer
+func (x *AllocatorAware2Builder) NotAContainer(value int32) *AllocatorAware2Builder {
+    x.obj.NotAContainer = value
     return x
 }
 
@@ -6498,18 +6498,18 @@ func (x *TypedefStruct) GetUintTypedefField() UintTypedef {
     return x.UintTypedefField
 }
 
-func (x *TypedefStruct) SetI32Field(i32Field int32) *TypedefStruct {
-    x.I32Field = i32Field
+func (x *TypedefStruct) SetI32Field(value int32) *TypedefStruct {
+    x.I32Field = value
     return x
 }
 
-func (x *TypedefStruct) SetIntTypedefField(intTypedefField IntTypedef) *TypedefStruct {
-    x.IntTypedefField = intTypedefField
+func (x *TypedefStruct) SetIntTypedefField(value IntTypedef) *TypedefStruct {
+    x.IntTypedefField = value
     return x
 }
 
-func (x *TypedefStruct) SetUintTypedefField(uintTypedefField UintTypedef) *TypedefStruct {
-    x.UintTypedefField = uintTypedefField
+func (x *TypedefStruct) SetUintTypedefField(value UintTypedef) *TypedefStruct {
+    x.UintTypedefField = value
     return x
 }
 
@@ -6606,18 +6606,18 @@ func NewTypedefStructBuilder() *TypedefStructBuilder {
     }
 }
 
-func (x *TypedefStructBuilder) I32Field(i32Field int32) *TypedefStructBuilder {
-    x.obj.I32Field = i32Field
+func (x *TypedefStructBuilder) I32Field(value int32) *TypedefStructBuilder {
+    x.obj.I32Field = value
     return x
 }
 
-func (x *TypedefStructBuilder) IntTypedefField(intTypedefField IntTypedef) *TypedefStructBuilder {
-    x.obj.IntTypedefField = intTypedefField
+func (x *TypedefStructBuilder) IntTypedefField(value IntTypedef) *TypedefStructBuilder {
+    x.obj.IntTypedefField = value
     return x
 }
 
-func (x *TypedefStructBuilder) UintTypedefField(uintTypedefField UintTypedef) *TypedefStructBuilder {
-    x.obj.UintTypedefField = uintTypedefField
+func (x *TypedefStructBuilder) UintTypedefField(value UintTypedef) *TypedefStructBuilder {
+    x.obj.UintTypedefField = value
     return x
 }
 
@@ -6712,8 +6712,8 @@ func (x *StructWithDoubleUnderscores) Get_Field() int32 {
     return x._Field
 }
 
-func (x *StructWithDoubleUnderscores) Set_Field(_Field int32) *StructWithDoubleUnderscores {
-    x._Field = _Field
+func (x *StructWithDoubleUnderscores) Set_Field(value int32) *StructWithDoubleUnderscores {
+    x._Field = value
     return x
 }
 
@@ -6756,8 +6756,8 @@ func NewStructWithDoubleUnderscoresBuilder() *StructWithDoubleUnderscoresBuilder
     }
 }
 
-func (x *StructWithDoubleUnderscoresBuilder) _Field(_Field int32) *StructWithDoubleUnderscoresBuilder {
-    x.obj._Field = _Field
+func (x *StructWithDoubleUnderscoresBuilder) _Field(value int32) *StructWithDoubleUnderscoresBuilder {
+    x.obj._Field = value
     return x
 }
 

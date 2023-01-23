@@ -182,8 +182,8 @@ func (x *reqNestedContainersMapList) GetFoo() map[int32][]int32 {
     return x.Foo
 }
 
-func (x *reqNestedContainersMapList) SetFoo(foo map[int32][]int32) *reqNestedContainersMapList {
-    x.Foo = foo
+func (x *reqNestedContainersMapList) SetFoo(value map[int32][]int32) *reqNestedContainersMapList {
+    x.Foo = value
     return x
 }
 
@@ -308,8 +308,8 @@ func newReqNestedContainersMapListBuilder() *reqNestedContainersMapListBuilder {
     }
 }
 
-func (x *reqNestedContainersMapListBuilder) Foo(foo map[int32][]int32) *reqNestedContainersMapListBuilder {
-    x.obj.Foo = foo
+func (x *reqNestedContainersMapListBuilder) Foo(value map[int32][]int32) *reqNestedContainersMapListBuilder {
+    x.obj.Foo = value
     return x
 }
 
@@ -460,8 +460,8 @@ func (x *reqNestedContainersMapSet) GetFoo() map[int32][]int32 {
     return x.Foo
 }
 
-func (x *reqNestedContainersMapSet) SetFoo(foo map[int32][]int32) *reqNestedContainersMapSet {
-    x.Foo = foo
+func (x *reqNestedContainersMapSet) SetFoo(value map[int32][]int32) *reqNestedContainersMapSet {
+    x.Foo = value
     return x
 }
 
@@ -586,8 +586,8 @@ func newReqNestedContainersMapSetBuilder() *reqNestedContainersMapSetBuilder {
     }
 }
 
-func (x *reqNestedContainersMapSetBuilder) Foo(foo map[int32][]int32) *reqNestedContainersMapSetBuilder {
-    x.obj.Foo = foo
+func (x *reqNestedContainersMapSetBuilder) Foo(value map[int32][]int32) *reqNestedContainersMapSetBuilder {
+    x.obj.Foo = value
     return x
 }
 
@@ -738,8 +738,8 @@ func (x *reqNestedContainersListMap) GetFoo() []map[int32]int32 {
     return x.Foo
 }
 
-func (x *reqNestedContainersListMap) SetFoo(foo []map[int32]int32) *reqNestedContainersListMap {
-    x.Foo = foo
+func (x *reqNestedContainersListMap) SetFoo(value []map[int32]int32) *reqNestedContainersListMap {
+    x.Foo = value
     return x
 }
 
@@ -864,8 +864,8 @@ func newReqNestedContainersListMapBuilder() *reqNestedContainersListMapBuilder {
     }
 }
 
-func (x *reqNestedContainersListMapBuilder) Foo(foo []map[int32]int32) *reqNestedContainersListMapBuilder {
-    x.obj.Foo = foo
+func (x *reqNestedContainersListMapBuilder) Foo(value []map[int32]int32) *reqNestedContainersListMapBuilder {
+    x.obj.Foo = value
     return x
 }
 
@@ -1016,8 +1016,8 @@ func (x *reqNestedContainersListSet) GetFoo() [][]int32 {
     return x.Foo
 }
 
-func (x *reqNestedContainersListSet) SetFoo(foo [][]int32) *reqNestedContainersListSet {
-    x.Foo = foo
+func (x *reqNestedContainersListSet) SetFoo(value [][]int32) *reqNestedContainersListSet {
+    x.Foo = value
     return x
 }
 
@@ -1125,8 +1125,8 @@ func newReqNestedContainersListSetBuilder() *reqNestedContainersListSetBuilder {
     }
 }
 
-func (x *reqNestedContainersListSetBuilder) Foo(foo [][]int32) *reqNestedContainersListSetBuilder {
-    x.obj.Foo = foo
+func (x *reqNestedContainersListSetBuilder) Foo(value [][]int32) *reqNestedContainersListSetBuilder {
+    x.obj.Foo = value
     return x
 }
 
@@ -1277,8 +1277,8 @@ func (x *reqNestedContainersTurtles) GetFoo() [][]map[int32]map[int32][]int32 {
     return x.Foo
 }
 
-func (x *reqNestedContainersTurtles) SetFoo(foo [][]map[int32]map[int32][]int32) *reqNestedContainersTurtles {
-    x.Foo = foo
+func (x *reqNestedContainersTurtles) SetFoo(value [][]map[int32]map[int32][]int32) *reqNestedContainersTurtles {
+    x.Foo = value
     return x
 }
 
@@ -1507,8 +1507,8 @@ func newReqNestedContainersTurtlesBuilder() *reqNestedContainersTurtlesBuilder {
     }
 }
 
-func (x *reqNestedContainersTurtlesBuilder) Foo(foo [][]map[int32]map[int32][]int32) *reqNestedContainersTurtlesBuilder {
-    x.obj.Foo = foo
+func (x *reqNestedContainersTurtlesBuilder) Foo(value [][]map[int32]map[int32][]int32) *reqNestedContainersTurtlesBuilder {
+    x.obj.Foo = value
     return x
 }
 

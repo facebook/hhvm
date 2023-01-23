@@ -30,8 +30,8 @@ func (x *Fiery) GetMessage() string {
     return x.Message
 }
 
-func (x *Fiery) SetMessage(message string) *Fiery {
-    x.Message = message
+func (x *Fiery) SetMessage(value string) *Fiery {
+    x.Message = value
     return x
 }
 
@@ -82,8 +82,8 @@ func NewFieryBuilder() *FieryBuilder {
     }
 }
 
-func (x *FieryBuilder) Message(message string) *FieryBuilder {
-    x.obj.Message = message
+func (x *FieryBuilder) Message(value string) *FieryBuilder {
+    x.obj.Message = value
     return x
 }
 
@@ -162,8 +162,8 @@ func (x *Serious) GetSonnet() *string {
     return x.Sonnet
 }
 
-func (x *Serious) SetSonnet(sonnet string) *Serious {
-    x.Sonnet = &sonnet
+func (x *Serious) SetSonnet(value string) *Serious {
+    x.Sonnet = &value
     return x
 }
 
@@ -221,8 +221,8 @@ func NewSeriousBuilder() *SeriousBuilder {
     }
 }
 
-func (x *SeriousBuilder) Sonnet(sonnet *string) *SeriousBuilder {
-    x.obj.Sonnet = sonnet
+func (x *SeriousBuilder) Sonnet(value *string) *SeriousBuilder {
+    x.obj.Sonnet = value
     return x
 }
 
@@ -306,13 +306,13 @@ func (x *ComplexFieldNames) GetInternalErrorMessage() string {
     return x.InternalErrorMessage
 }
 
-func (x *ComplexFieldNames) SetErrorMessage(errorMessage string) *ComplexFieldNames {
-    x.ErrorMessage = errorMessage
+func (x *ComplexFieldNames) SetErrorMessage(value string) *ComplexFieldNames {
+    x.ErrorMessage = value
     return x
 }
 
-func (x *ComplexFieldNames) SetInternalErrorMessage(internalErrorMessage string) *ComplexFieldNames {
-    x.InternalErrorMessage = internalErrorMessage
+func (x *ComplexFieldNames) SetInternalErrorMessage(value string) *ComplexFieldNames {
+    x.InternalErrorMessage = value
     return x
 }
 
@@ -390,13 +390,13 @@ func NewComplexFieldNamesBuilder() *ComplexFieldNamesBuilder {
     }
 }
 
-func (x *ComplexFieldNamesBuilder) ErrorMessage(errorMessage string) *ComplexFieldNamesBuilder {
-    x.obj.ErrorMessage = errorMessage
+func (x *ComplexFieldNamesBuilder) ErrorMessage(value string) *ComplexFieldNamesBuilder {
+    x.obj.ErrorMessage = value
     return x
 }
 
-func (x *ComplexFieldNamesBuilder) InternalErrorMessage(internalErrorMessage string) *ComplexFieldNamesBuilder {
-    x.obj.InternalErrorMessage = internalErrorMessage
+func (x *ComplexFieldNamesBuilder) InternalErrorMessage(value string) *ComplexFieldNamesBuilder {
+    x.obj.InternalErrorMessage = value
     return x
 }
 
@@ -488,13 +488,13 @@ func (x *CustomFieldNames) GetInternalErrorMessage() string {
     return x.InternalErrorMessage
 }
 
-func (x *CustomFieldNames) SetErrorMessage(errorMessage string) *CustomFieldNames {
-    x.ErrorMessage = errorMessage
+func (x *CustomFieldNames) SetErrorMessage(value string) *CustomFieldNames {
+    x.ErrorMessage = value
     return x
 }
 
-func (x *CustomFieldNames) SetInternalErrorMessage(internalErrorMessage string) *CustomFieldNames {
-    x.InternalErrorMessage = internalErrorMessage
+func (x *CustomFieldNames) SetInternalErrorMessage(value string) *CustomFieldNames {
+    x.InternalErrorMessage = value
     return x
 }
 
@@ -572,13 +572,13 @@ func NewCustomFieldNamesBuilder() *CustomFieldNamesBuilder {
     }
 }
 
-func (x *CustomFieldNamesBuilder) ErrorMessage(errorMessage string) *CustomFieldNamesBuilder {
-    x.obj.ErrorMessage = errorMessage
+func (x *CustomFieldNamesBuilder) ErrorMessage(value string) *CustomFieldNamesBuilder {
+    x.obj.ErrorMessage = value
     return x
 }
 
-func (x *CustomFieldNamesBuilder) InternalErrorMessage(internalErrorMessage string) *CustomFieldNamesBuilder {
-    x.obj.InternalErrorMessage = internalErrorMessage
+func (x *CustomFieldNamesBuilder) InternalErrorMessage(value string) *CustomFieldNamesBuilder {
+    x.obj.InternalErrorMessage = value
     return x
 }
 
@@ -670,13 +670,13 @@ func (x *ExceptionWithPrimitiveField) GetErrorCode() int32 {
     return x.ErrorCode
 }
 
-func (x *ExceptionWithPrimitiveField) SetMessage(message string) *ExceptionWithPrimitiveField {
-    x.Message = message
+func (x *ExceptionWithPrimitiveField) SetMessage(value string) *ExceptionWithPrimitiveField {
+    x.Message = value
     return x
 }
 
-func (x *ExceptionWithPrimitiveField) SetErrorCode(errorCode int32) *ExceptionWithPrimitiveField {
-    x.ErrorCode = errorCode
+func (x *ExceptionWithPrimitiveField) SetErrorCode(value int32) *ExceptionWithPrimitiveField {
+    x.ErrorCode = value
     return x
 }
 
@@ -754,13 +754,13 @@ func NewExceptionWithPrimitiveFieldBuilder() *ExceptionWithPrimitiveFieldBuilder
     }
 }
 
-func (x *ExceptionWithPrimitiveFieldBuilder) Message(message string) *ExceptionWithPrimitiveFieldBuilder {
-    x.obj.Message = message
+func (x *ExceptionWithPrimitiveFieldBuilder) Message(value string) *ExceptionWithPrimitiveFieldBuilder {
+    x.obj.Message = value
     return x
 }
 
-func (x *ExceptionWithPrimitiveFieldBuilder) ErrorCode(errorCode int32) *ExceptionWithPrimitiveFieldBuilder {
-    x.obj.ErrorCode = errorCode
+func (x *ExceptionWithPrimitiveFieldBuilder) ErrorCode(value int32) *ExceptionWithPrimitiveFieldBuilder {
+    x.obj.ErrorCode = value
     return x
 }
 
@@ -852,13 +852,13 @@ func (x *ExceptionWithStructuredAnnotation) GetErrorCode() int32 {
     return x.ErrorCode
 }
 
-func (x *ExceptionWithStructuredAnnotation) SetMessageField(messageField string) *ExceptionWithStructuredAnnotation {
-    x.MessageField = messageField
+func (x *ExceptionWithStructuredAnnotation) SetMessageField(value string) *ExceptionWithStructuredAnnotation {
+    x.MessageField = value
     return x
 }
 
-func (x *ExceptionWithStructuredAnnotation) SetErrorCode(errorCode int32) *ExceptionWithStructuredAnnotation {
-    x.ErrorCode = errorCode
+func (x *ExceptionWithStructuredAnnotation) SetErrorCode(value int32) *ExceptionWithStructuredAnnotation {
+    x.ErrorCode = value
     return x
 }
 
@@ -936,13 +936,13 @@ func NewExceptionWithStructuredAnnotationBuilder() *ExceptionWithStructuredAnnot
     }
 }
 
-func (x *ExceptionWithStructuredAnnotationBuilder) MessageField(messageField string) *ExceptionWithStructuredAnnotationBuilder {
-    x.obj.MessageField = messageField
+func (x *ExceptionWithStructuredAnnotationBuilder) MessageField(value string) *ExceptionWithStructuredAnnotationBuilder {
+    x.obj.MessageField = value
     return x
 }
 
-func (x *ExceptionWithStructuredAnnotationBuilder) ErrorCode(errorCode int32) *ExceptionWithStructuredAnnotationBuilder {
-    x.obj.ErrorCode = errorCode
+func (x *ExceptionWithStructuredAnnotationBuilder) ErrorCode(value int32) *ExceptionWithStructuredAnnotationBuilder {
+    x.obj.ErrorCode = value
     return x
 }
 

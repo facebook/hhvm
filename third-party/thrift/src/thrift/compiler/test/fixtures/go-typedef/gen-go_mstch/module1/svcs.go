@@ -152,8 +152,8 @@ func (x *reqFinderByPlate) GetPlate() Plate {
     return x.Plate
 }
 
-func (x *reqFinderByPlate) SetPlate(plate Plate) *reqFinderByPlate {
-    x.Plate = plate
+func (x *reqFinderByPlate) SetPlate(value Plate) *reqFinderByPlate {
+    x.Plate = value
     return x
 }
 
@@ -196,8 +196,8 @@ func newReqFinderByPlateBuilder() *reqFinderByPlateBuilder {
     }
 }
 
-func (x *reqFinderByPlateBuilder) Plate(plate Plate) *reqFinderByPlateBuilder {
-    x.obj.Plate = plate
+func (x *reqFinderByPlateBuilder) Plate(value Plate) *reqFinderByPlateBuilder {
+    x.obj.Plate = value
     return x
 }
 
@@ -406,8 +406,8 @@ func (x *reqFinderAliasByPlate) GetPlate() Plate {
     return x.Plate
 }
 
-func (x *reqFinderAliasByPlate) SetPlate(plate Plate) *reqFinderAliasByPlate {
-    x.Plate = plate
+func (x *reqFinderAliasByPlate) SetPlate(value Plate) *reqFinderAliasByPlate {
+    x.Plate = value
     return x
 }
 
@@ -450,8 +450,8 @@ func newReqFinderAliasByPlateBuilder() *reqFinderAliasByPlateBuilder {
     }
 }
 
-func (x *reqFinderAliasByPlateBuilder) Plate(plate Plate) *reqFinderAliasByPlateBuilder {
-    x.obj.Plate = plate
+func (x *reqFinderAliasByPlateBuilder) Plate(value Plate) *reqFinderAliasByPlateBuilder {
+    x.obj.Plate = value
     return x
 }
 
@@ -660,8 +660,8 @@ func (x *reqFinderPreviousPlate) GetPlate() Plate {
     return x.Plate
 }
 
-func (x *reqFinderPreviousPlate) SetPlate(plate Plate) *reqFinderPreviousPlate {
-    x.Plate = plate
+func (x *reqFinderPreviousPlate) SetPlate(value Plate) *reqFinderPreviousPlate {
+    x.Plate = value
     return x
 }
 
@@ -704,8 +704,8 @@ func newReqFinderPreviousPlateBuilder() *reqFinderPreviousPlateBuilder {
     }
 }
 
-func (x *reqFinderPreviousPlateBuilder) Plate(plate Plate) *reqFinderPreviousPlateBuilder {
-    x.obj.Plate = plate
+func (x *reqFinderPreviousPlateBuilder) Plate(value Plate) *reqFinderPreviousPlateBuilder {
+    x.obj.Plate = value
     return x
 }
 

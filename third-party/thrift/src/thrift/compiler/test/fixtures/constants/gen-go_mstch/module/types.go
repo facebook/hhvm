@@ -255,28 +255,28 @@ func (x *Internship) GetSchool() *string {
     return x.School
 }
 
-func (x *Internship) SetWeeks(weeks int32) *Internship {
-    x.Weeks = weeks
+func (x *Internship) SetWeeks(value int32) *Internship {
+    x.Weeks = value
     return x
 }
 
-func (x *Internship) SetTitle(title string) *Internship {
-    x.Title = title
+func (x *Internship) SetTitle(value string) *Internship {
+    x.Title = value
     return x
 }
 
-func (x *Internship) SetEmployer(employer Company) *Internship {
-    x.Employer = &employer
+func (x *Internship) SetEmployer(value Company) *Internship {
+    x.Employer = &value
     return x
 }
 
-func (x *Internship) SetCompensation(compensation float64) *Internship {
-    x.Compensation = &compensation
+func (x *Internship) SetCompensation(value float64) *Internship {
+    x.Compensation = &value
     return x
 }
 
-func (x *Internship) SetSchool(school string) *Internship {
-    x.School = &school
+func (x *Internship) SetSchool(value string) *Internship {
+    x.School = &value
     return x
 }
 
@@ -449,28 +449,28 @@ func NewInternshipBuilder() *InternshipBuilder {
     }
 }
 
-func (x *InternshipBuilder) Weeks(weeks int32) *InternshipBuilder {
-    x.obj.Weeks = weeks
+func (x *InternshipBuilder) Weeks(value int32) *InternshipBuilder {
+    x.obj.Weeks = value
     return x
 }
 
-func (x *InternshipBuilder) Title(title string) *InternshipBuilder {
-    x.obj.Title = title
+func (x *InternshipBuilder) Title(value string) *InternshipBuilder {
+    x.obj.Title = value
     return x
 }
 
-func (x *InternshipBuilder) Employer(employer *Company) *InternshipBuilder {
-    x.obj.Employer = employer
+func (x *InternshipBuilder) Employer(value *Company) *InternshipBuilder {
+    x.obj.Employer = value
     return x
 }
 
-func (x *InternshipBuilder) Compensation(compensation *float64) *InternshipBuilder {
-    x.obj.Compensation = compensation
+func (x *InternshipBuilder) Compensation(value *float64) *InternshipBuilder {
+    x.obj.Compensation = value
     return x
 }
 
-func (x *InternshipBuilder) School(school *string) *InternshipBuilder {
-    x.obj.School = school
+func (x *InternshipBuilder) School(value *string) *InternshipBuilder {
+    x.obj.School = value
     return x
 }
 
@@ -586,13 +586,13 @@ func (x *Range) GetMax() int32 {
     return x.Max
 }
 
-func (x *Range) SetMin(min int32) *Range {
-    x.Min = min
+func (x *Range) SetMin(value int32) *Range {
+    x.Min = value
     return x
 }
 
-func (x *Range) SetMax(max int32) *Range {
-    x.Max = max
+func (x *Range) SetMax(value int32) *Range {
+    x.Max = value
     return x
 }
 
@@ -662,13 +662,13 @@ func NewRangeBuilder() *RangeBuilder {
     }
 }
 
-func (x *RangeBuilder) Min(min int32) *RangeBuilder {
-    x.obj.Min = min
+func (x *RangeBuilder) Min(value int32) *RangeBuilder {
+    x.obj.Min = value
     return x
 }
 
-func (x *RangeBuilder) Max(max int32) *RangeBuilder {
-    x.obj.Max = max
+func (x *RangeBuilder) Max(value int32) *RangeBuilder {
+    x.obj.Max = value
     return x
 }
 
@@ -762,13 +762,13 @@ func (x *Struct1) GetB() string {
     return x.B
 }
 
-func (x *Struct1) SetA(a int32) *Struct1 {
-    x.A = a
+func (x *Struct1) SetA(value int32) *Struct1 {
+    x.A = value
     return x
 }
 
-func (x *Struct1) SetB(b string) *Struct1 {
-    x.B = b
+func (x *Struct1) SetB(value string) *Struct1 {
+    x.B = value
     return x
 }
 
@@ -838,13 +838,13 @@ func NewStruct1Builder() *Struct1Builder {
     }
 }
 
-func (x *Struct1Builder) A(a int32) *Struct1Builder {
-    x.obj.A = a
+func (x *Struct1Builder) A(value int32) *Struct1Builder {
+    x.obj.A = value
     return x
 }
 
-func (x *Struct1Builder) B(b string) *Struct1Builder {
-    x.obj.B = b
+func (x *Struct1Builder) B(value string) *Struct1Builder {
+    x.obj.B = value
     return x
 }
 
@@ -946,23 +946,23 @@ func (x *Struct2) GetD() []int32 {
     return x.D
 }
 
-func (x *Struct2) SetA(a int32) *Struct2 {
-    x.A = a
+func (x *Struct2) SetA(value int32) *Struct2 {
+    x.A = value
     return x
 }
 
-func (x *Struct2) SetB(b string) *Struct2 {
-    x.B = b
+func (x *Struct2) SetB(value string) *Struct2 {
+    x.B = value
     return x
 }
 
-func (x *Struct2) SetC(c Struct1) *Struct2 {
-    x.C = &c
+func (x *Struct2) SetC(value Struct1) *Struct2 {
+    x.C = &value
     return x
 }
 
-func (x *Struct2) SetD(d []int32) *Struct2 {
-    x.D = d
+func (x *Struct2) SetD(value []int32) *Struct2 {
+    x.D = value
     return x
 }
 
@@ -1130,23 +1130,23 @@ func NewStruct2Builder() *Struct2Builder {
     }
 }
 
-func (x *Struct2Builder) A(a int32) *Struct2Builder {
-    x.obj.A = a
+func (x *Struct2Builder) A(value int32) *Struct2Builder {
+    x.obj.A = value
     return x
 }
 
-func (x *Struct2Builder) B(b string) *Struct2Builder {
-    x.obj.B = b
+func (x *Struct2Builder) B(value string) *Struct2Builder {
+    x.obj.B = value
     return x
 }
 
-func (x *Struct2Builder) C(c *Struct1) *Struct2Builder {
-    x.obj.C = c
+func (x *Struct2Builder) C(value *Struct1) *Struct2Builder {
+    x.obj.C = value
     return x
 }
 
-func (x *Struct2Builder) D(d []int32) *Struct2Builder {
-    x.obj.D = d
+func (x *Struct2Builder) D(value []int32) *Struct2Builder {
+    x.obj.D = value
     return x
 }
 
@@ -1259,18 +1259,18 @@ func (x *Struct3) GetC() *Struct2 {
     return x.C
 }
 
-func (x *Struct3) SetA(a string) *Struct3 {
-    x.A = a
+func (x *Struct3) SetA(value string) *Struct3 {
+    x.A = value
     return x
 }
 
-func (x *Struct3) SetB(b int32) *Struct3 {
-    x.B = b
+func (x *Struct3) SetB(value int32) *Struct3 {
+    x.B = value
     return x
 }
 
-func (x *Struct3) SetC(c Struct2) *Struct3 {
-    x.C = &c
+func (x *Struct3) SetC(value Struct2) *Struct3 {
+    x.C = &value
     return x
 }
 
@@ -1375,18 +1375,18 @@ func NewStruct3Builder() *Struct3Builder {
     }
 }
 
-func (x *Struct3Builder) A(a string) *Struct3Builder {
-    x.obj.A = a
+func (x *Struct3Builder) A(value string) *Struct3Builder {
+    x.obj.A = value
     return x
 }
 
-func (x *Struct3Builder) B(b int32) *Struct3Builder {
-    x.obj.B = b
+func (x *Struct3Builder) B(value int32) *Struct3Builder {
+    x.obj.B = value
     return x
 }
 
-func (x *Struct3Builder) C(c *Struct2) *Struct3Builder {
-    x.obj.C = c
+func (x *Struct3Builder) C(value *Struct2) *Struct3Builder {
+    x.obj.C = value
     return x
 }
 
@@ -1491,18 +1491,18 @@ func (x *Struct4) GetC() *byte {
     return x.C
 }
 
-func (x *Struct4) SetA(a int32) *Struct4 {
-    x.A = a
+func (x *Struct4) SetA(value int32) *Struct4 {
+    x.A = value
     return x
 }
 
-func (x *Struct4) SetB(b float64) *Struct4 {
-    x.B = &b
+func (x *Struct4) SetB(value float64) *Struct4 {
+    x.B = &value
     return x
 }
 
-func (x *Struct4) SetC(c byte) *Struct4 {
-    x.C = &c
+func (x *Struct4) SetC(value byte) *Struct4 {
+    x.C = &value
     return x
 }
 
@@ -1613,18 +1613,18 @@ func NewStruct4Builder() *Struct4Builder {
     }
 }
 
-func (x *Struct4Builder) A(a int32) *Struct4Builder {
-    x.obj.A = a
+func (x *Struct4Builder) A(value int32) *Struct4Builder {
+    x.obj.A = value
     return x
 }
 
-func (x *Struct4Builder) B(b *float64) *Struct4Builder {
-    x.obj.B = b
+func (x *Struct4Builder) B(value *float64) *Struct4Builder {
+    x.obj.B = value
     return x
 }
 
-func (x *Struct4Builder) C(c *byte) *Struct4Builder {
-    x.obj.C = c
+func (x *Struct4Builder) C(value *byte) *Struct4Builder {
+    x.obj.C = value
     return x
 }
 
@@ -1724,13 +1724,13 @@ func (x *Union1) GetD() *float64 {
     return x.D
 }
 
-func (x *Union1) SetI(i int32) *Union1 {
-    x.I = &i
+func (x *Union1) SetI(value int32) *Union1 {
+    x.I = &value
     return x
 }
 
-func (x *Union1) SetD(d float64) *Union1 {
-    x.D = &d
+func (x *Union1) SetD(value float64) *Union1 {
+    x.D = &value
     return x
 }
 
@@ -1897,23 +1897,23 @@ func (x *Union2) GetU() *Union1 {
     return x.U
 }
 
-func (x *Union2) SetI(i int32) *Union2 {
-    x.I = &i
+func (x *Union2) SetI(value int32) *Union2 {
+    x.I = &value
     return x
 }
 
-func (x *Union2) SetD(d float64) *Union2 {
-    x.D = &d
+func (x *Union2) SetD(value float64) *Union2 {
+    x.D = &value
     return x
 }
 
-func (x *Union2) SetS(s Struct1) *Union2 {
-    x.S = &s
+func (x *Union2) SetS(value Struct1) *Union2 {
+    x.S = &value
     return x
 }
 
-func (x *Union2) SetU(u Union1) *Union2 {
-    x.U = &u
+func (x *Union2) SetU(value Union1) *Union2 {
+    x.U = &value
     return x
 }
 

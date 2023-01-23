@@ -297,18 +297,18 @@ func (x *BoolPatch) GetInvert() bool {
     return x.Invert
 }
 
-func (x *BoolPatch) SetAssign(assign bool) *BoolPatch {
-    x.Assign = &assign
+func (x *BoolPatch) SetAssign(value bool) *BoolPatch {
+    x.Assign = &value
     return x
 }
 
-func (x *BoolPatch) SetClear(clear bool) *BoolPatch {
-    x.Clear = clear
+func (x *BoolPatch) SetClear(value bool) *BoolPatch {
+    x.Clear = value
     return x
 }
 
-func (x *BoolPatch) SetInvert(invert bool) *BoolPatch {
-    x.Invert = invert
+func (x *BoolPatch) SetInvert(value bool) *BoolPatch {
+    x.Invert = value
     return x
 }
 
@@ -412,18 +412,18 @@ func NewBoolPatchBuilder() *BoolPatchBuilder {
     }
 }
 
-func (x *BoolPatchBuilder) Assign(assign *bool) *BoolPatchBuilder {
-    x.obj.Assign = assign
+func (x *BoolPatchBuilder) Assign(value *bool) *BoolPatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *BoolPatchBuilder) Clear(clear bool) *BoolPatchBuilder {
-    x.obj.Clear = clear
+func (x *BoolPatchBuilder) Clear(value bool) *BoolPatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *BoolPatchBuilder) Invert(invert bool) *BoolPatchBuilder {
-    x.obj.Invert = invert
+func (x *BoolPatchBuilder) Invert(value bool) *BoolPatchBuilder {
+    x.obj.Invert = value
     return x
 }
 
@@ -528,18 +528,18 @@ func (x *BytePatch) GetAdd() byte {
     return x.Add
 }
 
-func (x *BytePatch) SetAssign(assign byte) *BytePatch {
-    x.Assign = &assign
+func (x *BytePatch) SetAssign(value byte) *BytePatch {
+    x.Assign = &value
     return x
 }
 
-func (x *BytePatch) SetClear(clear bool) *BytePatch {
-    x.Clear = clear
+func (x *BytePatch) SetClear(value bool) *BytePatch {
+    x.Clear = value
     return x
 }
 
-func (x *BytePatch) SetAdd(add byte) *BytePatch {
-    x.Add = add
+func (x *BytePatch) SetAdd(value byte) *BytePatch {
+    x.Add = value
     return x
 }
 
@@ -643,18 +643,18 @@ func NewBytePatchBuilder() *BytePatchBuilder {
     }
 }
 
-func (x *BytePatchBuilder) Assign(assign *byte) *BytePatchBuilder {
-    x.obj.Assign = assign
+func (x *BytePatchBuilder) Assign(value *byte) *BytePatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *BytePatchBuilder) Clear(clear bool) *BytePatchBuilder {
-    x.obj.Clear = clear
+func (x *BytePatchBuilder) Clear(value bool) *BytePatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *BytePatchBuilder) Add(add byte) *BytePatchBuilder {
-    x.obj.Add = add
+func (x *BytePatchBuilder) Add(value byte) *BytePatchBuilder {
+    x.obj.Add = value
     return x
 }
 
@@ -759,18 +759,18 @@ func (x *I16Patch) GetAdd() int16 {
     return x.Add
 }
 
-func (x *I16Patch) SetAssign(assign int16) *I16Patch {
-    x.Assign = &assign
+func (x *I16Patch) SetAssign(value int16) *I16Patch {
+    x.Assign = &value
     return x
 }
 
-func (x *I16Patch) SetClear(clear bool) *I16Patch {
-    x.Clear = clear
+func (x *I16Patch) SetClear(value bool) *I16Patch {
+    x.Clear = value
     return x
 }
 
-func (x *I16Patch) SetAdd(add int16) *I16Patch {
-    x.Add = add
+func (x *I16Patch) SetAdd(value int16) *I16Patch {
+    x.Add = value
     return x
 }
 
@@ -874,18 +874,18 @@ func NewI16PatchBuilder() *I16PatchBuilder {
     }
 }
 
-func (x *I16PatchBuilder) Assign(assign *int16) *I16PatchBuilder {
-    x.obj.Assign = assign
+func (x *I16PatchBuilder) Assign(value *int16) *I16PatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *I16PatchBuilder) Clear(clear bool) *I16PatchBuilder {
-    x.obj.Clear = clear
+func (x *I16PatchBuilder) Clear(value bool) *I16PatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *I16PatchBuilder) Add(add int16) *I16PatchBuilder {
-    x.obj.Add = add
+func (x *I16PatchBuilder) Add(value int16) *I16PatchBuilder {
+    x.obj.Add = value
     return x
 }
 
@@ -990,18 +990,18 @@ func (x *I32Patch) GetAdd() int32 {
     return x.Add
 }
 
-func (x *I32Patch) SetAssign(assign int32) *I32Patch {
-    x.Assign = &assign
+func (x *I32Patch) SetAssign(value int32) *I32Patch {
+    x.Assign = &value
     return x
 }
 
-func (x *I32Patch) SetClear(clear bool) *I32Patch {
-    x.Clear = clear
+func (x *I32Patch) SetClear(value bool) *I32Patch {
+    x.Clear = value
     return x
 }
 
-func (x *I32Patch) SetAdd(add int32) *I32Patch {
-    x.Add = add
+func (x *I32Patch) SetAdd(value int32) *I32Patch {
+    x.Add = value
     return x
 }
 
@@ -1105,18 +1105,18 @@ func NewI32PatchBuilder() *I32PatchBuilder {
     }
 }
 
-func (x *I32PatchBuilder) Assign(assign *int32) *I32PatchBuilder {
-    x.obj.Assign = assign
+func (x *I32PatchBuilder) Assign(value *int32) *I32PatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *I32PatchBuilder) Clear(clear bool) *I32PatchBuilder {
-    x.obj.Clear = clear
+func (x *I32PatchBuilder) Clear(value bool) *I32PatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *I32PatchBuilder) Add(add int32) *I32PatchBuilder {
-    x.obj.Add = add
+func (x *I32PatchBuilder) Add(value int32) *I32PatchBuilder {
+    x.obj.Add = value
     return x
 }
 
@@ -1221,18 +1221,18 @@ func (x *I64Patch) GetAdd() int64 {
     return x.Add
 }
 
-func (x *I64Patch) SetAssign(assign int64) *I64Patch {
-    x.Assign = &assign
+func (x *I64Patch) SetAssign(value int64) *I64Patch {
+    x.Assign = &value
     return x
 }
 
-func (x *I64Patch) SetClear(clear bool) *I64Patch {
-    x.Clear = clear
+func (x *I64Patch) SetClear(value bool) *I64Patch {
+    x.Clear = value
     return x
 }
 
-func (x *I64Patch) SetAdd(add int64) *I64Patch {
-    x.Add = add
+func (x *I64Patch) SetAdd(value int64) *I64Patch {
+    x.Add = value
     return x
 }
 
@@ -1336,18 +1336,18 @@ func NewI64PatchBuilder() *I64PatchBuilder {
     }
 }
 
-func (x *I64PatchBuilder) Assign(assign *int64) *I64PatchBuilder {
-    x.obj.Assign = assign
+func (x *I64PatchBuilder) Assign(value *int64) *I64PatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *I64PatchBuilder) Clear(clear bool) *I64PatchBuilder {
-    x.obj.Clear = clear
+func (x *I64PatchBuilder) Clear(value bool) *I64PatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *I64PatchBuilder) Add(add int64) *I64PatchBuilder {
-    x.obj.Add = add
+func (x *I64PatchBuilder) Add(value int64) *I64PatchBuilder {
+    x.obj.Add = value
     return x
 }
 
@@ -1452,18 +1452,18 @@ func (x *FloatPatch) GetAdd() float32 {
     return x.Add
 }
 
-func (x *FloatPatch) SetAssign(assign float32) *FloatPatch {
-    x.Assign = &assign
+func (x *FloatPatch) SetAssign(value float32) *FloatPatch {
+    x.Assign = &value
     return x
 }
 
-func (x *FloatPatch) SetClear(clear bool) *FloatPatch {
-    x.Clear = clear
+func (x *FloatPatch) SetClear(value bool) *FloatPatch {
+    x.Clear = value
     return x
 }
 
-func (x *FloatPatch) SetAdd(add float32) *FloatPatch {
-    x.Add = add
+func (x *FloatPatch) SetAdd(value float32) *FloatPatch {
+    x.Add = value
     return x
 }
 
@@ -1567,18 +1567,18 @@ func NewFloatPatchBuilder() *FloatPatchBuilder {
     }
 }
 
-func (x *FloatPatchBuilder) Assign(assign *float32) *FloatPatchBuilder {
-    x.obj.Assign = assign
+func (x *FloatPatchBuilder) Assign(value *float32) *FloatPatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *FloatPatchBuilder) Clear(clear bool) *FloatPatchBuilder {
-    x.obj.Clear = clear
+func (x *FloatPatchBuilder) Clear(value bool) *FloatPatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *FloatPatchBuilder) Add(add float32) *FloatPatchBuilder {
-    x.obj.Add = add
+func (x *FloatPatchBuilder) Add(value float32) *FloatPatchBuilder {
+    x.obj.Add = value
     return x
 }
 
@@ -1683,18 +1683,18 @@ func (x *DoublePatch) GetAdd() float64 {
     return x.Add
 }
 
-func (x *DoublePatch) SetAssign(assign float64) *DoublePatch {
-    x.Assign = &assign
+func (x *DoublePatch) SetAssign(value float64) *DoublePatch {
+    x.Assign = &value
     return x
 }
 
-func (x *DoublePatch) SetClear(clear bool) *DoublePatch {
-    x.Clear = clear
+func (x *DoublePatch) SetClear(value bool) *DoublePatch {
+    x.Clear = value
     return x
 }
 
-func (x *DoublePatch) SetAdd(add float64) *DoublePatch {
-    x.Add = add
+func (x *DoublePatch) SetAdd(value float64) *DoublePatch {
+    x.Add = value
     return x
 }
 
@@ -1798,18 +1798,18 @@ func NewDoublePatchBuilder() *DoublePatchBuilder {
     }
 }
 
-func (x *DoublePatchBuilder) Assign(assign *float64) *DoublePatchBuilder {
-    x.obj.Assign = assign
+func (x *DoublePatchBuilder) Assign(value *float64) *DoublePatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *DoublePatchBuilder) Clear(clear bool) *DoublePatchBuilder {
-    x.obj.Clear = clear
+func (x *DoublePatchBuilder) Clear(value bool) *DoublePatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *DoublePatchBuilder) Add(add float64) *DoublePatchBuilder {
-    x.obj.Add = add
+func (x *DoublePatchBuilder) Add(value float64) *DoublePatchBuilder {
+    x.obj.Add = value
     return x
 }
 
@@ -1919,23 +1919,23 @@ func (x *StringPatch) GetAppend() string {
     return x.Append
 }
 
-func (x *StringPatch) SetAssign(assign string) *StringPatch {
-    x.Assign = &assign
+func (x *StringPatch) SetAssign(value string) *StringPatch {
+    x.Assign = &value
     return x
 }
 
-func (x *StringPatch) SetClear(clear bool) *StringPatch {
-    x.Clear = clear
+func (x *StringPatch) SetClear(value bool) *StringPatch {
+    x.Clear = value
     return x
 }
 
-func (x *StringPatch) SetPrepend(prepend string) *StringPatch {
-    x.Prepend = prepend
+func (x *StringPatch) SetPrepend(value string) *StringPatch {
+    x.Prepend = value
     return x
 }
 
-func (x *StringPatch) SetAppend(append_ string) *StringPatch {
-    x.Append = append_
+func (x *StringPatch) SetAppend(value string) *StringPatch {
+    x.Append = value
     return x
 }
 
@@ -2066,23 +2066,23 @@ func NewStringPatchBuilder() *StringPatchBuilder {
     }
 }
 
-func (x *StringPatchBuilder) Assign(assign *string) *StringPatchBuilder {
-    x.obj.Assign = assign
+func (x *StringPatchBuilder) Assign(value *string) *StringPatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *StringPatchBuilder) Clear(clear bool) *StringPatchBuilder {
-    x.obj.Clear = clear
+func (x *StringPatchBuilder) Clear(value bool) *StringPatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *StringPatchBuilder) Prepend(prepend string) *StringPatchBuilder {
-    x.obj.Prepend = prepend
+func (x *StringPatchBuilder) Prepend(value string) *StringPatchBuilder {
+    x.obj.Prepend = value
     return x
 }
 
-func (x *StringPatchBuilder) Append(append_ string) *StringPatchBuilder {
-    x.obj.Append = append_
+func (x *StringPatchBuilder) Append(value string) *StringPatchBuilder {
+    x.obj.Append = value
     return x
 }
 
@@ -2200,23 +2200,23 @@ func (x *BinaryPatch) GetAppend() standard.ByteBuffer {
     return x.Append
 }
 
-func (x *BinaryPatch) SetAssign(assign standard.ByteBuffer) *BinaryPatch {
-    x.Assign = assign
+func (x *BinaryPatch) SetAssign(value standard.ByteBuffer) *BinaryPatch {
+    x.Assign = value
     return x
 }
 
-func (x *BinaryPatch) SetClear(clear bool) *BinaryPatch {
-    x.Clear = clear
+func (x *BinaryPatch) SetClear(value bool) *BinaryPatch {
+    x.Clear = value
     return x
 }
 
-func (x *BinaryPatch) SetPrepend(prepend standard.ByteBuffer) *BinaryPatch {
-    x.Prepend = prepend
+func (x *BinaryPatch) SetPrepend(value standard.ByteBuffer) *BinaryPatch {
+    x.Prepend = value
     return x
 }
 
-func (x *BinaryPatch) SetAppend(append_ standard.ByteBuffer) *BinaryPatch {
-    x.Append = append_
+func (x *BinaryPatch) SetAppend(value standard.ByteBuffer) *BinaryPatch {
+    x.Append = value
     return x
 }
 
@@ -2361,23 +2361,23 @@ func NewBinaryPatchBuilder() *BinaryPatchBuilder {
     }
 }
 
-func (x *BinaryPatchBuilder) Assign(assign standard.ByteBuffer) *BinaryPatchBuilder {
-    x.obj.Assign = assign
+func (x *BinaryPatchBuilder) Assign(value standard.ByteBuffer) *BinaryPatchBuilder {
+    x.obj.Assign = value
     return x
 }
 
-func (x *BinaryPatchBuilder) Clear(clear bool) *BinaryPatchBuilder {
-    x.obj.Clear = clear
+func (x *BinaryPatchBuilder) Clear(value bool) *BinaryPatchBuilder {
+    x.obj.Clear = value
     return x
 }
 
-func (x *BinaryPatchBuilder) Prepend(prepend standard.ByteBuffer) *BinaryPatchBuilder {
-    x.obj.Prepend = prepend
+func (x *BinaryPatchBuilder) Prepend(value standard.ByteBuffer) *BinaryPatchBuilder {
+    x.obj.Prepend = value
     return x
 }
 
-func (x *BinaryPatchBuilder) Append(append_ standard.ByteBuffer) *BinaryPatchBuilder {
-    x.obj.Append = append_
+func (x *BinaryPatchBuilder) Append(value standard.ByteBuffer) *BinaryPatchBuilder {
+    x.obj.Append = value
     return x
 }
 

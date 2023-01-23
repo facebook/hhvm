@@ -118,8 +118,8 @@ func (x *reqTestServiceInit) GetInt1() int64 {
     return x.Int1
 }
 
-func (x *reqTestServiceInit) SetInt1(int1 int64) *reqTestServiceInit {
-    x.Int1 = int1
+func (x *reqTestServiceInit) SetInt1(value int64) *reqTestServiceInit {
+    x.Int1 = value
     return x
 }
 
@@ -162,8 +162,8 @@ func newReqTestServiceInitBuilder() *reqTestServiceInitBuilder {
     }
 }
 
-func (x *reqTestServiceInitBuilder) Int1(int1 int64) *reqTestServiceInitBuilder {
-    x.obj.Int1 = int1
+func (x *reqTestServiceInitBuilder) Int1(value int64) *reqTestServiceInitBuilder {
+    x.obj.Int1 = value
     return x
 }
 

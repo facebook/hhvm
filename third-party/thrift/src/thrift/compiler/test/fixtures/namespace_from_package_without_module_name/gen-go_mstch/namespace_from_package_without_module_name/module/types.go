@@ -28,8 +28,8 @@ func (x *Foo) GetMyInt() int64 {
     return x.MyInt
 }
 
-func (x *Foo) SetMyInt(myInt int64) *Foo {
-    x.MyInt = myInt
+func (x *Foo) SetMyInt(value int64) *Foo {
+    x.MyInt = value
     return x
 }
 
@@ -72,8 +72,8 @@ func NewFooBuilder() *FooBuilder {
     }
 }
 
-func (x *FooBuilder) MyInt(myInt int64) *FooBuilder {
-    x.obj.MyInt = myInt
+func (x *FooBuilder) MyInt(value int64) *FooBuilder {
+    x.obj.MyInt = value
     return x
 }
 

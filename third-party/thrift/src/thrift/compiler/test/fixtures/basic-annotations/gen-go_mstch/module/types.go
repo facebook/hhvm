@@ -100,8 +100,8 @@ func (x *MyStructNestedAnnotation) GetName() string {
     return x.Name
 }
 
-func (x *MyStructNestedAnnotation) SetName(name string) *MyStructNestedAnnotation {
-    x.Name = name
+func (x *MyStructNestedAnnotation) SetName(value string) *MyStructNestedAnnotation {
+    x.Name = value
     return x
 }
 
@@ -144,8 +144,8 @@ func NewMyStructNestedAnnotationBuilder() *MyStructNestedAnnotationBuilder {
     }
 }
 
-func (x *MyStructNestedAnnotationBuilder) Name(name string) *MyStructNestedAnnotationBuilder {
-    x.obj.Name = name
+func (x *MyStructNestedAnnotationBuilder) Name(value string) *MyStructNestedAnnotationBuilder {
+    x.obj.Name = value
     return x
 }
 
@@ -410,53 +410,53 @@ func (x *MyStruct) GetMyId() MyId {
     return x.MyId
 }
 
-func (x *MyStruct) SetMajor(major int64) *MyStruct {
-    x.Major = major
+func (x *MyStruct) SetMajor(value int64) *MyStruct {
+    x.Major = value
     return x
 }
 
-func (x *MyStruct) SetPackage(package_ string) *MyStruct {
-    x.Package = package_
+func (x *MyStruct) SetPackage(value string) *MyStruct {
+    x.Package = value
     return x
 }
 
-func (x *MyStruct) SetAnnotationWithQuote(annotationWithQuote string) *MyStruct {
-    x.AnnotationWithQuote = annotationWithQuote
+func (x *MyStruct) SetAnnotationWithQuote(value string) *MyStruct {
+    x.AnnotationWithQuote = value
     return x
 }
 
-func (x *MyStruct) SetClass(class string) *MyStruct {
-    x.Class = class
+func (x *MyStruct) SetClass(value string) *MyStruct {
+    x.Class = value
     return x
 }
 
-func (x *MyStruct) SetAnnotationWithTrailingComma(annotationWithTrailingComma string) *MyStruct {
-    x.AnnotationWithTrailingComma = annotationWithTrailingComma
+func (x *MyStruct) SetAnnotationWithTrailingComma(value string) *MyStruct {
+    x.AnnotationWithTrailingComma = value
     return x
 }
 
-func (x *MyStruct) SetEmptyAnnotations(emptyAnnotations string) *MyStruct {
-    x.EmptyAnnotations = emptyAnnotations
+func (x *MyStruct) SetEmptyAnnotations(value string) *MyStruct {
+    x.EmptyAnnotations = value
     return x
 }
 
-func (x *MyStruct) SetMyEnum(myEnum MyEnum) *MyStruct {
-    x.MyEnum = myEnum
+func (x *MyStruct) SetMyEnum(value MyEnum) *MyStruct {
+    x.MyEnum = value
     return x
 }
 
-func (x *MyStruct) SetCppTypeAnnotation(cppTypeAnnotation []string) *MyStruct {
-    x.CppTypeAnnotation = cppTypeAnnotation
+func (x *MyStruct) SetCppTypeAnnotation(value []string) *MyStruct {
+    x.CppTypeAnnotation = value
     return x
 }
 
-func (x *MyStruct) SetMyUnion(myUnion MyUnion) *MyStruct {
-    x.MyUnion = &myUnion
+func (x *MyStruct) SetMyUnion(value MyUnion) *MyStruct {
+    x.MyUnion = &value
     return x
 }
 
-func (x *MyStruct) SetMyId(myId MyId) *MyStruct {
-    x.MyId = myId
+func (x *MyStruct) SetMyId(value MyId) *MyStruct {
+    x.MyId = value
     return x
 }
 
@@ -787,53 +787,53 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) Major(major int64) *MyStructBuilder {
-    x.obj.Major = major
+func (x *MyStructBuilder) Major(value int64) *MyStructBuilder {
+    x.obj.Major = value
     return x
 }
 
-func (x *MyStructBuilder) Package(package_ string) *MyStructBuilder {
-    x.obj.Package = package_
+func (x *MyStructBuilder) Package(value string) *MyStructBuilder {
+    x.obj.Package = value
     return x
 }
 
-func (x *MyStructBuilder) AnnotationWithQuote(annotationWithQuote string) *MyStructBuilder {
-    x.obj.AnnotationWithQuote = annotationWithQuote
+func (x *MyStructBuilder) AnnotationWithQuote(value string) *MyStructBuilder {
+    x.obj.AnnotationWithQuote = value
     return x
 }
 
-func (x *MyStructBuilder) Class(class string) *MyStructBuilder {
-    x.obj.Class = class
+func (x *MyStructBuilder) Class(value string) *MyStructBuilder {
+    x.obj.Class = value
     return x
 }
 
-func (x *MyStructBuilder) AnnotationWithTrailingComma(annotationWithTrailingComma string) *MyStructBuilder {
-    x.obj.AnnotationWithTrailingComma = annotationWithTrailingComma
+func (x *MyStructBuilder) AnnotationWithTrailingComma(value string) *MyStructBuilder {
+    x.obj.AnnotationWithTrailingComma = value
     return x
 }
 
-func (x *MyStructBuilder) EmptyAnnotations(emptyAnnotations string) *MyStructBuilder {
-    x.obj.EmptyAnnotations = emptyAnnotations
+func (x *MyStructBuilder) EmptyAnnotations(value string) *MyStructBuilder {
+    x.obj.EmptyAnnotations = value
     return x
 }
 
-func (x *MyStructBuilder) MyEnum(myEnum MyEnum) *MyStructBuilder {
-    x.obj.MyEnum = myEnum
+func (x *MyStructBuilder) MyEnum(value MyEnum) *MyStructBuilder {
+    x.obj.MyEnum = value
     return x
 }
 
-func (x *MyStructBuilder) CppTypeAnnotation(cppTypeAnnotation []string) *MyStructBuilder {
-    x.obj.CppTypeAnnotation = cppTypeAnnotation
+func (x *MyStructBuilder) CppTypeAnnotation(value []string) *MyStructBuilder {
+    x.obj.CppTypeAnnotation = value
     return x
 }
 
-func (x *MyStructBuilder) MyUnion(myUnion *MyUnion) *MyStructBuilder {
-    x.obj.MyUnion = myUnion
+func (x *MyStructBuilder) MyUnion(value *MyUnion) *MyStructBuilder {
+    x.obj.MyUnion = value
     return x
 }
 
-func (x *MyStructBuilder) MyId(myId MyId) *MyStructBuilder {
-    x.obj.MyId = myId
+func (x *MyStructBuilder) MyId(value MyId) *MyStructBuilder {
+    x.obj.MyId = value
     return x
 }
 
@@ -989,13 +989,13 @@ func (x *SecretStruct) GetPassword() string {
     return x.Password
 }
 
-func (x *SecretStruct) SetId(id int64) *SecretStruct {
-    x.Id = id
+func (x *SecretStruct) SetId(value int64) *SecretStruct {
+    x.Id = value
     return x
 }
 
-func (x *SecretStruct) SetPassword(password string) *SecretStruct {
-    x.Password = password
+func (x *SecretStruct) SetPassword(value string) *SecretStruct {
+    x.Password = value
     return x
 }
 
@@ -1065,13 +1065,13 @@ func NewSecretStructBuilder() *SecretStructBuilder {
     }
 }
 
-func (x *SecretStructBuilder) Id(id int64) *SecretStructBuilder {
-    x.obj.Id = id
+func (x *SecretStructBuilder) Id(value int64) *SecretStructBuilder {
+    x.obj.Id = value
     return x
 }
 
-func (x *SecretStructBuilder) Password(password string) *SecretStructBuilder {
-    x.obj.Password = password
+func (x *SecretStructBuilder) Password(value string) *SecretStructBuilder {
+    x.obj.Password = value
     return x
 }
 

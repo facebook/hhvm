@@ -44,18 +44,18 @@ func (x *MyStruct) GetMyIncludedInt() includes.IncludedInt64 {
     return x.MyIncludedInt
 }
 
-func (x *MyStruct) SetMyIncludedField(myIncludedField includes.Included) *MyStruct {
-    x.MyIncludedField = &myIncludedField
+func (x *MyStruct) SetMyIncludedField(value includes.Included) *MyStruct {
+    x.MyIncludedField = &value
     return x
 }
 
-func (x *MyStruct) SetMyOtherIncludedField(myOtherIncludedField includes.Included) *MyStruct {
-    x.MyOtherIncludedField = &myOtherIncludedField
+func (x *MyStruct) SetMyOtherIncludedField(value includes.Included) *MyStruct {
+    x.MyOtherIncludedField = &value
     return x
 }
 
-func (x *MyStruct) SetMyIncludedInt(myIncludedInt includes.IncludedInt64) *MyStruct {
-    x.MyIncludedInt = myIncludedInt
+func (x *MyStruct) SetMyIncludedInt(value includes.IncludedInt64) *MyStruct {
+    x.MyIncludedInt = value
     return x
 }
 
@@ -168,18 +168,18 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) MyIncludedField(myIncludedField *includes.Included) *MyStructBuilder {
-    x.obj.MyIncludedField = myIncludedField
+func (x *MyStructBuilder) MyIncludedField(value *includes.Included) *MyStructBuilder {
+    x.obj.MyIncludedField = value
     return x
 }
 
-func (x *MyStructBuilder) MyOtherIncludedField(myOtherIncludedField *includes.Included) *MyStructBuilder {
-    x.obj.MyOtherIncludedField = myOtherIncludedField
+func (x *MyStructBuilder) MyOtherIncludedField(value *includes.Included) *MyStructBuilder {
+    x.obj.MyOtherIncludedField = value
     return x
 }
 
-func (x *MyStructBuilder) MyIncludedInt(myIncludedInt includes.IncludedInt64) *MyStructBuilder {
-    x.obj.MyIncludedInt = myIncludedInt
+func (x *MyStructBuilder) MyIncludedInt(value includes.IncludedInt64) *MyStructBuilder {
+    x.obj.MyIncludedInt = value
     return x
 }
 

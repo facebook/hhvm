@@ -98,13 +98,13 @@ func (x *MyStruct) GetMyStringField() string {
     return x.MyStringField
 }
 
-func (x *MyStruct) SetMyIntField(myIntField int64) *MyStruct {
-    x.MyIntField = myIntField
+func (x *MyStruct) SetMyIntField(value int64) *MyStruct {
+    x.MyIntField = value
     return x
 }
 
-func (x *MyStruct) SetMyStringField(myStringField string) *MyStruct {
-    x.MyStringField = myStringField
+func (x *MyStruct) SetMyStringField(value string) *MyStruct {
+    x.MyStringField = value
     return x
 }
 
@@ -174,13 +174,13 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) MyIntField(myIntField int64) *MyStructBuilder {
-    x.obj.MyIntField = myIntField
+func (x *MyStructBuilder) MyIntField(value int64) *MyStructBuilder {
+    x.obj.MyIntField = value
     return x
 }
 
-func (x *MyStructBuilder) MyStringField(myStringField string) *MyStructBuilder {
-    x.obj.MyStringField = myStringField
+func (x *MyStructBuilder) MyStringField(value string) *MyStructBuilder {
+    x.obj.MyStringField = value
     return x
 }
 
@@ -272,13 +272,13 @@ func (x *MyUnion) GetMyDataItem() *MyStruct {
     return x.MyDataItem
 }
 
-func (x *MyUnion) SetMyEnum(myEnum MyEnum) *MyUnion {
-    x.MyEnum = &myEnum
+func (x *MyUnion) SetMyEnum(value MyEnum) *MyUnion {
+    x.MyEnum = &value
     return x
 }
 
-func (x *MyUnion) SetMyDataItem(myDataItem MyStruct) *MyUnion {
-    x.MyDataItem = &myDataItem
+func (x *MyUnion) SetMyDataItem(value MyStruct) *MyUnion {
+    x.MyDataItem = &value
     return x
 }
 

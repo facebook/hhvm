@@ -30,8 +30,8 @@ func (x *IncludesAlso) GetAlso() *includesAlso.Also {
     return x.Also
 }
 
-func (x *IncludesAlso) SetAlso(also includesAlso.Also) *IncludesAlso {
-    x.Also = &also
+func (x *IncludesAlso) SetAlso(value includesAlso.Also) *IncludesAlso {
+    x.Also = &value
     return x
 }
 
@@ -82,8 +82,8 @@ func NewIncludesAlsoBuilder() *IncludesAlsoBuilder {
     }
 }
 
-func (x *IncludesAlsoBuilder) Also(also *includesAlso.Also) *IncludesAlsoBuilder {
-    x.obj.Also = also
+func (x *IncludesAlsoBuilder) Also(value *includesAlso.Also) *IncludesAlsoBuilder {
+    x.obj.Also = value
     return x
 }
 

@@ -145,13 +145,13 @@ func (x *reqMyServiceQuery) GetI() *includes.Included {
     return x.I
 }
 
-func (x *reqMyServiceQuery) SetS(s module.MyStruct) *reqMyServiceQuery {
-    x.S = &s
+func (x *reqMyServiceQuery) SetS(value module.MyStruct) *reqMyServiceQuery {
+    x.S = &value
     return x
 }
 
-func (x *reqMyServiceQuery) SetI(i includes.Included) *reqMyServiceQuery {
-    x.I = &i
+func (x *reqMyServiceQuery) SetI(value includes.Included) *reqMyServiceQuery {
+    x.I = &value
     return x
 }
 
@@ -237,13 +237,13 @@ func newReqMyServiceQueryBuilder() *reqMyServiceQueryBuilder {
     }
 }
 
-func (x *reqMyServiceQueryBuilder) S(s *module.MyStruct) *reqMyServiceQueryBuilder {
-    x.obj.S = s
+func (x *reqMyServiceQueryBuilder) S(value *module.MyStruct) *reqMyServiceQueryBuilder {
+    x.obj.S = value
     return x
 }
 
-func (x *reqMyServiceQueryBuilder) I(i *includes.Included) *reqMyServiceQueryBuilder {
-    x.obj.I = i
+func (x *reqMyServiceQueryBuilder) I(value *includes.Included) *reqMyServiceQueryBuilder {
+    x.obj.I = value
     return x
 }
 
@@ -407,13 +407,13 @@ func (x *reqMyServiceHasArgDocs) GetI() *includes.Included {
     return x.I
 }
 
-func (x *reqMyServiceHasArgDocs) SetS(s module.MyStruct) *reqMyServiceHasArgDocs {
-    x.S = &s
+func (x *reqMyServiceHasArgDocs) SetS(value module.MyStruct) *reqMyServiceHasArgDocs {
+    x.S = &value
     return x
 }
 
-func (x *reqMyServiceHasArgDocs) SetI(i includes.Included) *reqMyServiceHasArgDocs {
-    x.I = &i
+func (x *reqMyServiceHasArgDocs) SetI(value includes.Included) *reqMyServiceHasArgDocs {
+    x.I = &value
     return x
 }
 
@@ -499,13 +499,13 @@ func newReqMyServiceHasArgDocsBuilder() *reqMyServiceHasArgDocsBuilder {
     }
 }
 
-func (x *reqMyServiceHasArgDocsBuilder) S(s *module.MyStruct) *reqMyServiceHasArgDocsBuilder {
-    x.obj.S = s
+func (x *reqMyServiceHasArgDocsBuilder) S(value *module.MyStruct) *reqMyServiceHasArgDocsBuilder {
+    x.obj.S = value
     return x
 }
 
-func (x *reqMyServiceHasArgDocsBuilder) I(i *includes.Included) *reqMyServiceHasArgDocsBuilder {
-    x.obj.I = i
+func (x *reqMyServiceHasArgDocsBuilder) I(value *includes.Included) *reqMyServiceHasArgDocsBuilder {
+    x.obj.I = value
     return x
 }
 

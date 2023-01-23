@@ -55,33 +55,33 @@ func (x *ComplexUnion) GetStringRef() *string {
     return x.StringRef
 }
 
-func (x *ComplexUnion) SetIntValue(intValue int64) *ComplexUnion {
-    x.IntValue = &intValue
+func (x *ComplexUnion) SetIntValue(value int64) *ComplexUnion {
+    x.IntValue = &value
     return x
 }
 
-func (x *ComplexUnion) SetStringValue(stringValue string) *ComplexUnion {
-    x.StringValue = &stringValue
+func (x *ComplexUnion) SetStringValue(value string) *ComplexUnion {
+    x.StringValue = &value
     return x
 }
 
-func (x *ComplexUnion) SetIntListValue(intListValue []int64) *ComplexUnion {
-    x.IntListValue = intListValue
+func (x *ComplexUnion) SetIntListValue(value []int64) *ComplexUnion {
+    x.IntListValue = value
     return x
 }
 
-func (x *ComplexUnion) SetStringListValue(stringListValue []string) *ComplexUnion {
-    x.StringListValue = stringListValue
+func (x *ComplexUnion) SetStringListValue(value []string) *ComplexUnion {
+    x.StringListValue = value
     return x
 }
 
-func (x *ComplexUnion) SetTypedefValue(typedefValue ContainerTypedef) *ComplexUnion {
-    x.TypedefValue = typedefValue
+func (x *ComplexUnion) SetTypedefValue(value ContainerTypedef) *ComplexUnion {
+    x.TypedefValue = value
     return x
 }
 
-func (x *ComplexUnion) SetStringRef(stringRef string) *ComplexUnion {
-    x.StringRef = &stringRef
+func (x *ComplexUnion) SetStringRef(value string) *ComplexUnion {
+    x.StringRef = &value
     return x
 }
 
@@ -510,13 +510,13 @@ func (x *ListUnion) GetStringListValue() []string {
     return x.StringListValue
 }
 
-func (x *ListUnion) SetIntListValue(intListValue []int64) *ListUnion {
-    x.IntListValue = intListValue
+func (x *ListUnion) SetIntListValue(value []int64) *ListUnion {
+    x.IntListValue = value
     return x
 }
 
-func (x *ListUnion) SetStringListValue(stringListValue []string) *ListUnion {
-    x.StringListValue = stringListValue
+func (x *ListUnion) SetStringListValue(value []string) *ListUnion {
+    x.StringListValue = value
     return x
 }
 
@@ -731,13 +731,13 @@ func (x *DataUnion) GetStringData() *string {
     return x.StringData
 }
 
-func (x *DataUnion) SetBinaryData(binaryData []byte) *DataUnion {
-    x.BinaryData = binaryData
+func (x *DataUnion) SetBinaryData(value []byte) *DataUnion {
+    x.BinaryData = value
     return x
 }
 
-func (x *DataUnion) SetStringData(stringData string) *DataUnion {
-    x.StringData = &stringData
+func (x *DataUnion) SetStringData(value string) *DataUnion {
+    x.StringData = &value
     return x
 }
 
@@ -899,18 +899,18 @@ func (x *Val) GetTypedefValue() ContainerTypedef {
     return x.TypedefValue
 }
 
-func (x *Val) SetStrVal(strVal string) *Val {
-    x.StrVal = strVal
+func (x *Val) SetStrVal(value string) *Val {
+    x.StrVal = value
     return x
 }
 
-func (x *Val) SetIntVal(intVal int32) *Val {
-    x.IntVal = intVal
+func (x *Val) SetIntVal(value int32) *Val {
+    x.IntVal = value
     return x
 }
 
-func (x *Val) SetTypedefValue(typedefValue ContainerTypedef) *Val {
-    x.TypedefValue = typedefValue
+func (x *Val) SetTypedefValue(value ContainerTypedef) *Val {
+    x.TypedefValue = value
     return x
 }
 
@@ -1060,18 +1060,18 @@ func NewValBuilder() *ValBuilder {
     }
 }
 
-func (x *ValBuilder) StrVal(strVal string) *ValBuilder {
-    x.obj.StrVal = strVal
+func (x *ValBuilder) StrVal(value string) *ValBuilder {
+    x.obj.StrVal = value
     return x
 }
 
-func (x *ValBuilder) IntVal(intVal int32) *ValBuilder {
-    x.obj.IntVal = intVal
+func (x *ValBuilder) IntVal(value int32) *ValBuilder {
+    x.obj.IntVal = value
     return x
 }
 
-func (x *ValBuilder) TypedefValue(typedefValue ContainerTypedef) *ValBuilder {
-    x.obj.TypedefValue = typedefValue
+func (x *ValBuilder) TypedefValue(value ContainerTypedef) *ValBuilder {
+    x.obj.TypedefValue = value
     return x
 }
 
@@ -1171,13 +1171,13 @@ func (x *ValUnion) GetV2() *Val {
     return x.V2
 }
 
-func (x *ValUnion) SetV1(v1 Val) *ValUnion {
-    x.V1 = &v1
+func (x *ValUnion) SetV1(value Val) *ValUnion {
+    x.V1 = &value
     return x
 }
 
-func (x *ValUnion) SetV2(v2 Val) *ValUnion {
-    x.V2 = &v2
+func (x *ValUnion) SetV2(value Val) *ValUnion {
+    x.V2 = &value
     return x
 }
 
@@ -1336,13 +1336,13 @@ func (x *VirtualComplexUnion) GetThingTwo() *string {
     return x.ThingTwo
 }
 
-func (x *VirtualComplexUnion) SetThingOne(thingOne string) *VirtualComplexUnion {
-    x.ThingOne = &thingOne
+func (x *VirtualComplexUnion) SetThingOne(value string) *VirtualComplexUnion {
+    x.ThingOne = &value
     return x
 }
 
-func (x *VirtualComplexUnion) SetThingTwo(thingTwo string) *VirtualComplexUnion {
-    x.ThingTwo = &thingTwo
+func (x *VirtualComplexUnion) SetThingTwo(value string) *VirtualComplexUnion {
+    x.ThingTwo = &value
     return x
 }
 
@@ -1494,8 +1494,8 @@ func (x *NonCopyableStruct) GetNum() int64 {
     return x.Num
 }
 
-func (x *NonCopyableStruct) SetNum(num int64) *NonCopyableStruct {
-    x.Num = num
+func (x *NonCopyableStruct) SetNum(value int64) *NonCopyableStruct {
+    x.Num = value
     return x
 }
 
@@ -1538,8 +1538,8 @@ func NewNonCopyableStructBuilder() *NonCopyableStructBuilder {
     }
 }
 
-func (x *NonCopyableStructBuilder) Num(num int64) *NonCopyableStructBuilder {
-    x.obj.Num = num
+func (x *NonCopyableStructBuilder) Num(value int64) *NonCopyableStructBuilder {
+    x.obj.Num = value
     return x
 }
 
@@ -1618,8 +1618,8 @@ func (x *NonCopyableUnion) GetS() *NonCopyableStruct {
     return x.S
 }
 
-func (x *NonCopyableUnion) SetS(s NonCopyableStruct) *NonCopyableUnion {
-    x.S = &s
+func (x *NonCopyableUnion) SetS(value NonCopyableStruct) *NonCopyableUnion {
+    x.S = &value
     return x
 }
 

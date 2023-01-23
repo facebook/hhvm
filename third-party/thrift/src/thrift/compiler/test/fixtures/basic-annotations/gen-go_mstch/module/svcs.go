@@ -557,8 +557,8 @@ func (x *reqMyServiceHasDataById) GetId() int64 {
     return x.Id
 }
 
-func (x *reqMyServiceHasDataById) SetId(id int64) *reqMyServiceHasDataById {
-    x.Id = id
+func (x *reqMyServiceHasDataById) SetId(value int64) *reqMyServiceHasDataById {
+    x.Id = value
     return x
 }
 
@@ -601,8 +601,8 @@ func newReqMyServiceHasDataByIdBuilder() *reqMyServiceHasDataByIdBuilder {
     }
 }
 
-func (x *reqMyServiceHasDataByIdBuilder) Id(id int64) *reqMyServiceHasDataByIdBuilder {
-    x.obj.Id = id
+func (x *reqMyServiceHasDataByIdBuilder) Id(value int64) *reqMyServiceHasDataByIdBuilder {
+    x.obj.Id = value
     return x
 }
 
@@ -803,8 +803,8 @@ func (x *reqMyServiceGetDataById) GetId() int64 {
     return x.Id
 }
 
-func (x *reqMyServiceGetDataById) SetId(id int64) *reqMyServiceGetDataById {
-    x.Id = id
+func (x *reqMyServiceGetDataById) SetId(value int64) *reqMyServiceGetDataById {
+    x.Id = value
     return x
 }
 
@@ -847,8 +847,8 @@ func newReqMyServiceGetDataByIdBuilder() *reqMyServiceGetDataByIdBuilder {
     }
 }
 
-func (x *reqMyServiceGetDataByIdBuilder) Id(id int64) *reqMyServiceGetDataByIdBuilder {
-    x.obj.Id = id
+func (x *reqMyServiceGetDataByIdBuilder) Id(value int64) *reqMyServiceGetDataByIdBuilder {
+    x.obj.Id = value
     return x
 }
 
@@ -1054,13 +1054,13 @@ func (x *reqMyServicePutDataById) GetData() string {
     return x.Data
 }
 
-func (x *reqMyServicePutDataById) SetId(id int64) *reqMyServicePutDataById {
-    x.Id = id
+func (x *reqMyServicePutDataById) SetId(value int64) *reqMyServicePutDataById {
+    x.Id = value
     return x
 }
 
-func (x *reqMyServicePutDataById) SetData(data string) *reqMyServicePutDataById {
-    x.Data = data
+func (x *reqMyServicePutDataById) SetData(value string) *reqMyServicePutDataById {
+    x.Data = value
     return x
 }
 
@@ -1130,13 +1130,13 @@ func newReqMyServicePutDataByIdBuilder() *reqMyServicePutDataByIdBuilder {
     }
 }
 
-func (x *reqMyServicePutDataByIdBuilder) Id(id int64) *reqMyServicePutDataByIdBuilder {
-    x.obj.Id = id
+func (x *reqMyServicePutDataByIdBuilder) Id(value int64) *reqMyServicePutDataByIdBuilder {
+    x.obj.Id = value
     return x
 }
 
-func (x *reqMyServicePutDataByIdBuilder) Data(data string) *reqMyServicePutDataByIdBuilder {
-    x.obj.Data = data
+func (x *reqMyServicePutDataByIdBuilder) Data(value string) *reqMyServicePutDataByIdBuilder {
+    x.obj.Data = value
     return x
 }
 
@@ -1300,13 +1300,13 @@ func (x *reqMyServiceLobDataById) GetData() string {
     return x.Data
 }
 
-func (x *reqMyServiceLobDataById) SetId(id int64) *reqMyServiceLobDataById {
-    x.Id = id
+func (x *reqMyServiceLobDataById) SetId(value int64) *reqMyServiceLobDataById {
+    x.Id = value
     return x
 }
 
-func (x *reqMyServiceLobDataById) SetData(data string) *reqMyServiceLobDataById {
-    x.Data = data
+func (x *reqMyServiceLobDataById) SetData(value string) *reqMyServiceLobDataById {
+    x.Data = value
     return x
 }
 
@@ -1376,13 +1376,13 @@ func newReqMyServiceLobDataByIdBuilder() *reqMyServiceLobDataByIdBuilder {
     }
 }
 
-func (x *reqMyServiceLobDataByIdBuilder) Id(id int64) *reqMyServiceLobDataByIdBuilder {
-    x.obj.Id = id
+func (x *reqMyServiceLobDataByIdBuilder) Id(value int64) *reqMyServiceLobDataByIdBuilder {
+    x.obj.Id = value
     return x
 }
 
-func (x *reqMyServiceLobDataByIdBuilder) Data(data string) *reqMyServiceLobDataByIdBuilder {
-    x.obj.Data = data
+func (x *reqMyServiceLobDataByIdBuilder) Data(value string) *reqMyServiceLobDataByIdBuilder {
+    x.obj.Data = value
     return x
 }
 

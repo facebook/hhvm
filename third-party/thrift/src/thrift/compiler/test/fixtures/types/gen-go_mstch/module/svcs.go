@@ -140,8 +140,8 @@ func (x *reqSomeServiceBounceMap) GetM() included.SomeMap {
     return x.M
 }
 
-func (x *reqSomeServiceBounceMap) SetM(m included.SomeMap) *reqSomeServiceBounceMap {
-    x.M = m
+func (x *reqSomeServiceBounceMap) SetM(value included.SomeMap) *reqSomeServiceBounceMap {
+    x.M = value
     return x
 }
 
@@ -237,8 +237,8 @@ func newReqSomeServiceBounceMapBuilder() *reqSomeServiceBounceMapBuilder {
     }
 }
 
-func (x *reqSomeServiceBounceMapBuilder) M(m included.SomeMap) *reqSomeServiceBounceMapBuilder {
-    x.obj.M = m
+func (x *reqSomeServiceBounceMapBuilder) M(value included.SomeMap) *reqSomeServiceBounceMapBuilder {
+    x.obj.M = value
     return x
 }
 
@@ -492,8 +492,8 @@ func (x *reqSomeServiceBinaryKeyedMap) GetR() []int64 {
     return x.R
 }
 
-func (x *reqSomeServiceBinaryKeyedMap) SetR(r []int64) *reqSomeServiceBinaryKeyedMap {
-    x.R = r
+func (x *reqSomeServiceBinaryKeyedMap) SetR(value []int64) *reqSomeServiceBinaryKeyedMap {
+    x.R = value
     return x
 }
 
@@ -572,8 +572,8 @@ func newReqSomeServiceBinaryKeyedMapBuilder() *reqSomeServiceBinaryKeyedMapBuild
     }
 }
 
-func (x *reqSomeServiceBinaryKeyedMapBuilder) R(r []int64) *reqSomeServiceBinaryKeyedMapBuilder {
-    x.obj.R = r
+func (x *reqSomeServiceBinaryKeyedMapBuilder) R(value []int64) *reqSomeServiceBinaryKeyedMapBuilder {
+    x.obj.R = value
     return x
 }
 

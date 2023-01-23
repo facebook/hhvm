@@ -238,73 +238,73 @@ func (x *MyUnion) GetStructField() *MyStruct {
     return x.StructField
 }
 
-func (x *MyUnion) SetBoolField(boolField bool) *MyUnion {
-    x.BoolField = &boolField
+func (x *MyUnion) SetBoolField(value bool) *MyUnion {
+    x.BoolField = &value
     return x
 }
 
-func (x *MyUnion) SetByteField(byteField byte) *MyUnion {
-    x.ByteField = &byteField
+func (x *MyUnion) SetByteField(value byte) *MyUnion {
+    x.ByteField = &value
     return x
 }
 
-func (x *MyUnion) SetShortField(shortField int16) *MyUnion {
-    x.ShortField = &shortField
+func (x *MyUnion) SetShortField(value int16) *MyUnion {
+    x.ShortField = &value
     return x
 }
 
-func (x *MyUnion) SetIntField(intField int32) *MyUnion {
-    x.IntField = &intField
+func (x *MyUnion) SetIntField(value int32) *MyUnion {
+    x.IntField = &value
     return x
 }
 
-func (x *MyUnion) SetLongField(longField int64) *MyUnion {
-    x.LongField = &longField
+func (x *MyUnion) SetLongField(value int64) *MyUnion {
+    x.LongField = &value
     return x
 }
 
-func (x *MyUnion) SetFloatField(floatField float32) *MyUnion {
-    x.FloatField = &floatField
+func (x *MyUnion) SetFloatField(value float32) *MyUnion {
+    x.FloatField = &value
     return x
 }
 
-func (x *MyUnion) SetDoubleField(doubleField float64) *MyUnion {
-    x.DoubleField = &doubleField
+func (x *MyUnion) SetDoubleField(value float64) *MyUnion {
+    x.DoubleField = &value
     return x
 }
 
-func (x *MyUnion) SetStringField(stringField string) *MyUnion {
-    x.StringField = &stringField
+func (x *MyUnion) SetStringField(value string) *MyUnion {
+    x.StringField = &value
     return x
 }
 
-func (x *MyUnion) SetBinaryField(binaryField []byte) *MyUnion {
-    x.BinaryField = binaryField
+func (x *MyUnion) SetBinaryField(value []byte) *MyUnion {
+    x.BinaryField = value
     return x
 }
 
-func (x *MyUnion) SetEnumField(enumField MyEnum) *MyUnion {
-    x.EnumField = &enumField
+func (x *MyUnion) SetEnumField(value MyEnum) *MyUnion {
+    x.EnumField = &value
     return x
 }
 
-func (x *MyUnion) SetListField(listField []int16) *MyUnion {
-    x.ListField = listField
+func (x *MyUnion) SetListField(value []int16) *MyUnion {
+    x.ListField = value
     return x
 }
 
-func (x *MyUnion) SetSetField(setField []int16) *MyUnion {
-    x.SetField = setField
+func (x *MyUnion) SetSetField(value []int16) *MyUnion {
+    x.SetField = value
     return x
 }
 
-func (x *MyUnion) SetMapField(mapField map[int16]int16) *MyUnion {
-    x.MapField = mapField
+func (x *MyUnion) SetMapField(value map[int16]int16) *MyUnion {
+    x.MapField = value
     return x
 }
 
-func (x *MyUnion) SetStructField(structField MyStruct) *MyUnion {
-    x.StructField = &structField
+func (x *MyUnion) SetStructField(value MyStruct) *MyUnion {
+    x.StructField = &value
     return x
 }
 
@@ -1067,8 +1067,8 @@ func (x *MyStructWithCustomDefault) GetField1() int64 {
     return x.Field1
 }
 
-func (x *MyStructWithCustomDefault) SetField1(field1 int64) *MyStructWithCustomDefault {
-    x.Field1 = field1
+func (x *MyStructWithCustomDefault) SetField1(value int64) *MyStructWithCustomDefault {
+    x.Field1 = value
     return x
 }
 
@@ -1111,8 +1111,8 @@ func NewMyStructWithCustomDefaultBuilder() *MyStructWithCustomDefaultBuilder {
     }
 }
 
-func (x *MyStructWithCustomDefaultBuilder) Field1(field1 int64) *MyStructWithCustomDefaultBuilder {
-    x.obj.Field1 = field1
+func (x *MyStructWithCustomDefaultBuilder) Field1(value int64) *MyStructWithCustomDefaultBuilder {
+    x.obj.Field1 = value
     return x
 }
 
@@ -1261,78 +1261,78 @@ func (x *StructLevelTerseStruct) GetUnionField() *MyUnion {
     return x.UnionField
 }
 
-func (x *StructLevelTerseStruct) SetBoolField(boolField bool) *StructLevelTerseStruct {
-    x.BoolField = boolField
+func (x *StructLevelTerseStruct) SetBoolField(value bool) *StructLevelTerseStruct {
+    x.BoolField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetByteField(byteField byte) *StructLevelTerseStruct {
-    x.ByteField = byteField
+func (x *StructLevelTerseStruct) SetByteField(value byte) *StructLevelTerseStruct {
+    x.ByteField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetShortField(shortField int16) *StructLevelTerseStruct {
-    x.ShortField = shortField
+func (x *StructLevelTerseStruct) SetShortField(value int16) *StructLevelTerseStruct {
+    x.ShortField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetIntField(intField int32) *StructLevelTerseStruct {
-    x.IntField = intField
+func (x *StructLevelTerseStruct) SetIntField(value int32) *StructLevelTerseStruct {
+    x.IntField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetLongField(longField int64) *StructLevelTerseStruct {
-    x.LongField = longField
+func (x *StructLevelTerseStruct) SetLongField(value int64) *StructLevelTerseStruct {
+    x.LongField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetFloatField(floatField float32) *StructLevelTerseStruct {
-    x.FloatField = floatField
+func (x *StructLevelTerseStruct) SetFloatField(value float32) *StructLevelTerseStruct {
+    x.FloatField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetDoubleField(doubleField float64) *StructLevelTerseStruct {
-    x.DoubleField = doubleField
+func (x *StructLevelTerseStruct) SetDoubleField(value float64) *StructLevelTerseStruct {
+    x.DoubleField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetStringField(stringField string) *StructLevelTerseStruct {
-    x.StringField = stringField
+func (x *StructLevelTerseStruct) SetStringField(value string) *StructLevelTerseStruct {
+    x.StringField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetBinaryField(binaryField []byte) *StructLevelTerseStruct {
-    x.BinaryField = binaryField
+func (x *StructLevelTerseStruct) SetBinaryField(value []byte) *StructLevelTerseStruct {
+    x.BinaryField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetEnumField(enumField MyEnum) *StructLevelTerseStruct {
-    x.EnumField = enumField
+func (x *StructLevelTerseStruct) SetEnumField(value MyEnum) *StructLevelTerseStruct {
+    x.EnumField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetListField(listField []int16) *StructLevelTerseStruct {
-    x.ListField = listField
+func (x *StructLevelTerseStruct) SetListField(value []int16) *StructLevelTerseStruct {
+    x.ListField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetSetField(setField []int16) *StructLevelTerseStruct {
-    x.SetField = setField
+func (x *StructLevelTerseStruct) SetSetField(value []int16) *StructLevelTerseStruct {
+    x.SetField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetMapField(mapField map[int16]int16) *StructLevelTerseStruct {
-    x.MapField = mapField
+func (x *StructLevelTerseStruct) SetMapField(value map[int16]int16) *StructLevelTerseStruct {
+    x.MapField = value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetStructField(structField MyStruct) *StructLevelTerseStruct {
-    x.StructField = &structField
+func (x *StructLevelTerseStruct) SetStructField(value MyStruct) *StructLevelTerseStruct {
+    x.StructField = &value
     return x
 }
 
-func (x *StructLevelTerseStruct) SetUnionField(unionField MyUnion) *StructLevelTerseStruct {
-    x.UnionField = &unionField
+func (x *StructLevelTerseStruct) SetUnionField(value MyUnion) *StructLevelTerseStruct {
+    x.UnionField = &value
     return x
 }
 
@@ -1902,78 +1902,78 @@ func NewStructLevelTerseStructBuilder() *StructLevelTerseStructBuilder {
     }
 }
 
-func (x *StructLevelTerseStructBuilder) BoolField(boolField bool) *StructLevelTerseStructBuilder {
-    x.obj.BoolField = boolField
+func (x *StructLevelTerseStructBuilder) BoolField(value bool) *StructLevelTerseStructBuilder {
+    x.obj.BoolField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) ByteField(byteField byte) *StructLevelTerseStructBuilder {
-    x.obj.ByteField = byteField
+func (x *StructLevelTerseStructBuilder) ByteField(value byte) *StructLevelTerseStructBuilder {
+    x.obj.ByteField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) ShortField(shortField int16) *StructLevelTerseStructBuilder {
-    x.obj.ShortField = shortField
+func (x *StructLevelTerseStructBuilder) ShortField(value int16) *StructLevelTerseStructBuilder {
+    x.obj.ShortField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) IntField(intField int32) *StructLevelTerseStructBuilder {
-    x.obj.IntField = intField
+func (x *StructLevelTerseStructBuilder) IntField(value int32) *StructLevelTerseStructBuilder {
+    x.obj.IntField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) LongField(longField int64) *StructLevelTerseStructBuilder {
-    x.obj.LongField = longField
+func (x *StructLevelTerseStructBuilder) LongField(value int64) *StructLevelTerseStructBuilder {
+    x.obj.LongField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) FloatField(floatField float32) *StructLevelTerseStructBuilder {
-    x.obj.FloatField = floatField
+func (x *StructLevelTerseStructBuilder) FloatField(value float32) *StructLevelTerseStructBuilder {
+    x.obj.FloatField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) DoubleField(doubleField float64) *StructLevelTerseStructBuilder {
-    x.obj.DoubleField = doubleField
+func (x *StructLevelTerseStructBuilder) DoubleField(value float64) *StructLevelTerseStructBuilder {
+    x.obj.DoubleField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) StringField(stringField string) *StructLevelTerseStructBuilder {
-    x.obj.StringField = stringField
+func (x *StructLevelTerseStructBuilder) StringField(value string) *StructLevelTerseStructBuilder {
+    x.obj.StringField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) BinaryField(binaryField []byte) *StructLevelTerseStructBuilder {
-    x.obj.BinaryField = binaryField
+func (x *StructLevelTerseStructBuilder) BinaryField(value []byte) *StructLevelTerseStructBuilder {
+    x.obj.BinaryField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) EnumField(enumField MyEnum) *StructLevelTerseStructBuilder {
-    x.obj.EnumField = enumField
+func (x *StructLevelTerseStructBuilder) EnumField(value MyEnum) *StructLevelTerseStructBuilder {
+    x.obj.EnumField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) ListField(listField []int16) *StructLevelTerseStructBuilder {
-    x.obj.ListField = listField
+func (x *StructLevelTerseStructBuilder) ListField(value []int16) *StructLevelTerseStructBuilder {
+    x.obj.ListField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) SetField(setField []int16) *StructLevelTerseStructBuilder {
-    x.obj.SetField = setField
+func (x *StructLevelTerseStructBuilder) SetField(value []int16) *StructLevelTerseStructBuilder {
+    x.obj.SetField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) MapField(mapField map[int16]int16) *StructLevelTerseStructBuilder {
-    x.obj.MapField = mapField
+func (x *StructLevelTerseStructBuilder) MapField(value map[int16]int16) *StructLevelTerseStructBuilder {
+    x.obj.MapField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) StructField(structField *MyStruct) *StructLevelTerseStructBuilder {
-    x.obj.StructField = structField
+func (x *StructLevelTerseStructBuilder) StructField(value *MyStruct) *StructLevelTerseStructBuilder {
+    x.obj.StructField = value
     return x
 }
 
-func (x *StructLevelTerseStructBuilder) UnionField(unionField *MyUnion) *StructLevelTerseStructBuilder {
-    x.obj.UnionField = unionField
+func (x *StructLevelTerseStructBuilder) UnionField(value *MyUnion) *StructLevelTerseStructBuilder {
+    x.obj.UnionField = value
     return x
 }
 
@@ -2309,153 +2309,153 @@ func (x *FieldLevelTerseStruct) GetUnionField() *MyUnion {
     return x.UnionField
 }
 
-func (x *FieldLevelTerseStruct) SetTerseBoolField(terseBoolField bool) *FieldLevelTerseStruct {
-    x.TerseBoolField = terseBoolField
+func (x *FieldLevelTerseStruct) SetTerseBoolField(value bool) *FieldLevelTerseStruct {
+    x.TerseBoolField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseByteField(terseByteField byte) *FieldLevelTerseStruct {
-    x.TerseByteField = terseByteField
+func (x *FieldLevelTerseStruct) SetTerseByteField(value byte) *FieldLevelTerseStruct {
+    x.TerseByteField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseShortField(terseShortField int16) *FieldLevelTerseStruct {
-    x.TerseShortField = terseShortField
+func (x *FieldLevelTerseStruct) SetTerseShortField(value int16) *FieldLevelTerseStruct {
+    x.TerseShortField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseIntField(terseIntField int32) *FieldLevelTerseStruct {
-    x.TerseIntField = terseIntField
+func (x *FieldLevelTerseStruct) SetTerseIntField(value int32) *FieldLevelTerseStruct {
+    x.TerseIntField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseLongField(terseLongField int64) *FieldLevelTerseStruct {
-    x.TerseLongField = terseLongField
+func (x *FieldLevelTerseStruct) SetTerseLongField(value int64) *FieldLevelTerseStruct {
+    x.TerseLongField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseFloatField(terseFloatField float32) *FieldLevelTerseStruct {
-    x.TerseFloatField = terseFloatField
+func (x *FieldLevelTerseStruct) SetTerseFloatField(value float32) *FieldLevelTerseStruct {
+    x.TerseFloatField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseDoubleField(terseDoubleField float64) *FieldLevelTerseStruct {
-    x.TerseDoubleField = terseDoubleField
+func (x *FieldLevelTerseStruct) SetTerseDoubleField(value float64) *FieldLevelTerseStruct {
+    x.TerseDoubleField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseStringField(terseStringField string) *FieldLevelTerseStruct {
-    x.TerseStringField = terseStringField
+func (x *FieldLevelTerseStruct) SetTerseStringField(value string) *FieldLevelTerseStruct {
+    x.TerseStringField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseBinaryField(terseBinaryField []byte) *FieldLevelTerseStruct {
-    x.TerseBinaryField = terseBinaryField
+func (x *FieldLevelTerseStruct) SetTerseBinaryField(value []byte) *FieldLevelTerseStruct {
+    x.TerseBinaryField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseEnumField(terseEnumField MyEnum) *FieldLevelTerseStruct {
-    x.TerseEnumField = terseEnumField
+func (x *FieldLevelTerseStruct) SetTerseEnumField(value MyEnum) *FieldLevelTerseStruct {
+    x.TerseEnumField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseListField(terseListField []int16) *FieldLevelTerseStruct {
-    x.TerseListField = terseListField
+func (x *FieldLevelTerseStruct) SetTerseListField(value []int16) *FieldLevelTerseStruct {
+    x.TerseListField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseSetField(terseSetField []int16) *FieldLevelTerseStruct {
-    x.TerseSetField = terseSetField
+func (x *FieldLevelTerseStruct) SetTerseSetField(value []int16) *FieldLevelTerseStruct {
+    x.TerseSetField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseMapField(terseMapField map[int16]int16) *FieldLevelTerseStruct {
-    x.TerseMapField = terseMapField
+func (x *FieldLevelTerseStruct) SetTerseMapField(value map[int16]int16) *FieldLevelTerseStruct {
+    x.TerseMapField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseStructField(terseStructField MyStruct) *FieldLevelTerseStruct {
-    x.TerseStructField = &terseStructField
+func (x *FieldLevelTerseStruct) SetTerseStructField(value MyStruct) *FieldLevelTerseStruct {
+    x.TerseStructField = &value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseUnionField(terseUnionField MyUnion) *FieldLevelTerseStruct {
-    x.TerseUnionField = &terseUnionField
+func (x *FieldLevelTerseStruct) SetTerseUnionField(value MyUnion) *FieldLevelTerseStruct {
+    x.TerseUnionField = &value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetBoolField(boolField bool) *FieldLevelTerseStruct {
-    x.BoolField = boolField
+func (x *FieldLevelTerseStruct) SetBoolField(value bool) *FieldLevelTerseStruct {
+    x.BoolField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetByteField(byteField byte) *FieldLevelTerseStruct {
-    x.ByteField = byteField
+func (x *FieldLevelTerseStruct) SetByteField(value byte) *FieldLevelTerseStruct {
+    x.ByteField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetShortField(shortField int16) *FieldLevelTerseStruct {
-    x.ShortField = shortField
+func (x *FieldLevelTerseStruct) SetShortField(value int16) *FieldLevelTerseStruct {
+    x.ShortField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetIntField(intField int32) *FieldLevelTerseStruct {
-    x.IntField = intField
+func (x *FieldLevelTerseStruct) SetIntField(value int32) *FieldLevelTerseStruct {
+    x.IntField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetLongField(longField int64) *FieldLevelTerseStruct {
-    x.LongField = longField
+func (x *FieldLevelTerseStruct) SetLongField(value int64) *FieldLevelTerseStruct {
+    x.LongField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetFloatField(floatField float32) *FieldLevelTerseStruct {
-    x.FloatField = floatField
+func (x *FieldLevelTerseStruct) SetFloatField(value float32) *FieldLevelTerseStruct {
+    x.FloatField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetDoubleField(doubleField float64) *FieldLevelTerseStruct {
-    x.DoubleField = doubleField
+func (x *FieldLevelTerseStruct) SetDoubleField(value float64) *FieldLevelTerseStruct {
+    x.DoubleField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetStringField(stringField string) *FieldLevelTerseStruct {
-    x.StringField = stringField
+func (x *FieldLevelTerseStruct) SetStringField(value string) *FieldLevelTerseStruct {
+    x.StringField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetBinaryField(binaryField []byte) *FieldLevelTerseStruct {
-    x.BinaryField = binaryField
+func (x *FieldLevelTerseStruct) SetBinaryField(value []byte) *FieldLevelTerseStruct {
+    x.BinaryField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetEnumField(enumField MyEnum) *FieldLevelTerseStruct {
-    x.EnumField = enumField
+func (x *FieldLevelTerseStruct) SetEnumField(value MyEnum) *FieldLevelTerseStruct {
+    x.EnumField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetListField(listField []int16) *FieldLevelTerseStruct {
-    x.ListField = listField
+func (x *FieldLevelTerseStruct) SetListField(value []int16) *FieldLevelTerseStruct {
+    x.ListField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetSetField(setField []int16) *FieldLevelTerseStruct {
-    x.SetField = setField
+func (x *FieldLevelTerseStruct) SetSetField(value []int16) *FieldLevelTerseStruct {
+    x.SetField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetMapField(mapField map[int16]int16) *FieldLevelTerseStruct {
-    x.MapField = mapField
+func (x *FieldLevelTerseStruct) SetMapField(value map[int16]int16) *FieldLevelTerseStruct {
+    x.MapField = value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetStructField(structField MyStruct) *FieldLevelTerseStruct {
-    x.StructField = &structField
+func (x *FieldLevelTerseStruct) SetStructField(value MyStruct) *FieldLevelTerseStruct {
+    x.StructField = &value
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetUnionField(unionField MyUnion) *FieldLevelTerseStruct {
-    x.UnionField = &unionField
+func (x *FieldLevelTerseStruct) SetUnionField(value MyUnion) *FieldLevelTerseStruct {
+    x.UnionField = &value
     return x
 }
 
@@ -3579,153 +3579,153 @@ func NewFieldLevelTerseStructBuilder() *FieldLevelTerseStructBuilder {
     }
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseBoolField(terseBoolField bool) *FieldLevelTerseStructBuilder {
-    x.obj.TerseBoolField = terseBoolField
+func (x *FieldLevelTerseStructBuilder) TerseBoolField(value bool) *FieldLevelTerseStructBuilder {
+    x.obj.TerseBoolField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseByteField(terseByteField byte) *FieldLevelTerseStructBuilder {
-    x.obj.TerseByteField = terseByteField
+func (x *FieldLevelTerseStructBuilder) TerseByteField(value byte) *FieldLevelTerseStructBuilder {
+    x.obj.TerseByteField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseShortField(terseShortField int16) *FieldLevelTerseStructBuilder {
-    x.obj.TerseShortField = terseShortField
+func (x *FieldLevelTerseStructBuilder) TerseShortField(value int16) *FieldLevelTerseStructBuilder {
+    x.obj.TerseShortField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseIntField(terseIntField int32) *FieldLevelTerseStructBuilder {
-    x.obj.TerseIntField = terseIntField
+func (x *FieldLevelTerseStructBuilder) TerseIntField(value int32) *FieldLevelTerseStructBuilder {
+    x.obj.TerseIntField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseLongField(terseLongField int64) *FieldLevelTerseStructBuilder {
-    x.obj.TerseLongField = terseLongField
+func (x *FieldLevelTerseStructBuilder) TerseLongField(value int64) *FieldLevelTerseStructBuilder {
+    x.obj.TerseLongField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseFloatField(terseFloatField float32) *FieldLevelTerseStructBuilder {
-    x.obj.TerseFloatField = terseFloatField
+func (x *FieldLevelTerseStructBuilder) TerseFloatField(value float32) *FieldLevelTerseStructBuilder {
+    x.obj.TerseFloatField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseDoubleField(terseDoubleField float64) *FieldLevelTerseStructBuilder {
-    x.obj.TerseDoubleField = terseDoubleField
+func (x *FieldLevelTerseStructBuilder) TerseDoubleField(value float64) *FieldLevelTerseStructBuilder {
+    x.obj.TerseDoubleField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseStringField(terseStringField string) *FieldLevelTerseStructBuilder {
-    x.obj.TerseStringField = terseStringField
+func (x *FieldLevelTerseStructBuilder) TerseStringField(value string) *FieldLevelTerseStructBuilder {
+    x.obj.TerseStringField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseBinaryField(terseBinaryField []byte) *FieldLevelTerseStructBuilder {
-    x.obj.TerseBinaryField = terseBinaryField
+func (x *FieldLevelTerseStructBuilder) TerseBinaryField(value []byte) *FieldLevelTerseStructBuilder {
+    x.obj.TerseBinaryField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseEnumField(terseEnumField MyEnum) *FieldLevelTerseStructBuilder {
-    x.obj.TerseEnumField = terseEnumField
+func (x *FieldLevelTerseStructBuilder) TerseEnumField(value MyEnum) *FieldLevelTerseStructBuilder {
+    x.obj.TerseEnumField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseListField(terseListField []int16) *FieldLevelTerseStructBuilder {
-    x.obj.TerseListField = terseListField
+func (x *FieldLevelTerseStructBuilder) TerseListField(value []int16) *FieldLevelTerseStructBuilder {
+    x.obj.TerseListField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseSetField(terseSetField []int16) *FieldLevelTerseStructBuilder {
-    x.obj.TerseSetField = terseSetField
+func (x *FieldLevelTerseStructBuilder) TerseSetField(value []int16) *FieldLevelTerseStructBuilder {
+    x.obj.TerseSetField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseMapField(terseMapField map[int16]int16) *FieldLevelTerseStructBuilder {
-    x.obj.TerseMapField = terseMapField
+func (x *FieldLevelTerseStructBuilder) TerseMapField(value map[int16]int16) *FieldLevelTerseStructBuilder {
+    x.obj.TerseMapField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseStructField(terseStructField *MyStruct) *FieldLevelTerseStructBuilder {
-    x.obj.TerseStructField = terseStructField
+func (x *FieldLevelTerseStructBuilder) TerseStructField(value *MyStruct) *FieldLevelTerseStructBuilder {
+    x.obj.TerseStructField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseUnionField(terseUnionField *MyUnion) *FieldLevelTerseStructBuilder {
-    x.obj.TerseUnionField = terseUnionField
+func (x *FieldLevelTerseStructBuilder) TerseUnionField(value *MyUnion) *FieldLevelTerseStructBuilder {
+    x.obj.TerseUnionField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) BoolField(boolField bool) *FieldLevelTerseStructBuilder {
-    x.obj.BoolField = boolField
+func (x *FieldLevelTerseStructBuilder) BoolField(value bool) *FieldLevelTerseStructBuilder {
+    x.obj.BoolField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) ByteField(byteField byte) *FieldLevelTerseStructBuilder {
-    x.obj.ByteField = byteField
+func (x *FieldLevelTerseStructBuilder) ByteField(value byte) *FieldLevelTerseStructBuilder {
+    x.obj.ByteField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) ShortField(shortField int16) *FieldLevelTerseStructBuilder {
-    x.obj.ShortField = shortField
+func (x *FieldLevelTerseStructBuilder) ShortField(value int16) *FieldLevelTerseStructBuilder {
+    x.obj.ShortField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) IntField(intField int32) *FieldLevelTerseStructBuilder {
-    x.obj.IntField = intField
+func (x *FieldLevelTerseStructBuilder) IntField(value int32) *FieldLevelTerseStructBuilder {
+    x.obj.IntField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) LongField(longField int64) *FieldLevelTerseStructBuilder {
-    x.obj.LongField = longField
+func (x *FieldLevelTerseStructBuilder) LongField(value int64) *FieldLevelTerseStructBuilder {
+    x.obj.LongField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) FloatField(floatField float32) *FieldLevelTerseStructBuilder {
-    x.obj.FloatField = floatField
+func (x *FieldLevelTerseStructBuilder) FloatField(value float32) *FieldLevelTerseStructBuilder {
+    x.obj.FloatField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) DoubleField(doubleField float64) *FieldLevelTerseStructBuilder {
-    x.obj.DoubleField = doubleField
+func (x *FieldLevelTerseStructBuilder) DoubleField(value float64) *FieldLevelTerseStructBuilder {
+    x.obj.DoubleField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) StringField(stringField string) *FieldLevelTerseStructBuilder {
-    x.obj.StringField = stringField
+func (x *FieldLevelTerseStructBuilder) StringField(value string) *FieldLevelTerseStructBuilder {
+    x.obj.StringField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) BinaryField(binaryField []byte) *FieldLevelTerseStructBuilder {
-    x.obj.BinaryField = binaryField
+func (x *FieldLevelTerseStructBuilder) BinaryField(value []byte) *FieldLevelTerseStructBuilder {
+    x.obj.BinaryField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) EnumField(enumField MyEnum) *FieldLevelTerseStructBuilder {
-    x.obj.EnumField = enumField
+func (x *FieldLevelTerseStructBuilder) EnumField(value MyEnum) *FieldLevelTerseStructBuilder {
+    x.obj.EnumField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) ListField(listField []int16) *FieldLevelTerseStructBuilder {
-    x.obj.ListField = listField
+func (x *FieldLevelTerseStructBuilder) ListField(value []int16) *FieldLevelTerseStructBuilder {
+    x.obj.ListField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) SetField(setField []int16) *FieldLevelTerseStructBuilder {
-    x.obj.SetField = setField
+func (x *FieldLevelTerseStructBuilder) SetField(value []int16) *FieldLevelTerseStructBuilder {
+    x.obj.SetField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) MapField(mapField map[int16]int16) *FieldLevelTerseStructBuilder {
-    x.obj.MapField = mapField
+func (x *FieldLevelTerseStructBuilder) MapField(value map[int16]int16) *FieldLevelTerseStructBuilder {
+    x.obj.MapField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) StructField(structField *MyStruct) *FieldLevelTerseStructBuilder {
-    x.obj.StructField = structField
+func (x *FieldLevelTerseStructBuilder) StructField(value *MyStruct) *FieldLevelTerseStructBuilder {
+    x.obj.StructField = value
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) UnionField(unionField *MyUnion) *FieldLevelTerseStructBuilder {
-    x.obj.UnionField = unionField
+func (x *FieldLevelTerseStructBuilder) UnionField(value *MyUnion) *FieldLevelTerseStructBuilder {
+    x.obj.UnionField = value
     return x
 }
 
@@ -4128,73 +4128,73 @@ func (x *TerseStructWithCustomDefault) GetStructField() *MyStructWithCustomDefau
     return x.StructField
 }
 
-func (x *TerseStructWithCustomDefault) SetBoolField(boolField bool) *TerseStructWithCustomDefault {
-    x.BoolField = boolField
+func (x *TerseStructWithCustomDefault) SetBoolField(value bool) *TerseStructWithCustomDefault {
+    x.BoolField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetByteField(byteField byte) *TerseStructWithCustomDefault {
-    x.ByteField = byteField
+func (x *TerseStructWithCustomDefault) SetByteField(value byte) *TerseStructWithCustomDefault {
+    x.ByteField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetShortField(shortField int16) *TerseStructWithCustomDefault {
-    x.ShortField = shortField
+func (x *TerseStructWithCustomDefault) SetShortField(value int16) *TerseStructWithCustomDefault {
+    x.ShortField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetIntField(intField int32) *TerseStructWithCustomDefault {
-    x.IntField = intField
+func (x *TerseStructWithCustomDefault) SetIntField(value int32) *TerseStructWithCustomDefault {
+    x.IntField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetLongField(longField int64) *TerseStructWithCustomDefault {
-    x.LongField = longField
+func (x *TerseStructWithCustomDefault) SetLongField(value int64) *TerseStructWithCustomDefault {
+    x.LongField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetFloatField(floatField float32) *TerseStructWithCustomDefault {
-    x.FloatField = floatField
+func (x *TerseStructWithCustomDefault) SetFloatField(value float32) *TerseStructWithCustomDefault {
+    x.FloatField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetDoubleField(doubleField float64) *TerseStructWithCustomDefault {
-    x.DoubleField = doubleField
+func (x *TerseStructWithCustomDefault) SetDoubleField(value float64) *TerseStructWithCustomDefault {
+    x.DoubleField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetStringField(stringField string) *TerseStructWithCustomDefault {
-    x.StringField = stringField
+func (x *TerseStructWithCustomDefault) SetStringField(value string) *TerseStructWithCustomDefault {
+    x.StringField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetBinaryField(binaryField []byte) *TerseStructWithCustomDefault {
-    x.BinaryField = binaryField
+func (x *TerseStructWithCustomDefault) SetBinaryField(value []byte) *TerseStructWithCustomDefault {
+    x.BinaryField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetEnumField(enumField MyEnum) *TerseStructWithCustomDefault {
-    x.EnumField = enumField
+func (x *TerseStructWithCustomDefault) SetEnumField(value MyEnum) *TerseStructWithCustomDefault {
+    x.EnumField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetListField(listField []int16) *TerseStructWithCustomDefault {
-    x.ListField = listField
+func (x *TerseStructWithCustomDefault) SetListField(value []int16) *TerseStructWithCustomDefault {
+    x.ListField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetSetField(setField []int16) *TerseStructWithCustomDefault {
-    x.SetField = setField
+func (x *TerseStructWithCustomDefault) SetSetField(value []int16) *TerseStructWithCustomDefault {
+    x.SetField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetMapField(mapField map[int16]int16) *TerseStructWithCustomDefault {
-    x.MapField = mapField
+func (x *TerseStructWithCustomDefault) SetMapField(value map[int16]int16) *TerseStructWithCustomDefault {
+    x.MapField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefault) SetStructField(structField MyStructWithCustomDefault) *TerseStructWithCustomDefault {
-    x.StructField = &structField
+func (x *TerseStructWithCustomDefault) SetStructField(value MyStructWithCustomDefault) *TerseStructWithCustomDefault {
+    x.StructField = &value
     return x
 }
 
@@ -4729,73 +4729,73 @@ func NewTerseStructWithCustomDefaultBuilder() *TerseStructWithCustomDefaultBuild
     }
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) BoolField(boolField bool) *TerseStructWithCustomDefaultBuilder {
-    x.obj.BoolField = boolField
+func (x *TerseStructWithCustomDefaultBuilder) BoolField(value bool) *TerseStructWithCustomDefaultBuilder {
+    x.obj.BoolField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) ByteField(byteField byte) *TerseStructWithCustomDefaultBuilder {
-    x.obj.ByteField = byteField
+func (x *TerseStructWithCustomDefaultBuilder) ByteField(value byte) *TerseStructWithCustomDefaultBuilder {
+    x.obj.ByteField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) ShortField(shortField int16) *TerseStructWithCustomDefaultBuilder {
-    x.obj.ShortField = shortField
+func (x *TerseStructWithCustomDefaultBuilder) ShortField(value int16) *TerseStructWithCustomDefaultBuilder {
+    x.obj.ShortField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) IntField(intField int32) *TerseStructWithCustomDefaultBuilder {
-    x.obj.IntField = intField
+func (x *TerseStructWithCustomDefaultBuilder) IntField(value int32) *TerseStructWithCustomDefaultBuilder {
+    x.obj.IntField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) LongField(longField int64) *TerseStructWithCustomDefaultBuilder {
-    x.obj.LongField = longField
+func (x *TerseStructWithCustomDefaultBuilder) LongField(value int64) *TerseStructWithCustomDefaultBuilder {
+    x.obj.LongField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) FloatField(floatField float32) *TerseStructWithCustomDefaultBuilder {
-    x.obj.FloatField = floatField
+func (x *TerseStructWithCustomDefaultBuilder) FloatField(value float32) *TerseStructWithCustomDefaultBuilder {
+    x.obj.FloatField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) DoubleField(doubleField float64) *TerseStructWithCustomDefaultBuilder {
-    x.obj.DoubleField = doubleField
+func (x *TerseStructWithCustomDefaultBuilder) DoubleField(value float64) *TerseStructWithCustomDefaultBuilder {
+    x.obj.DoubleField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) StringField(stringField string) *TerseStructWithCustomDefaultBuilder {
-    x.obj.StringField = stringField
+func (x *TerseStructWithCustomDefaultBuilder) StringField(value string) *TerseStructWithCustomDefaultBuilder {
+    x.obj.StringField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) BinaryField(binaryField []byte) *TerseStructWithCustomDefaultBuilder {
-    x.obj.BinaryField = binaryField
+func (x *TerseStructWithCustomDefaultBuilder) BinaryField(value []byte) *TerseStructWithCustomDefaultBuilder {
+    x.obj.BinaryField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) EnumField(enumField MyEnum) *TerseStructWithCustomDefaultBuilder {
-    x.obj.EnumField = enumField
+func (x *TerseStructWithCustomDefaultBuilder) EnumField(value MyEnum) *TerseStructWithCustomDefaultBuilder {
+    x.obj.EnumField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) ListField(listField []int16) *TerseStructWithCustomDefaultBuilder {
-    x.obj.ListField = listField
+func (x *TerseStructWithCustomDefaultBuilder) ListField(value []int16) *TerseStructWithCustomDefaultBuilder {
+    x.obj.ListField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) SetField(setField []int16) *TerseStructWithCustomDefaultBuilder {
-    x.obj.SetField = setField
+func (x *TerseStructWithCustomDefaultBuilder) SetField(value []int16) *TerseStructWithCustomDefaultBuilder {
+    x.obj.SetField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) MapField(mapField map[int16]int16) *TerseStructWithCustomDefaultBuilder {
-    x.obj.MapField = mapField
+func (x *TerseStructWithCustomDefaultBuilder) MapField(value map[int16]int16) *TerseStructWithCustomDefaultBuilder {
+    x.obj.MapField = value
     return x
 }
 
-func (x *TerseStructWithCustomDefaultBuilder) StructField(structField *MyStructWithCustomDefault) *TerseStructWithCustomDefaultBuilder {
-    x.obj.StructField = structField
+func (x *TerseStructWithCustomDefaultBuilder) StructField(value *MyStructWithCustomDefault) *TerseStructWithCustomDefaultBuilder {
+    x.obj.StructField = value
     return x
 }
 
@@ -4988,18 +4988,18 @@ func (x *AdaptedFields) GetField3() MyInteger {
     return x.Field3
 }
 
-func (x *AdaptedFields) SetField1(field1 MyInteger) *AdaptedFields {
-    x.Field1 = field1
+func (x *AdaptedFields) SetField1(value MyInteger) *AdaptedFields {
+    x.Field1 = value
     return x
 }
 
-func (x *AdaptedFields) SetField2(field2 int32) *AdaptedFields {
-    x.Field2 = field2
+func (x *AdaptedFields) SetField2(value int32) *AdaptedFields {
+    x.Field2 = value
     return x
 }
 
-func (x *AdaptedFields) SetField3(field3 MyInteger) *AdaptedFields {
-    x.Field3 = field3
+func (x *AdaptedFields) SetField3(value MyInteger) *AdaptedFields {
+    x.Field3 = value
     return x
 }
 
@@ -5096,18 +5096,18 @@ func NewAdaptedFieldsBuilder() *AdaptedFieldsBuilder {
     }
 }
 
-func (x *AdaptedFieldsBuilder) Field1(field1 MyInteger) *AdaptedFieldsBuilder {
-    x.obj.Field1 = field1
+func (x *AdaptedFieldsBuilder) Field1(value MyInteger) *AdaptedFieldsBuilder {
+    x.obj.Field1 = value
     return x
 }
 
-func (x *AdaptedFieldsBuilder) Field2(field2 int32) *AdaptedFieldsBuilder {
-    x.obj.Field2 = field2
+func (x *AdaptedFieldsBuilder) Field2(value int32) *AdaptedFieldsBuilder {
+    x.obj.Field2 = value
     return x
 }
 
-func (x *AdaptedFieldsBuilder) Field3(field3 MyInteger) *AdaptedFieldsBuilder {
-    x.obj.Field3 = field3
+func (x *AdaptedFieldsBuilder) Field3(value MyInteger) *AdaptedFieldsBuilder {
+    x.obj.Field3 = value
     return x
 }
 
@@ -5203,8 +5203,8 @@ func (x *WrappedFields) GetField1() int32 {
     return x.Field1
 }
 
-func (x *WrappedFields) SetField1(field1 int32) *WrappedFields {
-    x.Field1 = field1
+func (x *WrappedFields) SetField1(value int32) *WrappedFields {
+    x.Field1 = value
     return x
 }
 
@@ -5247,8 +5247,8 @@ func NewWrappedFieldsBuilder() *WrappedFieldsBuilder {
     }
 }
 
-func (x *WrappedFieldsBuilder) Field1(field1 int32) *WrappedFieldsBuilder {
-    x.obj.Field1 = field1
+func (x *WrappedFieldsBuilder) Field1(value int32) *WrappedFieldsBuilder {
+    x.obj.Field1 = value
     return x
 }
 
@@ -5327,8 +5327,8 @@ func (x *TerseException) GetMsg() string {
     return x.Msg
 }
 
-func (x *TerseException) SetMsg(msg string) *TerseException {
-    x.Msg = msg
+func (x *TerseException) SetMsg(value string) *TerseException {
+    x.Msg = value
     return x
 }
 
@@ -5379,8 +5379,8 @@ func NewTerseExceptionBuilder() *TerseExceptionBuilder {
     }
 }
 
-func (x *TerseExceptionBuilder) Msg(msg string) *TerseExceptionBuilder {
-    x.obj.Msg = msg
+func (x *TerseExceptionBuilder) Msg(value string) *TerseExceptionBuilder {
+    x.obj.Msg = value
     return x
 }
 

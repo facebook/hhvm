@@ -28,8 +28,8 @@ func (x *GetEntityRequest) GetId() string {
     return x.Id
 }
 
-func (x *GetEntityRequest) SetId(id string) *GetEntityRequest {
-    x.Id = id
+func (x *GetEntityRequest) SetId(value string) *GetEntityRequest {
+    x.Id = value
     return x
 }
 
@@ -72,8 +72,8 @@ func NewGetEntityRequestBuilder() *GetEntityRequestBuilder {
     }
 }
 
-func (x *GetEntityRequestBuilder) Id(id string) *GetEntityRequestBuilder {
-    x.obj.Id = id
+func (x *GetEntityRequestBuilder) Id(value string) *GetEntityRequestBuilder {
+    x.obj.Id = value
     return x
 }
 
@@ -152,8 +152,8 @@ func (x *GetEntityResponse) GetEntity() string {
     return x.Entity
 }
 
-func (x *GetEntityResponse) SetEntity(entity string) *GetEntityResponse {
-    x.Entity = entity
+func (x *GetEntityResponse) SetEntity(value string) *GetEntityResponse {
+    x.Entity = value
     return x
 }
 
@@ -196,8 +196,8 @@ func NewGetEntityResponseBuilder() *GetEntityResponseBuilder {
     }
 }
 
-func (x *GetEntityResponseBuilder) Entity(entity string) *GetEntityResponseBuilder {
-    x.obj.Entity = entity
+func (x *GetEntityResponseBuilder) Entity(value string) *GetEntityResponseBuilder {
+    x.obj.Entity = value
     return x
 }
 

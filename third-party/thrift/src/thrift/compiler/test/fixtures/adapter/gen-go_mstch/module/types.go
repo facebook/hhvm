@@ -236,13 +236,13 @@ func (x *MyAnnotation) GetColor() Color {
     return x.Color
 }
 
-func (x *MyAnnotation) SetSignature(signature string) *MyAnnotation {
-    x.Signature = signature
+func (x *MyAnnotation) SetSignature(value string) *MyAnnotation {
+    x.Signature = value
     return x
 }
 
-func (x *MyAnnotation) SetColor(color Color) *MyAnnotation {
-    x.Color = color
+func (x *MyAnnotation) SetColor(value Color) *MyAnnotation {
+    x.Color = value
     return x
 }
 
@@ -313,13 +313,13 @@ func NewMyAnnotationBuilder() *MyAnnotationBuilder {
     }
 }
 
-func (x *MyAnnotationBuilder) Signature(signature string) *MyAnnotationBuilder {
-    x.obj.Signature = signature
+func (x *MyAnnotationBuilder) Signature(value string) *MyAnnotationBuilder {
+    x.obj.Signature = value
     return x
 }
 
-func (x *MyAnnotationBuilder) Color(color Color) *MyAnnotationBuilder {
-    x.obj.Color = color
+func (x *MyAnnotationBuilder) Color(value Color) *MyAnnotationBuilder {
+    x.obj.Color = value
     return x
 }
 
@@ -457,58 +457,58 @@ func (x *Foo) GetDoubleAdaptedField() DoubleTypedefI64 {
     return x.DoubleAdaptedField
 }
 
-func (x *Foo) SetIntField(intField int32) *Foo {
-    x.IntField = intField
+func (x *Foo) SetIntField(value int32) *Foo {
+    x.IntField = value
     return x
 }
 
-func (x *Foo) SetOptionalIntField(optionalIntField int32) *Foo {
-    x.OptionalIntField = &optionalIntField
+func (x *Foo) SetOptionalIntField(value int32) *Foo {
+    x.OptionalIntField = &value
     return x
 }
 
-func (x *Foo) SetIntFieldWithDefault(intFieldWithDefault int32) *Foo {
-    x.IntFieldWithDefault = intFieldWithDefault
+func (x *Foo) SetIntFieldWithDefault(value int32) *Foo {
+    x.IntFieldWithDefault = value
     return x
 }
 
-func (x *Foo) SetSetField(setField SetWithAdapter) *Foo {
-    x.SetField = setField
+func (x *Foo) SetSetField(value SetWithAdapter) *Foo {
+    x.SetField = value
     return x
 }
 
-func (x *Foo) SetOptionalSetField(optionalSetField SetWithAdapter) *Foo {
-    x.OptionalSetField = optionalSetField
+func (x *Foo) SetOptionalSetField(value SetWithAdapter) *Foo {
+    x.OptionalSetField = value
     return x
 }
 
-func (x *Foo) SetMapField(mapField map[string]ListWithElemAdapterWithAdapter) *Foo {
-    x.MapField = mapField
+func (x *Foo) SetMapField(value map[string]ListWithElemAdapterWithAdapter) *Foo {
+    x.MapField = value
     return x
 }
 
-func (x *Foo) SetOptionalMapField(optionalMapField map[string]ListWithElemAdapterWithAdapter) *Foo {
-    x.OptionalMapField = optionalMapField
+func (x *Foo) SetOptionalMapField(value map[string]ListWithElemAdapterWithAdapter) *Foo {
+    x.OptionalMapField = value
     return x
 }
 
-func (x *Foo) SetBinaryField(binaryField []byte) *Foo {
-    x.BinaryField = binaryField
+func (x *Foo) SetBinaryField(value []byte) *Foo {
+    x.BinaryField = value
     return x
 }
 
-func (x *Foo) SetLongField(longField MyI64) *Foo {
-    x.LongField = longField
+func (x *Foo) SetLongField(value MyI64) *Foo {
+    x.LongField = value
     return x
 }
 
-func (x *Foo) SetAdaptedLongField(adaptedLongField MyI64) *Foo {
-    x.AdaptedLongField = adaptedLongField
+func (x *Foo) SetAdaptedLongField(value MyI64) *Foo {
+    x.AdaptedLongField = value
     return x
 }
 
-func (x *Foo) SetDoubleAdaptedField(doubleAdaptedField DoubleTypedefI64) *Foo {
-    x.DoubleAdaptedField = doubleAdaptedField
+func (x *Foo) SetDoubleAdaptedField(value DoubleTypedefI64) *Foo {
+    x.DoubleAdaptedField = value
     return x
 }
 
@@ -1071,58 +1071,58 @@ func NewFooBuilder() *FooBuilder {
     }
 }
 
-func (x *FooBuilder) IntField(intField int32) *FooBuilder {
-    x.obj.IntField = intField
+func (x *FooBuilder) IntField(value int32) *FooBuilder {
+    x.obj.IntField = value
     return x
 }
 
-func (x *FooBuilder) OptionalIntField(optionalIntField *int32) *FooBuilder {
-    x.obj.OptionalIntField = optionalIntField
+func (x *FooBuilder) OptionalIntField(value *int32) *FooBuilder {
+    x.obj.OptionalIntField = value
     return x
 }
 
-func (x *FooBuilder) IntFieldWithDefault(intFieldWithDefault int32) *FooBuilder {
-    x.obj.IntFieldWithDefault = intFieldWithDefault
+func (x *FooBuilder) IntFieldWithDefault(value int32) *FooBuilder {
+    x.obj.IntFieldWithDefault = value
     return x
 }
 
-func (x *FooBuilder) SetField(setField SetWithAdapter) *FooBuilder {
-    x.obj.SetField = setField
+func (x *FooBuilder) SetField(value SetWithAdapter) *FooBuilder {
+    x.obj.SetField = value
     return x
 }
 
-func (x *FooBuilder) OptionalSetField(optionalSetField SetWithAdapter) *FooBuilder {
-    x.obj.OptionalSetField = optionalSetField
+func (x *FooBuilder) OptionalSetField(value SetWithAdapter) *FooBuilder {
+    x.obj.OptionalSetField = value
     return x
 }
 
-func (x *FooBuilder) MapField(mapField map[string]ListWithElemAdapterWithAdapter) *FooBuilder {
-    x.obj.MapField = mapField
+func (x *FooBuilder) MapField(value map[string]ListWithElemAdapterWithAdapter) *FooBuilder {
+    x.obj.MapField = value
     return x
 }
 
-func (x *FooBuilder) OptionalMapField(optionalMapField map[string]ListWithElemAdapterWithAdapter) *FooBuilder {
-    x.obj.OptionalMapField = optionalMapField
+func (x *FooBuilder) OptionalMapField(value map[string]ListWithElemAdapterWithAdapter) *FooBuilder {
+    x.obj.OptionalMapField = value
     return x
 }
 
-func (x *FooBuilder) BinaryField(binaryField []byte) *FooBuilder {
-    x.obj.BinaryField = binaryField
+func (x *FooBuilder) BinaryField(value []byte) *FooBuilder {
+    x.obj.BinaryField = value
     return x
 }
 
-func (x *FooBuilder) LongField(longField MyI64) *FooBuilder {
-    x.obj.LongField = longField
+func (x *FooBuilder) LongField(value MyI64) *FooBuilder {
+    x.obj.LongField = value
     return x
 }
 
-func (x *FooBuilder) AdaptedLongField(adaptedLongField MyI64) *FooBuilder {
-    x.obj.AdaptedLongField = adaptedLongField
+func (x *FooBuilder) AdaptedLongField(value MyI64) *FooBuilder {
+    x.obj.AdaptedLongField = value
     return x
 }
 
-func (x *FooBuilder) DoubleAdaptedField(doubleAdaptedField DoubleTypedefI64) *FooBuilder {
-    x.obj.DoubleAdaptedField = doubleAdaptedField
+func (x *FooBuilder) DoubleAdaptedField(value DoubleTypedefI64) *FooBuilder {
+    x.obj.DoubleAdaptedField = value
     return x
 }
 
@@ -1301,28 +1301,28 @@ func (x *Baz) GetLongField() *MyI64 {
     return x.LongField
 }
 
-func (x *Baz) SetIntField(intField int32) *Baz {
-    x.IntField = &intField
+func (x *Baz) SetIntField(value int32) *Baz {
+    x.IntField = &value
     return x
 }
 
-func (x *Baz) SetSetField(setField SetWithAdapter) *Baz {
-    x.SetField = setField
+func (x *Baz) SetSetField(value SetWithAdapter) *Baz {
+    x.SetField = value
     return x
 }
 
-func (x *Baz) SetMapField(mapField map[string]ListWithElemAdapterWithAdapter) *Baz {
-    x.MapField = mapField
+func (x *Baz) SetMapField(value map[string]ListWithElemAdapterWithAdapter) *Baz {
+    x.MapField = value
     return x
 }
 
-func (x *Baz) SetBinaryField(binaryField []byte) *Baz {
-    x.BinaryField = binaryField
+func (x *Baz) SetBinaryField(value []byte) *Baz {
+    x.BinaryField = value
     return x
 }
 
-func (x *Baz) SetLongField(longField MyI64) *Baz {
-    x.LongField = &longField
+func (x *Baz) SetLongField(value MyI64) *Baz {
+    x.LongField = &value
     return x
 }
 
@@ -1734,38 +1734,38 @@ func (x *Bar) GetAdaptedStructField() *DirectlyAdapted {
     return x.AdaptedStructField
 }
 
-func (x *Bar) SetStructField(structField Foo) *Bar {
-    x.StructField = &structField
+func (x *Bar) SetStructField(value Foo) *Bar {
+    x.StructField = &value
     return x
 }
 
-func (x *Bar) SetOptionalStructField(optionalStructField Foo) *Bar {
-    x.OptionalStructField = &optionalStructField
+func (x *Bar) SetOptionalStructField(value Foo) *Bar {
+    x.OptionalStructField = &value
     return x
 }
 
-func (x *Bar) SetStructListField(structListField []*FooWithAdapter) *Bar {
-    x.StructListField = structListField
+func (x *Bar) SetStructListField(value []*FooWithAdapter) *Bar {
+    x.StructListField = value
     return x
 }
 
-func (x *Bar) SetOptionalStructListField(optionalStructListField []*FooWithAdapter) *Bar {
-    x.OptionalStructListField = optionalStructListField
+func (x *Bar) SetOptionalStructListField(value []*FooWithAdapter) *Bar {
+    x.OptionalStructListField = value
     return x
 }
 
-func (x *Bar) SetUnionField(unionField Baz) *Bar {
-    x.UnionField = &unionField
+func (x *Bar) SetUnionField(value Baz) *Bar {
+    x.UnionField = &value
     return x
 }
 
-func (x *Bar) SetOptionalUnionField(optionalUnionField Baz) *Bar {
-    x.OptionalUnionField = &optionalUnionField
+func (x *Bar) SetOptionalUnionField(value Baz) *Bar {
+    x.OptionalUnionField = &value
     return x
 }
 
-func (x *Bar) SetAdaptedStructField(adaptedStructField DirectlyAdapted) *Bar {
-    x.AdaptedStructField = &adaptedStructField
+func (x *Bar) SetAdaptedStructField(value DirectlyAdapted) *Bar {
+    x.AdaptedStructField = &value
     return x
 }
 
@@ -2084,38 +2084,38 @@ func NewBarBuilder() *BarBuilder {
     }
 }
 
-func (x *BarBuilder) StructField(structField *Foo) *BarBuilder {
-    x.obj.StructField = structField
+func (x *BarBuilder) StructField(value *Foo) *BarBuilder {
+    x.obj.StructField = value
     return x
 }
 
-func (x *BarBuilder) OptionalStructField(optionalStructField *Foo) *BarBuilder {
-    x.obj.OptionalStructField = optionalStructField
+func (x *BarBuilder) OptionalStructField(value *Foo) *BarBuilder {
+    x.obj.OptionalStructField = value
     return x
 }
 
-func (x *BarBuilder) StructListField(structListField []*FooWithAdapter) *BarBuilder {
-    x.obj.StructListField = structListField
+func (x *BarBuilder) StructListField(value []*FooWithAdapter) *BarBuilder {
+    x.obj.StructListField = value
     return x
 }
 
-func (x *BarBuilder) OptionalStructListField(optionalStructListField []*FooWithAdapter) *BarBuilder {
-    x.obj.OptionalStructListField = optionalStructListField
+func (x *BarBuilder) OptionalStructListField(value []*FooWithAdapter) *BarBuilder {
+    x.obj.OptionalStructListField = value
     return x
 }
 
-func (x *BarBuilder) UnionField(unionField *Baz) *BarBuilder {
-    x.obj.UnionField = unionField
+func (x *BarBuilder) UnionField(value *Baz) *BarBuilder {
+    x.obj.UnionField = value
     return x
 }
 
-func (x *BarBuilder) OptionalUnionField(optionalUnionField *Baz) *BarBuilder {
-    x.obj.OptionalUnionField = optionalUnionField
+func (x *BarBuilder) OptionalUnionField(value *Baz) *BarBuilder {
+    x.obj.OptionalUnionField = value
     return x
 }
 
-func (x *BarBuilder) AdaptedStructField(adaptedStructField *DirectlyAdapted) *BarBuilder {
-    x.obj.AdaptedStructField = adaptedStructField
+func (x *BarBuilder) AdaptedStructField(value *DirectlyAdapted) *BarBuilder {
+    x.obj.AdaptedStructField = value
     return x
 }
 
@@ -2242,8 +2242,8 @@ func (x *DirectlyAdapted) GetField() int32 {
     return x.Field
 }
 
-func (x *DirectlyAdapted) SetField(field int32) *DirectlyAdapted {
-    x.Field = field
+func (x *DirectlyAdapted) SetField(value int32) *DirectlyAdapted {
+    x.Field = value
     return x
 }
 
@@ -2286,8 +2286,8 @@ func NewDirectlyAdaptedBuilder() *DirectlyAdaptedBuilder {
     }
 }
 
-func (x *DirectlyAdaptedBuilder) Field(field int32) *DirectlyAdaptedBuilder {
-    x.obj.Field = field
+func (x *DirectlyAdaptedBuilder) Field(value int32) *DirectlyAdaptedBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -2366,8 +2366,8 @@ func (x *IndependentDirectlyAdapted) GetField() int32 {
     return x.Field
 }
 
-func (x *IndependentDirectlyAdapted) SetField(field int32) *IndependentDirectlyAdapted {
-    x.Field = field
+func (x *IndependentDirectlyAdapted) SetField(value int32) *IndependentDirectlyAdapted {
+    x.Field = value
     return x
 }
 
@@ -2410,8 +2410,8 @@ func NewIndependentDirectlyAdaptedBuilder() *IndependentDirectlyAdaptedBuilder {
     }
 }
 
-func (x *IndependentDirectlyAdaptedBuilder) Field(field int32) *IndependentDirectlyAdaptedBuilder {
-    x.obj.Field = field
+func (x *IndependentDirectlyAdaptedBuilder) Field(value int32) *IndependentDirectlyAdaptedBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -2505,23 +2505,23 @@ func (x *StructWithFieldAdapter) GetOptBoxedField() *int32 {
     return x.OptBoxedField
 }
 
-func (x *StructWithFieldAdapter) SetField(field int32) *StructWithFieldAdapter {
-    x.Field = field
+func (x *StructWithFieldAdapter) SetField(value int32) *StructWithFieldAdapter {
+    x.Field = value
     return x
 }
 
-func (x *StructWithFieldAdapter) SetSharedField(sharedField int32) *StructWithFieldAdapter {
-    x.SharedField = sharedField
+func (x *StructWithFieldAdapter) SetSharedField(value int32) *StructWithFieldAdapter {
+    x.SharedField = value
     return x
 }
 
-func (x *StructWithFieldAdapter) SetOptSharedField(optSharedField int32) *StructWithFieldAdapter {
-    x.OptSharedField = &optSharedField
+func (x *StructWithFieldAdapter) SetOptSharedField(value int32) *StructWithFieldAdapter {
+    x.OptSharedField = &value
     return x
 }
 
-func (x *StructWithFieldAdapter) SetOptBoxedField(optBoxedField int32) *StructWithFieldAdapter {
-    x.OptBoxedField = &optBoxedField
+func (x *StructWithFieldAdapter) SetOptBoxedField(value int32) *StructWithFieldAdapter {
+    x.OptBoxedField = &value
     return x
 }
 
@@ -2659,23 +2659,23 @@ func NewStructWithFieldAdapterBuilder() *StructWithFieldAdapterBuilder {
     }
 }
 
-func (x *StructWithFieldAdapterBuilder) Field(field int32) *StructWithFieldAdapterBuilder {
-    x.obj.Field = field
+func (x *StructWithFieldAdapterBuilder) Field(value int32) *StructWithFieldAdapterBuilder {
+    x.obj.Field = value
     return x
 }
 
-func (x *StructWithFieldAdapterBuilder) SharedField(sharedField int32) *StructWithFieldAdapterBuilder {
-    x.obj.SharedField = sharedField
+func (x *StructWithFieldAdapterBuilder) SharedField(value int32) *StructWithFieldAdapterBuilder {
+    x.obj.SharedField = value
     return x
 }
 
-func (x *StructWithFieldAdapterBuilder) OptSharedField(optSharedField *int32) *StructWithFieldAdapterBuilder {
-    x.obj.OptSharedField = optSharedField
+func (x *StructWithFieldAdapterBuilder) OptSharedField(value *int32) *StructWithFieldAdapterBuilder {
+    x.obj.OptSharedField = value
     return x
 }
 
-func (x *StructWithFieldAdapterBuilder) OptBoxedField(optBoxedField *int32) *StructWithFieldAdapterBuilder {
-    x.obj.OptBoxedField = optBoxedField
+func (x *StructWithFieldAdapterBuilder) OptBoxedField(value *int32) *StructWithFieldAdapterBuilder {
+    x.obj.OptBoxedField = value
     return x
 }
 
@@ -2788,18 +2788,18 @@ func (x *TerseAdaptedFields) GetSetField() []int32 {
     return x.SetField
 }
 
-func (x *TerseAdaptedFields) SetIntField(intField int32) *TerseAdaptedFields {
-    x.IntField = intField
+func (x *TerseAdaptedFields) SetIntField(value int32) *TerseAdaptedFields {
+    x.IntField = value
     return x
 }
 
-func (x *TerseAdaptedFields) SetStringField(stringField string) *TerseAdaptedFields {
-    x.StringField = stringField
+func (x *TerseAdaptedFields) SetStringField(value string) *TerseAdaptedFields {
+    x.StringField = value
     return x
 }
 
-func (x *TerseAdaptedFields) SetSetField(setField []int32) *TerseAdaptedFields {
-    x.SetField = setField
+func (x *TerseAdaptedFields) SetSetField(value []int32) *TerseAdaptedFields {
+    x.SetField = value
     return x
 }
 
@@ -2932,18 +2932,18 @@ func NewTerseAdaptedFieldsBuilder() *TerseAdaptedFieldsBuilder {
     }
 }
 
-func (x *TerseAdaptedFieldsBuilder) IntField(intField int32) *TerseAdaptedFieldsBuilder {
-    x.obj.IntField = intField
+func (x *TerseAdaptedFieldsBuilder) IntField(value int32) *TerseAdaptedFieldsBuilder {
+    x.obj.IntField = value
     return x
 }
 
-func (x *TerseAdaptedFieldsBuilder) StringField(stringField string) *TerseAdaptedFieldsBuilder {
-    x.obj.StringField = stringField
+func (x *TerseAdaptedFieldsBuilder) StringField(value string) *TerseAdaptedFieldsBuilder {
+    x.obj.StringField = value
     return x
 }
 
-func (x *TerseAdaptedFieldsBuilder) SetField(setField []int32) *TerseAdaptedFieldsBuilder {
-    x.obj.SetField = setField
+func (x *TerseAdaptedFieldsBuilder) SetField(value []int32) *TerseAdaptedFieldsBuilder {
+    x.obj.SetField = value
     return x
 }
 
@@ -3038,8 +3038,8 @@ func (x *B) GetA() *AdaptedA {
     return x.A
 }
 
-func (x *B) SetA(a AdaptedA) *B {
-    x.A = &a
+func (x *B) SetA(value AdaptedA) *B {
+    x.A = &value
     return x
 }
 
@@ -3090,8 +3090,8 @@ func NewBBuilder() *BBuilder {
     }
 }
 
-func (x *BBuilder) A(a *AdaptedA) *BBuilder {
-    x.obj.A = a
+func (x *BBuilder) A(value *AdaptedA) *BBuilder {
+    x.obj.A = value
     return x
 }
 
@@ -3244,8 +3244,8 @@ func (x *Config) GetPath() string {
     return x.Path
 }
 
-func (x *Config) SetPath(path string) *Config {
-    x.Path = path
+func (x *Config) SetPath(value string) *Config {
+    x.Path = value
     return x
 }
 
@@ -3288,8 +3288,8 @@ func NewConfigBuilder() *ConfigBuilder {
     }
 }
 
-func (x *ConfigBuilder) Path(path string) *ConfigBuilder {
-    x.obj.Path = path
+func (x *ConfigBuilder) Path(value string) *ConfigBuilder {
+    x.obj.Path = value
     return x
 }
 
@@ -3373,13 +3373,13 @@ func (x *MyStruct) GetSetString() SetWithAdapter {
     return x.SetString
 }
 
-func (x *MyStruct) SetField(field int32) *MyStruct {
-    x.Field = field
+func (x *MyStruct) SetField(value int32) *MyStruct {
+    x.Field = value
     return x
 }
 
-func (x *MyStruct) SetSetString(setString SetWithAdapter) *MyStruct {
-    x.SetString = setString
+func (x *MyStruct) SetSetString(value SetWithAdapter) *MyStruct {
+    x.SetString = value
     return x
 }
 
@@ -3485,13 +3485,13 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) Field(field int32) *MyStructBuilder {
-    x.obj.Field = field
+func (x *MyStructBuilder) Field(value int32) *MyStructBuilder {
+    x.obj.Field = value
     return x
 }
 
-func (x *MyStructBuilder) SetString(setString SetWithAdapter) *MyStructBuilder {
-    x.obj.SetString = setString
+func (x *MyStructBuilder) SetString(value SetWithAdapter) *MyStructBuilder {
+    x.obj.SetString = value
     return x
 }
 
@@ -3623,53 +3623,53 @@ func (x *AdaptTestStruct) GetBinaryData() []byte {
     return x.BinaryData
 }
 
-func (x *AdaptTestStruct) SetDelay(delay DurationMs) *AdaptTestStruct {
-    x.Delay = delay
+func (x *AdaptTestStruct) SetDelay(value DurationMs) *AdaptTestStruct {
+    x.Delay = value
     return x
 }
 
-func (x *AdaptTestStruct) SetCustom(custom CustomProtocolType) *AdaptTestStruct {
-    x.Custom = custom
+func (x *AdaptTestStruct) SetCustom(value CustomProtocolType) *AdaptTestStruct {
+    x.Custom = value
     return x
 }
 
-func (x *AdaptTestStruct) SetTimeout(timeout int64) *AdaptTestStruct {
-    x.Timeout = timeout
+func (x *AdaptTestStruct) SetTimeout(value int64) *AdaptTestStruct {
+    x.Timeout = value
     return x
 }
 
-func (x *AdaptTestStruct) SetData(data int64) *AdaptTestStruct {
-    x.Data = data
+func (x *AdaptTestStruct) SetData(value int64) *AdaptTestStruct {
+    x.Data = value
     return x
 }
 
-func (x *AdaptTestStruct) SetMeta(meta string) *AdaptTestStruct {
-    x.Meta = meta
+func (x *AdaptTestStruct) SetMeta(value string) *AdaptTestStruct {
+    x.Meta = value
     return x
 }
 
-func (x *AdaptTestStruct) SetIndirectionString(indirectionString IndirectionString) *AdaptTestStruct {
-    x.IndirectionString = indirectionString
+func (x *AdaptTestStruct) SetIndirectionString(value IndirectionString) *AdaptTestStruct {
+    x.IndirectionString = value
     return x
 }
 
-func (x *AdaptTestStruct) SetStringData(stringData string) *AdaptTestStruct {
-    x.StringData = stringData
+func (x *AdaptTestStruct) SetStringData(value string) *AdaptTestStruct {
+    x.StringData = value
     return x
 }
 
-func (x *AdaptTestStruct) SetDoubleWrappedBool(doubleWrappedBool AdaptedBool) *AdaptTestStruct {
-    x.DoubleWrappedBool = doubleWrappedBool
+func (x *AdaptTestStruct) SetDoubleWrappedBool(value AdaptedBool) *AdaptTestStruct {
+    x.DoubleWrappedBool = value
     return x
 }
 
-func (x *AdaptTestStruct) SetDoubleWrappedInteger(doubleWrappedInteger AdaptedInteger) *AdaptTestStruct {
-    x.DoubleWrappedInteger = doubleWrappedInteger
+func (x *AdaptTestStruct) SetDoubleWrappedInteger(value AdaptedInteger) *AdaptTestStruct {
+    x.DoubleWrappedInteger = value
     return x
 }
 
-func (x *AdaptTestStruct) SetBinaryData(binaryData []byte) *AdaptTestStruct {
-    x.BinaryData = binaryData
+func (x *AdaptTestStruct) SetBinaryData(value []byte) *AdaptTestStruct {
+    x.BinaryData = value
     return x
 }
 
@@ -3969,53 +3969,53 @@ func NewAdaptTestStructBuilder() *AdaptTestStructBuilder {
     }
 }
 
-func (x *AdaptTestStructBuilder) Delay(delay DurationMs) *AdaptTestStructBuilder {
-    x.obj.Delay = delay
+func (x *AdaptTestStructBuilder) Delay(value DurationMs) *AdaptTestStructBuilder {
+    x.obj.Delay = value
     return x
 }
 
-func (x *AdaptTestStructBuilder) Custom(custom CustomProtocolType) *AdaptTestStructBuilder {
-    x.obj.Custom = custom
+func (x *AdaptTestStructBuilder) Custom(value CustomProtocolType) *AdaptTestStructBuilder {
+    x.obj.Custom = value
     return x
 }
 
-func (x *AdaptTestStructBuilder) Timeout(timeout int64) *AdaptTestStructBuilder {
-    x.obj.Timeout = timeout
+func (x *AdaptTestStructBuilder) Timeout(value int64) *AdaptTestStructBuilder {
+    x.obj.Timeout = value
     return x
 }
 
-func (x *AdaptTestStructBuilder) Data(data int64) *AdaptTestStructBuilder {
-    x.obj.Data = data
+func (x *AdaptTestStructBuilder) Data(value int64) *AdaptTestStructBuilder {
+    x.obj.Data = value
     return x
 }
 
-func (x *AdaptTestStructBuilder) Meta(meta string) *AdaptTestStructBuilder {
-    x.obj.Meta = meta
+func (x *AdaptTestStructBuilder) Meta(value string) *AdaptTestStructBuilder {
+    x.obj.Meta = value
     return x
 }
 
-func (x *AdaptTestStructBuilder) IndirectionString(indirectionString IndirectionString) *AdaptTestStructBuilder {
-    x.obj.IndirectionString = indirectionString
+func (x *AdaptTestStructBuilder) IndirectionString(value IndirectionString) *AdaptTestStructBuilder {
+    x.obj.IndirectionString = value
     return x
 }
 
-func (x *AdaptTestStructBuilder) StringData(stringData string) *AdaptTestStructBuilder {
-    x.obj.StringData = stringData
+func (x *AdaptTestStructBuilder) StringData(value string) *AdaptTestStructBuilder {
+    x.obj.StringData = value
     return x
 }
 
-func (x *AdaptTestStructBuilder) DoubleWrappedBool(doubleWrappedBool AdaptedBool) *AdaptTestStructBuilder {
-    x.obj.DoubleWrappedBool = doubleWrappedBool
+func (x *AdaptTestStructBuilder) DoubleWrappedBool(value AdaptedBool) *AdaptTestStructBuilder {
+    x.obj.DoubleWrappedBool = value
     return x
 }
 
-func (x *AdaptTestStructBuilder) DoubleWrappedInteger(doubleWrappedInteger AdaptedInteger) *AdaptTestStructBuilder {
-    x.obj.DoubleWrappedInteger = doubleWrappedInteger
+func (x *AdaptTestStructBuilder) DoubleWrappedInteger(value AdaptedInteger) *AdaptTestStructBuilder {
+    x.obj.DoubleWrappedInteger = value
     return x
 }
 
-func (x *AdaptTestStructBuilder) BinaryData(binaryData []byte) *AdaptTestStructBuilder {
-    x.obj.BinaryData = binaryData
+func (x *AdaptTestStructBuilder) BinaryData(value []byte) *AdaptTestStructBuilder {
+    x.obj.BinaryData = value
     return x
 }
 
@@ -4296,113 +4296,113 @@ func (x *AdaptTemplatedTestStruct) GetDoubleTypedefBool() DoubleTypedefBool {
     return x.DoubleTypedefBool
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedBool(adaptedBool AdaptedBool) *AdaptTemplatedTestStruct {
-    x.AdaptedBool = adaptedBool
+func (x *AdaptTemplatedTestStruct) SetAdaptedBool(value AdaptedBool) *AdaptTemplatedTestStruct {
+    x.AdaptedBool = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedByte(adaptedByte AdaptedByte) *AdaptTemplatedTestStruct {
-    x.AdaptedByte = adaptedByte
+func (x *AdaptTemplatedTestStruct) SetAdaptedByte(value AdaptedByte) *AdaptTemplatedTestStruct {
+    x.AdaptedByte = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedShort(adaptedShort AdaptedShort) *AdaptTemplatedTestStruct {
-    x.AdaptedShort = adaptedShort
+func (x *AdaptTemplatedTestStruct) SetAdaptedShort(value AdaptedShort) *AdaptTemplatedTestStruct {
+    x.AdaptedShort = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedInteger(adaptedInteger AdaptedInteger) *AdaptTemplatedTestStruct {
-    x.AdaptedInteger = adaptedInteger
+func (x *AdaptTemplatedTestStruct) SetAdaptedInteger(value AdaptedInteger) *AdaptTemplatedTestStruct {
+    x.AdaptedInteger = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedLong(adaptedLong AdaptedLong) *AdaptTemplatedTestStruct {
-    x.AdaptedLong = adaptedLong
+func (x *AdaptTemplatedTestStruct) SetAdaptedLong(value AdaptedLong) *AdaptTemplatedTestStruct {
+    x.AdaptedLong = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedDouble(adaptedDouble AdaptedDouble) *AdaptTemplatedTestStruct {
-    x.AdaptedDouble = adaptedDouble
+func (x *AdaptTemplatedTestStruct) SetAdaptedDouble(value AdaptedDouble) *AdaptTemplatedTestStruct {
+    x.AdaptedDouble = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedString(adaptedString AdaptedString) *AdaptTemplatedTestStruct {
-    x.AdaptedString = adaptedString
+func (x *AdaptTemplatedTestStruct) SetAdaptedString(value AdaptedString) *AdaptTemplatedTestStruct {
+    x.AdaptedString = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedList(adaptedList []int64) *AdaptTemplatedTestStruct {
-    x.AdaptedList = adaptedList
+func (x *AdaptTemplatedTestStruct) SetAdaptedList(value []int64) *AdaptTemplatedTestStruct {
+    x.AdaptedList = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedSet(adaptedSet []int64) *AdaptTemplatedTestStruct {
-    x.AdaptedSet = adaptedSet
+func (x *AdaptTemplatedTestStruct) SetAdaptedSet(value []int64) *AdaptTemplatedTestStruct {
+    x.AdaptedSet = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedMap(adaptedMap map[int64]int64) *AdaptTemplatedTestStruct {
-    x.AdaptedMap = adaptedMap
+func (x *AdaptTemplatedTestStruct) SetAdaptedMap(value map[int64]int64) *AdaptTemplatedTestStruct {
+    x.AdaptedMap = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedBoolDefault(adaptedBoolDefault AdaptedBool) *AdaptTemplatedTestStruct {
-    x.AdaptedBoolDefault = adaptedBoolDefault
+func (x *AdaptTemplatedTestStruct) SetAdaptedBoolDefault(value AdaptedBool) *AdaptTemplatedTestStruct {
+    x.AdaptedBoolDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedByteDefault(adaptedByteDefault AdaptedByte) *AdaptTemplatedTestStruct {
-    x.AdaptedByteDefault = adaptedByteDefault
+func (x *AdaptTemplatedTestStruct) SetAdaptedByteDefault(value AdaptedByte) *AdaptTemplatedTestStruct {
+    x.AdaptedByteDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedShortDefault(adaptedShortDefault AdaptedShort) *AdaptTemplatedTestStruct {
-    x.AdaptedShortDefault = adaptedShortDefault
+func (x *AdaptTemplatedTestStruct) SetAdaptedShortDefault(value AdaptedShort) *AdaptTemplatedTestStruct {
+    x.AdaptedShortDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedIntegerDefault(adaptedIntegerDefault AdaptedInteger) *AdaptTemplatedTestStruct {
-    x.AdaptedIntegerDefault = adaptedIntegerDefault
+func (x *AdaptTemplatedTestStruct) SetAdaptedIntegerDefault(value AdaptedInteger) *AdaptTemplatedTestStruct {
+    x.AdaptedIntegerDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedLongDefault(adaptedLongDefault AdaptedLong) *AdaptTemplatedTestStruct {
-    x.AdaptedLongDefault = adaptedLongDefault
+func (x *AdaptTemplatedTestStruct) SetAdaptedLongDefault(value AdaptedLong) *AdaptTemplatedTestStruct {
+    x.AdaptedLongDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedDoubleDefault(adaptedDoubleDefault AdaptedDouble) *AdaptTemplatedTestStruct {
-    x.AdaptedDoubleDefault = adaptedDoubleDefault
+func (x *AdaptTemplatedTestStruct) SetAdaptedDoubleDefault(value AdaptedDouble) *AdaptTemplatedTestStruct {
+    x.AdaptedDoubleDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedStringDefault(adaptedStringDefault AdaptedString) *AdaptTemplatedTestStruct {
-    x.AdaptedStringDefault = adaptedStringDefault
+func (x *AdaptTemplatedTestStruct) SetAdaptedStringDefault(value AdaptedString) *AdaptTemplatedTestStruct {
+    x.AdaptedStringDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedEnum(adaptedEnum AdaptedEnum) *AdaptTemplatedTestStruct {
-    x.AdaptedEnum = adaptedEnum
+func (x *AdaptTemplatedTestStruct) SetAdaptedEnum(value AdaptedEnum) *AdaptTemplatedTestStruct {
+    x.AdaptedEnum = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedListDefault(adaptedListDefault []int64) *AdaptTemplatedTestStruct {
-    x.AdaptedListDefault = adaptedListDefault
+func (x *AdaptTemplatedTestStruct) SetAdaptedListDefault(value []int64) *AdaptTemplatedTestStruct {
+    x.AdaptedListDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedSetDefault(adaptedSetDefault []int64) *AdaptTemplatedTestStruct {
-    x.AdaptedSetDefault = adaptedSetDefault
+func (x *AdaptTemplatedTestStruct) SetAdaptedSetDefault(value []int64) *AdaptTemplatedTestStruct {
+    x.AdaptedSetDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetAdaptedMapDefault(adaptedMapDefault map[int64]int64) *AdaptTemplatedTestStruct {
-    x.AdaptedMapDefault = adaptedMapDefault
+func (x *AdaptTemplatedTestStruct) SetAdaptedMapDefault(value map[int64]int64) *AdaptTemplatedTestStruct {
+    x.AdaptedMapDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStruct) SetDoubleTypedefBool(doubleTypedefBool DoubleTypedefBool) *AdaptTemplatedTestStruct {
-    x.DoubleTypedefBool = doubleTypedefBool
+func (x *AdaptTemplatedTestStruct) SetDoubleTypedefBool(value DoubleTypedefBool) *AdaptTemplatedTestStruct {
+    x.DoubleTypedefBool = value
     return x
 }
 
@@ -5263,113 +5263,113 @@ func NewAdaptTemplatedTestStructBuilder() *AdaptTemplatedTestStructBuilder {
     }
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedBool(adaptedBool AdaptedBool) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedBool = adaptedBool
+func (x *AdaptTemplatedTestStructBuilder) AdaptedBool(value AdaptedBool) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedBool = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedByte(adaptedByte AdaptedByte) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedByte = adaptedByte
+func (x *AdaptTemplatedTestStructBuilder) AdaptedByte(value AdaptedByte) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedByte = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedShort(adaptedShort AdaptedShort) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedShort = adaptedShort
+func (x *AdaptTemplatedTestStructBuilder) AdaptedShort(value AdaptedShort) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedShort = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedInteger(adaptedInteger AdaptedInteger) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedInteger = adaptedInteger
+func (x *AdaptTemplatedTestStructBuilder) AdaptedInteger(value AdaptedInteger) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedInteger = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedLong(adaptedLong AdaptedLong) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedLong = adaptedLong
+func (x *AdaptTemplatedTestStructBuilder) AdaptedLong(value AdaptedLong) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedLong = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedDouble(adaptedDouble AdaptedDouble) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedDouble = adaptedDouble
+func (x *AdaptTemplatedTestStructBuilder) AdaptedDouble(value AdaptedDouble) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedDouble = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedString(adaptedString AdaptedString) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedString = adaptedString
+func (x *AdaptTemplatedTestStructBuilder) AdaptedString(value AdaptedString) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedString = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedList(adaptedList []int64) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedList = adaptedList
+func (x *AdaptTemplatedTestStructBuilder) AdaptedList(value []int64) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedList = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedSet(adaptedSet []int64) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedSet = adaptedSet
+func (x *AdaptTemplatedTestStructBuilder) AdaptedSet(value []int64) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedSet = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedMap(adaptedMap map[int64]int64) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedMap = adaptedMap
+func (x *AdaptTemplatedTestStructBuilder) AdaptedMap(value map[int64]int64) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedMap = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedBoolDefault(adaptedBoolDefault AdaptedBool) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedBoolDefault = adaptedBoolDefault
+func (x *AdaptTemplatedTestStructBuilder) AdaptedBoolDefault(value AdaptedBool) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedBoolDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedByteDefault(adaptedByteDefault AdaptedByte) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedByteDefault = adaptedByteDefault
+func (x *AdaptTemplatedTestStructBuilder) AdaptedByteDefault(value AdaptedByte) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedByteDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedShortDefault(adaptedShortDefault AdaptedShort) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedShortDefault = adaptedShortDefault
+func (x *AdaptTemplatedTestStructBuilder) AdaptedShortDefault(value AdaptedShort) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedShortDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedIntegerDefault(adaptedIntegerDefault AdaptedInteger) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedIntegerDefault = adaptedIntegerDefault
+func (x *AdaptTemplatedTestStructBuilder) AdaptedIntegerDefault(value AdaptedInteger) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedIntegerDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedLongDefault(adaptedLongDefault AdaptedLong) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedLongDefault = adaptedLongDefault
+func (x *AdaptTemplatedTestStructBuilder) AdaptedLongDefault(value AdaptedLong) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedLongDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedDoubleDefault(adaptedDoubleDefault AdaptedDouble) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedDoubleDefault = adaptedDoubleDefault
+func (x *AdaptTemplatedTestStructBuilder) AdaptedDoubleDefault(value AdaptedDouble) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedDoubleDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedStringDefault(adaptedStringDefault AdaptedString) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedStringDefault = adaptedStringDefault
+func (x *AdaptTemplatedTestStructBuilder) AdaptedStringDefault(value AdaptedString) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedStringDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedEnum(adaptedEnum AdaptedEnum) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedEnum = adaptedEnum
+func (x *AdaptTemplatedTestStructBuilder) AdaptedEnum(value AdaptedEnum) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedEnum = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedListDefault(adaptedListDefault []int64) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedListDefault = adaptedListDefault
+func (x *AdaptTemplatedTestStructBuilder) AdaptedListDefault(value []int64) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedListDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedSetDefault(adaptedSetDefault []int64) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedSetDefault = adaptedSetDefault
+func (x *AdaptTemplatedTestStructBuilder) AdaptedSetDefault(value []int64) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedSetDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) AdaptedMapDefault(adaptedMapDefault map[int64]int64) *AdaptTemplatedTestStructBuilder {
-    x.obj.AdaptedMapDefault = adaptedMapDefault
+func (x *AdaptTemplatedTestStructBuilder) AdaptedMapDefault(value map[int64]int64) *AdaptTemplatedTestStructBuilder {
+    x.obj.AdaptedMapDefault = value
     return x
 }
 
-func (x *AdaptTemplatedTestStructBuilder) DoubleTypedefBool(doubleTypedefBool DoubleTypedefBool) *AdaptTemplatedTestStructBuilder {
-    x.obj.DoubleTypedefBool = doubleTypedefBool
+func (x *AdaptTemplatedTestStructBuilder) DoubleTypedefBool(value DoubleTypedefBool) *AdaptTemplatedTestStructBuilder {
+    x.obj.DoubleTypedefBool = value
     return x
 }
 
@@ -5616,8 +5616,8 @@ func (x *AdaptTemplatedNestedTestStruct) GetAdaptedStruct() *AdaptTemplatedTestS
     return x.AdaptedStruct
 }
 
-func (x *AdaptTemplatedNestedTestStruct) SetAdaptedStruct(adaptedStruct AdaptTemplatedTestStruct) *AdaptTemplatedNestedTestStruct {
-    x.AdaptedStruct = &adaptedStruct
+func (x *AdaptTemplatedNestedTestStruct) SetAdaptedStruct(value AdaptTemplatedTestStruct) *AdaptTemplatedNestedTestStruct {
+    x.AdaptedStruct = &value
     return x
 }
 
@@ -5668,8 +5668,8 @@ func NewAdaptTemplatedNestedTestStructBuilder() *AdaptTemplatedNestedTestStructB
     }
 }
 
-func (x *AdaptTemplatedNestedTestStructBuilder) AdaptedStruct(adaptedStruct *AdaptTemplatedTestStruct) *AdaptTemplatedNestedTestStructBuilder {
-    x.obj.AdaptedStruct = adaptedStruct
+func (x *AdaptTemplatedNestedTestStructBuilder) AdaptedStruct(value *AdaptTemplatedTestStruct) *AdaptTemplatedNestedTestStructBuilder {
+    x.obj.AdaptedStruct = value
     return x
 }
 
@@ -5753,13 +5753,13 @@ func (x *AdaptTestUnion) GetCustom() CustomProtocolType {
     return x.Custom
 }
 
-func (x *AdaptTestUnion) SetDelay(delay DurationMs) *AdaptTestUnion {
-    x.Delay = &delay
+func (x *AdaptTestUnion) SetDelay(value DurationMs) *AdaptTestUnion {
+    x.Delay = &value
     return x
 }
 
-func (x *AdaptTestUnion) SetCustom(custom CustomProtocolType) *AdaptTestUnion {
-    x.Custom = custom
+func (x *AdaptTestUnion) SetCustom(value CustomProtocolType) *AdaptTestUnion {
+    x.Custom = value
     return x
 }
 
@@ -5911,8 +5911,8 @@ func (x *AdaptedStruct) GetData() int64 {
     return x.Data
 }
 
-func (x *AdaptedStruct) SetData(data int64) *AdaptedStruct {
-    x.Data = data
+func (x *AdaptedStruct) SetData(value int64) *AdaptedStruct {
+    x.Data = value
     return x
 }
 
@@ -5955,8 +5955,8 @@ func NewAdaptedStructBuilder() *AdaptedStructBuilder {
     }
 }
 
-func (x *AdaptedStructBuilder) Data(data int64) *AdaptedStructBuilder {
-    x.obj.Data = data
+func (x *AdaptedStructBuilder) Data(value int64) *AdaptedStructBuilder {
+    x.obj.Data = value
     return x
 }
 
@@ -6035,8 +6035,8 @@ func (x *DirectlyAdaptedStruct) GetData() int64 {
     return x.Data
 }
 
-func (x *DirectlyAdaptedStruct) SetData(data int64) *DirectlyAdaptedStruct {
-    x.Data = data
+func (x *DirectlyAdaptedStruct) SetData(value int64) *DirectlyAdaptedStruct {
+    x.Data = value
     return x
 }
 
@@ -6079,8 +6079,8 @@ func NewDirectlyAdaptedStructBuilder() *DirectlyAdaptedStructBuilder {
     }
 }
 
-func (x *DirectlyAdaptedStructBuilder) Data(data int64) *DirectlyAdaptedStructBuilder {
-    x.obj.Data = data
+func (x *DirectlyAdaptedStructBuilder) Data(value int64) *DirectlyAdaptedStructBuilder {
+    x.obj.Data = value
     return x
 }
 
@@ -6174,23 +6174,23 @@ func (x *StructFieldAdaptedStruct) GetTypedefOfAdapted() *TypedefOfDirect {
     return x.TypedefOfAdapted
 }
 
-func (x *StructFieldAdaptedStruct) SetAdaptedStruct(adaptedStruct AdaptedStruct) *StructFieldAdaptedStruct {
-    x.AdaptedStruct = &adaptedStruct
+func (x *StructFieldAdaptedStruct) SetAdaptedStruct(value AdaptedStruct) *StructFieldAdaptedStruct {
+    x.AdaptedStruct = &value
     return x
 }
 
-func (x *StructFieldAdaptedStruct) SetAdaptedTypedef(adaptedTypedef AdaptedTypedef) *StructFieldAdaptedStruct {
-    x.AdaptedTypedef = &adaptedTypedef
+func (x *StructFieldAdaptedStruct) SetAdaptedTypedef(value AdaptedTypedef) *StructFieldAdaptedStruct {
+    x.AdaptedTypedef = &value
     return x
 }
 
-func (x *StructFieldAdaptedStruct) SetDirectlyAdapted(directlyAdapted DirectlyAdaptedStruct) *StructFieldAdaptedStruct {
-    x.DirectlyAdapted = &directlyAdapted
+func (x *StructFieldAdaptedStruct) SetDirectlyAdapted(value DirectlyAdaptedStruct) *StructFieldAdaptedStruct {
+    x.DirectlyAdapted = &value
     return x
 }
 
-func (x *StructFieldAdaptedStruct) SetTypedefOfAdapted(typedefOfAdapted TypedefOfDirect) *StructFieldAdaptedStruct {
-    x.TypedefOfAdapted = &typedefOfAdapted
+func (x *StructFieldAdaptedStruct) SetTypedefOfAdapted(value TypedefOfDirect) *StructFieldAdaptedStruct {
+    x.TypedefOfAdapted = &value
     return x
 }
 
@@ -6346,23 +6346,23 @@ func NewStructFieldAdaptedStructBuilder() *StructFieldAdaptedStructBuilder {
     }
 }
 
-func (x *StructFieldAdaptedStructBuilder) AdaptedStruct(adaptedStruct *AdaptedStruct) *StructFieldAdaptedStructBuilder {
-    x.obj.AdaptedStruct = adaptedStruct
+func (x *StructFieldAdaptedStructBuilder) AdaptedStruct(value *AdaptedStruct) *StructFieldAdaptedStructBuilder {
+    x.obj.AdaptedStruct = value
     return x
 }
 
-func (x *StructFieldAdaptedStructBuilder) AdaptedTypedef(adaptedTypedef *AdaptedTypedef) *StructFieldAdaptedStructBuilder {
-    x.obj.AdaptedTypedef = adaptedTypedef
+func (x *StructFieldAdaptedStructBuilder) AdaptedTypedef(value *AdaptedTypedef) *StructFieldAdaptedStructBuilder {
+    x.obj.AdaptedTypedef = value
     return x
 }
 
-func (x *StructFieldAdaptedStructBuilder) DirectlyAdapted(directlyAdapted *DirectlyAdaptedStruct) *StructFieldAdaptedStructBuilder {
-    x.obj.DirectlyAdapted = directlyAdapted
+func (x *StructFieldAdaptedStructBuilder) DirectlyAdapted(value *DirectlyAdaptedStruct) *StructFieldAdaptedStructBuilder {
+    x.obj.DirectlyAdapted = value
     return x
 }
 
-func (x *StructFieldAdaptedStructBuilder) TypedefOfAdapted(typedefOfAdapted *TypedefOfDirect) *StructFieldAdaptedStructBuilder {
-    x.obj.TypedefOfAdapted = typedefOfAdapted
+func (x *StructFieldAdaptedStructBuilder) TypedefOfAdapted(value *TypedefOfDirect) *StructFieldAdaptedStructBuilder {
+    x.obj.TypedefOfAdapted = value
     return x
 }
 
@@ -6465,8 +6465,8 @@ func (x *CircularAdaptee) GetField() *CircularStruct {
     return x.Field
 }
 
-func (x *CircularAdaptee) SetField(field CircularStruct) *CircularAdaptee {
-    x.Field = &field
+func (x *CircularAdaptee) SetField(value CircularStruct) *CircularAdaptee {
+    x.Field = &value
     return x
 }
 
@@ -6517,8 +6517,8 @@ func NewCircularAdapteeBuilder() *CircularAdapteeBuilder {
     }
 }
 
-func (x *CircularAdapteeBuilder) Field(field *CircularStruct) *CircularAdapteeBuilder {
-    x.obj.Field = field
+func (x *CircularAdapteeBuilder) Field(value *CircularStruct) *CircularAdapteeBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -6597,8 +6597,8 @@ func (x *CircularStruct) GetField() *AdaptedCircularAdaptee {
     return x.Field
 }
 
-func (x *CircularStruct) SetField(field AdaptedCircularAdaptee) *CircularStruct {
-    x.Field = &field
+func (x *CircularStruct) SetField(value AdaptedCircularAdaptee) *CircularStruct {
+    x.Field = &value
     return x
 }
 
@@ -6649,8 +6649,8 @@ func NewCircularStructBuilder() *CircularStructBuilder {
     }
 }
 
-func (x *CircularStructBuilder) Field(field *AdaptedCircularAdaptee) *CircularStructBuilder {
-    x.obj.Field = field
+func (x *CircularStructBuilder) Field(value *AdaptedCircularAdaptee) *CircularStructBuilder {
+    x.obj.Field = value
     return x
 }
 
@@ -6729,8 +6729,8 @@ func (x *ReorderedStruct) GetReorderedDependentAdapted() *DeclaredAfterStruct {
     return x.ReorderedDependentAdapted
 }
 
-func (x *ReorderedStruct) SetReorderedDependentAdapted(reorderedDependentAdapted DeclaredAfterStruct) *ReorderedStruct {
-    x.ReorderedDependentAdapted = &reorderedDependentAdapted
+func (x *ReorderedStruct) SetReorderedDependentAdapted(value DeclaredAfterStruct) *ReorderedStruct {
+    x.ReorderedDependentAdapted = &value
     return x
 }
 
@@ -6781,8 +6781,8 @@ func NewReorderedStructBuilder() *ReorderedStructBuilder {
     }
 }
 
-func (x *ReorderedStructBuilder) ReorderedDependentAdapted(reorderedDependentAdapted *DeclaredAfterStruct) *ReorderedStructBuilder {
-    x.obj.ReorderedDependentAdapted = reorderedDependentAdapted
+func (x *ReorderedStructBuilder) ReorderedDependentAdapted(value *DeclaredAfterStruct) *ReorderedStructBuilder {
+    x.obj.ReorderedDependentAdapted = value
     return x
 }
 
@@ -6935,8 +6935,8 @@ func (x *RenamedStruct) GetData() int64 {
     return x.Data
 }
 
-func (x *RenamedStruct) SetData(data int64) *RenamedStruct {
-    x.Data = data
+func (x *RenamedStruct) SetData(value int64) *RenamedStruct {
+    x.Data = value
     return x
 }
 
@@ -6979,8 +6979,8 @@ func NewRenamedStructBuilder() *RenamedStructBuilder {
     }
 }
 
-func (x *RenamedStructBuilder) Data(data int64) *RenamedStructBuilder {
-    x.obj.Data = data
+func (x *RenamedStructBuilder) Data(value int64) *RenamedStructBuilder {
+    x.obj.Data = value
     return x
 }
 
@@ -7059,8 +7059,8 @@ func (x *SameNamespaceStruct) GetData() int64 {
     return x.Data
 }
 
-func (x *SameNamespaceStruct) SetData(data int64) *SameNamespaceStruct {
-    x.Data = data
+func (x *SameNamespaceStruct) SetData(value int64) *SameNamespaceStruct {
+    x.Data = value
     return x
 }
 
@@ -7103,8 +7103,8 @@ func NewSameNamespaceStructBuilder() *SameNamespaceStructBuilder {
     }
 }
 
-func (x *SameNamespaceStructBuilder) Data(data int64) *SameNamespaceStructBuilder {
-    x.obj.Data = data
+func (x *SameNamespaceStructBuilder) Data(value int64) *SameNamespaceStructBuilder {
+    x.obj.Data = value
     return x
 }
 
@@ -7257,8 +7257,8 @@ func (x *MoveOnly) GetPtr() *HeapAllocated {
     return x.Ptr
 }
 
-func (x *MoveOnly) SetPtr(ptr HeapAllocated) *MoveOnly {
-    x.Ptr = &ptr
+func (x *MoveOnly) SetPtr(value HeapAllocated) *MoveOnly {
+    x.Ptr = &value
     return x
 }
 
@@ -7309,8 +7309,8 @@ func NewMoveOnlyBuilder() *MoveOnlyBuilder {
     }
 }
 
-func (x *MoveOnlyBuilder) Ptr(ptr *HeapAllocated) *MoveOnlyBuilder {
-    x.obj.Ptr = ptr
+func (x *MoveOnlyBuilder) Ptr(value *HeapAllocated) *MoveOnlyBuilder {
+    x.obj.Ptr = value
     return x
 }
 
@@ -7389,8 +7389,8 @@ func (x *AlsoMoveOnly) GetPtr() int64 {
     return x.Ptr
 }
 
-func (x *AlsoMoveOnly) SetPtr(ptr int64) *AlsoMoveOnly {
-    x.Ptr = ptr
+func (x *AlsoMoveOnly) SetPtr(value int64) *AlsoMoveOnly {
+    x.Ptr = value
     return x
 }
 
@@ -7433,8 +7433,8 @@ func NewAlsoMoveOnlyBuilder() *AlsoMoveOnlyBuilder {
     }
 }
 
-func (x *AlsoMoveOnlyBuilder) Ptr(ptr int64) *AlsoMoveOnlyBuilder {
-    x.obj.Ptr = ptr
+func (x *AlsoMoveOnlyBuilder) Ptr(value int64) *AlsoMoveOnlyBuilder {
+    x.obj.Ptr = value
     return x
 }
 
@@ -7671,18 +7671,18 @@ func (x *CountingStruct) GetRegularString() *string {
     return x.RegularString
 }
 
-func (x *CountingStruct) SetRegularInt(regularInt int64) *CountingStruct {
-    x.RegularInt = &regularInt
+func (x *CountingStruct) SetRegularInt(value int64) *CountingStruct {
+    x.RegularInt = &value
     return x
 }
 
-func (x *CountingStruct) SetCountingInt(countingInt CountingInt) *CountingStruct {
-    x.CountingInt = &countingInt
+func (x *CountingStruct) SetCountingInt(value CountingInt) *CountingStruct {
+    x.CountingInt = &value
     return x
 }
 
-func (x *CountingStruct) SetRegularString(regularString string) *CountingStruct {
-    x.RegularString = &regularString
+func (x *CountingStruct) SetRegularString(value string) *CountingStruct {
+    x.RegularString = &value
     return x
 }
 
@@ -7800,18 +7800,18 @@ func NewCountingStructBuilder() *CountingStructBuilder {
     }
 }
 
-func (x *CountingStructBuilder) RegularInt(regularInt *int64) *CountingStructBuilder {
-    x.obj.RegularInt = regularInt
+func (x *CountingStructBuilder) RegularInt(value *int64) *CountingStructBuilder {
+    x.obj.RegularInt = value
     return x
 }
 
-func (x *CountingStructBuilder) CountingInt(countingInt *CountingInt) *CountingStructBuilder {
-    x.obj.CountingInt = countingInt
+func (x *CountingStructBuilder) CountingInt(value *CountingInt) *CountingStructBuilder {
+    x.obj.CountingInt = value
     return x
 }
 
-func (x *CountingStructBuilder) RegularString(regularString *string) *CountingStructBuilder {
-    x.obj.RegularString = regularString
+func (x *CountingStructBuilder) RegularString(value *string) *CountingStructBuilder {
+    x.obj.RegularString = value
     return x
 }
 
@@ -7906,8 +7906,8 @@ func (x *Person) GetName() string {
     return x.Name
 }
 
-func (x *Person) SetName(name string) *Person {
-    x.Name = name
+func (x *Person) SetName(value string) *Person {
+    x.Name = value
     return x
 }
 
@@ -7950,8 +7950,8 @@ func NewPersonBuilder() *PersonBuilder {
     }
 }
 
-func (x *PersonBuilder) Name(name string) *PersonBuilder {
-    x.obj.Name = name
+func (x *PersonBuilder) Name(value string) *PersonBuilder {
+    x.obj.Name = value
     return x
 }
 
@@ -8030,8 +8030,8 @@ func (x *Person2) GetName() string {
     return x.Name
 }
 
-func (x *Person2) SetName(name string) *Person2 {
-    x.Name = name
+func (x *Person2) SetName(value string) *Person2 {
+    x.Name = value
     return x
 }
 
@@ -8074,8 +8074,8 @@ func NewPerson2Builder() *Person2Builder {
     }
 }
 
-func (x *Person2Builder) Name(name string) *Person2Builder {
-    x.obj.Name = name
+func (x *Person2Builder) Name(value string) *Person2Builder {
+    x.obj.Name = value
     return x
 }
 

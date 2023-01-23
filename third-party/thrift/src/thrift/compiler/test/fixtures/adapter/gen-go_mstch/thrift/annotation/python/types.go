@@ -35,13 +35,13 @@ func (x *Adapter) GetTypeHint() string {
     return x.TypeHint
 }
 
-func (x *Adapter) SetName(name string) *Adapter {
-    x.Name = name
+func (x *Adapter) SetName(value string) *Adapter {
+    x.Name = value
     return x
 }
 
-func (x *Adapter) SetTypeHint(typeHint string) *Adapter {
-    x.TypeHint = typeHint
+func (x *Adapter) SetTypeHint(value string) *Adapter {
+    x.TypeHint = value
     return x
 }
 
@@ -111,13 +111,13 @@ func NewAdapterBuilder() *AdapterBuilder {
     }
 }
 
-func (x *AdapterBuilder) Name(name string) *AdapterBuilder {
-    x.obj.Name = name
+func (x *AdapterBuilder) Name(value string) *AdapterBuilder {
+    x.obj.Name = value
     return x
 }
 
-func (x *AdapterBuilder) TypeHint(typeHint string) *AdapterBuilder {
-    x.obj.TypeHint = typeHint
+func (x *AdapterBuilder) TypeHint(value string) *AdapterBuilder {
+    x.obj.TypeHint = value
     return x
 }
 

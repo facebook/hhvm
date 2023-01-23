@@ -15,15 +15,14 @@ module SN = Naming_special_names
 type class_t = Typing_class_types.class_t [@@deriving show]
 
 let make_eager_class_decl decl =
-  Eager
-    ( decl,
-      {
-        methods = String.Table.create ();
-        static_methods = String.Table.create ();
-        props = String.Table.create ();
-        static_props = String.Table.create ();
-        construct = ref None;
-      } )
+  ( decl,
+    {
+      methods = String.Table.create ();
+      static_methods = String.Table.create ();
+      props = String.Table.create ();
+      static_props = String.Table.create ();
+      construct = ref None;
+    } )
 
 let make_eager_class_type ctx class_name declare_folded_class =
   match Decl_store.((get ()).get_class class_name) with
@@ -50,94 +49,94 @@ module ApiShallow = struct
     (* Looks only at the immediate shallow decl *)
     Decl_counters.count_subdecl decl Decl_counters.Shallow_decl @@ fun () ->
     match t with
-    | Eager _ -> failwith "shallow_class_decl is disabled"
+    | _ -> failwith "shallow_class_decl is disabled"
 
   let abstract (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Abstract @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_abstract
+    let (c, _) = t in
+    c.Decl_defs.dc_abstract
 
   let final (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Final @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_final
+    let (c, _) = t in
+    c.Decl_defs.dc_final
 
   let const (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Const @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_const
+    let (c, _) = t in
+    c.Decl_defs.dc_const
 
   let kind (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Kind @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_kind
+    let (c, _) = t in
+    c.Decl_defs.dc_kind
 
   let is_xhp (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Is_xhp @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_is_xhp
+    let (c, _) = t in
+    c.Decl_defs.dc_is_xhp
 
   let name (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Name @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_name
+    let (c, _) = t in
+    c.Decl_defs.dc_name
 
   let pos (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Pos @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_pos
+    let (c, _) = t in
+    c.Decl_defs.dc_pos
 
   let tparams (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Tparams @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_tparams
+    let (c, _) = t in
+    c.Decl_defs.dc_tparams
 
   let where_constraints (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Where_constraints
     @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_where_constraints
+    let (c, _) = t in
+    c.Decl_defs.dc_where_constraints
 
   let enum_type (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Enum_type @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_enum_type
+    let (c, _) = t in
+    c.Decl_defs.dc_enum_type
 
   let xhp_enum_values (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Xhp_enum_values @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_xhp_enum_values
+    let (c, _) = t in
+    c.Decl_defs.dc_xhp_enum_values
 
   let sealed_whitelist (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Sealed_whitelist @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_sealed_whitelist
+    let (c, _) = t in
+    c.Decl_defs.dc_sealed_whitelist
 
   let get_docs_url (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Docs_url @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_docs_url
+    let (c, _) = t in
+    c.Decl_defs.dc_docs_url
 
   let get_module (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Module @@ fun () ->
-    match t with
-    | Eager (c, _) -> Option.map c.Decl_defs.dc_module ~f:snd
+    let (c, _) = t in
+    Option.map c.Decl_defs.dc_module ~f:snd
 
   let internal (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Internal @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_internal
+    let (c, _) = t in
+    c.Decl_defs.dc_internal
 
   let decl_errors (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Decl_errors @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_decl_errors
+    let (c, _) = t in
+    c.Decl_defs.dc_decl_errors
 
   let get_support_dynamic_type (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Support_dynamic_type
     @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_support_dynamic_type
+    let (c, _) = t in
+    c.Decl_defs.dc_support_dynamic_type
 
   let all_where_constraints_on_this t =
     (* tally is already done by where_constraints *)
@@ -195,151 +194,145 @@ end
 module ApiLazy = struct
   let construct (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Construct @@ fun () ->
-    match t with
-    | Eager (cls, members) ->
-      (match !(members.construct) with
-      | Some x -> x
-      | None ->
-        let x =
-          Decl_class.lookup_constructor_lazy
-            ctx
-            ~child_class_name:cls.Decl_defs.dc_name
-            cls.Decl_defs.dc_substs
-            cls.Decl_defs.dc_construct
-        in
-        members.construct := Some x;
-        x)
+    let (cls, members) = t in
+    match !(members.construct) with
+    | Some x -> x
+    | None ->
+      let x =
+        Decl_class.lookup_constructor_lazy
+          ctx
+          ~child_class_name:cls.Decl_defs.dc_name
+          cls.Decl_defs.dc_substs
+          cls.Decl_defs.dc_construct
+      in
+      members.construct := Some x;
+      x
 
   let need_init (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Need_init @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_need_init
+    let (c, _) = t in
+    c.Decl_defs.dc_need_init
 
   let get_ancestor (decl, t, _ctx) ancestor =
     Decl_counters.count_subdecl decl (Decl_counters.Get_ancestor ancestor)
     @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.find_opt ancestor c.Decl_defs.dc_ancestors
+    let (c, _) = t in
+    SMap.find_opt ancestor c.Decl_defs.dc_ancestors
 
   let has_ancestor (decl, t, _ctx) ancestor =
     Decl_counters.count_subdecl decl (Decl_counters.Has_ancestor ancestor)
     @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.mem ancestor c.Decl_defs.dc_ancestors
+    let (c, _) = t in
+    SMap.mem ancestor c.Decl_defs.dc_ancestors
 
   let requires_ancestor (decl, t, _ctx) ancestor =
     Decl_counters.count_subdecl decl (Decl_counters.Requires_ancestor ancestor)
     @@ fun () ->
-    match t with
-    | Eager (c, _) -> SSet.mem ancestor c.Decl_defs.dc_req_ancestors_extends
+    let (c, _) = t in
+    SSet.mem ancestor c.Decl_defs.dc_req_ancestors_extends
 
   let get_const (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_const id) @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.find_opt id c.Decl_defs.dc_consts
+    let (c, _) = t in
+    SMap.find_opt id c.Decl_defs.dc_consts
 
   let has_const (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_const id) @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.mem id c.Decl_defs.dc_consts
+    let (c, _) = t in
+    SMap.mem id c.Decl_defs.dc_consts
 
   let get_typeconst (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_typeconst id)
     @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.find_opt id c.Decl_defs.dc_typeconsts
+    let (c, _) = t in
+    SMap.find_opt id c.Decl_defs.dc_typeconsts
 
   let has_typeconst (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_typeconst id)
     @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.mem id c.Decl_defs.dc_typeconsts
+    let (c, _) = t in
+    SMap.mem id c.Decl_defs.dc_typeconsts
 
   let get_typeconst_enforceability (decl, t, _ctx) id =
     Decl_counters.count_subdecl
       decl
       (Decl_counters.Get_typeconst_enforceability id)
     @@ fun () ->
-    match t with
-    | Eager (c, _) ->
-      Option.map (SMap.find_opt id c.Decl_defs.dc_typeconsts) ~f:(fun t ->
-          t.ttc_enforceable)
+    let (c, _) = t in
+    Option.map (SMap.find_opt id c.Decl_defs.dc_typeconsts) ~f:(fun t ->
+        t.ttc_enforceable)
 
   let get_prop (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_prop id) @@ fun () ->
-    match t with
-    | Eager (c, members) ->
-      (match String.Table.find members.props id with
-      | Some _ as elt_opt -> elt_opt
-      | None ->
-        (match SMap.find_opt id c.Decl_defs.dc_props with
-        | None -> None
-        | Some elt ->
-          let elt = Decl_class.lookup_property_type_lazy ctx c id elt in
-          String.Table.add_exn members.props ~key:id ~data:elt;
-          Some elt))
+    let (c, members) = t in
+    match String.Table.find members.props id with
+    | Some _ as elt_opt -> elt_opt
+    | None ->
+      (match SMap.find_opt id c.Decl_defs.dc_props with
+      | None -> None
+      | Some elt ->
+        let elt = Decl_class.lookup_property_type_lazy ctx c id elt in
+        String.Table.add_exn members.props ~key:id ~data:elt;
+        Some elt)
 
   let has_prop (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_prop id) @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.mem id c.Decl_defs.dc_props
+    let (c, _) = t in
+    SMap.mem id c.Decl_defs.dc_props
 
   let get_sprop (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_sprop id) @@ fun () ->
-    match t with
-    | Eager (c, members) ->
-      (match String.Table.find members.static_props id with
-      | Some _ as elt_opt -> elt_opt
-      | None ->
-        (match SMap.find_opt id c.Decl_defs.dc_sprops with
-        | None -> None
-        | Some elt ->
-          let elt = Decl_class.lookup_static_property_type_lazy ctx c id elt in
-          String.Table.add_exn members.static_props ~key:id ~data:elt;
-          Some elt))
+    let (c, members) = t in
+    match String.Table.find members.static_props id with
+    | Some _ as elt_opt -> elt_opt
+    | None ->
+      (match SMap.find_opt id c.Decl_defs.dc_sprops with
+      | None -> None
+      | Some elt ->
+        let elt = Decl_class.lookup_static_property_type_lazy ctx c id elt in
+        String.Table.add_exn members.static_props ~key:id ~data:elt;
+        Some elt)
 
   let has_sprop (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_sprop id) @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.mem id c.Decl_defs.dc_sprops
+    let (c, _) = t in
+    SMap.mem id c.Decl_defs.dc_sprops
 
   let get_method (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_method id) @@ fun () ->
-    match t with
-    | Eager (c, members) ->
-      (match String.Table.find members.methods id with
-      | Some _ as elt_opt -> elt_opt
-      | None ->
-        (match SMap.find_opt id c.Decl_defs.dc_methods with
-        | None -> None
-        | Some elt ->
-          let elt = Decl_class.lookup_method_type_lazy ctx c id elt in
-          String.Table.add_exn members.methods ~key:id ~data:elt;
-          Some elt))
+    let (c, members) = t in
+    match String.Table.find members.methods id with
+    | Some _ as elt_opt -> elt_opt
+    | None ->
+      (match SMap.find_opt id c.Decl_defs.dc_methods with
+      | None -> None
+      | Some elt ->
+        let elt = Decl_class.lookup_method_type_lazy ctx c id elt in
+        String.Table.add_exn members.methods ~key:id ~data:elt;
+        Some elt)
 
   let has_method (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_method id) @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.mem id c.Decl_defs.dc_methods
+    let (c, _) = t in
+    SMap.mem id c.Decl_defs.dc_methods
 
   let get_smethod (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_smethod id) @@ fun () ->
-    match t with
-    | Eager (c, members) ->
-      (match String.Table.find members.static_methods id with
-      | Some _ as elt_opt -> elt_opt
-      | None ->
-        (match SMap.find_opt id c.Decl_defs.dc_smethods with
-        | None -> None
-        | Some elt ->
-          let elt = Decl_class.lookup_static_method_type_lazy ctx c id elt in
-          String.Table.add_exn members.static_methods ~key:id ~data:elt;
-          Some elt))
+    let (c, members) = t in
+    match String.Table.find members.static_methods id with
+    | Some _ as elt_opt -> elt_opt
+    | None ->
+      (match SMap.find_opt id c.Decl_defs.dc_smethods with
+      | None -> None
+      | Some elt ->
+        let elt = Decl_class.lookup_static_method_type_lazy ctx c id elt in
+        String.Table.add_exn members.static_methods ~key:id ~data:elt;
+        Some elt)
 
   let has_smethod (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Has_smethod id) @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.mem id c.Decl_defs.dc_smethods
+    let (c, _) = t in
+    SMap.mem id c.Decl_defs.dc_smethods
 
   let get_any_method ~is_static cls id =
     (* tally is already done inside the following three methods *)
@@ -355,37 +348,37 @@ module ApiEager = struct
   let linearization (decl, t, _ctx) kind : Decl_defs.mro_element list =
     Decl_counters.count_subdecl decl Decl_counters.Linearization @@ fun () ->
     match (t, kind) with
-    | (Eager _, _) -> failwith "shallow_class_decl is disabled"
+    | (_, _) -> failwith "shallow_class_decl is disabled"
 
   let all_ancestor_req_names (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestor_req_names
     @@ fun () ->
     (* The two below will traverse ancestors in different orders.
        But if the typechecker discovers errors in different order, no matter. *)
-    match t with
-    | Eager (c, _) -> SSet.elements c.Decl_defs.dc_req_ancestors_extends
+    let (c, _) = t in
+    SSet.elements c.Decl_defs.dc_req_ancestors_extends
 
   let all_ancestors (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestors @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.bindings c.Decl_defs.dc_ancestors
+    let (c, _) = t in
+    SMap.bindings c.Decl_defs.dc_ancestors
 
   let all_ancestor_names (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestors @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.ordered_keys c.Decl_defs.dc_ancestors
+    let (c, _) = t in
+    SMap.ordered_keys c.Decl_defs.dc_ancestors
 
   let all_ancestor_reqs (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestor_reqs
     @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_req_ancestors
+    let (c, _) = t in
+    c.Decl_defs.dc_req_ancestors
 
   let all_ancestor_req_class_requirements (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestor_reqs
     @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_req_class_ancestors
+    let (c, _) = t in
+    c.Decl_defs.dc_req_class_ancestors
 
   let upper_bounds_on_this t =
     (* tally is already done by all_ancestors and upper_bounds *)
@@ -395,57 +388,53 @@ module ApiEager = struct
 
   let consts (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Consts @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.bindings c.Decl_defs.dc_consts
+    let (c, _) = t in
+    SMap.bindings c.Decl_defs.dc_consts
 
   let typeconsts (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Typeconsts @@ fun () ->
-    match t with
-    | Eager (c, _) -> SMap.bindings c.Decl_defs.dc_typeconsts
+    let (c, _) = t in
+    SMap.bindings c.Decl_defs.dc_typeconsts
 
   let props (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Props @@ fun () ->
-    match t with
-    | Eager (c, _) ->
-      SMap.bindings c.Decl_defs.dc_props
-      |> List.map ~f:(fun (id, elt) ->
-             (id, Decl_class.lookup_property_type_lazy ctx c id elt))
+    let (c, _) = t in
+    SMap.bindings c.Decl_defs.dc_props
+    |> List.map ~f:(fun (id, elt) ->
+           (id, Decl_class.lookup_property_type_lazy ctx c id elt))
 
   let sprops (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.SProps @@ fun () ->
-    match t with
-    | Eager (c, _) ->
-      SMap.bindings c.Decl_defs.dc_sprops
-      |> List.map ~f:(fun (id, elt) ->
-             (id, Decl_class.lookup_static_property_type_lazy ctx c id elt))
+    let (c, _) = t in
+    SMap.bindings c.Decl_defs.dc_sprops
+    |> List.map ~f:(fun (id, elt) ->
+           (id, Decl_class.lookup_static_property_type_lazy ctx c id elt))
 
   let methods (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Methods @@ fun () ->
-    match t with
-    | Eager (c, _) ->
-      SMap.bindings c.Decl_defs.dc_methods
-      |> List.map ~f:(fun (id, elt) ->
-             (id, Decl_class.lookup_method_type_lazy ctx c id elt))
+    let (c, _) = t in
+    SMap.bindings c.Decl_defs.dc_methods
+    |> List.map ~f:(fun (id, elt) ->
+           (id, Decl_class.lookup_method_type_lazy ctx c id elt))
 
   let smethods (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.SMethods @@ fun () ->
-    match t with
-    | Eager (c, _) ->
-      SMap.bindings c.Decl_defs.dc_smethods
-      |> List.map ~f:(fun (id, elt) ->
-             (id, Decl_class.lookup_static_method_type_lazy ctx c id elt))
+    let (c, _) = t in
+    SMap.bindings c.Decl_defs.dc_smethods
+    |> List.map ~f:(fun (id, elt) ->
+           (id, Decl_class.lookup_static_method_type_lazy ctx c id elt))
 
   let all_inherited_methods (decl, t, _ctx) _id =
     Decl_counters.count_subdecl decl Decl_counters.All_inherited_methods
     @@ fun () ->
     match t with
-    | Eager _ -> failwith "shallow_class_decl is disabled"
+    | _ -> failwith "shallow_class_decl is disabled"
 
   let all_inherited_smethods (decl, t, _ctx) _id =
     Decl_counters.count_subdecl decl Decl_counters.All_inherited_smethods
     @@ fun () ->
     match t with
-    | Eager _ -> failwith "shallow_class_decl is disabled"
+    | _ -> failwith "shallow_class_decl is disabled"
 
   let overridden_method (decl, t, ctx) ~method_name ~is_static ~get_class =
     let open Option.Monad_infix in
@@ -457,10 +446,9 @@ module ApiEager = struct
       get_class ctx class_name >>= fun cls ->
       ApiLazy.get_any_method ~is_static cls method_name
     in
-    match t with
-    | Eager (cls, _members) ->
-      Shallow_classes_provider.get ctx cls.Decl_defs.dc_name
-      >>= Decl_inherit.find_overridden_method ~get_method
+    let (cls, _members) = t in
+    Shallow_classes_provider.get ctx cls.Decl_defs.dc_name
+    >>= Decl_inherit.find_overridden_method ~get_method
 end
 
 module Api = struct
@@ -482,8 +470,8 @@ module Api = struct
     (* Not applicable to shallow decl *)
     Decl_counters.count_subdecl decl Decl_counters.Deferred_init_members
     @@ fun () ->
-    match t with
-    | Eager (c, _) -> c.Decl_defs.dc_deferred_init_members
+    let (c, _) = t in
+    c.Decl_defs.dc_deferred_init_members
 
   let valid_newable_class cls =
     if Ast_defs.is_c_class (kind cls) then

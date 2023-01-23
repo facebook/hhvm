@@ -32,17 +32,11 @@ type eager_members = {
 }
 
 (** class_t:
-This type is an abstraction layer over shallow vs folded decl,
-and provides a view of classes which includes all
-inherited members and their types.
+This type is an abstraction layer over the way folded decls are stored, and
+provides a view of classes which includes all inherited members and their types.
 
-In legacy folded decl, that view is constructed by merging a single
-heap entry for the folded class with many entries for the types
-of each of its members (those member entries are looked up lazily,
-as needed).
-
-In shallow decl, that view is constructed even more lazily,
-by iterating over the shallow representation of the class
-and its ancestors one at a time. *)
-type class_t = Eager of Decl_defs.decl_class_type * (eager_members[@opaque])
+This view is constructed by merging a single heap entry for the folded class
+with many entries for the types of each of its members (those member entries are
+looked up lazily, as needed). *)
+type class_t = Decl_defs.decl_class_type * (eager_members[@opaque])
 [@@deriving show]

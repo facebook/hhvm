@@ -169,6 +169,9 @@ impl HhConfig {
                 "const_default_lambda_args" => {
                     go.po_const_default_lambda_args = parse_json(&value);
                 }
+                "like_casts" => {
+                    go.tco_like_casts = parse_json(&value);
+                }
                 _ => c.unknown.push((key, value)),
             }
         }

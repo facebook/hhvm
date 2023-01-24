@@ -1929,6 +1929,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         }) => {
                             let attributes = self.to_attributes(attributes);
 
+                            let type_ = self
+                                .rewrite_ty_for_global_inference(
+                                    self.node_to_ty(hint),
+                                    Reason::RglobalFunParam(pos),
+                                )
+                                .unwrap_or_else(|| self.tany_with_pos(pos));
                             if let Some(visibility) = visibility.as_visibility() {
                                 let name = name.unwrap_or("");
                                 let name = strip_dollar_prefix(name);
@@ -1940,21 +1946,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                                 properties.push(ShallowProp {
                                     xhp_attr: None,
                                     name: (pos, name),
-                                    type_: self.rewrite_ty_for_global_inference(
-                                        self.node_to_ty(hint),
-                                        Reason::RglobalFunParam(pos),
-                                    ),
+                                    type_,
                                     visibility,
                                     flags,
                                 });
                             }
 
-                            let type_ = self
-                                .rewrite_ty_for_global_inference(
-                                    self.node_to_ty(hint),
-                                    Reason::RglobalFunParam(pos),
-                                )
-                                .unwrap_or_else(|| self.tany_with_pos(pos));
                             // These are illegal here--they can only be used on
                             // parameters in a function type hint (see
                             // make_closure_type_specifier and unwrap_mutability).
@@ -4388,14 +4385,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                         self.node_to_non_ret_ty(hint),
                         Reason::RglobalClassProp(pos),
                     );
+                    let ty = ty.unwrap_or_else(|| self.tany_with_pos(pos));
                     let ty = if self.opts.interpret_soft_types_as_like_types {
                         if attributes.soft {
-                            ty.map(|t| {
-                                self.alloc(Ty(
-                                    self.alloc(Reason::hint(self.get_pos(hint))),
-                                    Ty_::Tlike(t),
-                                ))
-                            })
+                            self.alloc(Ty(
+                                self.alloc(Reason::hint(self.get_pos(hint))),
+                                Ty_::Tlike(ty),
+                            ))
                         } else {
                             ty
                         }
@@ -4453,27 +4449,35 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             let name = prefix_colon(self.arena, name);
 
             let (like, type_, enum_values) = match node.hint {
-                Node::XhpEnumTy((like, ty, values)) => (*like, Some(*ty), Some(values)),
-                _ => (None, self.node_to_ty(node.hint), None),
+                Node::XhpEnumTy((like, ty, values)) => (*like, *ty, Some(values)),
+                _ => (
+                    None,
+                    self.node_to_ty(node.hint)
+                        .unwrap_or_else(|| self.tany_with_pos(pos)),
+                    None,
+                ),
             };
             if let Some(enum_values) = enum_values {
                 xhp_attr_enum_values.push((name, *enum_values));
             };
 
             let type_ = if node.nullable && node.tag.is_none() {
-                type_.and_then(|x| match x {
+                match type_ {
                     // already nullable
                     Ty(_, Ty_::Toption(_)) | Ty(_, Ty_::Tmixed) => type_,
                     // make nullable
-                    _ => self.node_to_ty(self.hint_ty(x.get_pos()?, Ty_::Toption(x))),
-                })
+                    _ => self.alloc(Ty(
+                        self.alloc(Reason::hint(type_.get_pos()?)),
+                        Ty_::Toption(type_),
+                    )),
+                }
             } else {
                 type_
             };
-            let type_ = type_.map(|t| match like {
-                Some(p) => self.alloc(Ty(self.alloc(Reason::hint(p)), Ty_::Tlike(t))),
-                None => t,
-            });
+            let type_ = match like {
+                Some(p) => self.alloc(Ty(self.alloc(Reason::hint(p)), Ty_::Tlike(type_))),
+                None => type_,
+            };
 
             let mut flags = PropFlags::empty();
             flags.set(PropFlags::NEEDS_INIT, node.needs_init);

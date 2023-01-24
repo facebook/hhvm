@@ -14,9 +14,8 @@
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([4:49-51], "i"); sp_xhp_attr = None;
           sp_type =
-          (Some (Rhint ([4:38-48]),
-                 (Tapply (([4:38-41], "\\HH\\vec"),
-                    [(Rhint ([4:42-47]), Tmixed)]))));
+          (Rhint ([4:38-48]),
+           (Tapply (([4:38-41], "\\HH\\vec"), [(Rhint ([4:42-47]), Tmixed)])));
           sp_visibility = Public; sp_flags = needs_init }
          ];
        sc_sprops = [];

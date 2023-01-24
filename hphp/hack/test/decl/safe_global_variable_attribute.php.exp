@@ -11,12 +11,10 @@
        sc_props = [];
        sc_sprops =
        [{ Shallow_decl_defs.sp_name = ([4:21-37], "$static_property");
-          sp_xhp_attr = None;
-          sp_type = (Some (Rhint ([4:17-20]), (Tprim Tint)));
+          sp_xhp_attr = None; sp_type = (Rhint ([4:17-20]), (Tprim Tint));
           sp_visibility = Public; sp_flags = (empty) };
          { Shallow_decl_defs.sp_name = ([5:52-73], "$static_property_safe");
-           sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([5:48-51]), (Tprim Tint)));
+           sp_xhp_attr = None; sp_type = (Rhint ([5:48-51]), (Tprim Tint));
            sp_visibility = Public; sp_flags = safe_global_variable }
          ];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -34,17 +32,15 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([11:17-34], "instanceProperty");
            sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([11:10-16]), (Tprim Tstring)));
+           sp_type = (Rhint ([11:10-16]), (Tprim Tstring));
            sp_visibility = Public; sp_flags = (empty) }
           ];
         sc_sprops =
         [{ Shallow_decl_defs.sp_name = ([9:22-38], "$static_property");
-           sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([9:18-21]), (Tprim Tint)));
+           sp_xhp_attr = None; sp_type = (Rhint ([9:18-21]), (Tprim Tint));
            sp_visibility = Private; sp_flags = (empty) };
           { Shallow_decl_defs.sp_name = ([10:53-74], "$static_property_safe");
-            sp_xhp_attr = None;
-            sp_type = (Some (Rhint ([10:49-52]), (Tprim Tint)));
+            sp_xhp_attr = None; sp_type = (Rhint ([10:49-52]), (Tprim Tint));
             sp_visibility = Private; sp_flags = safe_global_variable }
           ];
         sc_constructor = None; sc_static_methods = [];

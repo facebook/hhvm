@@ -383,7 +383,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ShallowProp<'_>> for shallow::Shal
         Self {
             name: sp.name.into(),
             xhp_attr: sp.xhp_attr,
-            ty: sp.type_.map(Into::into),
+            ty: sp.type_.into(),
             visibility: sp.visibility,
             flags: sp.flags,
         }

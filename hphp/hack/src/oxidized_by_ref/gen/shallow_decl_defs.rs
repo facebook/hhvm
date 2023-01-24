@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6ab6c2ec7f7eb43c6f1866876488486d>>
+// @generated SignedSource<<d1c097c925fcb93719300d64328bc569>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -113,7 +113,7 @@ pub struct ShallowProp<'a> {
     pub name: typing_defs::PosId<'a>,
     pub xhp_attr: Option<XhpAttr>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub type_: Option<&'a Ty<'a>>,
+    pub type_: &'a Ty<'a>,
     pub visibility: oxidized::ast_defs::Visibility,
     pub flags: prop_flags::PropFlags,
 }

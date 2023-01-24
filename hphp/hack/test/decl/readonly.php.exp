@@ -74,12 +74,12 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([14:23-25], "x"); sp_xhp_attr = None;
            sp_type =
-           (Some (Rhint ([14:19-22]), (Tapply (([14:19-22], "\\Foo"), []))));
+           (Rhint ([14:19-22]), (Tapply (([14:19-22], "\\Foo"), [])));
            sp_visibility = Public; sp_flags = needs_init | readonly };
           { Shallow_decl_defs.sp_name = ([17:25-27], "y");
             sp_xhp_attr = None;
             sp_type =
-            (Some (Rhint ([17:21-24]), (Tapply (([17:21-24], "\\Foo"), []))));
+            (Rhint ([17:21-24]), (Tapply (([17:21-24], "\\Foo"), [])));
             sp_visibility = Public; sp_flags = needs_init | readonly }
           ];
         sc_sprops = [];

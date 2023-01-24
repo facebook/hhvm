@@ -12,8 +12,7 @@
        sc_sprops =
        [{ Shallow_decl_defs.sp_name = ([4:16-18], "$b"); sp_xhp_attr = None;
           sp_type =
-          (Some (Rhint ([4:10-15]),
-                 (Toption (Rhint ([4:11-15]), (Tprim Tbool)))));
+          (Rhint ([4:10-15]), (Toption (Rhint ([4:11-15]), (Tprim Tbool))));
           sp_visibility = Public; sp_flags = needs_init }
          ];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];

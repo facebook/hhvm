@@ -10,7 +10,7 @@
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([5:40-42], "p"); sp_xhp_attr = None;
-          sp_type = (Some (Rhint ([5:31-39]), (Tprim Tarraykey)));
+          sp_type = (Rhint ([5:31-39]), (Tprim Tarraykey));
           sp_visibility = Public; sp_flags = abstract | const | needs_init }
          ];
        sc_sprops = []; sc_constructor = None; sc_static_methods = [];
@@ -30,7 +30,7 @@
         sc_typeconsts = [];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([9:26-28], "p"); sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([9:22-25]), (Tprim Tint)));
+           sp_type = (Rhint ([9:22-25]), (Tprim Tint));
            sp_visibility = Public; sp_flags = const }
           ];
         sc_sprops = []; sc_constructor = None; sc_static_methods = [];

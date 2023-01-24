@@ -30,16 +30,14 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([9:16-18], "x"); sp_xhp_attr = None;
            sp_type =
-           (Some (Rhint ([9:11-15]),
-                  (Toption (Rhint ([9:12-15]), (Tprim Tint)))));
+           (Rhint ([9:11-15]), (Toption (Rhint ([9:12-15]), (Tprim Tint))));
            sp_visibility = Private; sp_flags = php_std_lib }
           ];
         sc_sprops =
         [{ Shallow_decl_defs.sp_name = ([12:23-25], "$y");
            sp_xhp_attr = None;
            sp_type =
-           (Some (Rhint ([12:18-22]),
-                  (Toption (Rhint ([12:19-22]), (Tprim Tint)))));
+           (Rhint ([12:18-22]), (Toption (Rhint ([12:19-22]), (Tprim Tint))));
            sp_visibility = Private; sp_flags = php_std_lib }
           ];
         sc_constructor = None;

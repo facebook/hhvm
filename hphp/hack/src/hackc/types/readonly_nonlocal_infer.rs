@@ -887,7 +887,7 @@ impl<'decl> Infer<'decl> {
             ClassScopeKind::Nonstatic => shallow_class.props,
         };
         let prop = props.iter().find(|prop| prop.name.1 == prop_name)?;
-        let ty = tyx::convert(&prop.type_?.1);
+        let ty = tyx::convert(&prop.type_.1);
         let ty = if prop.flags.is_readonly() {
             Tyx::Readonly(Box::new(ty))
         } else {

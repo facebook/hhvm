@@ -10,10 +10,10 @@
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([4:15-17], "i"); sp_xhp_attr = None;
-          sp_type = (Some (Rhint ([4:11-14]), (Tprim Tint)));
+          sp_type = (Rhint ([4:11-14]), (Tprim Tint));
           sp_visibility = Private; sp_flags = (empty) };
          { Shallow_decl_defs.sp_name = ([5:46-48], "s"); sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([5:39-45]), (Tprim Tstring)));
+           sp_type = (Rhint ([5:39-45]), (Tprim Tstring));
            sp_visibility = Private; sp_flags = (empty) }
          ];
        sc_sprops = [];

@@ -378,7 +378,7 @@ struct
     {
       sp_name = positioned_id sp.sp_name;
       sp_xhp_attr = sp.sp_xhp_attr;
-      sp_type = Option.map sp.sp_type ~f:ty;
+      sp_type = ty sp.sp_type;
       sp_visibility = sp.sp_visibility;
       sp_flags = sp.sp_flags;
     }

@@ -99,7 +99,7 @@ impl<R: Reason> ShallowTypeconst<R> {
 pub struct ShallowProp<R: Reason> {
     pub name: Positioned<PropName, R::Pos>,
     pub xhp_attr: Option<XhpAttribute>,
-    pub ty: Option<Ty<R>>,
+    pub ty: Ty<R>,
     pub visibility: Visibility,
     pub flags: PropFlags,
 }
@@ -107,15 +107,6 @@ pub struct ShallowProp<R: Reason> {
 walkable!(ShallowProp<R> => [ty]);
 
 impl<R: Reason> ShallowProp<R> {
-    /// In OCaml folding, we use Tany when a shallow property has no type. This
-    /// method provides the same behavior.
-    pub fn ty_or_tany(&self) -> Ty<R> {
-        match &self.ty {
-            Some(ty) => ty.clone(),
-            None => Ty::any(R::witness_from_decl(self.name.pos().clone())),
-        }
-    }
-
     pub fn is_required_xhp_attribute(&self) -> bool {
         match self.xhp_attr {
             None => false,

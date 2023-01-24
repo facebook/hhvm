@@ -603,7 +603,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ShallowProp<R> {
         arena.alloc(obr::shallow_decl_defs::ShallowProp {
             name: name.to_oxidized(arena),
             xhp_attr: *xhp_attr,
-            type_: ty.as_ref().map(|o| o.to_oxidized(arena)),
+            type_: ty.to_oxidized(arena),
             visibility: *visibility,
             flags: *flags,
         })

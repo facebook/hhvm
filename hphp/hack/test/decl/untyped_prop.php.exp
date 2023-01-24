@@ -10,7 +10,8 @@
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([14:10-12], "x"); sp_xhp_attr = None;
-          sp_type = None; sp_visibility = Public; sp_flags = (empty) }
+          sp_type = (Rwitness_from_decl ([14:10-12]), Tany);
+          sp_visibility = Public; sp_flags = (empty) }
          ];
        sc_sprops = []; sc_constructor = None; sc_static_methods = [];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;

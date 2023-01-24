@@ -11,20 +11,20 @@
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([5:5-9], "map"); sp_xhp_attr = None;
           sp_type =
-          (Some (Rhint ([4:11-24]),
-                 (Tapply (([4:11-14], "\\HH\\Map"),
-                    [(Rhint ([4:15-18]), (Tprim Tint));
-                      (Rhint ([4:20-23]), (Tprim Tint))]
-                    ))));
+          (Rhint ([4:11-24]),
+           (Tapply (([4:11-14], "\\HH\\Map"),
+              [(Rhint ([4:15-18]), (Tprim Tint));
+                (Rhint ([4:20-23]), (Tprim Tint))]
+              )));
           sp_visibility = Private; sp_flags = (empty) };
          { Shallow_decl_defs.sp_name = ([6:5-12], "uninit");
            sp_xhp_attr = None;
            sp_type =
-           (Some (Rhint ([4:11-24]),
-                  (Tapply (([4:11-14], "\\HH\\Map"),
-                     [(Rhint ([4:15-18]), (Tprim Tint));
-                       (Rhint ([4:20-23]), (Tprim Tint))]
-                     ))));
+           (Rhint ([4:11-24]),
+            (Tapply (([4:11-14], "\\HH\\Map"),
+               [(Rhint ([4:15-18]), (Tprim Tint));
+                 (Rhint ([4:20-23]), (Tprim Tint))]
+               )));
            sp_visibility = Private; sp_flags = needs_init }
          ];
        sc_sprops = [];

@@ -95,7 +95,7 @@ type shallow_typeconst = {
 type shallow_prop = {
   sp_name: Typing_defs.pos_id;
   sp_xhp_attr: xhp_attr option;
-  sp_type: decl_ty option;
+  sp_type: decl_ty;
   sp_visibility: Ast_defs.visibility;
   sp_flags: PropFlags.t;
 }

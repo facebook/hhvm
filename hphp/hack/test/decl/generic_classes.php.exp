@@ -16,7 +16,7 @@
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([4:13-18], "data");
           sp_xhp_attr = None;
-          sp_type = (Some (Rhint ([4:11-12]), (Tgeneric ("T", []))));
+          sp_type = (Rhint ([4:11-12]), (Tgeneric ("T", [])));
           sp_visibility = Private; sp_flags = needs_init }
          ];
        sc_sprops = [];
@@ -92,7 +92,7 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([16:13-18], "data");
            sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([16:11-12]), (Tgeneric ("T", []))));
+           sp_type = (Rhint ([16:11-12]), (Tgeneric ("T", [])));
            sp_visibility = Private; sp_flags = needs_init }
           ];
         sc_sprops = [];
@@ -149,7 +149,7 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([24:13-18], "data");
            sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([24:11-12]), (Tgeneric ("T", []))));
+           sp_type = (Rhint ([24:11-12]), (Tgeneric ("T", [])));
            sp_visibility = Private; sp_flags = needs_init }
           ];
         sc_sprops = [];

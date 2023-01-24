@@ -73,8 +73,7 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([10:41-45], "foo");
            sp_xhp_attr = None;
-           sp_type =
-           (Some (Rhint ([10:39-40]), (Tapply (([10:39-40], "\\_"), []))));
+           sp_type = (Rhint ([10:39-40]), (Tapply (([10:39-40], "\\_"), [])));
            sp_visibility = Private; sp_flags = needs_init }
           ];
         sc_sprops = [];

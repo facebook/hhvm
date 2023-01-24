@@ -188,11 +188,11 @@ impl<R: Reason> ShallowDeclStore<R> {
         let cid = cls.name.id();
         for prop in cls.props.iter().rev() {
             self.properties
-                .insert((cid, prop.name.id()), prop.ty_or_tany())?
+                .insert((cid, prop.name.id()), prop.ty.clone())?
         }
         for prop in cls.static_props.iter().rev() {
             self.static_properties
-                .insert((cid, prop.name.id()), prop.ty_or_tany())?
+                .insert((cid, prop.name.id()), prop.ty.clone())?
         }
         for meth in cls.methods.iter().rev() {
             self.methods
@@ -221,7 +221,7 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for PropFinder<R> {
         Ok(self.classes.get(class_name)?.and_then(|cls| {
             cls.props.iter().rev().find_map(|prop| {
                 if prop.name.id() == property_name {
-                    Some(prop.ty_or_tany())
+                    Some(prop.ty.clone())
                 } else {
                     None
                 }
@@ -247,7 +247,7 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
         Ok(self.classes.get(class_name)?.and_then(|cls| {
             cls.static_props.iter().rev().find_map(|prop| {
                 if prop.name.id() == property_name {
-                    Some(prop.ty_or_tany())
+                    Some(prop.ty.clone())
                 } else {
                     None
                 }

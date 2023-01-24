@@ -133,16 +133,19 @@ module Program = struct
           FindUtils.file_filter (Relative_path.to_absolute update))
     in
     let config_in_updates =
-      Relative_path.Set.mem updates ServerConfig.filename
+      Relative_path.Set.mem updates ServerConfig.repo_config_path
     in
     (if config_in_updates then
       let (new_config, _) =
-        ServerConfig.(load ~silent:false filename genv.options)
+        ServerConfig.load
+          ~silent:false
+          ServerConfig.repo_config_path
+          genv.options
       in
       if not (ServerConfig.is_compatible genv.config new_config) then (
         Hh_logger.log
           "%s changed in an incompatible way; please restart %s.\n"
-          (Relative_path.suffix ServerConfig.filename)
+          (Relative_path.suffix ServerConfig.repo_config_path)
           GlobalConfig.program_name;
 
         (* TODO: Notify the server monitor directly about this. *)
@@ -1513,7 +1516,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
 
   Printexc.record_backtrace true;
   let (config, local_config) =
-    ServerConfig.(load ~silent:false filename options)
+    ServerConfig.load ~silent:false ServerConfig.repo_config_path options
   in
   Option.iter local_config.ServerLocalConfig.memtrace_dir ~f:(fun dir ->
       Daemon.start_memtracing (Filename.concat dir "memtrace.server.ctf"));

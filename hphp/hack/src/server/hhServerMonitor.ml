@@ -68,7 +68,7 @@ let monitor_daemon_main
   let () = ServerLoadFlag.set_no_load (ServerArgs.no_load options) in
   let init_id = Random_id.short_string () in
   let (config, local_config) =
-    ServerConfig.(load ~silent:false filename options)
+    ServerConfig.load ~silent:false ServerConfig.repo_config_path options
   in
   if not (Sys_utils.enable_telemetry ()) then
     EventLogger.init_fake ()

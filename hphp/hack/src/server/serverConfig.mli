@@ -19,7 +19,7 @@ val set_glean_options : t -> GleanOptions.t -> t
 
 val set_symbol_write_options : t -> SymbolWriteOptions.t -> t
 
-val filename : Relative_path.t
+val repo_config_path : Relative_path.t
 
 val load :
   silent:bool ->

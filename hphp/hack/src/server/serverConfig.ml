@@ -38,7 +38,7 @@ type t = {
 }
 [@@deriving show]
 
-let filename =
+let repo_config_path =
   Relative_path.from_root ~suffix:Config_file.file_path_relative_to_repo_root
 
 let is_compatible c1 c2 =
@@ -254,19 +254,27 @@ let prepare_allowed_decl_fixme_codes config =
   prepare_iset config "allowed_decl_fixme_codes" (ISet.of_list [])
 
 let load ~silent config_filename options : t * ServerLocalConfig.t =
-  let config_overrides = Config_file.of_list @@ ServerArgs.config options in
+  let command_line_overrides =
+    Config_file.of_list @@ ServerArgs.config options
+  in
   let (config_hash, config) =
     Config_file.parse_hhconfig (Relative_path.to_absolute config_filename)
   in
   let config =
-    Config_file.apply_overrides ~from:None ~config ~overrides:config_overrides
+    Config_file.apply_overrides
+      ~from:None
+      ~config
+      ~overrides:command_line_overrides
   in
   process_untrusted_mode config;
   let version =
     Config_file.parse_version (Config_file.Getters.string_opt "version" config)
   in
   let local_config =
-    ServerLocalConfig.load ~silent ~current_version:version config_overrides
+    ServerLocalConfig.load
+      ~silent
+      ~current_version:version
+      command_line_overrides
   in
   let local_config =
     if Option.is_some (ServerArgs.ai_mode options) then

@@ -4096,7 +4096,11 @@ let handle_client_message
       in
       let server_args = ServerArgs.set_config server_args env.args.config in
       let local_config =
-        snd @@ ServerConfig.load ~silent:true ServerConfig.filename server_args
+        snd
+        @@ ServerConfig.load
+             ~silent:true
+             ServerConfig.repo_config_path
+             server_args
       in
       ref_local_config := Some local_config;
       HackEventLogger.set_rollout_flags

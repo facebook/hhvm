@@ -103,7 +103,10 @@ let () =
         | Some config -> ServerArgs.set_config fake_server_args config
       in
       let (config, local_config) =
-        ServerConfig.load ~silent:true ServerConfig.filename fake_server_args
+        ServerConfig.load
+          ~silent:true
+          ServerConfig.repo_config_path
+          fake_server_args
       in
       HackEventLogger.set_hhconfig_version
         (ServerConfig.version config |> Config_file.version_to_string_opt);

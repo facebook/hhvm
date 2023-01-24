@@ -605,7 +605,7 @@ let default =
     ide_should_use_hack_64_distc = false;
   }
 
-let path =
+let system_config_path =
   let dir =
     try Sys.getenv "HH_LOCALCONF_PATH" with
     | _ -> BuildOptions.system_config_path
@@ -699,8 +699,8 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
   in
   (experiments_meta, config)
 
-let load_ fn ~silent ~current_version overrides =
-  let config = Config_file.parse_local_config fn in
+let load_ system_config_path ~silent ~current_version overrides =
+  let config = Config_file.parse_local_config system_config_path in
   let (experiments_config_meta, config) =
     apply_overrides ~silent ~current_version ~config ~overrides
   in
@@ -1486,7 +1486,7 @@ let load_ fn ~silent ~current_version overrides =
 On top of that, applies [config_overrides]. If [silent] then prints what it's doing
 to stderr. *)
 let load ~silent ~current_version config_overrides =
-  load_ path ~silent ~current_version config_overrides
+  load_ system_config_path ~silent ~current_version config_overrides
 
 let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
   HackEventLogger.

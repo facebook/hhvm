@@ -25,10 +25,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
+import reactor.core.Fuseable;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Operators;
 import reactor.core.publisher.SignalType;
+import reactor.core.scheduler.Scheduler;
 
 /**
  * TimeoutTransform is used to do I/O timeouts in the client and server that use Netty 4. It uses
@@ -40,17 +42,21 @@ import reactor.core.publisher.SignalType;
  * @param <T>
  */
 public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T>> {
-  private final EventLoop eventLoop;
+  // TODO: remove after enabled
+  static final boolean enableMonoTimeoutFusion =
+      System.getProperty("thrift.enable-mono-transformer-fusion", "false").equalsIgnoreCase("true");
+
+  private final Scheduler scheduler;
   private final long delay;
   private final TimeUnit unit;
   private final Mono<T> fallback;
 
-  public MonoTimeoutTransformer(EventLoop eventLoop, long delay, TimeUnit unit) {
-    this(eventLoop, delay, unit, null);
+  public MonoTimeoutTransformer(Scheduler scheduler, long delay, TimeUnit unit) {
+    this(scheduler, delay, unit, null);
   }
 
-  public MonoTimeoutTransformer(EventLoop eventLoop, long delay, TimeUnit unit, Mono<T> fallback) {
-    this.eventLoop = eventLoop;
+  public MonoTimeoutTransformer(Scheduler scheduler, long delay, TimeUnit unit, Mono<T> fallback) {
+    this.scheduler = scheduler;
     this.delay = delay;
     this.unit = unit;
     this.fallback = fallback;
@@ -58,20 +64,20 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
 
   @Override
   public Mono<T> apply(Mono<T> source) {
-    return new TimeoutMono<>(source, eventLoop, delay, unit, fallback);
+    return new TimeoutMono<>(source, scheduler, delay, unit, fallback);
   }
 
   private static class TimeoutMono<T> extends Mono<T> {
     private final Mono<T> source;
-    private final EventLoop eventLoop;
+    private final Scheduler scheduler;
     private final long delay;
     private final TimeUnit unit;
     private final Mono<T> fallback;
 
     public TimeoutMono(
-        Mono<T> source, EventLoop eventLoop, long delay, TimeUnit unit, Mono<T> fallback) {
+        Mono<T> source, Scheduler scheduler, long delay, TimeUnit unit, Mono<T> fallback) {
       this.source = source;
-      this.eventLoop = eventLoop;
+      this.scheduler = scheduler;
       this.delay = delay;
       this.unit = unit;
       this.fallback = fallback;
@@ -79,8 +85,29 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
 
     @Override
     public void subscribe(CoreSubscriber<? super T> actual) {
+      if (enableMonoTimeoutFusion) {
+        // If the source mono is a ScalarCallable, there might not be a need for a timeout. Get the
+        // value from the call() method. If it returns a value just emit that directly without
+        // applying a timeout
+        // because there's already a value.
+        if (source instanceof Fuseable.ScalarCallable<?>) {
+          Fuseable.ScalarCallable<T> callable = (Fuseable.ScalarCallable<T>) source;
+          try {
+            T t = callable.call();
+            if (t != null) {
+              Subscription subscription = Operators.scalarSubscription(actual, t);
+              actual.onSubscribe(subscription);
+              return;
+            }
+          } catch (Throwable t) {
+            Operators.error(actual, t);
+            return;
+          }
+        }
+      }
+
       TimeoutSubscription<T> subscription =
-          new TimeoutSubscription<>(source, actual, eventLoop, delay, unit, fallback);
+          new TimeoutSubscription<>(source, actual, scheduler, delay, unit, fallback);
       actual.onSubscribe(subscription);
     }
   }
@@ -88,7 +115,7 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
   private static class TimeoutSubscription<T> implements Subscription {
     private final Mono<T> source;
     private final CoreSubscriber<? super T> actual;
-    private final EventLoop eventLoop;
+    private final Scheduler scheduler;
     private final long delay;
     private final TimeUnit unit;
     private final Mono<T> fallback;
@@ -97,13 +124,13 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
     public TimeoutSubscription(
         Mono<T> source,
         CoreSubscriber<? super T> actual,
-        EventLoop eventLoop,
+        Scheduler scheduler,
         long delay,
         TimeUnit unit,
         Mono<T> fallback) {
       this.source = source;
       this.actual = actual;
-      this.eventLoop = eventLoop;
+      this.scheduler = scheduler;
       this.delay = delay;
       this.unit = unit;
       this.fallback = fallback;
@@ -113,7 +140,7 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
     public void request(long ignore) {
       // ignore request n because any valid request n means emit.
       if (Operators.validate(ignore)) {
-        sourceSubscriber = new SourceSubscriber<>(this.actual, eventLoop, delay, unit, fallback);
+        sourceSubscriber = new SourceSubscriber<>(this.actual, scheduler, delay, unit, fallback);
         source.subscribe(sourceSubscriber);
       } else {
         Operators.error(actual, new IllegalArgumentException("invalid request n, " + ignore));
@@ -130,33 +157,33 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
 
   private static class SourceSubscriber<T> extends BaseSubscriber<T> {
     private final CoreSubscriber<? super T> actual;
-    private final EventLoop eventLoop;
+    private final Scheduler scheduler;
     private final long delay;
     private final TimeUnit unit;
     private final Mono<T> fallback;
-    private Timeout timeout;
+    private final Timeout timeout;
 
     public SourceSubscriber(
         CoreSubscriber<? super T> actual,
-        EventLoop eventLoop,
+        Scheduler scheduler,
         long delay,
         TimeUnit unit,
         Mono<T> fallback) {
       this.actual = actual;
-      this.eventLoop = eventLoop;
+      this.scheduler = scheduler;
       this.delay = delay;
       this.unit = unit;
       this.fallback = fallback;
+      this.timeout = RpcResources.getHashedWheelTimer().newTimeout(this::doTimeout, delay, unit);
     }
 
     @Override
     protected void hookOnSubscribe(Subscription subscription) {
       subscription.request(Long.MAX_VALUE);
-      timeout = RpcResources.getHashedWheelTimer().newTimeout(this::doTimeout, delay, unit);
     }
 
     private void doTimeout(Timeout timeout) {
-      if (!isDisposed()) {
+      if (!isDisposed() && !timeout.isCancelled()) {
         doTimeout();
       }
     }
@@ -172,11 +199,11 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
     private void doTimeoutException() {
       TimeoutException timeoutException =
           new TimeoutException("request timed out after " + delay + " " + unit.toString());
-      eventLoop.execute(() -> actual.onError(timeoutException));
+      scheduler.schedule(() -> actual.onError(timeoutException));
     }
 
     private void doTimeoutFallback() {
-      eventLoop.execute(
+      scheduler.schedule(
           () -> {
             try {
               fallback.subscribe(actual::onNext, actual::onError, actual::onComplete);
@@ -188,6 +215,7 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
 
     @Override
     protected void hookOnNext(T value) {
+      timeout.cancel();
       actual.onNext(value);
     }
 
@@ -203,7 +231,7 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
 
     @Override
     protected void hookFinally(SignalType type) {
-      if (timeout != null) {
+      if (!timeout.isCancelled()) {
         timeout.cancel();
       }
     }

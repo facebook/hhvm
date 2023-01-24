@@ -21,6 +21,7 @@ import io.netty.util.concurrent.FastThreadLocalThread;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.LockSupport;
 import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -30,13 +31,69 @@ import reactor.test.StepVerifier;
 
 public class MonoTimeoutTransformerTest {
   @Test
+  public void testMultipleSubscriptionsToSingleTransformer() {
+    MonoTimeoutTransformer<Integer> transformer =
+        new MonoTimeoutTransformer<>(
+            RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.MILLISECONDS);
+
+    StepVerifier.create(Mono.just(1).transform(transformer)).expectNext(1).verifyComplete();
+    StepVerifier.create(Mono.delay(Duration.ofSeconds(1)).then(Mono.just(1)).transform(transformer))
+        .verifyError(TimeoutException.class);
+    StepVerifier.create(Mono.just(1).transform(transformer)).expectNext(1).verifyComplete();
+    StepVerifier.create(Mono.delay(Duration.ofSeconds(1)).then(Mono.just(1)).transform(transformer))
+        .verifyError(TimeoutException.class);
+  }
+
+  @Test
+  public void testMonoTimeoutTransformerWhenFluxIsBlocked() {
+    Mono<Object> transform =
+        Mono.fromRunnable(LockSupport::park)
+            .transform(
+                new MonoTimeoutTransformer<>(
+                    RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.MILLISECONDS))
+            .subscribeOn(RpcResources.getOffLoopScheduler());
+
+    StepVerifier.create(transform).verifyError(TimeoutException.class);
+  }
+
+  @Test
+  public void testMonoTimeoutTransformerBeingCalledParallel() {
+    int count = 1_000;
+    Mono<Integer> reduce =
+        Flux.range(0, count)
+            .parallel()
+            .runOn(Schedulers.parallel())
+            .flatMap(
+                i -> {
+                  if (i % 2 == 0) {
+                    return Mono.just(1)
+                        .transform(
+                            new MonoTimeoutTransformer<>(
+                                RpcResources.getClientOffLoopScheduler(),
+                                1,
+                                TimeUnit.MILLISECONDS));
+                  } else {
+                    return Mono.delay(Duration.ofSeconds(1))
+                        .transform(
+                            new MonoTimeoutTransformer<>(
+                                RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.MILLISECONDS))
+                        .onErrorResume(throwable -> Mono.empty());
+                  }
+                })
+            .sequential()
+            .reduce(0, (integer, number) -> integer + 1);
+
+    StepVerifier.create(reduce).expectNext(count / 2).verifyComplete();
+  }
+
+  @Test
   public void testShouldNotTimeout() {
     Mono<Integer> transform =
         Flux.range(0, 100_000)
             .ignoreElements()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getEventLoopGroup().next(), 1, TimeUnit.DAYS));
+                    RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.DAYS));
 
     StepVerifier.create(transform).expectComplete().verify();
   }
@@ -47,7 +104,7 @@ public class MonoTimeoutTransformerTest {
         Mono.never()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getEventLoopGroup().next(), 1, TimeUnit.SECONDS));
+                    RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.SECONDS));
 
     StepVerifier.create(transform).verifyError(TimeoutException.class);
   }
@@ -58,7 +115,7 @@ public class MonoTimeoutTransformerTest {
         Mono.<String>never()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getEventLoopGroup().next(),
+                    RpcResources.getClientOffLoopScheduler(),
                     1,
                     TimeUnit.SECONDS,
                     Mono.just("hello")));
@@ -72,7 +129,7 @@ public class MonoTimeoutTransformerTest {
         Mono.<String>never()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getEventLoopGroup().next(),
+                    RpcResources.getClientOffLoopScheduler(),
                     1,
                     TimeUnit.SECONDS,
                     Mono.just("hello")));
@@ -89,7 +146,7 @@ public class MonoTimeoutTransformerTest {
             .ignoreElements()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getEventLoopGroup().next(), 1, TimeUnit.SECONDS));
+                    RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.SECONDS));
 
     StepVerifier.create(infinite)
         .verifyErrorSatisfies(
@@ -106,7 +163,7 @@ public class MonoTimeoutTransformerTest {
         Mono.never()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getEventLoopGroup().next(), 1, TimeUnit.SECONDS));
+                    RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.SECONDS));
 
     StepVerifier.create(never).verifyError();
   }

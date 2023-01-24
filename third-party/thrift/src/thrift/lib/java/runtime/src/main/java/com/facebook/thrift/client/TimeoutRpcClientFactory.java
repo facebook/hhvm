@@ -56,7 +56,7 @@ public class TimeoutRpcClientFactory extends DelegatingRpcClientFactory {
         .createRpcClient(socketAddress)
         .transform(
             new MonoTimeoutTransformer<>(
-                RpcResources.getEventLoopGroup().next(),
+                RpcResources.getClientOffLoopScheduler(),
                 connectionTimeoutMs,
                 TimeUnit.MILLISECONDS))
         .onErrorMap(
@@ -88,7 +88,7 @@ public class TimeoutRpcClientFactory extends DelegatingRpcClientFactory {
       long timeoutMs = calculateRequestTimeout(options);
       return target.transform(
           new MonoTimeoutTransformer<>(
-              RpcResources.getEventLoopGroup().next(), timeoutMs, TimeUnit.MILLISECONDS));
+              RpcResources.getClientOffLoopScheduler(), timeoutMs, TimeUnit.MILLISECONDS));
     }
 
     @VisibleForTesting

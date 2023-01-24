@@ -640,6 +640,10 @@ let make_depend_on_current_module env =
   Option.iter env.genv.current_module ~f:(fun (_, mid) ->
       make_depend_on_module env mid)
 
+let make_depend_on_ancestors (env : Typing_env_types.env) (cls : Cls.t) : unit =
+  List.iter (Cls.all_ancestor_names cls) ~f:(fun ancestor ->
+      add_dependency_edge env (Typing_deps.Dep.Type ancestor))
+
 let add_extends_dependency (env : Typing_env_types.env) x =
   add_dependency_edge env (Dep.Extends x)
 

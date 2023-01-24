@@ -1757,6 +1757,8 @@ let class_def ctx (c : _ class_) =
     None
   | Some tc ->
     Typing_helpers.add_decl_errors (Cls.decl_errors tc);
+    Typing_env.make_depend_on_ancestors env tc;
+
     (* If there are duplicate definitions of the class then we will end up
      * checking one AST with respect to the decl corresponding to the other definition.
      * Naming has already detected duplicates, so let's just avoid cascading unhelpful

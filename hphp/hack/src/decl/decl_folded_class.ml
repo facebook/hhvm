@@ -1030,23 +1030,6 @@ and class_decl
       m_constructor = Option.(cstr |> fst >>= snd);
     }
   in
-  SMap.iter
-    begin
-      fun x _ ->
-        Typing_deps.add_idep
-          (Provider_context.get_deps_mode ctx)
-          (Dep.Type cls_name)
-          (Dep.Type x);
-        if
-          TypecheckerOptions.record_fine_grained_dependencies
-          @@ Provider_context.get_tcopt ctx
-        then
-          Typing_pessimisation_deps.add_coarse_dep
-            (Provider_context.get_deps_mode ctx)
-            (Dep.Type cls_name)
-            (Dep.Type x)
-    end
-    impl;
   (tc, member_heaps_values)
 
 let class_decl_if_missing

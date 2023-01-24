@@ -705,9 +705,18 @@ module UserAttributes = struct
           ( uaSoftInternal,
             {
               (* Parameters are for constructor promotion: if someone tries to use it on a
-                 parameter without const, they'll encounter a nast check error *)
+                 parameter without internal, they'll encounter a nast check error *)
               contexts =
-                [fn; cls; mthd; instProperty; staticProperty; parameter];
+                [
+                  fn;
+                  cls;
+                  mthd;
+                  instProperty;
+                  staticProperty;
+                  parameter;
+                  enum;
+                  enumcls;
+                ];
               autocomplete = false;
               doc =
                 "Instead of throwing an exception upon a module boundary violation at this symbol, logs a warning instead.";

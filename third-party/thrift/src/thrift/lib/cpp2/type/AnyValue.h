@@ -26,7 +26,7 @@ namespace type {
 
 // A type-erased Thrift value.
 //
-// TODO(afuller): Harden and stress test type::Value and migrage usage once
+// TODO(afuller): Harden and stress test type::Value and migrate usage once
 // satisfied.
 class AnyValue : public detail::AnyValueBase {
   using Base = detail::AnyValueBase;

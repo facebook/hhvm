@@ -34,12 +34,12 @@ namespace type {
 // needed is the 'snipping' logic.
 
 // An Any value, that may not contain all the required information
-// to deserilize the value.
+// to deserialize the value.
 //
 // TODO(afuller): Add native wrappers.
 using SemiAny = SemiAnyStruct;
 
-// A serilaized Any value, with all the required information to deserilize the
+// A serialized Any value, with all the required information to deserialize the
 // value.
 class AnyData : public detail::Wrap<AnyStruct> {
   using Base = detail::Wrap<AnyStruct>;

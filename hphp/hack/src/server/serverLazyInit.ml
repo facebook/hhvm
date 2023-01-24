@@ -295,9 +295,7 @@ let download_and_load_state_exn
   let (progress_naming_table_load, progress_dep_table_load) =
     (ref None, ref None)
   in
-  let env : Saved_state_loader.env =
-    ServerLocalConfig.make_saved_state_env genv.local_config
-  in
+  let ssopt = genv.local_config.ServerLocalConfig.saved_state_loading in
   (* TODO(hverr): Support the ignore_hhconfig flag, how to do this with Watchman? *)
   let _ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig genv.options in
   let naming_table_saved_state_future =
@@ -306,7 +304,7 @@ let download_and_load_state_exn
 
       let loader_future =
         State_loader_futures.load
-          ~env
+          ~ssopt
           ~progress_callback:(fun update ->
             report
               update
@@ -351,7 +349,7 @@ let download_and_load_state_exn
     in
     let loader_future =
       State_loader_futures.load
-        ~env
+        ~ssopt
         ~progress_callback:(fun update ->
           report
             update

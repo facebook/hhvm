@@ -311,6 +311,7 @@ type quantile = {
 }
 
 type t = {
+  saved_state_loading: GlobalOptions.saved_state_loading;
   min_log_level: Hh_logger.Level.t;
   attempt_fix_credentials: bool;
       (** Indicates whether we attempt to fix the credentials if they're broken *)
@@ -461,8 +462,6 @@ type t = {
   watchman: Watchman.t;
   log_from_client_when_slow_monitor_connections: bool;
       (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
-  log_saved_state_age_and_distance: bool;
-      (** Collects the age of a saved state (in seconds) and distance (in globalrevs) for telemetry *)
   naming_sqlite_in_hack_64: bool;
       (** Add sqlite naming table to hack/64 ss job *)
   workload_quantile: quantile option;
@@ -472,16 +471,11 @@ type t = {
        into here, [t], it was first used as a lookup in ServerLocalConfigKnobs.
        Intended meaning: what class of user is running hh_server, hence what experiments
        should they be subject to. *)
-  saved_state_manifold_api_key: string option;
-      (** A string from hh.conf. The API key is used for saved state downloads
-       when we call out to manifold *)
   specify_manifold_api_key: bool;
   remote_old_decls_no_limit: bool;
       (**  Remove remote old decl fetching limit *)
   no_marshalled_naming_table_in_saved_state: bool;
       (** Remove marshalled naming table from saved state *)
-  use_manifold_cython_client: bool;
-      (** Required for Hedwig support for saved state downloads *)
   cache_remote_decls: bool;
       (** Configure whether fetch and cache remote decls *)
   use_shallow_decls_saved_state: bool;
@@ -505,6 +499,7 @@ type t = {
 
 let default =
   {
+    saved_state_loading = GlobalOptions.default_saved_state_loading;
     min_log_level = Hh_logger.Level.Info;
     attempt_fix_credentials = false;
     log_categories = [];
@@ -596,12 +591,9 @@ let default =
     naming_sqlite_in_hack_64 = false;
     workload_quantile = None;
     rollout_group = None;
-    saved_state_manifold_api_key = None;
-    log_saved_state_age_and_distance = false;
     specify_manifold_api_key = false;
     remote_old_decls_no_limit = false;
     no_marshalled_naming_table_in_saved_state = false;
-    use_manifold_cython_client = false;
     cache_remote_decls = false;
     use_shallow_decls_saved_state = false;
     shallow_decls_manifold_path = None;
@@ -1221,7 +1213,17 @@ let load_ fn ~silent ~current_version overrides =
   let log_saved_state_age_and_distance =
     bool_if_min_version
       "log_saved_state_age_and_distance"
-      ~default:default.log_saved_state_age_and_distance
+      ~default:
+        default.saved_state_loading
+          .GlobalOptions.log_saved_state_age_and_distance
+      ~current_version
+      config
+  in
+  let use_manifold_cython_client =
+    bool_if_min_version
+      "use_manifold_cython_client"
+      ~default:
+        default.saved_state_loading.GlobalOptions.use_manifold_cython_client
       ~current_version
       config
   in
@@ -1301,13 +1303,6 @@ let load_ fn ~silent ~current_version overrides =
     ) else
       rust_provider_backend
   in
-  let use_manifold_cython_client =
-    bool_if_min_version
-      "use_manifold_cython_client"
-      ~default:default.use_manifold_cython_client
-      ~current_version
-      config
-  in
   let cache_remote_decls =
     bool_if_min_version
       "cache_remote_decls"
@@ -1368,6 +1363,12 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   {
+    saved_state_loading =
+      {
+        GlobalOptions.saved_state_manifold_api_key;
+        log_saved_state_age_and_distance;
+        use_manifold_cython_client;
+      };
     min_log_level;
     attempt_fix_credentials;
     log_categories;
@@ -1467,12 +1468,9 @@ let load_ fn ~silent ~current_version overrides =
     naming_sqlite_in_hack_64;
     workload_quantile;
     rollout_group;
-    saved_state_manifold_api_key;
-    log_saved_state_age_and_distance;
     specify_manifold_api_key;
     remote_old_decls_no_limit;
     no_marshalled_naming_table_in_saved_state;
-    use_manifold_cython_client;
     cache_remote_decls;
     use_shallow_decls_saved_state;
     shallow_decls_manifold_path;
@@ -1497,7 +1495,8 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       log_from_client_when_slow_monitor_connections =
         options.log_from_client_when_slow_monitor_connections;
       log_saved_state_age_and_distance =
-        options.log_saved_state_age_and_distance;
+        options.saved_state_loading
+          .GlobalOptions.log_saved_state_age_and_distance;
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
       use_hack_64_naming_table = options.use_hack_64_naming_table;
       fetch_remote_old_decls = options.fetch_remote_old_decls;
@@ -1516,7 +1515,8 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       populate_member_heaps = options.populate_member_heaps;
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;
       shm_cache_size = options.shm_cache_size;
-      use_manifold_cython_client = options.use_manifold_cython_client;
+      use_manifold_cython_client =
+        options.saved_state_loading.GlobalOptions.use_manifold_cython_client;
       disable_naming_table_fallback_loading =
         options.disable_naming_table_fallback_loading;
       use_type_alias_heap = options.use_type_alias_heap;
@@ -1526,23 +1526,3 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       load_hack_64_distc_saved_state = options.load_hack_64_distc_saved_state;
       ide_should_use_hack_64_distc = options.ide_should_use_hack_64_distc;
     }
-
-let make_saved_state_env
-    ?log_saved_state_age_and_distance
-    ?(saved_state_manifold_api_key : string option)
-    ?use_manifold_cython_client
-    (config : t) : Saved_state_loader.env =
-  {
-    Saved_state_loader.log_saved_state_age_and_distance =
-      Option.value
-        log_saved_state_age_and_distance
-        ~default:config.log_saved_state_age_and_distance;
-    saved_state_manifold_api_key =
-      Option.first_some
-        saved_state_manifold_api_key
-        config.saved_state_manifold_api_key;
-    use_manifold_cython_client =
-      Option.value
-        use_manifold_cython_client
-        ~default:config.use_manifold_cython_client;
-  }

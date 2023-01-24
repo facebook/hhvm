@@ -268,14 +268,15 @@ let load_saved_state
             |> Provider_context.get_tcopt
             |> TypecheckerOptions.ide_should_use_hack_64_distc
           in
-          let env =
-            Saved_state_loader.make_env (Provider_context.get_tcopt ctx)
+          let ssopt =
+            TypecheckerOptions.saved_state_loading
+              (Provider_context.get_tcopt ctx)
           in
           let%lwt result =
             if ide_should_use_hack_64_distc then
               let%lwt result =
                 State_loader_lwt.load
-                  ~env
+                  ~ssopt
                   ~progress_callback:(fun _ -> ())
                   ~watchman_opts:
                     Saved_state_loader.Watchman_options.
@@ -318,7 +319,7 @@ let load_saved_state
               | Error e -> Lwt.return (Error e)
             else
               State_loader_lwt.load
-                ~env
+                ~ssopt
                 ~progress_callback:(fun _ -> ())
                 ~watchman_opts:
                   Saved_state_loader.Watchman_options.{ root; sockname = None }

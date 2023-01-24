@@ -7,13 +7,24 @@
  *
  *)
 
-(* Naming conventions in this file:
-   - tco_<feature/flag/setting> - type checker option
-   - po_<feature/flag/setting> - parser option
-   - so_<feature/flag/setting> - server option
-*)
+type saved_state_loading = {
+  saved_state_manifold_api_key: string option;
+      (** A string from hh.conf. The API key is used for saved state downloads
+       when we call out to manifold *)
+  log_saved_state_age_and_distance: bool;
+      (** Collects the age of a saved state (in seconds) and distance (in globalrevs) for telemetry *)
+  use_manifold_cython_client: bool;
+      (** Required for Hedwig support for saved state downloads *)
+}
 
+val default_saved_state_loading : saved_state_loading
+
+(** Naming conventions for fieds:
+  - tco_<feature/flag/setting> - type checker option
+  - po_<feature/flag/setting> - parser option
+  - so_<feature/flag/setting> - server option *)
 type t = {
+  tco_saved_state_loading: saved_state_loading;
   (* Set of experimental features, in lowercase. *)
   tco_experimental_features: SSet.t;
   (* Set of opt-in migration behavior flags, in lowercase. *)
@@ -302,16 +313,13 @@ type t = {
   (* Sets the amount of fuel that the type printer can use to display an
    * individual type. More of a type is printed as the value increases. *)
   tco_type_printer_fuel: int;
-  tco_log_saved_state_age_and_distance: bool;
   (* allows saved_state_loader to shell out to hg to find globalrev and timestamp of revisions *)
   tco_specify_manifold_api_key: bool;
-  tco_saved_state_manifold_api_key: string option;
   (* Measures and reports the time it takes to typecheck each top-level
      definition. *)
   tco_profile_top_level_definitions: bool;
   tco_allow_all_files_for_module_declarations: bool;
   tco_allowed_files_for_module_declarations: string list;
-  tco_use_manifold_cython_client: bool;
   (* If enabled, the type checker records more fine-grained dependencies than usual,
      for example between individual methods. *)
   tco_record_fine_grained_dependencies: bool;
@@ -336,6 +344,7 @@ type t = {
 [@@deriving eq, show]
 
 val make :
+  tco_saved_state_loading:saved_state_loading ->
   ?po_deregister_php_stdlib:bool ->
   ?po_disallow_toplevel_requires:bool ->
   ?tco_log_large_fanouts_threshold:int ->
@@ -453,13 +462,10 @@ val make :
   ?tco_explicit_consistent_constructors:int ->
   ?tco_require_types_class_consts:int ->
   ?tco_type_printer_fuel:int ->
-  ?tco_log_saved_state_age_and_distance:bool ->
   ?tco_specify_manifold_api_key:bool ->
-  ?tco_saved_state_manifold_api_key:string option ->
   ?tco_profile_top_level_definitions:bool ->
   ?tco_allow_all_files_for_module_declarations:bool ->
   ?tco_allowed_files_for_module_declarations:string list ->
-  ?tco_use_manifold_cython_client:bool ->
   ?tco_record_fine_grained_dependencies:bool ->
   ?tco_loop_iteration_upper_bound:int option ->
   ?tco_expression_tree_virtualize_functions:bool ->

@@ -472,10 +472,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (int_opt "require_types_tco_require_types_class_consts" config)
       ?tco_type_printer_fuel:(int_opt "type_printer_fuel" config)
       ?tco_is_systemlib:(bool_opt "is_systemlib" config)
-      ?tco_saved_state_manifold_api_key:
-        (Some local_config.ServerLocalConfig.saved_state_manifold_api_key)
-      ~tco_log_saved_state_age_and_distance:
-        local_config.ServerLocalConfig.log_saved_state_age_and_distance
+      ~tco_saved_state_loading:
+        local_config.ServerLocalConfig.saved_state_loading
       ~log_levels:(prepare_log_levels config)
       ?tco_allowed_files_for_module_declarations:
         (string_list_opt "allowed_files_for_module_declarations" config)

@@ -4,11 +4,19 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::gen::global_options::GlobalOptions;
+use crate::gen::global_options::SavedStateLoading;
 use crate::i_set;
 use crate::s_map;
 use crate::s_set;
 
+const DEFAULT_SAVED_STATE_LOADING: SavedStateLoading<'_> = SavedStateLoading {
+    saved_state_manifold_api_key: None,
+    log_saved_state_age_and_distance: false,
+    use_manifold_cython_client: false,
+};
+
 const DEFAULT: GlobalOptions<'_> = GlobalOptions {
+    tco_saved_state_loading: &DEFAULT_SAVED_STATE_LOADING,
     tco_experimental_features: s_set::SSet::empty(),
     tco_migration_flags: s_set::SSet::empty(),
     tco_num_local_workers: None,
@@ -127,13 +135,10 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_explicit_consistent_constructors: 0,
     tco_require_types_class_consts: 0,
     tco_type_printer_fuel: 100,
-    tco_log_saved_state_age_and_distance: false,
     tco_specify_manifold_api_key: false,
-    tco_saved_state_manifold_api_key: None,
     tco_profile_top_level_definitions: false,
     tco_allow_all_files_for_module_declarations: false,
     tco_allowed_files_for_module_declarations: &[],
-    tco_use_manifold_cython_client: false,
     tco_record_fine_grained_dependencies: false,
     tco_loop_iteration_upper_bound: None,
     tco_expression_tree_virtualize_functions: false,

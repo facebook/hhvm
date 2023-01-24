@@ -286,11 +286,12 @@ let load_saved_state :
       Saved_state_loader.load_error )
     Lwt_result.t =
  fun ~env ~local_config ~saved_state_type ->
-  let saved_state_env =
-    ServerLocalConfig.make_saved_state_env
-      local_config
-      ~log_saved_state_age_and_distance:false
-      ?saved_state_manifold_api_key:env.saved_state_manifold_api_key
+  let ssopt =
+    {
+      local_config.ServerLocalConfig.saved_state_loading with
+      GlobalOptions.log_saved_state_age_and_distance = false;
+      saved_state_manifold_api_key = env.saved_state_manifold_api_key;
+    }
   in
   match env.replay_token with
   | None ->
@@ -299,7 +300,7 @@ let load_saved_state :
     in
     let%lwt result =
       State_loader_lwt.load
-        ~env:saved_state_env
+        ~ssopt
         ~progress_callback:(fun _ -> ())
         ~watchman_opts
         ~ignore_hh_version:false
@@ -325,7 +326,7 @@ let load_saved_state :
     in
     let%lwt result =
       State_loader_lwt.download_and_unpack_saved_state_from_manifold
-        ~env:saved_state_env
+        ~ssopt
         ~progress_callback:(fun _ -> ())
         ~manifold_path
         ~target_path

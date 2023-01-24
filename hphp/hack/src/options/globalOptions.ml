@@ -22,12 +22,27 @@ open Hh_prelude
    etc.
 *)
 
+type saved_state_loading = {
+  saved_state_manifold_api_key: string option;
+  log_saved_state_age_and_distance: bool;
+  use_manifold_cython_client: bool;
+}
+[@@deriving show, eq]
+
+let default_saved_state_loading =
+  {
+    saved_state_manifold_api_key = None;
+    log_saved_state_age_and_distance = false;
+    use_manifold_cython_client = false;
+  }
+
 (** Naming conventions for fields in this struct:
   - tco_<feature/flag/setting> - type checker option
   - po_<feature/flag/setting> - parser option
   - so_<feature/flag/setting> - server option
 *)
 type t = {
+  tco_saved_state_loading: saved_state_loading;
   tco_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
   tco_num_local_workers: int option;
@@ -146,13 +161,10 @@ type t = {
   tco_explicit_consistent_constructors: int;
   tco_require_types_class_consts: int;
   tco_type_printer_fuel: int;
-  tco_log_saved_state_age_and_distance: bool;
   tco_specify_manifold_api_key: bool;
-  tco_saved_state_manifold_api_key: string option;
   tco_profile_top_level_definitions: bool;
   tco_allow_all_files_for_module_declarations: bool;
   tco_allowed_files_for_module_declarations: string list;
-  tco_use_manifold_cython_client: bool;
   tco_record_fine_grained_dependencies: bool;
   tco_loop_iteration_upper_bound: int option;
   tco_expression_tree_virtualize_functions: bool;
@@ -169,6 +181,7 @@ type t = {
 
 let default =
   {
+    tco_saved_state_loading = default_saved_state_loading;
     tco_experimental_features = SSet.empty;
     tco_migration_flags = SSet.empty;
     tco_num_local_workers = None;
@@ -287,13 +300,10 @@ let default =
     tco_explicit_consistent_constructors = 0;
     tco_require_types_class_consts = 0;
     tco_type_printer_fuel = 100;
-    tco_log_saved_state_age_and_distance = false;
     tco_specify_manifold_api_key = false;
-    tco_saved_state_manifold_api_key = None;
     tco_profile_top_level_definitions = false;
     tco_allow_all_files_for_module_declarations = true;
     tco_allowed_files_for_module_declarations = [];
-    tco_use_manifold_cython_client = false;
     tco_record_fine_grained_dependencies = false;
     tco_loop_iteration_upper_bound = None;
     tco_expression_tree_virtualize_functions = false;
@@ -308,6 +318,7 @@ let default =
   }
 
 let make
+    ~tco_saved_state_loading
     ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
     ?(po_disallow_toplevel_requires = default.po_disallow_toplevel_requires)
     ?tco_log_large_fanouts_threshold
@@ -448,18 +459,13 @@ let make
       default.tco_explicit_consistent_constructors)
     ?(tco_require_types_class_consts = default.tco_require_types_class_consts)
     ?(tco_type_printer_fuel = default.tco_type_printer_fuel)
-    ?(tco_log_saved_state_age_and_distance =
-      default.tco_log_saved_state_age_and_distance)
     ?(tco_specify_manifold_api_key = default.tco_specify_manifold_api_key)
-    ?(tco_saved_state_manifold_api_key =
-      default.tco_saved_state_manifold_api_key)
     ?(tco_profile_top_level_definitions =
       default.tco_profile_top_level_definitions)
     ?(tco_allow_all_files_for_module_declarations =
       default.tco_allow_all_files_for_module_declarations)
     ?(tco_allowed_files_for_module_declarations =
       default.tco_allowed_files_for_module_declarations)
-    ?(tco_use_manifold_cython_client = default.tco_use_manifold_cython_client)
     ?(tco_record_fine_grained_dependencies =
       default.tco_record_fine_grained_dependencies)
     ?(tco_loop_iteration_upper_bound = default.tco_loop_iteration_upper_bound)
@@ -481,6 +487,7 @@ let make
       default.tco_ide_should_use_hack_64_distc)
     () =
   {
+    tco_saved_state_loading;
     tco_experimental_features;
     tco_migration_flags;
     tco_num_local_workers;
@@ -599,13 +606,10 @@ let make
     tco_explicit_consistent_constructors;
     tco_require_types_class_consts;
     tco_type_printer_fuel;
-    tco_log_saved_state_age_and_distance;
     tco_specify_manifold_api_key;
-    tco_saved_state_manifold_api_key;
     tco_profile_top_level_definitions;
     tco_allow_all_files_for_module_declarations;
     tco_allowed_files_for_module_declarations;
-    tco_use_manifold_cython_client;
     tco_record_fine_grained_dependencies;
     tco_loop_iteration_upper_bound;
     tco_expression_tree_virtualize_functions;

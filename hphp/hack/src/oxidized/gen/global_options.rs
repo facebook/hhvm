@@ -3,11 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dd9c52f5c497fe81bbb290380b2178cf>>
+// @generated SignedSource<<3d763d2f7792aa385b2c048a6ef044f8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
+use eq_modulo_pos::EqModuloPos;
+use no_pos_hash::NoPosHash;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
@@ -15,6 +17,29 @@ use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (show, eq)")]
+#[repr(C)]
+pub struct SavedStateLoading {
+    pub saved_state_manifold_api_key: Option<String>,
+    pub log_saved_state_age_and_distance: bool,
+    pub use_manifold_cython_client: bool,
+}
 
 /// Naming conventions for fields in this struct:
 /// - tco_<feature/flag/setting> - type checker option
@@ -33,6 +58,7 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct GlobalOptions {
+    pub tco_saved_state_loading: SavedStateLoading,
     pub tco_experimental_features: s_set::SSet,
     pub tco_migration_flags: s_set::SSet,
     pub tco_num_local_workers: Option<isize>,
@@ -151,13 +177,10 @@ pub struct GlobalOptions {
     pub tco_explicit_consistent_constructors: isize,
     pub tco_require_types_class_consts: isize,
     pub tco_type_printer_fuel: isize,
-    pub tco_log_saved_state_age_and_distance: bool,
     pub tco_specify_manifold_api_key: bool,
-    pub tco_saved_state_manifold_api_key: Option<String>,
     pub tco_profile_top_level_definitions: bool,
     pub tco_allow_all_files_for_module_declarations: bool,
     pub tco_allowed_files_for_module_declarations: Vec<String>,
-    pub tco_use_manifold_cython_client: bool,
     pub tco_record_fine_grained_dependencies: bool,
     pub tco_loop_iteration_upper_bound: Option<isize>,
     pub tco_expression_tree_virtualize_functions: bool,

@@ -91,8 +91,9 @@ function testTypecheck(): void {
 "
 
 let test () =
-  let global_opts =
+  let global_opts : GlobalOptions.t =
     GlobalOptions.make
+      ~tco_saved_state_loading:GlobalOptions.default_saved_state_loading
       ~po_auto_namespace_map:[("ShortName", "HH\\LongName\\ShortName")]
       ~po_deregister_php_stdlib:true
       ()

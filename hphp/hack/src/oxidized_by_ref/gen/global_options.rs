@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0d7c8a97233e0f384ec87d22121efcc9>>
+// @generated SignedSource<<701567141f14091ad5659f64abba1f8d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
+use eq_modulo_pos::EqModuloPos;
+use no_pos_hash::NoPosHash;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
@@ -16,6 +18,32 @@ use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (show, eq)")]
+#[repr(C)]
+pub struct SavedStateLoading<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub saved_state_manifold_api_key: Option<&'a str>,
+    pub log_saved_state_age_and_distance: bool,
+    pub use_manifold_cython_client: bool,
+}
+impl<'a> TrivialDrop for SavedStateLoading<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(SavedStateLoading<'arena>);
 
 /// Naming conventions for fields in this struct:
 /// - tco_<feature/flag/setting> - type checker option
@@ -34,6 +62,8 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct GlobalOptions<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub tco_saved_state_loading: &'a SavedStateLoading<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_experimental_features: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -178,15 +208,11 @@ pub struct GlobalOptions<'a> {
     pub tco_explicit_consistent_constructors: isize,
     pub tco_require_types_class_consts: isize,
     pub tco_type_printer_fuel: isize,
-    pub tco_log_saved_state_age_and_distance: bool,
     pub tco_specify_manifold_api_key: bool,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub tco_saved_state_manifold_api_key: Option<&'a str>,
     pub tco_profile_top_level_definitions: bool,
     pub tco_allow_all_files_for_module_declarations: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_allowed_files_for_module_declarations: &'a [&'a str],
-    pub tco_use_manifold_cython_client: bool,
     pub tco_record_fine_grained_dependencies: bool,
     pub tco_loop_iteration_upper_bound: Option<isize>,
     pub tco_expression_tree_virtualize_functions: bool,

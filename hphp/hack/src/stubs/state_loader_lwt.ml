@@ -7,7 +7,7 @@
  *)
 
 let load
-    ~env:_
+    ~ssopt:_
     ~progress_callback:_
     ~watchman_opts:_
     ~ignore_hh_version:_
@@ -15,7 +15,7 @@ let load
   failwith "Not implemented"
 
 let load_internal
-    ~env:_
+    ~ssopt:_
     ~progress_callback:_
     ~watchman_opts:_
     ~ignore_hh_version:_
@@ -28,7 +28,7 @@ let get_saved_state_target_path ~download_dir:_ ~manifold_path:_ =
   failwith "Not implemented"
 
 let download_and_unpack_saved_state_from_manifold
-    ~env:_
+    ~ssopt:_
     ~progress_callback:_
     ~manifold_path:_
     ~target_path:_

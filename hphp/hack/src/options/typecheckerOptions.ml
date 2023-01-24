@@ -265,12 +265,11 @@ let require_types_class_consts t =
 let type_printer_fuel t = t.GlobalOptions.tco_type_printer_fuel
 
 let log_saved_state_age_and_distance t =
-  t.GlobalOptions.tco_log_saved_state_age_and_distance
+  GlobalOptions.(t.tco_saved_state_loading.log_saved_state_age_and_distance)
 
 let specify_manifold_api_key t = t.GlobalOptions.tco_specify_manifold_api_key
 
-let saved_state_manifold_api_key t =
-  t.GlobalOptions.tco_saved_state_manifold_api_key
+let saved_state_loading t = t.GlobalOptions.tco_saved_state_loading
 
 let profile_top_level_definitions t =
   t.GlobalOptions.tco_profile_top_level_definitions
@@ -286,9 +285,6 @@ let allow_all_locations_for_type_constant_in_enum_class t =
 
 let allowed_locations_for_type_constant_in_enum_class t =
   t.GlobalOptions.tco_allowed_locations_for_type_constant_in_enum_class
-
-let use_manifold_cython_client t =
-  t.GlobalOptions.tco_use_manifold_cython_client
 
 let record_fine_grained_dependencies t =
   t.GlobalOptions.tco_record_fine_grained_dependencies

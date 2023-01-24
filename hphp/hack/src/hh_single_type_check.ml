@@ -939,8 +939,9 @@ let parse_options () =
       Path.make root
   in
 
-  let tcopt =
+  let tcopt : GlobalOptions.t =
     GlobalOptions.make
+      ~tco_saved_state_loading:GlobalOptions.default_saved_state_loading
       ?po_deregister_php_stdlib:!deregister_attributes
       ?tco_log_inference_constraints:!log_inference_constraints
       ?tco_timeout:!timeout

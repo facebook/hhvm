@@ -20,7 +20,9 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/perf-counters.h"
@@ -145,6 +147,12 @@ void HHVM_FUNCTION(hphp_stats, const String& name, int64_t value) {
   ServerStats::Log(name.data(), value);
 }
 int64_t HHVM_FUNCTION(hphp_get_stats, const String& name) {
+  if (strcmp(name.c_str(), "units") == 0) {
+    return numLoadedUnits();
+  }
+  if (strcmp(name.c_str(), "funcs") == 0) {
+    return Func::maxFuncIdNum();
+  }
   return ServerStats::Get(name.data());
 }
 Array HHVM_FUNCTION(hphp_get_status) {

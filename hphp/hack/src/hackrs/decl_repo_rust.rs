@@ -224,7 +224,7 @@ fn fold<R: Reason>(provider: &impl FoldedDeclProvider<R>, classes: Vec<TypeName>
         .progress_count(len as u64)
         .for_each(|class| {
             provider
-                .get_class(class.into(), class)
+                .get_class(class)
                 .unwrap_or_else(|e| panic!("failed to fold class {}: {:?}", class, e))
                 .unwrap_or_else(|| panic!("failed to look up class {}", class));
         })

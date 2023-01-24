@@ -6,8 +6,6 @@
 use std::sync::Arc;
 
 use datastore::Store;
-use depgraph_api::DepGraphWriter;
-use depgraph_api::DependencyName;
 use hash::IndexMap;
 use hash::IndexSet;
 use oxidized::global_options::GlobalOptions;
@@ -30,7 +28,6 @@ use ty::decl_error::DeclError;
 use ty::reason::Reason;
 
 use super::fold::DeclFolder;
-use super::DeclName;
 use super::Error;
 use super::Result;
 use super::TypeDecl;
@@ -46,7 +43,6 @@ pub struct LazyFoldedDeclProvider<R: Reason> {
     opts: Arc<GlobalOptions>,
     store: Arc<dyn Store<TypeName, Arc<FoldedClass<R>>>>,
     shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
-    dependency_registrar: Arc<dyn DepGraphWriter>,
 }
 
 impl<R: Reason> LazyFoldedDeclProvider<R> {
@@ -54,43 +50,29 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         opts: Arc<GlobalOptions>,
         store: Arc<dyn Store<TypeName, Arc<FoldedClass<R>>>>,
         shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
-        dependency_registrar: Arc<dyn DepGraphWriter>,
     ) -> Self {
         Self {
             opts,
             store,
             shallow_decl_provider,
-            dependency_registrar,
         }
     }
 }
 
 impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
-    fn get_fun(&self, dependent: DeclName, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
-        self.dependency_registrar
-            .add_dependency(dependent, name.into())?;
+    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
         Ok(self.shallow_decl_provider.get_fun(name)?)
     }
 
-    fn get_const(&self, dependent: DeclName, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
-        self.dependency_registrar
-            .add_dependency(dependent, name.into())?;
+    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
         Ok(self.shallow_decl_provider.get_const(name)?)
     }
 
-    fn get_module(
-        &self,
-        dependent: DeclName,
-        name: ModuleName,
-    ) -> Result<Option<Arc<ModuleDecl<R>>>> {
-        self.dependency_registrar
-            .add_dependency(dependent, name.into())?;
+    fn get_module(&self, name: ModuleName) -> Result<Option<Arc<ModuleDecl<R>>>> {
         Ok(self.shallow_decl_provider.get_module(name)?)
     }
 
-    fn get_type(&self, dependent: DeclName, name: TypeName) -> Result<Option<TypeDecl<R>>> {
-        self.dependency_registrar
-            .add_dependency(dependent, name.into())?;
+    fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
         match self.shallow_decl_provider.get_type_kind(name)? {
             None => Ok(None),
             Some(KindOfType::TTypedef) => Ok(Some(TypeDecl::Typedef(
@@ -109,12 +91,9 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_property_type(
         &self,
-        dependent: DeclName,
         class_name: TypeName,
         property_name: PropName,
     ) -> Result<Option<Ty<R>>> {
-        self.dependency_registrar
-            .add_dependency(dependent, DependencyName::Prop(class_name, property_name))?;
         Ok(self
             .shallow_decl_provider
             .get_property_type(class_name, property_name)?)
@@ -122,14 +101,9 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_static_property_type(
         &self,
-        dependent: DeclName,
         class_name: TypeName,
         property_name: PropName,
     ) -> Result<Option<Ty<R>>> {
-        self.dependency_registrar.add_dependency(
-            dependent,
-            DependencyName::StaticProp(class_name, property_name),
-        )?;
         Ok(self
             .shallow_decl_provider
             .get_static_property_type(class_name, property_name)?)
@@ -137,12 +111,9 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_method_type(
         &self,
-        dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<Ty<R>>> {
-        self.dependency_registrar
-            .add_dependency(dependent, DependencyName::Method(class_name, method_name))?;
         Ok(self
             .shallow_decl_provider
             .get_method_type(class_name, method_name)?)
@@ -150,26 +121,15 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_static_method_type(
         &self,
-        dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<Ty<R>>> {
-        self.dependency_registrar.add_dependency(
-            dependent,
-            DependencyName::StaticMethod(class_name, method_name),
-        )?;
         Ok(self
             .shallow_decl_provider
             .get_static_method_type(class_name, method_name)?)
     }
 
-    fn get_shallow_constructor_type(
-        &self,
-        dependent: DeclName,
-        class_name: TypeName,
-    ) -> Result<Option<Ty<R>>> {
-        self.dependency_registrar
-            .add_dependency(dependent, DependencyName::Constructor(class_name))?;
+    fn get_shallow_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>> {
         Ok(self
             .shallow_decl_provider
             .get_constructor_type(class_name)?)
@@ -237,16 +197,6 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         }
     }
 
-    // Add a DeclType::Extends and DeclType::Type edge to each direct parent.
-    // Keep in sync with Decl_env.add_extends_dependency
-    fn add_extends_dependency(&self, parent: TypeName, child: TypeName) -> Result<()> {
-        self.dependency_registrar
-            .add_dependency(DeclName::Type(child), DependencyName::Extends(parent))?;
-        self.dependency_registrar
-            .add_dependency(DeclName::Type(child), DependencyName::Type(parent))?;
-        Ok(())
-    }
-
     /// Produce a stream of a class's parent types that will be folded
     /// recursively before folding the class itself.
     pub fn parents_to_fold(sc: &ShallowClass<R>) -> impl Iterator<Item = &Ty<R>> {
@@ -270,21 +220,11 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         errors: &mut Vec<DeclError<R::Pos>>,
         sc: &ShallowClass<R>,
     ) -> Result<IndexMap<TypeName, Arc<FoldedClass<R>>>> {
-        use pos::Pos;
         Self::parents_to_fold(sc)
             .chain(DeclFolder::stringish_object_parent(sc).iter())
             .map(|ty| {
-                let folded = self
-                    .decl_class_type(stack, errors, ty)
-                    .map_err(|err| Self::parent_error(sc, ty, err))?;
-                if let Some((parent, folded)) = &folded {
-                    // If this class is not an Hhi decl, add dependency edges on parents.
-                    // Keep in sync with Decl_env.get_class_and_add_dep.
-                    if !folded.pos.is_hhi() {
-                        self.add_extends_dependency(*parent, sc.name.id())?;
-                    }
-                }
-                Ok(folded)
+                self.decl_class_type(stack, errors, ty)
+                    .map_err(|err| Self::parent_error(sc, ty, err))
             })
             .filter_map(Result::transpose)
             .collect()
@@ -305,7 +245,6 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         stack.remove(&name);
         Ok(Some(DeclFolder::decl_class(
             &self.opts,
-            &*self.dependency_registrar,
             &shallow_class,
             &parents,
             errors,

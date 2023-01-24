@@ -4,11 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod decl_provider;
-pub mod registrar;
 pub mod serde_store;
 pub mod store;
 
 pub use decl_provider::*;
-pub use registrar::*;
 pub use serde_store::*;
 pub use store::*;

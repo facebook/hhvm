@@ -5,15 +5,11 @@
 
 use std::sync::Arc;
 
-use depgraph_api::DeclName;
-use depgraph_api::DepGraphWriter;
-use depgraph_api::DependencyName;
 use hash::IndexMap;
 use indexmap::map::Entry;
 use oxidized::global_options::GlobalOptions;
 use pos::ClassConstName;
 use pos::MethodName;
-use pos::Pos;
 use pos::PropName;
 use pos::TypeConstName;
 use pos::TypeName;
@@ -350,7 +346,6 @@ struct MemberFolder<'a, R: Reason> {
     opts: &'a GlobalOptions,
     child: &'a ShallowClass<R>,
     parents: &'a IndexMap<TypeName, Arc<FoldedClass<R>>>,
-    dependency_registrar: &'a dyn DepGraphWriter,
     members: Inherited<R>,
 }
 
@@ -453,12 +448,6 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
             );
 
             let constructor = parent_folded_decl.constructor.clone();
-            if !parent_folded_decl.pos.is_hhi() {
-                self.dependency_registrar.add_dependency(
-                    DeclName::Type(self.child.name.id()),
-                    DependencyName::Constructor(parent_folded_decl.name),
-                )?;
-            }
 
             return Ok(Inherited {
                 substs,
@@ -604,13 +593,11 @@ impl<R: Reason> Inherited<R> {
         opts: &GlobalOptions,
         child: &ShallowClass<R>,
         parents: &IndexMap<TypeName, Arc<FoldedClass<R>>>,
-        dependency_registrar: &dyn DepGraphWriter,
     ) -> Result<Self> {
         let mut folder = MemberFolder {
             opts,
             child,
             parents,
-            dependency_registrar,
             members: Self::default(),
         };
         folder.add_from_parents()?; // Members inherited from parents ...

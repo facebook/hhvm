@@ -81,7 +81,6 @@ impl HhServerProviderBackend {
             disk: DiskProvider::new(Arc::clone(&path_ctx), None),
         });
         let decl_parser = DeclParser::with_options(Arc::clone(&file_provider) as _, opts.clone());
-        let dependency_graph = Arc::new(depgraph_api::NoDepGraph::default());
         let naming_table = Arc::new(NamingTable::new(db_path)?);
 
         let shallow_decl_changes_store = Arc::new(ShallowStoreWithChanges::new());
@@ -105,7 +104,6 @@ impl HhServerProviderBackend {
             Arc::new(opts.clone()),
             Arc::clone(&folded_classes_store) as _,
             Arc::clone(&lazy_shallow_decl_provider) as _,
-            dependency_graph,
         ));
 
         Ok(Self {

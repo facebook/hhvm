@@ -30,10 +30,10 @@ fn when_cyclic_class_error(fb: FacebookInit) -> Result<()> {
     let (a, b) = (TypeName::new(r#"\A"#), TypeName::new(r#"\B"#));
     // To declare B, we'll first declare A. During the declaring of A, the
     // dependency on B will be noted as a cycle in A's errors.
-    ctx.folded_decl_provider.get_class(b.into(), b)?;
+    ctx.folded_decl_provider.get_class(b)?;
     // Since we already declared A incidentally above, this next line will
     // simply pull it from cache.
-    let decl = ctx.folded_decl_provider.get_class(a.into(), a)?.unwrap();
+    let decl = ctx.folded_decl_provider.get_class(a)?.unwrap();
     // Now check that A has recorded the cyclic class error as we predict.
     match decl.decl_errors.first().unwrap() {
         DeclError::CyclicClassDef(_, ts) => {
@@ -65,7 +65,7 @@ fn results_stable(fb: FacebookInit) -> Result<()> {
             TypeName::new(r#"\C"#),
             TypeName::new(r#"\D"#),
         );
-        let decl = ctx.folded_decl_provider.get_class(d.into(), d)?.unwrap();
+        let decl = ctx.folded_decl_provider.get_class(d)?.unwrap();
         itertools::assert_equal(decl.ancestors.keys().copied(), [a, b, c].into_iter())
     }
 
@@ -109,7 +109,7 @@ fn when_file_missing_error(fb: FacebookInit) -> Result<()> {
 
     // try getting a folded decl for 'D'
     use ::folded_decl_provider::Error;
-    match ctx.folded_decl_provider.get_class(d.into(), d) {
+    match ctx.folded_decl_provider.get_class(d) {
         Err(
             ref err @ Error::Parent {
                 ref class,

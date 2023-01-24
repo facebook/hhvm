@@ -13,7 +13,6 @@ bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.11.1", features = ["collections"] }
 datastore = { path = "../../hackrs/datastore" }
 decl_parser = { path = "../../hackrs/decl_parser/cargo/decl_parser" }
-depgraph_api = { path = "../../hackrs/depgraph_api/cargo/depgraph_api" }
 deps_rust = { path = "../../deps/cargo/deps_rust" }
 file_info = { path = "../../deps/rust/file_info" }
 file_provider = { path = "../../hackrs/file_provider/cargo/file_provider" }

@@ -129,12 +129,12 @@ ocaml_ffi! {
             // match the OCaml behavior. This should only matter when emitting
             // errors for cyclic definitions.
             for &name in classes.iter().rev() {
-                folded_decl_provider.get_class(name.into(), name)
+                folded_decl_provider.get_class(name)
                     .map_err(|e| format!("Failed to fold class {}: {:?}", name, e))?;
             }
             Ok((filename, classes.into_iter().map(|name| {
                 let folded_class = folded_decl_provider
-                    .get_class(name.into(), name)
+                    .get_class(name)
                     .map_err(|e| format!("Failed to fold class {}: {:?}", name, e))?
                     .ok_or_else(|| format!("Decl not found: class {}", name))?;
                 verify_to_ocamlrep(&Bump::new(), &*folded_class);
@@ -224,7 +224,7 @@ ocaml_ffi! {
             .progress_count(len.try_into().unwrap())
             .map(|class| {
                 let folded_decl = folded_decl_provider
-                    .get_class((*class).into(), *class)
+                    .get_class(*class)
                     .expect("failed to fold class")
                     .expect("failed to look up class");
                 (class.as_str().into(), folded_decl)

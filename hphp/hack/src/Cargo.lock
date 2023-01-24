@@ -1221,18 +1221,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "depgraph_api"
-version = "0.0.0"
-dependencies = [
- "core_utils_rust",
- "dep",
- "hh24_types",
- "pos",
- "thiserror",
- "typing_deps_hash",
-]
-
-[[package]]
 name = "depgraph_compress"
 version = "0.0.0"
 dependencies = [
@@ -1798,7 +1786,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "datastore",
- "depgraph_api",
  "eq_modulo_pos",
  "hash",
  "indexmap",
@@ -2063,8 +2050,6 @@ dependencies = [
  "bincode",
  "datastore",
  "decl_parser",
- "dep",
- "depgraph_api",
  "folded_decl_provider",
  "hash",
  "indicatif",

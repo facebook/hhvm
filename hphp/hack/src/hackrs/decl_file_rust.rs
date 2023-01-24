@@ -120,7 +120,7 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
                         println!("{:#?}", decl);
                     }
                     if opts.folded {
-                        match folded_decl_provider.get_class(name.into(), name) {
+                        match folded_decl_provider.get_class(name) {
                             Ok(decl) => println!(
                                 "{:#?}",
                                 decl.expect("expected decl provider to return Some")

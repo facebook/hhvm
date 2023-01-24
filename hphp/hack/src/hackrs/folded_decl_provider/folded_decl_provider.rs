@@ -6,7 +6,6 @@
 use std::fmt::Debug;
 use std::sync::Arc;
 
-use depgraph_api::DeclName;
 use itertools::Itertools;
 use pos::ConstName;
 use pos::FunName;
@@ -39,9 +38,6 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 pub enum Error {
     #[error("{0}")]
     Shallow(#[from] shallow_decl_provider::Error),
-
-    #[error("{0}")]
-    Dependency(#[from] depgraph_api::Error),
 
     #[error(
         "Failed to declare {class} because of error in ancestor {} (via {}): {error}",
@@ -98,29 +94,21 @@ pub enum TypeDecl<R: Reason> {
 /// `TypingDeclProvider` implementations) in the event of disk changes.
 pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
     /// Fetch the declaration of the toplevel function with the given name.
-    fn get_fun(&self, dependent: DeclName, name: FunName) -> Result<Option<Arc<FunDecl<R>>>>;
+    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>>;
 
     /// Fetch the declaration of the global constant with the given name.
-    fn get_const(&self, dependent: DeclName, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>>;
+    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>>;
 
     /// Fetch the declaration of the module with the given name.
-    fn get_module(
-        &self,
-        dependent: DeclName,
-        name: ModuleName,
-    ) -> Result<Option<Arc<ModuleDecl<R>>>>;
+    fn get_module(&self, name: ModuleName) -> Result<Option<Arc<ModuleDecl<R>>>>;
 
     /// Fetch the declaration of the class or typedef with the given name.
-    fn get_type(&self, dependent: DeclName, name: TypeName) -> Result<Option<TypeDecl<R>>>;
+    fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>>;
 
     /// Fetch the declaration of the typedef with the given name. If the given
     /// name is bound to a class rather than a typedef, return `None`.
-    fn get_typedef(
-        &self,
-        dependent: DeclName,
-        name: TypeName,
-    ) -> Result<Option<Arc<TypedefDecl<R>>>> {
-        Ok(self.get_type(dependent, name)?.and_then(|decl| match decl {
+    fn get_typedef(&self, name: TypeName) -> Result<Option<Arc<TypedefDecl<R>>>> {
+        Ok(self.get_type(name)?.and_then(|decl| match decl {
             TypeDecl::Typedef(td) => Some(td),
             TypeDecl::Class(..) => None,
         }))
@@ -128,12 +116,8 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
 
     /// Fetch the declaration of the class with the given name. If the given
     /// name is bound to a typedef rather than a class, return `None`.
-    fn get_class(
-        &self,
-        dependent: DeclName,
-        name: TypeName,
-    ) -> Result<Option<Arc<FoldedClass<R>>>> {
-        Ok(self.get_type(dependent, name)?.and_then(|decl| match decl {
+    fn get_class(&self, name: TypeName) -> Result<Option<Arc<FoldedClass<R>>>> {
+        Ok(self.get_type(name)?.and_then(|decl| match decl {
             TypeDecl::Class(cls) => Some(cls),
             TypeDecl::Typedef(..) => None,
         }))
@@ -149,7 +133,7 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
     /// `ShallowClass`.
     fn get_shallow_property_type(
         &self,
-        dependent: DeclName,
+
         class_name: TypeName,
         property_name: PropName,
     ) -> Result<Option<Ty<R>>>;
@@ -164,7 +148,6 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
     /// `ShallowClass`.
     fn get_shallow_static_property_type(
         &self,
-        dependent: DeclName,
         class_name: TypeName,
         property_name: PropName,
     ) -> Result<Option<Ty<R>>>;
@@ -179,7 +162,6 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
     /// `ShallowClass`.
     fn get_shallow_method_type(
         &self,
-        dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<Ty<R>>>;
@@ -194,7 +176,6 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
     /// `ShallowClass`.
     fn get_shallow_static_method_type(
         &self,
-        dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<Ty<R>>>;
@@ -208,9 +189,5 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
     /// stores data in a serialized format, implementations of this method
     /// should only deserialize the one constructor type, not the entire
     /// containing `ShallowClass`.
-    fn get_shallow_constructor_type(
-        &self,
-        dependent: DeclName,
-        class_name: TypeName,
-    ) -> Result<Option<Ty<R>>>;
+    fn get_shallow_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>>;
 }

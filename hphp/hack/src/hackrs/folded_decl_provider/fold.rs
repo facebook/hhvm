@@ -5,7 +5,6 @@
 
 use std::sync::Arc;
 
-use depgraph_api::DepGraphWriter;
 use eq_modulo_pos::EqModuloPos;
 use hash::IndexMap;
 use hash::IndexSet;
@@ -59,8 +58,6 @@ pub struct DeclFolder<'a, R: Reason> {
     #[allow(dead_code)] // This can be removed after this field's first use.
     /// Options affecting typechecking behaviors.
     opts: &'a GlobalOptions,
-    /// An observer of dependencies.
-    dependency_registrar: &'a dyn DepGraphWriter,
     /// The class whose folded decl we are producing.
     child: &'a ShallowClass<R>,
     /// The folded decls of all (recursive) ancestors of `child`.
@@ -79,14 +76,12 @@ enum Pass {
 impl<'a, R: Reason> DeclFolder<'a, R> {
     pub fn decl_class(
         opts: &'a GlobalOptions,
-        dependency_registrar: &'a dyn DepGraphWriter,
         child: &'a ShallowClass<R>,
         parents: &'a IndexMap<TypeName, Arc<FoldedClass<R>>>,
         errors: Vec<DeclError<R::Pos>>,
     ) -> Result<Arc<FoldedClass<R>>> {
         let this = Self {
             opts,
-            dependency_registrar,
             child,
             parents,
             errors,
@@ -774,12 +769,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             mut constructor,
             mut consts,
             mut type_consts,
-        } = Inherited::make(
-            self.opts,
-            self.child,
-            self.parents,
-            self.dependency_registrar,
-        )?;
+        } = Inherited::make(self.opts, self.child, self.parents)?;
 
         for sp in self.child.props.iter() {
             self.decl_prop(&mut props, sp);
@@ -881,12 +871,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             docs_url: self.child.docs_url.clone(),
         });
 
-        // Add a DepType::Type edge to every transitive ancestor.
-        // Keep in sync with Decl_folded_class.class_decl
-        for &ancestor in fc.ancestors.keys() {
-            self.dependency_registrar
-                .add_dependency(fc.name.into(), ancestor.into())?;
-        }
         Ok(fc)
     }
 }

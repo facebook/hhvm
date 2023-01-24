@@ -14,7 +14,6 @@ use decl_parser::DeclParser;
 use fbinit::FacebookInit;
 use folded_decl_provider::FoldedDeclProvider;
 use folded_decl_provider::LazyFoldedDeclProvider;
-use hackrs_test_utils::registrar::DependencyGraph;
 use hackrs_test_utils::serde_store::StoreOpts::Unserialized;
 use hackrs_test_utils::store::make_shallow_decl_store;
 use hh24_test::TestRepo;
@@ -24,14 +23,12 @@ use shallow_decl_provider::LazyShallowDeclProvider;
 use tempdir::TempDir;
 use ty::reason::BReason;
 
-mod depgraph_api_test;
 mod folded_decl_provider_test;
 mod pos_test;
 
 struct TestContext {
     root: TestRepo,
     decl_parser: DeclParser<BReason>,
-    dependency_graph: Arc<dyn depgraph_api::DepGraph>,
     folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
 }
 
@@ -50,7 +47,6 @@ impl TestContext {
             dummy: PathBuf::new(),
             tmp: tmpdir.path().to_path_buf(),
         });
-        let dependency_graph = Arc::new(DependencyGraph::default());
         let decl_parser =
             DeclParser::new(Arc::new(file_provider::DiskProvider::new(path_ctx, None)));
         let shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
@@ -62,12 +58,10 @@ impl TestContext {
             Arc::new(Default::default()), // TODO: remove?
             Arc::new(NonEvictingStore::new()),
             shallow_decl_provider,
-            Arc::clone(&dependency_graph) as _,
         ));
         Ok(Self {
             root,
             decl_parser,
-            dependency_graph,
             folded_decl_provider,
         })
     }

@@ -10,7 +10,6 @@ path = "../../folded_decl_provider.rs"
 [dependencies]
 anyhow = "1.0.65"
 datastore = { path = "../../../datastore" }
-depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
 eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
 hash = { path = "../../../../utils/hash" }
 indexmap = { version = "1.9.1", features = ["rayon", "serde-1"] }

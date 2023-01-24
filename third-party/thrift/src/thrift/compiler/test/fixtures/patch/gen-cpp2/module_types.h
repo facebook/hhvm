@@ -1496,17 +1496,23 @@ class InnerUnion final  {
   bool operator==(const InnerUnion&) const;
   bool operator<(const InnerUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_innerOption(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::innerOption);
-    ::new (std::addressof(value_.innerOption)) ::std::string(t);
+    ::new (std::addressof(value_.innerOption)) T(t);
     return value_.innerOption;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_innerOption(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::innerOption);
-    ::new (std::addressof(value_.innerOption)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.innerOption)) T(std::move(t));
     return value_.innerOption;
   }
 
@@ -1793,17 +1799,23 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_option1(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::option1);
-    ::new (std::addressof(value_.option1)) ::std::string(t);
+    ::new (std::addressof(value_.option1)) T(t);
     return value_.option1;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_option1(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::option1);
-    ::new (std::addressof(value_.option1)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.option1)) T(std::move(t));
     return value_.option1;
   }
 
@@ -1814,24 +1826,33 @@ class MyUnion final  {
     return value_.option1;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_option2(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::option2);
-    ::new (std::addressof(value_.option2)) ::std::int32_t(t);
+    ::new (std::addressof(value_.option2)) T(t);
     return value_.option2;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::patch::InnerUnion& set_option3(::test::fixtures::patch::InnerUnion const &t) {
+    using T0 = ::test::fixtures::patch::InnerUnion;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::option3);
-    ::new (std::addressof(value_.option3)) ::test::fixtures::patch::InnerUnion(t);
+    ::new (std::addressof(value_.option3)) T(t);
     return value_.option3;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::patch::InnerUnion& set_option3(::test::fixtures::patch::InnerUnion&& t) {
+    using T0 = ::test::fixtures::patch::InnerUnion;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::option3);
-    ::new (std::addressof(value_.option3)) ::test::fixtures::patch::InnerUnion(std::move(t));
+    ::new (std::addressof(value_.option3)) T(std::move(t));
     return value_.option3;
   }
 

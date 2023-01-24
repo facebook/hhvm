@@ -1123,24 +1123,33 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyEnum& set_myEnum(::test::fixtures::basic::MyEnum t = ::test::fixtures::basic::MyEnum()) {
+    using T0 = ::test::fixtures::basic::MyEnum;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myEnum);
-    ::new (std::addressof(value_.myEnum)) ::test::fixtures::basic::MyEnum(t);
+    ::new (std::addressof(value_.myEnum)) T(t);
     return value_.myEnum;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyStruct& set_myStruct(::test::fixtures::basic::MyStruct const &t) {
+    using T0 = ::test::fixtures::basic::MyStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myStruct);
-    ::new (std::addressof(value_.myStruct)) ::test::fixtures::basic::MyStruct(t);
+    ::new (std::addressof(value_.myStruct)) T(t);
     return value_.myStruct;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyStruct& set_myStruct(::test::fixtures::basic::MyStruct&& t) {
+    using T0 = ::test::fixtures::basic::MyStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myStruct);
-    ::new (std::addressof(value_.myStruct)) ::test::fixtures::basic::MyStruct(std::move(t));
+    ::new (std::addressof(value_.myStruct)) T(std::move(t));
     return value_.myStruct;
   }
 
@@ -1151,17 +1160,23 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyDataItem& set_myDataItem(::test::fixtures::basic::MyDataItem const &t) {
+    using T0 = ::test::fixtures::basic::MyDataItem;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myDataItem);
-    ::new (std::addressof(value_.myDataItem)) ::test::fixtures::basic::MyDataItem(t);
+    ::new (std::addressof(value_.myDataItem)) T(t);
     return value_.myDataItem;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyDataItem& set_myDataItem(::test::fixtures::basic::MyDataItem&& t) {
+    using T0 = ::test::fixtures::basic::MyDataItem;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myDataItem);
-    ::new (std::addressof(value_.myDataItem)) ::test::fixtures::basic::MyDataItem(std::move(t));
+    ::new (std::addressof(value_.myDataItem)) T(std::move(t));
     return value_.myDataItem;
   }
 
@@ -1172,17 +1187,23 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::set<float>& set_floatSet(::std::set<float> const &t) {
+    using T0 = ::std::set<float>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::floatSet);
-    ::new (std::addressof(value_.floatSet)) ::std::set<float>(t);
+    ::new (std::addressof(value_.floatSet)) T(t);
     return value_.floatSet;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::set<float>& set_floatSet(::std::set<float>&& t) {
+    using T0 = ::std::set<float>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::floatSet);
-    ::new (std::addressof(value_.floatSet)) ::std::set<float>(std::move(t));
+    ::new (std::addressof(value_.floatSet)) T(std::move(t));
     return value_.floatSet;
   }
 
@@ -1676,10 +1697,13 @@ class UnionToBeRenamed final  {
   bool operator==(const UnionToBeRenamed&) const;
   bool operator<(const UnionToBeRenamed&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_reserved_field(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::reserved_field);
-    ::new (std::addressof(value_.reserved_field)) ::std::int32_t(t);
+    ::new (std::addressof(value_.reserved_field)) T(t);
     return value_.reserved_field;
   }
 

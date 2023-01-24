@@ -442,24 +442,33 @@ class U final  {
   bool operator==(const U&) const;
   bool operator<(const U&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::i);
-    ::new (std::addressof(value_.i)) ::std::int32_t(t);
+    ::new (std::addressof(value_.i)) T(t);
     return value_.i;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::s);
-    ::new (std::addressof(value_.s)) ::std::string(t);
+    ::new (std::addressof(value_.s)) T(t);
     return value_.s;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::s);
-    ::new (std::addressof(value_.s)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.s)) T(std::move(t));
     return value_.s;
   }
 

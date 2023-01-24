@@ -474,26 +474,35 @@ class MyUnion final  {
   bool operator<(const MyUnion&) const;
  private:
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyEnum& set_myEnum(::test::fixtures::basic::MyEnum t = ::test::fixtures::basic::MyEnum()) {
+    using T0 = ::test::fixtures::basic::MyEnum;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myEnum);
-    ::new (std::addressof(value_.myEnum)) ::test::fixtures::basic::MyEnum(t);
+    ::new (std::addressof(value_.myEnum)) T(t);
     return value_.myEnum;
   }
  public:
  private:
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyStruct& set_myDataItem(::test::fixtures::basic::MyStruct const &t) {
+    using T0 = ::test::fixtures::basic::MyStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myDataItem);
-    ::new (std::addressof(value_.myDataItem)) ::test::fixtures::basic::MyStruct(t);
+    ::new (std::addressof(value_.myDataItem)) T(t);
     return value_.myDataItem;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic::MyStruct& set_myDataItem(::test::fixtures::basic::MyStruct&& t) {
+    using T0 = ::test::fixtures::basic::MyStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myDataItem);
-    ::new (std::addressof(value_.myDataItem)) ::test::fixtures::basic::MyStruct(std::move(t));
+    ::new (std::addressof(value_.myDataItem)) T(std::move(t));
     return value_.myDataItem;
   }
 

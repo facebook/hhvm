@@ -611,24 +611,33 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_anInteger(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::anInteger);
-    ::new (std::addressof(value_.anInteger)) ::std::int32_t(t);
+    ::new (std::addressof(value_.anInteger)) T(t);
     return value_.anInteger;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::unique_ptr<::std::string>& set_aString(::std::string const &t) {
+    using T0 = ::std::unique_ptr<::std::string>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::aString);
-    ::new (std::addressof(value_.aString)) ::std::unique_ptr<::std::string>(new ::std::unique_ptr<::std::string>::element_type(t));
+    ::new (std::addressof(value_.aString)) T(new typename T::element_type(t));
     return value_.aString;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::unique_ptr<::std::string>& set_aString(::std::string&& t) {
+    using T0 = ::std::unique_ptr<::std::string>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::aString);
-    ::new (std::addressof(value_.aString)) ::std::unique_ptr<::std::string>(new ::std::unique_ptr<::std::string>::element_type(std::move(t)));
+    ::new (std::addressof(value_.aString)) T(new typename T::element_type(std::move(t)));
     return value_.aString;
   }
 

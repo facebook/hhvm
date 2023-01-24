@@ -360,17 +360,23 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_myString(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myString);
-    ::new (std::addressof(value_.myString)) ::std::string(t);
+    ::new (std::addressof(value_.myString)) T(t);
     return value_.myString;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_myString(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myString);
-    ::new (std::addressof(value_.myString)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.myString)) T(std::move(t));
     return value_.myString;
   }
 

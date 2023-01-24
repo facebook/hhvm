@@ -1806,17 +1806,23 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic-structured-annotations::annotated_inline_string& set_first(::test::fixtures::basic-structured-annotations::annotated_inline_string const &t) {
+    using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::first);
-    ::new (std::addressof(value_.first)) ::test::fixtures::basic-structured-annotations::annotated_inline_string(t);
+    ::new (std::addressof(value_.first)) T(t);
     return value_.first;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic-structured-annotations::annotated_inline_string& set_first(::test::fixtures::basic-structured-annotations::annotated_inline_string&& t) {
+    using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::first);
-    ::new (std::addressof(value_.first)) ::test::fixtures::basic-structured-annotations::annotated_inline_string(std::move(t));
+    ::new (std::addressof(value_.first)) T(std::move(t));
     return value_.first;
   }
 
@@ -1827,10 +1833,13 @@ class MyUnion final  {
     return value_.first;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic-structured-annotations::annotated_inline_i64& set_second(::test::fixtures::basic-structured-annotations::annotated_inline_i64 t = ::test::fixtures::basic-structured-annotations::annotated_inline_i64()) {
+    using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_i64;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::second);
-    ::new (std::addressof(value_.second)) ::test::fixtures::basic-structured-annotations::annotated_inline_i64(t);
+    ::new (std::addressof(value_.second)) T(t);
     return value_.second;
   }
 

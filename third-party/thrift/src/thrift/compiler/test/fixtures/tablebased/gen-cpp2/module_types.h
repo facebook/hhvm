@@ -1258,17 +1258,23 @@ class ExampleUnion final  {
   bool operator==(const ExampleUnion&) const;
   bool operator<(const ExampleUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::tablebased::ContainerStruct& set_fieldA(::test::fixtures::tablebased::ContainerStruct const &t) {
+    using T0 = ::test::fixtures::tablebased::ContainerStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::fieldA);
-    ::new (std::addressof(value_.fieldA)) ::test::fixtures::tablebased::ContainerStruct(t);
+    ::new (std::addressof(value_.fieldA)) T(t);
     return value_.fieldA;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::tablebased::ContainerStruct& set_fieldA(::test::fixtures::tablebased::ContainerStruct&& t) {
+    using T0 = ::test::fixtures::tablebased::ContainerStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::fieldA);
-    ::new (std::addressof(value_.fieldA)) ::test::fixtures::tablebased::ContainerStruct(std::move(t));
+    ::new (std::addressof(value_.fieldA)) T(std::move(t));
     return value_.fieldA;
   }
 
@@ -1279,17 +1285,23 @@ class ExampleUnion final  {
     return value_.fieldA;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::tablebased::TrivialTypesStruct& set_fieldB(::test::fixtures::tablebased::TrivialTypesStruct const &t) {
+    using T0 = ::test::fixtures::tablebased::TrivialTypesStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::fieldB);
-    ::new (std::addressof(value_.fieldB)) ::test::fixtures::tablebased::TrivialTypesStruct(t);
+    ::new (std::addressof(value_.fieldB)) T(t);
     return value_.fieldB;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::tablebased::TrivialTypesStruct& set_fieldB(::test::fixtures::tablebased::TrivialTypesStruct&& t) {
+    using T0 = ::test::fixtures::tablebased::TrivialTypesStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::fieldB);
-    ::new (std::addressof(value_.fieldB)) ::test::fixtures::tablebased::TrivialTypesStruct(std::move(t));
+    ::new (std::addressof(value_.fieldB)) T(std::move(t));
     return value_.fieldB;
   }
 

@@ -736,24 +736,33 @@ class MyUnion final  {
   bool operator==(const MyUnion&) const;
   bool operator<(const MyUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum t = ::cpp2::MyEnum()) {
+    using T0 = ::cpp2::MyEnum;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myEnum);
-    ::new (std::addressof(value_.myEnum)) ::cpp2::MyEnum(t);
+    ::new (std::addressof(value_.myEnum)) T(t);
     return value_.myEnum;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyStruct& set_myStruct(::cpp2::MyStruct const &t) {
+    using T0 = ::cpp2::MyStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myStruct);
-    ::new (std::addressof(value_.myStruct)) ::cpp2::MyStruct(t);
+    ::new (std::addressof(value_.myStruct)) T(t);
     return value_.myStruct;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyStruct& set_myStruct(::cpp2::MyStruct&& t) {
+    using T0 = ::cpp2::MyStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myStruct);
-    ::new (std::addressof(value_.myStruct)) ::cpp2::MyStruct(std::move(t));
+    ::new (std::addressof(value_.myStruct)) T(std::move(t));
     return value_.myStruct;
   }
 
@@ -764,17 +773,23 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem const &t) {
+    using T0 = ::cpp2::MyDataItem;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myDataItem);
-    ::new (std::addressof(value_.myDataItem)) ::cpp2::MyDataItem(t);
+    ::new (std::addressof(value_.myDataItem)) T(t);
     return value_.myDataItem;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem&& t) {
+    using T0 = ::cpp2::MyDataItem;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myDataItem);
-    ::new (std::addressof(value_.myDataItem)) ::cpp2::MyDataItem(std::move(t));
+    ::new (std::addressof(value_.myDataItem)) T(std::move(t));
     return value_.myDataItem;
   }
 

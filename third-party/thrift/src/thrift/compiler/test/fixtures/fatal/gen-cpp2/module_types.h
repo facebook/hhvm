@@ -1315,31 +1315,43 @@ class union1 final  {
   bool operator==(const union1&) const;
   bool operator<(const union1&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_ui(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::ui);
-    ::new (std::addressof(value_.ui)) ::std::int32_t(t);
+    ::new (std::addressof(value_.ui)) T(t);
     return value_.ui;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_ud(double t = double()) {
+    using T0 = double;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::ud);
-    ::new (std::addressof(value_.ud)) double(t);
+    ::new (std::addressof(value_.ud)) T(t);
     return value_.ud;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::us);
-    ::new (std::addressof(value_.us)) ::std::string(t);
+    ::new (std::addressof(value_.us)) T(t);
     return value_.us;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::us);
-    ::new (std::addressof(value_.us)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.us)) T(std::move(t));
     return value_.us;
   }
 
@@ -1350,10 +1362,13 @@ class union1 final  {
     return value_.us;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_ue(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
+    using T0 = ::test_cpp2::cpp_reflection::enum1;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::ue);
-    ::new (std::addressof(value_.ue)) ::test_cpp2::cpp_reflection::enum1(t);
+    ::new (std::addressof(value_.ue)) T(t);
     return value_.ue;
   }
 
@@ -1763,31 +1778,43 @@ class union2 final  {
   bool operator==(const union2&) const;
   bool operator<(const union2&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_ui_2(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::ui_2);
-    ::new (std::addressof(value_.ui_2)) ::std::int32_t(t);
+    ::new (std::addressof(value_.ui_2)) T(t);
     return value_.ui_2;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_ud_2(double t = double()) {
+    using T0 = double;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::ud_2);
-    ::new (std::addressof(value_.ud_2)) double(t);
+    ::new (std::addressof(value_.ud_2)) T(t);
     return value_.ud_2;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us_2(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::us_2);
-    ::new (std::addressof(value_.us_2)) ::std::string(t);
+    ::new (std::addressof(value_.us_2)) T(t);
     return value_.us_2;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us_2(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::us_2);
-    ::new (std::addressof(value_.us_2)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.us_2)) T(std::move(t));
     return value_.us_2;
   }
 
@@ -1798,10 +1825,13 @@ class union2 final  {
     return value_.us_2;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_ue_2(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
+    using T0 = ::test_cpp2::cpp_reflection::enum1;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::ue_2);
-    ::new (std::addressof(value_.ue_2)) ::test_cpp2::cpp_reflection::enum1(t);
+    ::new (std::addressof(value_.ue_2)) T(t);
     return value_.ue_2;
   }
 
@@ -2211,31 +2241,43 @@ class union3 final  {
   bool operator==(const union3&) const;
   bool operator<(const union3&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_ui_3(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::ui_3);
-    ::new (std::addressof(value_.ui_3)) ::std::int32_t(t);
+    ::new (std::addressof(value_.ui_3)) T(t);
     return value_.ui_3;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_ud_3(double t = double()) {
+    using T0 = double;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::ud_3);
-    ::new (std::addressof(value_.ud_3)) double(t);
+    ::new (std::addressof(value_.ud_3)) T(t);
     return value_.ud_3;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us_3(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::us_3);
-    ::new (std::addressof(value_.us_3)) ::std::string(t);
+    ::new (std::addressof(value_.us_3)) T(t);
     return value_.us_3;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_us_3(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::us_3);
-    ::new (std::addressof(value_.us_3)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.us_3)) T(std::move(t));
     return value_.us_3;
   }
 
@@ -2246,10 +2288,13 @@ class union3 final  {
     return value_.us_3;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_ue_3(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
+    using T0 = ::test_cpp2::cpp_reflection::enum1;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::ue_3);
-    ::new (std::addressof(value_.ue_3)) ::test_cpp2::cpp_reflection::enum1(t);
+    ::new (std::addressof(value_.ue_3)) T(t);
     return value_.ue_3;
   }
 
@@ -2888,31 +2933,43 @@ class unionA final  {
   bool operator==(const unionA&) const;
   bool operator<(const unionA&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::i);
-    ::new (std::addressof(value_.i)) ::std::int32_t(t);
+    ::new (std::addressof(value_.i)) T(t);
     return value_.i;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_d(double t = double()) {
+    using T0 = double;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::d);
-    ::new (std::addressof(value_.d)) double(t);
+    ::new (std::addressof(value_.d)) T(t);
     return value_.d;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::s);
-    ::new (std::addressof(value_.s)) ::std::string(t);
+    ::new (std::addressof(value_.s)) T(t);
     return value_.s;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_s(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::s);
-    ::new (std::addressof(value_.s)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.s)) T(std::move(t));
     return value_.s;
   }
 
@@ -2923,24 +2980,33 @@ class unionA final  {
     return value_.s;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::enum1& set_e(::test_cpp2::cpp_reflection::enum1 t = ::test_cpp2::cpp_reflection::enum1()) {
+    using T0 = ::test_cpp2::cpp_reflection::enum1;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::e);
-    ::new (std::addressof(value_.e)) ::test_cpp2::cpp_reflection::enum1(t);
+    ::new (std::addressof(value_.e)) T(t);
     return value_.e;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::structA& set_a(::test_cpp2::cpp_reflection::structA const &t) {
+    using T0 = ::test_cpp2::cpp_reflection::structA;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a);
-    ::new (std::addressof(value_.a)) ::test_cpp2::cpp_reflection::structA(t);
+    ::new (std::addressof(value_.a)) T(t);
     return value_.a;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::structA& set_a(::test_cpp2::cpp_reflection::structA&& t) {
+    using T0 = ::test_cpp2::cpp_reflection::structA;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a);
-    ::new (std::addressof(value_.a)) ::test_cpp2::cpp_reflection::structA(std::move(t));
+    ::new (std::addressof(value_.a)) T(std::move(t));
     return value_.a;
   }
 
@@ -9296,199 +9362,283 @@ class union_with_special_names final  {
   bool operator==(const union_with_special_names&) const;
   bool operator<(const union_with_special_names&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_get(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::get);
-    ::new (std::addressof(value_.get)) ::std::int32_t(t);
+    ::new (std::addressof(value_.get)) T(t);
     return value_.get;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_getter(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::getter);
-    ::new (std::addressof(value_.getter)) ::std::int32_t(t);
+    ::new (std::addressof(value_.getter)) T(t);
     return value_.getter;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_lists(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::lists);
-    ::new (std::addressof(value_.lists)) ::std::int32_t(t);
+    ::new (std::addressof(value_.lists)) T(t);
     return value_.lists;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_maps(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::maps);
-    ::new (std::addressof(value_.maps)) ::std::int32_t(t);
+    ::new (std::addressof(value_.maps)) T(t);
     return value_.maps;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_name(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::name);
-    ::new (std::addressof(value_.name)) ::std::int32_t(t);
+    ::new (std::addressof(value_.name)) T(t);
     return value_.name;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_name_to_value(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::name_to_value);
-    ::new (std::addressof(value_.name_to_value)) ::std::int32_t(t);
+    ::new (std::addressof(value_.name_to_value)) T(t);
     return value_.name_to_value;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_names(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::names);
-    ::new (std::addressof(value_.names)) ::std::int32_t(t);
+    ::new (std::addressof(value_.names)) T(t);
     return value_.names;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_prefix_tree(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::prefix_tree);
-    ::new (std::addressof(value_.prefix_tree)) ::std::int32_t(t);
+    ::new (std::addressof(value_.prefix_tree)) T(t);
     return value_.prefix_tree;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_sets(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::sets);
-    ::new (std::addressof(value_.sets)) ::std::int32_t(t);
+    ::new (std::addressof(value_.sets)) T(t);
     return value_.sets;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_setter(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::setter);
-    ::new (std::addressof(value_.setter)) ::std::int32_t(t);
+    ::new (std::addressof(value_.setter)) T(t);
     return value_.setter;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_str(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::str);
-    ::new (std::addressof(value_.str)) ::std::int32_t(t);
+    ::new (std::addressof(value_.str)) T(t);
     return value_.str;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_strings(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::strings);
-    ::new (std::addressof(value_.strings)) ::std::int32_t(t);
+    ::new (std::addressof(value_.strings)) T(t);
     return value_.strings;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_type(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::type);
-    ::new (std::addressof(value_.type)) ::std::int32_t(t);
+    ::new (std::addressof(value_.type)) T(t);
     return value_.type;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_value(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::value);
-    ::new (std::addressof(value_.value)) ::std::int32_t(t);
+    ::new (std::addressof(value_.value)) T(t);
     return value_.value;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_value_to_name(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::value_to_name);
-    ::new (std::addressof(value_.value_to_name)) ::std::int32_t(t);
+    ::new (std::addressof(value_.value_to_name)) T(t);
     return value_.value_to_name;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_values(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::values);
-    ::new (std::addressof(value_.values)) ::std::int32_t(t);
+    ::new (std::addressof(value_.values)) T(t);
     return value_.values;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_id(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::id);
-    ::new (std::addressof(value_.id)) ::std::int32_t(t);
+    ::new (std::addressof(value_.id)) T(t);
     return value_.id;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_ids(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::ids);
-    ::new (std::addressof(value_.ids)) ::std::int32_t(t);
+    ::new (std::addressof(value_.ids)) T(t);
     return value_.ids;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_descriptor(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::descriptor);
-    ::new (std::addressof(value_.descriptor)) ::std::int32_t(t);
+    ::new (std::addressof(value_.descriptor)) T(t);
     return value_.descriptor;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_descriptors(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::descriptors);
-    ::new (std::addressof(value_.descriptors)) ::std::int32_t(t);
+    ::new (std::addressof(value_.descriptors)) T(t);
     return value_.descriptors;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_key(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::key);
-    ::new (std::addressof(value_.key)) ::std::int32_t(t);
+    ::new (std::addressof(value_.key)) T(t);
     return value_.key;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_keys(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::keys);
-    ::new (std::addressof(value_.keys)) ::std::int32_t(t);
+    ::new (std::addressof(value_.keys)) T(t);
     return value_.keys;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_annotation(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::annotation);
-    ::new (std::addressof(value_.annotation)) ::std::int32_t(t);
+    ::new (std::addressof(value_.annotation)) T(t);
     return value_.annotation;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_annotations(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::annotations);
-    ::new (std::addressof(value_.annotations)) ::std::int32_t(t);
+    ::new (std::addressof(value_.annotations)) T(t);
     return value_.annotations;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_member(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::member);
-    ::new (std::addressof(value_.member)) ::std::int32_t(t);
+    ::new (std::addressof(value_.member)) T(t);
     return value_.member;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_members(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::members);
-    ::new (std::addressof(value_.members)) ::std::int32_t(t);
+    ::new (std::addressof(value_.members)) T(t);
     return value_.members;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_field(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::field);
-    ::new (std::addressof(value_.field)) ::std::int32_t(t);
+    ::new (std::addressof(value_.field)) T(t);
     return value_.field;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_fields(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::fields);
-    ::new (std::addressof(value_.fields)) ::std::int32_t(t);
+    ::new (std::addressof(value_.fields)) T(t);
     return value_.fields;
   }
 
@@ -12828,10 +12978,13 @@ class UnionWithTypedefFieldAdapter final  {
   bool operator==(const UnionWithTypedefFieldAdapter&) const;
   bool operator<(const UnionWithTypedefFieldAdapter&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test_cpp2::cpp_reflection::I32& set_field(::test_cpp2::cpp_reflection::I32 t = ::test_cpp2::cpp_reflection::I32()) {
+    using T0 = ::test_cpp2::cpp_reflection::I32;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::field);
-    ::new (std::addressof(value_.field)) ::test_cpp2::cpp_reflection::I32(t);
+    ::new (std::addressof(value_.field)) T(t);
     return value_.field;
   }
 

@@ -2395,24 +2395,33 @@ class SimpleUnion  {
   bool operator==(const SimpleUnion&) const;
   bool operator<(const SimpleUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int64_t& set_intValue(::std::int64_t t = ::std::int64_t()) {
+    using T0 = ::std::int64_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::intValue);
-    ::new (std::addressof(value_.intValue)) ::std::int64_t(t);
+    ::new (std::addressof(value_.intValue)) T(t);
     return value_.intValue;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringValue(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::stringValue);
-    ::new (std::addressof(value_.stringValue)) ::std::string(t);
+    ::new (std::addressof(value_.stringValue)) T(t);
     return value_.stringValue;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringValue(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::stringValue);
-    ::new (std::addressof(value_.stringValue)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.stringValue)) T(std::move(t));
     return value_.stringValue;
   }
 
@@ -3333,31 +3342,43 @@ class ComplexUnion final  {
   bool operator==(const ComplexUnion&) const;
   bool operator<(const ComplexUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int64_t& set_intValue(::std::int64_t t = ::std::int64_t()) {
+    using T0 = ::std::int64_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::intValue);
-    ::new (std::addressof(value_.intValue)) ::std::int64_t(t);
+    ::new (std::addressof(value_.intValue)) T(t);
     return value_.intValue;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int64_t& set_opt_intValue(::std::int64_t t = ::std::int64_t()) {
+    using T0 = ::std::int64_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::opt_intValue);
-    ::new (std::addressof(value_.opt_intValue)) ::std::int64_t(t);
+    ::new (std::addressof(value_.opt_intValue)) T(t);
     return value_.opt_intValue;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringValue(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::stringValue);
-    ::new (std::addressof(value_.stringValue)) ::std::string(t);
+    ::new (std::addressof(value_.stringValue)) T(t);
     return value_.stringValue;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_stringValue(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::stringValue);
-    ::new (std::addressof(value_.stringValue)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.stringValue)) T(std::move(t));
     return value_.stringValue;
   }
 
@@ -3368,17 +3389,23 @@ class ComplexUnion final  {
     return value_.stringValue;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_opt_stringValue(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::opt_stringValue);
-    ::new (std::addressof(value_.opt_stringValue)) ::std::string(t);
+    ::new (std::addressof(value_.opt_stringValue)) T(t);
     return value_.opt_stringValue;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_opt_stringValue(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::opt_stringValue);
-    ::new (std::addressof(value_.opt_stringValue)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.opt_stringValue)) T(std::move(t));
     return value_.opt_stringValue;
   }
 
@@ -3389,45 +3416,63 @@ class ComplexUnion final  {
     return value_.opt_stringValue;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int16_t& set_intValue2(::std::int16_t t = ::std::int16_t()) {
+    using T0 = ::std::int16_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::intValue2);
-    ::new (std::addressof(value_.intValue2)) ::std::int16_t(t);
+    ::new (std::addressof(value_.intValue2)) T(t);
     return value_.intValue2;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_intValue3(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::intValue3);
-    ::new (std::addressof(value_.intValue3)) ::std::int32_t(t);
+    ::new (std::addressof(value_.intValue3)) T(t);
     return value_.intValue3;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_doubelValue(double t = double()) {
+    using T0 = double;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::doubelValue);
-    ::new (std::addressof(value_.doubelValue)) double(t);
+    ::new (std::addressof(value_.doubelValue)) T(t);
     return value_.doubelValue;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   bool& set_boolValue(bool t = bool()) {
+    using T0 = bool;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::boolValue);
-    ::new (std::addressof(value_.boolValue)) bool(t);
+    ::new (std::addressof(value_.boolValue)) T(t);
     return value_.boolValue;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::int32_t>& set_union_list(::std::vector<::std::int32_t> const &t) {
+    using T0 = ::std::vector<::std::int32_t>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::union_list);
-    ::new (std::addressof(value_.union_list)) ::std::vector<::std::int32_t>(t);
+    ::new (std::addressof(value_.union_list)) T(t);
     return value_.union_list;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::int32_t>& set_union_list(::std::vector<::std::int32_t>&& t) {
+    using T0 = ::std::vector<::std::int32_t>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::union_list);
-    ::new (std::addressof(value_.union_list)) ::std::vector<::std::int32_t>(std::move(t));
+    ::new (std::addressof(value_.union_list)) T(std::move(t));
     return value_.union_list;
   }
 
@@ -3438,17 +3483,23 @@ class ComplexUnion final  {
     return value_.union_list;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::set<::std::int64_t>& set_union_set(::std::set<::std::int64_t> const &t) {
+    using T0 = ::std::set<::std::int64_t>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::union_set);
-    ::new (std::addressof(value_.union_set)) ::std::set<::std::int64_t>(t);
+    ::new (std::addressof(value_.union_set)) T(t);
     return value_.union_set;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::set<::std::int64_t>& set_union_set(::std::set<::std::int64_t>&& t) {
+    using T0 = ::std::set<::std::int64_t>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::union_set);
-    ::new (std::addressof(value_.union_set)) ::std::set<::std::int64_t>(std::move(t));
+    ::new (std::addressof(value_.union_set)) T(std::move(t));
     return value_.union_set;
   }
 
@@ -3459,17 +3510,23 @@ class ComplexUnion final  {
     return value_.union_set;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::map<::std::string, ::std::int32_t>& set_union_map(::std::map<::std::string, ::std::int32_t> const &t) {
+    using T0 = ::std::map<::std::string, ::std::int32_t>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::union_map);
-    ::new (std::addressof(value_.union_map)) ::std::map<::std::string, ::std::int32_t>(t);
+    ::new (std::addressof(value_.union_map)) T(t);
     return value_.union_map;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::map<::std::string, ::std::int32_t>& set_union_map(::std::map<::std::string, ::std::int32_t>&& t) {
+    using T0 = ::std::map<::std::string, ::std::int32_t>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::union_map);
-    ::new (std::addressof(value_.union_map)) ::std::map<::std::string, ::std::int32_t>(std::move(t));
+    ::new (std::addressof(value_.union_map)) T(std::move(t));
     return value_.union_map;
   }
 
@@ -3480,17 +3537,23 @@ class ComplexUnion final  {
     return value_.union_map;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::map<::std::string, ::std::int32_t>& set_opt_union_map(::std::map<::std::string, ::std::int32_t> const &t) {
+    using T0 = ::std::map<::std::string, ::std::int32_t>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::opt_union_map);
-    ::new (std::addressof(value_.opt_union_map)) ::std::map<::std::string, ::std::int32_t>(t);
+    ::new (std::addressof(value_.opt_union_map)) T(t);
     return value_.opt_union_map;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::map<::std::string, ::std::int32_t>& set_opt_union_map(::std::map<::std::string, ::std::int32_t>&& t) {
+    using T0 = ::std::map<::std::string, ::std::int32_t>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::opt_union_map);
-    ::new (std::addressof(value_.opt_union_map)) ::std::map<::std::string, ::std::int32_t>(std::move(t));
+    ::new (std::addressof(value_.opt_union_map)) T(std::move(t));
     return value_.opt_union_map;
   }
 
@@ -3501,24 +3564,33 @@ class ComplexUnion final  {
     return value_.opt_union_map;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::MyEnumA& set_enum_field(::some::valid::ns::MyEnumA t = ::some::valid::ns::MyEnumA()) {
+    using T0 = ::some::valid::ns::MyEnumA;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::enum_field);
-    ::new (std::addressof(value_.enum_field)) ::some::valid::ns::MyEnumA(t);
+    ::new (std::addressof(value_.enum_field)) T(t);
     return value_.enum_field;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::some::valid::ns::MyEnumA>& set_enum_container(::std::vector<::some::valid::ns::MyEnumA> const &t) {
+    using T0 = ::std::vector<::some::valid::ns::MyEnumA>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::enum_container);
-    ::new (std::addressof(value_.enum_container)) ::std::vector<::some::valid::ns::MyEnumA>(t);
+    ::new (std::addressof(value_.enum_container)) T(t);
     return value_.enum_container;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::some::valid::ns::MyEnumA>& set_enum_container(::std::vector<::some::valid::ns::MyEnumA>&& t) {
+    using T0 = ::std::vector<::some::valid::ns::MyEnumA>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::enum_container);
-    ::new (std::addressof(value_.enum_container)) ::std::vector<::some::valid::ns::MyEnumA>(std::move(t));
+    ::new (std::addressof(value_.enum_container)) T(std::move(t));
     return value_.enum_container;
   }
 
@@ -3529,17 +3601,23 @@ class ComplexUnion final  {
     return value_.enum_container;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::MyStruct& set_a_struct(::some::valid::ns::MyStruct const &t) {
+    using T0 = ::some::valid::ns::MyStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_struct);
-    ::new (std::addressof(value_.a_struct)) ::some::valid::ns::MyStruct(t);
+    ::new (std::addressof(value_.a_struct)) T(t);
     return value_.a_struct;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::MyStruct& set_a_struct(::some::valid::ns::MyStruct&& t) {
+    using T0 = ::some::valid::ns::MyStruct;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_struct);
-    ::new (std::addressof(value_.a_struct)) ::some::valid::ns::MyStruct(std::move(t));
+    ::new (std::addressof(value_.a_struct)) T(std::move(t));
     return value_.a_struct;
   }
 
@@ -3550,17 +3628,23 @@ class ComplexUnion final  {
     return value_.a_struct;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::set<::some::valid::ns::MyStruct>& set_a_set_struct(::std::set<::some::valid::ns::MyStruct> const &t) {
+    using T0 = ::std::set<::some::valid::ns::MyStruct>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_set_struct);
-    ::new (std::addressof(value_.a_set_struct)) ::std::set<::some::valid::ns::MyStruct>(t);
+    ::new (std::addressof(value_.a_set_struct)) T(t);
     return value_.a_set_struct;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::set<::some::valid::ns::MyStruct>& set_a_set_struct(::std::set<::some::valid::ns::MyStruct>&& t) {
+    using T0 = ::std::set<::some::valid::ns::MyStruct>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_set_struct);
-    ::new (std::addressof(value_.a_set_struct)) ::std::set<::some::valid::ns::MyStruct>(std::move(t));
+    ::new (std::addressof(value_.a_set_struct)) T(std::move(t));
     return value_.a_set_struct;
   }
 
@@ -3571,17 +3655,23 @@ class ComplexUnion final  {
     return value_.a_set_struct;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::SimpleUnion& set_a_union(::some::valid::ns::SimpleUnion const &t) {
+    using T0 = ::some::valid::ns::SimpleUnion;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_union);
-    ::new (std::addressof(value_.a_union)) ::some::valid::ns::SimpleUnion(t);
+    ::new (std::addressof(value_.a_union)) T(t);
     return value_.a_union;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::SimpleUnion& set_a_union(::some::valid::ns::SimpleUnion&& t) {
+    using T0 = ::some::valid::ns::SimpleUnion;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_union);
-    ::new (std::addressof(value_.a_union)) ::some::valid::ns::SimpleUnion(std::move(t));
+    ::new (std::addressof(value_.a_union)) T(std::move(t));
     return value_.a_union;
   }
 
@@ -3592,17 +3682,23 @@ class ComplexUnion final  {
     return value_.a_union;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::SimpleUnion& set_opt_a_union(::some::valid::ns::SimpleUnion const &t) {
+    using T0 = ::some::valid::ns::SimpleUnion;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::opt_a_union);
-    ::new (std::addressof(value_.opt_a_union)) ::some::valid::ns::SimpleUnion(t);
+    ::new (std::addressof(value_.opt_a_union)) T(t);
     return value_.opt_a_union;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::SimpleUnion& set_opt_a_union(::some::valid::ns::SimpleUnion&& t) {
+    using T0 = ::some::valid::ns::SimpleUnion;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::opt_a_union);
-    ::new (std::addressof(value_.opt_a_union)) ::some::valid::ns::SimpleUnion(std::move(t));
+    ::new (std::addressof(value_.opt_a_union)) T(std::move(t));
     return value_.opt_a_union;
   }
 
@@ -3613,17 +3709,23 @@ class ComplexUnion final  {
     return value_.opt_a_union;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::some::valid::ns::SimpleUnion>& set_a_union_list(::std::vector<::some::valid::ns::SimpleUnion> const &t) {
+    using T0 = ::std::vector<::some::valid::ns::SimpleUnion>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_union_list);
-    ::new (std::addressof(value_.a_union_list)) ::std::vector<::some::valid::ns::SimpleUnion>(t);
+    ::new (std::addressof(value_.a_union_list)) T(t);
     return value_.a_union_list;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::some::valid::ns::SimpleUnion>& set_a_union_list(::std::vector<::some::valid::ns::SimpleUnion>&& t) {
+    using T0 = ::std::vector<::some::valid::ns::SimpleUnion>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_union_list);
-    ::new (std::addressof(value_.a_union_list)) ::std::vector<::some::valid::ns::SimpleUnion>(std::move(t));
+    ::new (std::addressof(value_.a_union_list)) T(std::move(t));
     return value_.a_union_list;
   }
 
@@ -3634,17 +3736,23 @@ class ComplexUnion final  {
     return value_.a_union_list;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::unionTypeDef& set_a_union_typedef(::some::valid::ns::unionTypeDef const &t) {
+    using T0 = ::some::valid::ns::unionTypeDef;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_union_typedef);
-    ::new (std::addressof(value_.a_union_typedef)) ::some::valid::ns::unionTypeDef(t);
+    ::new (std::addressof(value_.a_union_typedef)) T(t);
     return value_.a_union_typedef;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::unionTypeDef& set_a_union_typedef(::some::valid::ns::unionTypeDef&& t) {
+    using T0 = ::some::valid::ns::unionTypeDef;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_union_typedef);
-    ::new (std::addressof(value_.a_union_typedef)) ::some::valid::ns::unionTypeDef(std::move(t));
+    ::new (std::addressof(value_.a_union_typedef)) T(std::move(t));
     return value_.a_union_typedef;
   }
 
@@ -3655,17 +3763,23 @@ class ComplexUnion final  {
     return value_.a_union_typedef;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::some::valid::ns::unionTypeDef>& set_a_union_typedef_list(::std::vector<::some::valid::ns::unionTypeDef> const &t) {
+    using T0 = ::std::vector<::some::valid::ns::unionTypeDef>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_union_typedef_list);
-    ::new (std::addressof(value_.a_union_typedef_list)) ::std::vector<::some::valid::ns::unionTypeDef>(t);
+    ::new (std::addressof(value_.a_union_typedef_list)) T(t);
     return value_.a_union_typedef_list;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::some::valid::ns::unionTypeDef>& set_a_union_typedef_list(::std::vector<::some::valid::ns::unionTypeDef>&& t) {
+    using T0 = ::std::vector<::some::valid::ns::unionTypeDef>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::a_union_typedef_list);
-    ::new (std::addressof(value_.a_union_typedef_list)) ::std::vector<::some::valid::ns::unionTypeDef>(std::move(t));
+    ::new (std::addressof(value_.a_union_typedef_list)) T(std::move(t));
     return value_.a_union_typedef_list;
   }
 
@@ -3676,17 +3790,23 @@ class ComplexUnion final  {
     return value_.a_union_typedef_list;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_MyBinaryField(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::MyBinaryField);
-    ::new (std::addressof(value_.MyBinaryField)) ::std::string(t);
+    ::new (std::addressof(value_.MyBinaryField)) T(t);
     return value_.MyBinaryField;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_MyBinaryField(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::MyBinaryField);
-    ::new (std::addressof(value_.MyBinaryField)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.MyBinaryField)) T(std::move(t));
     return value_.MyBinaryField;
   }
 
@@ -3697,17 +3817,23 @@ class ComplexUnion final  {
     return value_.MyBinaryField;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_MyBinaryField2(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::MyBinaryField2);
-    ::new (std::addressof(value_.MyBinaryField2)) ::std::string(t);
+    ::new (std::addressof(value_.MyBinaryField2)) T(t);
     return value_.MyBinaryField2;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::string& set_MyBinaryField2(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::MyBinaryField2);
-    ::new (std::addressof(value_.MyBinaryField2)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.MyBinaryField2)) T(std::move(t));
     return value_.MyBinaryField2;
   }
 
@@ -3718,17 +3844,23 @@ class ComplexUnion final  {
     return value_.MyBinaryField2;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::string>& set_MyBinaryListField4(::std::vector<::std::string> const &t) {
+    using T0 = ::std::vector<::std::string>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::MyBinaryListField4);
-    ::new (std::addressof(value_.MyBinaryListField4)) ::std::vector<::std::string>(t);
+    ::new (std::addressof(value_.MyBinaryListField4)) T(t);
     return value_.MyBinaryListField4;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::vector<::std::string>& set_MyBinaryListField4(::std::vector<::std::string>&& t) {
+    using T0 = ::std::vector<::std::string>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::MyBinaryListField4);
-    ::new (std::addressof(value_.MyBinaryListField4)) ::std::vector<::std::string>(std::move(t));
+    ::new (std::addressof(value_.MyBinaryListField4)) T(std::move(t));
     return value_.MyBinaryListField4;
   }
 
@@ -3759,17 +3891,23 @@ class ComplexUnion final  {
     return value_.ref_field2;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::AnException& set_excp_field(::some::valid::ns::AnException const &t) {
+    using T0 = ::some::valid::ns::AnException;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::excp_field);
-    ::new (std::addressof(value_.excp_field)) ::some::valid::ns::AnException(t);
+    ::new (std::addressof(value_.excp_field)) T(t);
     return value_.excp_field;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::AnException& set_excp_field(::some::valid::ns::AnException&& t) {
+    using T0 = ::some::valid::ns::AnException;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::excp_field);
-    ::new (std::addressof(value_.excp_field)) ::some::valid::ns::AnException(std::move(t));
+    ::new (std::addressof(value_.excp_field)) T(std::move(t));
     return value_.excp_field;
   }
 
@@ -3780,17 +3918,23 @@ class ComplexUnion final  {
     return value_.excp_field;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::CustomProtocolType& set_MyCustomField(::some::valid::ns::CustomProtocolType const &t) {
+    using T0 = ::some::valid::ns::CustomProtocolType;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::MyCustomField);
-    ::new (std::addressof(value_.MyCustomField)) ::some::valid::ns::CustomProtocolType(t);
+    ::new (std::addressof(value_.MyCustomField)) T(t);
     return value_.MyCustomField;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::some::valid::ns::CustomProtocolType& set_MyCustomField(::some::valid::ns::CustomProtocolType&& t) {
+    using T0 = ::some::valid::ns::CustomProtocolType;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::MyCustomField);
-    ::new (std::addressof(value_.MyCustomField)) ::some::valid::ns::CustomProtocolType(std::move(t));
+    ::new (std::addressof(value_.MyCustomField)) T(std::move(t));
     return value_.MyCustomField;
   }
 
@@ -9918,17 +10062,23 @@ class FloatUnion final  {
   bool operator==(const FloatUnion&) const;
   bool operator<(const FloatUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   float& set_floatSide(float t = float()) {
+    using T0 = float;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::floatSide);
-    ::new (std::addressof(value_.floatSide)) float(t);
+    ::new (std::addressof(value_.floatSide)) T(t);
     return value_.floatSide;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   double& set_doubleSide(double t = double()) {
+    using T0 = double;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::doubleSide);
-    ::new (std::addressof(value_.doubleSide)) double(t);
+    ::new (std::addressof(value_.doubleSide)) T(t);
     return value_.doubleSide;
   }
 

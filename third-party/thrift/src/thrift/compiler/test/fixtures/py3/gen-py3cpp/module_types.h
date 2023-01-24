@@ -1006,10 +1006,13 @@ class AdaptedUnion final  {
   bool operator==(const AdaptedUnion&) const;
   bool operator<(const AdaptedUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int16_t& set_best(::std::int16_t t = ::std::int16_t()) {
+    using T0 = ::std::int16_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::best);
-    ::new (std::addressof(value_.best)) ::std::int16_t(t);
+    ::new (std::addressof(value_.best)) T(t);
     return value_.best;
   }
 
@@ -2457,17 +2460,23 @@ class BinaryUnion final  {
     ~storage_type() {}
   } ;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::py3::simple::IOBuf& set_iobuf_val(::py3::simple::IOBuf const &t) {
+    using T0 = ::py3::simple::IOBuf;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::iobuf_val);
-    ::new (std::addressof(value_.iobuf_val)) ::py3::simple::IOBuf(t);
+    ::new (std::addressof(value_.iobuf_val)) T(t);
     return value_.iobuf_val;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::py3::simple::IOBuf& set_iobuf_val(::py3::simple::IOBuf&& t) {
+    using T0 = ::py3::simple::IOBuf;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::iobuf_val);
-    ::new (std::addressof(value_.iobuf_val)) ::py3::simple::IOBuf(std::move(t));
+    ::new (std::addressof(value_.iobuf_val)) T(std::move(t));
     return value_.iobuf_val;
   }
 

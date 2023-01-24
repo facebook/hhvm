@@ -1482,24 +1482,33 @@ class Baz final  {
   bool operator==(const Baz&) const;
   bool operator<(const Baz&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::int32_t& set_intField(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::intField);
-    ::new (std::addressof(value_.intField)) ::std::int32_t(t);
+    ::new (std::addressof(value_.intField)) T(t);
     return value_.intField;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::facebook::thrift::test::SetWithAdapter& set_setField(::facebook::thrift::test::SetWithAdapter const &t) {
+    using T0 = ::facebook::thrift::test::SetWithAdapter;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::setField);
-    ::new (std::addressof(value_.setField)) ::facebook::thrift::test::SetWithAdapter(t);
+    ::new (std::addressof(value_.setField)) T(t);
     return value_.setField;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::facebook::thrift::test::SetWithAdapter& set_setField(::facebook::thrift::test::SetWithAdapter&& t) {
+    using T0 = ::facebook::thrift::test::SetWithAdapter;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::setField);
-    ::new (std::addressof(value_.setField)) ::facebook::thrift::test::SetWithAdapter(std::move(t));
+    ::new (std::addressof(value_.setField)) T(std::move(t));
     return value_.setField;
   }
 
@@ -1510,17 +1519,23 @@ class Baz final  {
     return value_.setField;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>& set_mapField(::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter> const &t) {
+    using T0 = ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::mapField);
-    ::new (std::addressof(value_.mapField)) ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>(t);
+    ::new (std::addressof(value_.mapField)) T(t);
     return value_.mapField;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>& set_mapField(::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>&& t) {
+    using T0 = ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::mapField);
-    ::new (std::addressof(value_.mapField)) ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>(std::move(t));
+    ::new (std::addressof(value_.mapField)) T(std::move(t));
     return value_.mapField;
   }
 
@@ -1531,17 +1546,23 @@ class Baz final  {
     return value_.mapField;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>& set_binaryField(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::binaryField);
-    ::new (std::addressof(value_.binaryField)) ::std::string(t);
+    ::new (std::addressof(value_.binaryField)) T(t);
     return value_.binaryField;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>& set_binaryField(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::binaryField);
-    ::new (std::addressof(value_.binaryField)) ::std::string(std::move(t));
+    ::new (std::addressof(value_.binaryField)) T(std::move(t));
     return value_.binaryField;
   }
 
@@ -1552,10 +1573,13 @@ class Baz final  {
     return value_.binaryField;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::facebook::thrift::test::MyI64& set_longField(::facebook::thrift::test::MyI64 t = ::facebook::thrift::test::MyI64()) {
+    using T0 = ::facebook::thrift::test::MyI64;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::longField);
-    ::new (std::addressof(value_.longField)) ::facebook::thrift::test::MyI64(t);
+    ::new (std::addressof(value_.longField)) T(t);
     return value_.longField;
   }
 
@@ -6021,24 +6045,33 @@ class ThriftAdaptTestUnion final  {
   bool operator==(const ThriftAdaptTestUnion&) const;
   bool operator<(const ThriftAdaptTestUnion&) const;
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::facebook::thrift::test::DurationMs& set_delay(::facebook::thrift::test::DurationMs t = ::facebook::thrift::test::DurationMs()) {
+    using T0 = ::facebook::thrift::test::DurationMs;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::delay);
-    ::new (std::addressof(value_.delay)) ::facebook::thrift::test::DurationMs(t);
+    ::new (std::addressof(value_.delay)) T(t);
     return value_.delay;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::facebook::thrift::test::CustomProtocolType& set_custom(::facebook::thrift::test::CustomProtocolType const &t) {
+    using T0 = ::facebook::thrift::test::CustomProtocolType;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::custom);
-    ::new (std::addressof(value_.custom)) ::facebook::thrift::test::CustomProtocolType(t);
+    ::new (std::addressof(value_.custom)) T(t);
     return value_.custom;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::facebook::thrift::test::CustomProtocolType& set_custom(::facebook::thrift::test::CustomProtocolType&& t) {
+    using T0 = ::facebook::thrift::test::CustomProtocolType;
+    using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::custom);
-    ::new (std::addressof(value_.custom)) ::facebook::thrift::test::CustomProtocolType(std::move(t));
+    ::new (std::addressof(value_.custom)) T(std::move(t));
     return value_.custom;
   }
 

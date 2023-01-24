@@ -18,7 +18,7 @@
 
 #include <array>
 #include <limits>
-#include <list>
+#include <vector>
 
 #include <folly/Conv.h>
 #include <folly/Range.h>
@@ -159,7 +159,7 @@ class JSONProtocolWriterCommon : public detail::ProtocolBase {
     int meta;
   };
 
-  std::list<Context> context;
+  std::vector<Context> context;
 
  private:
   uint32_t writeJSONDoubleInternal(double dbl);
@@ -308,7 +308,7 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
     int meta;
   };
 
-  std::list<Context> context;
+  std::vector<Context> context;
 
   bool keyish_{false};
   // we sometimes consume whitespace while peeking

@@ -5928,8 +5928,25 @@ and expression_tree env p et =
         expr env et_virtualized_expr ~allow_awaitable:false)
   in
 
-  (* If the virtualized expression is pessimised, we should strip off like types *)
-  let ty_virtual = Typing_utils.strip_dynamic env ty_virtual in
+  (* If the virtualized expression type is pessimised, we should strip off likes.
+   * Do this through supportdyn and unions.
+   *)
+  let rec strip_all_likes env ty =
+    let (env, ty) = Env.expand_type env ty in
+    match get_node ty with
+    | Tnewtype (name, [ty'], _) when String.equal name SN.Classes.cSupportDyn ->
+      let (env, ty'') = strip_all_likes env ty' in
+      (env, MakeType.supportdyn (get_reason ty) ty'')
+    | Tunion tyl ->
+      let tyl =
+        List.filter tyl ~f:(fun ty -> not (Typing_defs.is_dynamic ty))
+      in
+      let (env, tyl) = List.map_env env tyl ~f:strip_all_likes in
+      Union.union_list env (get_reason ty) tyl
+    | _ -> (env, ty)
+  in
+
+  let (env, ty_virtual) = strip_all_likes env ty_virtual in
 
   (* Given the runtime expression:
 

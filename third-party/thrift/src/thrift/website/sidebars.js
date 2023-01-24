@@ -329,6 +329,19 @@ module.exports = {
     },
     {
       type: 'category',
+      label: 'Thrift Xrepo Sync',
+      link: {
+        type: 'doc',
+        id: "fb/developer-tools/xrepo-sync/index",
+      },
+      items: [
+        'fb/developer-tools/xrepo-sync/glossary',
+        'fb/developer-tools/xrepo-sync/auto-sync',
+        'fb/developer-tools/xrepo-sync/manual-sync',
+      ]
+    },
+    {
+      type: 'category',
       label: 'Server',
       link: {
         type: 'doc',

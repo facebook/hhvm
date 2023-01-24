@@ -531,25 +531,25 @@ struct BlobDecoder {
   // Produce a value of type T from the decoder. Uses a specialized
   // creation function if available, otherwise just default constructs
   // the value and calls the decoder on it.
-  template <typename T> T make() {
+  template <typename T, typename... Extra> T make(const Extra&... extra) {
     if constexpr (HasMakeForSerde<T, BlobDecoder>::value) {
-      return T::makeForSerde(*this);
+      return T::makeForSerde(*this, extra...);
     } else {
       T t;
-      (*this)(t);
+      (*this)(t, extra...);
       return t;
     }
   }
 
   // Like make(), except asserts the decoder is done afterwards.
-  template <typename T> T makeWhole() {
+  template <typename T, typename... Extra> T makeWhole(const Extra&... extra) {
     if constexpr (HasMakeForSerde<T, BlobDecoder>::value) {
-      auto t = T::makeForSerde(*this);
+      auto t = T::makeForSerde(*this, extra...);
       assertDone();
       return t;
     } else {
       T t;
-      (*this)(t);
+      (*this)(t, extra...);
       assertDone();
       return t;
     }
@@ -637,9 +637,7 @@ struct BlobDecoder {
     if (!some) {
       opt = std::nullopt;
     } else {
-      T value;
-      decode(value);
-      opt = value;
+      opt = make<T>();
     }
   }
 
@@ -937,12 +935,8 @@ private:
     uint32_t size;
     decode(size);
     for (uint32_t i = 0; i < size; ++i) {
-      // Cont::value_type typically has a const key, so we cannot use
-      // it directly
-      typename Cont::key_type key;
-      typename Cont::mapped_type val;
-      decode(key);
-      decode(val, extra...);
+      auto key = make<typename Cont::key_type>();
+      auto val = make<typename Cont::mapped_type>(extra...);
       cont.emplace(std::move(key), std::move(val));
     }
   }
@@ -954,8 +948,7 @@ private:
     decode(size);
     cont.reserve(size);
     for (uint32_t i = 0; i < size; ++i) {
-      typename Cont::value_type val;
-      decode(val, extra...);
+      auto val = make<typename Cont::value_type>(extra...);
       cont.emplace(std::move(val));
     }
   }
@@ -967,8 +960,7 @@ private:
     decode(size);
     cont.reserve(size);
     for (uint32_t i = 0; i < size; ++i) {
-      typename Cont::value_type val;
-      decode(val, extra...);
+      auto val = make<typename Cont::value_type>(extra...);
       cont.emplace_back(std::move(val));
     }
   }

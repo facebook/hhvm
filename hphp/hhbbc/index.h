@@ -765,13 +765,6 @@ struct Index {
 
   /*
    * Throw away data structures that won't be needed during or after
-   * analysis. Currently just some data structures only used while
-   * building the index.
-   */
-  void cleanup_pre_analysis();
-
-  /*
-   * Throw away data structures that won't be needed during or after
    * the final pass. Currently the dependency map, which can take a
    * long time to destroy.
    */

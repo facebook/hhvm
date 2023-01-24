@@ -83,6 +83,12 @@ struct RuntimeCoeffects {
   template <typename SerDe> void serde(SerDe& sd) {
     sd(m_data);
   }
+  template <typename SerDe>
+  static RuntimeCoeffects makeForSerde(SerDe& sd) {
+    storage_t s;
+    sd(s);
+    return RuntimeCoeffects{s};
+  }
 private:
   explicit RuntimeCoeffects(uint16_t data) : m_data(data) {}
   storage_t m_data;

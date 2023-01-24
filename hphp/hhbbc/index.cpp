@@ -116,12 +116,6 @@ static_assert(CheckSize<RepoAuthType, 8>(), "");
 //////////////////////////////////////////////////////////////////////
 
 /*
- * One-to-many case sensitive map, where the keys are static strings
- * and the values are some kind of pointer.
- */
-template<class T> using SStringToMany = std::unordered_multimap<SString, T*>;
-
-/*
  * One-to-one case insensitive map, where the keys are static strings
  * and the values are some T.
  *
@@ -733,11 +727,88 @@ struct FuncFamily2 {
   // Methods used exclusively by non-regular classes
   std::vector<MethRef> m_nonRegular;
 
+  // Information about the group of methods relevant to analysis which
+  // doesn't change (hence "static").
+  struct StaticInfo {
+    Optional<uint32_t> m_numInOut;
+    Optional<RuntimeCoeffects> m_requiredCoeffects;
+    Optional<CompactVector<CoeffectRule>> m_coeffectRules;
+    PrepKindVec m_paramPreps;
+    uint32_t m_minNonVariadicParams;
+    uint32_t m_maxNonVariadicParams;
+    TriBool m_isReadonlyReturn;
+    TriBool m_isReadonlyThis;
+    TriBool m_supportsAER;
+    bool m_maybeReified;
+    bool m_maybeCaresAboutDynCalls;
+    bool m_maybeBuiltin;
+
+    StaticInfo& operator|=(const StaticInfo& o) {
+      if (m_numInOut != o.m_numInOut) {
+        m_numInOut.reset();
+      }
+      if (m_requiredCoeffects != o.m_requiredCoeffects) {
+        m_requiredCoeffects.reset();
+      }
+      if (m_coeffectRules != o.m_coeffectRules) {
+        m_coeffectRules.reset();
+      }
+
+      if (o.m_paramPreps.size() > m_paramPreps.size()) {
+        m_paramPreps.resize(
+          o.m_paramPreps.size(),
+          PrepKind{TriBool::No, TriBool::No}
+        );
+      }
+      for (size_t i = 0; i < o.m_paramPreps.size(); ++i) {
+        m_paramPreps[i].inOut |= o.m_paramPreps[i].inOut;
+        m_paramPreps[i].readonly |= o.m_paramPreps[i].readonly;
+      }
+      for (size_t i = o.m_paramPreps.size(); i < m_paramPreps.size(); ++i) {
+        m_paramPreps[i].inOut |= TriBool::No;
+        m_paramPreps[i].readonly |= TriBool::No;
+      }
+
+      m_minNonVariadicParams =
+        std::min(m_minNonVariadicParams, o.m_minNonVariadicParams);
+      m_maxNonVariadicParams =
+        std::max(m_maxNonVariadicParams, o.m_maxNonVariadicParams);
+      m_isReadonlyReturn |= o.m_isReadonlyReturn;
+      m_isReadonlyThis |= o.m_isReadonlyThis;
+      m_supportsAER |= o.m_supportsAER;
+      m_maybeReified |= o.m_maybeReified;
+      m_maybeCaresAboutDynCalls |= o.m_maybeCaresAboutDynCalls;
+      m_maybeBuiltin |= o.m_maybeBuiltin;
+
+      return *this;
+    }
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_numInOut)
+        (m_requiredCoeffects)
+        (m_coeffectRules)
+        (m_paramPreps)
+        (m_minNonVariadicParams)
+        (m_maxNonVariadicParams)
+        (m_isReadonlyReturn)
+        (m_isReadonlyThis)
+        (m_supportsAER)
+        (m_maybeReified)
+        (m_maybeCaresAboutDynCalls)
+        (m_maybeBuiltin)
+        ;
+    }
+  };
+  Optional<StaticInfo> m_allStatic;
+  Optional<StaticInfo> m_regularStatic;
+
   template <typename SerDe> void serde(SerDe& sd) {
     sd(m_id)
       (m_regular)
       (m_nonRegularPrivate)
       (m_nonRegular)
+      (m_allStatic)
+      (m_regularStatic)
       ;
   }
 };
@@ -863,6 +934,42 @@ std::string show(const FuncFamilyOrSingle& fam) {
  * that can occur.
  */
 struct FuncFamilyEntry {
+  // The equivalent of FuncFamily::StaticInfo, but only relevant for a
+  // single method (so doesn't have a FuncFamily where the StaticInfo
+  // can live). This can be derived from the method directly, but by
+  // storing it here, we don't need to send the actual methods to the
+  // workers.
+  struct MethMetadata {
+    MethMetadata() : m_requiredCoeffects{RuntimeCoeffects::none()} {}
+
+    PrepKindVec m_prepKinds;
+    CompactVector<CoeffectRule> m_coeffectRules;
+    uint32_t m_numInOut;
+    uint32_t m_nonVariadicParams;
+    RuntimeCoeffects m_requiredCoeffects;
+    bool m_isReadonlyReturn : 1;
+    bool m_isReadonlyThis : 1;
+    bool m_supportsAER : 1;
+    bool m_isReified : 1;
+    bool m_caresAboutDyncalls : 1;
+    bool m_builtin : 1;
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_prepKinds)
+        (m_coeffectRules)
+        (m_numInOut)
+        (m_nonVariadicParams)
+        (m_requiredCoeffects)
+        ;
+      SERDE_BITFIELD(m_isReadonlyReturn, sd);
+      SERDE_BITFIELD(m_isReadonlyThis, sd);
+      SERDE_BITFIELD(m_supportsAER, sd);
+      SERDE_BITFIELD(m_isReified, sd);
+      SERDE_BITFIELD(m_caresAboutDyncalls, sd);
+      SERDE_BITFIELD(m_builtin, sd);
+    }
+  };
+
   // Both "regular" and "all" resolutions map to a func family. This
   // must always be the same func family because the func family
   // stores the information necessary for both cases.
@@ -897,19 +1004,21 @@ struct FuncFamilyEntry {
   // method.
   struct BothSingle {
     MethRef m_all;
+    MethMetadata m_meta;
     // If true, m_all is actually non-regular, but a private method
     // (which is sometimes treated as regular).
     bool m_nonRegularPrivate;
     template <typename SerDe> void serde(SerDe& sd) {
-      sd(m_all)(m_nonRegularPrivate);
+      sd(m_all)(m_meta)(m_nonRegularPrivate);
     }
   };
   // The "all" resolution maps to a single method but the "regular"
   // resolution maps to nothing.
   struct SingleAndNone {
     MethRef m_all;
+    MethMetadata m_meta;
     template <typename SerDe> void serde(SerDe& sd) {
-      sd(m_all);
+      sd(m_all)(m_meta);
     }
   };
   // No resolutions at all.
@@ -3278,7 +3387,6 @@ struct Index::IndexData {
   std::unique_ptr<php::Program> program;
 
   ISStringToOneT<php::Class*>      classes;
-  SStringToMany<php::Func>         methods;
   ISStringToOneT<php::Func*>       funcs;
   ISStringToOneT<php::TypeAlias*>  typeAliases;
   ISStringToOneT<php::Class*>      enums;
@@ -3639,10 +3747,10 @@ uint32_t func_num_inout(const php::Func* func) {
   return count;
 }
 
-TriBool func_supports_AER(const php::Func* func) {
+bool func_supports_AER(const php::Func* func) {
   // Async functions always support async eager return, and no other
   // functions support it yet.
-  return yesOrNo(func->isAsync && !func->isGenerator);
+  return func->isAsync && !func->isGenerator;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3732,7 +3840,6 @@ void add_class_to_index(IndexData& index, php::Class& c) {
 
   for (auto& m : c.methods) {
     attribute_setter(m->attrs, false, AttrNoOverride);
-    index.methods.insert({m->name, m.get()});
     m->idx = index.nextFuncId++;
   }
 }
@@ -3762,173 +3869,6 @@ void add_program_to_index(IndexData& index) {
     auto& s = index.classClosureMap[index.classes.at(c->closureContextCls)];
     s.emplace_back(c.get());
   }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-// Calculate the StaticInfo for the given FuncFamily, and assign it
-// the pointer to the unique allocation corresponding to it. If `all`
-// is true, then all possible funcs should be considered. Otherwise,
-// only the regular subset will.
-void build_func_family_static_info(IndexData& index, FuncFamily* ff, bool all) {
-  auto const& possible = ff->possibleFuncs();
-  assertx(possible.size() > 1);
-
-  // Calculate the StaticInfo from all possible functions:
-
-  auto info =  [&] {
-    FuncFamily::StaticInfo info;
-
-    // Find the first func, taking into account whether we care about
-    // non-regular funcs or not.
-    auto const func = [&] {
-      for (auto const pf : possible) {
-        if (all || pf.inRegular()) return pf.ptr();
-      }
-      always_assert(false);
-    }();
-
-    info.m_numInOut = func_num_inout(func);
-    info.m_isReadonlyReturn = yesOrNo(func->isReadonlyReturn);
-    info.m_isReadonlyThis = yesOrNo(func->isReadonlyThis);
-    info.m_maybeReified = func->isReified;
-    info.m_maybeCaresAboutDynCalls = (dyn_call_error_level(func) > 0);
-    info.m_maybeBuiltin = (func->attrs & AttrBuiltin);
-    info.m_minNonVariadicParams =
-      info.m_maxNonVariadicParams = numNVArgs(*func);
-    info.m_requiredCoeffects = func->requiredCoeffects;
-    info.m_coeffectRules = func->coeffectRules;
-    info.m_supportsAER = func_supports_AER(func);
-
-    for (size_t i = 0; i < func->params.size(); ++i) {
-      info.m_paramPreps.emplace_back(func_param_prep(func, i));
-    }
-    return info;
-  }();
-
-  auto const addToParamPreps = [&] (const php::Func* f) {
-    if (f->params.size() > info.m_paramPreps.size()) {
-      info.m_paramPreps.resize(
-        f->params.size(),
-        PrepKind{TriBool::No, TriBool::No}
-      );
-    }
-    for (size_t i = 0; i < info.m_paramPreps.size(); ++i) {
-      auto const prep = func_param_prep(f, i);
-      info.m_paramPreps[i].inOut |= prep.inOut;
-      info.m_paramPreps[i].readonly |= prep.readonly;
-    }
-  };
-
-  for (auto const& pf : possible) {
-    // Skip non-regular funcs if we don't care about those.
-    if (!all && !pf.inRegular()) continue;
-    auto const func = pf.ptr();
-
-    if (info.m_numInOut && *info.m_numInOut != func_num_inout(func)) {
-      info.m_numInOut.reset();
-    }
-    info.m_isReadonlyReturn |= yesOrNo(func->isReadonlyReturn);
-    info.m_isReadonlyThis |= yesOrNo(func->isReadonlyThis);
-    info.m_maybeReified |= func->isReified;
-    info.m_maybeCaresAboutDynCalls |= (dyn_call_error_level(func) > 0);
-    info.m_maybeBuiltin |= (func->attrs & AttrBuiltin);
-    addToParamPreps(func);
-
-    if (info.m_supportsAER != TriBool::Maybe) {
-      info.m_supportsAER |= func_supports_AER(func);
-    }
-
-    auto const numNV = numNVArgs(*func);
-    info.m_minNonVariadicParams =
-      std::min(info.m_minNonVariadicParams, numNV);
-    info.m_maxNonVariadicParams =
-      std::max(info.m_maxNonVariadicParams, numNV);
-
-    if (info.m_requiredCoeffects &&
-        *info.m_requiredCoeffects != func->requiredCoeffects) {
-      info.m_requiredCoeffects.reset();
-    }
-
-    if (info.m_coeffectRules) {
-      if (!std::is_permutation(
-            info.m_coeffectRules->begin(),
-            info.m_coeffectRules->end(),
-            func->coeffectRules.begin(),
-            func->coeffectRules.end())) {
-        info.m_coeffectRules.reset();
-      }
-    }
-  }
-
-  // Modify the info to make it more likely to match an existing one:
-
-  // Any param beyond the size of m_paramPreps is implicitly
-  // TriBool::No, so we can drop trailing entries which are
-  // TriBool::No.
-  while (!info.m_paramPreps.empty()) {
-    auto& back = info.m_paramPreps.back();
-    if (back.inOut != TriBool::No || back.readonly != TriBool::No) break;
-    info.m_paramPreps.pop_back();
-  }
-
-  // Sort the coeffect rules to increase matching.
-  if (info.m_coeffectRules) {
-    std::sort(info.m_coeffectRules->begin(), info.m_coeffectRules->end());
-  }
-
-  // See if the info already exists in the set. If it doesn't exist,
-  // add it. Otherwise use the already created one.
-  auto const staticInfo = [&] {
-    auto const it = index.funcFamilyStaticInfos.find(info);
-    if (it != index.funcFamilyStaticInfos.end()) return it->first.get();
-    return index.funcFamilyStaticInfos.insert(
-      std::make_unique<FuncFamily::StaticInfo>(std::move(info)),
-      false
-    ).first->first.get();
-  }();
-
-  // Set the static info in the appropriate place. If we asked for the
-  // regular subset, we should have space allocated to put it there.
-  if (all) {
-    ff->m_all.m_static = staticInfo;
-  } else {
-    assertx(ff->m_regular);
-    ff->m_regular->m_static = staticInfo;
-  }
-}
-
-void fixup_func_families(IndexData& index) {
-  trace_time tracer("fixup_func_families");
-  tracer.ignore_client_stats();
-
-  // Now that all of the FuncFamilies have been created, generate the
-  // back links from FuncInfo to their FuncFamilies.
-  std::vector<FuncFamily*> work;
-  work.reserve(index.funcFamilies.size());
-  for (auto const& kv : index.funcFamilies) work.emplace_back(kv.first.get());
-
-  // Different threads can touch the same FuncInfo, so use sharded
-  // locking scheme.
-  std::array<std::mutex, 256> locks;
-  parallel::for_each(
-    work,
-    [&] (FuncFamily* ff) {
-      build_func_family_static_info(index, ff, true);
-      if (ff->m_regular) build_func_family_static_info(index, ff, false);
-      for (auto const pf : ff->possibleFuncs()) {
-        auto finfo = create_func_info(index, pf.ptr());
-        auto& lock = locks[pointer_hash<FuncInfo>{}(finfo) % locks.size()];
-        std::lock_guard<std::mutex> _{lock};
-        finfo->families.emplace_back(ff);
-      }
-    }
-  );
-
-  parallel::for_each(
-    index.funcInfo,
-    [&] (FuncInfo& fi) { fi.families.shrink_to_fit(); }
-  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -5530,10 +5470,26 @@ struct FlattenJob {
     for (auto& cls : classes.vals) {
       auto const name = cls->name;
       auto const cinfoIt = index.m_classInfos.find(name);
-      if (cinfoIt == index.m_classInfos.end()) {
+      if (cinfoIt == end(index.m_classInfos)) {
         always_assert(index.uninstantiable(name));
         outMeta.uninstantiable.emplace(name);
         continue;
+      }
+      auto& cinfo = cinfoIt->second;
+
+      index.m_ctx = cls.get();
+      SCOPE_EXIT { index.m_ctx = nullptr; };
+
+      // For building FuncFamily::StaticInfo, we need to ensure that
+      // every method has an entry in methodFamilies. Make all of the
+      // initial entries here (they'll be created assuming this method
+      // is AttrNoOverride).
+      for (auto const& [methname, mte] : cinfo->methods) {
+        if (is_special_method_name(methname)) continue;
+        auto entry = make_initial_func_family_entry(*cls, index.meth(mte), mte);
+        always_assert(
+          cinfo->methodFamilies.emplace(methname, std::move(entry)).second
+        );
       }
 
       if (!is_closure(*cls)) {
@@ -5548,7 +5504,7 @@ struct FlattenJob {
 
       outNames.emplace(name);
       outClasses.vals.emplace_back(std::move(cls));
-      outInfos.vals.emplace_back(std::move(cinfoIt->second));
+      outInfos.vals.emplace_back(std::move(cinfo));
     }
 
     std::sort(
@@ -5813,6 +5769,61 @@ private:
     for (auto const& [_, cls] : classes) always_assert(!uses.at(cls));
     std::reverse(ordered.begin(), ordered.end());
     return ordered;
+  }
+
+  /*
+   * Create a FuncFamilyEntry for the give method. This
+   * FuncFamilyEntry assumes that the method is AttrNoOverride, and
+   * hence reflects just this method. The method isn't necessarily
+   * actually AttrNoOverride, but if not, it will be updated in
+   * BuildSubclassListJob (that job needs the initial entries).
+   */
+  static FuncFamilyEntry make_initial_func_family_entry(
+    const php::Class& cls,
+    const php::Func& meth,
+    const MethTabEntry& mte
+  ) {
+    FuncFamilyEntry entry;
+    entry.m_allIncomplete = false;
+    entry.m_regularIncomplete = false;
+    entry.m_privateAncestor = is_regular_class(cls) && mte.hasPrivateAncestor();
+
+    FuncFamilyEntry::MethMetadata meta;
+
+    for (size_t i = 0; i < meth.params.size(); ++i) {
+      meta.m_prepKinds.emplace_back(func_param_prep(&meth, i));
+    }
+    // Any param beyond the size of m_paramPreps is implicitly
+    // TriBool::No, so we can drop trailing entries which are
+    // TriBool::No.
+    while (!meta.m_prepKinds.empty()) {
+      auto& back = meta.m_prepKinds.back();
+      if (back.inOut != TriBool::No || back.readonly != TriBool::No) break;
+      meta.m_prepKinds.pop_back();
+    }
+    meta.m_numInOut = func_num_inout(&meth);
+    meta.m_nonVariadicParams = numNVArgs(meth);
+    meta.m_coeffectRules = meth.coeffectRules;
+    meta.m_requiredCoeffects = meth.requiredCoeffects;
+    meta.m_isReadonlyReturn = meth.isReadonlyReturn;
+    meta.m_isReadonlyThis = meth.isReadonlyThis;
+    meta.m_supportsAER = func_supports_AER(&meth);
+    meta.m_isReified = meth.isReified;
+    meta.m_caresAboutDyncalls = (dyn_call_error_level(&meth) > 0);
+    meta.m_builtin = meth.attrs & AttrBuiltin;
+
+    if (is_regular_class(cls)) {
+      entry.m_meths =
+        FuncFamilyEntry::BothSingle{mte.meth(), std::move(meta), false};
+    } else if (bool(mte.attrs & AttrPrivate) && mte.topLevel()) {
+      entry.m_meths =
+        FuncFamilyEntry::BothSingle{mte.meth(), std::move(meta), true};
+    } else {
+      entry.m_meths =
+        FuncFamilyEntry::SingleAndNone{mte.meth(), std::move(meta)};
+    }
+
+    return entry;
   }
 
   static std::unique_ptr<ClassInfo2> make_info(const LocalIndex& index,
@@ -7984,6 +7995,10 @@ struct BuildSubclassListJob {
       // Methods which are only present on non-regular classes (and
       // never private). These three sets are always disjoint.
       MethRefSet nonRegularMeths;
+
+      Optional<FuncFamily2::StaticInfo> allStatic;
+      Optional<FuncFamily2::StaticInfo> regularStatic;
+
       // Whether all classes in this Data have a method with this
       // name.
       bool complete{true};
@@ -7997,6 +8012,8 @@ struct BuildSubclassListJob {
         sd(regularMeths, std::less<MethRef>{})
           (nonRegularPrivateMeths, std::less<MethRef>{})
           (nonRegularMeths, std::less<MethRef>{})
+          (allStatic)
+          (regularStatic)
           (complete)
           (regularComplete)
           (privateAncestor)
@@ -8383,38 +8400,10 @@ protected:
   ) {
     SStringToOneT<Data::MethInfo> infos;
 
-    // If the method is AttrNoOverride, we can create an entry from
-    // just the single MethRef.
-    auto const noOverride = [&] (const ClassInfo2* cinfo,
-                                 SString name,
-                                 const MethTabEntry& mte) {
-      auto& info = infos[name];
-      info.complete = false;
-      info.regularComplete = false;
-
-      auto const meth = mte.meth();
-      if (cinfo->isRegularClass || cinfo->hasRegularSubclass) {
-        if (!info.regularMeths.count(meth)) {
-          info.regularMeths.emplace(meth);
-          info.nonRegularPrivateMeths.erase(meth);
-          info.nonRegularMeths.erase(meth);
-        }
-      } else if (bool(mte.attrs & AttrPrivate) && mte.topLevel()) {
-        if (!info.regularMeths.count(meth) &&
-            !info.nonRegularPrivateMeths.count(meth)) {
-          info.nonRegularPrivateMeths.emplace(meth);
-          info.nonRegularMeths.erase(meth);
-        }
-          } else if (!info.regularMeths.count(meth) &&
-                     !info.nonRegularPrivateMeths.count(meth)) {
-        info.nonRegularMeths.emplace(meth);
-      }
-    };
-
-    // Otherwise, use the already calculated method family and merge
+    // Use the already calculated method family and merge
     // it's contents into what we already have.
-    auto const overridden = [&] (const ClassInfo2* cinfo,
-                                 SString name) {
+    auto const process = [&] (const ClassInfo2* cinfo,
+                              SString name) {
       auto const it = cinfo->methodFamilies.find(name);
       always_assert(it != end(cinfo->methodFamilies));
       auto entryInfo = meth_info_from_func_family_entry(index, it->second);
@@ -8445,6 +8434,22 @@ protected:
         }
         info.nonRegularMeths.emplace(meth);
       }
+
+      // Merge any StaticInfo entries we have for this method.
+      if (entryInfo.allStatic) {
+        if (!info.allStatic) {
+          info.allStatic = std::move(*entryInfo.allStatic);
+        } else {
+          *info.allStatic |= *entryInfo.allStatic;
+        }
+      }
+      if (entryInfo.regularStatic) {
+        if (!info.regularStatic) {
+          info.regularStatic = std::move(*entryInfo.regularStatic);
+        } else {
+          *info.regularStatic |= *entryInfo.regularStatic;
+        }
+      }
     };
 
     // First process the roots. These methods might be overridden or
@@ -8453,11 +8458,7 @@ protected:
       for (auto const& [name, mte] : cinfo->methods) {
         if (!mte.firstName()) continue;
         if (!has_name_only_func_family(name)) continue;
-        if (mte.attrs & AttrNoOverride) {
-          noOverride(cinfo.get(), name, mte);
-        } else {
-          overridden(cinfo.get(), name);
-        }
+        process(cinfo.get(), name);
       }
     }
 
@@ -8466,8 +8467,7 @@ protected:
       for (auto const& [name, mte] : cinfo->methods) {
         if (!mte.firstName()) continue;
         if (!has_name_only_func_family(name)) continue;
-        assertx(mte.attrs & AttrNoOverride);
-        noOverride(cinfo.get(), name, mte);
+        process(cinfo.get(), name);
       }
     }
 
@@ -8482,9 +8482,10 @@ protected:
 
     // Turn the MethInfos into FuncFamilyEntries
     for (auto const name : sorted) {
+      auto& info = infos.at(name);
       entries.emplace_back(
         name,
-        make_method_family_entry(index, infos.at(name))
+        make_method_family_entry(index, std::move(info))
       );
     }
     return entries;
@@ -8573,6 +8574,25 @@ protected:
     }
   }
 
+  static FuncFamily2::StaticInfo static_info_from_meth_meta(
+    const FuncFamilyEntry::MethMetadata& meta
+  ) {
+    FuncFamily2::StaticInfo info;
+    info.m_numInOut = meta.m_numInOut;
+    info.m_requiredCoeffects = meta.m_requiredCoeffects;
+    info.m_coeffectRules = meta.m_coeffectRules;
+    info.m_paramPreps = meta.m_prepKinds;
+    info.m_minNonVariadicParams = info.m_maxNonVariadicParams =
+      meta.m_nonVariadicParams;
+    info.m_isReadonlyReturn = yesOrNo(meta.m_isReadonlyReturn);
+    info.m_isReadonlyThis = yesOrNo(meta.m_isReadonlyThis);
+    info.m_supportsAER = yesOrNo(meta.m_supportsAER);
+    info.m_maybeReified = meta.m_isReified;
+    info.m_maybeCaresAboutDynCalls = meta.m_caresAboutDyncalls;
+    info.m_maybeBuiltin = meta.m_builtin;
+    return info;
+  }
+
   // Turn a FuncFamilyEntry into an equivalent Data::MethInfo.
   static Data::MethInfo
   meth_info_from_func_family_entry(LocalIndex& index,
@@ -8609,6 +8629,10 @@ protected:
           begin(ff.m_nonRegular),
           end(ff.m_nonRegular)
         );
+        assertx(ff.m_allStatic);
+        assertx(ff.m_regularStatic);
+        info.allStatic = ff.m_allStatic;
+        info.regularStatic = ff.m_regularStatic;
       },
       [&] (const FuncFamilyEntry::FFAndSingle& e) {
         auto const& ff = getFF(e.m_ff);
@@ -8625,6 +8649,10 @@ protected:
           assertx(ff.m_regular[0] == e.m_regular);
           info.regularMeths.emplace(e.m_regular);
         }
+        assertx(ff.m_allStatic);
+        assertx(ff.m_regularStatic);
+        info.allStatic = ff.m_allStatic;
+        info.regularStatic = ff.m_regularStatic;
       },
       [&] (const FuncFamilyEntry::FFAndNone& e) {
         auto const& ff = getFF(e.m_ff);
@@ -8633,6 +8661,9 @@ protected:
           begin(ff.m_nonRegular),
           end(ff.m_nonRegular)
         );
+        assertx(ff.m_allStatic);
+        assertx(!ff.m_regularStatic);
+        info.allStatic = ff.m_allStatic;
       },
       [&] (const FuncFamilyEntry::BothSingle& e) {
         if (e.m_nonRegularPrivate) {
@@ -8640,9 +8671,12 @@ protected:
         } else {
           info.regularMeths.emplace(e.m_all);
         }
+        info.allStatic = info.regularStatic =
+          static_info_from_meth_meta(e.m_meta);
       },
       [&] (const FuncFamilyEntry::SingleAndNone& e) {
         info.nonRegularMeths.emplace(e.m_all);
+        info.allStatic = static_info_from_meth_meta(e.m_meta);
       },
       [&] (const FuncFamilyEntry::None&) {
         assertx(!info.complete);
@@ -8681,37 +8715,22 @@ protected:
         );
       }
 
-      for (auto const& [name, mte] : cinfo->methods) {
-        if (is_special_method_name(name)) continue;
+      if (debug) {
+        for (auto const& [name, mte] : cinfo->methods) {
+          if (is_special_method_name(name)) continue;
 
-        auto const meth = mte.meth();
-        if (mte.attrs & AttrNoOverride) {
-          // The method is AttrNoOverride, so we shouldn't have seen a
-          // method family entry above.
-          assertx(!data.methods.count(name));
-          auto& info = data.methods[name];
+          // Every method should have a methodFamilies entry. If this
+          // method is AttrNoOverride, it shouldn't have a FuncFamily
+          // associated with it.
+          auto const it = cinfo->methodFamilies.find(name);
+          always_assert(it != end(cinfo->methodFamilies));
 
-          if (cinfo->isRegularClass || cinfo->hasRegularSubclass) {
-            info.regularMeths.emplace(meth);
-          } else if (bool(mte.attrs & AttrPrivate) && mte.topLevel()) {
-            info.nonRegularPrivateMeths.emplace(meth);
-          } else {
-            info.nonRegularMeths.emplace(meth);
+          if (mte.attrs & AttrNoOverride) {
+            always_assert(
+              boost::get<FuncFamilyEntry::BothSingle>(&it->second.m_meths) ||
+              boost::get<FuncFamilyEntry::SingleAndNone>(&it->second.m_meths)
+            );
           }
-
-          assertx(info.complete);
-          assertx(info.regularComplete);
-          assertx(!info.privateAncestor);
-          if (mte.hasPrivateAncestor() &&
-                  (cinfo->isRegularClass || cinfo->hasRegularSubclass)) {
-            info.privateAncestor = true;
-          }
-        } else {
-          // The method isn't AttrNoOverride, so we should have seen a
-          // method family above for it and have a MethInfo for it
-          // already. Unprocessed ClassInfos will have everything as
-          // AttrNoOverride.
-          assertx(data.methods.count(name));
         }
       }
 
@@ -8849,6 +8868,22 @@ protected:
               assertx(childInfo->regularComplete);
               assertx(!childInfo->privateAncestor);
             }
+
+            if (childInfo->allStatic) {
+              if (!info.allStatic) {
+                info.allStatic = std::move(*childInfo->allStatic);
+              } else {
+                *info.allStatic |= *childInfo->allStatic;
+              }
+            }
+            if (childInfo->regularStatic) {
+              if (!info.regularStatic) {
+                info.regularStatic = std::move(*childInfo->regularStatic);
+              } else {
+                *info.regularStatic |= *childInfo->regularStatic;
+              }
+            }
+
             return false;
           }
 
@@ -8878,15 +8913,18 @@ protected:
       // processed first. Detect this condition and manually add such
       // methods to data.methods.
       if (!data.hasRegularClass && childData.hasRegularClass) {
-        for (auto const& [name, info] : childData.methods) {
+        for (auto& [name, info] : childData.methods) {
           if (!info.regularComplete || info.privateAncestor) continue;
           if (is_special_method_name(name)) continue;
           if (name == s_construct.get()) continue;
           if (data.methods.count(name)) continue;
           auto& newInfo = data.methods[name];
-          newInfo.regularMeths = info.regularMeths;
-          newInfo.nonRegularPrivateMeths = info.nonRegularPrivateMeths;
-          newInfo.nonRegularMeths = info.nonRegularMeths;
+          newInfo.regularMeths = std::move(info.regularMeths);
+          newInfo.nonRegularPrivateMeths =
+            std::move(info.nonRegularPrivateMeths);
+          newInfo.nonRegularMeths = std::move(info.nonRegularMeths);
+          newInfo.allStatic = std::move(info.allStatic);
+          newInfo.regularStatic = std::move(info.regularStatic);
           newInfo.complete = false;
           newInfo.regularComplete = true;
           newInfo.privateAncestor = false;
@@ -8914,7 +8952,7 @@ protected:
   // Create (or re-use an existing) FuncFamily for the given MethInfo.
   static FuncFamily2::Id make_func_family(
     LocalIndex& index,
-    const Data::MethInfo& info
+    Data::MethInfo info
   ) {
     // We should have more than one method because otherwise we
     // shouldn't be trying to create a FuncFamily for it.
@@ -9003,6 +9041,8 @@ protected:
     ff->m_regular = std::move(regular);
     ff->m_nonRegularPrivate = std::move(nonRegularPrivate);
     ff->m_nonRegular = std::move(nonRegular);
+    ff->m_allStatic = std::move(info.allStatic);
+    ff->m_regularStatic = std::move(info.regularStatic);
 
     always_assert(
       index.funcFamilies.emplace(id, std::move(ff)).second
@@ -9020,10 +9060,39 @@ protected:
     return id;
   }
 
+  // Turn a FuncFamily::StaticInfo into an equivalent
+  // FuncFamilyEntry::MethMetadata. The StaticInfo must be valid for a
+  // single method.
+  static FuncFamilyEntry::MethMetadata single_meth_meta_from_static_info(
+    const FuncFamily2::StaticInfo& info
+  ) {
+    assertx(info.m_numInOut);
+    assertx(info.m_requiredCoeffects);
+    assertx(info.m_coeffectRules);
+    assertx(info.m_minNonVariadicParams == info.m_maxNonVariadicParams);
+    assertx(info.m_isReadonlyReturn != TriBool::Maybe);
+    assertx(info.m_isReadonlyThis != TriBool::Maybe);
+    assertx(info.m_supportsAER != TriBool::Maybe);
+
+    FuncFamilyEntry::MethMetadata meta;
+    meta.m_prepKinds = info.m_paramPreps;
+    meta.m_coeffectRules = *info.m_coeffectRules;
+    meta.m_numInOut = *info.m_numInOut;
+    meta.m_requiredCoeffects = *info.m_requiredCoeffects;
+    meta.m_nonVariadicParams = info.m_minNonVariadicParams;
+    meta.m_isReadonlyReturn = info.m_isReadonlyReturn == TriBool::Yes;
+    meta.m_isReadonlyThis = info.m_isReadonlyThis == TriBool::Yes;
+    meta.m_supportsAER = info.m_supportsAER == TriBool::Yes;
+    meta.m_isReified = info.m_maybeReified;
+    meta.m_caresAboutDyncalls = info.m_maybeCaresAboutDynCalls;
+    meta.m_builtin = info.m_maybeBuiltin;
+    return meta;
+  }
+
   // Translate a MethInfo into the appropriate FuncFamilyEntry
   static FuncFamilyEntry make_method_family_entry(
     LocalIndex& index,
-    const Data::MethInfo& info
+    Data::MethInfo info
   ) {
     FuncFamilyEntry entry;
     entry.m_allIncomplete = !info.complete;
@@ -9035,42 +9104,57 @@ protected:
       // nonRegularPrivateMeths, or one of each (remember they are
       // disjoint). In either case, there's more than one method, so
       // we need a func family.
-      auto const ff = make_func_family(index, info);
+      assertx(info.allStatic);
+      assertx(info.regularStatic);
+      auto const ff = make_func_family(index, std::move(info));
       entry.m_meths = FuncFamilyEntry::BothFF{ff};
     } else if (!info.regularMeths.empty() ||
                !info.nonRegularPrivateMeths.empty()) {
       // We know their sum isn't greater than one, so only one of them
       // can be non-empty (and the one that is has only a single
       // method).
+      assertx(info.allStatic);
+      assertx(info.regularStatic);
       auto const r = !info.regularMeths.empty()
         ? *begin(info.regularMeths)
         : *begin(info.nonRegularPrivateMeths);
       if (info.nonRegularMeths.empty()) {
         // There's only one method and it covers both variants.
-        entry.m_meths =
-          FuncFamilyEntry::BothSingle{r, info.regularMeths.empty()};
+        entry.m_meths = FuncFamilyEntry::BothSingle{
+          r,
+          single_meth_meta_from_static_info(*info.allStatic),
+          info.regularMeths.empty()
+        };
       } else {
         // nonRegularMeths is non-empty. Since the MethRefSets are
         // disjoint, overall there's more than one method so need a
         // func family.
         auto const nonRegularPrivate = info.regularMeths.empty();
-        auto const ff = make_func_family(index, info);
+        auto const ff = make_func_family(index, std::move(info));
         entry.m_meths = FuncFamilyEntry::FFAndSingle{ff, r, nonRegularPrivate};
       }
     } else if (info.nonRegularMeths.size() > 1) {
       // Both regularMeths and nonRegularPrivateMeths is empty. If
       // there's multiple nonRegularMeths, we need a func family for
       // the non-regular variant, but the regular variant is empty.
-      auto const ff = make_func_family(index, info);
+      assertx(info.allStatic);
+      assertx(!info.regularStatic);
+      auto const ff = make_func_family(index, std::move(info));
       entry.m_meths = FuncFamilyEntry::FFAndNone{ff};
     } else if (!info.nonRegularMeths.empty()) {
       // There's exactly one nonRegularMeths method (and nothing for
       // the regular variant).
-      entry.m_meths =
-        FuncFamilyEntry::SingleAndNone{*begin(info.nonRegularMeths)};
+      assertx(info.allStatic);
+      assertx(!info.regularStatic);
+      entry.m_meths = FuncFamilyEntry::SingleAndNone{
+        *begin(info.nonRegularMeths),
+        single_meth_meta_from_static_info(*info.allStatic)
+      };
     } else {
       // No methods at all
       assertx(!info.complete);
+      assertx(!info.allStatic);
+      assertx(!info.regularStatic);
       entry.m_meths = FuncFamilyEntry::None{};
     }
 
@@ -9220,44 +9304,64 @@ protected:
           attribute_setter(mte.attrs, false, AttrNoOverride);
         }
 
-        if (!(mte.attrs & AttrNoOverride)) {
-          assertx(!(cinfo->attrs & AttrNoOverride));
-          auto entry = make_method_family_entry(index, info);
+        auto& entry = cinfo->methodFamilies.at(name);
+        assertx(
+          boost::get<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
+          boost::get<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
+        );
+
+        if (debug) {
+          if (mte.attrs & AttrNoOverride) {
+            always_assert(info.complete);
+            always_assert(info.regularComplete);
+
+            if (cinfo->isRegularClass || cinfo->hasRegularSubclass) {
+              always_assert(info.regularMeths.size() == 1);
+              always_assert(info.regularMeths.count(meth));
+              always_assert(info.nonRegularPrivateMeths.empty());
+              always_assert(info.nonRegularMeths.empty());
+            } else {
+              // If this class isn't regular, it could still have a
+              // regular method which it inherited from a (regular)
+              // parent. There should only be one method across all the
+              // sets though.
+              always_assert(
+                info.regularMeths.size() +
+                info.nonRegularPrivateMeths.size() +
+                info.nonRegularMeths.size() == 1
+              );
+              always_assert(
+                info.regularMeths.count(meth) ||
+                info.nonRegularPrivateMeths.count(meth) ||
+                info.nonRegularMeths.count(meth)
+              );
+            }
+
+            if (mte.hasPrivateAncestor() &&
+                (cinfo->isRegularClass || cinfo->hasRegularSubclass)) {
+              always_assert(info.privateAncestor);
+            } else {
+              always_assert(!info.privateAncestor);
+            }
+          } else {
+            always_assert(!(cinfo->attrs & AttrNoOverride));
+          }
+        }
+
+        // NB: Even if the method is AttrNoOverride, we might need to
+        // change the FuncFamilyEntry. This class could be non-regular
+        // and a child class could be regular. Even if the child class
+        // doesn't override the method, it changes it from non-regular
+        // to regular.
+        entry = make_method_family_entry(index, std::move(info));
+
+        if (mte.attrs & AttrNoOverride) {
+          // However, even if the entry changes with AttrNoOverride,
+          // it can only be these two cases.
           always_assert(
-            cinfo->methodFamilies.emplace(name, std::move(entry)).second
+            boost::get<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
+            boost::get<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
           );
-        } else if (debug) {
-          always_assert(info.complete);
-          always_assert(info.regularComplete);
-
-          if (cinfo->isRegularClass || cinfo->hasRegularSubclass) {
-            always_assert(info.regularMeths.size() == 1);
-            always_assert(info.regularMeths.count(meth));
-            always_assert(info.nonRegularPrivateMeths.empty());
-            always_assert(info.nonRegularMeths.empty());
-          } else {
-            // If this class isn't regular, it could still have a
-            // regular method which it inherited from a (regular)
-            // parent. There should only be one method across all the
-            // sets though.
-            always_assert(
-              info.regularMeths.size() +
-              info.nonRegularPrivateMeths.size() +
-              info.nonRegularMeths.size() == 1
-            );
-            always_assert(
-              info.regularMeths.count(meth) ||
-              info.nonRegularPrivateMeths.count(meth) ||
-              info.nonRegularMeths.count(meth)
-            );
-          }
-
-          if (mte.hasPrivateAncestor() &&
-              (cinfo->isRegularClass || cinfo->hasRegularSubclass)) {
-            always_assert(info.privateAncestor);
-          } else {
-            always_assert(!info.privateAncestor);
-          }
         }
       }
 
@@ -9295,7 +9399,7 @@ protected:
       for (auto& [name, info] : data.methods) {
         if (cinfo->methods.count(name)) continue;
         assertx(!is_special_method_name(name));
-        auto entry = make_method_family_entry(index, info);
+        auto entry = make_method_family_entry(index, std::move(info));
         always_assert(
           cinfo->methodFamilies.emplace(name, std::move(entry)).second
         );
@@ -9401,9 +9505,26 @@ struct AggregateNameOnlyJob: public BuildSubclassListJob {
           }
           info.nonRegularMeths.emplace(meth);
         }
+
+        if (entryInfo.allStatic) {
+          if (!info.allStatic) {
+            info.allStatic = std::move(*entryInfo.allStatic);
+          } else {
+            *info.allStatic |= *entryInfo.allStatic;
+          }
+        }
+        if (entryInfo.regularStatic) {
+          if (!info.regularStatic) {
+            info.regularStatic = std::move(*entryInfo.regularStatic);
+          } else {
+            *info.regularStatic |= *entryInfo.regularStatic;
+          }
+        }
       }
 
-      meta.nameOnly.emplace_back(make_method_family_entry(index, info));
+      meta.nameOnly.emplace_back(
+        make_method_family_entry(index, std::move(info))
+      );
     }
 
     Variadic<FuncFamilyGroup> funcFamilyGroups;
@@ -9918,6 +10039,8 @@ void aggregate_name_only_entries(
     }(),
     kBucketSize
   );
+
+  if (buckets.empty()) return;
 
   struct Updates {
     std::vector<
@@ -10589,10 +10712,10 @@ void make_class_infos_local(
       for (auto const& m : m_ff->m_regular) {
         funcs.emplace_back(func_from_meth_ref(index, m), true);
       }
+      for (auto const& m : m_ff->m_nonRegularPrivate) {
+        funcs.emplace_back(func_from_meth_ref(index, m), true);
+      }
       if (!expanded) {
-        for (auto const& m : m_ff->m_nonRegularPrivate) {
-          funcs.emplace_back(func_from_meth_ref(index, m), true);
-        }
         for (auto const& m : m_ff->m_nonRegular) {
           funcs.emplace_back(func_from_meth_ref(index, m), false);
         }
@@ -10612,8 +10735,49 @@ void make_class_infos_local(
       funcs.shrink_to_fit();
 
       assertx(funcs.size() > 1);
+
+      auto const convert = [&] (const FuncFamily2::StaticInfo& in) {
+        FuncFamily::StaticInfo out;
+        out.m_numInOut = in.m_numInOut;
+        out.m_requiredCoeffects = in.m_requiredCoeffects;
+        out.m_coeffectRules = in.m_coeffectRules;
+        out.m_paramPreps = in.m_paramPreps;
+        out.m_minNonVariadicParams = in.m_minNonVariadicParams;
+        out.m_maxNonVariadicParams = in.m_maxNonVariadicParams;
+        out.m_isReadonlyReturn = in.m_isReadonlyReturn;
+        out.m_isReadonlyThis = in.m_isReadonlyThis;
+        out.m_supportsAER = in.m_supportsAER;
+        out.m_maybeReified = in.m_maybeReified;
+        out.m_maybeCaresAboutDynCalls = in.m_maybeCaresAboutDynCalls;
+        out.m_maybeBuiltin = in.m_maybeBuiltin;
+
+        auto const it = index.funcFamilyStaticInfos.find(out);
+        if (it != end(index.funcFamilyStaticInfos)) return it->first.get();
+        return index.funcFamilyStaticInfos.insert(
+          std::make_unique<FuncFamily::StaticInfo>(std::move(out)),
+          false
+        ).first->first.get();
+      };
+
+      auto newFuncFamily =
+        std::make_unique<FuncFamily>(std::move(funcs), extra);
+
+      always_assert(m_ff->m_allStatic);
+      if (m_ff->m_regularStatic) {
+        const FuncFamily::StaticInfo* reg = nullptr;
+        if (expanded || extra) reg = convert(*m_ff->m_regularStatic);
+        newFuncFamily->m_all.m_static =
+          expanded ? reg : convert(*m_ff->m_allStatic);
+        if (extra) {
+          newFuncFamily->m_regular = std::make_unique<FuncFamily::Info>();
+          newFuncFamily->m_regular->m_static = reg;
+        }
+      } else {
+        newFuncFamily->m_all.m_static = convert(*m_ff->m_allStatic);
+      }
+
       return index.funcFamilies.insert(
-        std::make_unique<FuncFamily>(std::move(funcs), extra),
+        std::move(newFuncFamily),
         false
       ).first->first.get();
     }
@@ -10707,6 +10871,13 @@ void make_class_infos_local(
 
       const_cast<php::Class*>(cinfo->cls)->attrs = rcinfo->attrs;
 
+      auto const noOverride = [&] (SString name) {
+        if (auto const mte = folly::get_ptr(cinfo->methods, name)) {
+          return bool(mte->attrs & AttrNoOverride);
+        }
+        return true;
+      };
+
       auto const noOverrideRegular = [&] (SString name) {
         if (auto const mte = folly::get_ptr(cinfo->methods, name)) {
           return mte->noOverrideRegular();
@@ -10726,6 +10897,8 @@ void make_class_infos_local(
           if (entry.m_regularIncomplete || entry.m_privateAncestor) continue;
           if (name == s_construct.get()) continue;
           expanded = true;
+        } else if (noOverride(name)) {
+          continue;
         }
 
         match<void>(
@@ -10880,6 +11053,8 @@ void make_class_infos_local(
     }
   );
 
+  remote.clear();
+
   for (auto const& [name, entry] : index.nameOnlyMethodFamilies) {
     match<void>(
       entry.m_meths,
@@ -10949,8 +11124,58 @@ void make_class_infos_local(
     );
   }
 
-  remote.clear();
-  funcFamilies.clear();
+  ffState.clear();
+  decltype(index.nameOnlyMethodFamilies){}.swap(index.nameOnlyMethodFamilies);
+
+  index.funcInfo.resize(index.nextFuncId);
+
+  // Now that all of the FuncFamilies have been created, generate the
+  // back links from FuncInfo to their FuncFamilies.
+  std::vector<FuncFamily*> work;
+  work.reserve(index.funcFamilies.size());
+  for (auto const& kv : index.funcFamilies) work.emplace_back(kv.first.get());
+
+  // First calculate the needed capacity for each FuncInfo's family
+  // list. We use this to presize the family list. This is superior
+  // just pushing back and then shrinking the vectors, as that can
+  // excessively fragment the heap.
+  std::vector<std::atomic<size_t>> capacities(index.nextFuncId);
+
+  parallel::for_each(
+    work,
+    [&] (FuncFamily* ff) {
+      for (auto const pf : ff->possibleFuncs()) {
+        // Ensure the FuncInfo is initialized.
+        create_func_info(index, pf.ptr());
+        ++capacities[pf.ptr()->idx];
+      }
+    }
+  );
+
+  parallel::for_each(
+    index.funcInfo,
+    [&] (FuncInfo& fi) {
+      if (!fi.func) return;
+      fi.families.reserve(capacities[fi.func->idx]);
+    }
+  );
+  capacities.clear();
+  capacities.shrink_to_fit();
+
+  // Different threads can touch the same FuncInfo when adding to the
+  // func family list, so use sharded locking scheme.
+  std::array<std::mutex, 256> locks;
+  parallel::for_each(
+    work,
+    [&] (FuncFamily* ff) {
+      for (auto const pf : ff->possibleFuncs()) {
+        auto finfo = create_func_info(index, pf.ptr());
+        auto& lock = locks[pointer_hash<FuncInfo>{}(finfo) % locks.size()];
+        std::lock_guard<std::mutex> _{lock};
+        finfo->families.emplace_back(ff);
+      }
+    }
+  );
 }
 
 // Switch to "local" mode, in which all calculations are expected to
@@ -11046,8 +11271,9 @@ void make_local(IndexData& index) {
 
   // We're going to be downloading all bytecode, so to avoid wasted
   // memory, try to re-use identical bytecode.
-  php::Func::BytecodeReuser reuser;
-  php::Func::s_reuser = &reuser;
+  Optional<php::Func::BytecodeReuser> reuser;
+  reuser.emplace();
+  php::Func::s_reuser = reuser.get_pointer();
   SCOPE_EXIT { php::Func::s_reuser = nullptr; };
 
   std::mutex lock;
@@ -11247,6 +11473,13 @@ void make_local(IndexData& index) {
   );
   index.disposeClient = decltype(index.disposeClient){};
 
+  php::Func::s_reuser = nullptr;
+  reuser.reset();
+
+  buckets.clear();
+  nameToFuncFamilyGroup.clear();
+  remoteFuncFamilyIds.clear();
+
   program->units.shrink_to_fit();
   program->classes.shrink_to_fit();
   program->funcs.shrink_to_fit();
@@ -11255,16 +11488,16 @@ void make_local(IndexData& index) {
   // For now we don't require system constants in any extern-worker
   // stuff we do. So we can just add it to the Index now.
   add_system_constants_to_index(index);
+
   // Buid Index data structures from the php::Program.
   add_program_to_index(index);
+
   // Convert the ClassInfo2s into ClassInfos.
   make_class_infos_local(
     index,
     std::move(remoteClassInfos),
     std::move(remoteFuncFamilies)
   );
-
-  decltype(index.nameOnlyMethodFamilies){}.swap(index.nameOnlyMethodFamilies);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -11311,7 +11544,6 @@ Index::Index(Input input,
   build_subclass_lists(*m_data, std::move(subclassMeta));
 
   make_local(*m_data);
-  m_data->funcInfo.resize(m_data->nextFuncId);
 
   auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
   m_data->compute_iface_vtables = std::thread([&] {
@@ -11322,22 +11554,23 @@ Index::Index(Input input,
       compute_iface_vtables(*m_data);
     }
   );
-  fixup_func_families(*m_data);
 
   check_invariants(*m_data);
 
   trace_time tracer_2("initialize return types", sample);
-  std::vector<const php::Func*> all_funcs;
-  all_funcs.reserve(m_data->funcs.size() + m_data->methods.size());
-  for (auto const fn : m_data->funcs) {
-    all_funcs.push_back(fn.second);
-  }
-  for (auto const fn : m_data->methods) {
-    all_funcs.push_back(fn.second);
-  }
   parallel::for_each(
-    all_funcs,
-    [&] (const php::Func* f) { init_return_type(f); }
+    m_data->program->classes,
+    [&] (const std::unique_ptr<php::Class>& cls) {
+      for (auto const& func : cls->methods) {
+        init_return_type(func.get());
+      }
+    }
+  );
+  parallel::for_each(
+    m_data->program->funcs,
+    [&] (const std::unique_ptr<php::Func>& func) {
+      init_return_type(func.get());
+    }
   );
 }
 
@@ -12894,15 +13127,17 @@ Index::supports_async_eager_return(res::Func rfunc) const {
     [&](res::Func::FuncName)   { return TriBool::Maybe; },
     [&](res::Func::MethodName) { return TriBool::Maybe; },
     [&](FuncInfo* finfo) {
-      return func_supports_AER(finfo->func);
+      return yesOrNo(func_supports_AER(finfo->func));
     },
     [&](res::Func::Method m) {
-      return func_supports_AER(m.func);
+      return yesOrNo(func_supports_AER(m.func));
     },
     [&](res::Func::MethodFamily fam) {
       return fam.family->infoFor(fam.regularOnly).m_static->m_supportsAER;
     },
-    [&](res::Func::MethodOrMissing m) { return func_supports_AER(m.func); },
+    [&](res::Func::MethodOrMissing m) {
+      return yesOrNo(func_supports_AER(m.func));
+    },
     [&](res::Func::Missing) { return TriBool::No; },
     [&](const res::Func::Isect& i) {
       auto aer = TriBool::Maybe;
@@ -14670,11 +14905,6 @@ void Index::freeze() {
     _.ignore_client_stats();                    \
     (x).clear();                                \
   }
-
-void Index::cleanup_pre_analysis() {
-  trace_time _{"cleanup pre analysis", m_data->sample};
-  CLEAR(m_data->methods);
-}
 
 void Index::cleanup_for_final() {
   trace_time _{"cleanup for final", m_data->sample};

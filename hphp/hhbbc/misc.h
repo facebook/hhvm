@@ -73,6 +73,11 @@ struct PrepKind {
   size_t hash() const {
     return folly::hash::hash_combine(inOut, readonly);
   }
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(inOut)
+      (readonly)
+      ;
+  }
 };
 using PrepKindVec = CompactVector<PrepKind>;
 

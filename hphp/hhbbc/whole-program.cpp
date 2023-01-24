@@ -802,8 +802,6 @@ void whole_program(WholeProgramInput inputs,
     callback(std::move(ue));
   };
 
-  auto cleanup_pre_analysis =
-    std::thread([&] { index.cleanup_pre_analysis(); });
   assertx(check(index.program()));
   prop_type_hint_pass(index);
   index.rewrite_default_initial_values();
@@ -821,7 +819,6 @@ void whole_program(WholeProgramInput inputs,
   index.join_iface_vtable_thread();
   parallel::num_threads = parallel::final_threads;
   final_pass(index, stats, emitUnit);
-  cleanup_pre_analysis.join();
   cleanup_for_final.join();
 
   print_stats(stats);

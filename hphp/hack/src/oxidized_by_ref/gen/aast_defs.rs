@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<267c33669904b8c99dfaa61973a922ef>>
+// @generated SignedSource<<4e4cff23c811fe39be0e3d95b9a5fe68>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -486,7 +486,7 @@ pub enum ClassId_<'a, Ex, En> {
     CIexpr(&'a Expr<'a, Ex, En>),
     /// Explicit class name. This is the common case.
     ///
-    ///     Foop::some_meth()
+    ///     Foo::some_meth()
     ///     Foo::$prop = 1;
     ///     new Foo();
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

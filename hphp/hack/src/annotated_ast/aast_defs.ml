@@ -284,7 +284,7 @@ and ('ex, 'en) class_id_ =
   | CI of class_name
       (** Explicit class name. This is the common case.
        *
-       *     Foop::some_meth()
+       *     Foo::some_meth()
        *     Foo::$prop = 1;
        *     new Foo(); *)
 

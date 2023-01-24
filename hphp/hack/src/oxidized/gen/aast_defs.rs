@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0f187c4cf0df0cd512822e32ce82e206>>
+// @generated SignedSource<<05c86ea79ca1085370da35871e7c97cf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -400,7 +400,7 @@ pub enum ClassId_<Ex, En> {
     CIexpr(Expr<Ex, En>),
     /// Explicit class name. This is the common case.
     ///
-    ///     Foop::some_meth()
+    ///     Foo::some_meth()
     ///     Foo::$prop = 1;
     ///     new Foo();
     CI(ClassName),

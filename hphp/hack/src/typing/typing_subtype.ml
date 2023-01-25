@@ -4329,8 +4329,8 @@ let can_sub_type env ty1 ty2 =
   <> Some false
 
 let is_type_disjoint env ty1 ty2 =
-  (* visited_tyvars record which type variables we've seen, to cut off cycles. *)
-  let rec is_type_disjoint visited_tyvars env ty1 ty2 =
+  (* visited record which type variables & generics we've seen, to cut off cycles. *)
+  let rec is_type_disjoint visited env ty1 ty2 =
     let (env, ty1) = Env.expand_type env ty1 in
     let (env, ty2) = Env.expand_type env ty2 in
     match (get_node ty1, get_node ty2) with
@@ -4350,22 +4350,12 @@ let is_type_disjoint env ty1 ty2 =
          type arguments, but it doesn't matter since disjointness doesn't ever
          look at them. *)
       let r = get_reason ty1 in
-      is_type_disjoint
-        visited_tyvars
-        env
-        MakeType.(dict r (arraykey r) (mixed r))
-        ty2
+      is_type_disjoint visited env MakeType.(dict r (arraykey r) (mixed r)) ty2
     | (_, Tshape _) ->
       let r = get_reason ty2 in
-      is_type_disjoint
-        visited_tyvars
-        env
-        ty1
-        MakeType.(dict r (arraykey r) (mixed r))
+      is_type_disjoint visited env ty1 MakeType.(dict r (arraykey r) (mixed r))
     | (Ttuple tyl1, Ttuple tyl2) ->
-      (match
-         List.exists2 ~f:(is_type_disjoint visited_tyvars env) tyl1 tyl2
-       with
+      (match List.exists2 ~f:(is_type_disjoint visited env) tyl1 tyl2 with
       | List.Or_unequal_lengths.Ok res -> res
       | List.Or_unequal_lengths.Unequal_lengths -> true)
     | (Ttuple _, _) ->
@@ -4376,46 +4366,46 @@ let is_type_disjoint env ty1 ty2 =
          type argument, but it doesn't matter since disjointness doesn't ever
          look at it. *)
       let r = get_reason ty1 in
-      is_type_disjoint visited_tyvars env MakeType.(vec r (mixed r)) ty2
+      is_type_disjoint visited env MakeType.(vec r (mixed r)) ty2
     | (_, Ttuple _) ->
       let r = get_reason ty2 in
-      is_type_disjoint visited_tyvars env ty1 MakeType.(vec r (mixed r))
+      is_type_disjoint visited env ty1 MakeType.(vec r (mixed r))
     | (Tvec_or_dict (tyk, tyv), _) ->
       let r = get_reason ty1 in
       is_type_disjoint
-        visited_tyvars
+        visited
         env
         MakeType.(union r [vec r tyv; dict r tyk tyv])
         ty2
     | (_, Tvec_or_dict (tyk, tyv)) ->
       let r = get_reason ty2 in
       is_type_disjoint
-        visited_tyvars
+        visited
         env
         ty1
         MakeType.(union r [vec r tyv; dict r tyk tyv])
+    | (Tgeneric (name, []), _) -> is_generic_disjoint visited env name ty1 ty2
+    | (_, Tgeneric (name, [])) -> is_generic_disjoint visited env name ty2 ty1
     | ((Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _), _) ->
       let (env, bounds) =
         Typing_utils.get_concrete_supertypes ~abstract_enum:false env ty1
       in
-      is_intersection_type_disjoint visited_tyvars env bounds ty2
+      is_intersection_type_disjoint visited env bounds ty2
     | (_, (Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _)) ->
       let (env, bounds) =
         Typing_utils.get_concrete_supertypes ~abstract_enum:false env ty2
       in
-      is_intersection_type_disjoint visited_tyvars env bounds ty1
-    | (Tvar tv, _) -> is_tyvar_disjoint visited_tyvars env tv ty2
-    | (_, Tvar tv) -> is_tyvar_disjoint visited_tyvars env tv ty1
-    | (Tunion tyl, _) ->
-      List.for_all ~f:(is_type_disjoint visited_tyvars env ty2) tyl
-    | (_, Tunion tyl) ->
-      List.for_all ~f:(is_type_disjoint visited_tyvars env ty1) tyl
+      is_intersection_type_disjoint visited env bounds ty1
+    | (Tvar tv, _) -> is_tyvar_disjoint visited env tv ty2
+    | (_, Tvar tv) -> is_tyvar_disjoint visited env tv ty1
+    | (Tunion tyl, _) -> List.for_all ~f:(is_type_disjoint visited env ty2) tyl
+    | (_, Tunion tyl) -> List.for_all ~f:(is_type_disjoint visited env ty1) tyl
     | (Toption ty1, _) ->
-      is_type_disjoint visited_tyvars env ty1 ty2
-      && is_type_disjoint visited_tyvars env (MakeType.null Reason.Rnone) ty2
+      is_type_disjoint visited env ty1 ty2
+      && is_type_disjoint visited env (MakeType.null Reason.Rnone) ty2
     | (_, Toption ty2) ->
-      is_type_disjoint visited_tyvars env ty1 ty2
-      && is_type_disjoint visited_tyvars env ty1 (MakeType.null Reason.Rnone)
+      is_type_disjoint visited env ty1 ty2
+      && is_type_disjoint visited env ty1 (MakeType.null Reason.Rnone)
     | (Tnonnull, _) ->
       is_sub_type_for_union env ty2 (MakeType.null Reason.Rnone)
     | (_, Tnonnull) ->
@@ -4466,19 +4456,33 @@ let is_type_disjoint env ty1 ty2 =
     match ity with
     | LoclType lty2 -> is_type_disjoint visited_tvyars env lty1 lty2
     | ConstraintType _ -> false
-  and is_tyvar_disjoint visited_tyvars env (tyvar : int) ty =
+  and is_tyvar_disjoint visited env (tyvar : int) ty =
+    let (visited_tyvars, visited_generics) = visited in
     if ISet.mem tyvar visited_tyvars then
       (* There is a cyclic type variable bound, this will lead to a type error *)
       false
     else
       let bounds = Env.get_tyvar_upper_bounds env tyvar in
       is_intersection_itype_set_disjoint
-        (ISet.add tyvar visited_tyvars)
+        (ISet.add tyvar visited_tyvars, visited_generics)
+        env
+        bounds
+        ty
+  and is_generic_disjoint visited env (name : string) gen_ty ty =
+    let (visited_tyvars, visited_generics) = visited in
+    if SSet.mem name visited_generics then
+      false
+    else
+      let (env, bounds) =
+        Typing_utils.get_concrete_supertypes ~abstract_enum:false env gen_ty
+      in
+      is_intersection_type_disjoint
+        (visited_tyvars, SSet.add name visited_generics)
         env
         bounds
         ty
   in
-  is_type_disjoint ISet.empty env ty1 ty2
+  is_type_disjoint (ISet.empty, SSet.empty) env ty1 ty2
 
 let decompose_subtype_add_bound
     ~coerce (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : env =

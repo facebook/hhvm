@@ -17,7 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/req-hash-map.h"
-#include "hphp/runtime/base/req-vector.h"
+#include "hphp/runtime/base/req-bitset.h"
 
 #include "hphp/util/optional.h"
 
@@ -67,7 +67,7 @@ struct CodeCoverage {
   void dumpOnExit() { shouldDump = true; }
 
 private:
-  using CodeCoverageMap = req::vector_map<const char*, req::vector<int>>;
+  using CodeCoverageMap = req::vector_map<const char*, req::dynamic_bitset>;
   Optional<CodeCoverageMap> m_hits;
   bool shouldDump{false};
 };

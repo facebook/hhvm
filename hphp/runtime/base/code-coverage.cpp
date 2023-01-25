@@ -93,16 +93,20 @@ void CodeCoverage::Record(const char *filename, int line) {
   if (iter == m_hits->end()) {
     auto& lines = (*m_hits)[filename];
     lines.resize(line + 1);
-    lines[line] = 1;
+    lines.set(line);
   } else {
     auto& lines = iter->second;
     if ((int)lines.size() < line + 1) {
       lines.resize(line + 1);
     }
-    ++lines[line];
+    lines.set(line);
   }
 }
 
+/*
+ * Frequency reported is binary ie. either 0 or 1. This is not
+ * changed to Array to make return type backwards compatible.
+ */
 Array CodeCoverage::Report(bool report_frequency /* = false*/,
                            bool sys /* = true */) {
   assertx(m_hits.has_value());
@@ -114,15 +118,13 @@ Array CodeCoverage::Report(bool report_frequency /* = false*/,
     const auto& lines = iter.second;
 
     if (report_frequency) {
-      auto const count = std::count_if(lines.begin(), lines.end(),
-                                       [](int i) { return i != 0; });
+      auto count = lines.count();
       ret.set(String(iter.first), Variant((int64_t)count));
     } else {
       auto tmp = Array::CreateDict();
-      for (int i = 1; i < (int)lines.size(); i++) {
-        if (lines[i]) {
-          tmp.set(i, Variant((int64_t)lines[i]));
-        }
+      auto const end = req::dynamic_bitset::npos;
+      for (int i = lines.find_first(); i != end; i = lines.find_next(i)) {
+        tmp.set(i, Variant((int64_t)1));
       }
       ret.set(String(iter.first), Variant(tmp));
     }
@@ -143,7 +145,13 @@ void CodeCoverage::Report(const std::string &filename) {
   for (CodeCoverageMap::const_iterator iter = m_hits->begin();
        iter != m_hits->end();) {
     f << "\"" << iter->first << "\": [";
-    f << folly::join(",", iter->second);
+    const auto& lines = iter->second;
+    for (int i = 0; i != lines.size(); ) {
+      f << (lines.test(i)? 1: 0);
+      if (++i != lines.size()) {
+        f << ",";
+      }
+    }
     f << "]";
     if (++iter != m_hits->end()) {
       f << ",";

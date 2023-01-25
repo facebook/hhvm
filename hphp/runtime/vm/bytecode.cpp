@@ -5316,7 +5316,7 @@ void recordCodeCoverage(PC /*pc*/) {
     s_prev_line = line;
     const StringData* filepath = unit->filepath();
     assertx(filepath->isStatic());
-    RI().m_coverage.Record(filepath->data(), line, line);
+    RI().m_coverage.Record(filepath->data(), line);
   }
 }
 

@@ -30,7 +30,7 @@ namespace HPHP {
 struct Array;
 
 struct CodeCoverage {
-  void Record(const char* filename, int line0, int line1);
+  void Record(const char* filename, int line);
   void onSessionInit();
   void onSessionExit();
 

@@ -33,13 +33,9 @@ namespace HPHP {
 /*
  * The function below will be called by the interpreter on each
  * evaluated expression when running hhvm with:
- *   $ hhvm -v Eval.RecordCodeCoverage=1 <phpfile>
+ *   $ hhvm -v Eval.EnableCodeCoverage=1 <phpfile>
  *
- * The (line0, line1) pair is supposed to represent the start and end
- * of an evaluated expression. One should normally increment the line
- * usage counters for all the lines between line0 and line1 but certain
- * constructs like including a file, eval-ing a string, or even
- * executing a for loop do not have a good value for line1.
+ * The line is the 1-indexed line number of the evaluated expression.
  *
  * Indeed on this toy cover.php file:
  *
@@ -58,57 +54,52 @@ namespace HPHP {
  *
  * and with this command:
  *
- *  $ hhvm -v Eval.RecordCodeCoverage=1 \
+ *  $ hhvm -v Eval.EnableCodeCoverage=1 \
  *         -v Eval.CodeCoverageOutputFile=/tmp/cov.log \
  *         -f cover.php
  *
  * one get this output (with appropriate printf in this file):
  *
- *   /home/pad/cover.php, (1, 12)
- *   /home/pad/cover.php, (3, 3)
+ *   /home/pad/cover.php, (1)
+ *   /home/pad/cover.php, (3)
  *   here
- *   /home/pad/cover.php, (4, 6)
- *   /home/pad/cover.php, (4, 4)
- *   /home/pad/cover.php, (5, 5)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (5)
  *   here 0
- *   /home/pad/cover.php, (4, 4)
- *   /home/pad/cover.php, (4, 4)
- *   /home/pad/cover.php, (5, 5)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (5)
  *   here 1
- *   /home/pad/cover.php, (4, 4)
- *   /home/pad/cover.php, (4, 4)
- *   /home/pad/cover.php, (8, 10)
- *   /home/pad/cover.php, (8, 9)
- *   /home/pad/cover.php, (8, 10)
- *   6/home/pad/cover.php, (12, 12)
- *   /home/pad/cover.php, (12, 12)
- *   /home/pad/cover.php, (1, 2)
- *   /home/pad/cover.php, (1, 2)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (8)
+ *   /home/pad/cover.php, (8)
+ *   /home/pad/cover.php, (8)
+ *   6/home/pad/cover.php, (12)
+ *   /home/pad/cover.php, (12)
+ *   /home/pad/cover.php, (1)
+ *   /home/pad/cover.php, (1)
  *
- * So right now it is just simpler to ignore line1.
  */
-void CodeCoverage::Record(const char *filename, int line0, int line1) {
+void CodeCoverage::Record(const char *filename, int line) {
   assertx(m_hits.has_value());
-  if (!filename || !*filename || line0 <= 0 || line1 <= 0 || line0 > line1) {
+  if (!filename || !*filename || line <= 0 ) {
     return;
   }
-  Logger::Verbose("%s, (%d, %d)\n", filename, line0, line1);
+  Logger::Verbose("%s, %d\n", filename, line);
 
   auto iter = m_hits->find(filename);
   if (iter == m_hits->end()) {
     auto& lines = (*m_hits)[filename];
-    lines.resize(line1 + 1);
-    for (int i = line0; i <= line0 /* should be line1 one day */; i++) {
-      lines[i] = 1;
-    }
+    lines.resize(line + 1);
+    lines[line] = 1;
   } else {
     auto& lines = iter->second;
-    if ((int)lines.size() < line1 + 1) {
-      lines.resize(line1 + 1);
+    if ((int)lines.size() < line + 1) {
+      lines.resize(line + 1);
     }
-    for (int i = line0; i <= line0 /* should be line1 one day */; i++) {
-      ++lines[i];
-    }
+    ++lines[line];
   }
 }
 

@@ -9007,10 +9007,7 @@ and call
             in
             (env, Some (hole_on_ty_mismatch ~ty_mismatch_opt te, ty))
           | None ->
-            let expected =
-              ExpectedTy.make pos Reason.URparam (Typing_utils.mk_tany env pos)
-            in
-            let (env, te, ty) = expr ~expected env e in
+            let (env, te, ty) = expr env e in
             (env, Some (te, ty))
         in
         let set_tyvar_variance_from_lambda_param env opt_param =

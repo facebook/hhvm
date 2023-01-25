@@ -221,6 +221,11 @@ let visitor =
       else
         state := { !state with prev_no_value_return = Some (Some return_pos) }
 
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> ()
+      | _ -> super#on_expr_ env expr_
+
     method! on_fun_ env fun_ =
       let decl_env = Tast_env.get_decl_env env in
       let has_impl_ret = Tast_env.fun_has_implicit_return env in
@@ -279,6 +284,11 @@ let visitor =
       | (return_pos, Return None) ->
         this#update_seen_return_stmts false return_pos
       | _ -> ()
+
+    method! on_expr env e =
+      match e with
+      | (_, _, Aast.Invalid _) -> ()
+      | _ -> super#on_expr env e
   end
 
 let handler =

@@ -6,20 +6,14 @@
  *
  *)
 open Hh_prelude
+module Err = Naming_phase_error
 
 let on_expr (env, expr, err_acc) =
-  let res =
-    match expr with
-    | (annot, pos, Aast.Tuple []) ->
-      let err =
-        Naming_phase_error.naming @@ Naming_error.Too_few_arguments pos
-      in
-      Error ((annot, pos, Naming_phase_error.invalid_expr_ pos), err)
-    | _ -> Ok expr
-  in
-  match res with
-  | Ok expr -> Ok (env, expr, err_acc)
-  | Error (expr, err) -> Error (env, expr, err :: err_acc)
+  match expr with
+  | (_, pos, Aast.Tuple []) ->
+    let err = Err.naming @@ Naming_error.Too_few_arguments pos in
+    Error (env, Err.invalid_expr expr, err :: err_acc)
+  | _ -> Ok (env, expr, err_acc)
 
 let pass =
   Naming_phase_pass.(

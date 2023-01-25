@@ -24,7 +24,9 @@ val malformed_access : Pos.t -> t
 
 val supportdyn : Pos.t -> t
 
-val invalid_expr_ : Pos.t -> (unit, unit) Aast.expr_
+val invalid_expr_ : ('ex, 'en) Aast.expr option -> ('ex, 'en) Aast.expr_
+
+val invalid_expr : ('ex, 'en) Aast.expr -> ('ex, 'en) Aast.expr
 
 val add : agg -> t -> agg
 

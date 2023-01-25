@@ -8,23 +8,7 @@ Errors:
       c_implements = []; c_where_constraints = [];
       c_consts =
       [{ cc_user_attributes = []; cc_type = (Some ([6:9-12], (Hprim Tint))); 
-         cc_id = ([6:13-14], "X");
-         cc_kind =
-         (CCConcrete
-            ((), [6:17-22],
-             (Call (
-                ((), [6:17-22],
-                 (Lfun (
-                    { f_span = [6:17-22]; f_readonly_this = None; f_annotation = (); 
-                      f_readonly_ret = None; f_ret = ((), None); f_tparams = []; 
-                      f_where_constraints = []; f_params = []; f_ctxs = None; 
-                      f_unsafe_ctxs = None;
-                      f_body =
-                      { fb_ast = [([6:17-22], (Throw ((), [6:17-22], (New (((), [6:17-22], (CI ([6:17-22], "\\Exception"))), [], [((), [6:17-22], (String "invalid expression"))], None, ())))))] };
-                      f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-                      f_doc_comment = None },
-                    []))),
-                [], [], None))));
+         cc_id = ([6:13-14], "X"); cc_kind = (CCConcrete ((), [6:17-22], (Invalid (Some ((), [6:17-22], (Call (((), [6:17-20], (Id ([6:17-20], "\\baz"))), [], [], None))))))); 
          cc_span = [6:3-23]; cc_doc_comment = None }
         ];
       c_typeconsts = []; c_vars = []; c_methods = []; c_xhp_children = []; 

@@ -22,24 +22,8 @@ Errors:
             [3:49-50], (Expr ((), [3:49-50], (Id ([3:49-50], "\\,")))));
             ([3:51-61], (Expr ((), [3:51-61], (Binop (Gt, ((), [3:51-57], (Id ([3:51-57], "\\string"))), ((), [3:59-61], (Lvar ([3:59-61], $x))))))));
             ([3:61-62], (Expr ((), [3:61-62], (Id ([3:61-62], "\\)"))))); (
-            [3:62-63], (Expr ((), [3:62-63], (Id ([3:62-63], "\\:")))));
-            ([3:64-71],
-             (Expr
-                ((), [3:64-71],
-                 (Call (
-                    ((), [3:64-68],
-                     (Lfun (
-                        { f_span = [3:64-68]; f_readonly_this = None; 
-                          f_annotation = (); f_readonly_ret = None; f_ret = ((), None); 
-                          f_tparams = []; f_where_constraints = []; f_params = []; 
-                          f_ctxs = None; f_unsafe_ctxs = None;
-                          f_body =
-                          { fb_ast = [([3:64-68], (Throw ((), [3:64-68], (New (((), [3:64-68], (CI ([3:64-68], "\\Exception"))), [], [((), [3:64-68], (String "invalid expression"))], None, ())))))] };
-                          f_fun_kind = FSync; f_user_attributes = []; 
-                          f_external = false; f_doc_comment = None },
-                        []))),
-                    [], [], None)))))
-            ]
+            [3:62-63], (Expr ((), [3:62-63], (Id ([3:62-63], "\\:"))))); (
+            [3:64-71], (Expr ((), [3:64-71], (Invalid (Some ((), [3:64-71], (Collection (([3:64-68], "\\void"), None, []))))))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };

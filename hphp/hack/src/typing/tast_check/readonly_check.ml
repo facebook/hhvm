@@ -622,9 +622,10 @@ let check =
       | (_, _, Class_const _)
       | (_, _, Float _)
       | (_, _, PrefixedString _)
-      | (_, _, Hole _)
-      | (_, _, Invalid _) ->
+      | (_, _, Hole _) ->
         super#on_expr env e
+      (* Stop at invalid marker *)
+      | (_, _, Invalid _) -> ()
   end
 
 let handler =
@@ -692,5 +693,7 @@ let handler =
           check_static_readonly_property pos env class_id get Mut
         | _ -> ()
       in
-      check e
+      match e with
+      | (_, _, Aast.Invalid _) -> ()
+      | _ -> check e
   end

@@ -103,41 +103,7 @@ let emit
 (* Helper for constructing expression to be substituted for invalid expressions
    TODO[mjt] this probably belongs with the AAST defs
 *)
-let invalid_expr_ pos =
-  let throw =
-    ( pos,
-      Aast.Throw
-        ( (),
-          pos,
-          Aast.New
-            ( ((), pos, Aast.CI (pos, "\\Exception")),
-              [],
-              [((), pos, Aast.String "invalid expression")],
-              None,
-              () ) ) )
-  in
-  Aast.Call
-    ( ( (),
-        pos,
-        Aast.Lfun
-          ( {
-              Aast.f_span = pos;
-              f_readonly_this = None;
-              f_annotation = ();
-              f_readonly_ret = None;
-              f_ret = ((), None);
-              f_tparams = [];
-              f_where_constraints = [];
-              f_params = [];
-              f_ctxs = None;
-              f_unsafe_ctxs = None;
-              f_body = { Aast.fb_ast = [throw] };
-              f_fun_kind = Ast_defs.FSync;
-              f_user_attributes = [];
-              f_external = false;
-              f_doc_comment = None;
-            },
-            [] ) ),
-      [],
-      [],
-      None )
+let invalid_expr_ expr_opt = Aast.Invalid expr_opt
+
+let invalid_expr ((annot, pos, _) as expr) =
+  (annot, pos, Aast.Invalid (Some expr))

@@ -24,7 +24,7 @@ let afield_key_value cname afield =
     in
     ((ek, ev), Some (Err.naming @@ Naming_error.Missing_arrow { pos; cname }))
 
-let on_expr_ (env, expr_, err_acc) =
+let on_expr (env, ((annot, pos, expr_) as expr), err_acc) =
   let res =
     match expr_ with
     | Aast.Collection ((pos, cname), c_targ_opt, afields)
@@ -85,9 +85,9 @@ let on_expr_ (env, expr_, err_acc) =
     | _ -> Ok (expr_, [])
   in
   match res with
-  | Ok (expr_, errs) -> Ok (env, expr_, errs @ err_acc)
-  | Error (pos, errs) -> Error (env, Err.invalid_expr_ pos, errs @ err_acc)
+  | Ok (expr_, errs) -> Ok (env, (annot, pos, expr_), errs @ err_acc)
+  | Error (_pos, errs) -> Error (env, Err.invalid_expr expr, errs @ err_acc)
 
 let pass =
   Naming_phase_pass.(
-    top_down Ast_transform.{ identity with on_expr_ = Some on_expr_ })
+    top_down Ast_transform.{ identity with on_expr = Some on_expr })

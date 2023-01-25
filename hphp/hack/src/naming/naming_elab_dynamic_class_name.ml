@@ -16,7 +16,7 @@ let is_dynamic = function
     false
   | _ -> true
 
-let on_expr (env, (ex, pos, expr_), err_acc) =
+let on_expr (env, ((ex, pos, expr_) as expr), err_acc) =
   let res =
     let open Aast in
     match expr_ with
@@ -69,7 +69,7 @@ let on_expr (env, (ex, pos, expr_), err_acc) =
     | _ -> Ok (expr_, err_acc)
   in
   match res with
-  | Error errs -> Error (env, (ex, pos, Err.invalid_expr_ pos), errs)
+  | Error errs -> Error (env, Err.invalid_expr expr, errs)
   | Ok (expr_, errs) -> Ok (env, (ex, pos, expr_), errs)
 
 let pass =

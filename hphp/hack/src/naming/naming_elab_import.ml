@@ -8,8 +8,8 @@
 
 let on_expr (env, expr, err_acc) =
   match expr with
-  | (annot, pos, Aast.Import _) ->
-    Error (env, (annot, pos, Naming_phase_error.invalid_expr_ pos), err_acc)
+  | (_, _, Aast.Import _) ->
+    Error (env, Naming_phase_error.invalid_expr expr, err_acc)
   | _ -> Ok (env, expr, err_acc)
 
 let pass =

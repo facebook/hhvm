@@ -88,6 +88,8 @@ let mk_env filename tcopt =
 
 let passes =
   [
+    (* Stop on `Invalid` expressions *)
+    Naming_guard_invalid.pass;
     (* Canonicalization passes -------------------------------------------- *)
     (* Remove top-level file attributes, noop and markup statements *)
     Naming_elab_defs.pass;

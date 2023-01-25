@@ -89,13 +89,13 @@ let rec const_expr_err in_mode acc (_, pos, expr_) =
     acc
   | _ -> (Err.naming @@ Naming_error.Illegal_constant pos) :: acc
 
-let const_expr in_mode in_enum_class ((_, pos, _) as expr) =
+let const_expr in_mode in_enum_class expr =
   if in_enum_class then
-    (expr, [])
+    Ok expr
   else
     match const_expr_err in_mode [] expr with
-    | [] -> (expr, [])
-    | errs -> (((), pos, Err.invalid_expr_ pos), errs)
+    | [] -> Ok expr
+    | errs -> Error (Err.invalid_expr expr, errs)
 
 let on_class_ (env, c, err) =
   let in_enum_class =
@@ -124,21 +124,21 @@ let on_module_def (env, md, err) =
 
 let on_class_const_kind (env, kind, err_acc) =
   let in_mode = Env.in_mode env and in_enum_class = Env.in_enum_class env in
-  let (kind, errs) =
-    match kind with
-    | Aast.CCConcrete expr ->
-      let (expr, errs) = const_expr in_mode in_enum_class expr in
-      (Aast.CCConcrete expr, errs)
-    | Aast.CCAbstract _ -> (kind, [])
-  in
-  let err = errs @ err_acc in
-  Ok (env, kind, err)
+  match kind with
+  | Aast.CCConcrete expr -> begin
+    match const_expr in_mode in_enum_class expr with
+    | Ok expr -> Ok (env, Aast.CCConcrete expr, err_acc)
+    | Error (expr, errs) -> Error (env, Aast.CCConcrete expr, errs @ err_acc)
+  end
+  | Aast.CCAbstract _ -> Ok (env, kind, err_acc)
 
 let on_gconst_cst_value (env, cst_value, err_acc) =
   let in_mode = Env.in_mode env and in_enum_class = Env.in_enum_class env in
-  let (cst_value, errs) = const_expr in_mode in_enum_class cst_value in
-  let err = errs @ err_acc in
-  Ok (env, cst_value, err)
+  match const_expr in_mode in_enum_class cst_value with
+  | Ok expr -> Ok (env, expr, err_acc)
+  | Error (expr, errs) ->
+    let err_acc = errs @ err_acc in
+    Error (env, expr, err_acc)
 
 let top_down_pass =
   Naming_phase_pass.(

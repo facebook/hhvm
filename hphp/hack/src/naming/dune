@@ -154,6 +154,7 @@
   naming_elab_tuple
   naming_elab_user_attributes
   naming_elab_wildcard_hint
+  naming_guard_invalid
   naming_phase_env
   naming_phase_error
   naming_phase_pass

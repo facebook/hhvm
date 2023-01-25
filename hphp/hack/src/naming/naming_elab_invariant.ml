@@ -24,10 +24,13 @@ let on_stmt (env, stmt, err_acc) =
                   unpacked_element ) )) )
       when String.equal fn_name SN.AutoimportedFunctions.invariant ->
       (match exprs with
-      | []
-      | [_] ->
+      | [] ->
         let err = Err.naming @@ Naming_error.Too_few_arguments fn_expr_pos in
-        let expr = ((), fn_expr_pos, Err.invalid_expr_ fn_expr_pos) in
+        let expr = ((), fn_expr_pos, Err.invalid_expr_ None) in
+        Error ((pos, Aast.Expr expr), err)
+      | [(_, expr)] ->
+        let err = Err.naming @@ Naming_error.Too_few_arguments fn_expr_pos in
+        let expr = Err.invalid_expr expr in
         Error ((pos, Aast.Expr expr), err)
       | (pk, (_, cond_pos, cond)) :: exprs ->
         let err_opt =

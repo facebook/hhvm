@@ -21,7 +21,7 @@ module Env = struct
     current_class
 end
 
-let on_expr_ (env, expr_, err_acc) =
+let on_expr (env, ((annot, pos, expr_) as expr), err_acc) =
   let (res, err_acc) =
     match expr_ with
     | Aast.(
@@ -337,8 +337,8 @@ let on_expr_ (env, expr_, err_acc) =
     | _ -> (Ok expr_, err_acc)
   in
   match res with
-  | Ok expr_ -> Ok (env, expr_, err_acc)
-  | Error pos -> Error (env, Naming_phase_error.invalid_expr_ pos, err_acc)
+  | Ok expr_ -> Ok (env, (annot, pos, expr_), err_acc)
+  | Error _pos -> Error (env, Naming_phase_error.invalid_expr expr, err_acc)
 
 let on_class_ (env, c, err) = Ok (Env.in_class env c, c, err)
 
@@ -348,4 +348,4 @@ let top_down_pass =
 
 let bottom_up_pass =
   Naming_phase_pass.(
-    bottom_up Ast_transform.{ identity with on_expr_ = Some on_expr_ })
+    bottom_up Ast_transform.{ identity with on_expr = Some on_expr })

@@ -19,6 +19,11 @@ class virtual iter =
 
     method go_def ctx x = self#on_def (Env.def_env ctx x) x
 
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> ()
+      | _ -> super#on_expr_ env expr_
+
     method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
 
     method! on_method_ env x =
@@ -94,6 +99,11 @@ class virtual ['state] iter_with_state =
       self#on_list (fun () -> self#go_def ctx state) () program
 
     method go_def ctx state x = self#on_def (Env.def_env ctx x, state) x
+
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> ()
+      | _ -> super#on_expr_ env expr_
 
     method on_fun_with_env (env, state) x = super#on_fun_ (env, state) x
 
@@ -178,6 +188,11 @@ class virtual ['a] reduce =
       self#on_list (fun () -> self#go_def ctx) () program
 
     method go_def ctx x = self#on_def (Env.def_env ctx x) x
+
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> self#zero
+      | _ -> super#on_expr_ env expr_
 
     method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
 
@@ -266,6 +281,11 @@ class virtual map =
       self#on_list (fun () -> self#go_def ctx) () program
 
     method go_def ctx x = self#on_def (Env.def_env ctx x) x
+
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> expr_
+      | _ -> super#on_expr_ env expr_
 
     method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
 
@@ -359,6 +379,11 @@ class virtual endo =
     method go ctx program = self#on_list (fun () -> self#go_def ctx) () program
 
     method go_def ctx x = self#on_def (Env.def_env ctx x) x
+
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> expr_
+      | _ -> super#on_expr_ env expr_
 
     method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
 

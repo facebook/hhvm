@@ -457,7 +457,7 @@ class ThriftServerConfig {
    * `folly::AsyncServerSocket::setQueueTimeout`.
    */
   void setSocketQueueTimeout(
-      folly::observer::Observer<std::optional<std::chrono::nanoseconds>>
+      folly::observer::Observer<std::optional<std::chrono::milliseconds>>
           timeout,
       AttributeSource source = AttributeSource::OVERRIDE);
 

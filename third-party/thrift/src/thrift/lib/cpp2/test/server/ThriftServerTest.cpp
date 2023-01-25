@@ -3347,7 +3347,7 @@ TEST(ThriftServer, SocketQueueTimeout) {
   // should always be disabled here
   checkSocketQueueTimeout(folly::kIsDebug ? 0ms : kDefaultTimeout);
 
-  folly::observer::SimpleObservable<std::optional<std::chrono::nanoseconds>>
+  folly::observer::SimpleObservable<std::optional<std::chrono::milliseconds>>
       baseline{kBaselineTimeout};
   // Should trigger value to change
   serverConfig.setSocketQueueTimeout(
@@ -3360,7 +3360,7 @@ TEST(ThriftServer, SocketQueueTimeout) {
   folly::observer_detail::ObserverManager::waitForAllUpdates();
   checkSocketQueueTimeout(kBaselineTimeoutUpdated);
 
-  folly::observer::SimpleObservable<std::optional<std::chrono::nanoseconds>>
+  folly::observer::SimpleObservable<std::optional<std::chrono::milliseconds>>
       overrideTimeoutObs{kOverrideTimeout};
   // Should use override instead of config
   serverConfig.setSocketQueueTimeout(overrideTimeoutObs.getObserver());
@@ -3369,14 +3369,14 @@ TEST(ThriftServer, SocketQueueTimeout) {
   // Should go back to baseline instead of override
   serverConfig.setSocketQueueTimeout(
       folly::observer::makeStaticObserver(
-          std::optional<std::chrono::nanoseconds>()),
+          std::optional<std::chrono::milliseconds>()),
       AttributeSource::OVERRIDE);
   checkSocketQueueTimeout(kBaselineTimeoutUpdated);
 
   // Should go back to using disabled
   serverConfig.setSocketQueueTimeout(
       folly::observer::makeStaticObserver(
-          std::optional<std::chrono::nanoseconds>()),
+          std::optional<std::chrono::milliseconds>()),
       AttributeSource::BASELINE);
   folly::observer_detail::ObserverManager::waitForAllUpdates();
   checkSocketQueueTimeout(folly::kIsDebug ? 0ms : kDefaultTimeout);

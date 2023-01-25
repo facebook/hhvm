@@ -1140,22 +1140,27 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
       folly::observer::Observer<std::chrono::nanoseconds> timeout) {
     thriftConfig_.setSocketQueueTimeout(
         folly::observer::makeObserver(
-            [=]() -> std::optional<std::chrono::nanoseconds> {
-              return **timeout;
+            [=]() -> std::optional<std::chrono::milliseconds> {
+              return std::chrono::duration_cast<std::chrono::milliseconds>(
+                  **timeout);
             }),
         AttributeSource::OVERRIDE);
   }
 
   void setSocketQueueTimeout(
       folly::Optional<std::chrono::nanoseconds> timeout) {
-    thriftConfig_.setSocketQueueTimeout(
-        folly::observer::makeStaticObserver(std::optional{*timeout}),
-        AttributeSource::OVERRIDE);
+    if (timeout) {
+      thriftConfig_.setSocketQueueTimeout(
+          folly::observer::makeStaticObserver(std::optional{
+              std::chrono::duration_cast<std::chrono::milliseconds>(*timeout)}),
+          AttributeSource::OVERRIDE);
+    }
   }
 
   void setSocketQueueTimeout(std::chrono::nanoseconds timeout) {
     thriftConfig_.setSocketQueueTimeout(
-        folly::observer::makeStaticObserver(std::optional{timeout}),
+        folly::observer::makeStaticObserver(std::optional{
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)}),
         AttributeSource::OVERRIDE);
   }
 

@@ -440,9 +440,16 @@ void ThriftServerConfig::setQueueTimeout(
 }
 
 void ThriftServerConfig::setSocketQueueTimeout(
-    folly::observer::Observer<std::optional<std::chrono::nanoseconds>> timeout,
+    folly::observer::Observer<std::optional<std::chrono::milliseconds>> timeout,
     AttributeSource source) {
-  socketQueueTimeout_.set(timeout, source);
+  auto timeoutNs = folly::observer::makeObserver(
+      [=]() -> std::optional<std::chrono::nanoseconds> {
+        if (**timeout) {
+          return std::chrono::milliseconds(***timeout);
+        }
+        return std::nullopt;
+      });
+  socketQueueTimeout_.set(timeoutNs, source);
 }
 
 void ThriftServerConfig::setSocketWriteTimeout(

@@ -567,6 +567,7 @@ let expr tenv ((), _p, e) =
   | Lfun (f, _)
   | Efun { ef_fun = f; _ } ->
     fun_ tenv f
+  | Invalid _
   | Darray _
   | Varray _
   | Shape _

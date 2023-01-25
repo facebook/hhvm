@@ -33,6 +33,7 @@ impl<'a> Reason<'a> {
         use T_::*;
         match self {
             Rnone => None,
+            Rinvalid => None,
             Rwitness(p)
             | RwitnessFromDecl(p)
             | Ridx((p, _))

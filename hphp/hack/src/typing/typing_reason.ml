@@ -161,6 +161,7 @@ type _ t_ =
       Pos_or_decl.t * string * locl_phase t_
       -> locl_phase t_
   | Rmissing_class : Pos.t -> locl_phase t_
+  | Rinvalid : 'phase t_
 
 type t = locl_phase t_
 
@@ -198,6 +199,7 @@ let rec localize : decl_phase t_ -> locl_phase t_ = function
   | Rsupport_dynamic_type p -> Rsupport_dynamic_type p
   | Rglobal_type_variable_generics (p, tp, n) ->
     Rglobal_type_variable_generics (p, tp, n)
+  | Rinvalid -> Rinvalid
 
 let arg_pos_str ap =
   match ap with
@@ -213,6 +215,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   let p = to_pos r in
   match r with
   | Rnone -> [(p, prefix)]
+  | Rinvalid -> [(p, prefix)]
   | Rwitness _ -> [(p, prefix)]
   | Rwitness_from_decl p -> [(p, prefix)]
   | Ridx (_, r2) ->
@@ -623,7 +626,9 @@ and to_pos : type ph. ph t_ -> Pos_or_decl.t =
 and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
   match r with
-  | Rnone -> Pos_or_decl.none
+  | Rnone
+  | Rinvalid ->
+    Pos_or_decl.none
   | Rret_fun_kind_from_decl (p, _)
   | Rhint p
   | Rwitness_from_decl p
@@ -851,6 +856,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rrigid_tvar_escape _ -> "Rrigid_tvar_escape"
   | Ropaque_type_from_module _ -> "Ropaque_type_from_module"
   | Rmissing_class _ -> "Rmissing_class"
+  | Rinvalid -> "Rinvalid"
 
 let pp fmt r =
   let pos = to_raw_pos r in

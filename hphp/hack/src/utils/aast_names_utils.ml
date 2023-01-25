@@ -85,3 +85,4 @@ let expr_name = function
   | A.EnumClassLabel _ -> "EnumClassLabel"
   | A.ReadonlyExpr _ -> "Readonly"
   | A.Hole _ -> "Hole"
+  | A.Invalid _ -> "Invalid"

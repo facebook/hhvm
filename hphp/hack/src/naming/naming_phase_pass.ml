@@ -1102,6 +1102,8 @@ module Ast_transform = struct
             on_expr e2 ~env ~handler )
       | Hole (expr, ex1, ex2, src) ->
         Hole (on_expr expr ~env ~handler, ex1, ex2, src)
+      | Invalid expr_opt ->
+        Invalid (Option.map ~f:(on_expr ~env ~handler) expr_opt)
       | ET_Splice expr -> ET_Splice (on_expr expr ~env ~handler)
       | ExpressionTree expr_tree ->
         ExpressionTree (on_expression_tree expr_tree ~env ~handler)

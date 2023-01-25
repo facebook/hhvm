@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<043241e05e08b9f331e5b39c5195d337>>
+// @generated SignedSource<<9d1982e675c28fe417bcb070c333536d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -316,6 +316,7 @@ pub enum T_ {
     RopaqueTypeFromModule(pos_or_decl::PosOrDecl, String, Box<T_>),
     #[rust_to_ocaml(name = "Rmissing_class")]
     RmissingClass(pos::Pos),
+    Rinvalid,
 }
 
 pub type Reason = T_;

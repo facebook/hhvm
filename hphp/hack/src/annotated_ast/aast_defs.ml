@@ -382,6 +382,13 @@ and ('ex, 'en) expr_ =
       (** The empty expression.
        *
        *     list(, $y) = vec[1, 2] // Omitted is the first expression inside list() *)
+  | Invalid of ('ex, 'en) expr option
+      (** Invalid expression marker generated during elaboration / validation phases
+       *
+       *     class MyFoo {
+       *       const int BAR = calls_are_invalid_here();
+       *     }
+       *)
   | Id of sid
       (** An identifier. Used for method names and global constants.
        *

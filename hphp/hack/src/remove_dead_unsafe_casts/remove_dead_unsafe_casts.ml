@@ -60,7 +60,8 @@ let rec can_be_captured =
   | Method_id _
   | Method_caller _
   | Smethod_id _
-  | EnumClassLabel _ ->
+  | EnumClassLabel _
+  | Invalid None ->
     false
   | Yield _
   | Clone _
@@ -82,7 +83,9 @@ let rec can_be_captured =
   | Pair _
   | ET_Splice _ ->
     true
-  | Hole ((_, _, exp), _, _, _) -> can_be_captured exp
+  | Invalid (Some (_, _, exp))
+  | Hole ((_, _, exp), _, _, _) ->
+    can_be_captured exp
 
 let patch_location_collection_handler =
   object

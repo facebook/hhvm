@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<724138b8ac7bd223e77e5af796319761>>
+// @generated SignedSource<<8afb3b453576ffe0d0d137cf2bac6a5f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -598,6 +598,12 @@ pub enum Expr_<Ex, En> {
     ///
     ///     list(, $y) = vec[1, 2] // Omitted is the first expression inside list()
     Omitted,
+    /// Invalid expression marker generated during elaboration / validation phases
+    ///
+    ///     class MyFoo {
+    ///       const int BAR = calls_are_invalid_here();
+    ///     }
+    Invalid(Box<Option<Expr<Ex, En>>>),
     /// An identifier. Used for method names and global constants.
     ///
     ///     SOME_CONST

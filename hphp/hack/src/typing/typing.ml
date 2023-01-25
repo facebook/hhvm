@@ -3438,6 +3438,15 @@ and expr_
       ~check_defined
       env
       e
+  | Invalid expr_opt ->
+    let ty = Typing_make_type.nothing @@ Typing_reason.Rinvalid in
+    let expr_opt =
+      Option.map
+        ~f:(Aast.map_expr (fun _ -> ty) (fun _ -> Tast.dummy_saved_env))
+        expr_opt
+    in
+    let expr_ = Aast.Invalid expr_opt in
+    make_result env p expr_ ty
   | Omitted ->
     (* If an expression is omitted in an lvalue position, currently only
      * possible in a list destructuring construct such as `list(,$x) = $y;`,

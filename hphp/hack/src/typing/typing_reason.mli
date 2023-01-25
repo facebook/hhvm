@@ -165,6 +165,7 @@ type _ t_ =
       Pos_or_decl.t * string * locl_phase t_
       -> locl_phase t_
   | Rmissing_class : Pos.t -> locl_phase t_
+  | Rinvalid : 'phase t_
 
 type t = locl_phase t_
 

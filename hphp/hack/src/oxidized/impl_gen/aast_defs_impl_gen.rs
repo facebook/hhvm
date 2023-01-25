@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<39d4f2e2d613074bdd05f2ca68aff62c>>
+// @generated SignedSource<<8aadd50b3488df330de4a08ab099d3d1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -888,6 +888,9 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_omitted() -> Self {
         Expr_::Omitted
     }
+    pub fn mk_invalid(p0: Option<Expr<Ex, En>>) -> Self {
+        Expr_::Invalid(Box::new(p0))
+    }
     pub fn mk_id(p0: Sid) -> Self {
         Expr_::Id(Box::new(p0))
     }
@@ -1097,6 +1100,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn is_omitted(&self) -> bool {
         match self {
             Expr_::Omitted => true,
+            _ => false,
+        }
+    }
+    pub fn is_invalid(&self) -> bool {
+        match self {
+            Expr_::Invalid(..) => true,
             _ => false,
         }
     }
@@ -1404,6 +1413,12 @@ impl<Ex, En> Expr_<Ex, En> {
     )> {
         match self {
             Expr_::KeyValCollection(p0) => Some((&p0.0, &p0.1, &p0.2)),
+            _ => None,
+        }
+    }
+    pub fn as_invalid(&self) -> Option<&Option<Expr<Ex, En>>> {
+        match self {
+            Expr_::Invalid(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -1738,6 +1753,12 @@ impl<Ex, En> Expr_<Ex, En> {
     )> {
         match self {
             Expr_::KeyValCollection(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
+            _ => None,
+        }
+    }
+    pub fn as_invalid_mut(&mut self) -> Option<&mut Option<Expr<Ex, En>>> {
+        match self {
+            Expr_::Invalid(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
@@ -2103,6 +2124,12 @@ impl<Ex, En> Expr_<Ex, En> {
     )> {
         match self {
             Expr_::KeyValCollection(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
+            _ => None,
+        }
+    }
+    pub fn as_invalid_into(self) -> Option<Option<Expr<Ex, En>>> {
+        match self {
+            Expr_::Invalid(p0) => Some(*p0),
             _ => None,
         }
     }

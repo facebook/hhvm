@@ -502,6 +502,9 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             Expr_::ETSplice(_) => Err(Error::unrecoverable(
                 "expression trees: splice should be erased during rewriting",
             )),
+            Expr_::Invalid(_) => Err(Error::unrecoverable(
+                "emit_expr: Invalid should never be encountered by codegen",
+            )),
             Expr_::FunId(_)
             | Expr_::MethodId(_)
             | Expr_::MethodCaller(_)

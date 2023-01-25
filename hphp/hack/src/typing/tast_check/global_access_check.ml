@@ -778,7 +778,8 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
   | Smethod_id _
   | ET_Splice _
   | EnumClassLabel _
-  | Hole _ ->
+  | Hole _
+  | Invalid _ ->
     DataSourceSet.singleton Unknown
 
 (* Get the global variable names from the given expression's data sources.

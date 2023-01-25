@@ -716,7 +716,9 @@ let shape_string_keys (sm : 'a TShapeMap.t) : string list =
 
 let unwrap_holes ((_, _, e_) as e : Tast.expr) : Tast.expr =
   match e_ with
-  | Aast.Hole (e, _, _, _) -> e
+  | Aast.Hole (e, _, _, _)
+  | Aast.Invalid (Some e) ->
+    e
   | _ -> e
 
 (* If we see a call to a function that takes a shape argument, offer

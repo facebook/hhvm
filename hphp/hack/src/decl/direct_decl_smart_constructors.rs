@@ -1373,7 +1373,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_) | ObjGet(_)
                         | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_) | Shape(_)
                         | SmethodId(_) | Tuple(_) | Upcast(_) | ValCollection(_) | Varray(_)
-                        | Xml(_) | Yield(_) => None,
+                        | Xml(_) | Yield(_) | Invalid(_) => None,
                     }
                 }
                 Some(self.alloc(Ty(

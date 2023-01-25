@@ -146,7 +146,7 @@ impl<'decl> Infer<'decl> {
             }
             This => (exp.clone(), Tyx::Todo, ctx),
             Null | True | False => (exp.clone(), Tyx::Primitive, ctx),
-            Omitted => (exp.clone(), Tyx::GiveUp, ctx),
+            Omitted | Invalid(_) => (exp.clone(), Tyx::GiveUp, ctx),
             Id(box id) => {
                 let ty = self
                     .get_fun_decl(id, pos)

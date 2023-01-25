@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e417d2db3dfffbbabd21c4f208e225e4>>
+// @generated SignedSource<<800d35be0c7f14123230dc75dad18ddf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -738,6 +738,13 @@ pub enum Expr_<'a, Ex, En> {
     ///
     ///     list(, $y) = vec[1, 2] // Omitted is the first expression inside list()
     Omitted,
+    /// Invalid expression marker generated during elaboration / validation phases
+    ///
+    ///     class MyFoo {
+    ///       const int BAR = calls_are_invalid_here();
+    ///     }
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Invalid(Option<&'a Expr<'a, Ex, En>>),
     /// An identifier. Used for method names and global constants.
     ///
     ///     SOME_CONST

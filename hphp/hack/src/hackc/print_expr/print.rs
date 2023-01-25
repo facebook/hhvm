@@ -25,6 +25,7 @@ use hhbc_string_utils::mangle;
 use hhbc_string_utils::strip_global_ns;
 use hhbc_string_utils::strip_ns;
 use hhbc_string_utils::types;
+use lazy_static::__Deref;
 use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
 use oxidized::ast;
@@ -687,6 +688,10 @@ fn print_expr(
             print_expr(ctx, w, env, expr)?;
             w.write_all(b")")
         }
+        Expr_::Invalid(expr_opt) => match &expr_opt.deref() {
+            Some(expr) => print_expr(ctx, w, env, expr),
+            _ => Ok(()),
+        },
         Expr_::Dollardollar(_)
         | Expr_::ExpressionTree(_)
         | Expr_::FunId(_)

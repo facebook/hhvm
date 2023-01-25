@@ -228,6 +228,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             let (expr, _, _, _) = &**h;
             rty_expr(context, expr)
         }
+        Invalid(_e) => Rty::Mutable,
         Cast(_) => Rty::Mutable, // Casts are only valid on primitive types, so its always mutable
         New(_) => Rty::Mutable,
         // FWIW, this does not appear on the aast at this stage(it only appears after naming in typechecker),

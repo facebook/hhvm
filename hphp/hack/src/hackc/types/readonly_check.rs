@@ -262,7 +262,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             rty_expr(context, expr)
         }
         // Primitive types are mutable
-        Null | True | False | Omitted => Rty::Mutable,
+        Null | True | False | Omitted | Invalid(_) => Rty::Mutable,
         Int(_) | Float(_) | String(_) | String2(_) | PrefixedString(_) => Rty::Mutable,
         Id(_) => Rty::Mutable,
         Dollardollar(lid) => {

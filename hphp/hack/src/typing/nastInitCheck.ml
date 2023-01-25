@@ -621,6 +621,8 @@ and expr_ env acc p e =
   | ET_Splice e -> expr acc e
   | ReadonlyExpr e -> expr acc e
   | Hole (e, _, _, _) -> expr acc e
+  (* Don't analyze invalid expressions *)
+  | Invalid _ -> acc
 
 and case env acc ((_, b) : (_, _) Aast.case) = block env acc b
 

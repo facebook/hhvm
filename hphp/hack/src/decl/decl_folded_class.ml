@@ -980,7 +980,11 @@ and class_decl
       c
   in
   let dc_tparams =
-    Decl_enforceability.maybe_add_supportdyn_constraints ctx p c.sc_tparams
+    Decl_enforceability.maybe_add_supportdyn_constraints
+      ~this_class:(Some c)
+      ctx
+      p
+      c.sc_tparams
   in
   let sealed_whitelist = get_sealed_whitelist c in
   let tc =

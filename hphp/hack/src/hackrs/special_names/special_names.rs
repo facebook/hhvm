@@ -297,6 +297,7 @@ pub mod user_attributes {
     pub static uaCanCall: Lazy<TypeName> = lazy!(sn::user_attributes::CAN_CALL);
     pub static uaSupportDynamicType: Lazy<TypeName> =
         lazy!(sn::user_attributes::SUPPORT_DYNAMIC_TYPE);
+    pub static uaNoAutoDynamic: Lazy<TypeName> = lazy!(sn::user_attributes::NO_AUTO_DYNAMIC);
     pub static uaRequireDynamic: Lazy<TypeName> = lazy!(sn::user_attributes::REQUIRE_DYNAMIC);
     pub static uaEnableMethodTraitDiamond: Lazy<TypeName> =
         lazy!(sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND);

@@ -35,7 +35,26 @@ module Env = struct
           Elab_everything_sdt.{ t.elab_everything_sdt with in_enum_class };
       }
 
+  let set_under_no_auto_dynamic t ~under_no_auto_dynamic =
+    Naming_phase_env.
+      {
+        t with
+        elab_everything_sdt =
+          Elab_everything_sdt.
+            { t.elab_everything_sdt with under_no_auto_dynamic };
+      }
+
   let everything_sdt Naming_phase_env.{ everything_sdt; _ } = everything_sdt
+
+  let under_no_auto_dynamic
+      Naming_phase_env.
+        {
+          elab_everything_sdt = Elab_everything_sdt.{ under_no_auto_dynamic; _ };
+          _;
+        } =
+    under_no_auto_dynamic
+
+  let implicit_sdt env = everything_sdt env && not (under_no_auto_dynamic env)
 end
 
 let wrap_supportdyn p h = Aast.Happly ((p, SN.Classes.cSupportDyn), [(p, h)])
@@ -52,7 +71,7 @@ let on_expr_ (env, expr_, err) =
 
 let on_hint (env, hint, err) =
   let hint =
-    if Env.everything_sdt env then
+    if Env.implicit_sdt env then
       match hint with
       | (pos, (Aast.(Hmixed | Hnonnull) as hint_)) when not @@ Env.in_is_as env
         ->
@@ -71,11 +90,21 @@ let on_hint (env, hint, err) =
   in
   Ok (env, hint, err)
 
+let on_fun_def_top_down (env, fd, err) =
+  let env =
+    Env.set_under_no_auto_dynamic
+      env
+      ~under_no_auto_dynamic:
+        (Naming_attributes.mem
+           SN.UserAttributes.uaNoAutoDynamic
+           Aast.(fd.fd_fun.f_user_attributes))
+  in
+  Ok (env, fd, err)
+
 let on_fun_def (env, fd, err) =
   let fd_fun = fd.Aast.fd_fun in
-
   let fd_fun =
-    if Env.everything_sdt env then
+    if Env.implicit_sdt env then
       let (pos, _) = fd.Aast.fd_name in
       let f_user_attributes =
         Aast.
@@ -94,7 +123,7 @@ let on_fun_def (env, fd, err) =
 
 let on_tparam (env, t, err) =
   let t =
-    if Env.everything_sdt env then
+    if Env.implicit_sdt env then
       let (pos, _) = t.Aast.tp_name in
       let tp_constraints =
         (Ast_defs.Constraint_as, (pos, wrap_supportdyn pos Aast.Hmixed))
@@ -113,11 +142,19 @@ let on_class_top_down (env, c, err) =
     | _ -> false
   in
   let env = Env.set_in_enum_class env ~in_enum_class in
+  let env =
+    Env.set_under_no_auto_dynamic
+      env
+      ~under_no_auto_dynamic:
+        (Naming_attributes.mem
+           SN.UserAttributes.uaNoAutoDynamic
+           c.Aast.c_user_attributes)
+  in
   Ok (env, c, err)
 
 let on_class_ (env, c, err) =
   let c =
-    if Env.everything_sdt env then
+    if Env.implicit_sdt env then
       let (pos, _) = c.Aast.c_name in
       let c_user_attributes =
         match c.Aast.c_kind with
@@ -174,6 +211,7 @@ let top_down_pass =
       Ast_transform.
         {
           identity with
+          on_fun_def = Some on_fun_def_top_down;
           on_class_ = Some on_class_top_down;
           on_expr_ = Some on_expr_;
         })

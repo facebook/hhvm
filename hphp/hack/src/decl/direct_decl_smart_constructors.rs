@@ -129,6 +129,7 @@ pub struct Impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
     classish_name_builder: ClassishNameBuilder<'a>,
     type_parameters: Rc<Vec<SSet<'a>>>,
     retain_or_omit_user_attributes_for_facts: bool,
+    under_no_auto_dynamic: bool,
     source_text_allocator: S,
     module: Option<Id<'a>>,
 }
@@ -168,6 +169,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 type_parameters: Rc::new(Vec::new()),
                 source_text_allocator,
                 retain_or_omit_user_attributes_for_facts,
+                under_no_auto_dynamic: false,
                 module: None,
             }),
             token_factory: SimpleTokenFactoryImpl::new(),
@@ -1115,6 +1117,17 @@ impl<'a> Node<'a> {
     fn is_present(&self) -> bool {
         !self.is_ignored()
     }
+
+    fn contains_marker_attribute(&self, name: &str) -> bool {
+        self.iter().any(|node| match node {
+            Node::Attribute(&UserAttributeNode {
+                name: Id(_pos, attr_name),
+                classname_params: [],
+                string_literal_params: [],
+            }) => attr_name == name,
+            _ => false,
+        })
+    }
 }
 
 #[derive(Debug)]
@@ -1142,18 +1155,23 @@ struct Attributes<'a> {
 
 impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
     fn add_class(&mut self, name: &'a str, decl: &'a shallow_decl_defs::ShallowClass<'a>) {
+        self.under_no_auto_dynamic = false;
         self.decls.add(name, Decl::Class(decl), self.arena);
     }
     fn add_fun(&mut self, name: &'a str, decl: &'a typing_defs::FunElt<'a>) {
+        self.under_no_auto_dynamic = false;
         self.decls.add(name, Decl::Fun(decl), self.arena);
     }
     fn add_typedef(&mut self, name: &'a str, decl: &'a typing_defs::TypedefType<'a>) {
+        self.under_no_auto_dynamic = false;
         self.decls.add(name, Decl::Typedef(decl), self.arena);
     }
     fn add_const(&mut self, name: &'a str, decl: &'a typing_defs::ConstDecl<'a>) {
+        self.under_no_auto_dynamic = false;
         self.decls.add(name, Decl::Const(decl), self.arena);
     }
     fn add_module(&mut self, name: &'a str, decl: &'a typing_defs::ModuleDefType<'a>) {
+        self.under_no_auto_dynamic = false;
         self.decls.add(name, Decl::Module(decl), self.arena)
     }
 
@@ -1318,6 +1336,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             self.alloc([self.alloc(Ty(self.alloc(Reason::witness_from_decl(pos)), ty))]),
         )))
     }
+
+    fn implicit_sdt(&self) -> bool {
+        self.opts.everything_sdt && !self.under_no_auto_dynamic
+    }
+
     fn node_to_ty_(&self, node: Node<'a>, allow_non_ret_ty: bool) -> Option<&'a Ty<'a>> {
         match node {
             Node::Ty(Ty(reason, Ty_::Tprim(aast::Tprim::Tvoid))) if !allow_non_ret_ty => {
@@ -1419,7 +1442,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     match name {
                         "nothing" => Ty_::Tunion(&[]),
                         "nonnull" => {
-                            if self.opts.everything_sdt {
+                            if self.implicit_sdt() {
                                 self.make_supportdyn(pos, Ty_::Tnonnull)
                             } else {
                                 Ty_::Tnonnull
@@ -2834,7 +2857,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             TokenKind::Bool => self.prim_ty(aast::Tprim::Tbool, token_pos(self)),
             TokenKind::Mixed => {
                 let reason = self.alloc(Reason::hint(token_pos(self)));
-                if self.opts.everything_sdt {
+                if self.implicit_sdt() {
                     let ty_ = self.make_supportdyn(token_pos(self), Ty_::Tmixed);
                     Node::Ty(self.alloc(Ty(reason, ty_)))
                 } else {
@@ -3670,7 +3693,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     type_,
                     pos,
                     php_std_lib: parsed_attributes.php_std_lib,
-                    support_dynamic_type: self.opts.everything_sdt
+                    support_dynamic_type: self.implicit_sdt()
                         || parsed_attributes.support_dynamic_type,
                 });
                 let this = Rc::make_mut(&mut self.state);
@@ -4256,8 +4279,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     // Annoyingly, the <<__SupportDynamicType>> annotation on a
                     // class implicitly changes the decls of every method inside
                     // it, so we have to reallocate them here.
-                    let method = if (self.opts.everything_sdt
-                        || class_attributes.support_dynamic_type)
+                    let method = if (self.implicit_sdt() || class_attributes.support_dynamic_type)
                         && !method.flags.contains(MethodFlags::SUPPORT_DYNAMIC_TYPE)
                     {
                         let type_ = match method.type_.1 {
@@ -4315,8 +4337,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let user_attributes = user_attributes.into_bump_slice();
         let extends = self.slice(extends.iter().filter_map(|&node| self.node_to_ty(node)));
         let implements = self.slice(implements.iter().filter_map(|&node| self.node_to_ty(node)));
-        let support_dynamic_type =
-            self.opts.everything_sdt || class_attributes.support_dynamic_type;
+        let support_dynamic_type = self.implicit_sdt() || class_attributes.support_dynamic_type;
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
         let module = self.module;
@@ -5135,7 +5156,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         };
         let pos = self.merge_positions(shape, rparen);
         let ty_ = Ty_::Tshape(self.alloc((kind, fields.into())));
-        if is_open && self.opts.everything_sdt {
+        if is_open && self.implicit_sdt() {
             self.hint_ty(pos, self.make_supportdyn(pos, ty_))
         } else {
             self.hint_ty(pos, ty_)
@@ -5296,6 +5317,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         attrs: Self::Output,
         gtgt: Self::Output,
     ) -> Self::Output {
+        if attrs.contains_marker_attribute("__NoAutoDynamic") {
+            let this = Rc::make_mut(&mut self.state);
+            this.under_no_auto_dynamic = true;
+        }
         match attrs {
             Node::List(nodes) => {
                 Node::BracketedList(self.alloc((self.get_pos(ltlt), nodes, self.get_pos(gtgt))))
@@ -5511,7 +5536,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             flags |= FunTypeFlags::VARIADIC
         }
 
-        let pess_return_type = if self.opts.everything_sdt {
+        let pess_return_type = if self.implicit_sdt() {
             self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tlike(ret)))
         } else {
             ret
@@ -5529,7 +5554,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             ifc_decl: default_ifc_fun_decl(),
         }));
 
-        if self.opts.everything_sdt {
+        if self.implicit_sdt() {
             self.hint_ty(pos, self.make_supportdyn(pos, fty))
         } else {
             self.hint_ty(pos, fty)
@@ -5854,6 +5879,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
     }
 
     fn make_attribute_specification(&mut self, attributes: Self::Output) -> Self::Output {
+        if attributes.contains_marker_attribute("__NoAutoDynamic") {
+            let this = Rc::make_mut(&mut self.state);
+            this.under_no_auto_dynamic = true;
+        }
         if self.retain_or_omit_user_attributes_for_facts {
             attributes
         } else {

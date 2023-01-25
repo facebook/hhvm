@@ -130,6 +130,7 @@ val add_supportdyn_constraints :
 
 (** Add as supportdyn<mixed> constraints to the type parameters if in implicit pessimisation mode.*)
 val maybe_add_supportdyn_constraints :
+  this_class:Shallow_decl_defs.shallow_class option ->
   Provider_context.t ->
   Pos_or_decl.t ->
   Typing_defs.decl_ty Typing_defs_core.tparam list ->

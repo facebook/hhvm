@@ -455,8 +455,8 @@ let add_supportdyn_constraints p tparams =
             :: tparam.tp_constraints;
         })
 
-let maybe_add_supportdyn_constraints ctx p tparams =
-  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+let maybe_add_supportdyn_constraints ~this_class ctx p tparams =
+  if Provider_context.implicit_sdt_for_class ctx this_class then
     add_supportdyn_constraints p tparams
   else
     tparams
@@ -471,7 +471,7 @@ let pessimise_type ~is_xhp_attr ~this_class ctx ty =
     make_like_type ~return_from_async:false ty
 
 let maybe_pessimise_type ~is_xhp_attr ~this_class ctx ty =
-  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+  if Provider_context.implicit_sdt_for_class ctx this_class then
     pessimise_type ~is_xhp_attr ~this_class ctx ty
   else
     ty
@@ -545,7 +545,7 @@ let pessimise_fun_type ~fun_kind ~this_class ctx p ty =
   | _ -> ty
 
 let maybe_pessimise_fun_type ~fun_kind ~this_class ctx p ty =
-  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+  if Provider_context.implicit_sdt_for_class ctx this_class then
     pessimise_fun_type ~fun_kind ~this_class ctx p ty
   else
     ty

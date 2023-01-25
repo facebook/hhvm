@@ -335,6 +335,8 @@ module UserAttributes = struct
 
   let uaSupportDynamicType = "__SupportDynamicType"
 
+  let uaNoAutoDynamic = "__NoAutoDynamic"
+
   let uaRequireDynamic = "__RequireDynamic"
 
   let uaEnableMethodTraitDiamond = "__EnableMethodTraitDiamond"
@@ -677,6 +679,12 @@ module UserAttributes = struct
               autocomplete = false;
               doc =
                 "Marks methods and functions that can be called on a receiver of type `dynamic` with `dynamic` arguments. Requires the enable_sound_dynamic_type typechecking flag.";
+            } );
+          ( uaNoAutoDynamic,
+            {
+              contexts = [fn; cls];
+              autocomplete = false;
+              doc = "Locally disable implicit pessimisation.";
             } );
           ( uaRequireDynamic,
             {

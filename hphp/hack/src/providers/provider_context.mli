@@ -224,3 +224,5 @@ support situations where the original backend isn't
 [Provider_backend.Pessimised_shared_memory] already and fail instead. *)
 val ctx_with_pessimisation_info_exn :
   t -> Provider_backend.pessimisation_info -> t
+
+val implicit_sdt_for_class : t -> Shallow_decl_defs.shallow_class option -> bool

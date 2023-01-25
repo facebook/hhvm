@@ -269,3 +269,15 @@ let ctx_with_pessimisation_info_exn ctx info =
     failwith
       "This operation is only supported on contexts with a
       Provider_backend.Pessimised_shared_memory backend."
+
+let noautodynamic this_class =
+  match this_class with
+  | None -> false
+  | Some sc ->
+    Typing_defs.Attributes.mem
+      Naming_special_names.UserAttributes.uaNoAutoDynamic
+      sc.Shallow_decl_defs.sc_user_attributes
+
+let implicit_sdt_for_class ctx this_class =
+  TypecheckerOptions.everything_sdt (get_tcopt ctx)
+  && not (noautodynamic this_class)

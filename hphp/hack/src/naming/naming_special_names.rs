@@ -310,6 +310,8 @@ pub mod user_attributes {
 
     pub const SUPPORT_DYNAMIC_TYPE: &str = "__SupportDynamicType";
 
+    pub const NO_AUTO_DYNAMIC: &str = "__NoAutoDynamic";
+
     pub const REQUIRE_DYNAMIC: &str = "__RequireDynamic";
 
     pub const ENABLE_METHOD_TRAIT_DIAMOND: &str = "__EnableMethodTraitDiamond";
@@ -354,6 +356,7 @@ pub mod user_attributes {
             EXTERNAL,
             CAN_CALL,
             SUPPORT_DYNAMIC_TYPE,
+            NO_AUTO_DYNAMIC,
             REQUIRE_DYNAMIC,
             ENABLE_METHOD_TRAIT_DIAMOND,
         ]

@@ -1002,7 +1002,7 @@ let class_constr_def ~is_disposable env cls constructor =
   Option.bind constructor ~f:(method_def ~is_disposable env cls)
 
 (** Type-check a property declaration, with optional initializer *)
-let class_var_def ~is_static cls env cv =
+let class_var_def ~is_static ~is_noautodynamic cls env cv =
   let tcopt = Env.get_tcopt env in
   Profile.measure_elapsed_time_and_report tcopt (Some env) cv.cv_id @@ fun () ->
   (* First pick up and localize the hint if it exists *)
@@ -1032,7 +1032,10 @@ let class_var_def ~is_static cls env cv =
         match cty.et_enforced with
         | Enforced when is_none cv.cv_xhp_attr -> cty
         | _ ->
-          if TypecheckerOptions.everything_sdt env.genv.tcopt then
+          if
+            TypecheckerOptions.everything_sdt env.genv.tcopt
+            && not is_noautodynamic
+          then
             { cty with et_type = Typing_utils.make_like env cty.et_type }
           else (
             Typing_log.log_pessimise_prop env (fst cv.cv_id) (snd cv.cv_id);
@@ -1624,8 +1627,16 @@ let check_class_members env c tc =
   let (static_vars, vars) = split_vars c.c_vars in
   let (constructor, static_methods, methods) = split_methods c.c_methods in
   let is_disposable = Typing_disposable.is_disposable_class env tc in
+  let is_noautodynamic =
+    Naming_attributes.mem
+      SN.UserAttributes.uaNoAutoDynamic
+      c.Aast.c_user_attributes
+  in
   let (env, typed_vars_and_global_inference_envs) =
-    List.map_env env vars ~f:(class_var_def ~is_static:false tc)
+    List.map_env
+      env
+      vars
+      ~f:(class_var_def ~is_static:false ~is_noautodynamic tc)
   in
   let (typed_vars, vars_global_inference_envs) =
     List.unzip typed_vars_and_global_inference_envs
@@ -1645,7 +1656,10 @@ let check_class_members env c tc =
   let typed_constructor = class_constr_def ~is_disposable env tc constructor in
   let env = Env.set_static env in
   let (env, typed_static_vars_and_global_inference_envs) =
-    List.map_env env static_vars ~f:(class_var_def ~is_static:true tc)
+    List.map_env
+      env
+      static_vars
+      ~f:(class_var_def ~is_static:true ~is_noautodynamic tc)
   in
   let (typed_static_vars, static_vars_global_inference_envs) =
     List.unzip typed_static_vars_and_global_inference_envs

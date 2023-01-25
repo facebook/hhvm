@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4e4cff23c811fe39be0e3d95b9a5fe68>>
+// @generated SignedSource<<e417d2db3dfffbbabd21c4f208e225e4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2975,7 +2975,7 @@ arena_deserializer::impl_deserialize_in_arena!(Enum_<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord,
+#[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord, map,
     (visitors
        {
          variety = "iter";

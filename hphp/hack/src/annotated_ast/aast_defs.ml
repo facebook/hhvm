@@ -11,7 +11,7 @@
  * requiring a lot of padding for inline doc comments. *)
 [@@@ocamlformat "doc-comments-padding=80"]
 
-type 'a local_id_map = 'a Local_id.Map.t [@@deriving eq, ord, show]
+type 'a local_id_map = 'a Local_id.Map.t [@@deriving eq, ord, map, show]
 
 let pp_local_id_map _ fmt map =
   Format.fprintf fmt "@[<hov 2>{";
@@ -218,7 +218,7 @@ and ('ex, 'en) stmt_ =
        * TODO: this really belongs in def.
        *
        *     <?hh *)
-  | AssertEnv of env_annot * (pos * 'ex) local_id_map
+  | AssertEnv of env_annot * ((pos * 'ex) local_id_map[@map.opaque])
       (** Used in IFC to track type inference environments. Not user
        * denotable. *)
 
@@ -1237,6 +1237,7 @@ and where_constraint_hint = hint * Ast_defs.constraint_kind * hint
   show { with_path = false },
     eq,
     ord,
+    map,
     visitors
       {
         variety = "iter";

@@ -16,15 +16,6 @@ open Hh_prelude
 module SN = Naming_special_names
 
 module Env = struct
-  let in_mode
-      Naming_phase_env.
-        { elab_class_members = Elab_class_members.{ in_mode }; _ } =
-    in_mode
-
-  let set_mode t ~in_mode =
-    Naming_phase_env.
-      { t with elab_class_members = Elab_class_members.{ in_mode } }
-
   let like_type_hints_enabled Naming_phase_env.{ like_type_hints_enabled; _ } =
     like_type_hints_enabled
 end
@@ -59,25 +50,18 @@ let is_xhp cv_name =
   try String.(sub cv_name ~pos:0 ~len:1 = ":") with
   | Invalid_argument _ -> false
 
-let elab_cv_expr mode pos cv_expr =
-  match cv_expr with
-  | None when FileInfo.is_hhi mode ->
-    Some ((), pos, Naming_phase_error.invalid_expr_ pos)
-  | cv_expr -> cv_expr
-
-let elab_class_prop mode (Aast.{ cv_expr; cv_id = (pos, cv_name); _ } as cv) =
-  let cv_expr = elab_cv_expr mode pos cv_expr in
+let elab_class_prop (Aast.{ cv_id = (_, cv_name); _ } as cv) =
   let cv_xhp_attr =
     if is_xhp cv_name then
       Some Aast.{ xai_like = None; xai_tag = None; xai_enum_values = [] }
     else
       None
   in
-  Aast.{ cv with cv_expr; cv_xhp_attr }
+  Aast.{ cv with cv_xhp_attr }
 
 let elab_non_static_class_prop
-    const_attr_opt mode (Aast.{ cv_user_attributes; _ } as cv) =
-  let cv = elab_class_prop mode cv in
+    const_attr_opt (Aast.{ cv_user_attributes; _ } as cv) =
+  let cv = elab_class_prop cv in
   let cv_user_attributes =
     match const_attr_opt with
     | Some ua
@@ -90,7 +74,7 @@ let elab_non_static_class_prop
   Aast.{ cv with cv_user_attributes }
 
 let elab_xhp_attr
-    like_type_hints_enabled mode (type_hint, cv, xhp_attr_tag_opt, enum_opt) =
+    like_type_hints_enabled (type_hint, cv, xhp_attr_tag_opt, enum_opt) =
   let is_required = Option.is_some xhp_attr_tag_opt
   and has_default =
     Option.value_map
@@ -145,47 +129,26 @@ let elab_xhp_attr
   let cv_type = ((), hint_opt)
   and cv_xhp_attr =
     Some Aast.{ xai_like; xai_tag = xhp_attr_tag_opt; xai_enum_values }
-  and cv_expr = elab_cv_expr mode (fst cv.Aast.cv_id) cv.Aast.cv_expr in
+  in
   let errs = List.filter_map ~f:Fn.id [req_attr_err; like_err] in
-  (Aast.{ cv with cv_xhp_attr; cv_type; cv_expr; cv_user_attributes = [] }, errs)
-
-let on_typedef (env, t, err) =
-  Ok (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
-
-let on_gconst (env, cst, err) =
-  Ok (Env.set_mode env ~in_mode:cst.Aast.cst_mode, cst, err)
-
-let on_fun_def (env, fd, err) =
-  Ok (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err)
-
-let on_module_def (env, md, err) =
-  Ok (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err)
+  (Aast.{ cv with cv_xhp_attr; cv_type; cv_user_attributes = [] }, errs)
 
 let on_class_
     ( env,
-      (Aast.{ c_vars; c_xhp_attrs; c_methods; c_user_attributes; c_mode; _ } as
-      c),
+      (Aast.{ c_vars; c_xhp_attrs; c_methods; c_user_attributes; _ } as c),
       err_acc ) =
-  let env = Env.set_mode env ~in_mode:c_mode in
   let (c, errs) =
     let (c_vars, err) =
       let (static_props, props) = Aast.split_vars c_vars in
       let const_attr_opt =
         Naming_attributes.find SN.UserAttributes.uaConst c_user_attributes
       in
-      let static_props =
-        List.map ~f:(elab_class_prop @@ Env.in_mode env) static_props
-      and props =
-        List.map
-          ~f:(elab_non_static_class_prop const_attr_opt @@ Env.in_mode env)
-          props
+      let static_props = List.map ~f:elab_class_prop static_props
+      and props = List.map ~f:(elab_non_static_class_prop const_attr_opt) props
       and (xhp_attrs, xhp_attrs_err) =
         List.unzip
         @@ List.map
-             ~f:
-               (elab_xhp_attr
-                  (Env.like_type_hints_enabled env)
-                  (Env.in_mode env))
+             ~f:(elab_xhp_attr (Env.like_type_hints_enabled env))
              c_xhp_attrs
       in
       (static_props @ props @ xhp_attrs, List.concat xhp_attrs_err)
@@ -203,13 +166,4 @@ let on_class_
 
 let pass =
   Naming_phase_pass.(
-    bottom_up
-      Ast_transform.
-        {
-          identity with
-          on_typedef = Some on_typedef;
-          on_gconst = Some on_gconst;
-          on_fun_def = Some on_fun_def;
-          on_module_def = Some on_module_def;
-          on_class_ = Some on_class_;
-        })
+    bottom_up Ast_transform.{ identity with on_class_ = Some on_class_ })

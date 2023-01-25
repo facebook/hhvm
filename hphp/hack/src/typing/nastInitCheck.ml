@@ -650,7 +650,8 @@ and fun_param env acc param =
 and fun_paraml env acc l = List.fold_left ~f:(fun_param env) ~init:acc l
 
 let class_ tenv c =
-  if not (FileInfo.is_hhi c.c_mode) then
+  let is_hhi = FileInfo.is_hhi c.c_mode in
+  if not is_hhi then
     List.iter c.c_vars ~f:(fun cv ->
         match cv.cv_expr with
         | Some _ when is_lateinit cv ->
@@ -706,7 +707,7 @@ let class_ tenv c =
               (fun prop _ -> not (SSet.mem prop env.init_not_required_props))
               uninit_props
           in
-          if not (SMap.is_empty class_uninit_props) then
+          if (not (SMap.is_empty class_uninit_props)) && not is_hhi then
             Errors.add_nast_check_error
             @@ Nast_check_error.Not_initialized
                  {

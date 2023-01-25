@@ -59,12 +59,6 @@ module Elab_class_id = struct
   let empty = { in_class = false }
 end
 
-module Elab_class_members = struct
-  type t = { in_mode: FileInfo.mode }
-
-  let empty = { in_mode = FileInfo.Mstrict }
-end
-
 module Elab_const_expr = struct
   type t = {
     in_enum_class: bool;
@@ -120,7 +114,6 @@ type t = {
   elab_class_id: Elab_class_id.t;
   elab_this_hint: Elab_this_hint.t;
   elab_call: Elab_call.t;
-  elab_class_members: Elab_class_members.t;
   elab_const_expr: Elab_const_expr.t;
   elab_everything_sdt: Elab_everything_sdt.t;
   elab_func_body: Elab_func_body.t;
@@ -147,7 +140,6 @@ let empty =
     elab_class_id = Elab_class_id.empty;
     elab_this_hint = Elab_this_hint.empty;
     elab_call = Elab_call.empty;
-    elab_class_members = Elab_class_members.empty;
     elab_const_expr = Elab_const_expr.empty;
     elab_everything_sdt = Elab_everything_sdt.empty;
     elab_func_body = Elab_func_body.empty;

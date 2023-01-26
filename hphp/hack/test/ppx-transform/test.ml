@@ -292,14 +292,14 @@ module No_restart : sig
     | Plus of t * t
     | Leq of t * t
     | Cond of t * t * t
-  [@@deriving transform { restart = `Disallow `Encode_as_variant }]
+  [@@deriving transform ~restart:(`Disallow `Encode_as_variant)]
 end = struct
   type t =
     | Num of int
     | Plus of t * t
     | Leq of t * t
     | Cond of t * t * t
-  [@@deriving transform { restart = `Disallow `Encode_as_variant }]
+  [@@deriving transform ~restart:(`Disallow `Encode_as_variant)]
 end
 
 module No_restart_as_result : sig
@@ -308,14 +308,14 @@ module No_restart_as_result : sig
     | Plus of t * t
     | Leq of t * t
     | Cond of t * t * t
-  [@@deriving transform { restart = `Disallow `Encode_as_result }]
+  [@@deriving transform ~restart:(`Disallow `Encode_as_result)]
 end = struct
   type t =
     | Num of int
     | Plus of t * t
     | Leq of t * t
     | Cond of t * t * t
-  [@@deriving transform { restart = `Disallow `Encode_as_result }]
+  [@@deriving transform ~restart:(`Disallow `Encode_as_result)]
 end
 
 module Variants = struct

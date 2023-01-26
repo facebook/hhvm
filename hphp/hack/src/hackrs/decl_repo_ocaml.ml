@@ -86,7 +86,7 @@ let init
         @ config server_args))
   in
   let (server_config, server_local_config) =
-    ServerConfig.load ~silent:true ServerConfig.repo_config_path server_args
+    ServerConfig.load ~silent:true server_args
   in
   let popt = ServerConfig.parser_options server_config in
   let tcopt = { popt with GlobalOptions.tco_higher_kinded_types = true } in

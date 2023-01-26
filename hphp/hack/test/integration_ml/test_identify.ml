@@ -24,13 +24,8 @@ let test () =
 
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename hhconfig_contents;
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
-  in
   let options = ServerArgs.default_options ~root in
-  let (custom_config, _) =
-    ServerConfig.load ~silent:false hhconfig_path options
-  in
+  let (custom_config, _) = ServerConfig.load ~silent:false options in
   let env =
     Integration_test_base.setup_server
       ()

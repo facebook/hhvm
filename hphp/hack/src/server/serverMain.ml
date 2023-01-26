@@ -136,12 +136,7 @@ module Program = struct
       Relative_path.Set.mem updates ServerConfig.repo_config_path
     in
     (if config_in_updates then
-      let (new_config, _) =
-        ServerConfig.load
-          ~silent:false
-          ServerConfig.repo_config_path
-          genv.options
-      in
+      let (new_config, _) = ServerConfig.load ~silent:false genv.options in
       if not (ServerConfig.is_compatible genv.config new_config) then (
         Hh_logger.log
           "%s changed in an incompatible way; please restart %s.\n"
@@ -1515,9 +1510,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   Folly.ensure_folly_init ();
 
   Printexc.record_backtrace true;
-  let (config, local_config) =
-    ServerConfig.load ~silent:false ServerConfig.repo_config_path options
-  in
+  let (config, local_config) = ServerConfig.load ~silent:false options in
   Option.iter local_config.ServerLocalConfig.memtrace_dir ~f:(fun dir ->
       Daemon.start_memtracing (Filename.concat dir "memtrace.server.ctf"));
   let (genv, env) =

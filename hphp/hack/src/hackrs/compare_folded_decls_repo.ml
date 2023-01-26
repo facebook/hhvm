@@ -59,7 +59,7 @@ let init (root : Path.t) (naming_table_path : string option) :
 
   let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
   let (server_config, server_local_config) =
-    ServerConfig.load ~silent:true ServerConfig.repo_config_path server_args
+    ServerConfig.load ~silent:true server_args
   in
   let popt = ServerConfig.parser_options server_config in
   let tcopt = { popt with GlobalOptions.tco_higher_kinded_types = true } in
@@ -286,7 +286,7 @@ let () =
       ServerArgs.default_options ~root:(Path.to_string www_root)
     in
     let (server_config, _server_local_config) =
-      ServerConfig.load ~silent:true ServerConfig.repo_config_path server_args
+      ServerConfig.load ~silent:true server_args
     in
     let popt = ServerConfig.parser_options server_config in
     popt

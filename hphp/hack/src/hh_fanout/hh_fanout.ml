@@ -43,7 +43,7 @@ let create_global_env (env : env) : ServerEnv.genv =
     ServerArgs.default_options_with_check_mode ~root:(Path.to_string env.root)
   in
   let (server_config, server_local_config) =
-    ServerConfig.load ~silent:false ServerConfig.repo_config_path server_args
+    ServerConfig.load ~silent:false server_args
   in
   ServerEnvBuild.make_genv server_args server_config server_local_config []
 

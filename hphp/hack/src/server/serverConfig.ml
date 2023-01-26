@@ -253,12 +253,12 @@ let prepare_iset config config_name initial_values =
 let prepare_allowed_decl_fixme_codes config =
   prepare_iset config "allowed_decl_fixme_codes" (ISet.of_list [])
 
-let load ~silent config_filename options : t * ServerLocalConfig.t =
+let load ~silent options : t * ServerLocalConfig.t =
   let command_line_overrides =
     Config_file.of_list @@ ServerArgs.config options
   in
   let (config_hash, config) =
-    Config_file.parse_hhconfig (Relative_path.to_absolute config_filename)
+    Config_file.parse_hhconfig (Relative_path.to_absolute repo_config_path)
   in
   let config =
     Config_file.apply_overrides

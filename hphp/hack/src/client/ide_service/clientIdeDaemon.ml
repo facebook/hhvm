@@ -444,9 +444,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
     ServerArgs.default_options_with_check_mode ~root:(Path.to_string param.root)
   in
   let server_args = ServerArgs.set_config server_args param.config in
-  let (config, local_config) =
-    ServerConfig.load ~silent:true ServerConfig.repo_config_path server_args
-  in
+  let (config, local_config) = ServerConfig.load ~silent:true server_args in
   HackEventLogger.set_hhconfig_version
     (ServerConfig.version config |> Config_file.version_to_string_opt);
   HackEventLogger.set_rollout_flags

@@ -266,14 +266,7 @@ let go (ctxt : index_builder_context) (workers : MultiWorker.worker list option)
          * an integration test that's using a fake repository.  Don't do anything! *)
       if Disk.file_exists (Path.to_string hhconfig_path) then
         let options = ServerArgs.default_options ~root:ctxt.repo_folder in
-        let (hhconfig, _) =
-          ServerConfig.load
-            ~silent:ctxt.silent
-            (Relative_path.create
-               Relative_path.Root
-               (Path.to_string hhconfig_path))
-            options
-        in
+        let (hhconfig, _) = ServerConfig.load ~silent:ctxt.silent options in
         let popt = ServerConfig.parser_options hhconfig in
         let ctxt =
           { ctxt with namespace_map = ParserOptions.auto_namespace_map popt }

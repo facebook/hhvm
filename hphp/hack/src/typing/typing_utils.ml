@@ -523,46 +523,50 @@ let run_on_intersection_array_key_value_res env ~f tyl =
   (env, res, arr_errs, key_errs, val_errs)
 
 (* Gets the base type of an abstract type *)
-let rec get_base_type ?(expand_supportdyn = true) env ty =
-  let get_base_type = get_base_type ~expand_supportdyn in
-  let (env, ty) = Env.expand_type env ty in
-  let r = get_reason ty in
-  match get_node ty with
-  | Tnewtype (classname, _, _) when String.equal classname SN.Classes.cClassname
-    ->
-    ty
-  | Tnewtype (n, _, ty) when String.equal n SN.Classes.cSupportDyn ->
-    let ty = get_base_type env ty in
-    if expand_supportdyn then
+let get_base_type ?(expand_supportdyn = true) env ty =
+  let rec loop seen_generics ty =
+    let (env, ty) = Env.expand_type env ty in
+    let r = get_reason ty in
+    match get_node ty with
+    | Tnewtype (classname, _, _)
+      when String.equal classname SN.Classes.cClassname ->
       ty
-    else
-      MakeType.supportdyn r ty
-  (* If we have an expression dependent type and it only has one super
-     type, we can treat it similarly to AKdependent _, Some ty *)
-  | Tgeneric (n, targs) when DependentKind.is_generic_dep_ty n -> begin
-    match TySet.elements (Env.get_upper_bounds env n targs) with
-    | ty2 :: _ when ty_equal ty ty2 -> ty
-    (* If it's exactly equal, then the base ty is just this one *)
-    | ty :: _ ->
-      if TySet.mem ty (Env.get_lower_bounds env n targs) then
+    | Tnewtype (n, _, ty) when String.equal n SN.Classes.cSupportDyn ->
+      let ty = loop seen_generics ty in
+      if expand_supportdyn then
         ty
       else
-        get_base_type env ty
-    | [] -> ty
-  end
-  | Tnewtype (cid, _, bound_ty)
-    when is_prim Aast.Tarraykey bound_ty && Env.is_enum env cid ->
-    ty
-  | Tgeneric _
-  | Tnewtype _
-  | Tdependent _ ->
-    let (_env, tys) =
-      get_concrete_supertypes ~expand_supportdyn ~abstract_enum:true env ty
-    in
-    (match tys with
-    | [ty] -> get_base_type env ty
-    | _ -> ty)
-  | _ -> ty
+        MakeType.supportdyn r ty
+    (* If we have an expression dependent type and it only has one super
+       type, we can treat it similarly to AKdependent _, Some ty *)
+    | Tgeneric (n, targs) when DependentKind.is_generic_dep_ty n -> begin
+      match TySet.elements (Env.get_upper_bounds env n targs) with
+      | ty2 :: _ when ty_equal ty ty2 -> ty
+      (* If it's exactly equal, then the base ty is just this one *)
+      | ty :: _ ->
+        if TySet.mem ty (Env.get_lower_bounds env n targs) then
+          ty
+        else if SSet.mem n seen_generics then
+          ty
+        else
+          loop (SSet.add n seen_generics) ty
+      | [] -> ty
+    end
+    | Tnewtype (cid, _, bound_ty)
+      when is_prim Aast.Tarraykey bound_ty && Env.is_enum env cid ->
+      ty
+    | Tgeneric _
+    | Tnewtype _
+    | Tdependent _ ->
+      let (_env, tys) =
+        get_concrete_supertypes ~expand_supportdyn ~abstract_enum:true env ty
+      in
+      (match tys with
+      | [ty] -> loop seen_generics ty
+      | _ -> ty)
+    | _ -> ty
+  in
+  loop SSet.empty ty
 
 let get_printable_shape_field_name = Typing_defs.TShapeField.name
 

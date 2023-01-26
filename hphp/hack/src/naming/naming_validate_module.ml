@@ -13,23 +13,27 @@ module Env = struct
     allow_module_def
 end
 
-let on_module_def :
-      'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * Err.t list ->
-      ( Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * Err.t list,
-        'c )
-      result =
- fun (env, (Aast.{ md_span; _ } as md), err_acc) ->
-  let err =
-    if Env.allow_module_def env then
-      err_acc
-    else
-      (Err.naming
-      @@ Naming_error.Module_declaration_outside_allowed_files md_span)
-      :: err_acc
+let on_module_def on_error =
+  let handler
+        : 'a 'b.
+          Naming_phase_env.t * ('a, 'b) Aast_defs.module_def ->
+          (Naming_phase_env.t * ('a, 'b) Aast_defs.module_def, _) result =
+   fun (env, (Aast.{ md_span; _ } as md)) ->
+    let err_opt =
+      if Env.allow_module_def env then
+        None
+      else
+        Some
+          (Err.naming
+          @@ Naming_error.Module_declaration_outside_allowed_files md_span)
+    in
+    Option.iter ~f:on_error err_opt;
+    Ok (env, md)
   in
-  Ok (env, md, err)
+  handler
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
-    top_down Ast_transform.{ identity with on_module_def = Some on_module_def })
+    top_down
+      Ast_transform.
+        { identity with on_module_def = Some (on_module_def on_error) })

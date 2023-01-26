@@ -8,19 +8,20 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-let on_hint_ (env, hint_, err) =
-  let err =
+let on_hint_ on_error (env, hint_) =
+  let err_opt =
     match hint_ with
     (* some common Xhp screw ups *)
     | Aast.Happly ((pos, ty_name), _hints)
       when String.(
              equal ty_name "Xhp" || equal ty_name ":Xhp" || equal ty_name "XHP")
       ->
-      (Err.naming @@ Naming_error.Disallowed_xhp_type { pos; ty_name }) :: err
-    | _ -> err
+      Some (Err.naming @@ Naming_error.Disallowed_xhp_type { pos; ty_name })
+    | _ -> None
   in
-  Ok (env, hint_, err)
+  Option.iter ~f:on_error err_opt;
+  Ok (env, hint_)
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
-    top_down Ast_transform.{ identity with on_hint_ = Some on_hint_ })
+    top_down Ast_transform.{ identity with on_hint_ = Some (on_hint_ on_error) })

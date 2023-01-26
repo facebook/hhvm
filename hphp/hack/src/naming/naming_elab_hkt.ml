@@ -12,35 +12,37 @@ module Env = struct
   let hkt_enabled Naming_phase_env.{ hkt_enabled; _ } = hkt_enabled
 end
 
-let on_hint (env, hint, err_acc) =
+let on_hint on_error (env, hint) =
   match hint with
   | (pos, Aast.Habstr (name, _ :: _)) when not @@ Env.hkt_enabled env ->
-    let err =
+    on_error
       (Err.naming
-      @@ Naming_error.Tparam_applied_to_type { pos; tparam_name = name })
-      :: err_acc
-    in
-    Ok (env, (pos, Aast.Habstr (name, [])), err)
-  | _ -> Ok (env, hint, err_acc)
+      @@ Naming_error.Tparam_applied_to_type { pos; tparam_name = name });
+    Ok (env, (pos, Aast.Habstr (name, [])))
+  | _ -> Ok (env, hint)
 
-let on_tparam :
-      'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.tparam * Err.t list ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.tparam * Err.t list, 'c) result =
- fun ( env,
-       (Aast.{ tp_parameters; tp_name = (pos, tparam_name); _ } as tparam),
-       err_acc ) ->
-  match tp_parameters with
-  | _ :: _ when not @@ Env.hkt_enabled env ->
-    let err =
-      (Err.naming @@ Naming_error.Tparam_with_tparam { pos; tparam_name })
-      :: err_acc
-    in
-    Ok (env, Aast.{ tparam with tp_parameters = [] }, err)
-  | _ -> Ok (env, tparam, err_acc)
+let on_tparam on_error =
+  let handler
+        : 'a 'b.
+          Naming_phase_env.t * ('a, 'b) Aast_defs.tparam ->
+          (Naming_phase_env.t * ('a, 'b) Aast_defs.tparam, _) result =
+   fun (env, (Aast.{ tp_parameters; tp_name = (pos, tparam_name); _ } as tparam))
+       ->
+    match tp_parameters with
+    | _ :: _ when not @@ Env.hkt_enabled env ->
+      on_error
+        (Err.naming @@ Naming_error.Tparam_with_tparam { pos; tparam_name });
+      Ok (env, Aast.{ tparam with tp_parameters = [] })
+    | _ -> Ok (env, tparam)
+  in
+  handler
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
     top_down
       Ast_transform.
-        { identity with on_hint = Some on_hint; on_tparam = Some on_tparam })
+        {
+          identity with
+          on_hint = Some (on_hint on_error);
+          on_tparam = Some (on_tparam on_error);
+        })

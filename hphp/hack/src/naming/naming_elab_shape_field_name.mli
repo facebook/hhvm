@@ -9,8 +9,7 @@
 (* We permit class constants to be used as shape field names. Here we replace
    uses of `self` with the class to which they refer or `unknown` if the shape
    is not defined within the context of a class *)
-val top_down_pass :
-  (Naming_phase_env.t, Naming_phase_error.t list) Naming_phase_pass.t
+val top_down_pass : Naming_phase_env.t Naming_phase_pass.t
 
 val bottom_up_pass :
-  (Naming_phase_env.t, Naming_phase_error.t list) Naming_phase_pass.t
+  (Naming_phase_error.t -> unit) -> Naming_phase_env.t Naming_phase_pass.t

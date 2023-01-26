@@ -15,10 +15,10 @@ module Env = struct
   let is_hhi Naming_phase_env.{ is_hhi; _ } = is_hhi
 end
 
-let on_hint_ (env, hint_, err_acc) =
-  let err =
+let on_hint_ on_error (env, hint_) =
+  let err_opt =
     if Env.is_systemlib env || Env.is_hhi env then
-      err_acc
+      None
     else
       match hint_ with
       | Aast.Happly ((pos, ty_name), _)
@@ -26,19 +26,20 @@ let on_hint_ (env, hint_, err_acc) =
                equal ty_name SN.Classes.cHH_BuiltinEnum
                || equal ty_name SN.Classes.cHH_BuiltinEnumClass
                || equal ty_name SN.Classes.cHH_BuiltinAbstractEnumClass) ->
-        (Err.naming
-        @@ Naming_error.Using_internal_class
-             { pos; class_name = Utils.strip_ns ty_name })
-        :: err_acc
-      | _ -> err_acc
+        Some
+          (Err.naming
+          @@ Naming_error.Using_internal_class
+               { pos; class_name = Utils.strip_ns ty_name })
+      | _ -> None
   in
-  Ok (env, hint_, err)
+  Option.iter ~f:on_error err_opt;
+  Ok (env, hint_)
 
 let on_class_ :
       'a 'b.
-      _ * ('a, 'b) Aast_defs.class_ * _ ->
-      (_ * ('a, 'b) Aast_defs.class_ * _, _) result =
- fun (env, (Aast.{ c_kind; c_enum; c_name; _ } as c), err) ->
+      _ * ('a, 'b) Aast_defs.class_ -> (_ * ('a, 'b) Aast_defs.class_, _) result
+    =
+ fun (env, (Aast.{ c_kind; c_enum; c_name; _ } as c)) ->
   let c =
     let pos = fst c_name in
     match c_enum with
@@ -66,10 +67,14 @@ let on_class_ :
       Aast.{ c with c_extends }
     | _ -> c
   in
-  Ok (env, c, err)
+  Ok (env, c)
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
     bottom_up
       Ast_transform.
-        { identity with on_hint_ = Some on_hint_; on_class_ = Some on_class_ })
+        {
+          identity with
+          on_hint_ = Some (on_hint_ on_error);
+          on_class_ = Some on_class_;
+        })

@@ -9,9 +9,9 @@ module SN = Naming_special_names
 
 let on_expr_ :
       'a 'b.
-      _ * ('a, 'b) Aast.expr_ * _ ->
-      (_ * ('a, 'b) Aast.expr_ * _, _ * ('a, 'b) Aast.expr_ * _) result =
- fun (env, expr_, err) ->
+      _ * ('a, 'b) Aast.expr_ ->
+      (_ * ('a, 'b) Aast.expr_, _ * ('a, 'b) Aast.expr_) result =
+ fun (env, expr_) ->
   let expr_ =
     match expr_ with
     | Aast.Lvar (pos, local_id) ->
@@ -30,7 +30,7 @@ let on_expr_ :
       Aast.Pipe (lid, e1, e2)
     | _ -> expr_
   in
-  Ok (env, expr_, err)
+  Ok (env, expr_)
 
 let pass =
   Naming_phase_pass.(

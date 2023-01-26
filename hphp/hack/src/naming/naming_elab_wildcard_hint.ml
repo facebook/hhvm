@@ -46,9 +46,9 @@ end
 
 let on_expr_ :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * 'c, 'd) result =
- fun (env, expr_, err) ->
+      Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.expr_, _) result =
+ fun (env, expr_) ->
   let env =
     match expr_ with
     | Aast.Cast _ -> Env.incr_tp_depth env
@@ -56,15 +56,12 @@ let on_expr_ :
     | Aast.Upcast _ -> Env.set_allow_wildcard env ~allow_wildcard:false
     | _ -> env
   in
-  Ok (env, expr_, err)
+  Ok (env, expr_)
 
-let on_targ (env, targ, err) =
-  Ok
-    ( Env.set_allow_wildcard ~allow_wildcard:true @@ Env.incr_tp_depth env,
-      targ,
-      err )
+let on_targ (env, targ) =
+  Ok (Env.set_allow_wildcard ~allow_wildcard:true @@ Env.incr_tp_depth env, targ)
 
-let on_hint_ (env, hint_, err) =
+let on_hint_ (env, hint_) =
   let env =
     match hint_ with
     | Aast.(
@@ -75,42 +72,43 @@ let on_hint_ (env, hint_, err) =
       Env.incr_tp_depth env
     | _ -> env
   in
-  Ok (env, hint_, err)
+  Ok (env, hint_)
 
-let on_shape_field_info (env, sfi, err) = Ok (Env.incr_tp_depth env, sfi, err)
+let on_shape_field_info (env, sfi) = Ok (Env.incr_tp_depth env, sfi)
 
-let on_context (env, hint, err_acc) =
+let on_context on_error (env, hint) =
   match hint with
   | (pos, Aast.Happly ((_, tycon_name), _))
     when String.equal tycon_name SN.Typehints.wildcard ->
-    let err =
-      Naming_phase_error.naming @@ Naming_error.Invalid_wildcard_context pos
-    in
-    Error (env, (pos, Aast.Herr), err :: err_acc)
-  | _ -> Ok (env, hint, err_acc)
+    on_error
+      (Naming_phase_error.naming @@ Naming_error.Invalid_wildcard_context pos);
+    Error (env, (pos, Aast.Herr))
+  | _ -> Ok (env, hint)
 
-let on_hint (env, hint, err_acc) =
+let on_hint on_error (env, hint) =
   match hint with
   | (pos, Aast.Happly ((_, tycon_name), hints))
     when String.equal tycon_name SN.Typehints.wildcard ->
     if Env.(allow_wildcard env && tp_depth env >= 1) (* prevents 3 as _ *) then
-      if not (List.is_empty hints) then
+      if not (List.is_empty hints) then (
         let err =
           Naming_phase_error.naming
           @@ Naming_error.Tparam_applied_to_type
                { pos; tparam_name = SN.Typehints.wildcard }
         in
-        Ok (env, (pos, Aast.Herr), err :: err_acc)
-      else
-        Ok (env, hint, err_acc)
+        on_error err;
+        Ok (env, (pos, Aast.Herr))
+      ) else
+        Ok (env, hint)
     else
       let err =
         Naming_phase_error.naming @@ Naming_error.Wildcard_hint_disallowed pos
       in
-      Ok (env, (pos, Aast.Herr), err :: err_acc)
-  | _ -> Ok (env, hint, err_acc)
+      on_error err;
+      Ok (env, (pos, Aast.Herr))
+  | _ -> Ok (env, hint)
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
     top_down
       Ast_transform.
@@ -120,6 +118,6 @@ let pass =
           on_targ = Some on_targ;
           on_hint_ = Some on_hint_;
           on_shape_field_info = Some on_shape_field_info;
-          on_context = Some on_context;
-          on_hint = Some on_hint;
+          on_context = Some (on_context on_error);
+          on_hint = Some (on_hint on_error);
         })

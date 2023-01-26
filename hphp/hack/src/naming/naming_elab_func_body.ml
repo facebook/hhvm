@@ -24,47 +24,46 @@ end
 
 let on_func_body :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.func_body * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.func_body * 'c, 'd) result =
- fun (env, func_body, err) ->
+      Naming_phase_env.t * ('a, 'b) Aast_defs.func_body ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.func_body, _) result =
+ fun (env, func_body) ->
   let func_body =
     if FileInfo.is_hhi @@ Env.in_mode env then
       Aast.{ fb_ast = [] }
     else
       func_body
   in
-  Ok (env, func_body, err)
+  Ok (env, func_body)
 
 let on_class_ :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c, 'd) result =
- (fun (env, c, err) -> Ok (Env.set_mode env ~in_mode:c.Aast.c_mode, c, err))
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_, _) result =
+ (fun (env, c) -> Ok (Env.set_mode env ~in_mode:c.Aast.c_mode, c))
 
 let on_typedef :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.typedef * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.typedef * 'c, 'd) result =
- (fun (env, t, err) -> Ok (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err))
+      Naming_phase_env.t * ('a, 'b) Aast_defs.typedef ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.typedef, _) result =
+ (fun (env, t) -> Ok (Env.set_mode env ~in_mode:t.Aast.t_mode, t))
 
 let on_gconst :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.gconst * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.gconst * 'c, 'd) result =
- fun (env, cst, err) ->
-  Ok (Env.set_mode env ~in_mode:cst.Aast.cst_mode, cst, err)
+      Naming_phase_env.t * ('a, 'b) Aast_defs.gconst ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.gconst, _) result =
+ (fun (env, cst) -> Ok (Env.set_mode env ~in_mode:cst.Aast.cst_mode, cst))
 
 let on_fun_def :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def * 'c, 'd) result =
- (fun (env, fd, err) -> Ok (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err))
+      Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def, _) result =
+ (fun (env, fd) -> Ok (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd))
 
 let on_module_def :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * 'c, 'd) result =
- (fun (env, md, err) -> Ok (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err))
+      Naming_phase_env.t * ('a, 'b) Aast_defs.module_def ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.module_def, _) result =
+ (fun (env, md) -> Ok (Env.set_mode env ~in_mode:md.Aast.md_mode, md))
 
 let pass =
   Naming_phase_pass.(

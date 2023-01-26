@@ -100,63 +100,63 @@ let passes =
     (* Strip `Hsoft` hints or replace with `Hlike` *)
     Naming_elab_soft.pass;
     (* Elaborate `Happly` to canonical representation, if any *)
-    Naming_elab_happly_hint.pass;
+    Naming_elab_happly_hint.pass on_error;
     (* Elaborate class identifier expressions (`CIexpr`) to canonical
         representation: `CIparent`, `CIself`, `CIstatic`, `CI` _or_
        `CIexpr (_,_, Lvar _ | This )` *)
-    Naming_elab_class_id.pass;
+    Naming_elab_class_id.pass on_error;
     (* Strip type parameters from type parameters when HKTs are not enabled *)
-    Naming_elab_hkt.pass;
+    Naming_elab_hkt.pass on_error;
     (* Elaborate `Collection` to `ValCollection` or `KeyValCollection` *)
-    Naming_elab_collection.pass;
+    Naming_elab_collection.pass on_error;
     (* Deduplicate user attributes *)
-    Naming_elab_user_attributes.pass;
+    Naming_elab_user_attributes.pass on_error;
     (* Replace import expressions with invalid expression marker *)
     Naming_elab_import.pass;
     (* Elaborate local variables to canonical representation *)
     Naming_elab_lvar.pass;
     (* Warn of explicit use of builtin enum classes; make subtyping of
        enum classes explicit*)
-    Naming_elab_enum_class.pass;
+    Naming_elab_enum_class.pass on_error;
     (* Elaborate class members & xhp attributes  *)
-    Naming_elab_class_members.pass;
+    Naming_elab_class_members.pass on_error;
     (* Elaborate special function calls to canonical representation, if any *)
     Naming_elab_call.top_down_pass;
-    Naming_elab_call.bottom_up_pass;
+    Naming_elab_call.bottom_up_pass on_error;
     (* Elaborate invariant calls to canonical representation *)
-    Naming_elab_invariant.pass;
+    Naming_elab_invariant.pass on_error;
     (* -- Mark invalid hints and expressions & miscellaneous validation --- *)
     (* Replace invalid uses of `void` and `noreturn` with `Herr` *)
-    Naming_elab_retonly_hint.pass;
+    Naming_elab_retonly_hint.pass on_error;
     (* Replace invalid uses of wildcard hints with `Herr` *)
-    Naming_elab_wildcard_hint.pass;
+    Naming_elab_wildcard_hint.pass on_error;
     (* Replace uses to `self` in shape field names with referenced class *)
     Naming_elab_shape_field_name.top_down_pass;
-    Naming_elab_shape_field_name.bottom_up_pass;
+    Naming_elab_shape_field_name.bottom_up_pass on_error;
     (* Replace invalid uses of `this` hints with `Herr` *)
-    Naming_elab_this_hint.pass;
+    Naming_elab_this_hint.pass on_error;
     (* Replace invalid `Haccess` root hints with `Herr` *)
-    Naming_elab_haccess_hint.pass;
+    Naming_elab_haccess_hint.pass on_error;
     (* Replace empty `Tuple`s with invalid expression marker *)
-    Naming_elab_tuple.pass;
+    Naming_elab_tuple.pass on_error;
     (* Validate / replace invalid uses of dynamic classes in `New` and `Class_get`
        expressions *)
-    Naming_elab_dynamic_class_name.pass;
+    Naming_elab_dynamic_class_name.pass on_error;
     (* Replace non-constant class or global constant with invalid expression marker *)
     Naming_elab_const_expr.top_down_pass;
-    Naming_elab_const_expr.bottom_up_pass;
+    Naming_elab_const_expr.bottom_up_pass on_error;
     (* Replace malformed key / value bindings in as expressions with invalid
        local var markers *)
-    Naming_elab_as_expr.pass;
+    Naming_elab_as_expr.pass on_error;
     (* Validate hints used in `Cast` expressions *)
-    Naming_validate_cast_expr.pass;
+    Naming_validate_cast_expr.pass on_error;
     (* Check for duplicate function parameter names *)
-    Naming_validate_fun_params.pass;
+    Naming_validate_fun_params.pass on_error;
     (* Validate use of `require implements`, `require extends` and
        `require class` declarations for traits, interfaces and classes *)
-    Naming_validate_class_req.pass;
+    Naming_validate_class_req.pass on_error;
     (* Validation dealing with common xhp naming errors *)
-    Naming_validate_xhp_name.pass;
+    Naming_validate_xhp_name.pass on_error;
     (* -- Elaboration & validation under typechecker options -------------- *)
     (* Add `supportdyn` and `Like` wrappers everywhere - under `everything-sdt`
        typechecker option *)
@@ -164,24 +164,24 @@ let passes =
     Naming_elab_everything_sdt.bottom_up_pass;
     (* Validate use of `Hlike` hints - depends on `enable-like-type-hints`
        and `everything_sdt` typechecker options *)
-    Naming_validate_like_hint.pass;
+    Naming_validate_like_hint.pass on_error;
     (* Validate constructors under
        `consistent-explicit_consistent_constructors` typechecker option *)
-    Naming_validate_consistent_construct.pass;
+    Naming_validate_consistent_construct.pass on_error;
     (* Validate  use of `SupportDyn` class - depends on `enable-supportdyn`
        and `everything_sdt` typechecker options *)
-    Naming_validate_supportdyn.pass;
+    Naming_validate_supportdyn.pass on_error;
     (* Validate uses of enum class type constants - depends on:
        - `allow_all_locations_for_type_constant_in_enum_class`
        - `allowed_locations_for_type_constant_in_enum_class`
        typecheck options
     *)
-    Naming_validate_enum_class_typeconst.pass;
+    Naming_validate_enum_class_typeconst.pass on_error;
     (* Validate use of module definitions - depends on:
         - `allow_all_files_for_module_declarations`
         - `allowed_files_for_module_declarations`
        typechecker options *)
-    Naming_validate_module.pass;
+    Naming_validate_module.pass on_error;
   ]
 
 let ( elab_core_program,
@@ -190,7 +190,7 @@ let ( elab_core_program,
       elab_core_module_def,
       elab_core_gconst,
       elab_core_typedef ) =
-  Naming_phase_pass.mk_visitor passes ~on_error
+  Naming_phase_pass.mk_visitor passes
 
 let elab_elem elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core =
   reset_errors ();

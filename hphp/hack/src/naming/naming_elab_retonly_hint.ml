@@ -18,23 +18,23 @@ module Env = struct
       { t with elab_retonly_hint = Elab_retonly_hint.{ allow_retonly } }
 end
 
-let on_targ (env, targ, err) =
+let on_targ (env, targ) =
   let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Ok (env, targ, err)
+  Ok (env, targ)
 
-let on_hint_fun_hf_return_ty (env, t, err) =
+let on_hint_fun_hf_return_ty (env, t) =
   let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Ok (env, t, err)
+  Ok (env, t)
 
-let on_fun_f_ret (env, f, err) =
+let on_fun_f_ret (env, f) =
   let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Ok (env, f, err)
+  Ok (env, f)
 
-let on_method_m_ret (env, m, err) =
+let on_method_m_ret (env, m) =
   let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Ok (env, m, err)
+  Ok (env, m)
 
-let on_hint (env, hint, err_acc) =
+let on_hint on_error (env, hint) =
   let allow_retonly = Env.allow_retonly env in
   let res =
     match hint with
@@ -54,16 +54,18 @@ let on_hint (env, hint, err_acc) =
     | _ -> Ok (env, hint)
   in
   match res with
-  | Ok (env, hint) -> Ok (env, hint, err_acc)
-  | Error (hint, err) -> Error (env, hint, err :: err_acc)
+  | Ok (env, hint) -> Ok (env, hint)
+  | Error (hint, err) ->
+    on_error err;
+    Error (env, hint)
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
     top_down
       Ast_transform.
         {
           identity with
-          on_hint = Some on_hint;
+          on_hint = Some (on_hint on_error);
           on_targ = Some on_targ;
           on_hint_fun_hf_return_ty = Some on_hint_fun_hf_return_ty;
           on_fun_f_ret = Some on_fun_f_ret;

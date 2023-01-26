@@ -7,4 +7,5 @@
  *)
 
 (* Elaborates `Happly` hints received from the lowerer to their canonical representation *)
-val pass : (Naming_phase_env.t, Naming_phase_error.t list) Naming_phase_pass.t
+val pass :
+  (Naming_phase_error.t -> unit) -> Naming_phase_env.t Naming_phase_pass.t

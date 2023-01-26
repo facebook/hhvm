@@ -8,4 +8,5 @@
 (* This validation pass will raise errors when it encounters use of certain
    miscased or errneous XHP related class names.
 *)
-val pass : (Naming_phase_env.t, Naming_phase_error.t list) Naming_phase_pass.t
+val pass :
+  (Naming_phase_error.t -> unit) -> Naming_phase_env.t Naming_phase_pass.t

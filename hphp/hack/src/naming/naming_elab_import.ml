@@ -8,13 +8,12 @@
 
 let on_expr :
       'a 'b.
-      _ * ('a, 'b) Aast.expr * _ ->
-      (_ * ('a, 'b) Aast.expr * _, _ * ('a, 'b) Aast.expr * _) result =
- fun (env, expr, err_acc) ->
+      _ * ('a, 'b) Aast.expr ->
+      (_ * ('a, 'b) Aast.expr, _ * ('a, 'b) Aast.expr) result =
+ fun (env, expr) ->
   match expr with
-  | (_, _, Aast.Import _) ->
-    Error (env, Naming_phase_error.invalid_expr expr, err_acc)
-  | _ -> Ok (env, expr, err_acc)
+  | (_, _, Aast.Import _) -> Error (env, Naming_phase_error.invalid_expr expr)
+  | _ -> Ok (env, expr)
 
 let pass =
   Naming_phase_pass.(

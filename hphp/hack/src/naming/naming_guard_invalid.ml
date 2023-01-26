@@ -6,10 +6,10 @@
  *
  *)
 
-let on_expr_ (env, expr_, errs) =
+let on_expr_ (env, expr_) =
   match expr_ with
-  | Aast.Invalid _ -> Error (env, expr_, errs)
-  | _ -> Ok (env, expr_, errs)
+  | Aast.Invalid _ -> Error (env, expr_)
+  | _ -> Ok (env, expr_)
 
 let pass =
   Naming_phase_pass.(

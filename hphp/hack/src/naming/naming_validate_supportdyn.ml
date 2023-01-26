@@ -21,24 +21,25 @@ module Env = struct
   let everything_sdt Naming_phase_env.{ everything_sdt; _ } = everything_sdt
 end
 
-let on_hint_ (env, hint_, err_acc) =
-  let err =
+let on_hint_ on_error (env, hint_) =
+  let err_opt =
     if
       Env.is_hhi env
       || Env.is_systemlib env
       || Env.supportdynamic_type_hint_enabled env
       || Env.everything_sdt env
     then
-      err_acc
+      None
     else
       match hint_ with
       | Aast.Happly ((pos, ty_name), _)
         when String.(equal ty_name SN.Classes.cSupportDyn) ->
-        Err.supportdyn pos :: err_acc
-      | _ -> err_acc
+        Some (Err.supportdyn pos)
+      | _ -> None
   in
-  Ok (env, hint_, err)
+  Option.iter ~f:on_error err_opt;
+  Ok (env, hint_)
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
-    top_down Ast_transform.{ identity with on_hint_ = Some on_hint_ })
+    top_down Ast_transform.{ identity with on_hint_ = Some (on_hint_ on_error) })

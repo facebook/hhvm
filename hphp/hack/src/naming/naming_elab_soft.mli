@@ -11,4 +11,4 @@
    - `Hlike`, when the `--interpret-soft-types-as-like-types` typechecker option
      is enabled
 *)
-val pass : (Naming_phase_env.t, Naming_phase_error.t list) Naming_phase_pass.t
+val pass : Naming_phase_env.t Naming_phase_pass.t

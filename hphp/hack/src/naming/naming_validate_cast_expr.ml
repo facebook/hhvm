@@ -8,31 +8,36 @@
 open Hh_prelude
 module SN = Naming_special_names
 
-let on_expr_ :
-      'a 'b.
-      _ * ('a, 'b) Aast.expr_ * _ ->
-      (_ * ('a, 'b) Aast.expr_ * _, _ * ('a, 'b) Aast.expr_ * _) result =
- fun (env, expr_, err_acc) ->
-  let err =
-    match expr_ with
-    | Aast.(Cast ((_, Hprim (Tint | Tbool | Tfloat | Tstring)), _)) -> err_acc
-    | Aast.(Cast ((_, Happly ((_, tycon_nm), _)), _))
-      when String.(
-             equal tycon_nm SN.Collections.cDict
-             || equal tycon_nm SN.Collections.cVec) ->
-      err_acc
-    | Aast.(Cast ((_, Aast.Hvec_or_dict (_, _)), _)) -> err_acc
-    | Aast.(Cast ((_, Aast.Hany), _)) ->
-      (* We end up with a `Hany` when we have an arity error for dict/vec
-         - we don't error on this case to preserve behaviour
-      *)
-      err_acc
-    | Aast.(Cast ((pos, _), _)) ->
-      (Naming_phase_error.naming @@ Naming_error.Object_cast pos) :: err_acc
-    | _ -> err_acc
+let on_expr_ on_error =
+  let handler
+        : 'a 'b.
+          _ * ('a, 'b) Aast.expr_ ->
+          (_ * ('a, 'b) Aast.expr_, _ * ('a, 'b) Aast.expr_) result =
+   fun (env, expr_) ->
+    let err_opt =
+      match expr_ with
+      | Aast.(Cast ((_, Hprim (Tint | Tbool | Tfloat | Tstring)), _)) -> None
+      | Aast.(Cast ((_, Happly ((_, tycon_nm), _)), _))
+        when String.(
+               equal tycon_nm SN.Collections.cDict
+               || equal tycon_nm SN.Collections.cVec) ->
+        None
+      | Aast.(Cast ((_, Aast.Hvec_or_dict (_, _)), _)) -> None
+      | Aast.(Cast ((_, Aast.Hany), _)) ->
+        (* We end up with a `Hany` when we have an arity error for dict/vec
+           - we don't error on this case to preserve behaviour
+        *)
+        None
+      | Aast.(Cast ((pos, _), _)) ->
+        Some (Naming_phase_error.naming @@ Naming_error.Object_cast pos)
+      | _ -> None
+    in
+    Option.iter ~f:on_error err_opt;
+    Ok (env, expr_)
   in
-  Ok (env, expr_, err)
+  handler
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
-    bottom_up Ast_transform.{ identity with on_expr_ = Some on_expr_ })
+    bottom_up
+      Ast_transform.{ identity with on_expr_ = Some (on_expr_ on_error) })

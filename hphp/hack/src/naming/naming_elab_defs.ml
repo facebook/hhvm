@@ -14,9 +14,9 @@ open Hh_prelude
    move these to top-level defs _or_ fully recurse to remove them *)
 let on_program :
       'a 'b.
-      _ * ('a, 'b) Aast_defs.def list * _ ->
-      (_ * ('a, 'b) Aast_defs.def list * _, _) result =
- fun (env, program, err) ->
+      _ * ('a, 'b) Aast_defs.def list ->
+      (_ * ('a, 'b) Aast_defs.def list, _) result =
+ fun (env, program) ->
   let rec aux acc def =
     match def with
     (* These are elaborated away in Namespaces.elaborate_toplevel_defs *)
@@ -37,7 +37,7 @@ let on_program :
     | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
   in
   let program = List.rev @@ List.fold_left ~f:aux ~init:[] program in
-  Ok (env, program, err)
+  Ok (env, program)
 
 let pass =
   Naming_phase_pass.(

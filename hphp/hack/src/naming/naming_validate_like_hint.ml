@@ -25,33 +25,38 @@ end
 
 let on_expr_ :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * 'c, 'd) result =
- fun (env, expr_, err) ->
+      Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.expr_, _) result =
+ fun (env, expr_) ->
   let env =
     match expr_ with
     | Aast.(Is _ | As _ | Upcast _) -> Env.set_allow_like env ~allow_like:true
     | _ -> env
   in
-  Ok (env, expr_, err)
+  Ok (env, expr_)
 
-let on_hint (env, hint, err_acc) =
-  let (err, env) =
+let on_hint on_error (env, hint) =
+  let (err_opt, env) =
     match hint with
     | (pos, Aast.Hlike _)
       when not
              (Env.allow_like env
              || Env.like_type_hints_enabled env
              || Env.everything_sdt env) ->
-      (Naming_phase_error.like_type pos :: err_acc, env)
+      (Some (Naming_phase_error.like_type pos), env)
     | (_, Aast.(Hfun _ | Happly _ | Haccess _ | Habstr _ | Hvec_or_dict _)) ->
-      (err_acc, Env.set_allow_like env ~allow_like:false)
-    | _ -> (err_acc, env)
+      (None, Env.set_allow_like env ~allow_like:false)
+    | _ -> (None, env)
   in
-  Ok (env, hint, err)
+  Option.iter ~f:on_error err_opt;
+  Ok (env, hint)
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
     top_down
       Ast_transform.
-        { identity with on_expr_ = Some on_expr_; on_hint = Some on_hint })
+        {
+          identity with
+          on_expr_ = Some on_expr_;
+          on_hint = Some (on_hint on_error);
+        })

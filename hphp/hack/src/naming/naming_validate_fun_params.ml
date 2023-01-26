@@ -9,11 +9,11 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-let validate_fun_params errs params =
+let validate_fun_params params =
   snd
   @@ List.fold_left
        params
-       ~init:(SSet.empty, errs)
+       ~init:(SSet.empty, [])
        ~f:(fun (seen, errs) Aast.{ param_name; param_pos; _ } ->
          if String.equal SN.SpecialIdents.placeholder param_name then
            (seen, errs)
@@ -27,24 +27,34 @@ let validate_fun_params errs params =
          else
            (SSet.add param_name seen, errs))
 
-let on_method_ :
-      'a 'b.
-      _ * ('a, 'b) Aast_defs.method_ * Err.t list ->
-      (_ * ('a, 'b) Aast_defs.method_ * Err.t list, _) result =
- fun (env, m, errs) ->
-  let err = validate_fun_params errs m.Aast.m_params in
-  Ok (env, m, err)
+let on_method_ on_error =
+  let handler
+        : 'a 'b.
+          _ * ('a, 'b) Aast_defs.method_ ->
+          (_ * ('a, 'b) Aast_defs.method_, _) result =
+   fun (env, m) ->
+    List.iter ~f:on_error @@ validate_fun_params m.Aast.m_params;
+    Ok (env, m)
+  in
+  handler
 
-let on_fun_ :
-      'a 'b.
-      _ * ('a, 'b) Aast_defs.fun_ * Err.t list ->
-      (_ * ('a, 'b) Aast_defs.fun_ * Err.t list, _) result =
- fun (env, f, errs) ->
-  let errs = validate_fun_params errs f.Aast.f_params in
-  Ok (env, f, errs)
+let on_fun_ on_error =
+  let handler
+        : 'a 'b.
+          _ * ('a, 'b) Aast_defs.fun_ -> (_ * ('a, 'b) Aast_defs.fun_, _) result
+      =
+   fun (env, f) ->
+    List.iter ~f:on_error @@ validate_fun_params f.Aast.f_params;
+    Ok (env, f)
+  in
+  handler
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
     top_down
       Ast_transform.
-        { identity with on_method_ = Some on_method_; on_fun_ = Some on_fun_ })
+        {
+          identity with
+          on_method_ = Some (on_method_ on_error);
+          on_fun_ = Some (on_fun_ on_error);
+        })

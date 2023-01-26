@@ -17,172 +17,151 @@ module Ast_transform = struct
      we know all child elements are already canonical and valid *)
   type 'a transform = 'a -> ('a, 'a) Result.t
 
-  type ('env, 'err) t = {
-    on_program: ('env * (unit, unit) program * 'err) transform option;
+  type 'env t = {
+    on_program: ('env * (unit, unit) program) transform option;
     (* -- Class and fields -------------------------------------------------- *)
-    on_class_: ('env * (unit, unit) class_ * 'err) transform option;
-    on_class_c_tparams:
-      ('env * (unit, unit) tparam list * 'err) transform option;
-    on_class_c_extends: ('env * hint list * 'err) transform option;
-    on_class_c_uses: ('env * hint list * 'err) transform option;
-    on_class_c_xhp_attrs:
-      ('env * (unit, unit) xhp_attr list * 'err) transform option;
-    on_class_c_xhp_attr_uses: ('env * hint list * 'err) transform option;
-    on_class_c_req: ('env * (hint * require_kind) * 'err) transform option;
-    on_class_c_reqs:
-      ('env * (hint * require_kind) list * 'err) transform option;
-    on_class_c_implements: ('env * hint list * 'err) transform option;
+    on_class_: ('env * (unit, unit) class_) transform option;
+    on_class_c_tparams: ('env * (unit, unit) tparam list) transform option;
+    on_class_c_extends: ('env * hint list) transform option;
+    on_class_c_uses: ('env * hint list) transform option;
+    on_class_c_xhp_attrs: ('env * (unit, unit) xhp_attr list) transform option;
+    on_class_c_xhp_attr_uses: ('env * hint list) transform option;
+    on_class_c_req: ('env * (hint * require_kind)) transform option;
+    on_class_c_reqs: ('env * (hint * require_kind) list) transform option;
+    on_class_c_implements: ('env * hint list) transform option;
     on_class_c_where_constraints:
-      ('env * where_constraint_hint list * 'err) transform option;
-    on_class_c_consts:
-      ('env * (unit, unit) class_const list * 'err) transform option;
+      ('env * where_constraint_hint list) transform option;
+    on_class_c_consts: ('env * (unit, unit) class_const list) transform option;
     on_class_c_typeconsts:
-      ('env * (unit, unit) class_typeconst_def list * 'err) transform option;
-    on_class_c_vars:
-      ('env * (unit, unit) class_var list * 'err) transform option;
-    on_class_c_enum: ('env * enum_ option * 'err) transform option;
-    on_class_c_methods:
-      ('env * (unit, unit) method_ list * 'err) transform option;
+      ('env * (unit, unit) class_typeconst_def list) transform option;
+    on_class_c_vars: ('env * (unit, unit) class_var list) transform option;
+    on_class_c_enum: ('env * enum_ option) transform option;
+    on_class_c_methods: ('env * (unit, unit) method_ list) transform option;
     on_class_c_user_attributes:
-      ('env * (unit, unit) user_attribute list * 'err) transform option;
+      ('env * (unit, unit) user_attribute list) transform option;
     on_class_c_file_attributes:
-      ('env * (unit, unit) file_attribute list * 'err) transform option;
+      ('env * (unit, unit) file_attribute list) transform option;
     (* -- Class vars -------------------------------------------------------- *)
-    on_class_var: ('env * (unit, unit) class_var * 'err) transform option;
+    on_class_var: ('env * (unit, unit) class_var) transform option;
     on_class_var_cv_user_attributes:
-      ('env * (unit, unit) user_attribute list * 'err) transform option;
-    on_class_var_cv_expr:
-      ('env * (unit, unit) expr option * 'err) transform option;
-    on_class_var_cv_type: ('env * unit type_hint * 'err) transform option;
+      ('env * (unit, unit) user_attribute list) transform option;
+    on_class_var_cv_expr: ('env * (unit, unit) expr option) transform option;
+    on_class_var_cv_type: ('env * unit type_hint) transform option;
     on_class_const_kind:
-      ('env * (unit, unit) class_const_kind * 'err) transform option;
+      ('env * (unit, unit) class_const_kind) transform option;
     (* -- Type defs --------------------------------------------------------- *)
-    on_typedef: ('env * (unit, unit) typedef * 'err) transform option;
+    on_typedef: ('env * (unit, unit) typedef) transform option;
     (* -- Global constants -------------------------------------------------- *)
-    on_gconst: ('env * (unit, unit) gconst * 'err) transform option;
-    on_gconst_cst_type: ('env * hint option * 'err) transform option;
-    on_gconst_cst_value: ('env * (unit, unit) expr * 'err) transform option;
+    on_gconst: ('env * (unit, unit) gconst) transform option;
+    on_gconst_cst_type: ('env * hint option) transform option;
+    on_gconst_cst_value: ('env * (unit, unit) expr) transform option;
     (* -- Function defs ----------------------------------------------------- *)
-    on_fun_def: ('env * (unit, unit) fun_def * 'err) transform option;
+    on_fun_def: ('env * (unit, unit) fun_def) transform option;
     (* -- Module defs ------------------------------------------------------- *)
-    on_module_def: ('env * (unit, unit) module_def * 'err) transform option;
+    on_module_def: ('env * (unit, unit) module_def) transform option;
     (* -- Statements -------------------------------------------------------- *)
-    on_stmt: ('env * (unit, unit) stmt * 'err) transform option;
-    on_stmt_: ('env * (unit, unit) stmt_ * 'err) transform option;
-    on_block: ('env * (unit, unit) block * 'err) transform option;
-    on_using_stmt: ('env * (unit, unit) using_stmt * 'err) transform option;
+    on_stmt: ('env * (unit, unit) stmt) transform option;
+    on_stmt_: ('env * (unit, unit) stmt_) transform option;
+    on_block: ('env * (unit, unit) block) transform option;
+    on_using_stmt: ('env * (unit, unit) using_stmt) transform option;
     (* -- Hints ------------------------------------------------------------- *)
-    on_hint: ('env * hint * 'err) transform option;
-    on_hint_: ('env * hint_ * 'err) transform option;
+    on_hint: ('env * hint) transform option;
+    on_hint_: ('env * hint_) transform option;
     (* -- hint_fun & fields ------------------------------------------------- *)
-    on_hint_fun: ('env * hint_fun * 'err) transform option;
-    on_hint_fun_hf_param_tys: ('env * hint list * 'err) transform option;
-    on_hint_fun_hf_variadic_ty: ('env * variadic_hint * 'err) transform option;
-    on_hint_fun_hf_ctxs: ('env * contexts option * 'err) transform option;
-    on_hint_fun_hf_return_ty: ('env * hint * 'err) transform option;
-    on_refinement: ('env * refinement * 'err) transform option;
-    on_type_refinement: ('env * type_refinement * 'err) transform option;
-    on_type_refinement_bounds:
-      ('env * type_refinement_bounds * 'err) transform option;
-    on_ctx_refinement: ('env * ctx_refinement * 'err) transform option;
-    on_ctx_refinement_bounds:
-      ('env * ctx_refinement_bounds * 'err) transform option;
+    on_hint_fun: ('env * hint_fun) transform option;
+    on_hint_fun_hf_param_tys: ('env * hint list) transform option;
+    on_hint_fun_hf_variadic_ty: ('env * variadic_hint) transform option;
+    on_hint_fun_hf_ctxs: ('env * contexts option) transform option;
+    on_hint_fun_hf_return_ty: ('env * hint) transform option;
+    on_refinement: ('env * refinement) transform option;
+    on_type_refinement: ('env * type_refinement) transform option;
+    on_type_refinement_bounds: ('env * type_refinement_bounds) transform option;
+    on_ctx_refinement: ('env * ctx_refinement) transform option;
+    on_ctx_refinement_bounds: ('env * ctx_refinement_bounds) transform option;
     (* -- shape fields ------------------------------------------------------- *)
-    on_nast_shape_info: ('env * nast_shape_info * 'err) transform option;
-    on_shape_field_info: ('env * shape_field_info * 'err) transform option;
-    on_nsi_field_map: ('env * shape_field_info list * 'err) transform option;
-    on_shape_field_name:
-      ('env * Ast_defs.shape_field_name * 'err) transform option;
+    on_nast_shape_info: ('env * nast_shape_info) transform option;
+    on_shape_field_info: ('env * shape_field_info) transform option;
+    on_nsi_field_map: ('env * shape_field_info list) transform option;
+    on_shape_field_name: ('env * Ast_defs.shape_field_name) transform option;
     (* -- Expressions ------------------------------------------------------- *)
-    on_expr: ('env * (unit, unit) expr * 'err) transform option;
-    on_expr_: ('env * (unit, unit) expr_ * 'err) transform option;
+    on_expr: ('env * (unit, unit) expr) transform option;
+    on_expr_: ('env * (unit, unit) expr_) transform option;
     (* -- Functions --------------------------------------------------------- *)
-    on_fun_: ('env * (unit, unit) fun_ * 'err) transform option;
-    on_fun_f_ret: ('env * unit type_hint * 'err) transform option;
-    on_fun_f_tparams: ('env * (unit, unit) tparam list * 'err) transform option;
+    on_fun_: ('env * (unit, unit) fun_) transform option;
+    on_fun_f_ret: ('env * unit type_hint) transform option;
+    on_fun_f_tparams: ('env * (unit, unit) tparam list) transform option;
     on_fun_f_where_constraints:
-      ('env * where_constraint_hint list * 'err) transform option;
-    on_fun_f_params:
-      ('env * (unit, unit) fun_param list * 'err) transform option;
-    on_fun_f_ctxs: ('env * contexts option * 'err) transform option;
-    on_fun_f_unsafe_ctxs: ('env * contexts option * 'err) transform option;
-    on_fun_f_body: ('env * (unit, unit) func_body * 'err) transform option;
+      ('env * where_constraint_hint list) transform option;
+    on_fun_f_params: ('env * (unit, unit) fun_param list) transform option;
+    on_fun_f_ctxs: ('env * contexts option) transform option;
+    on_fun_f_unsafe_ctxs: ('env * contexts option) transform option;
+    on_fun_f_body: ('env * (unit, unit) func_body) transform option;
     on_fun_f_user_attributes:
-      ('env * (unit, unit) user_attribute list * 'err) transform option;
+      ('env * (unit, unit) user_attribute list) transform option;
     (* -- Methods ----------------------------------------------------------- *)
-    on_method_: ('env * (unit, unit) method_ * 'err) transform option;
-    on_method_m_ret: ('env * unit type_hint * 'err) transform option;
-    on_method_m_tparams:
-      ('env * (unit, unit) tparam list * 'err) transform option;
+    on_method_: ('env * (unit, unit) method_) transform option;
+    on_method_m_ret: ('env * unit type_hint) transform option;
+    on_method_m_tparams: ('env * (unit, unit) tparam list) transform option;
     on_method_m_where_constraints:
-      ('env * where_constraint_hint list * 'err) transform option;
-    on_method_m_params:
-      ('env * (unit, unit) fun_param list * 'err) transform option;
-    on_method_m_ctxs: ('env * contexts option * 'err) transform option;
-    on_method_m_unsafe_ctxs: ('env * contexts option * 'err) transform option;
-    on_method_m_body: ('env * (unit, unit) func_body * 'err) transform option;
+      ('env * where_constraint_hint list) transform option;
+    on_method_m_params: ('env * (unit, unit) fun_param list) transform option;
+    on_method_m_ctxs: ('env * contexts option) transform option;
+    on_method_m_unsafe_ctxs: ('env * contexts option) transform option;
+    on_method_m_body: ('env * (unit, unit) func_body) transform option;
     on_method_m_user_attributes:
-      ('env * (unit, unit) user_attribute list * 'err) transform option;
+      ('env * (unit, unit) user_attribute list) transform option;
     (* -- Class ID ---------------------------------------------------------- *)
-    on_class_id: ('env * (unit, unit) class_id * 'err) transform option;
-    on_class_id_: ('env * (unit, unit) class_id_ * 'err) transform option;
+    on_class_id: ('env * (unit, unit) class_id) transform option;
+    on_class_id_: ('env * (unit, unit) class_id_) transform option;
     (* -- Common ------------------------------------------------------------ *)
-    on_func_body: ('env * (unit, unit) func_body * 'err) transform option;
-    on_enum_: ('env * enum_ * 'err) transform option;
-    on_tparam: ('env * (unit, unit) tparam * 'err) transform option;
+    on_func_body: ('env * (unit, unit) func_body) transform option;
+    on_enum_: ('env * enum_) transform option;
+    on_tparam: ('env * (unit, unit) tparam) transform option;
     on_user_attributes:
-      ('env * (unit, unit) user_attribute list * 'err) transform option;
-    on_user_attribute:
-      ('env * (unit, unit) user_attribute * 'err) transform option;
+      ('env * (unit, unit) user_attribute list) transform option;
+    on_user_attribute: ('env * (unit, unit) user_attribute) transform option;
     on_file_attributes:
-      ('env * (unit, unit) file_attribute list * 'err) transform option;
-    on_file_attribute:
-      ('env * (unit, unit) file_attribute * 'err) transform option;
-    on_where_constraint_hint:
-      ('env * where_constraint_hint * 'err) transform option;
+      ('env * (unit, unit) file_attribute list) transform option;
+    on_file_attribute: ('env * (unit, unit) file_attribute) transform option;
+    on_where_constraint_hint: ('env * where_constraint_hint) transform option;
     on_where_constraint_hints:
-      ('env * where_constraint_hint list * 'err) transform option;
-    on_contexts: ('env * contexts * 'err) transform option;
-    on_context: ('env * hint * 'err) transform option;
-    on_targ: ('env * unit targ * 'err) transform option;
-    on_as_expr: ('env * (unit, unit) as_expr * 'err) transform option;
-    on_afield: ('env * (unit, unit) afield * 'err) transform option;
-    on_collection_targ: ('env * unit collection_targ * 'err) transform option;
-    on_class_get_expr:
-      ('env * (unit, unit) class_get_expr * 'err) transform option;
-    on_xhp_attribute:
-      ('env * (unit, unit) xhp_attribute * 'err) transform option;
-    on_xhp_simple: ('env * (unit, unit) xhp_simple * 'err) transform option;
-    on_function_ptr_id:
-      ('env * (unit, unit) function_ptr_id * 'err) transform option;
-    on_tparams: ('env * (unit, unit) tparam list * 'err) transform option;
-    on_tparam_tparams:
-      ('env * (unit, unit) tparam list * 'err) transform option;
+      ('env * where_constraint_hint list) transform option;
+    on_contexts: ('env * contexts) transform option;
+    on_context: ('env * hint) transform option;
+    on_targ: ('env * unit targ) transform option;
+    on_as_expr: ('env * (unit, unit) as_expr) transform option;
+    on_afield: ('env * (unit, unit) afield) transform option;
+    on_collection_targ: ('env * unit collection_targ) transform option;
+    on_class_get_expr: ('env * (unit, unit) class_get_expr) transform option;
+    on_xhp_attribute: ('env * (unit, unit) xhp_attribute) transform option;
+    on_xhp_simple: ('env * (unit, unit) xhp_simple) transform option;
+    on_function_ptr_id: ('env * (unit, unit) function_ptr_id) transform option;
+    on_tparams: ('env * (unit, unit) tparam list) transform option;
+    on_tparam_tparams: ('env * (unit, unit) tparam list) transform option;
     on_tparam_tp_constraints:
-      ('env * (Ast_defs.constraint_kind * hint) list * 'err) transform option;
+      ('env * (Ast_defs.constraint_kind * hint) list) transform option;
     on_tp_constraint:
-      ('env * (Ast_defs.constraint_kind * hint) * 'err) transform option;
+      ('env * (Ast_defs.constraint_kind * hint)) transform option;
     on_tparam_tp_user_attributes:
-      ('env * (unit, unit) user_attribute list * 'err) transform option;
-    on_catch: ('env * (unit, unit) catch * 'err) transform option;
-    on_case: ('env * (unit, unit) case * 'err) transform option;
-    on_default_case: ('env * (unit, unit) default_case * 'err) transform option;
+      ('env * (unit, unit) user_attribute list) transform option;
+    on_catch: ('env * (unit, unit) catch) transform option;
+    on_case: ('env * (unit, unit) case) transform option;
+    on_default_case: ('env * (unit, unit) default_case) transform option;
     on_fun_param_user_attributes:
-      ('env * (unit, unit) user_attribute list * 'err) transform option;
-    on_fun_param: ('env * (unit, unit) fun_param * 'err) transform option;
-    on_fun_params: ('env * (unit, unit) fun_param list * 'err) transform option;
-    on_xhp_attr: ('env * (unit, unit) xhp_attr * 'err) transform option;
-    on_class_const: ('env * (unit, unit) class_const * 'err) transform option;
+      ('env * (unit, unit) user_attribute list) transform option;
+    on_fun_param: ('env * (unit, unit) fun_param) transform option;
+    on_fun_params: ('env * (unit, unit) fun_param list) transform option;
+    on_xhp_attr: ('env * (unit, unit) xhp_attr) transform option;
+    on_class_const: ('env * (unit, unit) class_const) transform option;
     on_class_typeconst_def:
-      ('env * (unit, unit) class_typeconst_def * 'err) transform option;
+      ('env * (unit, unit) class_typeconst_def) transform option;
     on_class_concrete_typeconst:
-      ('env * class_concrete_typeconst * 'err) transform option;
+      ('env * class_concrete_typeconst) transform option;
     on_class_abstract_typeconst:
-      ('env * class_abstract_typeconst * 'err) transform option;
-    on_class_typeconst: ('env * class_typeconst * 'err) transform option;
-    on_def: ('env * (unit, unit) def * 'err) transform option;
-    on_expression_tree:
-      ('env * (unit, unit) expression_tree * 'err) transform option;
+      ('env * class_abstract_typeconst) transform option;
+    on_class_typeconst: ('env * class_typeconst) transform option;
+    on_def: ('env * (unit, unit) def) transform option;
+    on_expression_tree: ('env * (unit, unit) expression_tree) transform option;
   }
 
   let combine_transform ps ~select =
@@ -485,10 +464,9 @@ module Ast_transform = struct
     }
 
   module Traversal = struct
-    type ('env, 'err) handler = {
-      top_down: ('env, 'err list) t;
-      bottom_up: ('env, 'err list) t;
-      on_error: 'err -> unit;
+    type 'env handler = {
+      top_down: 'env t;
+      bottom_up: 'env t;
     }
 
     let on_tuple2 f g (fst, snd) ~env ~handler =
@@ -517,31 +495,30 @@ module Ast_transform = struct
     (* -- Hints ----------------------------------------------------------------- *)
 
     let rec on_hint (elem : hint) ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_hint) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_hint) (env, elem) >>= fun (env, elem) ->
               let elem = (on_snd on_hint_) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_hint) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_hint) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_hint_ elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_hint_) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_hint_) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_hint_ elem ~env ~handler in
-              (or_ok handler.bottom_up.on_hint_) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_hint_) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_hint_ elem ~env ~handler =
@@ -574,17 +551,17 @@ module Ast_transform = struct
         elem
 
     and on_hint_fun elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_hint_fun) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_hint_fun) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_hint_fun elem ~env ~handler in
-              (or_ok handler.bottom_up.on_hint_fun) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_hint_fun) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_hint_fun hfun ~env ~handler =
@@ -599,104 +576,102 @@ module Ast_transform = struct
       Aast.{ hfun with hf_param_tys; hf_variadic_ty; hf_ctxs; hf_return_ty }
 
     and on_hint_fun_hf_return_ty elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_hint_fun_hf_return_ty) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_hint_fun_hf_return_ty) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_hint elem ~env ~handler in
-              (or_ok handler.bottom_up.on_hint_fun_hf_return_ty)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_hint_fun_hf_return_ty) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_hint_fun_hf_param_tys elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_hint_fun_hf_param_tys) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_hint_fun_hf_param_tys) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_hint) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_hint_fun_hf_param_tys)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_hint_fun_hf_param_tys) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_hint_fun_hf_variadic_ty elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_hint_fun_hf_variadic_ty) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_hint_fun_hf_variadic_ty) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_option on_hint) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_hint_fun_hf_variadic_ty)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_hint_fun_hf_variadic_ty) (env, elem)
+            ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_hint_fun_hf_ctxs elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_hint_fun_hf_ctxs) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_hint_fun_hf_ctxs) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_option on_contexts) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_hint_fun_hf_ctxs) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_hint_fun_hf_ctxs) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_contexts elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_contexts) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_contexts) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_snd (on_list on_context) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_contexts) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_contexts) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_context elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_context) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_context) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_hint elem ~env ~handler in
-              (or_ok handler.bottom_up.on_context) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_context) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_nast_shape_info elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_nast_shape_info) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_nast_shape_info) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_nast_shape_info elem ~env ~handler in
-              (or_ok handler.bottom_up.on_nast_shape_info) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_nast_shape_info) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_nast_shape_info nast_shape_info ~env ~handler =
@@ -706,31 +681,31 @@ module Ast_transform = struct
       Aast.{ nast_shape_info with nsi_field_map }
 
     and on_nsi_field_map elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_nsi_field_map) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_nsi_field_map) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_shape_field_info) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_nsi_field_map) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_nsi_field_map) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_shape_field_info elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_shape_field_info) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_shape_field_info) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_shape_field_info elem ~env ~handler in
-              (or_ok handler.bottom_up.on_shape_field_info) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_shape_field_info) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_shape_field_info elem ~env ~handler =
@@ -739,31 +714,31 @@ module Ast_transform = struct
       { elem with sfi_hint; sfi_name }
 
     and on_shape_field_name elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_shape_field_name) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_shape_field_name) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_id elem ~env ~handler in
-              (or_ok handler.bottom_up.on_shape_field_name) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_shape_field_name) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_refinement elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_refinement) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_refinement) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_refinement elem ~env ~handler in
-              (or_ok handler.bottom_up.on_refinement) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_refinement) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_refinement refinement ~env ~handler =
@@ -774,17 +749,17 @@ module Ast_transform = struct
         Aast.Rtype (sid, on_type_refinement type_refinement ~env ~handler)
 
     and on_type_refinement elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_type_refinement) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_type_refinement) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_type_refinement elem ~env ~handler in
-              (or_ok handler.bottom_up.on_type_refinement) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_type_refinement) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_type_refinement type_refinement ~env ~handler =
@@ -794,18 +769,17 @@ module Ast_transform = struct
         TRloose (on_type_refinement_bounds type_refinement_bounds ~env ~handler)
 
     and on_type_refinement_bounds elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_type_refinement_bounds) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_type_refinement_bounds) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_type_refinement_bounds elem ~env ~handler in
-              (or_ok handler.bottom_up.on_type_refinement_bounds)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_type_refinement_bounds) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_type_refinement_bounds
@@ -817,17 +791,17 @@ module Ast_transform = struct
         }
 
     and on_ctx_refinement elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_ctx_refinement) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_ctx_refinement) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_ctx_refinement elem ~env ~handler in
-              (or_ok handler.bottom_up.on_ctx_refinement) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_ctx_refinement) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_ctx_refinement ctx_refinement ~env ~handler =
@@ -838,18 +812,17 @@ module Ast_transform = struct
           (on_ctx_refinement_bounds ctx_refinement_bounds ~env ~handler)
 
     and on_ctx_refinement_bounds elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_ctx_refinement_bounds) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_ctx_refinement_bounds) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_ctx_refinement_bounds elem ~env ~handler in
-              (or_ok handler.bottom_up.on_ctx_refinement_bounds)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_ctx_refinement_bounds) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_ctx_refinement_bounds Aast.{ cr_lower; cr_upper } ~env ~handler
@@ -863,17 +836,17 @@ module Ast_transform = struct
     (* -- Class type constants -------------------------------------------------- *)
 
     let rec on_class_typeconst elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_typeconst) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_typeconst) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_class_typeconst elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_typeconst) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_typeconst) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_class_typeconst elem ~env ~handler =
@@ -886,19 +859,18 @@ module Ast_transform = struct
           (on_class_concrete_typeconst class_abstract_typeconst ~env ~handler)
 
     and on_class_abstract_typeconst elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_abstract_typeconst)
-                (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_abstract_typeconst) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_class_abstract_typeconst elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_abstract_typeconst)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_abstract_typeconst) (env, elem)
+            ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_class_abstract_typeconst elem ~env ~handler =
@@ -910,19 +882,18 @@ module Ast_transform = struct
       { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }
 
     and on_class_concrete_typeconst elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_concrete_typeconst)
-                (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_concrete_typeconst) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_class_concrete_typeconst elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_concrete_typeconst)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_concrete_typeconst) (env, elem)
+            ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_class_concrete_typeconst { c_tc_type } ~env ~handler =
@@ -936,45 +907,43 @@ module Ast_transform = struct
       { e_base; e_constraint; e_includes }
 
     let on_enum_ elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_enum_) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_enum_) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_enum_ elem ~env ~handler in
-              (or_ok handler.bottom_up.on_enum_) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_enum_) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     let on_targ elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_targ) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_targ) (env, elem) >>= fun (env, elem) ->
               let elem = (on_snd on_hint) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_targ) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_targ) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     let rec on_expr elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_expr) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_expr) (env, elem) >>= fun (env, elem) ->
               let elem = traverse_expr elem ~env ~handler in
-              (or_ok handler.bottom_up.on_expr) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_expr) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_expr (annot, pos, expr_) ~env ~handler =
@@ -982,17 +951,17 @@ module Ast_transform = struct
       (annot, pos, expr_)
 
     and on_expr_ elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_expr_) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_expr_) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_expr_ elem ~env ~handler in
-              (or_ok handler.bottom_up.on_expr_) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_expr_) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_expr_ expr_ ~env ~handler =
@@ -1125,17 +1094,17 @@ module Ast_transform = struct
         expr_
 
     and on_expression_tree elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_expression_tree) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_expression_tree) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_expression_tree elem ~env ~handler in
-              (or_ok handler.bottom_up.on_expression_tree) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_expression_tree) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_expression_tree elem ~env ~handler =
@@ -1155,17 +1124,17 @@ module Ast_transform = struct
       }
 
     and on_class_get_expr elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_get_expr) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_get_expr) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_class_get_expr elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_get_expr) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_get_expr) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_class_get_expr elem ~env ~handler =
@@ -1174,17 +1143,17 @@ module Ast_transform = struct
       | CGexpr expr -> CGexpr (on_expr expr ~env ~handler)
 
     and on_afield elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_afield) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_afield) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_afield elem ~env ~handler in
-              (or_ok handler.bottom_up.on_afield) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_afield) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_afield elem ~env ~handler =
@@ -1194,17 +1163,17 @@ module Ast_transform = struct
         AFkvalue (on_expr e1 ~env ~handler, on_expr e2 ~env ~handler)
 
     and on_class_id elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_id) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_id) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_class_id elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_id) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_id) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_class_id (ex, pos, class_id_) ~env ~handler =
@@ -1212,17 +1181,17 @@ module Ast_transform = struct
       (ex, pos, class_id_)
 
     and on_class_id_ elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_id_) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_id_) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_class_id_ elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_id_) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_id_) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_class_id_ class_id_ ~env ~handler =
@@ -1235,17 +1204,17 @@ module Ast_transform = struct
       | CIexpr expr -> CIexpr (on_expr expr ~env ~handler)
 
     and on_collection_targ elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_collection_targ) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_collection_targ) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_collection_targ elem ~env ~handler in
-              (or_ok handler.bottom_up.on_collection_targ) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_collection_targ) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_collection_targ elem ~env ~handler =
@@ -1255,17 +1224,17 @@ module Ast_transform = struct
         CollectionTKV (on_targ ktarg ~env ~handler, on_targ vtarg ~env ~handler)
 
     and on_xhp_attribute elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_xhp_attribute) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_xhp_attribute) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_xhp_attribute elem ~env ~handler in
-              (or_ok handler.bottom_up.on_xhp_attribute) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_xhp_attribute) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_xhp_attribute elem ~env ~handler =
@@ -1275,17 +1244,17 @@ module Ast_transform = struct
       | Xhp_spread expr -> Xhp_spread (on_expr expr ~env ~handler)
 
     and on_xhp_simple elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_xhp_simple) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_xhp_simple) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_xhp_simple elem ~env ~handler in
-              (or_ok handler.bottom_up.on_xhp_simple) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_xhp_simple) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_xhp_simple elem ~env ~handler =
@@ -1293,17 +1262,17 @@ module Ast_transform = struct
       { elem with xs_expr }
 
     and on_function_ptr_id elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_function_ptr_id) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_function_ptr_id) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_function_ptr_id elem ~env ~handler in
-              (or_ok handler.bottom_up.on_function_ptr_id) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_function_ptr_id) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_function_ptr_id elem ~env ~handler =
@@ -1313,17 +1282,17 @@ module Ast_transform = struct
         FP_class_const (on_class_id class_id ~env ~handler, str)
 
     and on_as_expr elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_as_expr) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_as_expr) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_as_expr elem ~env ~handler in
-              (or_ok handler.bottom_up.on_as_expr) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_as_expr) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_as_expr elem ~env ~handler =
@@ -1336,17 +1305,16 @@ module Ast_transform = struct
         Await_as_kv (pos, on_expr e1 ~env ~handler, on_expr e2 ~env ~handler)
 
     and on_fun_ elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_) (env, elem) >>= fun (env, elem) ->
               let elem = traverse_fun_ elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_fun_ f ~env ~handler =
@@ -1375,146 +1343,144 @@ module Ast_transform = struct
       }
 
     and on_fun_f_ret elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_f_ret) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_f_ret) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_snd (on_option on_hint)) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_f_ret) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_f_ret) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_fun_f_tparams elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_f_tparams) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_f_tparams) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_tparams elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_f_tparams) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_f_tparams) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_fun_f_where_constraints elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_f_where_constraints) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_f_where_constraints) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_where_constraint_hints elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_f_where_constraints)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_f_where_constraints) (env, elem)
+            ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_fun_f_params elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_f_params) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_f_params) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_fun_params elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_f_params) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_f_params) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_fun_f_ctxs elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_f_ctxs) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_f_ctxs) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_option on_contexts) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_f_ctxs) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_f_ctxs) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_fun_f_unsafe_ctxs elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_f_unsafe_ctxs) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_f_unsafe_ctxs) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_option on_contexts) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_f_unsafe_ctxs) (env, elem, errs)
-            ))
+              (or_ok handler.bottom_up.on_fun_f_unsafe_ctxs) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_fun_f_body elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_f_body) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_f_body) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_func_body elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_f_body) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_f_body) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_fun_f_user_attributes elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_f_user_attributes) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_f_user_attributes) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_user_attributes elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_f_user_attributes)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_f_user_attributes) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_fun_params elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_params) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_params) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_fun_param) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_params) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_params) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_fun_param elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_param) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_param) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_fun_param elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_param) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_param) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_fun_param elem ~env ~handler =
@@ -1527,33 +1493,32 @@ module Ast_transform = struct
       { elem with param_type_hint; param_expr; param_user_attributes }
 
     and on_fun_param_user_attributes elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_param_user_attributes)
-                (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_param_user_attributes) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_user_attributes elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_param_user_attributes)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_param_user_attributes) (env, elem)
+            ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_func_body elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_func_body) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_func_body) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_func_body elem ~env ~handler in
-              (or_ok handler.bottom_up.on_func_body) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_func_body) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_func_body { fb_ast } ~env ~handler =
@@ -1561,31 +1526,31 @@ module Ast_transform = struct
       { fb_ast }
 
     and on_tparams elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_tparams) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_tparams) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_tparam) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_tparams) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_tparams) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_tparam elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_tparam) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_tparam) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_tparam elem ~env ~handler in
-              (or_ok handler.bottom_up.on_tparam) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_tparam) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_tparam tparam ~env ~handler =
@@ -1598,31 +1563,31 @@ module Ast_transform = struct
       { tparam with tp_parameters; tp_constraints; tp_user_attributes }
 
     and on_user_attributes elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_user_attributes) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_user_attributes) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_user_attribute) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_user_attributes) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_user_attributes) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_user_attribute elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_user_attribute) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_user_attribute) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_user_attribute elem ~env ~handler in
-              (or_ok handler.bottom_up.on_user_attribute) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_user_attribute) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_user_attribute user_attribute ~env ~handler =
@@ -1630,31 +1595,31 @@ module Ast_transform = struct
       { user_attribute with ua_params }
 
     and on_file_attributes elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_file_attributes) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_file_attributes) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_file_attribute) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_file_attributes) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_file_attributes) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_file_attribute elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_file_attribute) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_file_attribute) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_file_attribute elem ~env ~handler in
-              (or_ok handler.bottom_up.on_file_attribute) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_file_attribute) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_file_attribute file_attribute ~env ~handler =
@@ -1664,35 +1629,33 @@ module Ast_transform = struct
       { file_attribute with fa_user_attributes }
 
     and on_where_constraint_hints elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_where_constraint_hints) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_where_constraint_hints) (env, elem)
+            >>= fun (env, elem) ->
               let elem =
                 (on_list on_where_constraint_hint) elem ~env ~handler
               in
-              (or_ok handler.bottom_up.on_where_constraint_hints)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_where_constraint_hints) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_where_constraint_hint elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_where_constraint_hint) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_where_constraint_hint) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_where_constraint_hint elem ~env ~handler in
-              (or_ok handler.bottom_up.on_where_constraint_hint)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_where_constraint_hint) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_where_constraint_hint (h1, cstr, h2) ~env ~handler =
@@ -1700,31 +1663,30 @@ module Ast_transform = struct
       (h1, cstr, h2)
 
     and on_stmt elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_stmt) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_stmt) (env, elem) >>= fun (env, elem) ->
               let elem = (on_snd on_stmt_) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_stmt) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_stmt) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_stmt_ elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_stmt_) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_stmt_) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_stmt_ elem ~env ~handler in
-              (or_ok handler.bottom_up.on_stmt_) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_stmt_) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_stmt_ elem ~env ~handler =
@@ -1778,31 +1740,31 @@ module Ast_transform = struct
         elem
 
     and on_block elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_block) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_block) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_stmt) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_block) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_block) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_using_stmt elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_using_stmt) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_using_stmt) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_using_stmt elem ~env ~handler in
-              (or_ok handler.bottom_up.on_using_stmt) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_using_stmt) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_using_stmt elem ~env ~handler =
@@ -1811,17 +1773,17 @@ module Ast_transform = struct
       { elem with us_exprs; us_block }
 
     and on_catch elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_catch) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_catch) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_catch elem ~env ~handler in
-              (or_ok handler.bottom_up.on_catch) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_catch) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_catch (class_name, lid, block) ~env ~handler =
@@ -1829,45 +1791,44 @@ module Ast_transform = struct
       (class_name, lid, block)
 
     and on_case elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_case) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_case) (env, elem) >>= fun (env, elem) ->
               let elem = (on_tuple2 on_expr on_block) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_case) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_case) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_default_case elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_default_case) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_default_case) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_snd on_block) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_default_case) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_default_case) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_ elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_class elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_class c ~env ~handler =
@@ -1911,74 +1872,73 @@ module Ast_transform = struct
       }
 
     and on_class_c_tparams elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_tparams) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_tparams) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_tparams elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_tparams) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_tparams) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_extends elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_extends) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_extends) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_hint) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_extends) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_extends) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_uses elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_uses) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_uses) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_hint) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_uses) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_uses) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_xhp_attrs elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_xhp_attrs) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_xhp_attrs) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_xhp_attr) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_xhp_attrs) (env, elem, errs)
-            ))
+              (or_ok handler.bottom_up.on_class_c_xhp_attrs) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_xhp_attr elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_xhp_attr) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_xhp_attr) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_xhp_attr elem ~env ~handler in
-              (or_ok handler.bottom_up.on_xhp_attr) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_xhp_attr) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_xhp_attr
@@ -1991,192 +1951,188 @@ module Ast_transform = struct
       (type_hint, class_var, tag_opt, pos_exprs_opt)
 
     and on_class_c_xhp_attr_uses elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_xhp_attr_uses) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_xhp_attr_uses) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_hint) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_xhp_attr_uses)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_xhp_attr_uses) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_req elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_req) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_req) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_fst on_hint) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_req) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_req) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_reqs elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_reqs) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_reqs) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_class_c_req) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_reqs) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_reqs) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_implements elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_implements) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_implements) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_hint) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_implements) (env, elem, errs)
-            ))
+              (or_ok handler.bottom_up.on_class_c_implements) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_where_constraints elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_where_constraints)
-                (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_where_constraints) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_where_constraint_hints elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_where_constraints)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_where_constraints) (env, elem)
+            ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_consts elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_consts) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_consts) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_class_const) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_consts) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_consts) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_typeconsts elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_typeconsts) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_typeconsts) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_class_typeconst_def) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_typeconsts) (env, elem, errs)
-            ))
+              (or_ok handler.bottom_up.on_class_c_typeconsts) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_vars elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_vars) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_vars) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_class_var) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_vars) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_vars) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_enum elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_enum) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_enum) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_option on_enum_) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_enum) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_enum) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_methods elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_methods) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_methods) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_list on_method_) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_methods) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_methods) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_user_attributes elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_user_attributes) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_user_attributes) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_user_attributes elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_user_attributes)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_user_attributes) (env, elem)
+            ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_c_file_attributes elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_c_file_attributes) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_c_file_attributes) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_file_attributes elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_c_file_attributes)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_c_file_attributes) (env, elem)
+            ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_const elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_const) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_const) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_class_const elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_const) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_const) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_class_const elem ~env ~handler =
@@ -2187,17 +2143,17 @@ module Ast_transform = struct
       { elem with cc_user_attributes; cc_type; cc_kind }
 
     and on_class_const_kind elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_const_kind) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_const_kind) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_class_const_kind elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_const_kind) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_const_kind) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_class_const_kind elem ~env ~handler =
@@ -2207,18 +2163,17 @@ module Ast_transform = struct
       | CCConcrete expr -> CCConcrete (on_expr expr ~env ~handler)
 
     and on_class_typeconst_def elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_typeconst_def) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_typeconst_def) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_class_typeconst_def elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_typeconst_def) (env, elem, errs)
-            ))
+              (or_ok handler.bottom_up.on_class_typeconst_def) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_class_typeconst_def elem ~env ~handler =
@@ -2228,17 +2183,17 @@ module Ast_transform = struct
       { elem with c_tconst_user_attributes; c_tconst_kind }
 
     and on_class_var elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_var) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_var) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_class_var elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_var) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_class_var) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_class_var cv ~env ~handler =
@@ -2249,63 +2204,61 @@ module Ast_transform = struct
       Aast.{ cv with cv_user_attributes; cv_type; cv_expr }
 
     and on_class_var_cv_user_attributes elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
             ( (or_ok handler.top_down.on_class_var_cv_user_attributes)
-                (env, elem, [])
-            >>= fun (env, elem, errs) ->
+                (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_user_attributes elem ~env ~handler in
               (or_ok handler.bottom_up.on_class_var_cv_user_attributes)
-                (env, elem, errs) ))
+                (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_var_cv_expr elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_var_cv_expr) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_var_cv_expr) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_option on_expr) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_var_cv_expr) (env, elem, errs)
-            ))
+              (or_ok handler.bottom_up.on_class_var_cv_expr) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_class_var_cv_type elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_class_var_cv_type) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_class_var_cv_type) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_snd (on_option on_hint)) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_class_var_cv_type) (env, elem, errs)
-            ))
+              (or_ok handler.bottom_up.on_class_var_cv_type) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_method_ elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_method_) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_method_) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_method_ elem ~env ~handler in
-              (or_ok handler.bottom_up.on_method_) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_method_) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and traverse_method_ m ~env ~handler =
@@ -2333,148 +2286,145 @@ module Ast_transform = struct
       }
 
     and on_method_m_ret elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_method_m_ret) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_method_m_ret) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_snd (on_option on_hint)) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_method_m_ret) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_method_m_ret) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_method_m_tparams elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_method_m_tparams) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_method_m_tparams) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_tparams elem ~env ~handler in
-              (or_ok handler.bottom_up.on_method_m_tparams) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_method_m_tparams) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_method_m_where_constraints elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_method_m_where_constraints)
-                (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_method_m_where_constraints) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_where_constraint_hints elem ~env ~handler in
-              (or_ok handler.bottom_up.on_method_m_where_constraints)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_method_m_where_constraints) (env, elem)
+            ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_method_m_params elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_f_params) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_f_params) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_fun_params elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_f_params) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_f_params) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_method_m_ctxs elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_method_m_ctxs) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_method_m_ctxs) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_option on_contexts) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_method_m_ctxs) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_method_m_ctxs) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_method_m_unsafe_ctxs elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_method_m_unsafe_ctxs) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_method_m_unsafe_ctxs) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_option on_contexts) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_method_m_unsafe_ctxs) (env, elem, errs)
-            ))
+              (or_ok handler.bottom_up.on_method_m_unsafe_ctxs) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_method_m_body elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_method_m_body) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_method_m_body) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_func_body elem ~env ~handler in
-              (or_ok handler.bottom_up.on_method_m_body) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_method_m_body) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     and on_method_m_user_attributes elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_method_m_user_attributes)
-                (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_method_m_user_attributes) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_user_attributes elem ~env ~handler in
-              (or_ok handler.bottom_up.on_method_m_user_attributes)
-                (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_method_m_user_attributes) (env, elem)
+            ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     let on_gconst_cst_type elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_gconst_cst_type) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_gconst_cst_type) (env, elem)
+            >>= fun (env, elem) ->
               let elem = (on_option on_hint) elem ~env ~handler in
-              (or_ok handler.bottom_up.on_gconst_cst_type) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_gconst_cst_type) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     let on_gconst_cst_value elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_gconst_cst_value) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_gconst_cst_value) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_expr elem ~env ~handler in
-              (or_ok handler.bottom_up.on_gconst_cst_value) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_gconst_cst_value) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     let traverse_gconst cst ~env ~handler =
@@ -2483,17 +2433,17 @@ module Ast_transform = struct
       Aast.{ cst with cst_type; cst_value }
 
     let on_gconst elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_gconst) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_gconst) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_gconst elem ~env ~handler in
-              (or_ok handler.bottom_up.on_gconst) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_gconst) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     let traverse_fun_def elem ~env ~handler =
@@ -2503,17 +2453,17 @@ module Ast_transform = struct
       { elem with fd_fun; fd_file_attributes }
 
     let on_fun_def elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_fun_def) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_fun_def) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_fun_def elem ~env ~handler in
-              (or_ok handler.bottom_up.on_fun_def) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_fun_def) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     let traverse_module_def elem ~env ~handler =
@@ -2523,17 +2473,17 @@ module Ast_transform = struct
       { elem with md_user_attributes }
 
     let on_module_def elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_module_def) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_module_def) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_module_def elem ~env ~handler in
-              (or_ok handler.bottom_up.on_module_def) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_module_def) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     let traverse_typedef elem ~env ~handler =
@@ -2557,17 +2507,17 @@ module Ast_transform = struct
       }
 
     let on_typedef elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_typedef) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_typedef) (env, elem)
+            >>= fun (env, elem) ->
               let elem = traverse_typedef elem ~env ~handler in
-              (or_ok handler.bottom_up.on_typedef) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_typedef) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     let rec traverse_def def ~env ~handler =
@@ -2583,38 +2533,37 @@ module Ast_transform = struct
       | _ -> def
 
     and on_def elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_def) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_def) (env, elem) >>= fun (env, elem) ->
               let elem = traverse_def elem ~env ~handler in
-              (or_ok handler.bottom_up.on_def) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_def) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
 
     let on_program elem ~env ~handler =
-      let (_, elem, errs) =
+      let (_, elem) =
         Result.(
           fold
             ~ok:Fn.id
             ~error:Fn.id
-            ( (or_ok handler.top_down.on_program) (env, elem, [])
-            >>= fun (env, elem, errs) ->
+            ( (or_ok handler.top_down.on_program) (env, elem)
+            >>= fun (env, elem) ->
               let elem = on_list on_def elem ~env ~handler in
-              (or_ok handler.bottom_up.on_program) (env, elem, errs) ))
+              (or_ok handler.bottom_up.on_program) (env, elem) ))
       in
-      List.iter ~f:handler.on_error errs;
+
       elem
   end
 end
 
-type ('env, 'err) t =
-  | Top_down of ('env, 'err) Ast_transform.t
-  | Bottom_up of ('env, 'err) Ast_transform.t
+type 'env t =
+  | Top_down of 'env Ast_transform.t
+  | Bottom_up of 'env Ast_transform.t
 
 let partition ts =
   List.fold_right ts ~init:([], []) ~f:(fun t (tds, bus) ->
@@ -2630,10 +2579,10 @@ let top_down pass = Top_down pass
 
 let bottom_up pass = Bottom_up pass
 
-let mk_visitor passes ~on_error =
+let mk_visitor passes =
   let (top_down, bottom_up) = combine passes in
   let open Ast_transform.Traversal in
-  let handler = { top_down; bottom_up; on_error } in
+  let handler = { top_down; bottom_up } in
   ( (fun env elem -> on_program elem ~env ~handler),
     (fun env elem -> on_class_ elem ~env ~handler),
     (fun env elem -> on_fun_def elem ~env ~handler),

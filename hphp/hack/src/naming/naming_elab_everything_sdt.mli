@@ -14,8 +14,6 @@
    It is intended for use when the `--everything-sdt` typechecker option is set
 *)
 
-val top_down_pass :
-  (Naming_phase_env.t, Naming_phase_error.t list) Naming_phase_pass.t
+val top_down_pass : Naming_phase_env.t Naming_phase_pass.t
 
-val bottom_up_pass :
-  (Naming_phase_env.t, Naming_phase_error.t list) Naming_phase_pass.t
+val bottom_up_pass : Naming_phase_env.t Naming_phase_pass.t

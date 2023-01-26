@@ -68,17 +68,17 @@ end
 
 let on_class_ :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c, 'd) result =
- (fun (env, c, err) -> Ok (Env.in_class env c, c, err))
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_, _) result =
+ (fun (env, c) -> Ok (Env.in_class env c, c))
 
-let on_where_constraint_hint (env, cstr, err) =
-  Ok (Env.set_in_where_clause env ~in_where_clause:true, cstr, err)
+let on_where_constraint_hint (env, cstr) =
+  Ok (Env.set_in_where_clause env ~in_where_clause:true, cstr)
 
-let on_contexts (env, ctxts, err) =
-  Ok (Env.set_in_context env ~in_context:true, ctxts, err)
+let on_contexts (env, ctxts) =
+  Ok (Env.set_in_context env ~in_context:true, ctxts)
 
-let on_hint (env, hint, err_acc) =
+let on_hint on_error (env, hint) =
   let res =
     if Env.in_haccess env then
       match hint with
@@ -125,11 +125,11 @@ let on_hint (env, hint, err_acc) =
   in
   match res with
   | Error (hint, err) ->
-    let err = err :: err_acc in
-    Error (env, hint, err)
-  | Ok hint -> Ok (env, hint, err_acc)
+    on_error err;
+    Error (env, hint)
+  | Ok hint -> Ok (env, hint)
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
     top_down
       Ast_transform.
@@ -138,5 +138,5 @@ let pass =
           on_class_ = Some on_class_;
           on_where_constraint_hint = Some on_where_constraint_hint;
           on_contexts = Some on_contexts;
-          on_hint = Some on_hint;
+          on_hint = Some (on_hint on_error);
         })

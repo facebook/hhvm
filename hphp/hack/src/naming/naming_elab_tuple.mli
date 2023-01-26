@@ -9,4 +9,5 @@
    the `invalid_expr_` and raise an error
 *)
 
-val pass : (Naming_phase_env.t, Naming_phase_error.t list) Naming_phase_pass.t
+val pass :
+  (Naming_phase_error.t -> unit) -> Naming_phase_env.t Naming_phase_pass.t

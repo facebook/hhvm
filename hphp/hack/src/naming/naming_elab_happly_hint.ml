@@ -267,52 +267,52 @@ let canonicalize_happly tparams hint_pos tycon hints =
 
 let on_typedef :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.typedef * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.typedef * 'c, 'd) result =
- (fun (env, t, err) -> Ok (Env.in_typedef env t, t, err))
+      Naming_phase_env.t * ('a, 'b) Aast_defs.typedef ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.typedef, _) result =
+ (fun (env, t) -> Ok (Env.in_typedef env t, t))
 
 let on_gconst :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.gconst * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.gconst * 'c, 'd) result =
- (fun (env, cst, err) -> Ok (Env.in_gconst env, cst, err))
+      Naming_phase_env.t * ('a, 'b) Aast_defs.gconst ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.gconst, _) result =
+ (fun (env, cst) -> Ok (Env.in_gconst env, cst))
 
 let on_fun_def :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def * 'c, 'd) result =
- (fun (env, fd, err) -> Ok (Env.in_fun_def env fd, fd, err))
+      Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def, _) result =
+ (fun (env, fd) -> Ok (Env.in_fun_def env fd, fd))
 
 let on_module_def :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * 'c, 'd) result =
- (fun (env, md, err) -> Ok (Env.in_module_def env, md, err))
+      Naming_phase_env.t * ('a, 'b) Aast_defs.module_def ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.module_def, _) result =
+ (fun (env, md) -> Ok (Env.in_module_def env, md))
 
 let on_class_ :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c, 'd) result =
- (fun (env, c, err) -> Ok (Env.in_class env c, c, err))
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_, _) result =
+ (fun (env, c) -> Ok (Env.in_class env c, c))
 
 let on_method_ :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.method_ * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.method_ * 'c, 'd) result =
- fun (env, m, err) ->
+      Naming_phase_env.t * ('a, 'b) Aast_defs.method_ ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.method_, _) result =
+ fun (env, m) ->
   let env = Env.extend_tparams env m.Aast.m_tparams in
-  Ok (env, m, err)
+  Ok (env, m)
 
 let on_tparam :
       'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.tparam * 'c ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.tparam * 'c, 'd) result =
- fun (env, tp, err) ->
+      Naming_phase_env.t * ('a, 'b) Aast_defs.tparam ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.tparam, _) result =
+ fun (env, tp) ->
   (* TODO[mjt] do we want to maintain the HKT code? *)
   let env = Env.extend_tparams env tp.Aast.tp_parameters in
-  Ok (env, tp, err)
+  Ok (env, tp)
 
-let on_hint (env, hint, err_acc) =
+let on_hint on_error (env, hint) =
   let res =
     match hint with
     | (hint_pos, Aast.Happly (tycon, hints)) ->
@@ -321,13 +321,13 @@ let on_hint (env, hint, err_acc) =
   in
   match res with
   | Ok (hint, err_opt) ->
-    let err =
-      Option.value_map err_opt ~default:err_acc ~f:(fun err -> err :: err_acc)
-    in
-    Ok (env, hint, err)
-  | Error (hint, err) -> Error (env, hint, err :: err_acc)
+    Option.iter ~f:on_error err_opt;
+    Ok (env, hint)
+  | Error (hint, err) ->
+    on_error err;
+    Error (env, hint)
 
-let pass =
+let pass on_error =
   Naming_phase_pass.(
     top_down
       Ast_transform.
@@ -340,5 +340,5 @@ let pass =
           on_class_ = Some on_class_;
           on_method_ = Some on_method_;
           on_tparam = Some on_tparam;
-          on_hint = Some on_hint;
+          on_hint = Some (on_hint on_error);
         })

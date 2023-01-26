@@ -16,14 +16,13 @@ let rec concat_blocks stmts =
     let rest = concat_blocks rest in
     next :: rest
 
-let on_block (env, stmts, err) = Ok (env, concat_blocks stmts, err)
+let on_block (env, stmts) = Ok (env, concat_blocks stmts)
 
 let on_using_stmt :
       'a 'b.
-      'env * ('a, 'b) Aast_defs.using_stmt * _ ->
-      ('env * ('a, 'b) Aast_defs.using_stmt * _, _) result =
- fun (env, us, err) ->
-  Ok (env, Aast.{ us with us_is_block_scoped = false }, err)
+      'env * ('a, 'b) Aast_defs.using_stmt ->
+      ('env * ('a, 'b) Aast_defs.using_stmt, _) result =
+ (fun (env, us) -> Ok (env, Aast.{ us with us_is_block_scoped = false }))
 
 let pass =
   Naming_phase_pass.(

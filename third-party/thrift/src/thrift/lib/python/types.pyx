@@ -740,12 +740,6 @@ cdef class Union(StructOrUnion):
     def __dir__(self):
         return dir(type(self))
 
-    def _unpickle(self, klass, bytes data):
-        cdef IOBuf iobuf = IOBuf(data)
-        inst = klass.__new__(klass)
-        (<Union>inst)._deserialize(iobuf, Protocol.COMPACT)
-        return inst
-
     def __reduce__(self):
         return (_unpickle_union, (type(self), b''.join(self._serialize(Protocol.COMPACT))))
 

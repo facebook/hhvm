@@ -9,7 +9,7 @@
 
 exception Error of string * Unix.error
 
-(* Contains all the fsevents context *)
+(* Contains all the inotify context *)
 type env
 
 (* A subscription to events for a directory *)
@@ -30,15 +30,15 @@ val add_watch : env -> string -> watch option
 type fd_select = Unix.file_descr * (unit -> unit)
 
 val select :
-  (* The fsevents context *)
+  (* The inotify context *)
   env ->
-  (* Additional file descriptor to select for reading *)
-  ?read_fdl:(fd_select list) ->
-  (* Additional file descriptor to select for writing *)
-  ?write_fdl:(fd_select list) ->
-  (* Timeout...like Unix.select *)
-  timeout:float ->
-  (* The callback for file system events *)
-  (event list -> unit) ->
+  ?read_fdl:(* Additional file descriptor to select for reading *)
+    fd_select list ->
+  ?write_fdl:
+    (* Additional file descriptor to select for writing *)
+    fd_select list ->
+  timeout:(* Timeout...like Unix.select *)
+          float ->
+  ((* The callback for file system events *)
+   event list -> unit) ->
   unit
-[@@ocamlformat "disable=true"]

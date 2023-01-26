@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8ab2922785fb751c76af2c2b312a049d>>
+// @generated SignedSource<<4d735f4ad8ea0b88c8042c067c4af9a5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -591,6 +591,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);
 )]
 #[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord,
+    (transform ~restart:(`Disallow `Encode_as_result)),
     (visitors
        {
          variety = "iter";

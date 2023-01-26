@@ -76,13 +76,13 @@ type prop_or_method = Ast_defs.prop_or_method =
   | Is_method
 [@@deriving eq, ord, show { with_path = false }]
 
-type local_id = (Local_id.t[@visitors.opaque])
+type local_id = (Local_id.t[@visitors.opaque] [@transform.opaque])
 
-and lid = pos * local_id
+and lid = pos * local_id [@@transform.opaque]
 
-and sid = Ast_defs.id
+and sid = Ast_defs.id [@@transform.opaque]
 
-and class_name = sid
+and class_name = sid [@@transform.opaque]
 
 (** Aast.program represents the top-level definitions in a Hack program.
  * ex: Expression annotation type (when typechecking, the inferred type)
@@ -90,7 +90,7 @@ and class_name = sid
  *)
 and ('ex, 'en) program = ('ex, 'en) def list
 
-and ('ex, 'en) stmt = pos * ('ex, 'en) stmt_
+and ('ex, 'en) stmt = (pos[@transform.opaque]) * ('ex, 'en) stmt_
 
 and ('ex, 'en) stmt_ =
   | Fallthrough
@@ -214,34 +214,37 @@ and ('ex, 'en) stmt_ =
        *
        *     { $foo = 42; } *)
   | Markup of pstring
+      [@transform.opaque]
       (** The mode tag at the beginning of a file.
        * TODO: this really belongs in def.
        *
        *     <?hh *)
   | AssertEnv of env_annot * ((pos * 'ex) local_id_map[@map.opaque])
+      [@transform.opaque]
       (** Used in IFC to track type inference environments. Not user
        * denotable. *)
 
 and env_annot =
   | Join
   | Refinement
+[@@transform.opaque]
 
 and ('ex, 'en) using_stmt = {
   us_is_block_scoped: bool;
   us_has_await: bool;
-  us_exprs: pos * ('ex, 'en) expr list;
+  us_exprs: (pos[@transform.opaque]) * ('ex, 'en) expr list;
   us_block: ('ex, 'en) block;
 }
 
 and ('ex, 'en) as_expr =
   | As_v of ('ex, 'en) expr
   | As_kv of ('ex, 'en) expr * ('ex, 'en) expr
-  | Await_as_v of pos * ('ex, 'en) expr
-  | Await_as_kv of pos * ('ex, 'en) expr * ('ex, 'en) expr
+  | Await_as_v of (pos[@transform.opaque]) * ('ex, 'en) expr
+  | Await_as_kv of (pos[@transform.opaque]) * ('ex, 'en) expr * ('ex, 'en) expr
 
 and ('ex, 'en) block = ('ex, 'en) stmt list
 
-and ('ex, 'en) class_id = 'ex * pos * ('ex, 'en) class_id_
+and ('ex, 'en) class_id = 'ex * (pos[@transform.opaque]) * ('ex, 'en) class_id_
 
 (** Class ID, used in things like instantiation and static property access. *)
 and ('ex, 'en) class_id_ =
@@ -288,7 +291,7 @@ and ('ex, 'en) class_id_ =
        *     Foo::$prop = 1;
        *     new Foo(); *)
 
-and ('ex, 'en) expr = 'ex * pos * ('ex, 'en) expr_
+and ('ex, 'en) expr = 'ex * (pos[@transform.opaque]) * ('ex, 'en) expr_
 
 and 'ex collection_targ =
   | CollectionTV of 'ex targ
@@ -296,12 +299,12 @@ and 'ex collection_targ =
 
 and ('ex, 'en) function_ptr_id =
   | FP_id of sid
-  | FP_class_const of ('ex, 'en) class_id * pstring
-
-(** An expression tree literal consists of a hint, splices, and
+  | FP_class_const of ('ex, 'en) class_id * (pstring[@transform.opaque])
+      (** An expression tree literal consists of a hint, splices, and
  *  expressions. Consider this example:
  *
  *     Foo`1 + ${$x} + ${bar()}` *)
+
 and ('ex, 'en) expression_tree = {
   et_hint: hint;
       (** The hint before the backtick, so Foo in this example. *)
@@ -323,7 +326,7 @@ and ('ex, 'en) expression_tree = {
       (** The expression that's executed at runtime.
        *
        *     Foo::makeTree($v ==> $v->visitBinOp(...)) *)
-  et_dollardollar_pos: pos option;
+  et_dollardollar_pos: pos option; [@transform.opaque]
       (** Position of the first $$ in a splice that refers
        * to a variable outside the Expression Tree
        *
@@ -343,11 +346,15 @@ and ('ex, 'en) expr_ =
        *
        *     varray['hello', 'world']
        *     varray<string>['hello', 'world'] *)
-  | Shape of (Ast_defs.shape_field_name * ('ex, 'en) expr) list
+  | Shape of
+      ((Ast_defs.shape_field_name[@transform.opaque]) * ('ex, 'en) expr) list
       (** Shape literal.
        *
-       *     shape('x' => 1, 'y' => 2) *)
-  | ValCollection of (pos * vc_kind) * 'ex targ option * ('ex, 'en) expr list
+       *     shape('x' => 1, 'y' => 2)*)
+  | ValCollection of
+      ((pos * vc_kind)[@transform.opaque])
+      * 'ex targ option
+      * ('ex, 'en) expr list
       (** Collection literal for indexable structures.
        *
        *     Vector {1, 2}
@@ -356,7 +363,9 @@ and ('ex, 'en) expr_ =
        *     vec[1, 2]
        *     keyset[] *)
   | KeyValCollection of
-      (pos * kvc_kind) * ('ex targ * 'ex targ) option * ('ex, 'en) field list
+      ((pos * kvc_kind)[@transform.opaque])
+      * ('ex targ * 'ex targ) option
+      * ('ex, 'en) field list
       (** Collection literal for key-value structures.
        *
        *     dict['x' => 1, 'y' => 2]
@@ -412,7 +421,10 @@ and ('ex, 'en) expr_ =
        *     $foo[]
        *     $foo[$bar] *)
   | Obj_get of
-      ('ex, 'en) expr * ('ex, 'en) expr * og_null_flavor * prop_or_method
+      ('ex, 'en) expr
+      * ('ex, 'en) expr
+      * (og_null_flavor[@transform.opaque])
+      * (prop_or_method[@transform.opaque])
       (** Instance property or method access.
        *
        * prop_or_method is:
@@ -431,7 +443,9 @@ and ('ex, 'en) expr_ =
        *     $foo?->$bar()  // OG_nullsafe,   Is_method
        *)
   | Class_get of
-      ('ex, 'en) class_id * ('ex, 'en) class_get_expr * prop_or_method
+      ('ex, 'en) class_id
+      * ('ex, 'en) class_get_expr
+      * (prop_or_method[@transform.opaque])
       (** Static property or dynamic method access. The rhs of the :: begins
        * with $ or is some non-name expression appearing within braces {}.
        *
@@ -443,7 +457,7 @@ and ('ex, 'en) expr_ =
        *     Foo::$bar();            // Is_method: dynamic call, method name stored in local $bar
        *     Foo::{$bar}();          // Is_method
        *)
-  | Class_const of ('ex, 'en) class_id * pstring
+  | Class_const of ('ex, 'en) class_id * (pstring[@transform.opaque])
       (** Class constant or static method call. As a standalone expression,
        * this is a class constant. Inside a Call node, this is a static
        * method call. The rhs of the :: does not begin with $ or is a name
@@ -470,7 +484,7 @@ and ('ex, 'en) expr_ =
       * (* explicit type annotations *)
       'ex targ list
       * (* positional args, plus their calling convention *)
-      (Ast_defs.param_kind * ('ex, 'en) expr) list
+      ((Ast_defs.param_kind[@transform.opaque]) * ('ex, 'en) expr) list
       * (* unpacked arg *)
       ('ex, 'en) expr option
       (** Function or method call.
@@ -504,6 +518,7 @@ and ('ex, 'en) expr_ =
        *     1.2e3
        *     7E-10 *)
   | String of byte_string
+      [@transform.opaque]
       (** String literal.
        *
        *     "foo"
@@ -560,14 +575,15 @@ and ('ex, 'en) expr_ =
        *
        *     (int)$foo
        *     (string)$foo *)
-  | Unop of Ast_defs.uop * ('ex, 'en) expr
+  | Unop of (Ast_defs.uop[@transform.opaque]) * ('ex, 'en) expr
       (** Unary operator.
        *
        *     !$foo
        *     -$foo
        *     +$foo
        *     $foo++ *)
-  | Binop of Ast_defs.bop * ('ex, 'en) expr * ('ex, 'en) expr
+  | Binop of
+      (Ast_defs.bop[@transform.opaque]) * ('ex, 'en) expr * ('ex, 'en) expr
       (** Binary operator.
        *
        *     $foo + $bar *)
@@ -629,11 +645,14 @@ and ('ex, 'en) expr_ =
        *     $x ==> $x
        *     (int $x): int ==> $x + $other
        *     ($x, $y) ==> { return $x + $y; } *)
-  | Xml of class_name * ('ex, 'en) xhp_attribute list * ('ex, 'en) expr list
+  | Xml of
+      (class_name[@transform.opaque])
+      * ('ex, 'en) xhp_attribute list
+      * ('ex, 'en) expr list
       (** XHP expression. May contain interpolated expressions.
        *
        *     <foo x="hello" y={$foo}>hello {$bar}</foo> *)
-  | Import of import_flavor * ('ex, 'en) expr
+  | Import of (import_flavor[@transform.opaque]) * ('ex, 'en) expr
       (** Include or require expression.
        *
        *     require('foo.php')
@@ -641,7 +660,9 @@ and ('ex, 'en) expr_ =
        *     include('foo.php')
        *     include_once('foo.php') *)
   | Collection of
-      class_name * 'ex collection_targ option * ('ex, 'en) afield list
+      (class_name[@transform.opaque])
+      * 'ex collection_targ option
+      * ('ex, 'en) afield list
       (** Collection literal.
        *
        * TODO: T38184446 this is redundant with ValCollection/KeyValCollection.
@@ -662,6 +683,7 @@ and ('ex, 'en) expr_ =
        *     $x = do_stuff();
        *     Foo`1 + ${$x}` *)
   | Lplaceholder of pos
+      [@transform.opaque]
       (** Placeholder local variable.
        *
        *     $_ *)
@@ -669,14 +691,14 @@ and ('ex, 'en) expr_ =
       (** Global function reference.
        *
        *     fun('foo') *)
-  | Method_id of ('ex, 'en) expr * pstring
+  | Method_id of ('ex, 'en) expr * (pstring[@transform.opaque])
       (** Instance method reference on a specific instance.
        *
        * TODO: This is only created in naming, and ought to happen in
        * lowering or be removed. The emitter just sees a normal Call.
        *
        *     inst_meth($f, 'some_meth') // equivalent: $f->some_meth<> *)
-  | Method_caller of class_name * pstring
+  | Method_caller of class_name * (pstring[@transform.opaque])
       (** Instance method reference that can be called with an instance.
        *
        *     meth_caller(FooClass::class, 'some_meth')
@@ -685,7 +707,7 @@ and ('ex, 'en) expr_ =
        * These examples are equivalent to:
        *
        *     (FooClass $f, ...$args) ==> $f->some_meth(...$args) *)
-  | Smethod_id of ('ex, 'en) class_id * pstring
+  | Smethod_id of ('ex, 'en) class_id * (pstring[@transform.opaque])
       (** Static method reference.
        *
        *     class_meth('FooClass', 'some_static_meth')
@@ -745,12 +767,12 @@ and hole_source =
   | EnforcedCast of hint list
 
 and ('ex, 'en) class_get_expr =
-  | CGstring of pstring
+  | CGstring of (pstring[@transform.opaque])
   | CGexpr of ('ex, 'en) expr
 
 and ('ex, 'en) case = ('ex, 'en) expr * ('ex, 'en) block
 
-and ('ex, 'en) default_case = pos * ('ex, 'en) block
+and ('ex, 'en) default_case = (pos[@transform.opaque]) * ('ex, 'en) block
 
 and ('ex, 'en) gen_case =
   | Case of ('ex, 'en) case
@@ -765,7 +787,7 @@ and ('ex, 'en) afield =
   | AFkvalue of ('ex, 'en) expr * ('ex, 'en) expr
 
 and ('ex, 'en) xhp_simple = {
-  xs_name: pstring;
+  xs_name: pstring; [@transform.opaque]
   xs_type: 'ex;
   xs_expr: ('ex, 'en) expr;
 }
@@ -774,26 +796,26 @@ and ('ex, 'en) xhp_attribute =
   | Xhp_simple of ('ex, 'en) xhp_simple
   | Xhp_spread of ('ex, 'en) expr
 
-and is_variadic = bool
+and is_variadic = bool [@@transform.opaque]
 
 and ('ex, 'en) fun_param = {
   param_annotation: 'ex;
   param_type_hint: 'ex type_hint;
   param_is_variadic: is_variadic;
-  param_pos: pos;
+  param_pos: pos; [@transform.opaque]
   param_name: string;
   param_expr: ('ex, 'en) expr option;
-  param_readonly: Ast_defs.readonly_kind option;
-  param_callconv: Ast_defs.param_kind;
+  param_readonly: Ast_defs.readonly_kind option; [@transform.opaque]
+  param_callconv: Ast_defs.param_kind; [@transform.opaque]
   param_user_attributes: ('ex, 'en) user_attribute list;
-  param_visibility: visibility option;
+  param_visibility: visibility option; [@transform.opaque]
 }
 
 and ('ex, 'en) fun_ = {
-  f_span: pos;
-  f_readonly_this: Ast_defs.readonly_kind option;
+  f_span: pos; [@transform.opaque]
+  f_readonly_this: Ast_defs.readonly_kind option; [@transform.opaque]
   f_annotation: 'en;
-  f_readonly_ret: Ast_defs.readonly_kind option;
+  f_readonly_ret: Ast_defs.readonly_kind option; [@transform.opaque]
       (** Whether the return value is readonly *)
   f_ret: 'ex type_hint;
   f_tparams: ('ex, 'en) tparam list;
@@ -802,7 +824,7 @@ and ('ex, 'en) fun_ = {
   f_ctxs: contexts option;
   f_unsafe_ctxs: contexts option;
   f_body: ('ex, 'en) func_body;
-  f_fun_kind: Ast_defs.fun_kind;
+  f_fun_kind: Ast_defs.fun_kind; [@transform.opaque]
   f_user_attributes: ('ex, 'en) user_attribute list;
   f_external: bool;
       (** true if this declaration has no body because it is an
@@ -850,11 +872,11 @@ and ('ex, 'en) file_attribute = {
 }
 
 and ('ex, 'en) tparam = {
-  tp_variance: Ast_defs.variance;
+  tp_variance: Ast_defs.variance; [@transform.opaque]
   tp_name: sid;
   tp_parameters: ('ex, 'en) tparam list;
-  tp_constraints: (Ast_defs.constraint_kind * hint) list;
-  tp_reified: reify_kind;
+  tp_constraints: ((Ast_defs.constraint_kind[@transform.opaque]) * hint) list;
+  tp_reified: reify_kind; [@transform.opaque]
   tp_user_attributes: ('ex, 'en) user_attribute list;
 }
 
@@ -862,28 +884,30 @@ and require_kind =
   | RequireExtends
   | RequireImplements
   | RequireClass
+[@@transform.opaque]
 
 and emit_id =
   | Emit_id of int
       (** For globally defined type, the ID used in the .main function. *)
   | Anonymous
       (** Closures are hoisted to classes, but they don't get an entry in .main. *)
+[@@transform.opaque]
 
 and ('ex, 'en) class_ = {
-  c_span: pos;
+  c_span: pos; [@transform.opaque]
   c_annotation: 'en;
-  c_mode: FileInfo.mode; [@visitors.opaque]
+  c_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
   c_final: bool;
   c_is_xhp: bool;
   c_has_xhp_keyword: bool;
-  c_kind: Ast_defs.classish_kind;
+  c_kind: Ast_defs.classish_kind; [@transform.opaque]
   c_name: class_name;
   c_tparams: ('ex, 'en) tparam list;
       (** The type parameters of a class A<T> (T is the parameter) *)
   c_extends: class_hint list;
   c_uses: trait_hint list;
   c_xhp_attr_uses: xhp_attr_hint list;
-  c_xhp_category: (pos * pstring list) option;
+  c_xhp_category: (pos * pstring list) option; [@transform.opaque]
   c_reqs: (class_hint * require_kind) list;
   c_implements: class_hint list;
   c_where_constraints: where_constraint_hint list;
@@ -891,7 +915,7 @@ and ('ex, 'en) class_ = {
   c_typeconsts: ('ex, 'en) class_typeconst_def list;
   c_vars: ('ex, 'en) class_var list;
   c_methods: ('ex, 'en) method_ list;
-  c_xhp_children: (pos * xhp_child) list;
+  c_xhp_children: ((pos[@transform.opaque]) * xhp_child) list;
   c_xhp_attrs: ('ex, 'en) xhp_attr list;
   c_namespace: nsenv;
   c_user_attributes: ('ex, 'en) user_attribute list;
@@ -913,12 +937,13 @@ and xhp_attr_hint = hint
 and xhp_attr_tag =
   | Required
   | LateInit
+[@@transform.opaque]
 
 and ('ex, 'en) xhp_attr =
   'ex type_hint
   * ('ex, 'en) class_var
   * xhp_attr_tag option
-  * (pos * ('ex, 'en) expr list) option
+  * ((pos[@transform.opaque]) * ('ex, 'en) expr list) option
 
 and ('ex, 'en) class_const_kind =
   | CCAbstract of ('ex, 'en) expr option
@@ -938,7 +963,7 @@ and ('ex, 'en) class_const = {
   cc_type: hint option;
   cc_id: sid;
   cc_kind: ('ex, 'en) class_const_kind;
-  cc_span: pos;
+  cc_span: pos; [@transform.opaque]
   cc_doc_comment: doc_comment option;
 }
 
@@ -964,15 +989,15 @@ and ('ex, 'en) class_typeconst_def = {
   c_tconst_user_attributes: ('ex, 'en) user_attribute list;
   c_tconst_name: sid;
   c_tconst_kind: class_typeconst;
-  c_tconst_span: pos;
+  c_tconst_span: pos; [@transform.opaque]
   c_tconst_doc_comment: doc_comment option;
   c_tconst_is_ctx: bool;
 }
 
 and xhp_attr_info = {
-  xai_like: pos option;
+  xai_like: pos option; [@transform.opaque]
   xai_tag: xhp_attr_tag option;
-  xai_enum_values: Ast_defs.xhp_enum_value list;
+  xai_enum_values: Ast_defs.xhp_enum_value list; [@transform.opaque]
 }
 
 and ('ex, 'en) class_var = {
@@ -980,7 +1005,7 @@ and ('ex, 'en) class_var = {
   cv_xhp_attr: xhp_attr_info option;
   cv_abstract: bool;
   cv_readonly: bool;
-  cv_visibility: visibility;
+  cv_visibility: visibility; [@transform.opaque]
   cv_type: 'ex type_hint;
   cv_id: sid;
   cv_expr: ('ex, 'en) expr option;
@@ -988,17 +1013,17 @@ and ('ex, 'en) class_var = {
   cv_doc_comment: doc_comment option;
   cv_is_promoted_variadic: bool;
   cv_is_static: bool;
-  cv_span: pos;
+  cv_span: pos; [@transform.opaque]
 }
 
 and ('ex, 'en) method_ = {
-  m_span: pos;
+  m_span: pos; [@transform.opaque]
   m_annotation: 'en;
   m_final: bool;
   m_abstract: bool;
   m_static: bool;
   m_readonly_this: bool;
-  m_visibility: visibility;
+  m_visibility: visibility; [@transform.opaque]
   m_name: sid;
   m_tparams: ('ex, 'en) tparam list;
   m_where_constraints: where_constraint_hint list;
@@ -1006,9 +1031,9 @@ and ('ex, 'en) method_ = {
   m_ctxs: contexts option;
   m_unsafe_ctxs: contexts option;
   m_body: ('ex, 'en) func_body;
-  m_fun_kind: Ast_defs.fun_kind;
+  m_fun_kind: Ast_defs.fun_kind; [@transform.opaque]
   m_user_attributes: ('ex, 'en) user_attribute list;
-  m_readonly_ret: Ast_defs.readonly_kind option;
+  m_readonly_ret: Ast_defs.readonly_kind option; [@transform.opaque]
   m_ret: 'ex type_hint;
   m_external: bool;
       (** true if this declaration has no body because it is an external method
@@ -1016,7 +1041,7 @@ and ('ex, 'en) method_ = {
   m_doc_comment: doc_comment option;
 }
 
-and nsenv = (Namespace_env.env[@visitors.opaque])
+and nsenv = (Namespace_env.env[@visitors.opaque]) [@@transform.opaque]
 
 and ('ex, 'en) typedef = {
   t_annotation: 'en;
@@ -1027,10 +1052,10 @@ and ('ex, 'en) typedef = {
   t_kind: hint;
   t_user_attributes: ('ex, 'en) user_attribute list;
   t_file_attributes: ('ex, 'en) file_attribute list;
-  t_mode: FileInfo.mode; [@visitors.opaque]
-  t_vis: typedef_visibility;
+  t_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
+  t_vis: typedef_visibility; [@transform.opaque]
   t_namespace: nsenv;
-  t_span: pos;
+  t_span: pos; [@transform.opaque]
   t_emit_id: emit_id option;
   t_is_ctx: bool;
   t_internal: bool;
@@ -1040,19 +1065,19 @@ and ('ex, 'en) typedef = {
 
 and ('ex, 'en) gconst = {
   cst_annotation: 'en;
-  cst_mode: FileInfo.mode; [@visitors.opaque]
+  cst_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
   cst_name: sid;
   cst_type: hint option;
   cst_value: ('ex, 'en) expr;
   cst_namespace: nsenv;
-  cst_span: pos;
+  cst_span: pos; [@transform.opaque]
   cst_emit_id: emit_id option;
 }
 
 and ('ex, 'en) fun_def = {
   fd_namespace: nsenv;
   fd_file_attributes: ('ex, 'en) file_attribute list;
-  fd_mode: FileInfo.mode; [@visitors.opaque]
+  fd_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
   fd_name: sid;
   fd_fun: ('ex, 'en) fun_;
   fd_internal: bool;
@@ -1061,10 +1086,10 @@ and ('ex, 'en) fun_def = {
 
 and ('ex, 'en) module_def = {
   md_annotation: 'en;
-  md_name: Ast_defs.id;
+  md_name: Ast_defs.id; [@transform.opaque]
   md_user_attributes: ('ex, 'en) user_attribute list;
-  md_span: pos;
-  md_mode: FileInfo.mode; [@visitors.opaque]
+  md_span: pos; [@transform.opaque]
+  md_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
   md_doc_comment: doc_comment option;
   md_exports: md_name_kind list option;
   md_imports: md_name_kind list option;
@@ -1074,6 +1099,7 @@ and md_name_kind =
   | MDNameGlobal of pos
   | MDNamePrefix of sid
   | MDNameExact of sid
+[@@transform.opaque]
 
 and ('ex, 'en) def =
   | Fun of ('ex, 'en) fun_def
@@ -1094,14 +1120,16 @@ and ns_kind =
   | NSClassAndNamespace
   | NSFun
   | NSConst
+[@@transform.opaque]
 
-and doc_comment = (Ast_defs.pstring[@visitors.opaque])
+and doc_comment = (Ast_defs.pstring[@visitors.opaque]) [@@transform.opaque]
 
 and import_flavor =
   | Include
   | Require
   | IncludeOnce
   | RequireOnce
+[@@transform.opaque]
 
 and xhp_child =
   | ChildName of sid
@@ -1113,20 +1141,22 @@ and xhp_child_op =
   | ChildStar
   | ChildPlus
   | ChildQuestion
+[@@transform.opaque]
 
-and hint = pos * hint_
+and hint = (pos[@transform.opaque]) * hint_
 
 and variadic_hint = hint option
 
-and contexts = pos * hint list
+and contexts = (pos[@transform.opaque]) * hint list
 
 and hf_param_info = {
   hfparam_kind: Ast_defs.param_kind;
   hfparam_readonlyness: Ast_defs.readonly_kind option;
 }
+[@@transform.opaque]
 
 and hint_fun = {
-  hf_is_readonly: Ast_defs.readonly_kind option;
+  hf_is_readonly: Ast_defs.readonly_kind option; [@transform.opaque]
   hf_param_tys: hint list;
   (* hf_param_info is None when all three are none, for perf optimization reasons.
      It is not semantically incorrect for the record to appear with 3 None values,
@@ -1135,7 +1165,7 @@ and hint_fun = {
   hf_variadic_ty: variadic_hint;
   hf_ctxs: contexts option;
   hf_return_ty: hint;
-  hf_is_readonly_return: Ast_defs.readonly_kind option;
+  hf_is_readonly_return: Ast_defs.readonly_kind option; [@transform.opaque]
 }
 
 and hint_ =
@@ -1176,7 +1206,7 @@ and hint_ =
   | Hnonnull
   | Habstr of string * hint list
   | Hvec_or_dict of hint option * hint
-  | Hprim of tprim
+  | Hprim of (tprim[@transform.opaque])
   | Hthis
   | Hdynamic
   | Hnothing
@@ -1210,7 +1240,7 @@ and ctx_refinement_bounds = {
 and shape_field_info = {
   sfi_optional: bool;
   sfi_hint: hint;
-  sfi_name: Ast_defs.shape_field_name;
+  sfi_name: Ast_defs.shape_field_name; [@transform.opaque]
 }
 
 and nast_shape_info = {
@@ -1222,7 +1252,7 @@ and kvc_kind =
   | Map
   | ImmMap
   | Dict
-[@@visitors.opaque]
+[@@visitors.opaque] [@@transform.opaque]
 
 and vc_kind =
   | Vector
@@ -1231,7 +1261,7 @@ and vc_kind =
   | Set
   | ImmSet
   | Keyset
-[@@visitors.opaque]
+[@@visitors.opaque] [@@transform.opaque]
 
 and enum_ = {
   e_base: hint;
@@ -1239,12 +1269,14 @@ and enum_ = {
   e_includes: hint list;
 }
 
-and where_constraint_hint = hint * Ast_defs.constraint_kind * hint
+and where_constraint_hint =
+  hint * (Ast_defs.constraint_kind[@transform.opaque]) * hint
 [@@deriving
   show { with_path = false },
     eq,
     ord,
     map,
+    transform ~restart:(`Disallow `Encode_as_result),
     visitors
       {
         variety = "iter";

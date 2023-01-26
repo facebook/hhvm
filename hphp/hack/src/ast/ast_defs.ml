@@ -11,7 +11,7 @@
 (* The Abstract Syntax Tree *)
 (*****************************************************************************)
 
-type pos = (Pos.t[@visitors.opaque])
+type pos = (Pos.t[@visitors.opaque]) [@@transform.opaque]
 
 and id_ = string
 
@@ -164,6 +164,7 @@ and reify_kind =
   show { with_path = false },
     eq,
     ord,
+    transform ~restart:(`Disallow `Encode_as_result),
     visitors
       {
         variety = "iter";

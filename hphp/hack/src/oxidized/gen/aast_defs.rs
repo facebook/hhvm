@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8afb3b453576ffe0d0d137cf2bac6a5f>>
+// @generated SignedSource<<a469177af740b1ae5851a120957e7c01>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -44,13 +44,16 @@ use crate::*;
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C)]
 pub struct Lid(pub Pos, pub LocalId);
 
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 pub type Sid = ast_defs::Id;
 
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 pub type ClassName = Sid;
 
 /// Aast.program represents the top-level definitions in a Hack program.
@@ -240,9 +243,11 @@ pub enum Stmt_<Ex, En> {
     /// TODO: this really belongs in def.
     ///
     ///     <?hh
+    #[rust_to_ocaml(attr = "transform.opaque")]
     Markup(Box<Pstring>),
     /// Used in IFC to track type inference environments. Not user
     /// denotable.
+    #[rust_to_ocaml(attr = "transform.opaque")]
     #[rust_to_ocaml(inline_tuple)]
     AssertEnv(Box<(EnvAnnot, LocalIdMap<(Pos, Ex)>)>),
 }
@@ -264,6 +269,7 @@ pub enum Stmt_<Ex, En> {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum EnvAnnot {
     Join,
@@ -464,14 +470,14 @@ pub enum CollectionTarg<Ex> {
 pub enum FunctionPtrId<Ex, En> {
     #[rust_to_ocaml(name = "FP_id")]
     FPId(Sid),
+    /// An expression tree literal consists of a hint, splices, and
+    ///  expressions. Consider this example:
+    ///
+    ///     Foo`1 + ${$x} + ${bar()}`
     #[rust_to_ocaml(name = "FP_class_const")]
     FPClassConst(ClassId<Ex, En>, Pstring),
 }
 
-/// An expression tree literal consists of a hint, splices, and
-///  expressions. Consider this example:
-///
-///     Foo`1 + ${$x} + ${bar()}`
 #[derive(
     Clone,
     Debug,
@@ -515,6 +521,7 @@ pub struct ExpressionTree<Ex, En> {
     ///
     ///     $x |> Code`${ $$ }` // Pos of the $$
     ///     Code`${ $x |> foo($$) }` // None
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub dollardollar_pos: Option<Pos>,
 }
 
@@ -734,6 +741,7 @@ pub enum Expr_<Ex, En> {
     ///     <<<'DOC'
     ///     foo
     ///     DOC
+    #[rust_to_ocaml(attr = "transform.opaque")]
     String(bstr::BString),
     /// Interpolated string literal.
     ///
@@ -898,6 +906,7 @@ pub enum Expr_<Ex, En> {
     /// Placeholder local variable.
     ///
     ///     $_
+    #[rust_to_ocaml(attr = "transform.opaque")]
     Lplaceholder(Box<Pos>),
     /// Global function reference.
     ///
@@ -1159,6 +1168,7 @@ pub enum Afield<Ex, En> {
 #[rust_to_ocaml(prefix = "xs_")]
 #[repr(C)]
 pub struct XhpSimple<Ex, En> {
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub name: Pstring,
     pub type_: Ex,
     pub expr: Expr<Ex, En>,
@@ -1188,6 +1198,7 @@ pub enum XhpAttribute<Ex, En> {
 }
 
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 pub type IsVariadic = bool;
 
 #[derive(
@@ -1211,12 +1222,16 @@ pub struct FunParam<Ex, En> {
     pub annotation: Ex,
     pub type_hint: TypeHint<Ex>,
     pub is_variadic: IsVariadic,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub pos: Pos,
     pub name: String,
     pub expr: Option<Expr<Ex, En>>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub readonly: Option<ast_defs::ReadonlyKind>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub callconv: ast_defs::ParamKind,
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub visibility: Option<Visibility>,
 }
 
@@ -1238,10 +1253,13 @@ pub struct FunParam<Ex, En> {
 #[rust_to_ocaml(prefix = "f_")]
 #[repr(C)]
 pub struct Fun_<Ex, En> {
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub readonly_this: Option<ast_defs::ReadonlyKind>,
     pub annotation: En,
     /// Whether the return value is readonly
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub readonly_ret: Option<ast_defs::ReadonlyKind>,
     pub ret: TypeHint<Ex>,
     pub tparams: Vec<Tparam<Ex, En>>,
@@ -1250,6 +1268,7 @@ pub struct Fun_<Ex, En> {
     pub ctxs: Option<Contexts>,
     pub unsafe_ctxs: Option<Contexts>,
     pub body: FuncBody<Ex, En>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub fun_kind: ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
     /// true if this declaration has no body because it is an
@@ -1414,10 +1433,12 @@ pub struct FileAttribute<Ex, En> {
 #[rust_to_ocaml(prefix = "tp_")]
 #[repr(C)]
 pub struct Tparam<Ex, En> {
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub variance: ast_defs::Variance,
     pub name: Sid,
     pub parameters: Vec<Tparam<Ex, En>>,
     pub constraints: Vec<(ast_defs::ConstraintKind, Hint)>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub reified: ReifyKind,
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
 }
@@ -1439,6 +1460,7 @@ pub struct Tparam<Ex, En> {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum RequireKind {
     RequireExtends,
@@ -1465,6 +1487,7 @@ arena_deserializer::impl_deserialize_in_arena!(RequireKind);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum EmitId {
     /// For globally defined type, the ID used in the .main function.
@@ -1493,13 +1516,16 @@ arena_deserializer::impl_deserialize_in_arena!(EmitId);
 #[rust_to_ocaml(prefix = "c_")]
 #[repr(C)]
 pub struct Class_<Ex, En> {
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,
     pub annotation: En,
     #[rust_to_ocaml(attr = "visitors.opaque")]
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub mode: file_info::Mode,
     pub final_: bool,
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub kind: ast_defs::ClassishKind,
     pub name: ClassName,
     /// The type parameters of a class A<T> (T is the parameter)
@@ -1507,6 +1533,7 @@ pub struct Class_<Ex, En> {
     pub extends: Vec<ClassHint>,
     pub uses: Vec<TraitHint>,
     pub xhp_attr_uses: Vec<XhpAttrHint>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub xhp_category: Option<(Pos, Vec<Pstring>)>,
     pub reqs: Vec<(ClassHint, RequireKind)>,
     pub implements: Vec<ClassHint>,
@@ -1554,6 +1581,7 @@ pub type XhpAttrHint = Hint;
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum XhpAttrTag {
     Required,
@@ -1635,6 +1663,7 @@ pub struct ClassConst<Ex, En> {
     pub type_: Option<Hint>,
     pub id: Sid,
     pub kind: ClassConstKind<Ex, En>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,
     pub doc_comment: Option<DocComment>,
 }
@@ -1729,6 +1758,7 @@ pub struct ClassTypeconstDef<Ex, En> {
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
     pub name: Sid,
     pub kind: ClassTypeconst,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,
     pub doc_comment: Option<DocComment>,
     pub is_ctx: bool,
@@ -1752,8 +1782,10 @@ pub struct ClassTypeconstDef<Ex, En> {
 #[rust_to_ocaml(prefix = "xai_")]
 #[repr(C)]
 pub struct XhpAttrInfo {
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub like: Option<Pos>,
     pub tag: Option<XhpAttrTag>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub enum_values: Vec<ast_defs::XhpEnumValue>,
 }
 
@@ -1779,6 +1811,7 @@ pub struct ClassVar<Ex, En> {
     pub xhp_attr: Option<XhpAttrInfo>,
     pub abstract_: bool,
     pub readonly: bool,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub visibility: Visibility,
     pub type_: TypeHint<Ex>,
     pub id: Sid,
@@ -1787,6 +1820,7 @@ pub struct ClassVar<Ex, En> {
     pub doc_comment: Option<DocComment>,
     pub is_promoted_variadic: bool,
     pub is_static: bool,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,
 }
 
@@ -1808,12 +1842,14 @@ pub struct ClassVar<Ex, En> {
 #[rust_to_ocaml(prefix = "m_")]
 #[repr(C)]
 pub struct Method_<Ex, En> {
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,
     pub annotation: En,
     pub final_: bool,
     pub abstract_: bool,
     pub static_: bool,
     pub readonly_this: bool,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub visibility: Visibility,
     pub name: Sid,
     pub tparams: Vec<Tparam<Ex, En>>,
@@ -1822,8 +1858,10 @@ pub struct Method_<Ex, En> {
     pub ctxs: Option<Contexts>,
     pub unsafe_ctxs: Option<Contexts>,
     pub body: FuncBody<Ex, En>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub fun_kind: ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub readonly_ret: Option<ast_defs::ReadonlyKind>,
     pub ret: TypeHint<Ex>,
     /// true if this declaration has no body because it is an external method
@@ -1833,6 +1871,7 @@ pub struct Method_<Ex, En> {
 }
 
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 pub type Nsenv = ocamlrep::rc::RcOc<namespace_env::Env>;
 
 #[derive(
@@ -1862,9 +1901,12 @@ pub struct Typedef<Ex, En> {
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
     pub file_attributes: Vec<FileAttribute<Ex, En>>,
     #[rust_to_ocaml(attr = "visitors.opaque")]
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub mode: file_info::Mode,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub vis: TypedefVisibility,
     pub namespace: Nsenv,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,
     pub emit_id: Option<EmitId>,
     pub is_ctx: bool,
@@ -1893,11 +1935,13 @@ pub struct Typedef<Ex, En> {
 pub struct Gconst<Ex, En> {
     pub annotation: En,
     #[rust_to_ocaml(attr = "visitors.opaque")]
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub mode: file_info::Mode,
     pub name: Sid,
     pub type_: Option<Hint>,
     pub value: Expr<Ex, En>,
     pub namespace: Nsenv,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,
     pub emit_id: Option<EmitId>,
 }
@@ -1923,6 +1967,7 @@ pub struct FunDef<Ex, En> {
     pub namespace: Nsenv,
     pub file_attributes: Vec<FileAttribute<Ex, En>>,
     #[rust_to_ocaml(attr = "visitors.opaque")]
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub mode: file_info::Mode,
     pub name: Sid,
     pub fun: Fun_<Ex, En>,
@@ -1949,10 +1994,13 @@ pub struct FunDef<Ex, En> {
 #[repr(C)]
 pub struct ModuleDef<Ex, En> {
     pub annotation: En,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub name: ast_defs::Id,
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,
     #[rust_to_ocaml(attr = "visitors.opaque")]
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub mode: file_info::Mode,
     pub doc_comment: Option<DocComment>,
     pub exports: Option<Vec<MdNameKind>>,
@@ -1974,6 +2022,7 @@ pub struct ModuleDef<Ex, En> {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum MdNameKind {
     MDNameGlobal(Pos),
@@ -2029,6 +2078,7 @@ pub enum Def<Ex, En> {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum NsKind {
     NSNamespace,
@@ -2041,6 +2091,7 @@ impl TrivialDrop for NsKind {}
 arena_deserializer::impl_deserialize_in_arena!(NsKind);
 
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 pub type DocComment = ast_defs::Pstring;
 
 #[derive(
@@ -2060,6 +2111,7 @@ pub type DocComment = ast_defs::Pstring;
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum ImportFlavor {
     Include,
@@ -2110,6 +2162,7 @@ pub enum XhpChild {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum XhpChildOp {
     ChildStar,
@@ -2173,6 +2226,7 @@ pub struct Contexts(pub Pos, pub Vec<Hint>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[rust_to_ocaml(prefix = "hfparam_")]
 #[repr(C)]
 pub struct HfParamInfo {
@@ -2198,12 +2252,14 @@ pub struct HfParamInfo {
 #[rust_to_ocaml(prefix = "hf_")]
 #[repr(C)]
 pub struct HintFun {
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub is_readonly: Option<ast_defs::ReadonlyKind>,
     pub param_tys: Vec<Hint>,
     pub param_info: Vec<Option<HfParamInfo>>,
     pub variadic_ty: VariadicHint,
     pub ctxs: Option<Contexts>,
     pub return_ty: Hint,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub is_readonly_return: Option<ast_defs::ReadonlyKind>,
 }
 
@@ -2398,6 +2454,7 @@ pub struct CtxRefinementBounds {
 pub struct ShapeFieldInfo {
     pub optional: bool,
     pub hint: Hint,
+    #[rust_to_ocaml(attr = "transform.opaque")]
     pub name: ast_defs::ShapeFieldName,
 }
 
@@ -2441,6 +2498,7 @@ pub struct NastShapeInfo {
 )]
 #[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "visitors.opaque")]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum KvcKind {
     Map,
@@ -2468,6 +2526,7 @@ arena_deserializer::impl_deserialize_in_arena!(KvcKind);
 )]
 #[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "visitors.opaque")]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum VcKind {
     Vector,
@@ -2519,6 +2578,7 @@ pub struct Enum_ {
 )]
 #[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord, map,
+    (transform ~restart:(`Disallow `Encode_as_result)),
     (visitors
        {
          variety = "iter";

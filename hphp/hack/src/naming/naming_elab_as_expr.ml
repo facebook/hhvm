@@ -22,7 +22,11 @@ let elab_key err_acc = function
     let ident = Local_id.make_unscoped "__internal_placeholder" in
     ((annot, pos, Aast.Lvar (pos, ident)), err :: err_acc)
 
-let on_as_expr (env, as_expr, err_acc) =
+let on_as_expr :
+      'a 'b.
+      'env * ('a, 'b) Aast_defs.as_expr * Err.t list ->
+      ('env * ('a, 'b) Aast_defs.as_expr * Err.t list, _) result =
+ fun (env, as_expr, err_acc) ->
   let (as_expr, err_acc) =
     match as_expr with
     | Aast.As_v e ->

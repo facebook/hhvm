@@ -18,7 +18,11 @@ let rec concat_blocks stmts =
 
 let on_block (env, stmts, err) = Ok (env, concat_blocks stmts, err)
 
-let on_using_stmt (env, us, err) =
+let on_using_stmt :
+      'a 'b.
+      'env * ('a, 'b) Aast_defs.using_stmt * _ ->
+      ('env * ('a, 'b) Aast_defs.using_stmt * _, _) result =
+ fun (env, us, err) ->
   Ok (env, Aast.{ us with us_is_block_scoped = false }, err)
 
 let pass =

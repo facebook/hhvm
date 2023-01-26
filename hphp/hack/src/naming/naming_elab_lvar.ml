@@ -7,7 +7,11 @@
  *)
 module SN = Naming_special_names
 
-let on_expr_ (env, expr_, err) =
+let on_expr_ :
+      'a 'b.
+      _ * ('a, 'b) Aast.expr_ * _ ->
+      (_ * ('a, 'b) Aast.expr_ * _, _ * ('a, 'b) Aast.expr_ * _) result =
+ fun (env, expr_, err) ->
   let expr_ =
     match expr_ with
     | Aast.Lvar (pos, local_id) ->

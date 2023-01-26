@@ -37,43 +37,53 @@ let on_class_c_user_attributes (env, c_user_attributes, err_acc) =
       the legacy code mangles positions by using the inner `class_id_` position
       in the output `class_id` tuple. This looks to be erroneous.
 *)
-let on_class_id (env, class_id, err_acc) =
+let on_class_id :
+      'a 'b.
+      Naming_phase_env.t
+      * (_ * Pos.t * ('a, 'b) Aast_defs.class_id_)
+      * Err.t list ->
+      ( Naming_phase_env.t
+        * (_ * Pos.t * ('a, 'b) Aast_defs.class_id_)
+        * Err.t list,
+        _ )
+      result =
+ fun (env, class_id, err_acc) ->
   let in_class = Env.in_class env in
   let (class_id, err_acc) =
     match class_id with
     (* TODO[mjt] if we don't expect these from lowering should we refine the
        NAST repr? *)
     | (_, _, Aast.(CIparent | CIself | CIstatic | CI _)) -> (class_id, err_acc)
-    | (_, _, Aast.(CIexpr (_, expr_pos, Id (id_pos, cname)))) ->
+    | (annot, _, Aast.(CIexpr (_, expr_pos, Id (id_pos, cname)))) ->
       if String.equal cname SN.Classes.cParent then
         if not in_class then
-          ( ((), expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
+          ( (annot, expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
             (Err.typing @@ Typing_error.Primary.Parent_outside_class id_pos)
             :: err_acc )
         else
-          (((), expr_pos, Aast.CIparent), err_acc)
+          ((annot, expr_pos, Aast.CIparent), err_acc)
       else if String.equal cname SN.Classes.cSelf then
         if not in_class then
-          ( ((), expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
+          ( (annot, expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
             (Err.typing @@ Typing_error.Primary.Self_outside_class id_pos)
             :: err_acc )
         else
-          (((), expr_pos, Aast.CIself), err_acc)
+          ((annot, expr_pos, Aast.CIself), err_acc)
       else if String.equal cname SN.Classes.cStatic then
         if not in_class then
-          ( ((), expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
+          ( (annot, expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
             (Err.typing @@ Typing_error.Primary.Static_outside_class id_pos)
             :: err_acc )
         else
-          (((), expr_pos, Aast.CIstatic), err_acc)
+          ((annot, expr_pos, Aast.CIstatic), err_acc)
       else
-        (((), expr_pos, Aast.CI (expr_pos, cname)), err_acc)
-    | (_, _, Aast.(CIexpr (_, expr_pos, Lvar (lid_pos, lid))))
+        ((annot, expr_pos, Aast.CI (expr_pos, cname)), err_acc)
+    | (annot, _, Aast.(CIexpr (ci_annot, expr_pos, Lvar (lid_pos, lid))))
       when String.equal (Local_id.to_string lid) SN.SpecialIdents.this ->
       (* TODO[mjt] why is `$this` valid outside a class? *)
-      (Aast.((), expr_pos, CIexpr ((), lid_pos, This)), err_acc)
-    | (_, _, (Aast.(CIexpr (_, expr_pos, _)) as class_id_)) ->
-      (((), expr_pos, class_id_), err_acc)
+      (Aast.(annot, expr_pos, CIexpr (ci_annot, lid_pos, This)), err_acc)
+    | (annot, _, (Aast.(CIexpr (_, expr_pos, _)) as class_id_)) ->
+      ((annot, expr_pos, class_id_), err_acc)
   in
   Ok (env, class_id, err_acc)
 

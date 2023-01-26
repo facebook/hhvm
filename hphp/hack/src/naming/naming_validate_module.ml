@@ -13,7 +13,13 @@ module Env = struct
     allow_module_def
 end
 
-let on_module_def (env, (Aast.{ md_span; _ } as md), err_acc) =
+let on_module_def :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * Err.t list ->
+      ( Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * Err.t list,
+        'c )
+      result =
+ fun (env, (Aast.{ md_span; _ } as md), err_acc) ->
   let err =
     if Env.allow_module_def env then
       err_acc

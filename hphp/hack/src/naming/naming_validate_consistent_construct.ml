@@ -13,8 +13,11 @@ module Env = struct
     consistent_ctor_level
 end
 
-let on_class_
-    (env, (Aast.{ c_methods; c_user_attributes; c_kind; _ } as c), err_acc) =
+let on_class_ :
+      'a 'b.
+      _ * ('a, 'b) Aast_defs.class_ * Naming_phase_error.t list ->
+      (_ * ('a, 'b) Aast_defs.class_ * Naming_phase_error.t list, _) result =
+ fun (env, (Aast.{ c_methods; c_user_attributes; c_kind; _ } as c), err_acc) ->
   let err =
     if Env.consistent_ctor_level env > 0 then
       let attr_pos_opt =

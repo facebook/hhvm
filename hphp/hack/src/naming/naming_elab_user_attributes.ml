@@ -7,7 +7,13 @@
  *)
 open Hh_prelude
 
-let on_user_attributes (env, us, err_acc) =
+let on_user_attributes :
+      'a 'b.
+      _ * ('a, 'b) Aast_defs.user_attribute list * Naming_phase_error.t list ->
+      ( _ * ('a, 'b) Aast_defs.user_attribute list * Naming_phase_error.t list,
+        _ )
+      result =
+ fun (env, us, err_acc) ->
   let seen = Caml.Hashtbl.create 0 in
   let dedup (attrs, err_acc) (Aast.{ ua_name = (pos, attr_name); _ } as attr) =
     match Caml.Hashtbl.find_opt seen attr_name with

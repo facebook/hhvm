@@ -12,7 +12,11 @@ open Hh_prelude
    for instance, we can't guarantee that `Noop` or `Markup`
    are not contained in say, a function body. We should either
    move these to top-level defs _or_ fully recurse to remove them *)
-let on_program (env, program, err) =
+let on_program :
+      'a 'b.
+      _ * ('a, 'b) Aast_defs.def list * _ ->
+      (_ * ('a, 'b) Aast_defs.def list * _, _) result =
+ fun (env, program, err) ->
   let rec aux acc def =
     match def with
     (* These are elaborated away in Namespaces.elaborate_toplevel_defs *)

@@ -61,8 +61,11 @@ let on_class_c_implements (env, c_implements, err_acc) =
   let env = Env.set_forbid_this env ~forbid_this:false in
   Ok (env, c_implements, err_acc)
 
-let on_class_var
-    (env, (Aast.{ cv_is_static; cv_user_attributes; _ } as cv), err_acc) =
+let on_class_var :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_var * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_var * 'c, 'd) result =
+ fun (env, (Aast.{ cv_is_static; cv_user_attributes; _ } as cv), err_acc) ->
   let lsb =
     if cv_is_static then
       Some
@@ -84,7 +87,11 @@ let on_fun_f_ret (env, f_ret, err_acc) =
   in
   Ok (env, f_ret, err_acc)
 
-let on_expr_ (env, expr_, err_acc) =
+let on_expr_ :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * 'c, 'd) result =
+ fun (env, expr_, err_acc) ->
   let env =
     match expr_ with
     | Aast.(Cast _ | Is _ | As _ | Upcast _) ->

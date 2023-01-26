@@ -13,7 +13,11 @@ module Env = struct
     allow_typeconst_in_enum_class
 end
 
-let on_class_ (env, (Aast.{ c_kind; c_typeconsts; c_span; _ } as c), err_acc) =
+let on_class_ :
+      'a 'b.
+      _ * ('a, 'b) Aast_defs.class_ * Naming_phase_error.t list ->
+      (_ * ('a, 'b) Aast_defs.class_ * Naming_phase_error.t list, _) result =
+ fun (env, (Aast.{ c_kind; c_typeconsts; c_span; _ } as c), err_acc) ->
   let err =
     if
       (not @@ Env.allow_typeconst_in_enum_class env)

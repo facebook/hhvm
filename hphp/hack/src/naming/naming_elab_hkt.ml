@@ -23,10 +23,13 @@ let on_hint (env, hint, err_acc) =
     Ok (env, (pos, Aast.Habstr (name, [])), err)
   | _ -> Ok (env, hint, err_acc)
 
-let on_tparam
-    ( env,
-      (Aast.{ tp_parameters; tp_name = (pos, tparam_name); _ } as tparam),
-      err_acc ) =
+let on_tparam :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.tparam * Err.t list ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.tparam * Err.t list, 'c) result =
+ fun ( env,
+       (Aast.{ tp_parameters; tp_name = (pos, tparam_name); _ } as tparam),
+       err_acc ) ->
   match tp_parameters with
   | _ :: _ when not @@ Env.hkt_enabled env ->
     let err =

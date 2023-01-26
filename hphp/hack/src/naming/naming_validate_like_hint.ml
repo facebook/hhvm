@@ -23,7 +23,11 @@ module Env = struct
       { t with validate_like_hint = Validate_like_hint.{ allow_like } }
 end
 
-let on_expr_ (env, expr_, err) =
+let on_expr_ :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * 'c, 'd) result =
+ fun (env, expr_, err) ->
   let env =
     match expr_ with
     | Aast.(Is _ | As _ | Upcast _) -> Env.set_allow_like env ~allow_like:true

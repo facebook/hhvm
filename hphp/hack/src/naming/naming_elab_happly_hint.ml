@@ -265,21 +265,49 @@ let canonicalize_happly tparams hint_pos tycon hints =
     let hint_ = Aast.Happly ((pos, tycon), hints) in
     Ok ((hint_pos, hint_), None)
 
-let on_typedef (env, t, err) = Ok (Env.in_typedef env t, t, err)
+let on_typedef :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.typedef * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.typedef * 'c, 'd) result =
+ (fun (env, t, err) -> Ok (Env.in_typedef env t, t, err))
 
-let on_gconst (env, cst, err) = Ok (Env.in_gconst env, cst, err)
+let on_gconst :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.gconst * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.gconst * 'c, 'd) result =
+ (fun (env, cst, err) -> Ok (Env.in_gconst env, cst, err))
 
-let on_fun_def (env, fd, err) = Ok (Env.in_fun_def env fd, fd, err)
+let on_fun_def :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def * 'c, 'd) result =
+ (fun (env, fd, err) -> Ok (Env.in_fun_def env fd, fd, err))
 
-let on_module_def (env, md, err) = Ok (Env.in_module_def env, md, err)
+let on_module_def :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * 'c, 'd) result =
+ (fun (env, md, err) -> Ok (Env.in_module_def env, md, err))
 
-let on_class_ (env, c, err) = Ok (Env.in_class env c, c, err)
+let on_class_ :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c, 'd) result =
+ (fun (env, c, err) -> Ok (Env.in_class env c, c, err))
 
-let on_method_ (env, m, err) =
+let on_method_ :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.method_ * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.method_ * 'c, 'd) result =
+ fun (env, m, err) ->
   let env = Env.extend_tparams env m.Aast.m_tparams in
   Ok (env, m, err)
 
-let on_tparam (env, tp, err) =
+let on_tparam :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.tparam * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.tparam * 'c, 'd) result =
+ fun (env, tp, err) ->
   (* TODO[mjt] do we want to maintain the HKT code? *)
   let env = Env.extend_tparams env tp.Aast.tp_parameters in
   Ok (env, tp, err)

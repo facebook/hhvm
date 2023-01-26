@@ -18,13 +18,21 @@ let afield_value cname afield =
 let afield_key_value cname afield =
   match afield with
   | Aast.AFkvalue (ek, ev) -> ((ek, ev), None)
-  | Aast.AFvalue ((_, pos, _) as ek) ->
+  | Aast.AFvalue ((annot, pos, _) as ek) ->
     let ev =
-      ((), pos, Aast.Lvar (pos, Local_id.make_unscoped "__internal_placeholder"))
+      ( annot,
+        pos,
+        Aast.Lvar (pos, Local_id.make_unscoped "__internal_placeholder") )
     in
     ((ek, ev), Some (Err.naming @@ Naming_error.Missing_arrow { pos; cname }))
 
-let on_expr (env, ((annot, pos, expr_) as expr), err_acc) =
+let on_expr :
+      'a 'b.
+      _ * ('a * Pos.t * ('a, 'b) Aast_defs.expr_) * Err.t list ->
+      ( _ * ('a * Pos.t * ('a, 'b) Aast_defs.expr_) * Err.t list,
+        _ * ('a, 'b) Aast.expr * Err.t list )
+      result =
+ fun (env, ((annot, pos, expr_) as expr), err_acc) ->
   let res =
     match expr_ with
     | Aast.Collection ((pos, cname), c_targ_opt, afields)

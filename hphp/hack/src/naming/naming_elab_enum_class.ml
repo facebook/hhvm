@@ -34,7 +34,11 @@ let on_hint_ (env, hint_, err_acc) =
   in
   Ok (env, hint_, err)
 
-let on_class_ (env, (Aast.{ c_kind; c_enum; c_name; _ } as c), err) =
+let on_class_ :
+      'a 'b.
+      _ * ('a, 'b) Aast_defs.class_ * _ ->
+      (_ * ('a, 'b) Aast_defs.class_ * _, _) result =
+ fun (env, (Aast.{ c_kind; c_enum; c_name; _ } as c), err) ->
   let c =
     let pos = fst c_name in
     match c_enum with

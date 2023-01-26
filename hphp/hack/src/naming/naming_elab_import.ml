@@ -6,7 +6,11 @@
  *
  *)
 
-let on_expr (env, expr, err_acc) =
+let on_expr :
+      'a 'b.
+      _ * ('a, 'b) Aast.expr * _ ->
+      (_ * ('a, 'b) Aast.expr * _, _ * ('a, 'b) Aast.expr * _) result =
+ fun (env, expr, err_acc) ->
   match expr with
   | (_, _, Aast.Import _) ->
     Error (env, Naming_phase_error.invalid_expr expr, err_acc)

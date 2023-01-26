@@ -44,7 +44,11 @@ module Env = struct
     tp_depth
 end
 
-let on_expr_ (env, expr_, err) =
+let on_expr_ :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * 'c, 'd) result =
+ fun (env, expr_, err) ->
   let env =
     match expr_ with
     | Aast.Cast _ -> Env.incr_tp_depth env

@@ -21,7 +21,17 @@ module Env = struct
     current_class
 end
 
-let on_expr (env, ((annot, pos, expr_) as expr), err_acc) =
+let on_expr :
+      'a 'b.
+      Naming_phase_env.t
+      * ('a * Pos.t * ('a, 'b) Aast_defs.expr_)
+      * Naming_phase_error.t list ->
+      ( Naming_phase_env.t
+        * ('a * Pos.t * ('a, 'b) Aast_defs.expr_)
+        * Naming_phase_error.t list,
+        Naming_phase_env.t * ('a, 'b) Aast.expr * Naming_phase_error.t list )
+      result =
+ fun (env, ((annot, pos, expr_) as expr), err_acc) ->
   let (res, err_acc) =
     match expr_ with
     | Aast.(
@@ -245,10 +255,10 @@ let on_expr (env, ((annot, pos, expr_) as expr), err_acc) =
           (Error fn_expr_pos, args_err :: err_acc)
         | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] -> begin
           match (e1, e2) with
-          | Aast.((_, pc, String cl), (_, pm, String meth)) ->
+          | Aast.((annot, pc, String cl), (_, pm, String meth)) ->
             let cid = Aast.CI (pc, cl) in
-            (Ok (Aast.Smethod_id (((), pc, cid), (pm, meth))), err_acc)
-          | Aast.((_, _, Id (pc, const)), (_, pm, String meth))
+            (Ok (Aast.Smethod_id ((annot, pc, cid), (pm, meth))), err_acc)
+          | Aast.((annot, _, Id (pc, const)), (_, pm, String meth))
             when String.equal const SN.PseudoConsts.g__CLASS__ ->
             (* All of these that use current_cls aren't quite correct
              * inside a trait, as the class should be the using class.
@@ -259,7 +269,7 @@ let on_expr (env, ((annot, pos, expr_) as expr), err_acc) =
             (match Env.current_class env with
             | Some (cid, _, true) ->
               let cid = Aast.CI (pc, snd cid) in
-              ( Ok Aast.(Smethod_id (((), fn_expr_pos, cid), (pm, meth))),
+              ( Ok Aast.(Smethod_id ((annot, fn_expr_pos, cid), (pm, meth))),
                 err_acc )
             | Some (cid, kind, false) ->
               let is_trait = Ast_defs.is_c_trait kind in
@@ -277,18 +287,18 @@ let on_expr (env, ((annot, pos, expr_) as expr), err_acc) =
               in
               (Error fn_expr_pos, meth_err :: err_acc))
           | Aast.
-              ( (_, _, Class_const ((_, pc, CI cl), (_, mem))),
+              ( (_, _, Class_const ((annot, pc, CI cl), (_, mem))),
                 (_, pm, String meth) )
             when String.equal mem SN.Members.mClass ->
             let cid = Aast.CI cl in
-            (Ok (Aast.Smethod_id (((), pc, cid), (pm, meth))), err_acc)
+            (Ok (Aast.Smethod_id ((annot, pc, cid), (pm, meth))), err_acc)
           | Aast.
-              ( (_, p, Class_const ((_, pc, CIself), (_, mem))),
+              ( (_, p, Class_const ((annot, pc, CIself), (_, mem))),
                 (_, pm, String meth) )
             when String.equal mem SN.Members.mClass ->
             (match Env.current_class env with
             | Some (_cid, _, true) ->
-              (Ok Aast.(Smethod_id (((), pc, CIself), (pm, meth))), err_acc)
+              (Ok Aast.(Smethod_id ((annot, pc, CIself), (pm, meth))), err_acc)
             | Some (cid, _, false) ->
               let class_name = snd cid in
               let non_final_err =
@@ -303,12 +313,12 @@ let on_expr (env, ((annot, pos, expr_) as expr), err_acc) =
               in
               (Error p, meth_err :: err_acc))
           | Aast.
-              ( (_, p, Class_const ((_, pc, CIstatic), (_, mem))),
+              ( (_, p, Class_const ((annot, pc, CIstatic), (_, mem))),
                 (_, pm, String meth) )
             when String.equal mem SN.Members.mClass ->
             (match Env.current_class env with
             | Some (_cid, _, _) ->
-              (Ok Aast.(Smethod_id (((), pc, CIstatic), (pm, meth))), err_acc)
+              (Ok Aast.(Smethod_id ((annot, pc, CIstatic), (pm, meth))), err_acc)
             | None ->
               let meth_err =
                 Naming_phase_error.naming @@ Naming_error.Illegal_class_meth p

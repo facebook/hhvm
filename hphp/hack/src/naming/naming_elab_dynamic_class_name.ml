@@ -16,14 +16,20 @@ let is_dynamic = function
     false
   | _ -> true
 
-let on_expr (env, ((ex, pos, expr_) as expr), err_acc) =
+let on_expr :
+      'a 'b.
+      _ * ('a * Pos.t * ('a, 'b) Aast_defs.expr_) * Err.t list ->
+      ( _ * ('a * Pos.t * ('a, 'b) Aast_defs.expr_) * Err.t list,
+        _ * ('a, 'b) Aast.expr * Err.t list )
+      result =
+ fun (env, ((ex, pos, expr_) as expr), err_acc) ->
   let res =
     let open Aast in
     match expr_ with
-    | Aast.(New ((_, ci_pos, ci), targs, exprs, expr_opt, ann))
+    | Aast.(New ((annot, ci_pos, ci), targs, exprs, expr_opt, ann))
       when is_dynamic ci ->
       let err = Err.naming @@ Naming_error.Dynamic_new_in_strict_mode ci_pos in
-      let class_id = ((), pos, Aast.CI (ci_pos, SN.Classes.cUnknown)) in
+      let class_id = (annot, pos, Aast.CI (ci_pos, SN.Classes.cUnknown)) in
       let expr_ = Aast.New (class_id, targs, exprs, expr_opt, ann) in
       Ok (expr_, err :: err_acc)
     (* TODO[mjt] can we decompose this case further? This is considering

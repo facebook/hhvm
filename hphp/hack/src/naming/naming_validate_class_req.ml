@@ -7,7 +7,11 @@
  *)
 open Hh_prelude
 
-let on_class_ (env, (Aast.{ c_reqs; c_kind; _ } as c), err_acc) =
+let on_class_ :
+      'a 'b.
+      _ * ('a, 'b) Aast_defs.class_ * Naming_phase_error.t list ->
+      (_ * ('a, 'b) Aast_defs.class_ * Naming_phase_error.t list, _) result =
+ fun (env, (Aast.{ c_reqs; c_kind; _ } as c), err_acc) ->
   let (c_req_extends, c_req_implements, c_req_class) = Aast.split_reqs c_reqs in
   let is_trait = Ast_defs.is_c_trait c_kind
   and is_interface = Ast_defs.is_c_interface c_kind in

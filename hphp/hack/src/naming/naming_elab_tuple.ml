@@ -8,7 +8,13 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-let on_expr (env, expr, err_acc) =
+let on_expr :
+      'a 'b.
+      _ * ('a, 'b) Aast.expr * Err.t list ->
+      ( _ * ('a, 'b) Aast.expr * Err.t list,
+        _ * ('a, 'b) Aast.expr * Err.t list )
+      result =
+ fun (env, expr, err_acc) ->
   match expr with
   | (_, pos, Aast.Tuple []) ->
     let err = Err.naming @@ Naming_error.Too_few_arguments pos in

@@ -8,7 +8,11 @@
 open Hh_prelude
 module SN = Naming_special_names
 
-let on_expr_ (env, expr_, err_acc) =
+let on_expr_ :
+      'a 'b.
+      _ * ('a, 'b) Aast.expr_ * _ ->
+      (_ * ('a, 'b) Aast.expr_ * _, _ * ('a, 'b) Aast.expr_ * _) result =
+ fun (env, expr_, err_acc) ->
   let err =
     match expr_ with
     | Aast.(Cast ((_, Hprim (Tint | Tbool | Tfloat | Tstring)), _)) -> err_acc

@@ -44,7 +44,13 @@ let canonical_shape_name current_class sfld =
       Error (Ast_defs.SFclass_const ((class_pos, SN.Classes.cUnknown), cst), err))
   | _ -> Ok sfld
 
-let on_expr_ (env, expr_, err_acc) =
+let on_expr_ :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * Naming_phase_error.t list ->
+      ( Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ * Naming_phase_error.t list,
+        'c )
+      result =
+ fun (env, expr_, err_acc) ->
   let (expr_, err_acc) =
     match expr_ with
     | Aast.Shape fdl ->

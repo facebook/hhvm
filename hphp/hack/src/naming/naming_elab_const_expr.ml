@@ -97,7 +97,11 @@ let const_expr in_mode in_enum_class expr =
     | [] -> Ok expr
     | errs -> Error (Err.invalid_expr expr, errs)
 
-let on_class_ (env, c, err) =
+let on_class_ :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * _ ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * _, _) result =
+ fun (env, c, err) ->
   let in_enum_class =
     match c.Aast.c_kind with
     | Ast_defs.Cenum_class _ -> true
@@ -109,20 +113,40 @@ let on_class_ (env, c, err) =
   in
   Ok (env, c, err)
 
-let on_gconst (env, cst, err) =
+let on_gconst :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.gconst * _ ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.gconst * _, _) result =
+ fun (env, cst, err) ->
   let env = Env.set_mode env ~in_mode:cst.Aast.cst_mode in
   Ok (env, cst, err)
 
-let on_typedef (env, t, err) =
-  Ok (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
+let on_typedef :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.typedef * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.typedef * 'c, 'd) result =
+ (fun (env, t, err) -> Ok (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err))
 
-let on_fun_def (env, fd, err) =
-  Ok (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err)
+let on_fun_def :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.fun_def * 'c, 'd) result =
+ (fun (env, fd, err) -> Ok (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err))
 
-let on_module_def (env, md, err) =
-  Ok (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err)
+let on_module_def :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.module_def * 'c, 'd) result =
+ (fun (env, md, err) -> Ok (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err))
 
-let on_class_const_kind (env, kind, err_acc) =
+let on_class_const_kind :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_const_kind * Err.t list ->
+      ( Naming_phase_env.t * ('a, 'b) Aast_defs.class_const_kind * Err.t list,
+        Naming_phase_env.t * ('a, 'b) Aast_defs.class_const_kind * Err.t list
+      )
+      result =
+ fun (env, kind, err_acc) ->
   let in_mode = Env.in_mode env and in_enum_class = Env.in_enum_class env in
   match kind with
   | Aast.CCConcrete expr -> begin
@@ -132,7 +156,13 @@ let on_class_const_kind (env, kind, err_acc) =
   end
   | Aast.CCAbstract _ -> Ok (env, kind, err_acc)
 
-let on_gconst_cst_value (env, cst_value, err_acc) =
+let on_gconst_cst_value :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast.expr * Err.t list ->
+      ( Naming_phase_env.t * ('a, 'b) Aast.expr * Err.t list,
+        Naming_phase_env.t * ('a, 'b) Aast.expr * Err.t list )
+      result =
+ fun (env, cst_value, err_acc) ->
   let in_mode = Env.in_mode env and in_enum_class = Env.in_enum_class env in
   match const_expr in_mode in_enum_class cst_value with
   | Ok expr -> Ok (env, expr, err_acc)

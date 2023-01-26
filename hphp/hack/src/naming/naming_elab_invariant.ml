@@ -9,16 +9,22 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-let on_stmt (env, stmt, err_acc) =
+let on_stmt :
+      'a 'b.
+      _ * (_ * ('a, 'b) Aast_defs.stmt_) * Err.t list ->
+      ( _ * (_ * ('a, 'b) Aast_defs.stmt_) * Err.t list,
+        _ * (_ * ('a, 'b) Aast_defs.stmt_) * Err.t list )
+      result =
+ fun (env, stmt, err_acc) ->
   let res =
     match stmt with
     | ( pos,
         Aast.(
           Expr
-            ( _,
+            ( annot,
               expr_pos,
               Call
-                ( (_, fn_expr_pos, Id (fn_name_pos, fn_name)),
+                ( (fn_annot, fn_expr_pos, Id (fn_name_pos, fn_name)),
                   targs,
                   exprs,
                   unpacked_element ) )) )
@@ -26,13 +32,13 @@ let on_stmt (env, stmt, err_acc) =
       (match exprs with
       | [] ->
         let err = Err.naming @@ Naming_error.Too_few_arguments fn_expr_pos in
-        let expr = ((), fn_expr_pos, Err.invalid_expr_ None) in
+        let expr = (annot, fn_expr_pos, Err.invalid_expr_ None) in
         Error ((pos, Aast.Expr expr), err)
       | [(_, expr)] ->
         let err = Err.naming @@ Naming_error.Too_few_arguments fn_expr_pos in
         let expr = Err.invalid_expr expr in
         Error ((pos, Aast.Expr expr), err)
-      | (pk, (_, cond_pos, cond)) :: exprs ->
+      | (pk, (cond_annot, cond_pos, cond)) :: exprs ->
         let err_opt =
           match pk with
           | Ast_defs.Pnormal -> None
@@ -45,9 +51,9 @@ let on_stmt (env, stmt, err_acc) =
         let id_expr =
           Aast.Id (fn_name_pos, SN.AutoimportedFunctions.invariant_violation)
         in
-        let fn_expr = ((), fn_expr_pos, id_expr) in
+        let fn_expr = (fn_annot, fn_expr_pos, id_expr) in
         let violation =
-          ((), expr_pos, Aast.Call (fn_expr, targs, exprs, unpacked_element))
+          (annot, expr_pos, Aast.Call (fn_expr, targs, exprs, unpacked_element))
         in
         (match cond with
         | Aast.False ->
@@ -58,7 +64,9 @@ let on_stmt (env, stmt, err_acc) =
             ([(expr_pos, Aast.Expr violation)], [(Pos.none, Aast.Noop)])
           in
           let cond =
-            ((), cond_pos, Aast.Unop (Ast_defs.Unot, ((), cond_pos, cond)))
+            ( cond_annot,
+              cond_pos,
+              Aast.Unop (Ast_defs.Unot, (cond_annot, cond_pos, cond)) )
           in
           Ok ((pos, Aast.If (cond, b1, b2)), err_opt)))
     | _ -> Ok (stmt, None)

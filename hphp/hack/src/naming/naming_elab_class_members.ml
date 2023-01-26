@@ -126,17 +126,24 @@ let elab_xhp_attr
              else
                Some (Naming_phase_error.like_type pos) ))
   in
-  let cv_type = ((), hint_opt)
+  let cv_type = (fst type_hint, hint_opt)
   and cv_xhp_attr =
     Some Aast.{ xai_like; xai_tag = xhp_attr_tag_opt; xai_enum_values }
   in
   let errs = List.filter_map ~f:Fn.id [req_attr_err; like_err] in
   (Aast.{ cv with cv_xhp_attr; cv_type; cv_user_attributes = [] }, errs)
 
-let on_class_
-    ( env,
-      (Aast.{ c_vars; c_xhp_attrs; c_methods; c_user_attributes; _ } as c),
-      err_acc ) =
+let on_class_ :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * Naming_phase_error.t list ->
+      ( Naming_phase_env.t
+        * ('a, 'b) Aast_defs.class_
+        * Naming_phase_error.t list,
+        'c )
+      result =
+ fun ( env,
+       (Aast.{ c_vars; c_xhp_attrs; c_methods; c_user_attributes; _ } as c),
+       err_acc ) ->
   let (c, errs) =
     let (c_vars, err) =
       let (static_props, props) = Aast.split_vars c_vars in

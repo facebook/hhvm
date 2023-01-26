@@ -66,7 +66,11 @@ module Env = struct
     current_class
 end
 
-let on_class_ (env, c, err) = Ok (Env.in_class env c, c, err)
+let on_class_ :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c, 'd) result =
+ (fun (env, c, err) -> Ok (Env.in_class env c, c, err))
 
 let on_where_constraint_hint (env, cstr, err) =
   Ok (Env.set_in_where_clause env ~in_where_clause:true, cstr, err)

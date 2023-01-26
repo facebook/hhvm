@@ -121,7 +121,11 @@ let on_fun_def (env, fd, err) =
   let fd = Aast.{ fd with fd_fun } in
   Ok (env, fd, err)
 
-let on_tparam (env, t, err) =
+let on_tparam :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.tparam * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.tparam * 'c, 'd) result =
+ fun (env, t, err) ->
   let t =
     if Env.implicit_sdt env then
       let (pos, _) = t.Aast.tp_name in
@@ -135,7 +139,11 @@ let on_tparam (env, t, err) =
   in
   Ok (env, t, err)
 
-let on_class_top_down (env, c, err) =
+let on_class_top_down :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c, 'd) result =
+ fun (env, c, err) ->
   let in_enum_class =
     match c.Aast.c_kind with
     | Ast_defs.Cenum_class _ -> true
@@ -152,7 +160,11 @@ let on_class_top_down (env, c, err) =
   in
   Ok (env, c, err)
 
-let on_class_ (env, c, err) =
+let on_class_ :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_ * 'c, 'd) result =
+ fun (env, c, err) ->
   let c =
     if Env.implicit_sdt env then
       let (pos, _) = c.Aast.c_name in
@@ -173,7 +185,12 @@ let on_class_ (env, c, err) =
   in
   Ok (env, c, err)
 
-let on_class_c_consts (env, c_consts, err) =
+let on_class_c_consts :
+      'a 'b.
+      Naming_phase_env.t * ('a, 'b) Aast_defs.class_const list * 'c ->
+      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_const list * 'c, 'd) result
+    =
+ fun (env, c_consts, err) ->
   let c_consts =
     if Env.everything_sdt env && Env.in_enum_class env then
       let elab_hint = function

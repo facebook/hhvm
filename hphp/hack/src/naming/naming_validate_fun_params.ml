@@ -27,11 +27,19 @@ let validate_fun_params errs params =
          else
            (SSet.add param_name seen, errs))
 
-let on_method_ (env, m, errs) =
+let on_method_ :
+      'a 'b.
+      _ * ('a, 'b) Aast_defs.method_ * Err.t list ->
+      (_ * ('a, 'b) Aast_defs.method_ * Err.t list, _) result =
+ fun (env, m, errs) ->
   let err = validate_fun_params errs m.Aast.m_params in
   Ok (env, m, err)
 
-let on_fun_ (env, f, errs) =
+let on_fun_ :
+      'a 'b.
+      _ * ('a, 'b) Aast_defs.fun_ * Err.t list ->
+      (_ * ('a, 'b) Aast_defs.fun_ * Err.t list, _) result =
+ fun (env, f, errs) ->
   let errs = validate_fun_params errs f.Aast.f_params in
   Ok (env, f, errs)
 

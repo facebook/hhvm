@@ -730,7 +730,7 @@ and obj_get_concrete_class_with_member_info
   let member_decl_ty = Typing_enum.member_type env member_info in
   let widen_this = this_appears_covariantly ~contra:true env member_decl_ty in
   let ety_env = mk_ety_env class_info params args.this_ty in
-  let ((env, lcl_ty_err_opt), member_ty, tal, et_enforced) =
+  let ((env, lcl_ty_err_opt), member_ty, tal, et_enforced, lval_mismatch) =
     match deref member_decl_ty with
     | (r, Tfun ft) when args.is_method ->
       (* We special case function types here to be able to pass explicit type
@@ -762,13 +762,29 @@ and obj_get_concrete_class_with_member_info
             env
             ft)
       in
-      let ft_ty1 =
-        Typing_dynamic.maybe_wrap_with_supportdyn
-          ~should_wrap:
-            (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-            && get_ce_support_dynamic_type member_info)
-          (Typing_reason.localize r)
-          ft1
+      let (ft_ty1, lval_mismatch) =
+        let should_wrap =
+          TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+          && get_ce_support_dynamic_type member_info
+        in
+        let lval_mismatch =
+          if should_wrap then
+            (* If this is supportdyn, suppress the Hole on the receiver *)
+            dflt_lval_mismatch
+          else
+            (* Phase.localize_ft will report an error, generated in
+               Typing_generic_constraint.check_where_constraint,
+               if we have a 4323 *)
+            match ft1_ty_err_opt with
+            | Some _ -> Error (concrete_ty, MakeType.nothing Reason.none)
+            | _ -> dflt_lval_mismatch
+        in
+
+        ( Typing_dynamic.maybe_wrap_with_supportdyn
+            ~should_wrap
+            (Typing_reason.localize r)
+            ft1,
+          lval_mismatch )
       in
       let ((env, ft_ty_err_opt), ft_ty) =
         if widen_this then
@@ -803,7 +819,7 @@ and obj_get_concrete_class_with_member_info
       let ty_err_opt =
         Option.merge lclz_ty_err_opt ft_ty_err_opt ~f:Typing_error.both
       in
-      ((env, ty_err_opt), ft_ty, explicit_targs, Unenforced)
+      ((env, ty_err_opt), ft_ty, explicit_targs, Unenforced, lval_mismatch)
     | _ ->
       let is_xhp_attr = Option.is_some (get_ce_xhp_attr member_info) in
       let { et_type; et_enforced } =
@@ -815,7 +831,7 @@ and obj_get_concrete_class_with_member_info
       in
       let (env, member_ty) = Phase.localize ~ety_env env et_type in
       (* TODO(T52753871): same as for class_get *)
-      (env, member_ty, [], et_enforced)
+      (env, member_ty, [], et_enforced, dflt_lval_mismatch)
   in
 
   let (env, (member_ty, tal)) =
@@ -887,7 +903,7 @@ and obj_get_concrete_class_with_member_info
          ~f:Fn.id
          (lcl_ty_err_opt :: coerce_ty_err_opt :: ty_err_opts)
   in
-  (env, ty_err_opt, (member_ty, tal), dflt_lval_mismatch, rval_mismatch)
+  (env, ty_err_opt, (member_ty, tal), lval_mismatch, rval_mismatch)
 
 and obj_get_concrete_class_without_member_info
     args

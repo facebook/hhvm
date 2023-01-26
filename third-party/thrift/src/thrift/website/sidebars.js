@@ -107,6 +107,7 @@ module.exports = {
             "spec/definition/tolerance",
             "spec/definition/value",
             "spec/definition/annotation",
+            "spec/definition/patch",
           ]
         },
         {

@@ -2454,7 +2454,9 @@ end = struct
           bottom_up:'ctx Pass.t ->
           record) =
      fun { variant } ~ctx ~top_down ~bottom_up ->
-      { variant = transform_ty_variant variant ~ctx ~top_down ~bottom_up }
+      {
+        variant = transform_fld_record_variant variant ~ctx ~top_down ~bottom_up;
+      }
 
     and (transform_ty_record :
           record ->

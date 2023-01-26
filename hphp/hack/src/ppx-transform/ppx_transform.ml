@@ -2021,6 +2021,18 @@ module Gen_traverse = struct
           match annot_opt with
           | Some Annot.Opaque ->
             ((label, loc), (ppat_var ~loc { loc; txt = label }, None))
+          | Some Annot.Explicit ->
+            let pat = ppat_var ~loc { loc; txt = label } in
+            let fn_nm =
+              Ident.(transform_fn_name @@ Field (record_name, label))
+            in
+            let fn_expr = pexp_ident ~loc { loc; txt = Lident fn_nm }
+            and elem_expr = pexp_ident ~loc { loc; txt = Lident label } in
+            let expr =
+              [%expr [%e fn_expr] [%e elem_expr] ~ctx ~top_down ~bottom_up]
+            in
+
+            ((label, loc), (pat, Some expr))
           | _ -> ((label, loc), gen_record_field fld ~opaque_map))
         record_fields
     in

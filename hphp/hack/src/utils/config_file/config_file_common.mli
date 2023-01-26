@@ -14,6 +14,7 @@ val empty : unit -> t
 
 val print_to_stderr : t -> unit
 
+(** Apply overrides using provided overrides. *)
 val apply_overrides : from:string option -> config:t -> overrides:t -> t
 
 val parse_contents : string -> t

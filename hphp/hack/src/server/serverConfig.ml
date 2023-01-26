@@ -271,9 +271,16 @@ let load ~silent options : t * ServerLocalConfig.t =
     Config_file.parse_version (Config_file.Getters.string_opt "version" config)
   in
   let local_config =
+    let current_rolled_out_flag_idx =
+      int_
+        "current_saved_state_rollout_flag_index"
+        ~default:Int.min_value
+        config
+    in
     ServerLocalConfig.load
       ~silent
       ~current_version:version
+      ~current_rolled_out_flag_idx
       command_line_overrides
   in
   let local_config =

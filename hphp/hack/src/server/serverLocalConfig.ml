@@ -13,6 +13,12 @@ open Hh_prelude
 open Option.Monad_infix
 module Bucket = Hack_bucket
 
+let output_config_section title output_config =
+  Printf.eprintf "** %s:\n%!" title;
+  output_config ();
+  Printf.eprintf "\n%!";
+  ()
+
 module Watchman = struct
   type t = {
     (* use_watchman *)
@@ -299,6 +305,84 @@ module RecheckCapture = struct
     }
 end
 
+module SavedStateRollouts = struct
+  type t = {
+    dummy_one: bool;
+    dummy_two: bool;
+    dummy_three: bool;
+  }
+
+  (* The names of these should be exactly the capitalized flag names.
+     For example for a flag named
+
+        my_flag
+
+     use the enum value
+
+        My_flag
+  *)
+  type flag =
+    | Dummy_one
+    | Dummy_two
+    | Dummy_three
+  [@@deriving show { with_path = false }]
+
+  let flag_name flag = String.lowercase (show_flag flag)
+
+  (* We need to guarantee that for all flag combination, there is a available saved
+     state corresponding to that combination. There are however an exponential number
+     of flag combinations.
+     What follows allows to restrict the number of possible combinations per www revision
+     to just two (one for the production saved state, one for the candidate saved state).
+
+     We specify a rollout order below, while .hhconfig provides a flag current_saved_state_rollout_flag_index
+     which specifies which flag is currently being rolled out for that www revision
+     using that order (current_saved_state_rollout_flag_index is an integer).
+     Only that flag will get its value from JustKnob,
+     while the other flags' values are determined by their order:
+     flags whose order is lower than the current flag index are considered to have been already
+     rolled out and therefore have there values set to true, while flags whose order is greater
+     are yet to be rollout and therefore have their values set to false. *)
+  let rollout_order =
+    (* This needs to be specified manually instead of using ppx_enum
+       because we want the indices to stay consistent when we remove flags. *)
+    function
+    | Dummy_one -> 0
+    | Dummy_two -> 1
+    | Dummy_three -> 2
+
+  let make (config : Config_file.t) ~current_rolled_out_flag_idx =
+    let get_flag_value flag =
+      let i = rollout_order flag in
+      if Int.equal current_rolled_out_flag_idx i then
+        bool_ (flag_name flag) ~default:false config
+      else if Int.(current_rolled_out_flag_idx < i) then
+        (* This flag will be rolled out next *)
+        false
+      else
+        (* This flag has already been rolled out *)
+        true
+    in
+    {
+      dummy_one = get_flag_value Dummy_one;
+      dummy_two = get_flag_value Dummy_two;
+      dummy_three = get_flag_value Dummy_three;
+    }
+
+  let default : t =
+    make (Config_file.empty ()) ~current_rolled_out_flag_idx:Int.min_value
+
+  let output t =
+    let print_flag flag value =
+      Printf.eprintf "%s = %b\n" (flag_name flag) value
+    in
+    let { dummy_one; dummy_two; dummy_three } = t in
+    output_config_section "Saved state rollout flags" @@ fun () ->
+    print_flag Dummy_one dummy_one;
+    print_flag Dummy_two dummy_two;
+    print_flag Dummy_three dummy_three
+end
+
 (** Allows to typecheck only a certain quantile of the workload. *)
 type quantile = {
   count: int;
@@ -312,6 +396,7 @@ type quantile = {
 
 type t = {
   saved_state_loading: GlobalOptions.saved_state_loading;
+  saved_state_flags: SavedStateRollouts.t;
   min_log_level: Hh_logger.Level.t;
   attempt_fix_credentials: bool;
       (** Indicates whether we attempt to fix the credentials if they're broken *)
@@ -500,6 +585,7 @@ type t = {
 let default =
   {
     saved_state_loading = GlobalOptions.default_saved_state_loading;
+    saved_state_flags = SavedStateRollouts.default;
     min_log_level = Hh_logger.Level.Info;
     attempt_fix_credentials = false;
     log_categories = [];
@@ -699,16 +785,19 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
   in
   (experiments_meta, config)
 
-let load_ system_config_path ~silent ~current_version overrides =
+let load_
+    system_config_path
+    ~silent
+    ~current_version
+    ~current_rolled_out_flag_idx
+    overrides =
   let config = Config_file.parse_local_config system_config_path in
   let (experiments_config_meta, config) =
     apply_overrides ~silent ~current_version ~config ~overrides
   in
-  if not silent then begin
-    Printf.eprintf "** Combined config:\n%!";
-    Config_file.print_to_stderr config;
-    Printf.eprintf "\n%!"
-  end;
+  (if not silent then
+    output_config_section "Combined config" @@ fun () ->
+    Config_file.print_to_stderr config);
 
   let experiments =
     string_list "experiments" ~default:default.experiments config
@@ -754,6 +843,10 @@ let load_ system_config_path ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let saved_state_flags =
+    SavedStateRollouts.make config ~current_rolled_out_flag_idx
+  in
+  if not silent then SavedStateRollouts.output saved_state_flags;
   let attempt_fix_credentials =
     bool_if_min_version
       "attempt_fix_credentials"
@@ -1369,6 +1462,7 @@ let load_ system_config_path ~silent ~current_version overrides =
         log_saved_state_age_and_distance;
         use_manifold_cython_client;
       };
+    saved_state_flags;
     min_log_level;
     attempt_fix_credentials;
     log_categories;
@@ -1485,8 +1579,7 @@ let load_ system_config_path ~silent ~current_version overrides =
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
 On top of that, applies [config_overrides]. If [silent] then prints what it's doing
 to stderr. *)
-let load ~silent ~current_version config_overrides =
-  load_ system_config_path ~silent ~current_version config_overrides
+let load = load_ system_config_path
 
 let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
   HackEventLogger.

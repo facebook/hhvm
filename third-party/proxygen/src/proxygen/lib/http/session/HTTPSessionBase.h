@@ -528,6 +528,10 @@ class HTTPSessionBase : public wangle::ManagedConnection {
 
   void updatePendingWrites();
 
+  bool hasPendingEgress() {
+    return pendingWriteSize_ + pendingWriteSizeDelta_ > 0;
+  }
+
   /**
    * Install a direct response handler for the transaction based on the
    * error.

@@ -41,7 +41,7 @@ let mk_env filename tcopt =
   and is_systemlib = TypecheckerOptions.is_systemlib tcopt
   and allow_typeconst_in_enum_class =
     TypecheckerOptions.allow_all_locations_for_type_constant_in_enum_class tcopt
-    || List.exists ~f:(String.equal dir_str)
+    || List.exists ~f:(fun prefix -> String.is_prefix ~prefix dir_str)
        @@ TypecheckerOptions.allowed_locations_for_type_constant_in_enum_class
             tcopt
   and allow_module_def =

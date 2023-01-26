@@ -183,7 +183,10 @@ let () =
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         "Interpret <<__Soft>> type hints as like types" );
-      ("--everything-sdt", Arg.Set everything_sdt, "Classes have SDT");
+      ( "--everything-sdt",
+        Arg.Set everything_sdt,
+        " Treat all classes, functions, and traits as though they are annotated with <<__SupportDynamicType>>, unless they are annotated with <<__NoAutoDynamic>>"
+      );
       (* The following options do not affect the direct decl parser and can be ignored
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
          the typecheck test cases). *)

@@ -797,7 +797,7 @@ let parse_options () =
         " Require all __Sealed arguments to be subclasses" );
       ( "--everything-sdt",
         Arg.Set everything_sdt,
-        " Treat all classes as though they are annotated with <<__SupportDynamicType>>"
+        " Treat all classes, functions, and traits as though they are annotated with <<__SupportDynamicType>>, unless they are annotated with <<__NoAutoDynamic>>"
       );
       ( "--pessimise-builtins",
         Arg.Set pessimise_builtins,

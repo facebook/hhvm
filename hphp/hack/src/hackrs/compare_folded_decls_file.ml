@@ -219,7 +219,10 @@ let () =
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         "Interpret <<__Soft>> type hints as like types" );
-      ("--everything-sdt", Arg.Set everything_sdt, "Classes have SDT");
+      ( "--everything-sdt",
+        Arg.Set everything_sdt,
+        " Treat all classes, functions, and traits as though they are annotated with <<__SupportDynamicType>>, unless they are annotated with <<__NoAutoDynamic>>"
+      );
       ( "--enable-strict-const-semantics",
         Arg.Int (fun x -> enable_strict_const_semantics := x),
         " Raise an error when a concrete constants is overridden or multiply defined"

@@ -94,8 +94,9 @@ let make_hover_doc_block ctx entry occurrence def_opt =
         ~base_class_name
       |> Option.to_list
     in
-    let docs_url_addendum = Option.to_list (docs_url ctx def) in
-    doc_block_hover @ docs_url_addendum
+    (match docs_url ctx def with
+    | Some info -> info :: doc_block_hover
+    | None -> doc_block_hover)
   | None
   | Some _ ->
     []

@@ -327,9 +327,73 @@ module SavedStateRollouts = struct
     | Dummy_three
   [@@deriving show { with_path = false }]
 
+  type flag_name = string
+
+  (** This module allows to handle the config flag 'ss_force',
+      which can have the following values:
+      'prod' or 'candidate' or 'prod_with_flag_on:my_flag_name' where 'my_flag_name'
+      is a saved state flag from this module.
+
+      This is useful to force using (or creating) the production or candidate saved state,
+      or for using/creating an alternative candidate saved state
+      (with 'prod_with_flag_on:my_flag_name') *)
+  module ForcedFlags : sig
+    (** Type to represent the possible values of config flag 'ss_force' *)
+    type t
+
+    (** Parse value of config flag 'ss_force' *)
+    val parse : Config_file.t -> t option
+
+    (** Return the forced value of the current rollout flag, if any.
+        Returning None means there is no forcing. *)
+    val rollout_flag_value : t option -> bool option
+
+    (** Whether a specific flag is forced to be on. *)
+    val is_forced : flag_name -> t option -> bool
+  end = struct
+    type additional_forced_flag = flag_name option
+
+    type t =
+      | Prod of additional_forced_flag
+      | Candidate
+
+    let force_flag_name : flag_name = "ss_force"
+
+    let parse config : t option =
+      let open Option.Monad_infix in
+      string_opt force_flag_name config >>= function
+      | "production"
+      | "prod" ->
+        Some (Prod None)
+      | "candidate" -> Some Candidate
+      | forced ->
+        let invalid () =
+          Hh_logger.warn "Invalid value for flag %s: %s" force_flag_name forced;
+          None
+        in
+        (match String.split forced ~on:':' with
+        | [forced; forced_flag] ->
+          (match forced with
+          | "prod_with_flag_on"
+          | "production_with_flag_on" ->
+            Some (Prod (Some forced_flag))
+          | _ -> invalid ())
+        | _ -> invalid ())
+
+    let rollout_flag_value (force : t option) : bool option =
+      Option.map force ~f:(function
+          | Prod _ -> false
+          | Candidate -> true)
+
+    let is_forced (flag_name : flag_name) (force : t option) : bool =
+      match force with
+      | Some (Prod (Some forced)) -> String.equal forced flag_name
+      | _ -> false
+  end
+
   let flag_name flag = String.lowercase (show_flag flag)
 
-  (* We need to guarantee that for all flag combination, there is a available saved
+  (* We need to guarantee that for all flag combination, there is an available saved
      state corresponding to that combination. There are however an exponential number
      of flag combinations.
      What follows allows to restrict the number of possible combinations per www revision
@@ -352,13 +416,16 @@ module SavedStateRollouts = struct
     | Dummy_three -> 2
 
   let make (config : Config_file.t) ~current_rolled_out_flag_idx =
+    let force_prod_or_candidate = ForcedFlags.parse config in
     let get_flag_value flag =
       let i = rollout_order flag in
+      let flag_name = flag_name flag in
       if Int.equal current_rolled_out_flag_idx i then
-        bool_ (flag_name flag) ~default:false config
+        ForcedFlags.rollout_flag_value force_prod_or_candidate
+        |> Option.value ~default:(bool_ flag_name ~default:false config)
       else if Int.(current_rolled_out_flag_idx < i) then
         (* This flag will be rolled out next *)
-        false
+        ForcedFlags.is_forced flag_name force_prod_or_candidate
       else
         (* This flag has already been rolled out *)
         true

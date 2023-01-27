@@ -14,6 +14,17 @@ namespace thrift {
 namespace detail {
 
 template <>
+struct VisitByFieldId<::apache::thrift::fixtures::types::empty_struct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::empty_struct");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::decorated_struct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {

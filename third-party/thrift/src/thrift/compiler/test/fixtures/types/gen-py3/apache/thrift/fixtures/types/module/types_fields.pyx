@@ -19,6 +19,23 @@ from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
 
 
 @__cython.auto_pickle(False)
+cdef class __empty_struct_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __empty_struct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cempty_struct* struct_cpp_obj):
+        cdef __empty_struct_FieldsSetter __fbthrift_inst = __empty_struct_FieldsSetter.__new__(__empty_struct_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        return __fbthrift_inst
+
+    cdef void set_field(__empty_struct_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __empty_struct_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+
+@__cython.auto_pickle(False)
 cdef class __decorated_struct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod

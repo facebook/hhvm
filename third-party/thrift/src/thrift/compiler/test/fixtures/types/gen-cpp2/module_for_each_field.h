@@ -14,6 +14,13 @@ namespace thrift {
 namespace detail {
 
 template <>
+struct ForEachField<::apache::thrift::fixtures::types::empty_struct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
+
+template <>
 struct ForEachField<::apache::thrift::fixtures::types::decorated_struct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

@@ -4,6 +4,12 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+cdef class empty_struct_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _apache_thrift_fixtures_types_module_types.empty_struct
+
+    def __iter__(self):
+        pass
+
 cdef class decorated_struct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _apache_thrift_fixtures_types_module_types.decorated_struct
 

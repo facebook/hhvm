@@ -22,6 +22,8 @@ package "apache.org/thrift/fixtures/types"
 
 typedef binary TBinary
 
+struct empty_struct {}
+
 struct decorated_struct {
   1: string field;
 } (cpp.declare_hash, cpp.declare_equal_to)

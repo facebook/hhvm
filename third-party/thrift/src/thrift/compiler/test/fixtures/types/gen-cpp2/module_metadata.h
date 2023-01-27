@@ -42,6 +42,11 @@ class EnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum> {
   static void gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::apache::thrift::fixtures::types::empty_struct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::apache::thrift::fixtures::types::decorated_struct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);

@@ -16,6 +16,13 @@ namespace thrift {
 namespace detail {
 
 template <>
+struct TccStructTraits<::apache::thrift::fixtures::types::empty_struct> {
+  static void translateFieldName(
+      folly::StringPiece _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype) noexcept;
+};
+template <>
 struct TccStructTraits<::apache::thrift::fixtures::types::decorated_struct> {
   static void translateFieldName(
       folly::StringPiece _fname,
@@ -259,6 +266,85 @@ struct TccStructTraits<::apache::thrift::fixtures::types::StructWithDoubleUnders
 } // namespace apache
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+template <class Protocol_>
+void empty_struct::readNoXfer(Protocol_* iprot) {
+  __fbthrift_clear_terse_fields();
+
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+
+  _readState.readStructBegin(iprot);
+
+  using apache::thrift::TProtocolException;
+
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _loop;
+  }
+
+_end:
+  _readState.readStructEnd(iprot);
+
+  return;
+
+_loop:
+  _readState.afterAdvanceFailure(iprot);
+  if (_readState.atStop()) {
+    goto _end;
+  }
+  if (iprot->kUsesFieldNames()) {
+    _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<empty_struct>>();
+  }
+
+  switch (_readState.fieldId) {
+    default:
+    {
+      _readState.skip(iprot);
+      _readState.readFieldEnd(iprot);
+      _readState.readFieldBeginNoInline(iprot);
+      goto _loop;
+    }
+  }
+}
+
+template <class Protocol_>
+uint32_t empty_struct::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("empty_struct");
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t empty_struct::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("empty_struct");
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t empty_struct::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("empty_struct");
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void empty_struct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t empty_struct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t empty_struct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t empty_struct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void empty_struct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t empty_struct::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t empty_struct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t empty_struct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
 
 template <class Protocol_>
 void decorated_struct::readNoXfer(Protocol_* iprot) {

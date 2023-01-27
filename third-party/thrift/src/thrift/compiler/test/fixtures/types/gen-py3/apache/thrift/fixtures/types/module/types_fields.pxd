@@ -47,6 +47,16 @@ cimport apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_typ
 
 
 
+ctypedef void (*__empty_struct_FieldsSetterFunc)(__empty_struct_FieldsSetter, object) except *
+
+cdef class __empty_struct_FieldsSetter(__StructFieldsSetter):
+    cdef _apache_thrift_fixtures_types_module_types.cempty_struct* _struct_cpp_obj
+    cdef cumap[__cstring_view, __empty_struct_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __empty_struct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cempty_struct* struct_cpp_obj)
+
+
 ctypedef void (*__decorated_struct_FieldsSetterFunc)(__decorated_struct_FieldsSetter, object) except *
 
 cdef class __decorated_struct_FieldsSetter(__StructFieldsSetter):

@@ -17,6 +17,7 @@ namespace types {
   ::apache::thrift::detail::md::EnumMetadata<has_bitwise_ops>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<is_unscoped>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<MyForwardRefEnum>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<empty_struct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<decorated_struct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ContainerStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<CppTypeStruct>::gen(metadata);

@@ -512,6 +512,7 @@ extern const _MyForwardRefEnum_EnumMapFactory::ValuesToNamesMapType _MyForwardRe
 // END declare_enums
 // BEGIN forward_declare
 namespace apache { namespace thrift { namespace fixtures { namespace types {
+class empty_struct;
 class decorated_struct;
 class ContainerStruct;
 class CppTypeStruct;
@@ -574,6 +575,97 @@ using ::apache::thrift::detail::operator>=;
 typedef ::std::string TBinary;
 typedef ::std::int32_t IntTypedef;
 typedef ::apache::thrift::fixtures::types::IntTypedef UintTypedef;
+
+class empty_struct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = empty_struct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  empty_struct() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  empty_struct(apache::thrift::FragileConstructor);
+
+  empty_struct(empty_struct&&) = default;
+
+  empty_struct(const empty_struct&) = default;
+
+
+  empty_struct& operator=(empty_struct&&) = default;
+
+  empty_struct& operator=(const empty_struct&) = default;
+
+ public:
+
+  bool operator==(const empty_struct&) const;
+  bool operator<(const empty_struct&) const;
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<empty_struct>;
+  friend void swap(empty_struct& a, empty_struct& b);
+};
+
+template <class Protocol_>
+unsigned long empty_struct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
 
 class decorated_struct final  {
  private:

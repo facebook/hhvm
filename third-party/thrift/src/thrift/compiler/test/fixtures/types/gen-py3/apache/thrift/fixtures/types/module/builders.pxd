@@ -19,6 +19,10 @@ cimport apache.thrift.fixtures.types.included.builders as _apache_thrift_fixture
 
 cimport apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 
+cdef class empty_struct_Builder(thrift.py3.builder.StructBuilder):
+    pass
+
+
 cdef class decorated_struct_Builder(thrift.py3.builder.StructBuilder):
     cdef public str field
 

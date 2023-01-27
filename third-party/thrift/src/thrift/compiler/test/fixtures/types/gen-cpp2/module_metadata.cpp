@@ -63,6 +63,17 @@ void EnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>::gen(Thri
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::fixtures::types::empty_struct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.empty_struct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_empty_struct = res.first->second;
+  module_empty_struct.name() = "module.empty_struct";
+  module_empty_struct.is_union() = false;
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::decorated_struct>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.decorated_struct", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

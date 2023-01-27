@@ -22,6 +22,33 @@ namespace apache { namespace thrift { namespace fixtures { namespace types {
 namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
 
+class empty_struct_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+
+  struct __fbthrift_member {
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::empty_struct;
+  using name = __fbthrift_strings_module::empty_struct;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(2387518879996368012ull)
+  >;
+};
+
 class decorated_struct_struct_traits {
   class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
     class __fbthrift_members {
@@ -1953,6 +1980,7 @@ class StructWithDoubleUnderscores_struct_traits {
 
 } // __fbthrift_refl
 
+THRIFT_REGISTER_STRUCT_TRAITS(empty_struct, __fbthrift_refl::empty_struct_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(decorated_struct, __fbthrift_refl::decorated_struct_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(ContainerStruct, __fbthrift_refl::ContainerStruct_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(CppTypeStruct, __fbthrift_refl::CppTypeStruct_struct_traits);

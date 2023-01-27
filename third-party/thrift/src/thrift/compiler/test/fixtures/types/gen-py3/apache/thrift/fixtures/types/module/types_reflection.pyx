@@ -26,6 +26,19 @@ from thrift.py3.types cimport (
 )
 
 
+cdef __StructSpec get_reflection__empty_struct():
+    cdef _apache_thrift_fixtures_types_module_types.empty_struct defaults = _apache_thrift_fixtures_types_module_types.empty_struct._fbthrift_create(
+        constant_shared_ptr[_apache_thrift_fixtures_types_module_types.cempty_struct](
+            default_inst[_apache_thrift_fixtures_types_module_types.cempty_struct]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="empty_struct",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    return spec
 cdef __StructSpec get_reflection__decorated_struct():
     cdef _apache_thrift_fixtures_types_module_types.decorated_struct defaults = _apache_thrift_fixtures_types_module_types.decorated_struct._fbthrift_create(
         constant_shared_ptr[_apache_thrift_fixtures_types_module_types.cdecorated_struct](

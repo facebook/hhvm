@@ -231,6 +231,80 @@ func MyForwardRefEnumPtr(v MyForwardRefEnum) *MyForwardRefEnum {
 }
 
 
+type EmptyStruct struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &EmptyStruct{}
+
+func NewEmptyStruct() *EmptyStruct {
+    return (&EmptyStruct{})
+}
+
+// Deprecated: Use EmptyStruct.Set* methods instead or set the fields directly.
+type EmptyStructBuilder struct {
+    obj *EmptyStruct
+}
+
+func NewEmptyStructBuilder() *EmptyStructBuilder {
+    return &EmptyStructBuilder{
+        obj: NewEmptyStruct(),
+    }
+}
+
+func (x *EmptyStructBuilder) Emit() *EmptyStruct {
+    var objCopy EmptyStruct = *x.obj
+    return &objCopy
+}
+
+func (x *EmptyStruct) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("empty_struct"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *EmptyStruct) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
 type DecoratedStruct struct {
     Field string `thrift:"field,1" json:"field" db:"field"`
 }

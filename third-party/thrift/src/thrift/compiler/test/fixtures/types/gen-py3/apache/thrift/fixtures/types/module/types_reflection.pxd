@@ -14,6 +14,8 @@ from thrift.py3.reflection cimport (
     FieldSpec as __FieldSpec,
 )
 
+cdef __StructSpec get_reflection__empty_struct()
+
 cdef __StructSpec get_reflection__decorated_struct()
 
 cdef __StructSpec get_reflection__ContainerStruct()

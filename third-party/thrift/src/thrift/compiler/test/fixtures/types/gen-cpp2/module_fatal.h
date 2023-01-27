@@ -81,6 +81,7 @@ struct __fbthrift_strings_module {
   using __fbthrift_hash_448d27c6db38f6f3798a038a9deae3f1b8527fc5b225886028d06c6d9ffa877c = ::fatal::sequence<char, 'M', 'y', 'D', 'a', 't', 'a', 'I', 't', 'e', 'm'>;
   using __fbthrift_hash_463a2e2458322db48dcc738e6792afe31f8fb1883cd29f0ecae7719e93de0818 = ::fatal::sequence<char, 'i', '3', '2', '_', 'f', 'i', 'e', 'l', 'd'>;
   using __fbthrift_hash_46a2d9d4323d5f1afec65c915a165277a03e43b6c68d742cf7011e3e53165010 = ::fatal::sequence<char, 'M', 'y', 'F', 'o', 'r', 'w', 'a', 'r', 'd', 'R', 'e', 'f', 'E', 'n', 'u', 'm'>;
+  using __fbthrift_hash_474c671a4588b9e32ce6beafdd372558d874086a8038790710c33186afccf69a = ::fatal::sequence<char, 'e', 'm', 'p', 't', 'y', '_', 's', 't', 'r', 'u', 'c', 't'>;
   using __fbthrift_hash_486ea46224d1bb4fb680f34f7c9ad96a8f24ec88be73ea8e5a6c65260e9cb8a7 = ::fatal::sequence<char, 'w', 'o', 'r', 'l', 'd'>;
   using __fbthrift_hash_4b52fb402e58543eb406111961ce4b6760c045edd3af4068b93a1ff7ac4ccfc1 = ::fatal::sequence<char, 'a', 'a', '_', 'm', 'a', 'p'>;
   using __fbthrift_hash_4c4f1be7384da0ab8e9483a59b7018f4671e228da38fa30ee8eabe777bc24cda = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', 'G'>;
@@ -165,6 +166,7 @@ struct __fbthrift_strings_module {
   using cpp_virtual = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'v', 'i', 'r', 't', 'u', 'a', 'l'>;
   using data = ::fatal::sequence<char, 'd', 'a', 't', 'a'>;
   using decorated_struct = ::fatal::sequence<char, 'd', 'e', 'c', 'o', 'r', 'a', 't', 'e', 'd', '_', 's', 't', 'r', 'u', 'c', 't'>;
+  using empty_struct = ::fatal::sequence<char, 'e', 'm', 'p', 't', 'y', '_', 's', 't', 'r', 'u', 'c', 't'>;
   using field = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd'>;
   using fieldA = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', 'A'>;
   using fieldB = ::fatal::sequence<char, 'f', 'i', 'e', 'l', 'd', 'B'>;
@@ -211,6 +213,7 @@ struct module_module_traits {
   using unions = ::fatal::list<
   >;
   using structs = ::fatal::list<
+      ::fatal::pair<::apache::thrift::fixtures::types::empty_struct, strings::empty_struct>,
       ::fatal::pair<::apache::thrift::fixtures::types::decorated_struct, strings::decorated_struct>,
       ::fatal::pair<::apache::thrift::fixtures::types::ContainerStruct, strings::ContainerStruct>,
       ::fatal::pair<::apache::thrift::fixtures::types::CppTypeStruct, strings::CppTypeStruct>,
@@ -265,6 +268,7 @@ class module_tags {
   struct __fbthrift_unions {
   };
   struct __fbthrift_structs {
+    using empty_struct = __fbthrift_strings::empty_struct;
     using decorated_struct = __fbthrift_strings::decorated_struct;
     using ContainerStruct = __fbthrift_strings::ContainerStruct;
     using CppTypeStruct = __fbthrift_strings::CppTypeStruct;

@@ -53,6 +53,13 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
+void reset_field<::apache::thrift::fixtures::types::empty_struct>(
+    ::apache::thrift::fixtures::types::empty_struct& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 void reset_field<::apache::thrift::fixtures::types::decorated_struct>(
     ::apache::thrift::fixtures::types::decorated_struct& obj, uint16_t index) {
   switch (index) {
@@ -454,6 +461,16 @@ void reset_field<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>
       obj.__field_ref().copy_from(default_inst<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>().__field_ref());
       return;
   }
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::apache::thrift::fixtures::types::empty_struct>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
 }
 
 template<>

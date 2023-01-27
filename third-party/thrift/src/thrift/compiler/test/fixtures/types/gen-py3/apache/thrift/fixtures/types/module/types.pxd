@@ -506,6 +506,17 @@ cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_metada
         void gen(__fbthrift_cThriftMetadata &metadata)
 cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_types_custom_protocol.h" namespace "::apache::thrift::fixtures::types":
 
+    cdef cppclass cempty_struct "::apache::thrift::fixtures::types::empty_struct":
+        cempty_struct() except +
+        cempty_struct(const cempty_struct&) except +
+        bint operator==(cempty_struct&)
+        bint operator!=(cempty_struct&)
+        bint operator<(cempty_struct&)
+        bint operator>(cempty_struct&)
+        bint operator<=(cempty_struct&)
+        bint operator>=(cempty_struct&)
+
+
     cdef cppclass cdecorated_struct "::apache::thrift::fixtures::types::decorated_struct":
         cdecorated_struct() except +
         cdecorated_struct(const cdecorated_struct&) except +
@@ -905,6 +916,15 @@ cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_types_
         bint operator>=(cStructWithDoubleUnderscores&)
         __field_ref[cint32_t] __field_ref "__field_ref" ()
 
+
+
+
+cdef class empty_struct(thrift.py3.types.Struct):
+    cdef shared_ptr[cempty_struct] _cpp_obj
+    cdef _fbthrift_types_fields.__empty_struct_FieldsSetter _fields_setter
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cempty_struct])
 
 
 

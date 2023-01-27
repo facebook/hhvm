@@ -13,6 +13,16 @@ pub type IntTypedef = ::std::primitive::i32;
 pub type UintTypedef = crate::types::IntTypedef;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct empty_struct {
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct decorated_struct {
     pub field: ::std::string::String,
     // This field forces `..Default::default()` when instantiating this
@@ -781,6 +791,71 @@ where
 }
 
 
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::empty_struct {
+    fn default() -> Self {
+        Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::empty_struct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("empty_struct")
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::empty_struct {}
+unsafe impl ::std::marker::Sync for self::empty_struct {}
+
+impl ::fbthrift::GetTType for self::empty_struct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::empty_struct {
+    fn uri() -> &'static str {
+        "apache.org/thrift/fixtures/types/empty_struct"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::empty_struct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("empty_struct");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::empty_struct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
 
 
 #[allow(clippy::derivable_impls)]

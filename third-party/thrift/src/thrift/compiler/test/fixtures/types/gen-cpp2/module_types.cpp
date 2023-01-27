@@ -91,6 +91,79 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::apache::thrift::fixtures::types::empty_struct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const char* empty_struct::__fbthrift_thrift_uri() {
+  return "apache.org/thrift/fixtures/types/empty_struct";
+}
+
+const folly::StringPiece empty_struct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<empty_struct>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+empty_struct::empty_struct(apache::thrift::FragileConstructor) {}
+
+
+void empty_struct::__fbthrift_clear() {
+  // clear all fields
+}
+
+void empty_struct::__fbthrift_clear_terse_fields() {
+}
+
+bool empty_struct::__fbthrift_is_empty() const {
+  return true;
+}
+
+bool empty_struct::operator==(FOLLY_MAYBE_UNUSED const empty_struct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
+}
+
+bool empty_struct::operator<(FOLLY_MAYBE_UNUSED const empty_struct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED empty_struct& a, FOLLY_MAYBE_UNUSED empty_struct& b) {
+  using ::std::swap;
+}
+
+template void empty_struct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t empty_struct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t empty_struct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t empty_struct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void empty_struct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t empty_struct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t empty_struct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t empty_struct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::apache::thrift::fixtures::types::decorated_struct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,

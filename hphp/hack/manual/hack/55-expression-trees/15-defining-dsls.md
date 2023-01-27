@@ -1,0 +1,245 @@
+Adding a DSL to Hack requires you to define a new visitor.
+
+This page will demonstrate defining a DSL supporting integer arithmetic:
+
+```hack no-extract
+$e = MyDsl`1 + 2`;
+```
+
+## DSLs are opt-in
+
+Hack only allows expression tree syntax usage for approved DSLs. These are specified in `.hhconfig`.
+
+```
+allowed_expression_tree_visitors = MyDsl, OtherDsl
+```
+
+If you just want to test your DSL, you can enable all expression syntax with the `__EnableUnstableFeatures` file attribute.
+
+```hack no-extract
+<<file:__EnableUnstableFeatures('expression_trees')>>
+
+function foo(): void {
+  $e = MyDsl`1 + 2`;
+}
+```
+
+## Representing DSL Expressions
+
+Our DSL needs a data type to represent expressions written by the user. We'll define a simple abstract syntax tree (AST).
+
+```Hack file:mydsl.hack
+abstract class MyDslAst {}
+
+class MyDslAstBinOp extends MyDslAst {
+  public function __construct(
+    public MyDslAst $lhs,
+    public string $operator,
+    public MyDslAst $rhs,
+  ) {}
+}
+
+class MyDslAstInt extends MyDslAst {
+  public function __construct(public int $value) {}
+}
+```
+
+## A DSL For Integer Literals
+
+Hack converts backtick syntax into method calls.
+
+```hack no-extract
+// The user writes backtick syntax.
+$e = MyDsl`1`;
+
+// The runtime sees a lambda calling methods on MyDSL (simplified)
+(MyDsl $v) ==> $v->visitInt(null, 1);
+```
+
+Our basic visitor looks like this.
+
+```hack no-extract
+// The runtime will pass file and line position in ExprPos.
+type ExprPos = shape(...);
+
+class MyDsl {
+  // The visitor is passed the literal value, so 1 in our example.
+  public function visitInt(?ExprPos $_pos, int $value): MyDslAst {
+    return new MyDslAstInt($value);
+  }
+}
+```
+
+## Adding Operators
+
+```hack no-extract
+// User syntax.
+$e = MyDsl`1 + 2`;
+
+// Runtime (simplified)
+(MyDsl $v) ==>
+  $v->visitBinop(
+    null,
+    $v->visitInt(null, 1),
+    '__plus',
+    $v->visitInt(null, 2)
+  );
+```
+
+You can see that `$v-visitBinop()` receives the return value of `$v->visitInt()`. This allows the visitor to construct more complex ASTs.
+
+**The `visitFoo` methods are always unityped.** They receive ASTs without type information, and return an untyped AST. Typechecking happens separately.
+
+We can support binary operators by adding `visitBinop` to our visitor.
+
+```Hack no-extract
+class MyDsl {
+  public function visitBinop(
+    ?ExprPos $_pos,
+    MyDslAst $lhs,
+    string $operator,
+    MyDslAst $rhs,
+  ): MyDslAst {
+    return new MyDslAstBinOp($lhs, $operator, $rhs);
+  }
+
+  public function visitInt(?ExprPos $_pos, int $value): MyDslAst {
+    return new MyDslAstInt($value);
+  }
+}
+```
+
+## The DSL Builder
+
+The visitor closure isn't enough. We want to type check the DSL expression, and we might want to do additional work before we execute the closure.
+
+```hack no-extract
+// The user writes backtick syntax.
+$e = MyDsl`1`;
+
+// Runtime (actual). The first two arguments are extra position information
+// and function metadata which aren't used in this tutorial.
+MyDsl::makeTree<MyDslInt>(null, shape(), (MyDsl $v) ==> $v->visitInt(null, 1))
+```
+
+We call `makeTree` on our visitor class, providing the visitor closure and some additional metadata. The type checker also sees the `TInfer` type, which is `MyDslInt` in this example (discussed below).
+
+```Hack file:mydsl.hack
+class MyDsl {
+  public static function makeTree<<<__Explicit>> TInfer>(
+    ?ExprPos $pos,
+    mixed $_metadata,
+    (function(MyDsl): MyDslAst) $visit_expr,
+  ): MyDslExprTree<TInfer> {
+    return new MyDslExprTree($pos, $visit_expr);
+  }
+
+  // ... all the visitFoo methods here
+ }
+```
+
+### Positions
+
+The builder method `makeTree` takes a nullable position argument as its first argument, as do all of the `visit...` methods on the Visitor class. At runtime, all of the methods will receive a shape value with the following type:
+
+```hack no-extract
+shape(
+  'path' => string,
+  'start_line' => int,
+  'start_column' => int,
+  'end_line' => int,
+  'end_column' => int,
+)
+```
+
+DSLs can choose to use this information to report errors with positional information about the source code back to the user.
+
+### Metadata
+
+The second argument to the `makeTree` method is a shape containing parts of the expression tree that may be useful to have references to without processing the entirety of the `$visit_expr`. The shape has the type:
+
+```hack no-extract
+shape(
+  'splices' => dict<string, mixed>,
+  'functions' => vec<mixed>,
+  'static_methods' => vec<mixed>,
+) $metadata
+```
+
+For the `functions` and `static_methods` fields, the vec contains the function pointers to any global functions or static method referenced within the expression tree. The same function pointers are passed to the individual calls of `visitGlobalFunction` and `visitStaticMethod`.
+
+The `splices` field contains a dictionary of string keys and the values the splices are evaluated to. The string keys are generated by the runtime and correspond to the string key and value passed to each individual `splice` Visitor method call.
+
+## Spliceable Types
+
+Expression tree values implement `Spliceable`, a typed value that can be visited or spliced into another `Spliceable`. Here's the definition for the `Spliceable` interface.
+
+```Hack no-extract
+/**
+ * Spliceable is this base type for all expression tree visitors.
+ *
+ * A visitor is a class with a visit method. This is extremely generic, so
+ * visitors can choose what they want to construct.
+ *
+ * Typically, you'll use a concrete type rather than this interface. For
+ * example:
+ *
+ *     $e = EtDemo`123`;
+ *
+ * This has type `Spliceable<EtDemoVisitor, EtDemoAst, EtDemoInt>`.
+ *
+ * TVisitor: The class with the `visit` method that constructs the value.
+ * TResult: The type we get back when running the visitor.
+ * TInfer: The inferred type of the expression, used only for type checking.
+*/
+interface Spliceable<TVisitor, TResult, +TInfer> {
+  public function visit(TVisitor $visitor): TResult;
+}
+```
+
+The `MyDslExprTree` class implements `Spliceable`, and calls the visitor closure ('builder') when `visit` is called.
+
+```Hack file:mydsl.hack
+class MyDslExprTree<+T> implements Spliceable<MyDsl, MyDslAst, T> {
+  public function __construct(
+    public ?ExprPos $pos,
+    private (function(MyDsl): MyDslAst) $builder,
+  ) {}
+
+  public function visit(MyDsl $v): MyDslAst {
+    return ($this->builder)($v);
+  }
+}
+```
+
+### DSL Types
+
+```hack no-extract
+// Inferred type: MyDslExprTree<MyDslInt>
+$e = MyDsl`1`;
+```
+
+Hack needs to know what types our DSL uses. The visitor specifies the type of literals using `fooType` stub methods.
+
+```hack no-extract
+class MyDsl {
+  public static function intType(): MyDslInt {
+    // Only used for type checking, so we don't need an implementation here.
+    throw new Exception();
+  }
+  // ...
+}
+```
+
+For each type in our DSL, we define an associated type. It's usually easier to use interfaces for these types, as they're only used for type checking.
+
+```Hack no-extract
+interface MyDslNonnull {}
+
+interface MyDslInt extends MyDslNonnull {
+  public function __plus(MyDslInt $_): MyDslInt;
+  public function __minus(MyDslInt $_): MyDslInt;
+}
+```
+
+This allows integers to support the `+` and `-` operators in our DSL, and they return DSL integers.

@@ -166,12 +166,12 @@ class ZipArchive {
    *   following values may be ORed to it.    ZipArchive::FL_UNCHANGED
    *   ZipArchive::FL_COMPRESSED
    *
-   * @return string - Returns the contents of the entry on success.
+   * @return string - Returns the contents of the entry on success. null on error.
    */
   <<__Native>>
   public function getFromIndex(int $index,
                         int $length = 0,
-                        int $flags = 0): mixed;
+                        int $flags = 0): ?string;
 
   /**
    * Returns the entry contents using its name

@@ -112,7 +112,7 @@ class ZipArchive {
     int $index,
     int $length = 0,
     int $flags = 0,
-  ): string;
+  ): ?string;
   public function getFromName(
     string $name,
     int $length = 0,

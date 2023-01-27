@@ -913,7 +913,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
 
   struct zip_stat zipStat;
   if (zip_stat_index(zipDir->getZip(), index, 0, &zipStat) != 0) {
-    return false;
+    return Variant{Variant::NullInit{}};
   }
 
   if (zipStat.size < 1) {

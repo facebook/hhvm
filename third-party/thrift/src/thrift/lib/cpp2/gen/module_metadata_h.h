@@ -54,22 +54,30 @@ class EmptyServiceMetadata {
 
 template <typename T>
 class EnumMetadata {
-  static_assert(!sizeof(T), "invalid use of base template");
+  static_assert(
+      !sizeof(T),
+      "invalid use of base template, you may need to include the <type>_metadata.h header");
 };
 
 template <typename T>
 class StructMetadata {
-  static_assert(!sizeof(T), "invalid use of base template");
+  static_assert(
+      !sizeof(T),
+      "invalid use of base template, you may need to include the <type>_metadata.h header");
 };
 
 template <typename T>
 class ExceptionMetadata {
-  static_assert(!sizeof(T), "invalid use of base template");
+  static_assert(
+      !sizeof(T),
+      "invalid use of base template, you may need to include the <type>_metadata.h header");
 };
 
 template <typename T>
 class ServiceMetadata {
-  static_assert(!sizeof(T), "invalid use of base template");
+  static_assert(
+      !sizeof(T),
+      "invalid use of base template, you may need to include the <type>_metadata.h header");
 };
 
 } // namespace md

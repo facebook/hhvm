@@ -27,6 +27,7 @@
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
+#include <thrift/lib/cpp2/type/Type.h>
 
 namespace apache {
 namespace thrift {

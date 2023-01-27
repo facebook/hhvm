@@ -928,7 +928,7 @@ ArrayData* StructDict::EscalateToVanilla(const StructDict* sad,
 }
 
 void StructDict::addNextSlot(Slot slot) {
-  assertx(slot < RO::EvalBespokeStructDictMaxNumKeys);
+  assertx(slot < StructLayout::maxNumKeys());
   isBigStruct() ?
     static_cast<uint16_t*>(rawPositions())[m_size++] = slot :
     static_cast<uint8_t*>(rawPositions())[m_size++] = slot;
@@ -949,7 +949,7 @@ void StructDict::removeSlot(Slot slot) {
 template<typename PosType>
 Slot StructDict::getSlotInPos(size_t pos) const {
   assertx(pos < m_size);
-  assertx(pos < RO::EvalBespokeStructDictMaxNumKeys);
+  assertx(pos < StructLayout::maxNumKeys());
   return static_cast<const PosType*>(rawPositions())[pos];
 }
 

@@ -63,13 +63,14 @@ struct TypePosValLayout {
 
   static bool checkInvariants(const StructDict* sad);
 
+  using PosType = uint8_t;
   // Fields used to initialize a new StructDict. The "m_extra_initializer" is
   // computed when we create the layout and used to initialize three fields in
   // the array header in one go in the JIT.
   //
   // The field's layout should pun our usage of ArrayData's m_extra field.
   typedef struct {
-    uint8_t m_num_fields;
+    PosType m_num_fields;
     uint8_t m_value_offset_in_values;
     bespoke::LayoutIndex m_layout_index;
   } HeaderData;
@@ -114,13 +115,14 @@ struct UnalignedTVLayout {
     return true;
   }
 
+  using PosType = uint16_t;
   // Fields used to initialize a new StructDict. The "m_extra_initializer" is
   // computed when we create the layout and used to initialize three fields in
   // the array header in one go in the JIT.
   //
   // The field's layout should pun our usage of ArrayData's m_extra field.
   typedef struct {
-    uint16_t m_num_fields;
+    PosType m_num_fields;
     bespoke::LayoutIndex m_layout_index;
   } HeaderData;
 

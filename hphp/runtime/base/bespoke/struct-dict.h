@@ -234,6 +234,13 @@ struct StructLayout : public ConcreteLayout {
     return offsetof(StructLayout, m_fields);
   }
 
+  static size_t maxNumKeys() {
+    return std::min<size_t>(
+      RuntimeOption::EvalBespokeStructDictMaxNumKeys,
+      std::numeric_limits<StructDataLayout::PosType>::max()
+    );
+  }
+
 private:
   // Callers must check whether the key is static before using one of these
   // wrapper types. The wrappers dispatch to the right hash/equal function.

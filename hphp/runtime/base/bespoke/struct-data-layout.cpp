@@ -86,6 +86,7 @@ size_t TypePosValLayout::numFieldsOffset() {
 }
 
 size_t TypePosValLayout::numFieldsSize() {
+  static_assert(sizeof(PosType) == sizeof(StructDict::m_extra_lo8));
   return sizeof(StructDict::m_extra_lo8);
 }
 
@@ -153,6 +154,7 @@ size_t UnalignedTVLayout::numFieldsOffset() {
 }
 
 size_t UnalignedTVLayout::numFieldsSize() {
+  static_assert(sizeof(PosType) == sizeof(StructDict::m_extra_lo16));
   return sizeof(StructDict::m_extra_lo16);
 }
 

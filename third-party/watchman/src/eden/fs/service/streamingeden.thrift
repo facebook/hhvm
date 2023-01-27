@@ -92,6 +92,8 @@ struct StreamChangesSinceParams {
 
 struct TraceTaskEventsRequest {}
 
+typedef binary EdenStartStatusUpdate
+
 /**
  * This Thrift service defines streaming functions. It is separate from
  * EdenService because older Thrift runtimes do not support Thrift streaming,
@@ -183,6 +185,19 @@ service StreamingEdenService extends eden.EdenService {
   ChangesSinceResult, stream<
     ChangedFileResult throws (1: eden.EdenError ex)
   > streamChangesSince(1: StreamChangesSinceParams params) throws (
+    1: eden.EdenError ex,
+  );
+
+  /**
+   * Returns the basic status from EdenFS as one would get from getDaemonInfo
+   * and a stream of updates of the EdenFS startup process if EdenFS is
+   * starting. This is the same data that would be printed to stdout during an
+   * `eden start` call. The stream will be terminated when EdenFS has started.
+   *
+   * I wouldn't recommend introspecting each of the updates, they are really
+   * just meant to be printed to a terminal for users to look at.
+   */
+  eden.DaemonInfo, stream<EdenStartStatusUpdate> streamStartStatus() throws (
     1: eden.EdenError ex,
   );
 }

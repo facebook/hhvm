@@ -1,0 +1,1 @@
+Built-in types known to the type checker.

@@ -81,3 +81,37 @@ A Patch **must** satisfy the following restructions, otherwise it’s considered
 
 * If `EnsureUnion` field is not empty, it can’t have more than one sub-fields.
 * All sub-fields in `PatchAfter` field should not have `clear` PatchOp.
+
+## Apply Functionality
+
+The following functionality should be provided in the target language.
+
+```
+void apply(const Object& patch, Value& value);
+```
+
+It applies patch to a thrift value and returns the patched value. Note that this API needs to work with dynamic type, thus both input and output are Thrift.Object. To apply the whole Patch, each field in the Patch is applied one by one, ordered by field id ascendingly.
+
+### Complexity
+
+```
+O(size of patched fields + size of patch)
+```
+
+### Behavior of each `PatchOp` for each value type
+
+|                                    | Assign                | Clear               | PatchPrior                     | EnsureUnion           | EnsureStruct              | PatchAfter         | Remove                              | Add                                           | Put                              |
+| ---                                | ---                   | ---                 | ---                            | ---                   | ---                       | ---                | ---                                 | ---                                           | ---                              |
+| bool                               | Replace the value[^1] | Clear the value[^2] | N/A                            | N/A                   | N/A                       | N/A                | N/A                                 | N/A                                           | Invert the bool                  |
+| byte, i16, i32, i64, float, double |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | N/A                                 | Increase the value by the number in patch     | N/A                              |
+| string/binary                      |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | N/A                                 | Prepend the string in the patch to the string | Append the string                |
+| list                               |                       |                     | Patch elements in the list     | N/A                   | N/A                       | N/A                | Remove elements that exist in patch | Prepend elements in the patch to the list     | Append elements                  |
+| set                                |                       |                     | N/A                            | N/A                   | N/A                       | N/A                | Remove elements that exist in patch | Insert elements in the patch to the set       | Same as Add                      |
+| map                                |                       |                     | Patch values in the map[^3]    | N/A                   | Insert key/value pair[^4] | Same as PatchPrior | Remove keys that exist in patch     | N/A                                           | Insert or assign key/value pairs |
+| struct/union                       |                       |                     | Patch each field in the struct | Set the active member | Ensure each fields.       | Same as PatchPrior | N/A                                 | N/A                                           | N/A                              |
+
+
+[^1]: If Assign PatchOp exists, all other PatchOp are ignored.
+[^2]: For optional field, clear means reset the field. For elements in container, clear means remove from the container. Otherwise clear means set to intrinstic default.
+[^3]: No-op if keys don't exist.
+[^4]: No-op if keys exist.

@@ -83,6 +83,13 @@ typedef binary BinaryHash
 typedef binary PathString
 
 /**
+ * Bit set indicating where data should be fetched from in our debugging
+ * commands.
+ * Bits are defined by DataFetchOriginSet.
+ */
+typedef unsigned64 DataFetchOriginSet
+
+/**
  * A customizable type to be returned with an EdenError, helpful for catching
  * and having custom client logic to handle specfic error cases
  */
@@ -761,7 +768,7 @@ struct DebugGetScmBlobRequest {
   # id of the blob we would like to fetch
   2: ThriftObjectId id;
   # where we should fetch the blob from
-  3: unsigned64 origins; # DataFetchOrigin
+  3: DataFetchOriginSet origins; # DataFetchOrigin
 }
 
 union ScmBlobOrError {
@@ -778,6 +785,30 @@ struct ScmBlobWithOrigin {
 
 struct DebugGetScmBlobResponse {
   1: list<ScmBlobWithOrigin> blobs;
+}
+
+struct DebugGetBlobMetadataRequest {
+  1: MountId mountId;
+  # id of the blob we would like to fetch metadata for
+  2: ThriftObjectId id;
+  # where we should fetch the blob metadata from
+  3: DataFetchOriginSet origins; # DataFetchOrigin
+}
+
+union BlobMetadataOrError {
+  1: ScmBlobMetadata metadata;
+  2: EdenError error;
+}
+
+struct BlobMetadataWithOrigin {
+  # the blob data
+  1: BlobMetadataOrError metadata;
+  # where the blob was fetched from
+  2: DataFetchOrigin origin;
+}
+
+struct DebugGetBlobMetadataResponse {
+  1: list<BlobMetadataWithOrigin> metadatas;
 }
 
 struct ActivityRecorderResult {
@@ -1878,6 +1909,9 @@ service EdenService extends fb303_core.BaseService {
   ) throws (1: EdenError ex);
 
   /**
+   * DEPRECATED -- use debugGetBlobMetadata instead.
+   * TODO: Remove Febuary 2023.
+   *
    * Get the metadata about a source control Blob.
    *
    * This retrieves the metadata about a source control Blob.  This returns
@@ -1889,6 +1923,22 @@ service EdenService extends fb303_core.BaseService {
     1: PathString mountPoint,
     2: ThriftObjectId id,
     3: bool localStoreOnly,
+  ) throws (1: EdenError ex);
+
+  /**
+   * Get the metadata about a source control Blob.
+   *
+   * This retrieves the metadata about a source control Blob.  This returns
+   * the size and contents SHA1 of the blob, which eden stores separately from
+   * the blob itself.  This can also be a useful alternative to
+   * debugGetBlob() when getting data about extremely large blobs.
+   *
+   * The origins field can control where to check for the blob. This will
+   * attempt to fetch the blob from all locations and return the blob contents
+   * from each of the locations.
+   */
+  DebugGetBlobMetadataResponse debugGetBlobMetadata(
+    1: DebugGetBlobMetadataRequest request,
   ) throws (1: EdenError ex);
 
   /**

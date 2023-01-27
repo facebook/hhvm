@@ -481,13 +481,17 @@ impl<'a, W: Write> State<'a, W> {
 
                 if tag == ocamlrep::FORWARD_TAG {
                     let f = b[0];
-                    if let Some(f) = f.as_block()
-                        && (f.tag() == ocamlrep::FORWARD_TAG
-                            || f.tag() == ocamlrep::LAZY_TAG
-                            || f.tag() == ocamlrep::FORCING_TAG
-                            || f.tag() == ocamlrep::DOUBLE_TAG)
-                    {
-                        // Do not short-circuit the pointer.
+                    if let Some(fb) = f.as_block() {
+                        if fb.tag() == ocamlrep::FORWARD_TAG
+                            || fb.tag() == ocamlrep::LAZY_TAG
+                            || fb.tag() == ocamlrep::FORCING_TAG
+                            || fb.tag() == ocamlrep::DOUBLE_TAG
+                        {
+                            // Do not short-circuit the pointer.
+                        } else {
+                            v = f;
+                            continue;
+                        }
                     } else {
                         v = f;
                         continue;

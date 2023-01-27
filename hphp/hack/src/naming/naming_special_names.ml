@@ -682,7 +682,7 @@ module UserAttributes = struct
             } );
           ( uaNoAutoDynamic,
             {
-              contexts = [fn; cls];
+              contexts = [fn; cls; typealias];
               autocomplete = false;
               doc = "Locally disable implicit pessimisation.";
             } );

@@ -3311,17 +3311,20 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
 
-        let user_attributes = if self.retain_or_omit_user_attributes_for_facts {
-            self.slice(attributes.iter().rev().filter_map(|attribute| {
-                if let Node::Attribute(attr) = attribute {
+        // Parse the user attributes
+        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
+        let user_attributes = self.slice(attributes.iter().rev().filter_map(|attribute| {
+            if let Node::Attribute(attr) = attribute {
+                if self.retain_or_omit_user_attributes_for_facts || attr.name.1 == "__NoAutoDynamic"
+                {
                     Some(self.user_attribute_to_decl(attr))
                 } else {
                     None
                 }
-            }))
-        } else {
-            &[][..]
-        };
+            } else {
+                None
+            }
+        }));
 
         let mut docs_url = None;
         for attribute in attributes.iter() {

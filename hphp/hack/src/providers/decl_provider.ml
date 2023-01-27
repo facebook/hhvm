@@ -213,7 +213,13 @@ let get_fun
     Rust_provider_backend.Decl.get_fun backend fun_name
 
 let maybe_pessimise_typedef_decl ctx typedef_decl =
-  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+  if
+    TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx)
+    && not
+         (Typing_defs.Attributes.mem
+            Naming_special_names.UserAttributes.uaNoAutoDynamic
+            typedef_decl.Typing_defs.td_attributes)
+  then
     (* TODO: deal with super constraint *)
     match typedef_decl.Typing_defs.td_as_constraint with
     | Some _ -> typedef_decl

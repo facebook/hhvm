@@ -135,6 +135,30 @@ let on_tparam t ~ctx =
   in
   (ctx, Ok t)
 
+let on_typedef_top_down t ~ctx =
+  let ctx =
+    Env.set_under_no_auto_dynamic
+      ctx
+      ~under_no_auto_dynamic:
+        (Naming_attributes.mem
+           SN.UserAttributes.uaNoAutoDynamic
+           t.Aast.t_user_attributes)
+  in
+  (ctx, Ok t)
+
+let on_typedef t ~ctx =
+  Aast_defs.(
+    let (pos, _) = t.Aast.t_name in
+    let t_as_constraint =
+      if Env.implicit_sdt ctx then
+        match t.t_as_constraint with
+        | Some _ -> t.t_as_constraint
+        | None -> Some (pos, wrap_supportdyn pos Aast.Hmixed)
+      else
+        t.t_as_constraint
+    in
+    (ctx, Ok Aast.{ t with t_as_constraint }))
+
 let on_class_top_down c ~ctx =
   let in_enum_class =
     match c.Aast.c_kind with
@@ -215,6 +239,7 @@ let top_down_pass =
           on_ty_fun_def = Some on_fun_def_top_down;
           on_ty_class_ = Some on_class_top_down;
           on_ty_expr_ = Some on_expr_;
+          on_ty_typedef = Some on_typedef_top_down;
         })
 
 let bottom_up_pass =
@@ -229,4 +254,5 @@ let bottom_up_pass =
         on_ty_class_ = Some on_class_;
         on_fld_class__c_consts = Some on_class_c_consts;
         on_ty_enum_ = Some on_enum_;
+        on_ty_typedef = Some on_typedef;
       }

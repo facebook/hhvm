@@ -18,56 +18,54 @@ module Env = struct
       { t with elab_retonly_hint = Elab_retonly_hint.{ allow_retonly } }
 end
 
-let on_targ (env, targ) =
-  let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Ok (env, targ)
+let on_targ targ ~ctx =
+  let ctx = Env.set_allow_retonly ctx ~allow_retonly:true in
+  (ctx, Ok targ)
 
-let on_hint_fun_hf_return_ty (env, t) =
-  let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Ok (env, t)
+let on_hint_fun_hf_return_ty t ~ctx =
+  let ctx = Env.set_allow_retonly ctx ~allow_retonly:true in
+  (ctx, Ok t)
 
-let on_fun_f_ret (env, f) =
-  let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Ok (env, f)
+let on_fun_f_ret f ~ctx =
+  let ctx = Env.set_allow_retonly ctx ~allow_retonly:true in
+  (ctx, Ok f)
 
-let on_method_m_ret (env, m) =
-  let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Ok (env, m)
+let on_method_m_ret m ~ctx =
+  let ctx = Env.set_allow_retonly ctx ~allow_retonly:true in
+  (ctx, Ok m)
 
-let on_hint on_error (env, hint) =
-  let allow_retonly = Env.allow_retonly env in
-  let res =
-    match hint with
-    | (pos, Aast.(Hprim Tvoid)) when not allow_retonly ->
-      Error
-        ( (pos, Aast.Herr),
-          Naming_phase_error.naming
-          @@ Naming_error.Return_only_typehint { pos; kind = `void } )
-    | (pos, Aast.(Hprim Tnoreturn)) when not allow_retonly ->
-      Error
-        ( (pos, Aast.Herr),
-          Naming_phase_error.naming
-          @@ Naming_error.Return_only_typehint { pos; kind = `noreturn } )
-    | (_, Aast.(Happly _ | Habstr _)) ->
-      let env = Env.set_allow_retonly env ~allow_retonly:true in
-      Ok (env, hint)
-    | _ -> Ok (env, hint)
-  in
-  match res with
-  | Ok (env, hint) -> Ok (env, hint)
-  | Error (hint, err) ->
-    on_error err;
-    Error (env, hint)
+let on_hint_ hint_ ~ctx =
+  match hint_ with
+  | Aast.(Happly _ | Habstr _) ->
+    let ctx = Env.set_allow_retonly ctx ~allow_retonly:true in
+    (ctx, Ok hint_)
+  | _ -> (ctx, Ok hint_)
+
+let on_hint on_error hint ~ctx =
+  let allow_retonly = Env.allow_retonly ctx in
+  match hint with
+  | (pos, Aast.(Hprim Tvoid)) when not allow_retonly ->
+    on_error
+      (Naming_phase_error.naming
+      @@ Naming_error.Return_only_typehint { pos; kind = `void });
+    (ctx, Error (pos, Aast.Herr))
+  | (pos, Aast.(Hprim Tnoreturn)) when not allow_retonly ->
+    on_error
+      (Naming_phase_error.naming
+      @@ Naming_error.Return_only_typehint { pos; kind = `noreturn });
+    (ctx, Error (pos, Aast.Herr))
+  | _ -> (ctx, Ok hint)
 
 let pass on_error =
-  Naming_phase_pass.(
-    top_down
-      Ast_transform.
-        {
-          identity with
-          on_hint = Some (on_hint on_error);
-          on_targ = Some on_targ;
-          on_hint_fun_hf_return_ty = Some on_hint_fun_hf_return_ty;
-          on_fun_f_ret = Some on_fun_f_ret;
-          on_method_m_ret = Some on_method_m_ret;
-        })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down
+    Aast.Pass.
+      {
+        id with
+        on_ty_hint_ = Some on_hint_;
+        on_ty_targ = Some on_targ;
+        on_fld_hint_fun_hf_return_ty = Some on_hint_fun_hf_return_ty;
+        on_fld_fun__f_ret = Some on_fun_f_ret;
+        on_fld_method__m_ret = Some on_method_m_ret;
+        on_ty_hint = Some (on_hint on_error);
+      }

@@ -10,15 +10,13 @@ module Env = struct
   let soft_as_like Naming_phase_env.{ soft_as_like; _ } = soft_as_like
 end
 
-let on_hint (env, hint) =
-  let hint =
-    match hint with
-    | (pos, Aast.Hsoft hint) when Env.soft_as_like env -> (pos, Aast.Hlike hint)
-    | (pos, Aast.Hsoft (_, hint_)) -> (pos, hint_)
-    | _ -> hint
-  in
-  Ok (env, hint)
+let on_hint hint ~ctx =
+  match hint with
+  | (pos, Aast.Hsoft hint) when Env.soft_as_like ctx ->
+    (ctx, Ok (pos, Aast.Hlike hint))
+  | (pos, Aast.Hsoft (_, hint_)) -> (ctx, Ok (pos, hint_))
+  | _ -> (ctx, Ok hint)
 
 let pass =
-  Naming_phase_pass.(
-    top_down Ast_transform.{ identity with on_hint = Some on_hint })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.bottom_up Aast.Pass.{ id with on_ty_hint = Some on_hint }

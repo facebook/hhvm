@@ -167,7 +167,7 @@
   naming_validate_module
   naming_validate_supportdyn
   naming_validate_xhp_name
-  naming_visitors)
+ )
  (libraries
   ast
   ast_provider

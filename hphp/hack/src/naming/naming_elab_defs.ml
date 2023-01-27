@@ -12,11 +12,7 @@ open Hh_prelude
    for instance, we can't guarantee that `Noop` or `Markup`
    are not contained in say, a function body. We should either
    move these to top-level defs _or_ fully recurse to remove them *)
-let on_program :
-      'a 'b.
-      _ * ('a, 'b) Aast_defs.def list ->
-      (_ * ('a, 'b) Aast_defs.def list, _) result =
- fun (env, program) ->
+let on_program program ~ctx =
   let rec aux acc def =
     match def with
     (* These are elaborated away in Namespaces.elaborate_toplevel_defs *)
@@ -37,8 +33,9 @@ let on_program :
     | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
   in
   let program = List.rev @@ List.fold_left ~f:aux ~init:[] program in
-  Ok (env, program)
+  (ctx, Ok program)
 
 let pass =
-  Naming_phase_pass.(
-    top_down Ast_transform.{ identity with on_program = Some on_program })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down
+    Aast.Pass.{ id with on_ty_program = Some on_program }

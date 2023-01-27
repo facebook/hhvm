@@ -61,19 +61,19 @@ let wrap_supportdyn p h = Aast.Happly ((p, SN.Classes.cSupportDyn), [(p, h)])
 
 let wrap_like ((pos, _) as hint) = (pos, Aast.Hlike hint)
 
-let on_expr_ (env, expr_) =
-  let env =
+let on_expr_ expr_ ~ctx =
+  let ctx =
     match expr_ with
-    | Aast.(Is _ | As _) -> Env.set_in_is_as env ~in_is_as:true
-    | _ -> env
+    | Aast.(Is _ | As _) -> Env.set_in_is_as ctx ~in_is_as:true
+    | _ -> ctx
   in
-  Ok (env, expr_)
+  (ctx, Ok expr_)
 
-let on_hint (env, hint) =
+let on_hint hint ~ctx =
   let hint =
-    if Env.implicit_sdt env then
+    if Env.implicit_sdt ctx then
       match hint with
-      | (pos, (Aast.(Hmixed | Hnonnull) as hint_)) when not @@ Env.in_is_as env
+      | (pos, (Aast.(Hmixed | Hnonnull) as hint_)) when not @@ Env.in_is_as ctx
         ->
         (pos, wrap_supportdyn pos hint_)
       | ( pos,
@@ -88,23 +88,23 @@ let on_hint (env, hint) =
     else
       hint
   in
-  Ok (env, hint)
+  (ctx, Ok hint)
 
-let on_fun_def_top_down (env, fd) =
-  let env =
+let on_fun_def_top_down fd ~ctx =
+  let ctx =
     Env.set_under_no_auto_dynamic
-      env
+      ctx
       ~under_no_auto_dynamic:
         (Naming_attributes.mem
            SN.UserAttributes.uaNoAutoDynamic
            Aast.(fd.fd_fun.f_user_attributes))
   in
-  Ok (env, fd)
+  (ctx, Ok fd)
 
-let on_fun_def (env, fd) =
+let on_fun_def fd ~ctx =
   let fd_fun = fd.Aast.fd_fun in
   let fd_fun =
-    if Env.implicit_sdt env then
+    if Env.implicit_sdt ctx then
       let (pos, _) = fd.Aast.fd_name in
       let f_user_attributes =
         Aast.
@@ -119,15 +119,11 @@ let on_fun_def (env, fd) =
       fd_fun
   in
   let fd = Aast.{ fd with fd_fun } in
-  Ok (env, fd)
+  (ctx, Ok fd)
 
-let on_tparam :
-      'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.tparam ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.tparam, _) result =
- fun (env, t) ->
+let on_tparam t ~ctx =
   let t =
-    if Env.implicit_sdt env then
+    if Env.implicit_sdt ctx then
       let (pos, _) = t.Aast.tp_name in
       let tp_constraints =
         (Ast_defs.Constraint_as, (pos, wrap_supportdyn pos Aast.Hmixed))
@@ -137,36 +133,28 @@ let on_tparam :
     else
       t
   in
-  Ok (env, t)
+  (ctx, Ok t)
 
-let on_class_top_down :
-      'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_, _) result =
- fun (env, c) ->
+let on_class_top_down c ~ctx =
   let in_enum_class =
     match c.Aast.c_kind with
     | Ast_defs.Cenum_class _ -> true
     | _ -> false
   in
-  let env = Env.set_in_enum_class env ~in_enum_class in
-  let env =
+  let ctx = Env.set_in_enum_class ctx ~in_enum_class in
+  let ctx =
     Env.set_under_no_auto_dynamic
-      env
+      ctx
       ~under_no_auto_dynamic:
         (Naming_attributes.mem
            SN.UserAttributes.uaNoAutoDynamic
            c.Aast.c_user_attributes)
   in
-  Ok (env, c)
+  (ctx, Ok c)
 
-let on_class_ :
-      'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_, _) result =
- fun (env, c) ->
+let on_class_ c ~ctx =
   let c =
-    if Env.implicit_sdt env then
+    if Env.implicit_sdt ctx then
       let (pos, _) = c.Aast.c_name in
       let c_user_attributes =
         match c.Aast.c_kind with
@@ -183,15 +171,11 @@ let on_class_ :
     else
       c
   in
-  Ok (env, c)
+  (ctx, Ok c)
 
-let on_class_c_consts :
-      'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.class_const list ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_const list, _) result =
- fun (env, c_consts) ->
+let on_class_c_consts c_consts ~ctx =
   let c_consts =
-    if Env.everything_sdt env && Env.in_enum_class env then
+    if Env.everything_sdt ctx && Env.in_enum_class ctx then
       let elab_hint = function
         | ( pos,
             Aast.(
@@ -209,39 +193,40 @@ let on_class_c_consts :
     else
       c_consts
   in
-  Ok (env, c_consts)
+  (ctx, Ok c_consts)
 
-let on_enum_ (env, e) =
+let on_enum_ e ~ctx =
   let e =
-    if Env.everything_sdt env && Env.in_enum_class env then
+    if Env.everything_sdt ctx && Env.in_enum_class ctx then
       let e_base = wrap_like e.Aast.e_base in
       Aast.{ e with e_base }
     else
       e
   in
-  Ok (env, e)
+  (ctx, Ok e)
 
 let top_down_pass =
+  let id = Aast.Pass.identity () in
   Naming_phase_pass.(
     top_down
-      Ast_transform.
+      Aast.Pass.
         {
-          identity with
-          on_fun_def = Some on_fun_def_top_down;
-          on_class_ = Some on_class_top_down;
-          on_expr_ = Some on_expr_;
+          id with
+          on_ty_fun_def = Some on_fun_def_top_down;
+          on_ty_class_ = Some on_class_top_down;
+          on_ty_expr_ = Some on_expr_;
         })
 
 let bottom_up_pass =
-  Naming_phase_pass.(
-    bottom_up
-      Ast_transform.
-        {
-          identity with
-          on_hint = Some on_hint;
-          on_fun_def = Some on_fun_def;
-          on_tparam = Some on_tparam;
-          on_class_ = Some on_class_;
-          on_class_c_consts = Some on_class_c_consts;
-          on_enum_ = Some on_enum_;
-        })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.bottom_up
+    Aast.Pass.
+      {
+        id with
+        on_ty_hint = Some on_hint;
+        on_ty_fun_def = Some on_fun_def;
+        on_ty_tparam = Some on_tparam;
+        on_ty_class_ = Some on_class_;
+        on_fld_class__c_consts = Some on_class_c_consts;
+        on_ty_enum_ = Some on_enum_;
+      }

@@ -21,13 +21,13 @@ module Env = struct
   let everything_sdt Naming_phase_env.{ everything_sdt; _ } = everything_sdt
 end
 
-let on_hint_ on_error (env, hint_) =
+let on_hint_ on_error hint_ ~ctx =
   let err_opt =
     if
-      Env.is_hhi env
-      || Env.is_systemlib env
-      || Env.supportdynamic_type_hint_enabled env
-      || Env.everything_sdt env
+      Env.is_hhi ctx
+      || Env.is_systemlib ctx
+      || Env.supportdynamic_type_hint_enabled ctx
+      || Env.everything_sdt ctx
     then
       None
     else
@@ -38,8 +38,9 @@ let on_hint_ on_error (env, hint_) =
       | _ -> None
   in
   Option.iter ~f:on_error err_opt;
-  Ok (env, hint_)
+  (ctx, Ok hint_)
 
 let pass on_error =
-  Naming_phase_pass.(
-    top_down Ast_transform.{ identity with on_hint_ = Some (on_hint_ on_error) })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down
+    Aast.Pass.{ id with on_ty_hint_ = Some (on_hint_ on_error) }

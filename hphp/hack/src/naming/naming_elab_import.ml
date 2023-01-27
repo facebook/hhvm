@@ -6,15 +6,11 @@
  *
  *)
 
-let on_expr :
-      'a 'b.
-      _ * ('a, 'b) Aast.expr ->
-      (_ * ('a, 'b) Aast.expr, _ * ('a, 'b) Aast.expr) result =
- fun (env, expr) ->
+let on_expr expr ~ctx =
   match expr with
-  | (_, _, Aast.Import _) -> Error (env, Naming_phase_error.invalid_expr expr)
-  | _ -> Ok (env, expr)
+  | (_, _, Aast.Import _) -> (ctx, Error (Naming_phase_error.invalid_expr expr))
+  | _ -> (ctx, Ok expr)
 
 let pass =
-  Naming_phase_pass.(
-    top_down Ast_transform.{ identity with on_expr = Some on_expr })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down Aast.Pass.{ id with on_ty_expr = Some on_expr }

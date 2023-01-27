@@ -66,28 +66,23 @@ module Env = struct
     current_class
 end
 
-let on_class_ :
-      'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.class_ ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.class_, _) result =
- (fun (env, c) -> Ok (Env.in_class env c, c))
+let on_class_ c ~ctx = (Env.in_class ctx c, Ok c)
 
-let on_where_constraint_hint (env, cstr) =
-  Ok (Env.set_in_where_clause env ~in_where_clause:true, cstr)
+let on_where_constraint_hint cstr ~ctx =
+  (Env.set_in_where_clause ctx ~in_where_clause:true, Ok cstr)
 
-let on_contexts (env, ctxts) =
-  Ok (Env.set_in_context env ~in_context:true, ctxts)
+let on_contexts ctxts ~ctx = (Env.set_in_context ctx ~in_context:true, Ok ctxts)
 
-let on_hint on_error (env, hint) =
+let on_hint on_error hint ~ctx =
   let res =
-    if Env.in_haccess env then
+    if Env.in_haccess ctx then
       match hint with
       (* TODO[mjt] we appear to be discarding type parameters on `Happly` here
          - should we change the representation of `Haccess` or handle
          erroneous type parameters? *)
       | (pos, Aast.Happly ((tycon_pos, tycon_name), _))
         when String.equal tycon_name SN.Classes.cSelf -> begin
-        match Env.current_class env with
+        match Env.current_class ctx with
         | Some (cid, _, _) -> Ok (pos, Aast.Happly (cid, []))
         | _ ->
           Error
@@ -106,7 +101,7 @@ let on_hint on_error (env, hint) =
             @@ Naming_error.Invalid_type_access_root
                  { pos = tycon_pos; id = Some tycon_name } )
       | (_, Aast.(Hthis | Happly _)) -> Ok hint
-      | (_, Aast.Habstr _) when Env.in_where_clause env || Env.in_context env ->
+      | (_, Aast.Habstr _) when Env.in_where_clause ctx || Env.in_context ctx ->
         Ok hint
       (* TODO[mjt] why are we allow `Hvar`? *)
       | (_, Aast.Hvar _) -> Ok hint
@@ -118,25 +113,25 @@ let on_hint on_error (env, hint) =
     else
       Ok hint
   in
-  let env =
+  let ctx =
     match hint with
-    | (_, Aast.Haccess _) -> Env.set_in_haccess env ~in_haccess:true
-    | _ -> Env.set_in_haccess env ~in_haccess:false
+    | (_, Aast.Haccess _) -> Env.set_in_haccess ctx ~in_haccess:true
+    | _ -> Env.set_in_haccess ctx ~in_haccess:false
   in
   match res with
   | Error (hint, err) ->
     on_error err;
-    Error (env, hint)
-  | Ok hint -> Ok (env, hint)
+    (ctx, Error hint)
+  | Ok hint -> (ctx, Ok hint)
 
 let pass on_error =
-  Naming_phase_pass.(
-    top_down
-      Ast_transform.
-        {
-          identity with
-          on_class_ = Some on_class_;
-          on_where_constraint_hint = Some on_where_constraint_hint;
-          on_contexts = Some on_contexts;
-          on_hint = Some (on_hint on_error);
-        })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down
+    Aast.Pass.
+      {
+        id with
+        on_ty_class_ = Some on_class_;
+        on_ty_where_constraint_hint = Some on_where_constraint_hint;
+        on_ty_contexts = Some on_contexts;
+        on_ty_hint = Some (on_hint on_error);
+      }

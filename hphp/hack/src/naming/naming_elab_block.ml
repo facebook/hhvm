@@ -16,20 +16,16 @@ let rec concat_blocks stmts =
     let rest = concat_blocks rest in
     next :: rest
 
-let on_block (env, stmts) = Ok (env, concat_blocks stmts)
+let on_block stmts ~ctx = (ctx, Ok (concat_blocks stmts))
 
-let on_using_stmt :
-      'a 'b.
-      'env * ('a, 'b) Aast_defs.using_stmt ->
-      ('env * ('a, 'b) Aast_defs.using_stmt, _) result =
- (fun (env, us) -> Ok (env, Aast.{ us with us_is_block_scoped = false }))
+let on_using_stmt us ~ctx = (ctx, Ok Aast.{ us with us_is_block_scoped = false })
 
 let pass =
-  Naming_phase_pass.(
-    top_down
-      Ast_transform.
-        {
-          identity with
-          on_block = Some on_block;
-          on_using_stmt = Some on_using_stmt;
-        })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down
+    Aast.Pass.
+      {
+        id with
+        on_ty_block = Some on_block;
+        on_ty_using_stmt = Some on_using_stmt;
+      }

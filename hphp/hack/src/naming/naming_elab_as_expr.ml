@@ -22,37 +22,34 @@ let elab_key = function
     let ident = Local_id.make_unscoped "__internal_placeholder" in
     ((annot, pos, Aast.Lvar (pos, ident)), Some err)
 
-let on_as_expr on_error =
-  let handler
-        : 'a 'b.
-          'env * ('a, 'b) Aast_defs.as_expr ->
-          ('env * ('a, 'b) Aast_defs.as_expr, _) result =
-   fun (env, as_expr) ->
-    match as_expr with
-    | Aast.As_v e ->
-      let (e, err_opt) = elab_value e in
-      Option.iter ~f:on_error err_opt;
-      Ok (env, Aast.As_v e)
-    | Aast.Await_as_v (pos, e) ->
-      let (e, err_opt) = elab_value e in
-      Option.iter ~f:on_error err_opt;
-      Ok (env, Aast.Await_as_v (pos, e))
-    | Aast.As_kv (ke, ve) ->
-      let (ke, key_err_opt) = elab_key ke in
-      let (ve, val_err_opt) = elab_value ve in
-      Option.iter ~f:on_error key_err_opt;
-      Option.iter ~f:on_error val_err_opt;
-      Ok (env, Aast.As_kv (ke, ve))
-    | Aast.Await_as_kv (pos, ke, ve) ->
-      let (ke, key_err_opt) = elab_key ke in
-      let (ve, val_err_opt) = elab_value ve in
-      Option.iter ~f:on_error key_err_opt;
-      Option.iter ~f:on_error val_err_opt;
-      Ok (env, Aast.Await_as_kv (pos, ke, ve))
-  in
-  handler
+let on_as_expr on_error as_expr ~ctx =
+  match as_expr with
+  | Aast.As_v e ->
+    let (e, err_opt) = elab_value e in
+    Option.iter ~f:on_error err_opt;
+    (ctx, Ok (Aast.As_v e))
+  | Aast.Await_as_v (pos, e) ->
+    let (e, err_opt) = elab_value e in
+    Option.iter ~f:on_error err_opt;
+    (ctx, Ok (Aast.Await_as_v (pos, e)))
+  | Aast.As_kv (ke, ve) ->
+    let (ke, key_err_opt) = elab_key ke in
+    let (ve, val_err_opt) = elab_value ve in
+    Option.iter ~f:on_error key_err_opt;
+    Option.iter ~f:on_error val_err_opt;
+    (ctx, Ok (Aast.As_kv (ke, ve)))
+  | Aast.Await_as_kv (pos, ke, ve) ->
+    let (ke, key_err_opt) = elab_key ke in
+    let (ve, val_err_opt) = elab_value ve in
+    Option.iter ~f:on_error key_err_opt;
+    Option.iter ~f:on_error val_err_opt;
+    (ctx, Ok (Aast.Await_as_kv (pos, ke, ve)))
 
 let pass on_error =
-  Naming_phase_pass.(
-    bottom_up
-      Ast_transform.{ identity with on_as_expr = Some (on_as_expr on_error) })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.bottom_up
+    Aast.Pass.
+      {
+        id with
+        on_ty_as_expr = Some (fun elem ~ctx -> on_as_expr on_error elem ~ctx);
+      }

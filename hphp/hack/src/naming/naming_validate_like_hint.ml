@@ -23,40 +23,36 @@ module Env = struct
       { t with validate_like_hint = Validate_like_hint.{ allow_like } }
 end
 
-let on_expr_ :
-      'a 'b.
-      Naming_phase_env.t * ('a, 'b) Aast_defs.expr_ ->
-      (Naming_phase_env.t * ('a, 'b) Aast_defs.expr_, _) result =
- fun (env, expr_) ->
-  let env =
+let on_expr_ expr_ ~ctx =
+  let ctx =
     match expr_ with
-    | Aast.(Is _ | As _ | Upcast _) -> Env.set_allow_like env ~allow_like:true
-    | _ -> env
+    | Aast.(Is _ | As _ | Upcast _) -> Env.set_allow_like ctx ~allow_like:true
+    | _ -> ctx
   in
-  Ok (env, expr_)
+  (ctx, Ok expr_)
 
-let on_hint on_error (env, hint) =
-  let (err_opt, env) =
+let on_hint on_error hint ~ctx =
+  let (err_opt, ctx) =
     match hint with
     | (pos, Aast.Hlike _)
       when not
-             (Env.allow_like env
-             || Env.like_type_hints_enabled env
-             || Env.everything_sdt env) ->
-      (Some (Naming_phase_error.like_type pos), env)
+             (Env.allow_like ctx
+             || Env.like_type_hints_enabled ctx
+             || Env.everything_sdt ctx) ->
+      (Some (Naming_phase_error.like_type pos), ctx)
     | (_, Aast.(Hfun _ | Happly _ | Haccess _ | Habstr _ | Hvec_or_dict _)) ->
-      (None, Env.set_allow_like env ~allow_like:false)
-    | _ -> (None, env)
+      (None, Env.set_allow_like ctx ~allow_like:false)
+    | _ -> (None, ctx)
   in
   Option.iter ~f:on_error err_opt;
-  Ok (env, hint)
+  (ctx, Ok hint)
 
 let pass on_error =
-  Naming_phase_pass.(
-    top_down
-      Ast_transform.
-        {
-          identity with
-          on_expr_ = Some on_expr_;
-          on_hint = Some (on_hint on_error);
-        })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down
+    Aast.Pass.
+      {
+        id with
+        on_ty_expr_ = Some on_expr_;
+        on_ty_hint = Some (on_hint on_error);
+      }

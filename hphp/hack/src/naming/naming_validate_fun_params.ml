@@ -27,34 +27,20 @@ let validate_fun_params params =
          else
            (SSet.add param_name seen, errs))
 
-let on_method_ on_error =
-  let handler
-        : 'a 'b.
-          _ * ('a, 'b) Aast_defs.method_ ->
-          (_ * ('a, 'b) Aast_defs.method_, _) result =
-   fun (env, m) ->
-    List.iter ~f:on_error @@ validate_fun_params m.Aast.m_params;
-    Ok (env, m)
-  in
-  handler
+let on_method_ on_error m ~ctx =
+  List.iter ~f:on_error @@ validate_fun_params m.Aast.m_params;
+  (ctx, Ok m)
 
-let on_fun_ on_error =
-  let handler
-        : 'a 'b.
-          _ * ('a, 'b) Aast_defs.fun_ -> (_ * ('a, 'b) Aast_defs.fun_, _) result
-      =
-   fun (env, f) ->
-    List.iter ~f:on_error @@ validate_fun_params f.Aast.f_params;
-    Ok (env, f)
-  in
-  handler
+let on_fun_ on_error f ~ctx =
+  List.iter ~f:on_error @@ validate_fun_params f.Aast.f_params;
+  (ctx, Ok f)
 
 let pass on_error =
-  Naming_phase_pass.(
-    top_down
-      Ast_transform.
-        {
-          identity with
-          on_method_ = Some (on_method_ on_error);
-          on_fun_ = Some (on_fun_ on_error);
-        })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down
+    Aast.Pass.
+      {
+        id with
+        on_ty_method_ = Some (fun elem ~ctx -> on_method_ on_error elem ~ctx);
+        on_ty_fun_ = Some (fun elem ~ctx -> on_fun_ on_error elem ~ctx);
+      }

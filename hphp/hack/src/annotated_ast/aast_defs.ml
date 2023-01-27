@@ -807,7 +807,7 @@ and ('ex, 'en) fun_param = {
   param_expr: ('ex, 'en) expr option;
   param_readonly: Ast_defs.readonly_kind option; [@transform.opaque]
   param_callconv: Ast_defs.param_kind; [@transform.opaque]
-  param_user_attributes: ('ex, 'en) user_attribute list;
+  param_user_attributes: ('ex, 'en) user_attributes;
   param_visibility: visibility option; [@transform.opaque]
 }
 
@@ -817,7 +817,7 @@ and ('ex, 'en) fun_ = {
   f_annotation: 'en;
   f_readonly_ret: Ast_defs.readonly_kind option; [@transform.opaque]
       (** Whether the return value is readonly *)
-  f_ret: 'ex type_hint;
+  f_ret: 'ex type_hint; [@transform.explicit]
   f_tparams: ('ex, 'en) tparam list;
   f_where_constraints: where_constraint_hint list;
   f_params: ('ex, 'en) fun_param list;
@@ -825,7 +825,7 @@ and ('ex, 'en) fun_ = {
   f_unsafe_ctxs: contexts option;
   f_body: ('ex, 'en) func_body;
   f_fun_kind: Ast_defs.fun_kind; [@transform.opaque]
-  f_user_attributes: ('ex, 'en) user_attribute list;
+  f_user_attributes: ('ex, 'en) user_attributes;
   f_external: bool;
       (** true if this declaration has no body because it is an
        * external function declaration (e.g. from an HHI file) *)
@@ -867,7 +867,7 @@ and ('ex, 'en) user_attribute = {
 }
 
 and ('ex, 'en) file_attribute = {
-  fa_user_attributes: ('ex, 'en) user_attribute list;
+  fa_user_attributes: ('ex, 'en) user_attributes;
   fa_namespace: nsenv;
 }
 
@@ -877,7 +877,7 @@ and ('ex, 'en) tparam = {
   tp_parameters: ('ex, 'en) tparam list;
   tp_constraints: ((Ast_defs.constraint_kind[@transform.opaque]) * hint) list;
   tp_reified: reify_kind; [@transform.opaque]
-  tp_user_attributes: ('ex, 'en) user_attribute list;
+  tp_user_attributes: ('ex, 'en) user_attributes;
 }
 
 and require_kind =
@@ -902,23 +902,23 @@ and ('ex, 'en) class_ = {
   c_has_xhp_keyword: bool;
   c_kind: Ast_defs.classish_kind; [@transform.opaque]
   c_name: class_name;
-  c_tparams: ('ex, 'en) tparam list;
+  c_tparams: ('ex, 'en) tparam list; [@transform.explicit]
       (** The type parameters of a class A<T> (T is the parameter) *)
-  c_extends: class_hint list;
-  c_uses: trait_hint list;
-  c_xhp_attr_uses: xhp_attr_hint list;
+  c_extends: class_hint list; [@transform.explicit]
+  c_uses: trait_hint list; [@transform.explicit]
+  c_xhp_attr_uses: xhp_attr_hint list; [@transform.explicit]
   c_xhp_category: (pos * pstring list) option; [@transform.opaque]
-  c_reqs: (class_hint * require_kind) list;
-  c_implements: class_hint list;
+  c_reqs: (class_hint * require_kind) list; [@transform.explicit]
+  c_implements: class_hint list; [@transform.explicit]
   c_where_constraints: where_constraint_hint list;
-  c_consts: ('ex, 'en) class_const list;
+  c_consts: ('ex, 'en) class_const list; [@transform.explicit]
   c_typeconsts: ('ex, 'en) class_typeconst_def list;
   c_vars: ('ex, 'en) class_var list;
   c_methods: ('ex, 'en) method_ list;
   c_xhp_children: ((pos[@transform.opaque]) * xhp_child) list;
-  c_xhp_attrs: ('ex, 'en) xhp_attr list;
+  c_xhp_attrs: ('ex, 'en) xhp_attr list; [@transform.explicit]
   c_namespace: nsenv;
-  c_user_attributes: ('ex, 'en) user_attribute list;
+  c_user_attributes: ('ex, 'en) user_attributes; [@transform.explicit]
   c_file_attributes: ('ex, 'en) file_attribute list;
   c_docs_url: string option;
   c_enum: enum_ option;
@@ -959,7 +959,7 @@ and ('ex, 'en) class_const_kind =
        *)
 
 and ('ex, 'en) class_const = {
-  cc_user_attributes: ('ex, 'en) user_attribute list;
+  cc_user_attributes: ('ex, 'en) user_attributes;
   cc_type: hint option;
   cc_id: sid;
   cc_kind: ('ex, 'en) class_const_kind;
@@ -986,7 +986,7 @@ and class_typeconst =
   | TCConcrete of class_concrete_typeconst
 
 and ('ex, 'en) class_typeconst_def = {
-  c_tconst_user_attributes: ('ex, 'en) user_attribute list;
+  c_tconst_user_attributes: ('ex, 'en) user_attributes;
   c_tconst_name: sid;
   c_tconst_kind: class_typeconst;
   c_tconst_span: pos; [@transform.opaque]
@@ -1006,10 +1006,10 @@ and ('ex, 'en) class_var = {
   cv_abstract: bool;
   cv_readonly: bool;
   cv_visibility: visibility; [@transform.opaque]
-  cv_type: 'ex type_hint;
+  cv_type: 'ex type_hint; [@transform.explicit]
   cv_id: sid;
   cv_expr: ('ex, 'en) expr option;
-  cv_user_attributes: ('ex, 'en) user_attribute list;
+  cv_user_attributes: ('ex, 'en) user_attributes;
   cv_doc_comment: doc_comment option;
   cv_is_promoted_variadic: bool;
   cv_is_static: bool;
@@ -1032,9 +1032,9 @@ and ('ex, 'en) method_ = {
   m_unsafe_ctxs: contexts option;
   m_body: ('ex, 'en) func_body;
   m_fun_kind: Ast_defs.fun_kind; [@transform.opaque]
-  m_user_attributes: ('ex, 'en) user_attribute list;
+  m_user_attributes: ('ex, 'en) user_attributes;
   m_readonly_ret: Ast_defs.readonly_kind option; [@transform.opaque]
-  m_ret: 'ex type_hint;
+  m_ret: 'ex type_hint; [@transform.explicit]
   m_external: bool;
       (** true if this declaration has no body because it is an external method
        * declaration (e.g. from an HHI file) *)
@@ -1050,7 +1050,7 @@ and ('ex, 'en) typedef = {
   t_as_constraint: hint option;
   t_super_constraint: hint option;
   t_kind: hint;
-  t_user_attributes: ('ex, 'en) user_attribute list;
+  t_user_attributes: ('ex, 'en) user_attributes;
   t_file_attributes: ('ex, 'en) file_attribute list;
   t_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
   t_vis: typedef_visibility; [@transform.opaque]
@@ -1068,7 +1068,7 @@ and ('ex, 'en) gconst = {
   cst_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
   cst_name: sid;
   cst_type: hint option;
-  cst_value: ('ex, 'en) expr;
+  cst_value: ('ex, 'en) expr; [@transform.explicit]
   cst_namespace: nsenv;
   cst_span: pos; [@transform.opaque]
   cst_emit_id: emit_id option;
@@ -1087,7 +1087,7 @@ and ('ex, 'en) fun_def = {
 and ('ex, 'en) module_def = {
   md_annotation: 'en;
   md_name: Ast_defs.id; [@transform.opaque]
-  md_user_attributes: ('ex, 'en) user_attribute list;
+  md_user_attributes: ('ex, 'en) user_attributes;
   md_span: pos; [@transform.opaque]
   md_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
   md_doc_comment: doc_comment option;
@@ -1147,7 +1147,11 @@ and hint = (pos[@transform.opaque]) * hint_
 
 and variadic_hint = hint option
 
-and contexts = (pos[@transform.opaque]) * hint list
+and ('ex, 'en) user_attributes = ('ex, 'en) user_attribute list
+
+and contexts = (pos[@transform.opaque]) * context list
+
+and context = hint
 
 and hf_param_info = {
   hfparam_kind: Ast_defs.param_kind;
@@ -1164,7 +1168,7 @@ and hint_fun = {
   hf_param_info: hf_param_info option list;
   hf_variadic_ty: variadic_hint;
   hf_ctxs: contexts option;
-  hf_return_ty: hint;
+  hf_return_ty: hint; [@transform.explicit]
   hf_is_readonly_return: Ast_defs.readonly_kind option; [@transform.opaque]
 }
 

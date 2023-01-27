@@ -7,11 +7,7 @@
  *)
 module SN = Naming_special_names
 
-let on_expr_ :
-      'a 'b.
-      _ * ('a, 'b) Aast.expr_ ->
-      (_ * ('a, 'b) Aast.expr_, _ * ('a, 'b) Aast.expr_) result =
- fun (env, expr_) ->
+let on_expr_ expr_ ~ctx =
   let expr_ =
     match expr_ with
     | Aast.Lvar (pos, local_id) ->
@@ -30,8 +26,8 @@ let on_expr_ :
       Aast.Pipe (lid, e1, e2)
     | _ -> expr_
   in
-  Ok (env, expr_)
+  (ctx, Ok expr_)
 
 let pass =
-  Naming_phase_pass.(
-    top_down Ast_transform.{ identity with on_expr_ = Some on_expr_ })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down Aast.Pass.{ id with on_ty_expr_ = Some on_expr_ }

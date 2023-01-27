@@ -13,47 +13,44 @@ module Env = struct
     consistent_ctor_level
 end
 
-let on_class_ on_error =
-  let handler
-        : 'a 'b.
-          _ * ('a, 'b) Aast_defs.class_ ->
-          (_ * ('a, 'b) Aast_defs.class_, _) result =
-   fun (env, (Aast.{ c_methods; c_user_attributes; c_kind; _ } as c)) ->
-    let err_opt =
-      if Env.consistent_ctor_level env > 0 then
-        let attr_pos_opt =
-          Naming_attributes.mem_pos
-            SN.UserAttributes.uaConsistentConstruct
-            c_user_attributes
-        in
-        let ctor_opt =
-          List.find c_methods ~f:(fun Aast.{ m_name = (_, nm); _ } ->
-              if String.equal nm "__construct" then
-                true
-              else
-                false)
-        in
-        match (attr_pos_opt, ctor_opt) with
-        | (Some pos, None)
-          when Ast_defs.is_c_trait c_kind || Env.consistent_ctor_level env > 1
-          ->
-          if Option.is_none ctor_opt then
-            Some
-              (Naming_phase_error.naming
-              @@ Naming_error.Explicit_consistent_constructor
-                   { classish_kind = c_kind; pos })
-          else
-            None
-        | _ -> None
-      else
-        None
-    in
-    Option.iter ~f:on_error err_opt;
-    Ok (env, c)
+let on_class_
+    on_error (Aast.{ c_methods; c_user_attributes; c_kind; _ } as c) ~ctx =
+  let err_opt =
+    if Env.consistent_ctor_level ctx > 0 then
+      let attr_pos_opt =
+        Naming_attributes.mem_pos
+          SN.UserAttributes.uaConsistentConstruct
+          c_user_attributes
+      in
+      let ctor_opt =
+        List.find c_methods ~f:(fun Aast.{ m_name = (_, nm); _ } ->
+            if String.equal nm "__construct" then
+              true
+            else
+              false)
+      in
+      match (attr_pos_opt, ctor_opt) with
+      | (Some pos, None)
+        when Ast_defs.is_c_trait c_kind || Env.consistent_ctor_level ctx > 1 ->
+        if Option.is_none ctor_opt then
+          Some
+            (Naming_phase_error.naming
+            @@ Naming_error.Explicit_consistent_constructor
+                 { classish_kind = c_kind; pos })
+        else
+          None
+      | _ -> None
+    else
+      None
   in
-  handler
+  Option.iter ~f:on_error err_opt;
+  (ctx, Ok c)
 
 let pass on_error =
-  Naming_phase_pass.(
-    top_down
-      Ast_transform.{ identity with on_class_ = Some (on_class_ on_error) })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down
+    Aast.Pass.
+      {
+        id with
+        on_ty_class_ = Some (fun elem ~ctx -> on_class_ on_error elem ~ctx);
+      }

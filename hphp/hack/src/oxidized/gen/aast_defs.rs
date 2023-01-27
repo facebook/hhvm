@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a469177af740b1ae5851a120957e7c01>>
+// @generated SignedSource<<7db901b364fcbe57674629f0dc9163c8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1230,7 +1230,7 @@ pub struct FunParam<Ex, En> {
     pub readonly: Option<ast_defs::ReadonlyKind>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub callconv: ast_defs::ParamKind,
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    pub user_attributes: UserAttributes<Ex, En>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub visibility: Option<Visibility>,
 }
@@ -1261,6 +1261,7 @@ pub struct Fun_<Ex, En> {
     /// Whether the return value is readonly
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub readonly_ret: Option<ast_defs::ReadonlyKind>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub ret: TypeHint<Ex>,
     pub tparams: Vec<Tparam<Ex, En>>,
     pub where_constraints: Vec<WhereConstraintHint>,
@@ -1270,7 +1271,7 @@ pub struct Fun_<Ex, En> {
     pub body: FuncBody<Ex, En>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub fun_kind: ast_defs::FunKind,
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    pub user_attributes: UserAttributes<Ex, En>,
     /// true if this declaration has no body because it is an
     /// external function declaration (e.g. from an HHI file)
     pub external: bool,
@@ -1411,7 +1412,7 @@ pub struct UserAttribute<Ex, En> {
 #[rust_to_ocaml(prefix = "fa_")]
 #[repr(C)]
 pub struct FileAttribute<Ex, En> {
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    pub user_attributes: UserAttributes<Ex, En>,
     pub namespace: Nsenv,
 }
 
@@ -1440,7 +1441,7 @@ pub struct Tparam<Ex, En> {
     pub constraints: Vec<(ast_defs::ConstraintKind, Hint)>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub reified: ReifyKind,
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    pub user_attributes: UserAttributes<Ex, En>,
 }
 
 #[derive(
@@ -1529,23 +1530,32 @@ pub struct Class_<Ex, En> {
     pub kind: ast_defs::ClassishKind,
     pub name: ClassName,
     /// The type parameters of a class A<T> (T is the parameter)
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub tparams: Vec<Tparam<Ex, En>>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub extends: Vec<ClassHint>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub uses: Vec<TraitHint>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub xhp_attr_uses: Vec<XhpAttrHint>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub xhp_category: Option<(Pos, Vec<Pstring>)>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub reqs: Vec<(ClassHint, RequireKind)>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub implements: Vec<ClassHint>,
     pub where_constraints: Vec<WhereConstraintHint>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub consts: Vec<ClassConst<Ex, En>>,
     pub typeconsts: Vec<ClassTypeconstDef<Ex, En>>,
     pub vars: Vec<ClassVar<Ex, En>>,
     pub methods: Vec<Method_<Ex, En>>,
     pub xhp_children: Vec<(Pos, XhpChild)>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub xhp_attrs: Vec<XhpAttr<Ex, En>>,
     pub namespace: Nsenv,
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
+    pub user_attributes: UserAttributes<Ex, En>,
     pub file_attributes: Vec<FileAttribute<Ex, En>>,
     pub docs_url: Option<String>,
     pub enum_: Option<Enum_>,
@@ -1659,7 +1669,7 @@ pub enum ClassConstKind<Ex, En> {
 #[rust_to_ocaml(prefix = "cc_")]
 #[repr(C)]
 pub struct ClassConst<Ex, En> {
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    pub user_attributes: UserAttributes<Ex, En>,
     pub type_: Option<Hint>,
     pub id: Sid,
     pub kind: ClassConstKind<Ex, En>,
@@ -1755,7 +1765,7 @@ pub enum ClassTypeconst {
 #[rust_to_ocaml(prefix = "c_tconst_")]
 #[repr(C)]
 pub struct ClassTypeconstDef<Ex, En> {
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    pub user_attributes: UserAttributes<Ex, En>,
     pub name: Sid,
     pub kind: ClassTypeconst,
     #[rust_to_ocaml(attr = "transform.opaque")]
@@ -1813,10 +1823,11 @@ pub struct ClassVar<Ex, En> {
     pub readonly: bool,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub visibility: Visibility,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub type_: TypeHint<Ex>,
     pub id: Sid,
     pub expr: Option<Expr<Ex, En>>,
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    pub user_attributes: UserAttributes<Ex, En>,
     pub doc_comment: Option<DocComment>,
     pub is_promoted_variadic: bool,
     pub is_static: bool,
@@ -1860,9 +1871,10 @@ pub struct Method_<Ex, En> {
     pub body: FuncBody<Ex, En>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub fun_kind: ast_defs::FunKind,
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    pub user_attributes: UserAttributes<Ex, En>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub readonly_ret: Option<ast_defs::ReadonlyKind>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub ret: TypeHint<Ex>,
     /// true if this declaration has no body because it is an external method
     /// declaration (e.g. from an HHI file)
@@ -1898,7 +1910,7 @@ pub struct Typedef<Ex, En> {
     pub as_constraint: Option<Hint>,
     pub super_constraint: Option<Hint>,
     pub kind: Hint,
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    pub user_attributes: UserAttributes<Ex, En>,
     pub file_attributes: Vec<FileAttribute<Ex, En>>,
     #[rust_to_ocaml(attr = "visitors.opaque")]
     #[rust_to_ocaml(attr = "transform.opaque")]
@@ -1939,6 +1951,7 @@ pub struct Gconst<Ex, En> {
     pub mode: file_info::Mode,
     pub name: Sid,
     pub type_: Option<Hint>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub value: Expr<Ex, En>,
     pub namespace: Nsenv,
     #[rust_to_ocaml(attr = "transform.opaque")]
@@ -1996,7 +2009,7 @@ pub struct ModuleDef<Ex, En> {
     pub annotation: En,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub name: ast_defs::Id,
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+    pub user_attributes: UserAttributes<Ex, En>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,
     #[rust_to_ocaml(attr = "visitors.opaque")]
@@ -2193,6 +2206,9 @@ pub struct Hint(pub Pos, pub Box<Hint_>);
 #[rust_to_ocaml(and)]
 pub type VariadicHint = Option<Hint>;
 
+#[rust_to_ocaml(and)]
+pub type UserAttributes<Ex, En> = Vec<UserAttribute<Ex, En>>;
+
 #[derive(
     Clone,
     Debug,
@@ -2209,7 +2225,10 @@ pub type VariadicHint = Option<Hint>;
 )]
 #[rust_to_ocaml(and)]
 #[repr(C)]
-pub struct Contexts(pub Pos, pub Vec<Hint>);
+pub struct Contexts(pub Pos, pub Vec<Context>);
+
+#[rust_to_ocaml(and)]
+pub type Context = Hint;
 
 #[derive(
     Clone,
@@ -2258,6 +2277,7 @@ pub struct HintFun {
     pub param_info: Vec<Option<HfParamInfo>>,
     pub variadic_ty: VariadicHint,
     pub ctxs: Option<Contexts>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub return_ty: Hint,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub is_readonly_return: Option<ast_defs::ReadonlyKind>,

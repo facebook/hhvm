@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a2c77e37f90cdaacd803fd2e10fc8168>>
+// @generated SignedSource<<9f8f71ea5796d0cc8fc9ea2b51286555>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1549,7 +1549,7 @@ pub struct FunParam<'a, Ex, En> {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub callconv: ast_defs::ParamKind<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub visibility: Option<oxidized::aast_defs::Visibility>,
 }
@@ -1588,6 +1588,7 @@ pub struct Fun_<'a, Ex, En> {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub readonly_ret: Option<oxidized::ast_defs::ReadonlyKind>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub ret: &'a TypeHint<'a, Ex>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a, Ex, En>],
@@ -1604,7 +1605,7 @@ pub struct Fun_<'a, Ex, En> {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub fun_kind: oxidized::ast_defs::FunKind,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     /// true if this declaration has no body because it is an
     /// external function declaration (e.g. from an HHI file)
     pub external: bool,
@@ -1785,7 +1786,7 @@ arena_deserializer::impl_deserialize_in_arena!(UserAttribute<'arena, Ex, En>);
 #[repr(C)]
 pub struct FileAttribute<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub namespace: &'a Nsenv<'a>,
 }
@@ -1824,7 +1825,7 @@ pub struct Tparam<'a, Ex, En> {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub reified: oxidized::aast_defs::ReifyKind,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Tparam<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Tparam<'arena, Ex, En>);
@@ -1870,23 +1871,30 @@ pub struct Class_<'a, Ex, En> {
     pub name: &'a ClassName<'a>,
     /// The type parameters of a class A<T> (T is the parameter)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub tparams: &'a [&'a Tparam<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub extends: &'a [&'a ClassHint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub uses: &'a [&'a TraitHint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub xhp_attr_uses: &'a [&'a XhpAttrHint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub xhp_category: Option<&'a (&'a Pos<'a>, &'a [&'a Pstring<'a>])>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub reqs: &'a [(&'a ClassHint<'a>, &'a oxidized::aast_defs::RequireKind)],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub implements: &'a [&'a ClassHint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub consts: &'a [&'a ClassConst<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub typeconsts: &'a [&'a ClassTypeconstDef<'a, Ex, En>],
@@ -1897,11 +1905,13 @@ pub struct Class_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub xhp_children: &'a [(&'a Pos<'a>, XhpChild<'a>)],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub xhp_attrs: &'a [&'a XhpAttr<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub namespace: &'a Nsenv<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    #[rust_to_ocaml(attr = "transform.explicit")]
+    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub file_attributes: &'a [&'a FileAttribute<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -2018,7 +2028,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstKind<'arena, Ex, En>);
 #[repr(C)]
 pub struct ClassConst<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: Option<&'a Hint<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -2138,7 +2148,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassTypeconst<'arena>);
 #[repr(C)]
 pub struct ClassTypeconstDef<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: Sid<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -2212,13 +2222,14 @@ pub struct ClassVar<'a, Ex, En> {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub visibility: oxidized::aast_defs::Visibility,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub type_: &'a TypeHint<'a, Ex>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub id: Sid<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub expr: Option<&'a Expr<'a, Ex, En>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub doc_comment: Option<&'a DocComment<'a>>,
     pub is_promoted_variadic: bool,
@@ -2279,10 +2290,11 @@ pub struct Method_<'a, Ex, En> {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub fun_kind: oxidized::ast_defs::FunKind,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub readonly_ret: Option<oxidized::ast_defs::ReadonlyKind>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub ret: &'a TypeHint<'a, Ex>,
     /// true if this declaration has no body because it is an external method
     /// declaration (e.g. from an HHI file)
@@ -2331,7 +2343,7 @@ pub struct Typedef<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub kind: &'a Hint<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub file_attributes: &'a [&'a FileAttribute<'a, Ex, En>],
     #[rust_to_ocaml(attr = "visitors.opaque")]
@@ -2387,6 +2399,7 @@ pub struct Gconst<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: Option<&'a Hint<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub value: &'a Expr<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub namespace: &'a Nsenv<'a>,
@@ -2465,7 +2478,7 @@ pub struct ModuleDef<'a, Ex, En> {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub name: ast_defs::Id<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: &'a Pos<'a>,
@@ -2627,6 +2640,9 @@ arena_deserializer::impl_deserialize_in_arena!(Hint<'arena>);
 #[rust_to_ocaml(and)]
 pub type VariadicHint<'a> = Option<&'a Hint<'a>>;
 
+#[rust_to_ocaml(and)]
+pub type UserAttributes<'a, Ex, En> = [&'a UserAttribute<'a, Ex, En>];
+
 #[derive(
     Clone,
     Debug,
@@ -2645,10 +2661,13 @@ pub type VariadicHint<'a> = Option<&'a Hint<'a>>;
 #[repr(C)]
 pub struct Contexts<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pos<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a [&'a Hint<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a [&'a Context<'a>],
 );
 impl<'a> TrivialDrop for Contexts<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Contexts<'arena>);
+
+#[rust_to_ocaml(and)]
+pub type Context<'a> = Hint<'a>;
 
 #[derive(
     Clone,
@@ -2705,6 +2724,7 @@ pub struct HintFun<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ctxs: Option<&'a Contexts<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     pub return_ty: &'a Hint<'a>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub is_readonly_return: Option<oxidized::ast_defs::ReadonlyKind>,

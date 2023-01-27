@@ -15,9 +15,9 @@ module Env = struct
   let is_hhi Naming_phase_env.{ is_hhi; _ } = is_hhi
 end
 
-let on_hint_ on_error (env, hint_) =
+let on_hint_ on_error hint_ ~ctx =
   let err_opt =
-    if Env.is_systemlib env || Env.is_hhi env then
+    if Env.is_systemlib ctx || Env.is_hhi ctx then
       None
     else
       match hint_ with
@@ -33,13 +33,9 @@ let on_hint_ on_error (env, hint_) =
       | _ -> None
   in
   Option.iter ~f:on_error err_opt;
-  Ok (env, hint_)
+  (ctx, Ok hint_)
 
-let on_class_ :
-      'a 'b.
-      _ * ('a, 'b) Aast_defs.class_ -> (_ * ('a, 'b) Aast_defs.class_, _) result
-    =
- fun (env, (Aast.{ c_kind; c_enum; c_name; _ } as c)) ->
+let on_class_ (Aast.{ c_kind; c_enum; c_name; _ } as c) ~ctx =
   let c =
     let pos = fst c_name in
     match c_enum with
@@ -67,14 +63,14 @@ let on_class_ :
       Aast.{ c with c_extends }
     | _ -> c
   in
-  Ok (env, c)
+  (ctx, Ok c)
 
 let pass on_error =
-  Naming_phase_pass.(
-    bottom_up
-      Ast_transform.
-        {
-          identity with
-          on_hint_ = Some (on_hint_ on_error);
-          on_class_ = Some on_class_;
-        })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.bottom_up
+    Aast.Pass.
+      {
+        id with
+        on_ty_hint_ = Some (on_hint_ on_error);
+        on_ty_class_ = Some on_class_;
+      }

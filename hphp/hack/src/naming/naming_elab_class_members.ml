@@ -133,44 +133,42 @@ let elab_xhp_attr
   let errs = List.filter_map ~f:Fn.id [req_attr_err; like_err] in
   (Aast.{ cv with cv_xhp_attr; cv_type; cv_user_attributes = [] }, errs)
 
-let on_class_ on_error =
-  let handler
-        : 'a 'b.
-          Naming_phase_env.t * ('a, 'b) Aast_defs.class_ ->
-          (Naming_phase_env.t * ('a, 'b) Aast_defs.class_, 'c) result =
-   fun ( env,
-         (Aast.{ c_vars; c_xhp_attrs; c_methods; c_user_attributes; _ } as c) ) ->
-    let (c, errs) =
-      let (c_vars, err) =
-        let (static_props, props) = Aast.split_vars c_vars in
-        let const_attr_opt =
-          Naming_attributes.find SN.UserAttributes.uaConst c_user_attributes
-        in
-        let static_props = List.map ~f:elab_class_prop static_props
-        and props =
-          List.map ~f:(elab_non_static_class_prop const_attr_opt) props
-        and (xhp_attrs, xhp_attrs_err) =
-          List.unzip
-          @@ List.map
-               ~f:(elab_xhp_attr (Env.like_type_hints_enabled env))
-               c_xhp_attrs
-        in
-        (static_props @ props @ xhp_attrs, List.concat xhp_attrs_err)
+let on_class_
+    on_error
+    (Aast.{ c_vars; c_xhp_attrs; c_methods; c_user_attributes; _ } as c)
+    ~ctx =
+  let (c, errs) =
+    let (c_vars, err) =
+      let (static_props, props) = Aast.split_vars c_vars in
+      let const_attr_opt =
+        Naming_attributes.find SN.UserAttributes.uaConst c_user_attributes
       in
-      let c_methods =
-        if Ast_defs.is_c_interface c.Aast.c_kind then
-          List.map c_methods ~f:(fun m -> Aast.{ m with m_abstract = true })
-        else
-          c_methods
+      let static_props = List.map ~f:elab_class_prop static_props
+      and props = List.map ~f:(elab_non_static_class_prop const_attr_opt) props
+      and (xhp_attrs, xhp_attrs_err) =
+        List.unzip
+        @@ List.map
+             ~f:(elab_xhp_attr (Env.like_type_hints_enabled ctx))
+             c_xhp_attrs
       in
-      (Aast.{ c with c_methods; c_vars; c_xhp_attrs = [] }, err)
+      (static_props @ props @ xhp_attrs, List.concat xhp_attrs_err)
     in
-    List.iter ~f:on_error errs;
-    Ok (env, c)
+    let c_methods =
+      if Ast_defs.is_c_interface c.Aast.c_kind then
+        List.map c_methods ~f:(fun m -> Aast.{ m with m_abstract = true })
+      else
+        c_methods
+    in
+    (Aast.{ c with c_methods; c_vars; c_xhp_attrs = [] }, err)
   in
-  handler
+  List.iter ~f:on_error errs;
+  (ctx, Ok c)
 
 let pass on_error =
-  Naming_phase_pass.(
-    bottom_up
-      Ast_transform.{ identity with on_class_ = Some (on_class_ on_error) })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.bottom_up
+    Aast.Pass.
+      {
+        id with
+        on_ty_class_ = Some (fun elem ~ctx -> on_class_ on_error elem ~ctx);
+      }

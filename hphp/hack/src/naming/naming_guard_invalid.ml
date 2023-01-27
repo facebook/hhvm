@@ -6,11 +6,11 @@
  *
  *)
 
-let on_expr_ (env, expr_) =
+let on_expr_ expr_ ~ctx =
   match expr_ with
-  | Aast.Invalid _ -> Error (env, expr_)
-  | _ -> Ok (env, expr_)
+  | Aast.Invalid _ -> (ctx, Error expr_)
+  | _ -> (ctx, Ok expr_)
 
 let pass =
-  Naming_phase_pass.(
-    top_down Ast_transform.{ identity with on_expr_ = Some on_expr_ })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down Aast.Pass.{ id with on_ty_expr_ = Some on_expr_ }

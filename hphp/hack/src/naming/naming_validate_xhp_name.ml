@@ -8,7 +8,7 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-let on_hint_ on_error (env, hint_) =
+let on_hint_ on_error hint_ ~ctx =
   let err_opt =
     match hint_ with
     (* some common Xhp screw ups *)
@@ -20,8 +20,9 @@ let on_hint_ on_error (env, hint_) =
     | _ -> None
   in
   Option.iter ~f:on_error err_opt;
-  Ok (env, hint_)
+  (ctx, Ok hint_)
 
 let pass on_error =
-  Naming_phase_pass.(
-    top_down Ast_transform.{ identity with on_hint_ = Some (on_hint_ on_error) })
+  let id = Aast.Pass.identity () in
+  Naming_phase_pass.top_down
+    Aast.Pass.{ id with on_ty_hint_ = Some (on_hint_ on_error) }

@@ -130,7 +130,7 @@ struct MyMapStruct {
 You can patch elements by key, e.g.,
 
 ```
-op::patch_type<MyMapStruct> patch;
+MyMapStructPatch patch;
 auto &stringPatch = patch.patch<ident::nested>().patchByKey(42);
 stringPatch.prepend("(");
 stringPatch += ")";
@@ -139,4 +139,15 @@ MyMapStruct s;
 s.nested[42] = "hi";
 patch.apply(s);
 EXPECT_EQ(s.nested[42], "(hi)");
+```
+
+## Utilities
+
+### Type alias for Patch type
+
+You can get Patch type from original type, vice versa. e.g.,
+
+```
+static_assert(std::is_same_v<apache::thrift::op::patch_type<MyStruct>, MyStructPatch>);
+static_assert(std::is_same_v<MyStruct, MyStructPatch::value_type>);
 ```

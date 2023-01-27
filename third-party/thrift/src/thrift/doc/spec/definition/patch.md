@@ -115,3 +115,32 @@ O(size of patched fields + size of patch)
 [^2]: For optional field, clear means reset the field. For elements in container, clear means remove from the container. Otherwise clear means set to intrinstic default.
 [^3]: No-op if keys don't exist.
 [^4]: No-op if keys exist.
+
+## Merge Functionality
+
+The following functionality should be provided in the target language.
+
+```
+Object merge(Object patch1, Object patch2);
+```
+
+so that
+
+```
+apply(patch1, value)
+apply(patch2, value)
+```
+
+**must** be equivalent to
+
+```
+apply(merge(patch1, patch2), value)
+```
+
+Note that this API needs to work with dynamic patch, thus both input and output are Thrift.Object.
+
+### Complexity
+
+```
+O(size of patch1 + size of patch2)
+```

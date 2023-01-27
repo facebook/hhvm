@@ -444,10 +444,12 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   explicit ThriftServer(
       const std::shared_ptr<HeaderServerChannel>& serverChannel);
 
+ private:
   // method to encapsulate the default setup needed for the construction of
   // ThriftServer. Should be called in all ctors not calling the default ctor
   void initializeDefaults();
 
+ public:
   ~ThriftServer() override;
 
   /**

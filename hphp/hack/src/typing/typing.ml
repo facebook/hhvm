@@ -6265,7 +6265,15 @@ and attributes_check_def env kind attrs =
     env
   in
   let env = Typing_attributes.check_def env new_object kind attrs in
-  List.map_env env attrs ~f:user_attribute
+  let (env, user_attrs) = List.map_env env attrs ~f:user_attribute in
+  (* If NoAutoDynamic is set, disable everything_sdt *)
+  let env =
+    if Naming_attributes.mem SN.UserAttributes.uaNoAutoDynamic user_attrs then
+      Env.set_everything_sdt env false
+    else
+      env
+  in
+  (env, user_attrs)
 
 (** Get class infos for a class expression (e.g. `parent`, `self` or
     regular classnames) - which might resolve to a union or intersection

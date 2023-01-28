@@ -1021,6 +1021,16 @@ let set_fn_kind env fn_type =
 let set_support_dynamic_type env b =
   { env with genv = { env.genv with this_support_dynamic_type = b } }
 
+let set_everything_sdt env b =
+  {
+    env with
+    genv =
+      {
+        env.genv with
+        tcopt = { env.genv.tcopt with GlobalOptions.tco_everything_sdt = b };
+      };
+  }
+
 let get_support_dynamic_type env = env.genv.this_support_dynamic_type
 
 let set_self env self_id self_ty =

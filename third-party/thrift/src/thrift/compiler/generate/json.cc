@@ -16,6 +16,7 @@
 
 #include <thrift/compiler/generate/json.h>
 
+#include <cstdint>
 #include <ostream>
 #include <sstream>
 

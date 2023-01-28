@@ -363,6 +363,9 @@ bool generate(
       auto generator = generator_registry::make_generator(
           generator_name, program, diags.source_mgr());
       if (!generator) {
+        fmt::print(
+            stderr, "Error: Invalid generator name: {}\n", generator_name);
+        usage();
         continue;
       }
       generator->process_options(options, params.out_path, params.add_gen_dir);

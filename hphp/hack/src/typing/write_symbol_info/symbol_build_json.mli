@@ -116,3 +116,5 @@ val build_typedef_decl_json_ref : Fact_id.t -> Hh_json.json
 val build_module_decl_json_ref : Fact_id.t -> Hh_json.json
 
 val build_method_occ_json_ref : Fact_id.t -> Hh_json.json
+
+val build_class_decl_json_nested : string -> Hh_json.json

@@ -264,7 +264,7 @@ let build_signature ctx pos_map_opt source_text params ctxs ret progress =
         List.filter_map sym_pos ~f:(fun (source_pos, pos) ->
             match XRefs.PosMap.find_opt source_pos pos_map with
             | None -> None
-            | Some json -> Some (json, pos))
+            | Some XRefs.{ target; _ } -> Some (target, pos))
       in
       let decl_json_aggr_pos = aggregate_pos decl_json_pos in
       let (fact_id, progress) = type_info ~ty decl_json_aggr_pos progress in
@@ -679,11 +679,17 @@ let method_occ receiver_class name progress =
     (JSON_Object json)
     progress
 
-let file_call ~path pos ~callee_xref ~call_args ~dispatch_arg progress =
+let file_call
+    ~path pos ~callee_xref ~call_args ~dispatch_arg ~receiver_type progress =
+  let receiver_type =
+    match receiver_type with
+    | None -> []
+    | Some receiver_type -> [("receiver_type", receiver_type)]
+  in
   let dispatch_arg =
     match dispatch_arg with
-    | None -> []
-    | Some dispatch_arg -> [("dispatch_arg", dispatch_arg)]
+    | None -> receiver_type
+    | Some dispatch_arg -> ("dispatch_arg", dispatch_arg) :: receiver_type
   in
   let xref_dispatch =
     match callee_xref with

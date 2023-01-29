@@ -430,3 +430,18 @@ let build_module_decl_json_ref fact_id =
 
 let build_method_occ_json_ref fact_id =
   JSON_Object [("method", build_id_json fact_id)]
+
+let build_class_decl_json_nested receiver =
+  JSON_Object
+    [
+      ( "container",
+        JSON_Object
+          [
+            ( "class_",
+              JSON_Object
+                [
+                  ( "key",
+                    JSON_Object [("name", build_qname_json_nested receiver)] );
+                ] );
+          ] );
+    ]

@@ -16,23 +16,28 @@ end)
 
 type fact_map = (Hh_json.json * Pos.t list) Fact_id.Map.t
 
-type pos_map = Hh_json.json PosMap.t
+type target_info = {
+  target: Hh_json.json;
+  receiver_type: Hh_json.json option;
+}
+
+type pos_map = target_info PosMap.t
 
 type t = {
   fact_map: fact_map;
   pos_map: pos_map;
 }
 
-let add { fact_map; pos_map } target_id pos target_json =
+let add { fact_map; pos_map } target_id pos { target; receiver_type } =
   let fact_map =
     Fact_id.Map.update
       target_id
       (function
-        | None -> Some (target_json, [pos])
+        | None -> Some (target, [pos])
         | Some (json, refs) -> Some (json, pos :: refs))
       fact_map
   in
-  let pos_map = PosMap.add pos target_json pos_map in
+  let pos_map = PosMap.add pos { target; receiver_type } pos_map in
   { fact_map; pos_map }
 
 let empty = { fact_map = Fact_id.Map.empty; pos_map = PosMap.empty }

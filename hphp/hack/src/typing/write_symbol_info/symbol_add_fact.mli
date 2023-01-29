@@ -183,6 +183,7 @@ val file_call :
   callee_xref:Hh_json.json option ->
   call_args:Hh_json.json list ->
   dispatch_arg:Hh_json.json option ->
+  receiver_type:Hh_json.json option ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t
 

@@ -149,11 +149,10 @@ let test_build_xrefs _test_ctxt =
          ~pos_start:(3, 25, 40)
          ~pos_end:(3, 25, 45))
   in
-  let xrefs = XRefs.add xrefs target_id next_ref_pos target_json in
-  let xrefs = XRefs.add xrefs target_id ref_pos target_json in
-  let XRefs.{ fact_map; _ } =
-    XRefs.add xrefs target_id dup_ref_pos target_json
-  in
+  let target = XRefs.{ target = target_json; receiver_type = None } in
+  let xrefs = XRefs.add xrefs target_id next_ref_pos target in
+  let xrefs = XRefs.add xrefs target_id ref_pos target in
+  let XRefs.{ fact_map; _ } = XRefs.add xrefs target_id dup_ref_pos target in
   let result =
     List.nth_exn (get_array_exn (Build_json.build_xrefs_json fact_map)) 0
   in

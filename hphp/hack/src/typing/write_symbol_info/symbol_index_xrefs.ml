@@ -31,7 +31,8 @@ let call_handler ~path progress_ref (pos_map : XRefs.pos_map) =
           | Aast.Id (id_pos, _)
           | Aast.Class_const (_, (id_pos, _)) ->
             Option.map
-              ~f:Symbol_build_json.build_argument_xref_json
+              ~f:(fun XRefs.{ target; _ } ->
+                Symbol_build_json.build_argument_xref_json target)
               (XRefs.PosMap.find_opt id_pos pos_map)
           | _ -> None
         in
@@ -56,8 +57,13 @@ let call_handler ~path progress_ref (pos_map : XRefs.pos_map) =
           | [arg] -> Some arg
           | _ -> None)
       in
-      let callee_xref =
+      let callee_xref_receiver_type_opt =
         Option.(id_pos >>= fun pos -> XRefs.PosMap.find_opt pos pos_map)
+      in
+      let (callee_xref, receiver_type) =
+        match callee_xref_receiver_type_opt with
+        | None -> (None, None)
+        | Some XRefs.{ target; receiver_type } -> (Some target, receiver_type)
       in
       let (_fact_id, prog) =
         Add_fact.file_call
@@ -66,6 +72,7 @@ let call_handler ~path progress_ref (pos_map : XRefs.pos_map) =
           ~callee_xref
           ~call_args
           ~dispatch_arg
+          ~receiver_type
           !progress_ref
       in
       progress_ref := prog
@@ -79,11 +86,12 @@ let process_calls ctx path tast map_pos_decl progress =
   visitor#go ctx tast;
   !progress_ref
 
-let process_xref decl_fun decl_ref_fun symbol_name pos (xrefs, prog) =
+let process_xref
+    decl_fun decl_ref_fun symbol_name pos ?receiver_type (xrefs, prog) =
   let (target_id, prog) = decl_fun symbol_name prog in
   let xref_json = decl_ref_fun target_id in
-  let target_json = Build.build_decl_target_json xref_json in
-  let xrefs = XRefs.add xrefs target_id pos target_json in
+  let target = Build.build_decl_target_json xref_json in
+  let xrefs = XRefs.add xrefs target_id pos XRefs.{ target; receiver_type } in
   (xrefs, prog)
 
 let process_enum_xref symbol_name pos (xrefs, prog) =
@@ -118,7 +126,8 @@ let process_gconst_xref symbol_def pos (xrefs, prog) =
     pos
     (xrefs, prog)
 
-let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
+let process_member_xref
+    ctx member pos mem_decl_fun ref_fun ?receiver_type (xrefs, prog) =
   let Sym_def.{ name; full_name; kind } = member in
   match Str.split (Str.regexp "::") full_name with
   | [] -> (xrefs, prog)
@@ -154,6 +163,7 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
         ref_fun
         name
         pos
+        ?receiver_type
         (xrefs, prog))
 
 let process_container_xref (con_type, decl_pred) symbol_name pos (xrefs, prog) =
@@ -240,6 +250,13 @@ let process_attribute_xref ctx File_info.{ occ; def } opt_info (xrefs, prog) =
         (Exn.to_string e);
       (xrefs, prog)
 
+let receiver_type occ =
+  let open SymbolOccurrence in
+  match occ.type_ with
+  | Method (ClassName receiver, _) ->
+    Some (Build.build_class_decl_json_nested receiver)
+  | _ -> None
+
 (* given symbols occurring in a file, compute the maps of xrefs *)
 let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
   let open SymbolOccurrence in
@@ -263,8 +280,11 @@ let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
                 Add_fact.method_occ receiver_class name prog
               in
               let xref_json = Build.build_method_occ_json_ref target_id in
-              let target_json = Build.build_occ_target_json xref_json in
-              let xrefs = XRefs.add xrefs target_id pos target_json in
+              let target = Build.build_occ_target_json xref_json in
+              let receiver_type = receiver_type occ in
+              let xrefs =
+                XRefs.add xrefs target_id pos XRefs.{ target; receiver_type }
+              in
               (xrefs, prog)
             | _ -> (xrefs, prog))
           | Some (Sym_def.{ name; kind; _ } as sym_def) ->
@@ -289,7 +309,14 @@ let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
               process_container_xref con_kind name pos (xrefs, prog)
             | Method ->
               let ref_fun = Build.build_method_decl_json_ref in
-              proc_mem Add_fact.method_decl ref_fun (xrefs, prog)
+              process_member_xref
+                ctx
+                sym_def
+                pos
+                Add_fact.method_decl
+                ref_fun (* TODO just pass the occurrence here *)
+                ?receiver_type:(receiver_type occ)
+                (xrefs, prog)
             | Property ->
               let ref_fun = Build.build_property_decl_json_ref in
               proc_mem Add_fact.property_decl ref_fun (xrefs, prog)

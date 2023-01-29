@@ -12,4 +12,4 @@ arena_collections = { path = "../../arena_collections" }
 bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
 eq_modulo_pos_derive = { path = "../eq_modulo_pos_derive" }
 hcons = { path = "../../hcons" }
-indexmap = { version = "1.9.1", features = ["rayon", "serde-1"] }
+indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }

@@ -14,7 +14,7 @@ bumpalo = { version = "3.11.1", features = ["collections"] }
 eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
 hh24_types = { path = "../../../../utils/hh24_types" }
 im = { version = "15.1", features = ["rayon", "serde"] }
-indexmap = { version = "1.9.1", features = ["rayon", "serde-1"] }
+indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }
 intern = { path = "../../../../utils/intern" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }

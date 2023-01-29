@@ -3217,10 +3217,13 @@ RematInfo find_defining_inst_for_remat_enter(State& state,
     find_defining_inst_for_remat_cached(state, r, b, instIdx, recursives);
 
   // Remove any ephemeral entries in the cache from mutually recursive
-  // definitions. They're not safe to keep across lookups. We want to
-  // store them during a single lookup to avoid exponential path
-  // behavior.
+  // definitions. They're not safe to keep across lookups, because their
+  // results are incomplete. We still want to store them during a single
+  // lookup to avoid exponential path behavior. The final result for `r`
+  // is complete though, so keep it. This avoids quadratic lookup behavior
+  // for large cycles.
   for (auto const recur : recursives) {
+    if (recur == r) continue;
     assertx(!recur.isPhys());
     auto& info = reg_info(state, recur);
     assertx(info.cachedRemat);

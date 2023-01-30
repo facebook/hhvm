@@ -1,0 +1,82 @@
+#!/bin/bash
+#
+# Copyright (c) 2017-present, Facebook, Inc.
+# All rights reserved.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+set -ex
+
+export DEBIAN_FRONTEND=noninteractive
+DEB_BUILD_OPTIONS="parallel=$(grep -E -c '^processor' /proc/cpuinfo)"
+export DEB_BUILD_OPTIONS
+
+DISTRO=${DISTRO:-"ubuntu-20.04-focal"}
+DISTRO_ROOT="ci/${DISTRO}"
+if [ ! -d "${DISTRO_ROOT}" ]; then
+  echo "Unsupported distro: ${DISTRO}"
+  exit 1
+fi
+
+if [ ! "$IS_NIGHTLY" ]; then
+  PKGBASE="hhvm"
+else
+  PKGBASE="hhvm-nightly"
+fi
+
+VERSION=${VERSION:-"$(date +%Y.%m.%d)"}
+PKGVER="$(<"$DISTRO_ROOT/PKGVER")"
+DISTRIBUTION="$(<"$DISTRO_ROOT/DISTRIBUTION")"
+FULL_VERSION="${VERSION}-${PKGVER}"
+BUILD_DEPS="${PKGBASE}-build-deps_${FULL_VERSION}_all.deb"
+OUT=${OUT:-/var/out}
+mkdir -p "$OUT"
+
+# Environment set up
+apt-get update -y
+apt-get clean
+apt-get install -y devscripts equivs
+
+# Copy the debian directory to the root of the git repo
+# so that all the devscripts command work.
+cp -R "$DISTRO_ROOT/debian" .
+cp -R ci/skeleton/ debian/skeleton
+
+if [ ! "$IS_NIGHTLY" ]; then
+  sed -i '/^Conflicts: hhvm$/d' debian/control
+  sed -i 's/hhvm-nightly/hhvm/' debian/control
+  sed -i 's/hhvm-nightly/hhvm/' debian/rules
+  for file in debian/hhvm-nightly*; do
+    mv "$file" "${file//hhvm-nightly/hhvm}"
+  done
+fi
+
+# Add debian changelog entry
+dch --create -v "${FULL_VERSION}" --package "${PKGBASE}" --controlmaint --distribution "$DISTRIBUTION" --force-distribution --empty
+
+# Build debian package that depends on build-depends, and install it
+mk-build-deps
+dpkg -i --force-depends "$BUILD_DEPS"
+apt-get install -y -f
+mv "$BUILD_DEPS" "$OUT"
+
+# Build the actual debian packages
+PREBUILD="$DISTRO_ROOT/make-package.prebuild"
+if [ -x "$PREBUILD" ]; then
+  #shellcheck disable=SC1090
+  source $PREBUILD
+fi
+debuild -us -uc
+
+cd ..
+FILES=$(awk '/^Files:/ { files=1; next } /^[^ ]/ { files=0; next } files==1 { print $NF }' ./*.changes)
+if [ -z "$FILES" ]; then
+  echo "Failed to identify neccessary files"
+  exit 1
+fi
+# FILES is one-per-line, but SC2086 wants to disable that expansion
+#shellcheck disable=SC2086
+cp ./*.changes $FILES "$OUT"
+set +ex
+echo "Build tree: $OUT"

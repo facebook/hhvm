@@ -8,7 +8,6 @@
 
 set -ex
 
-export DEBIAN_FRONTEND=noninteractive
 DEB_BUILD_OPTIONS="parallel=$(grep -E -c '^processor' /proc/cpuinfo)"
 export DEB_BUILD_OPTIONS
 

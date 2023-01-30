@@ -41,7 +41,7 @@ jobs:
         submodules: 'recursive'
 
     - name: Installing HHVM deps and building HHVM
-      run: ci/bin/make-debianish-package
+      run: "ci/bin/make-debianish-package 6.26.0"
 
     - name: Uploading artifacts
       uses: actions/upload-artifact@v3

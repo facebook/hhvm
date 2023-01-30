@@ -164,9 +164,9 @@ class NewSessionTicketCb : public folly::AsyncTransport::ReadCallback {
 TEST(
     TLSTicketKeyManager,
     TestNewSessionTicketGeneratedCorrectlyButNotResumable) {
+  // The OpenSSL bug occurs with TLS 1.3 PSKs only, SSLContext should enable
+  // TLS 1.3 by default.
   auto serverCtx = std::make_shared<folly::SSLContext>();
-  // the OpenSSL bug occurs with TLS 1.3 PSKs only
-  serverCtx->enableTLS13();
   serverCtx->loadCertificate("folly/io/async/test/certs/tests-cert.pem");
   serverCtx->loadPrivateKey("folly/io/async/test/certs/tests-key.pem");
 
@@ -183,7 +183,6 @@ TEST(
 
   folly::EventBase evb;
   auto clientCtx = std::make_shared<folly::SSLContext>();
-  clientCtx->enableTLS13();
   clientCtx->setVerificationOption(
       folly::SSLContext::VerifyServerCertificate::IF_PRESENTED);
   clientCtx->loadTrustedCertificates("folly/io/async/test/certs/ca-cert.pem");

@@ -595,7 +595,6 @@ TEST(SSL, TestResumptionWithTickets) {
 
   folly::EventBase evb;
   auto ctx = std::make_shared<SSLContext>();
-  ctx->enableTLS13();
   ctx->setSessionCacheContext(kSessionCacheContext);
   SSLSessionReadCallback sessionCb;
   wangle::SSLSessionCallbacks::attachCallbacksToContext(ctx.get(), &sessionCb);
@@ -633,7 +632,6 @@ TEST(SSL, TestResumptionAfterUpdateFails) {
 
   folly::EventBase evb;
   auto ctx = std::make_shared<SSLContext>();
-  ctx->enableTLS13();
   ctx->setAdvertisedNextProtocols({"http/1.1"});
   ctx->setSessionCacheContext(kSessionCacheContext);
   SSLSessionReadCallback sessionCb;

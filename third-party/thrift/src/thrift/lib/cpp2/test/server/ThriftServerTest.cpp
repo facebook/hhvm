@@ -3178,6 +3178,7 @@ TEST(ThriftServer, RocketOverSSLNoALPN) {
   folly::SocketAddress loopback("::1", port);
 
   auto ctx = makeClientSslContext();
+  ctx->disableTLS13();
   folly::AsyncSSLSocket::UniquePtr sslSock(
       new folly::AsyncSSLSocket(ctx, &base));
   sslSock->connect(nullptr /* connect callback */, loopback);
@@ -3204,9 +3205,8 @@ TEST(ThriftServer, RocketOverSSLNoALPNWithTLS13) {
   auto port = sst.getAddress()->getPort();
   folly::SocketAddress loopback("::1", port);
 
+  // Should use TLS 1.3 by default
   auto ctx = makeClientSslContext();
-  // explicitly enable TLS 1.3, otherwise uses TLS 1.2, the current default
-  ctx->enableTLS13();
   folly::AsyncSSLSocket::UniquePtr sslSock(
       new folly::AsyncSSLSocket(ctx, &base));
   sslSock->connect(nullptr /* connect callback */, loopback);

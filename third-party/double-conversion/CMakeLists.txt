@@ -4,7 +4,7 @@ include(HPHPFunctions)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   DOUBLE_CONVERSION_DOWNLOAD_ARGS
   SOURCE_URL "https://github.com/google/double-conversion/archive/refs/tags/v3.0.1.tar.gz"
-  SOURCE_HASH "SHA256=d400c86417df2980b60dc27ad68249dd124964738916d20cdc9c90b42de86490"
+  SOURCE_HASH "SHA256=0777bb2702ebf18a16dd3bc2eb0b0e7b3aa1c9b4375feaa87ea4cf9d27be4536"
   # The tarball name is just the tag name, which can conflict in the cache
   FILENAME_PREFIX "double-conversion-"
 )

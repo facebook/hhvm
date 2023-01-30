@@ -1,12 +1,11 @@
 #!/bin/bash
 
-set -e
-
+hack_manual_bin=$1
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract "$SCRIPT_DIR/../../manual/hack"
+$hack_manual_bin extract "$SCRIPT_DIR/../../manual/hack"
 
-CHANGED_FILES="$(hg st)"
+CHANGED_FILES="$(hg st | grep extracted_from_manual/ )"
 if [[ -z "$CHANGED_FILES" ]]
 then
   echo "No files changed!"

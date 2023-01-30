@@ -1,6 +1,0 @@
-File "as2.bad.php", line 17, characters 8-20:
-Typing error (Typing[4110])
-  File "as2.bad.php", line 16, characters 12-19:
-  Expected `dynamic`
-  File "as2.bad.php", line 16, characters 12-19:
-  Type `Box<int>` is not a subtype of `dynamic` under dynamic-aware subtyping

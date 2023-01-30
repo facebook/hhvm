@@ -283,6 +283,7 @@ TEST_F(H3DatagramAsyncSocketTest, BufferWriteBeforeConnectSuccess) {
   EXPECT_EQ(socketDriver_->outDatagrams_.size(), 0);
   session_->onTransportReady();
   session_->onReplaySafe();
+  onHeadersComplete(makeResponse(200));
   EXPECT_EQ(socketDriver_->outDatagrams_.size(), 1);
 }
 
@@ -300,6 +301,7 @@ TEST_F(H3DatagramAsyncSocketTest, DiscardWhenApplicationWriteBufferFull) {
   }
   session_->onTransportReady();
   session_->onReplaySafe();
+  onHeadersComplete(makeResponse(200));
   EXPECT_EQ(socketDriver_->outDatagrams_.size(), kMaxDatagramsBufferedWrite);
 }
 

@@ -72,10 +72,6 @@ void H3DatagramAsyncSocket::connectSuccess() {
   txn_->sendHeaders(*options_.httpRequest_);
   upstreamSession_->closeWhenIdle();
   transportConnected_ = true;
-  for (auto& datagram : writeBuf_) {
-    txn_->sendDatagram(std::move(datagram));
-  }
-  writeBuf_.clear();
 }
 
 void H3DatagramAsyncSocket::onReplaySafe() {
@@ -104,6 +100,12 @@ void H3DatagramAsyncSocket::onHeadersComplete(
          fmt::format("HTTP Error: status code {}", msg->getStatusCode())});
     return;
   }
+
+  // Upstream ready to receive buffers.
+  for (auto& datagram : writeBuf_) {
+    txn_->sendDatagram(std::move(datagram));
+  }
+  writeBuf_.clear();
 }
 
 void H3DatagramAsyncSocket::onDatagram(

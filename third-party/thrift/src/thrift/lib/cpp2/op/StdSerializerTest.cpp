@@ -25,10 +25,9 @@ namespace apache::thrift::op {
 namespace {
 
 // Checks that the value roundtrips correctly for all standard protocols.
-template <typename T>
-void testStructRoundTrip(const T& value) {
+template <typename T, typename Tag = type::infer_tag<T>>
+void testRoundTrip(const T& value) {
   using type::StandardProtocol;
-  using Tag = type::struct_t<T>;
   FBTHRIFT_SCOPED_CHECK(test::expectRoundTrip<Tag>(
       StdSerializer<Tag, StandardProtocol::Binary>(), value));
   FBTHRIFT_SCOPED_CHECK(test::expectRoundTrip<Tag>(
@@ -41,17 +40,27 @@ void testStructRoundTrip(const T& value) {
 
 TEST(StdSerializerTest, Struct) {
   using conformance::asValueStruct;
-  FBTHRIFT_SCOPED_CHECK(testStructRoundTrip(asValueStruct<type::bool_t>(true)));
-  FBTHRIFT_SCOPED_CHECK(testStructRoundTrip(asValueStruct<type::byte_t>(1)));
-  FBTHRIFT_SCOPED_CHECK(testStructRoundTrip(asValueStruct<type::i16_t>(1)));
-  FBTHRIFT_SCOPED_CHECK(testStructRoundTrip(asValueStruct<type::i32_t>(1)));
-  FBTHRIFT_SCOPED_CHECK(testStructRoundTrip(asValueStruct<type::i64_t>(1)));
-  FBTHRIFT_SCOPED_CHECK(testStructRoundTrip(asValueStruct<type::float_t>(1)));
-  FBTHRIFT_SCOPED_CHECK(testStructRoundTrip(asValueStruct<type::double_t>(1)));
-  FBTHRIFT_SCOPED_CHECK(
-      testStructRoundTrip(asValueStruct<type::string_t>("hi")));
-  FBTHRIFT_SCOPED_CHECK(
-      testStructRoundTrip(asValueStruct<type::binary_t>("hi")));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::bool_t>(true)));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::byte_t>(1)));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::i16_t>(1)));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::i32_t>(1)));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::i64_t>(1)));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::float_t>(1)));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::double_t>(1)));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::string_t>("hi")));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::binary_t>("hi")));
+}
+
+TEST(StdSerializerTest, PrimaryTypes) {
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(true));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(std::int8_t(16)));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(std::int16_t(16)));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(std::int32_t(32)));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(std::int64_t(64)));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(1.1f));
+  FBTHRIFT_SCOPED_CHECK(testRoundTrip(2.2));
+  FBTHRIFT_SCOPED_CHECK((testRoundTrip<std::string, type::string_t>("hi")));
+  FBTHRIFT_SCOPED_CHECK((testRoundTrip<std::string, type::binary_t>("hi")));
 }
 
 } // namespace

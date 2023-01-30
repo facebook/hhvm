@@ -23,6 +23,7 @@
 
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/type/AnyValue.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Protocol.h>
@@ -144,14 +145,14 @@ class ProtocolSerializer
   void encode(const T& value, folly::io::QueueAppender&& appender) const {
     Writer writer;
     writer.setOutput(std::move(appender));
-    value.write(&writer);
+    op::encode<Tag>(writer, value);
   }
 
   using Base::decode;
   void decode(folly::io::Cursor& cursor, T& value) const {
     Reader reader;
     reader.setInput(cursor);
-    value.read(&reader);
+    op::decode<Tag>(reader, value);
     cursor = reader.getCursor();
   }
 };

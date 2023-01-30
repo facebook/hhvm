@@ -65,7 +65,6 @@
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
 
-#include "hphp/util/algorithm.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/lock-free-lazy.h"
@@ -1410,6 +1409,13 @@ struct ClassInfo2 {
   ISStringSet implInterfaces;
 
   /*
+   * A (case-insensitive) set of interface names implemented by this
+   * class, or any of its subclasses. If this is folly::none, then
+   * subImplInterfaces is the same as implInterfaces.
+   */
+  Optional<ISStringSet> subImplInterfaces;
+
+  /*
    * A vector of the included enums names, in class order, mirroring
    * the php::Class includedEnums vector.
    */
@@ -1612,6 +1618,7 @@ struct ClassInfo2 {
       (parent)
       (declInterfaces)
       (implInterfaces, string_data_lti{})
+      (subImplInterfaces, string_data_lti{})
       (clsConstants, string_data_lt{})
       (includedEnums)
       (usedTraits)
@@ -3332,8 +3339,6 @@ std::string show(const Func& f) {
 
 //////////////////////////////////////////////////////////////////////
 
-using IfaceSlotMap = hphp_fast_map<const php::Class*, Slot>;
-
 // Inferred class constant type from a 86cinit.
 struct ClsConstInfo {
   Type type;
@@ -3344,11 +3349,6 @@ struct Index::IndexData {
   explicit IndexData(Index* index) : m_index{index} {}
   IndexData(const IndexData&) = delete;
   IndexData& operator=(const IndexData&) = delete;
-  ~IndexData() {
-    if (compute_iface_vtables.joinable()) {
-      compute_iface_vtables.join();
-    }
-  }
 
   Index* m_index;
 
@@ -3483,7 +3483,7 @@ struct Index::IndexData {
    * Map from interfaces to their assigned vtable slots, computed in
    * compute_iface_vtables().
    */
-  IfaceSlotMap ifaceSlotMap;
+  ISStringToOneT<Slot> ifaceSlotMap;
 
   hphp_hash_map<
     const php::Class*,
@@ -3548,8 +3548,6 @@ struct Index::IndexData {
    * Lazily calculate the class that should be used for wait-handles.
    */
   LockFreeLazy<res::Class> lazyWaitHandleCls;
-
-  std::thread compute_iface_vtables;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -3874,218 +3872,111 @@ void add_program_to_index(IndexData& index) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * ConflictGraph maintains lists of interfaces that conflict with each other
- * due to being implemented by the same class.
+ * Lists of interfaces that conflict with each other due to being
+ * implemented by the same class.
  */
-struct ConflictGraph {
-  void add(const php::Class* i, const php::Class* j) {
-    if (i == j) return;
-    map[i].insert(j);
-  }
 
-  hphp_fast_map<const php::Class*,
-                hphp_fast_set<const php::Class*>> map;
+struct InterfaceConflicts {
+  SString name;
+  // The number of classes which implements this interface (used to
+  // prioritize lower slots for more heavily used interfaces).
+  size_t usage;
+  std::vector<SString> conflicts;
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(name)(usage)(conflicts);
+  }
 };
 
-/*
- * Trace information about interface conflict sets and the vtables computed
- * from them.
- */
-void trace_interfaces(const IndexData& index, const ConflictGraph& cg) {
-  // Compute what the vtable for each Class will look like, and build up a list
-  // of all interfaces.
-  struct Cls {
-    const ClassInfo* cinfo;
-    std::vector<const php::Class*> vtable;
-  };
-  std::vector<Cls> classes;
-  std::vector<const php::Class*> ifaces;
-  size_t total_slots = 0, empty_slots = 0;
-  for (auto& cinfo : index.allClassInfos) {
-    if (cinfo->cls->attrs & AttrInterface) {
-      ifaces.emplace_back(cinfo->cls);
-      continue;
+void compute_iface_vtables(IndexData& index,
+                           std::vector<InterfaceConflicts> conflicts) {
+  trace_time tracer{"compute interface vtables"};
+  tracer.ignore_client_stats();
+
+  if (conflicts.empty()) return;
+
+  // Sort interfaces by usage frequencies. We assign slots greedily,
+  // so sort the interface list so the most frequently implemented
+  // ones come first.
+  std::sort(
+    begin(conflicts),
+    end(conflicts),
+    [&] (const InterfaceConflicts& a, const InterfaceConflicts& b) {
+      if (a.usage != b.usage) return a.usage > b.usage;
+      return string_data_lti{}(a.name, b.name);
     }
-    if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrEnumClass)) continue;
-
-    classes.emplace_back(Cls{cinfo.get()});
-    auto& vtable = classes.back().vtable;
-    for (auto& pair : cinfo->implInterfaces) {
-      auto it = index.ifaceSlotMap.find(pair.second->cls);
-      assertx(it != end(index.ifaceSlotMap));
-      auto const slot = it->second;
-      if (slot >= vtable.size()) vtable.resize(slot + 1);
-      vtable[slot] = pair.second->cls;
-    }
-
-    total_slots += vtable.size();
-    for (auto iface : vtable) if (iface == nullptr) ++empty_slots;
-  }
-
-  Slot max_slot = 0;
-  for (auto const& pair : index.ifaceSlotMap) {
-    max_slot = std::max(max_slot, pair.second);
-  }
-
-  // Sort the list of class vtables so the largest ones come first.
-  auto class_cmp = [&](const Cls& a, const Cls& b) {
-    return a.vtable.size() > b.vtable.size();
-  };
-  std::sort(begin(classes), end(classes), class_cmp);
-
-  // Sort the list of interfaces so the biggest conflict sets come first.
-  auto iface_cmp = [&](const php::Class* a, const php::Class* b) {
-    return cg.map.at(a).size() > cg.map.at(b).size();
-  };
-  std::sort(begin(ifaces), end(ifaces), iface_cmp);
-
-  std::string out;
-  folly::format(&out, "{} interfaces, {} classes\n",
-                ifaces.size(), classes.size());
-  folly::format(&out,
-                "{} vtable slots, {} empty vtable slots, max slot {}\n",
-                total_slots, empty_slots, max_slot);
-  folly::format(&out, "\n{:-^80}\n", " interface slots & conflict sets");
-  for (auto iface : ifaces) {
-    auto cgIt = cg.map.find(iface);
-    if (cgIt == end(cg.map)) break;
-    auto& conflicts = cgIt->second;
-
-    folly::format(&out, "{:>40} {:3} {:2} [", iface->name,
-                  conflicts.size(),
-                  folly::get_default(index.ifaceSlotMap, iface));
-    auto sep = "";
-    for (auto conflict : conflicts) {
-      folly::format(&out, "{}{}", sep, conflict->name);
-      sep = ", ";
-    }
-    folly::format(&out, "]\n");
-  }
-
-  folly::format(&out, "\n{:-^80}\n", " class vtables ");
-  for (auto& item : classes) {
-    if (item.vtable.empty()) break;
-
-    folly::format(&out, "{:>30}: [", item.cinfo->cls->name);
-    auto sep = "";
-    for (auto iface : item.vtable) {
-      folly::format(&out, "{}{}", sep, iface ? iface->name->data() : "null");
-      sep = ", ";
-    }
-    folly::format(&out, "]\n");
-  }
-
-  Trace::traceRelease("%s", out.c_str());
-}
-
-/*
- * Find the lowest Slot that doesn't conflict with anything in the conflict set
- * for iface.
- */
-Slot find_min_slot(const php::Class* iface,
-                   const IfaceSlotMap& slots,
-                   const ConflictGraph& cg) {
-  auto const& cit = cg.map.find(iface);
-  if (cit == cg.map.end() || cit->second.empty()) {
-    // No conflicts. This is the only interface implemented by the classes that
-    // implement it.
-    return 0;
-  }
-
-  boost::dynamic_bitset<> used;
-
-  for (auto const& c : cit->second) {
-    auto const it = slots.find(c);
-    if (it == slots.end()) continue;
-    auto const slot = it->second;
-
-    if (used.size() <= slot) used.resize(slot + 1);
-    used.set(slot);
-  }
-  used.flip();
-  return used.any() ? used.find_first() : used.size();
-}
-
-/*
- * Compute vtable slots for all interfaces. No two interfaces implemented by
- * the same class will share the same vtable slot.
- */
-void compute_iface_vtables(IndexData& index) {
-  trace_time tracer("compute interface vtables", index.sample);
-
-  ConflictGraph cg;
-  std::vector<const php::Class*>             ifaces;
-  hphp_fast_map<const php::Class*, int> iface_uses;
-
-  // Build up the conflict sets.
-  for (auto& cinfo : index.allClassInfos) {
-    // Gather interfaces.
-    if (cinfo->cls->attrs & AttrInterface) {
-      ifaces.emplace_back(cinfo->cls);
-      // Make sure cg.map has an entry for every interface - this simplifies
-      // some code later on.
-      cg.map[cinfo->cls];
-      continue;
-    }
-
-    // Only worry about classes with methods that can be called.
-    if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrEnumClass)) continue;
-
-    for (auto& ipair : cinfo->implInterfaces) {
-      ++iface_uses[ipair.second->cls];
-      for (auto& jpair : cinfo->implInterfaces) {
-        cg.add(ipair.second->cls, jpair.second->cls);
-      }
-    }
-  }
-
-  if (ifaces.size() == 0) return;
-
-  // Sort interfaces by usage frequencies.
-  // We assign slots greedily, so sort the interface list so the most
-  // frequently implemented ones come first.
-  auto iface_cmp = [&](const php::Class* a, const php::Class* b) {
-    return iface_uses[a] > iface_uses[b];
-  };
-  std::sort(begin(ifaces), end(ifaces), iface_cmp);
-
-  // Assign slots, keeping track of the largest assigned slot and the total
-  // number of uses for each slot.
-  Slot max_slot = 0;
-  hphp_fast_map<Slot, int> slot_uses;
-  for (auto* iface : ifaces) {
-    auto const slot = find_min_slot(iface, index.ifaceSlotMap, cg);
-    index.ifaceSlotMap[iface] = slot;
-    max_slot = std::max(max_slot, slot);
-
-    // Interfaces implemented by the same class never share a slot, so normal
-    // addition is fine here.
-    slot_uses[slot] += iface_uses[iface];
-  }
-
-  // Make sure we have an initialized entry for each slot for the sort below.
-  for (Slot slot = 0; slot < max_slot; ++slot) {
-    assertx(slot_uses.count(slot));
-  }
-
-  // Finally, sort and reassign slots so the most frequently used slots come
-  // first. This slightly reduces the number of wasted vtable vector entries at
-  // runtime.
-  auto const slots = sort_keys_by_value(
-    slot_uses,
-    [&] (int a, int b) { return a > b; }
   );
 
-  std::vector<Slot> slots_permute(max_slot + 1, 0);
-  for (size_t i = 0; i <= max_slot; ++i) slots_permute[slots[i]] = i;
+  // Assign slots, keeping track of the largest assigned slot and the
+  // total number of uses for each slot.
 
-  // re-map interfaces to permuted slots
-  for (auto& pair : index.ifaceSlotMap) {
-    pair.second = slots_permute[pair.second];
+  Slot maxSlot = 0;
+  hphp_fast_map<Slot, int> slotUses;
+  boost::dynamic_bitset<> used;
+
+  for (auto const& iface : conflicts) {
+    used.reset();
+
+    // Find the lowest Slot that doesn't conflict with anything in the
+    // conflict set for iface.
+    auto const slot = [&] () -> Slot {
+      // No conflicts. This is the only interface implemented by the
+      // classes that implement it.
+      if (iface.conflicts.empty()) return 0;
+
+      for (auto const conflict : iface.conflicts) {
+        auto const it = index.ifaceSlotMap.find(conflict);
+        if (it == end(index.ifaceSlotMap)) continue;
+        auto const s = it->second;
+        if (used.size() <= s) used.resize(s + 1);
+        used.set(s);
+      }
+
+      used.flip();
+      return used.any() ? used.find_first() : used.size();
+    }();
+
+    always_assert(
+      index.ifaceSlotMap.emplace(iface.name, slot).second
+    );
+    maxSlot = std::max(maxSlot, slot);
+    slotUses[slot] += iface.usage;
   }
 
-  if (Trace::moduleEnabledRelease(Trace::hhbbc_iface)) {
-    trace_interfaces(index, cg);
+  if (debug) {
+    // Make sure we have an initialized entry for each slot for the sort below.
+    for (Slot slot = 0; slot < maxSlot; ++slot) {
+      always_assert(slotUses.count(slot));
+    }
+  }
+
+  // Finally, sort and reassign slots so the most frequently used
+  // slots come first. This slightly reduces the number of wasted
+  // vtable vector entries at runtime.
+
+  auto const slots = [&] {
+    std::vector<std::pair<Slot, int>> flattened{
+      begin(slotUses), end(slotUses)
+    };
+    std::sort(
+      begin(flattened),
+      end(flattened),
+      [&] (auto const& a, auto const& b) {
+        if (a.second != b.second) return a.second > b.second;
+        return a.first < b.first;
+      }
+    );
+    std::vector<Slot> out;
+    out.reserve(flattened.size());
+    for (auto const& [slot, _] : flattened) out.emplace_back(slot);
+    return out;
+  }();
+
+  std::vector<Slot> slotsPermute(maxSlot + 1, 0);
+  for (size_t i = 0; i <= maxSlot; ++i) slotsPermute[slots[i]] = i;
+
+  // re-map interfaces to permuted slots
+  for (auto& [cls, slot] : index.ifaceSlotMap) {
+    slot = slotsPermute[slot];
   }
 }
 
@@ -5342,10 +5233,13 @@ struct FlattenJob {
       template <typename SerDe> void serde(SerDe& sd) { sd(names); }
     };
     std::vector<Parents> parents;
+    // Classes which are interfaces.
+    ISStringSet interfaces;
     template <typename SerDe> void serde(SerDe& sd) {
       sd(uninstantiable, string_data_lti{})
         (newClosures)
         (parents)
+        (interfaces, string_data_lti{})
         ;
     }
   };
@@ -5500,6 +5394,10 @@ struct FlattenJob {
         for (auto const p : state->m_parents) {
           parents.emplace_back(p->name);
         }
+      }
+
+      if (cls->attrs & AttrInterface) {
+        outMeta.interfaces.emplace(name);
       }
 
       outNames.emplace(name);
@@ -6005,6 +5903,10 @@ private:
     }
 
     if (cls.attrs & AttrInterface) cinfo->implInterfaces.emplace(cls.name);
+
+    if (cls.attrs & (AttrInterface | AttrTrait | AttrEnum | AttrEnumClass)) {
+      cinfo->subImplInterfaces.emplace();
+    }
 
     // One can specify implementing the same interface multiple
     // times. It's easier if we ensure the list is unique.
@@ -7715,6 +7617,8 @@ struct SubclassMetadata {
   ISStringToOneT<Meta> meta;
   // All classes to be processed
   std::vector<SString> all;
+  // Classes which are interfaces
+  ISStringSet interfaces;
 };
 
 SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
@@ -7727,6 +7631,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     UniquePtrRef<php::Class> cls;
     UniquePtrRef<ClassInfo2> cinfo;
     SString unitToAddTo;
+    bool isInterface;
     CompactVector<SString> parents;
   };
   using UpdateVec = std::vector<Update>;
@@ -7784,7 +7689,8 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           name,
           std::move(clsRefs[outputIdx]),
           std::move(cinfoRefs[outputIdx]),
-          nullptr
+          nullptr,
+          (bool)clsMeta.interfaces.count(name)
         }
       );
 
@@ -7915,6 +7821,14 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         assertx(std::adjacent_find(begin(all), end(all)) == end(all));
 
         for (size_t i = 0; i < all.size(); ++i) meta[all[i]].idx = i;
+      },
+      [&] {
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            if (!update.isInterface) continue;
+            subclassMeta.interfaces.emplace(update.name);
+          }
+        }
       }
     );
   }
@@ -7983,6 +7897,10 @@ struct BuildSubclassListJob {
     // All of the classes comprising this data.
     ISStringSet subclasses;
 
+    // All of the interfaces implemented by the classes comprising
+    // this data.
+    ISStringSet implInterfaces;
+
     // Information about all of the methods with a particular name
     // between all of the classes in this Data.
     struct MethInfo {
@@ -8039,6 +7957,7 @@ struct BuildSubclassListJob {
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(subclasses, string_data_lti{})
+        (implInterfaces, string_data_lti{})
         (methods, string_data_lt{})
         (mockedClasses, string_data_lti{})
         (hasConstProp)
@@ -8099,10 +8018,13 @@ struct BuildSubclassListJob {
     // generally produce func family entries for the same name, so
     // they must be aggregated together afterwards.
     std::vector<std::pair<SString, FuncFamilyEntry>> nameOnly;
+    std::vector<InterfaceConflicts> interfaces;
+
     template <typename SerDe> void serde(SerDe& sd) {
       sd(funcFamilyDeps, std::less<FuncFamily2::Id>{})
         (newFuncFamilyIds)
         (nameOnly)
+        (interfaces)
         ;
     }
   };
@@ -8166,12 +8088,34 @@ struct BuildSubclassListJob {
       }
     }
 
+    OutputMeta meta;
+
     // If there's no classes or splits, this job is doing nothing but
     // calculating name only func family entries (so should have at
     // least one leaf).
     if (!index.top.empty()) {
       build_children(index, edges.vals);
       process_roots(index, classes.vals, splits.vals);
+
+      for (auto const& cinfo : classes.vals) {
+        if (!(cinfo->attrs & AttrInterface)) continue;
+        assertx(cinfo->subImplInterfaces);
+
+        meta.interfaces.emplace_back(InterfaceConflicts{cinfo->name});
+
+        auto& back = meta.interfaces.back();
+        back.usage = cinfo->subclassList.size();
+
+        for (auto const iface : *cinfo->subImplInterfaces) {
+          if (iface->isame(cinfo->name)) continue;
+          back.conflicts.emplace_back(iface);
+        }
+        std::sort(
+          begin(back.conflicts),
+          end(back.conflicts),
+          string_data_lti{}
+        );
+      }
     } else {
       assertx(classes.vals.empty());
       assertx(splits.vals.empty());
@@ -8180,8 +8124,6 @@ struct BuildSubclassListJob {
       assertx(!leafs.vals.empty());
       assertx(!index.classInfos.empty());
     }
-
-    OutputMeta meta;
 
     meta.nameOnly =
       make_name_only_method_entries(index, classes.vals, leafs.vals);
@@ -8706,6 +8648,18 @@ protected:
         end(cinfo->subclassList)
       );
 
+      if (cinfo->subImplInterfaces) {
+        data.implInterfaces.insert(
+          begin(*cinfo->subImplInterfaces),
+          end(*cinfo->subImplInterfaces)
+        );
+      } else {
+        data.implInterfaces.insert(
+          begin(cinfo->implInterfaces),
+          end(cinfo->implInterfaces)
+        );
+      }
+
       // Use the method family table to build initial MethInfos (if
       // the ClassInfo hasn't been processed this will be empty).
       for (auto const& [name, entry] : cinfo->methodFamilies) {
@@ -8716,6 +8670,11 @@ protected:
       }
 
       if (debug) {
+        if (cinfo->attrs &
+            (AttrInterface | AttrTrait | AttrEnum | AttrEnumClass)) {
+          always_assert(cinfo->subImplInterfaces.has_value());
+        }
+
         for (auto const& [name, mte] : cinfo->methods) {
           if (is_special_method_name(name)) continue;
 
@@ -8824,6 +8783,11 @@ protected:
       data.subclasses.insert(
         begin(childData.subclasses),
         end(childData.subclasses)
+      );
+
+      data.implInterfaces.insert(
+        begin(childData.implInterfaces),
+        end(childData.implInterfaces)
       );
 
       // Combine MethInfos for each method name:
@@ -9425,6 +9389,14 @@ protected:
         string_data_lti{}
       );
       assertx(!cinfo->subclassList.empty());
+
+      assertx(
+        IMPLIES(cinfo->subImplInterfaces, cinfo->subImplInterfaces->empty())
+      );
+      if (cinfo->subImplInterfaces ||
+          cinfo->implInterfaces != data.implInterfaces) {
+        cinfo->subImplInterfaces = std::move(data.implInterfaces);
+      }
     }
 
     // Splits just store the data directly. Since this split hasn't
@@ -9551,6 +9523,7 @@ struct SubclassWork {
     std::vector<BuildSubclassListJob::EdgeToSplit> edges;
   };
   std::vector<std::vector<Bucket>> buckets;
+  ISStringSet leafInterfaces;
 };
 
 /*
@@ -9851,6 +9824,9 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
           // If the leaf has no parent either, it will never be a dep,
           // so cannot promote it. Just treat it as a root.
           if (meta.parents.empty()) roots.emplace_back(l.cls);
+          if (subclassMeta.interfaces.count(l.cls)) {
+            out.leafInterfaces.emplace(l.cls);
+          }
         },
         [&] (Root r) {
           roots.emplace_back(r.cls);
@@ -10164,7 +10140,8 @@ void aggregate_name_only_entries(
   }
 }
 
-void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
+std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
+                                                     SubclassMetadata meta) {
   trace_time tracer{"build subclass lists", index.sample};
 
   using namespace folly::gen;
@@ -10176,6 +10153,8 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
   ISStringToOneT<hphp_fast_set<FuncFamily2::Id>> funcFamilyDeps;
 
   SStringToOneT<std::vector<FuncFamilyEntry>> nameOnlyEntries;
+
+  std::vector<InterfaceConflicts> ifaceConflicts;
 
   // Use the metadata to assign to rounds and buckets.
   auto work = build_subclass_lists_assign(std::move(meta));
@@ -10195,6 +10174,7 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
       std::pair<SString, hphp_fast_set<FuncFamily2::Id>>
     > funcFamilyDeps;
     std::vector<std::pair<SString, FuncFamilyEntry>> nameOnly;
+    std::vector<InterfaceConflicts> ifaceConflicts;
   };
 
   auto const run = [&] (SubclassWork::Bucket bucket, size_t round)
@@ -10342,6 +10322,7 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
       );
     }
     updates.nameOnly = std::move(outMeta.nameOnly);
+    updates.ifaceConflicts = std::move(outMeta.interfaces);
 
     HPHP_CORO_MOVE_RETURN(updates);
   };
@@ -10419,6 +10400,15 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
               nameOnlyEntries[name].emplace_back(std::move(entry));
             }
           }
+        },
+        [&] {
+          for (auto& u : updates) {
+            ifaceConflicts.insert(
+              end(ifaceConflicts),
+              begin(u.ifaceConflicts),
+              end(u.ifaceConflicts)
+            );
+          }
         }
       );
     }
@@ -10429,7 +10419,16 @@ void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
   work.buckets.clear();
   work.allSplits.clear();
 
+  // Leaf interfaces won't be processed by a Job, but their
+  // InterfaceConflicts are trivial.
+  for (auto const iface : work.leafInterfaces) {
+    ifaceConflicts.emplace_back(InterfaceConflicts{iface, 1});
+  }
+  work.leafInterfaces.clear();
+
   aggregate_name_only_entries(index, std::move(nameOnlyEntries));
+
+  return ifaceConflicts;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -11541,19 +11540,10 @@ Index::Index(Input input,
     std::move(dispose)
   );
   auto subclassMeta = flatten_classes(*m_data, std::move(flattenMeta));
-  build_subclass_lists(*m_data, std::move(subclassMeta));
+  auto ifaceConflicts = build_subclass_lists(*m_data, std::move(subclassMeta));
+  compute_iface_vtables(*m_data, std::move(ifaceConflicts));
 
   make_local(*m_data);
-
-  auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
-  m_data->compute_iface_vtables = std::thread([&] {
-      HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
-      auto const enable =
-        logging && !Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
-      Trace::BumpRelease bumper(Trace::hhbbc_time, -1, enable);
-      compute_iface_vtables(*m_data);
-    }
-  );
 
   check_invariants(*m_data);
 
@@ -14149,15 +14139,9 @@ bool Index::lookup_class_init_might_raise(Context ctx, res::Class cls) const {
   );
 }
 
-void Index::join_iface_vtable_thread() const {
-  if (m_data->compute_iface_vtables.joinable()) {
-    m_data->compute_iface_vtables.join();
-  }
-}
-
 Slot
 Index::lookup_iface_vtable_slot(const php::Class* cls) const {
-  return folly::get_default(m_data->ifaceSlotMap, cls, kInvalidSlot);
+  return folly::get_default(m_data->ifaceSlotMap, cls->name, kInvalidSlot);
 }
 
 //////////////////////////////////////////////////////////////////////

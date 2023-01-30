@@ -816,7 +816,6 @@ void whole_program(WholeProgramInput inputs,
   index.use_class_dependencies(true);
   analyze_iteratively(index, AnalyzeMode::NormalPass);
   auto cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });
-  index.join_iface_vtable_thread();
   parallel::num_threads = parallel::final_threads;
   final_pass(index, stats, emitUnit);
   cleanup_for_final.join();

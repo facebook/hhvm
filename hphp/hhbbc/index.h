@@ -1192,13 +1192,6 @@ struct Index {
   Type lookup_public_prop(const php::Class* cls, SString name) const;
 
   /*
-   * We compute the interface vtables in a separate thread. It needs
-   * to be joined (in single threaded context) before calling
-   * lookup_iface_vtable_slot.
-   */
-  void join_iface_vtable_thread() const;
-
-  /*
    * Returns the computed vtable slot for the given class, if it's an interface
    * that was given a vtable slot. No two interfaces implemented by the same
    * class will share the same vtable slot. May return kInvalidSlot, if the

@@ -205,11 +205,11 @@ struct BlobEncoder {
     encode(p.string());
   }
 
-  template<class T>
-  void encode(const Optional<T>& opt) {
-    const bool some = opt.has_value();
+  template<class T, typename... Extra>
+  void encode(const Optional<T>& opt, const Extra&... extra) {
+    auto const some = opt.has_value();
     encode(some);
-    if (some) encode(*opt);
+    if (some) encode(*opt, extra...);
   }
 
   template <size_t I = 0, typename... Ts>
@@ -629,15 +629,15 @@ struct BlobDecoder {
     return sz + sizeBytes;
   }
 
-  template<class T>
-  void decode(Optional<T>& opt) {
+  template<class T, typename... Extra>
+  void decode(Optional<T>& opt, Extra... extra) {
     bool some;
     decode(some);
 
     if (!some) {
       opt = std::nullopt;
     } else {
-      opt = make<T>();
+      opt = make<T>(extra...);
     }
   }
 

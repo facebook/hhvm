@@ -172,6 +172,18 @@ impl HhConfig {
                 "like_casts" => {
                     go.tco_like_casts = parse_json(&value);
                 }
+                "timeout" => {
+                    go.tco_timeout = parse_json(&value);
+                }
+                "enable_sound_dynamic_type" => {
+                    go.tco_enable_sound_dynamic = parse_json(&value);
+                }
+                "like_type_hints" => {
+                    go.tco_like_type_hints = parse_json(&value);
+                }
+                "pessimise_builtins" => {
+                    go.tco_pessimise_builtins = parse_json(&value);
+                }
                 _ => c.unknown.push((key, value)),
             }
         }

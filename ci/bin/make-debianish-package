@@ -33,11 +33,6 @@ BUILD_DEPS="${PKGBASE}-build-deps_${FULL_VERSION}_all.deb"
 OUT=${OUT:-/var/out}
 mkdir -p "$OUT"
 
-# Environment set up
-apt-get update -y
-apt-get clean
-apt-get install -y devscripts equivs
-
 # Copy the debian directory to the root of the git repo
 # so that all the devscripts command work.
 cp -R "$DISTRO_ROOT/debian" .

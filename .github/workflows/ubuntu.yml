@@ -22,6 +22,7 @@ concurrency:
 # https://github.com/actions/runner/issues/480
 env:
   OUT: ${{ format('{0}/out', github.workspace) }}
+  DEBIAN_FRONTEND: noninteractive
 
 jobs:
   build_ubuntu_focal_nightly:

@@ -31,12 +31,18 @@ jobs:
       env:
         DISTRO: ubuntu-20.04-focal
     steps:
+    # Required because checkout@v3 on Ubuntu 20.04 needs git 2.18+.
+    - name: Installing latest git
+      run: apt update -y && apt install -y git
+      
     - name: Fetching HHVM and its submodules
       uses: actions/checkout@v3
       with:
         submodules: 'recursive'
+
     - name: Installing HHVM deps and building HHVM
       run: ci/bin/make-debianish-package
+
     - name: Uploading artifacts
       uses: actions/upload-artifact@v3
       with:

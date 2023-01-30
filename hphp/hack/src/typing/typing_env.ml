@@ -1022,14 +1022,9 @@ let set_support_dynamic_type env b =
   { env with genv = { env.genv with this_support_dynamic_type = b } }
 
 let set_everything_sdt env b =
-  {
-    env with
-    genv =
-      {
-        env.genv with
-        tcopt = { env.genv.tcopt with GlobalOptions.tco_everything_sdt = b };
-      };
-  }
+  map_tcopt
+    ~f:(fun tcopt -> { tcopt with GlobalOptions.tco_everything_sdt = b })
+    env
 
 let get_support_dynamic_type env = env.genv.this_support_dynamic_type
 

@@ -30,10 +30,7 @@ jobs:
       image: ubuntu:focal
       env:
         DISTRO: ubuntu-20.04-focal
-        IS_NIGHTLY: 1
     steps:
-    - name: Installing git
-      run: apt update -y && apt install -y git
     - name: Fetching HHVM and its submodules
       uses: actions/checkout@v3
       with:

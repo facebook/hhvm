@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -27,6 +28,15 @@
 #include <watchman/cppclient/WatchmanClient.h>
 
 namespace HPHP {
+
+using ClockTime = std::chrono::time_point<std::chrono::steady_clock>;
+using WatchmanProfiler = void (*)(
+  const watchman::QueryResult& result,
+  const folly::dynamic& query,
+  ClockTime preLockTime,
+  ClockTime preExecTime,
+  ClockTime execTime
+);
 
 /**
  * Singleton to interact with Watchman for a given root.
@@ -40,6 +50,12 @@ public:
    */
   static std::shared_ptr<Watchman>
   get(const std::filesystem::path& path, const Optional<std::string>& sockPath);
+
+  /**
+   * Set a profiling function to invoke with timing information from watchman
+   * queries.
+   */
+  static void setProfiler(WatchmanProfiler&&);
 
   /**
    * Return information about the altered and deleted paths matching

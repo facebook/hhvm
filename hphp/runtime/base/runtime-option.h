@@ -1437,6 +1437,8 @@ struct RuntimeOption {
   F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
   F(uint32_t, NFLogSlowWatchmanMsec, 500)                               \
   F(uint32_t, NFLogSlowWatchmanSampleRate, 1)                           \
+  F(uint32_t, LogSlowWatchmanQueriesMsec, 500)                          \
+  F(uint32_t, LogSlowWatchmanQueriesRate, 1)                            \
   /* */
 
 private:

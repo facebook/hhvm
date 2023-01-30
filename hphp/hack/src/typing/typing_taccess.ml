@@ -363,8 +363,8 @@ let rec type_of_result ~ignore_errors ctx env root res =
       else
         None
     in
-    let (env, ty) =
-      Env.fresh_type_error env (Pos_or_decl.unsafe_to_raw_pos (get_pos root))
+    let ty =
+      Typing_utils.mk_tany env (Pos_or_decl.unsafe_to_raw_pos (get_pos root))
     in
     ((env, ty_err_opt), ty)
 

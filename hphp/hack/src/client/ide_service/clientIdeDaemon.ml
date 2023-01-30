@@ -350,14 +350,18 @@ let load_saved_state
           ClientIdeMessage.
             {
               short_user_message =
-                Saved_state_loader.short_user_message_of_error load_error;
+                Saved_state_loader.LoadError.short_user_message_of_error
+                  load_error;
               medium_user_message =
-                Saved_state_loader.medium_user_message_of_error load_error;
+                Saved_state_loader.LoadError.medium_user_message_of_error
+                  load_error;
               long_user_message =
-                Saved_state_loader.long_user_message_of_error load_error;
+                Saved_state_loader.LoadError.long_user_message_of_error
+                  load_error;
               debug_details =
-                Saved_state_loader.debug_details_of_error load_error;
-              is_actionable = Saved_state_loader.is_error_actionable load_error;
+                Saved_state_loader.LoadError.debug_details_of_error load_error;
+              is_actionable =
+                Saved_state_loader.LoadError.is_error_actionable load_error;
             }
         in
         let e =

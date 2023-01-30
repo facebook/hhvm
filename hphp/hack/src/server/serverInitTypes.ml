@@ -9,7 +9,7 @@
 
 type load_state_error =
   (* an error reported when downloading saved-state through [Saved_state_loader] *)
-  | Load_state_saved_state_loader_failure of Saved_state_loader.load_error
+  | Load_state_saved_state_loader_failure of Saved_state_loader.LoadError.t
   (* an error fetching list of dirty files from hg *)
   | Load_state_dirty_files_failure of Future.error
   (* any other unhandled exception from lazy_init *)
@@ -59,8 +59,8 @@ let load_state_error_to_verbose_string (err : load_state_error) :
           ("Could not load saved-state from DevX infrastructure. "
           ^^ "The underlying error message was: %s\n\n"
           ^^ "The accompanying debug details are: %s")
-          (Saved_state_loader.long_user_message_of_error err)
-          (Saved_state_loader.debug_details_of_error err);
+          (Saved_state_loader.LoadError.long_user_message_of_error err)
+          (Saved_state_loader.LoadError.debug_details_of_error err);
       auto_retry = false;
       telemetry =
         Telemetry.create ()
@@ -69,14 +69,16 @@ let load_state_error_to_verbose_string (err : load_state_error) :
              ~value:"Load_state_saved_state_loader_failure"
         |> Telemetry.string_
              ~key:"category"
-             ~value:(Saved_state_loader.category_of_error err)
+             ~value:(Saved_state_loader.LoadError.category_of_error err)
         |> Telemetry.string_
              ~key:"debug_details"
-             ~value:(Saved_state_loader.debug_details_of_error err)
+             ~value:(Saved_state_loader.LoadError.debug_details_of_error err)
         |> Telemetry.string_opt
              ~key:"saved_state_manifold_api_key"
              ~value:
-               (Saved_state_loader.saved_state_manifold_api_key_of_error err);
+               (Saved_state_loader.LoadError
+                .saved_state_manifold_api_key_of_error
+                  err);
     }
   | Load_state_dirty_files_failure error ->
     let Future.{ message; stack = Utils.Callstack stack; environment } =

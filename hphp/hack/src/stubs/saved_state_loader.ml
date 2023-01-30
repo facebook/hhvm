@@ -98,24 +98,26 @@ type ('main_artifacts, 'additional_info) load_result = {
   is_cached: bool;
 }
 
-type load_error = string
+module LoadError = struct
+  type t = string
 
-(* Please do not throw an exception here; it breaks hack for open source users *)
-let short_user_message_of_error _ =
-  "Saved states are not supported in this build."
+  (* Please do not throw an exception here; it breaks hack for open source users *)
+  let short_user_message_of_error _ =
+    "Saved states are not supported in this build."
 
-let medium_user_message_of_error _ =
-  "Saved states are not supported in this build."
+  let medium_user_message_of_error _ =
+    "Saved states are not supported in this build."
 
-let long_user_message_of_error _ =
-  "Saved states are not supported in this build."
+  let long_user_message_of_error _ =
+    "Saved states are not supported in this build."
 
-let saved_state_manifold_api_key_of_error _ = None
+  let saved_state_manifold_api_key_of_error _ = None
 
-let debug_details_of_error _ = ""
+  let debug_details_of_error _ = ""
 
-let category_of_error _ = ""
+  let category_of_error _ = ""
 
-let is_error_actionable _ = false
+  let is_error_actionable _ = false
+end
 
 let get_project_name _ = ""

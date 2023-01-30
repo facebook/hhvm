@@ -42,13 +42,13 @@ let changed_files_to_relative_paths_json
   |> List.map ~f:Relative_path.suffix
   |> Hh_json_helpers.Jprint.string_array
 
-let print_load_error (load_error : Saved_state_loader.load_error) : unit =
+let print_load_error (load_error : Saved_state_loader.LoadError.t) : unit =
   let json =
     Hh_json.JSON_Object
       [
         ( "error",
-          Hh_json.string_ (Saved_state_loader.debug_details_of_error load_error)
-        );
+          Hh_json.string_
+            (Saved_state_loader.LoadError.debug_details_of_error load_error) );
       ]
   in
   Hh_json.json_to_multiline_output stdout json
@@ -283,7 +283,7 @@ let load_saved_state :
     saved_state_type:
       (main_artifacts * additional_info) Saved_state_loader.saved_state_type ->
     ( (main_artifacts, additional_info) Saved_state_loader.load_result,
-      Saved_state_loader.load_error )
+      Saved_state_loader.LoadError.t )
     Lwt_result.t =
  fun ~env ~local_config ~saved_state_type ->
   let ssopt =

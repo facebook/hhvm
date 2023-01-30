@@ -304,7 +304,7 @@ let make_remote_server_api
       | Ok download_result -> begin
         match download_result with
         | Error (err, _telemetry) ->
-          Error (Saved_state_loader.debug_details_of_error err)
+          Error (Saved_state_loader.LoadError.debug_details_of_error err)
         | Ok (main_artifacts, _telemetry) ->
           let (_ : float) =
             Hh_logger.log_duration
@@ -520,7 +520,7 @@ let make_remote_server_api
       | Ok download_result -> begin
         match download_result with
         | Error (err, _telemetry) ->
-          Error (Saved_state_loader.debug_details_of_error err)
+          Error (Saved_state_loader.LoadError.debug_details_of_error err)
         | Ok (main_artifacts, _telemetry) ->
           let (_ : float) =
             Hh_logger.log_duration

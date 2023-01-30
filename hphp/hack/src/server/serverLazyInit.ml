@@ -320,7 +320,8 @@ let download_and_load_state_exn
       Future.continue_and_map_err loader_future @@ fun result ->
       match result with
       | Ok (Ok load_state) -> Ok (Some load_state)
-      | Ok (Error e) -> Error (Saved_state_loader.long_user_message_of_error e)
+      | Ok (Error e) ->
+        Error (Saved_state_loader.LoadError.long_user_message_of_error e)
       | Error e -> Error (Future.error_to_string e)
     end else
       Future.of_value (Ok None)

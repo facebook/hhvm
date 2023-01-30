@@ -93,7 +93,7 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
         failwith
           (Printf.sprintf
              "Failed to load naming-table saved-state, and saved-state files were not manually provided on command-line: %s"
-             (Saved_state_loader.debug_details_of_error load_error))
+             (Saved_state_loader.LoadError.debug_details_of_error load_error))
       | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
         Lwt.return
           ( main_artifacts.Saved_state_loader.Naming_table_info.naming_table_path,
@@ -127,7 +127,7 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
         failwith
           (Printf.sprintf
              "Failed to load dep-table saved-state, and saved-state files were not manually provided on command-line: %s"
-             (Saved_state_loader.debug_details_of_error load_error))
+             (Saved_state_loader.LoadError.debug_details_of_error load_error))
       | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
         let open Saved_state_loader.Naming_and_dep_table_info in
         Lwt.return

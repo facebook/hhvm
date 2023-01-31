@@ -87,7 +87,7 @@ jobs:
     - name: Run HHVM tests
       run: hhvm hphp/test/run.php -x hphp/test/cmake_builds_excluded_tests slow
 
-  run_all_tests:
+  run_all_tests_repo:
     name: Run all HHVM tests (repo mode)
     runs-on: 16-core
     container:

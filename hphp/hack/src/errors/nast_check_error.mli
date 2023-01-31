@@ -5,6 +5,11 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+type verb =
+  | Vreq_implement
+  | Vimplement
+
 type t =
   | Repeated_record_field_name of {
       pos: Pos.t;
@@ -60,7 +65,7 @@ type t =
   | Non_interface of {
       pos: Pos.t;
       name: string;
-      verb: [ `req_implement | `implement ];
+      verb: verb;
     }
   | ToString_returns_string of Pos.t
   | ToString_visibility of Pos.t

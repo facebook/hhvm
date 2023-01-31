@@ -8,6 +8,10 @@
 open Hh_prelude
 module Error_code = Error_codes.NastCheck
 
+type verb =
+  | Vreq_implement
+  | Vimplement
+
 type t =
   | Repeated_record_field_name of {
       pos: Pos.t;
@@ -63,7 +67,7 @@ type t =
   | Non_interface of {
       pos: Pos.t;
       name: string;
-      verb: [ `req_implement | `implement ];
+      verb: verb;
     }
   | ToString_returns_string of Pos.t
   | ToString_visibility of Pos.t
@@ -525,8 +529,8 @@ let php_lambda_disallowed pos =
 let non_interface pos name verb =
   let verb_str =
     match verb with
-    | `implement -> "implement"
-    | `req_implement -> "require implementation of"
+    | Vimplement -> "implement"
+    | Vreq_implement -> "require implementation of"
   in
   User_error.make
     Error_code.(to_enum NonInterface)

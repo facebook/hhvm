@@ -112,7 +112,11 @@ let handler =
       List.iter c.c_uses ~f:(check_is_trait env);
       duplicated_used_traits c;
       List.iter req_extends ~f:(check_is_class ~require_class_check:false env);
-      List.iter c.c_implements ~f:(check_is_interface (env, `implement));
-      List.iter req_implements ~f:(check_is_interface (env, `req_implement));
+      List.iter
+        c.c_implements
+        ~f:(check_is_interface (env, Nast_check_error.Vimplement));
+      List.iter
+        req_implements
+        ~f:(check_is_interface (env, Nast_check_error.Vreq_implement));
       List.iter req_class ~f:(check_is_class ~require_class_check:true env)
   end

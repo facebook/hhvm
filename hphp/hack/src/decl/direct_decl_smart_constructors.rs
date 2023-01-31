@@ -4340,7 +4340,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let user_attributes = user_attributes.into_bump_slice();
         let extends = self.slice(extends.iter().filter_map(|&node| self.node_to_ty(node)));
         let implements = self.slice(implements.iter().filter_map(|&node| self.node_to_ty(node)));
-        let support_dynamic_type = self.implicit_sdt() || class_attributes.support_dynamic_type;
+        //  A trait supports the dynamic type only if one of its trait requirements
+        // constraints the trait to be used only from an SDT class, and the trait itself
+        // is SDT.  In shallow classes the support_dynamic_type flag is thus always set to false,
+        // and updated during decl folding.
+        let support_dynamic_type = (self.implicit_sdt() || class_attributes.support_dynamic_type)
+            && class_kind != ClassishKind::Ctrait;
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
         let module = self.module;

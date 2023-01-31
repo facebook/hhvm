@@ -945,6 +945,19 @@ and class_decl
   let (req_ancestors, req_ancestors_extends, req_class_ancestors) =
     Decl_requirements.get_class_requirements env parents c
   in
+  let support_dynamic_type =
+    (* A trait supports the dynamic type only if one of its trait requirements
+     * constraints the trait to be used only from an SDT class, and the trait itself
+     * is SDT.  For all other classish only the local SDT attribute is checked. *)
+    if Ast_defs.is_c_trait c.sc_kind then
+      inherited.Decl_inherit.ih_support_dynamic_type
+      && (Typing_defs.Attributes.mem
+            Naming_special_names.UserAttributes.uaSupportDynamicType
+            c.sc_user_attributes
+         || Provider_context.implicit_sdt_for_class ctx (Some c))
+    else
+      c.sc_support_dynamic_type
+  in
   let enum = c.sc_enum_type in
   let enum_inner_ty = SMap.find_opt SN.FB.tInner typeconsts in
   let is_enum_class = Ast_defs.is_c_enum_class c.sc_kind in
@@ -1012,7 +1025,7 @@ and class_decl
       dc_smethods = SMap.map fst static_methods;
       dc_construct = Tuple.T2.map_fst ~f:(Option.map ~f:fst) cstr;
       dc_ancestors = impl;
-      dc_support_dynamic_type = c.sc_support_dynamic_type;
+      dc_support_dynamic_type = support_dynamic_type;
       dc_extends = extends;
       dc_sealed_whitelist = sealed_whitelist;
       dc_xhp_attr_deps = xhp_attr_deps;

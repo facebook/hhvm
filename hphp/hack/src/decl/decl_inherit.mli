@@ -26,6 +26,7 @@ type inherited = {
   ih_sprops: (element * decl_ty option) SMap.t;
   ih_methods: (element * fun_elt option) SMap.t;
   ih_smethods: (element * fun_elt option) SMap.t;
+  ih_support_dynamic_type: bool;
 }
 
 (** Builds the [inherited] type by fetching any ancestor from the heap.

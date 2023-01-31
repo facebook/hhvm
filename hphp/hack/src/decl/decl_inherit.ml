@@ -34,6 +34,7 @@ type inherited = {
   ih_sprops: (Decl_defs.element * decl_ty option) SMap.t;
   ih_methods: (Decl_defs.element * fun_elt option) SMap.t;
   ih_smethods: (Decl_defs.element * fun_elt option) SMap.t;
+  ih_support_dynamic_type: bool;
 }
 
 let empty =
@@ -46,6 +47,7 @@ let empty =
     ih_sprops = SMap.empty;
     ih_methods = SMap.empty;
     ih_smethods = SMap.empty;
+    ih_support_dynamic_type = false;
   }
 
 (*****************************************************************************)
@@ -340,6 +342,8 @@ let add_inherited env c inherited acc =
     ih_sprops = add_members inherited.ih_sprops acc.ih_sprops;
     ih_methods = add_methods inherited.ih_methods acc.ih_methods;
     ih_smethods = add_methods inherited.ih_smethods acc.ih_smethods;
+    ih_support_dynamic_type =
+      inherited.ih_support_dynamic_type || acc.ih_support_dynamic_type;
   }
 
 (*****************************************************************************)
@@ -369,6 +373,7 @@ let mark_as_synthesized inh =
         inh.ih_typeconsts;
     ih_consts =
       SMap.map (fun const -> { const with cc_synthesized = true }) inh.ih_consts;
+    ih_support_dynamic_type = inh.ih_support_dynamic_type;
   }
 
 (*****************************************************************************)
@@ -491,6 +496,18 @@ let inherit_hack_class
         pair_with_heap_entries
           parent.dc_smethods
           (parent_members >>| fun m -> m.Decl_store.m_static_methods);
+      ih_support_dynamic_type =
+        (match child.sc_kind with
+        | Ast_defs.Ctrait ->
+          (* A trait supports the dynamic type only if one of its trait requirements
+           * constraints the trait to be used only from an SDT class, and the trait itself
+           * is SDT.  We here thus gather SDT information about parents SDTness.  Since
+           * shallow decls for traits have the support_dynamic_type set to false, independently
+           * of the SDT attribute, this will be set to true only via trait requirements
+           * constraints and not use statements.  We ignore parent SDTness for all non-trait
+           * classish. *)
+          parent.dc_support_dynamic_type
+        | _ -> false);
     }
   in
   result

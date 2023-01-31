@@ -1,0 +1,6 @@
+File "trait_5a.bad.php", line 12, characters 12-16:
+Invalid return type (Typing[4110])
+  File "trait_5a.bad.php", line 11, characters 24-30:
+  Expected `dynamic`
+  File "trait_5a.bad.php", line 12, characters 12-16:
+  Type `this` is not a subtype of `dynamic` under dynamic-aware subtyping

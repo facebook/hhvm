@@ -20,13 +20,12 @@ struct Opt {
 }
 
 #[tokio::main(flavor = "current_thread")]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() {
     if let Err(err) = run().await {
         // Print a prettier error than the default
         eprintln!("{}", err);
         std::process::exit(1);
     }
-    Ok(())
 }
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {

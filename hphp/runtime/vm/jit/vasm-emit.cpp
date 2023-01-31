@@ -83,7 +83,7 @@ private:
 void bindDataPtrs(Vunit& vunit, DataBlock& data) {
   if (vunit.dataBlocks.empty()) return;
 
-  Timer timer(Timer::vasm_bind_ptrs);
+  Timer timer(Timer::vasm_bind_ptrs, vunit.log_entry);
   FTRACE(1, "{:-^80}\n", "binding VdataPtrs");
 
   DataBlockMap blocks;
@@ -122,7 +122,7 @@ void emit(Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
 
 void emitVunit(Vunit& vunit, const IRUnit* unit,
                CodeCache::View code, CGMeta& meta, Annotations* annotations) {
-  Timer _t(Timer::vasm_emit);
+  Timer _t(Timer::vasm_emit, vunit.log_entry);
 
   tracing::Block _{"vasm-emit", [&] { return traceProps(vunit); }};
 

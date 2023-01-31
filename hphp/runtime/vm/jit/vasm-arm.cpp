@@ -1937,7 +1937,7 @@ void lowerForARM(Vunit& unit) {
 }
 
 void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
-  Timer timer(Timer::vasm_optimize);
+  Timer timer(Timer::vasm_optimize, unit.log_entry);
 
   removeTrivialNops(unit);
   optimizePhis(unit);

@@ -632,7 +632,7 @@ RegionDescPtr form_region(Env& env) {
 
 RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
                              int32_t maxBCInstrs, bool inlining /* = false */) {
-  Timer _t(Timer::selectTracelet);
+  Timer _t(Timer::selectTracelet, nullptr);
   InterpSet interp;
   SrcKey breakAt;
   RegionDescPtr region;

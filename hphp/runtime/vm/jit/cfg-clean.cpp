@@ -264,7 +264,7 @@ bool collapseDiamond(IRUnit& unit, Block* block) {
  */
 void cleanCfg(IRUnit& unit) {
   PassTracer tracer { &unit, Trace::hhir_cfg, "cleanCfg" };
-  Timer timer(Timer::optimize_cleancfg);
+  Timer timer(Timer::optimize_cleancfg, unit.logEntry().get_pointer());
   bool changed = false;
   do {
     auto const blocks = rpoSortCfg(unit);

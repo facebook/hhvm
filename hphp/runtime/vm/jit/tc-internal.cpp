@@ -567,7 +567,7 @@ Translator::translate(Optional<CodeCache::View> view) {
   // TODO: categorize failure
   if (!vunit) return TranslationResult::failTransiently();
 
-  Timer timer(Timer::mcg_finishTranslation);
+  Timer timer(Timer::mcg_finishTranslation, nullptr);
 
   tracing::Block _b{
     "emit-translation",
@@ -634,7 +634,7 @@ Translator::translate(Optional<CodeCache::View> view) {
     profData()->setProfiling(sk.func());
   }
 
-  Timer metaTimer(Timer::mcg_finishTranslation_metadata);
+  Timer metaTimer(Timer::mcg_finishTranslation_metadata, nullptr);
   if (unit && unit->logEntry()) {
     auto metaLock = lockMetadata();
     logTranslation(this, transMeta->range);

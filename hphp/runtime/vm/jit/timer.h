@@ -104,7 +104,7 @@ struct Timer {
     }
   };
 
-  explicit Timer(Name name, StructuredLogEntry* = nullptr);
+  explicit Timer(Name name, StructuredLogEntry* log_entry);
   ~Timer();
 
   /*

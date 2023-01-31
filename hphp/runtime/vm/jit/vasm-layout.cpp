@@ -636,7 +636,7 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
 ///////////////////////////////////////////////////////////////////////////////
 
 jit::vector<Vlabel> layoutBlocks(Vunit& unit) {
-  Timer timer(Timer::vasm_layout);
+  Timer timer(Timer::vasm_layout, unit.log_entry);
   auto const optimizePrologue = unit.context &&
     unit.context->kind == TransKind::OptPrologue &&
     RuntimeOption::EvalJitPGOVasmBlockCountersOptPrologue;

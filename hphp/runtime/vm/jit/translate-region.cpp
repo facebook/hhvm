@@ -438,7 +438,8 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 const RegionDesc& region,
                                 double profFactor,
                                 bool ignoresBCSize = false) {
-  const Timer irGenTimer(Timer::irGenRegionAttempt);
+  const Timer irGenTimer(
+    Timer::irGenRegionAttempt, irgs.unit.logEntry().get_pointer());
   auto& irb = *irgs.irb;
   auto prevRegion      = irgs.region;      irgs.region      = &region;
   auto prevProfFactor  = irgs.profFactor;  irgs.profFactor  = profFactor;
@@ -625,7 +626,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
                                     const TransContext& context,
                                     PostConditions& pConds) noexcept {
-  Timer irGenTimer(Timer::irGenRegion);
+  Timer irGenTimer(Timer::irGenRegion, nullptr);
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
 
   tracing::Block _{"hhir-gen", [&] { return traceProps(context); }};

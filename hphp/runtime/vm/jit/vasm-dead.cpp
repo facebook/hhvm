@@ -51,7 +51,7 @@ namespace HPHP::jit {
 // or not a useful block executes, and useless branches can be forwarded to
 // the nearest useful post-dominator.
 void removeDeadCode(Vunit& unit) {
-  Timer timer(Timer::vasm_dce);
+  Timer timer(Timer::vasm_dce, unit.log_entry);
 
   assertx(check(unit));
 

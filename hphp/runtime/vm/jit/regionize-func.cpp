@@ -301,7 +301,7 @@ bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
  *           covered appropriately
  */
 RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
-  const Timer rf_timer(Timer::regionizeFunc);
+  const Timer rf_timer(Timer::regionizeFunc, nullptr);
   assertx(profData());
 
   tracing::Block _{"regionize-func", [&] { return traceProps(func); }};

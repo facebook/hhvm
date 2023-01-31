@@ -671,7 +671,7 @@ void RegionTranslator::gen() {
   if (!region) return fail();
 
   INC_TPC(translate);
-  Timer timer(Timer::mcg_translate);
+  Timer timer(Timer::mcg_translate, nullptr);
 
   tracing::Block _{"translate", [&] {
 		return traceProps(sk.func())

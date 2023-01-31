@@ -1318,7 +1318,7 @@ void fullDCE(IRUnit& unit) {
     return mandatoryDCE(unit);
   }
 
-  Timer dceTimer(Timer::optimize_dce);
+  Timer dceTimer(Timer::optimize_dce, unit.logEntry().get_pointer());
 
   // kill unreachable code and remove any traces that are now empty
   auto const blocks = prepareBlocks(unit);

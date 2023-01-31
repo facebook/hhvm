@@ -301,7 +301,7 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
 }
 
 void optimizeJmps(Vunit& unit, bool makeSideExits, bool trustWidths) {
-  Timer timer(Timer::vasm_jumps);
+  Timer timer(Timer::vasm_jumps, unit.log_entry);
 
   bool changed = false;
   bool ever_changed = false;

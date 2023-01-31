@@ -7,7 +7,7 @@ find_program(RE2C_EXECUTABLE NAMES re2c REQUIRED)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   TIMELIB_DOWNLOAD_ARGS
   SOURCE_URL "https://github.com/derickr/timelib/archive/refs/tags/2021.07.tar.gz"
-  SOURCE_HASH "SHA512=8694c1d3420994ea3d94c7f044e467e29f5f707df9d1afe4c2c44233e208eed1b8f3025d21c721695ae741bad9b49f8390d67f818ff7e5fcf79a84a62ed37a0a"
+  SOURCE_HASH "SHA512=7bc56d20360937af10f63960e443cc8bd4d24c5369f697241e54da21465d4512bd16cfa6f0efcf2b847cc19781e1cecf93c9e19a1efa4f1a7012c9fa442eeabe"
   # Look for timelib-YYYY.MM.tar.gz in download cache, not just YYYY.MM.tar.gz
   FILENAME_PREFIX "timelib-"
 )

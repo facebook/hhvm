@@ -1642,8 +1642,7 @@ void GeneratedAsyncProcessorBase::processInThread(
       std::move(req),
       std::move(serializedRequest),
       ctx,
-      tm ? tm->getKeepAlive(
-               std::move(scope), concurrency::ThreadManager::Source::INTERNAL)
+      tm ? tm->getKeepAlive(scope, concurrency::ThreadManager::Source::INTERNAL)
          : folly::Executor::KeepAlive{},
       kind,
       executeFunc,

@@ -38,7 +38,7 @@ import reactor.core.scheduler.Schedulers;
  * reactor-core schedulers this will *not* create a new Worker to assign work to a particular
  * thread. All tasks are submitted to the underlying executor.
  */
-final class ThreadPoolScheduler extends AtomicBoolean implements Scheduler {
+final class ThreadPoolScheduler extends AtomicBoolean implements StatsScheduler {
   private static final Logger LOGGER = LoggerFactory.getLogger(ThreadPoolScheduler.class);
 
   private final Distribution executionTime;

@@ -37,7 +37,7 @@ import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-public final class ForkJoinPoolScheduler implements Scheduler {
+public final class ForkJoinPoolScheduler implements StatsScheduler {
   private ForkJoinPoolSchedulerStats stats;
 
   private static volatile BiConsumer<Thread, ? super Throwable> onHandleErrorHook;

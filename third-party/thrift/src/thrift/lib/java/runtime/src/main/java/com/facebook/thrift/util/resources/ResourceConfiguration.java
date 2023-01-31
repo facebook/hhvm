@@ -21,6 +21,9 @@ import reactor.util.concurrent.Queues;
 final class ResourceConfiguration {
   private ResourceConfiguration() {}
 
+  static final boolean enableForkJoinPool =
+      System.getProperty("thrift.separate-forkjoin-scheduler", "false").equalsIgnoreCase("true");
+
   static final boolean forceExecutionOffEventLoop =
       System.getProperty("thrift.force-execution-off-eventloop", "true").equalsIgnoreCase("true");
 
@@ -39,6 +42,19 @@ final class ResourceConfiguration {
           numThreadsForEventLoop,
           Integer.getInteger(
               "thrift.executor-threads.count", Runtime.getRuntime().availableProcessors() * 4));
+
+  static final int forkJoinPoolThreads =
+      Math.max(
+          numThreadsForEventLoop,
+          Integer.getInteger(
+              "thrift.forkjoin-threads.count", Runtime.getRuntime().availableProcessors() * 4));
+
+  static final int forkJoinPoolClientThreads =
+      Math.max(
+          numThreadsForEventLoop,
+          Integer.getInteger(
+              "thrift.forkjoin-client-threads.count",
+              Runtime.getRuntime().availableProcessors() * 4));
 
   static final int minNumThreadsForOffLoop = numThreadsForEventLoop;
 

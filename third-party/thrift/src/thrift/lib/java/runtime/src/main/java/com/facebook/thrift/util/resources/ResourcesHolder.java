@@ -16,8 +16,11 @@
 
 package com.facebook.thrift.util.resources;
 
+import static com.facebook.thrift.util.resources.ResourceConfiguration.enableForkJoinPool;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.eventLoopGroupThreadPrefix;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.forceExecutionOffEventLoop;
+import static com.facebook.thrift.util.resources.ResourceConfiguration.forkJoinPoolClientThreads;
+import static com.facebook.thrift.util.resources.ResourceConfiguration.forkJoinPoolThreads;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.maxPendingTasksForOffLoop;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.minNumThreadsForOffLoop;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.minPendingTasksBeforeNewThread;
@@ -38,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.scheduler.Scheduler;
 
 class ResourcesHolder implements Closeable {
   private static final Logger LOGGER = LoggerFactory.getLogger(ResourcesHolder.class);
@@ -46,8 +50,8 @@ class ResourcesHolder implements Closeable {
 
   private final HashedWheelTimer timer;
   private final EventLoopGroup eventLoopGroup;
-  private final ThreadPoolScheduler offLoopScheduler;
-  private final ThreadPoolScheduler clientOffLoopScheduler;
+  private final StatsScheduler offLoopScheduler;
+  private final StatsScheduler clientOffLoopScheduler;
 
   public ResourcesHolder() {
     this.timer = createHashedWheelTimer();
@@ -72,11 +76,11 @@ class ResourcesHolder implements Closeable {
     return eventLoopGroup;
   }
 
-  public ThreadPoolScheduler getOffLoopScheduler() {
+  public Scheduler getOffLoopScheduler() {
     return offLoopScheduler;
   }
 
-  public ThreadPoolScheduler getClientOffLoopScheduler() {
+  public Scheduler getClientOffLoopScheduler() {
     return clientOffLoopScheduler;
   }
 
@@ -105,27 +109,42 @@ class ResourcesHolder implements Closeable {
     }
   }
 
-  private ThreadPoolScheduler createOffLoopScheduler() {
+  private StatsScheduler createOffLoopScheduler() {
     LOGGER.info("force execution off event loop enabled:  {}", forceExecutionOffEventLoop);
-    LOGGER.info("off event loop max threads: {}", numThreadsForOffLoop);
-    LOGGER.info("off event loop max pending tasks: {}", maxPendingTasksForOffLoop);
-    return new ThreadPoolScheduler(
-        minNumThreadsForOffLoop,
-        numThreadsForOffLoop,
-        maxPendingTasksForOffLoop,
-        minPendingTasksBeforeNewThread);
+    if (enableForkJoinPool) {
+      LOGGER.info("creating ForkJoinPoolScheduler scheduler");
+      LOGGER.info("off event loop max threads: {}", forkJoinPoolThreads);
+      return ForkJoinPoolScheduler.create("thrift-forkjoin-scheduler", forkJoinPoolThreads);
+    } else {
+      LOGGER.info("creating ThreadPoolScheduler scheduler");
+      LOGGER.info("off event loop max threads: {}", numThreadsForOffLoop);
+      LOGGER.info("off event loop max pending tasks: {}", maxPendingTasksForOffLoop);
+      return new ThreadPoolScheduler(
+          minNumThreadsForOffLoop,
+          numThreadsForOffLoop,
+          maxPendingTasksForOffLoop,
+          minPendingTasksBeforeNewThread);
+    }
   }
 
-  private ThreadPoolScheduler createClientOffLoopScheduler() {
-    LOGGER.info("creating separate off event loop scheduler for client");
+  private StatsScheduler createClientOffLoopScheduler() {
     LOGGER.info("force client execution off event loop enabled:  {}", forceExecutionOffEventLoop);
-    LOGGER.info("client off event loop max threads: {}", numThreadsForOffLoop);
-    LOGGER.info("client off event loop max pending tasks: {}", maxPendingTasksForOffLoop);
-    return new ThreadPoolScheduler(
-        minNumThreadsForOffLoop,
-        numThreadsForOffLoop,
-        maxPendingTasksForOffLoop,
-        minPendingTasksBeforeNewThread);
+
+    if (enableForkJoinPool) {
+      LOGGER.info("creating separate ForkJoinPoolScheduler scheduler for client");
+      LOGGER.info("off event loop max threads: {}", forkJoinPoolClientThreads);
+      return ForkJoinPoolScheduler.create(
+          "thrift-forkjoin-client-scheduler", forkJoinPoolClientThreads);
+    } else {
+      LOGGER.info("creating separate ThreadPoolScheduler scheduler for client");
+      LOGGER.info("client off event loop max threads: {}", numThreadsForOffLoop);
+      LOGGER.info("client off event loop max pending tasks: {}", maxPendingTasksForOffLoop);
+      return new ThreadPoolScheduler(
+          minNumThreadsForOffLoop,
+          numThreadsForOffLoop,
+          maxPendingTasksForOffLoop,
+          minPendingTasksBeforeNewThread);
+    }
   }
 
   protected void shutdownOffLoopScheduler() {

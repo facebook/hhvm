@@ -35,6 +35,7 @@
   server_command_types
   server_monitor
   server_utils
+  state_loader
   sys_utils
   utils_config_file_lwt
   version)

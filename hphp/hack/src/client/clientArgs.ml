@@ -76,6 +76,11 @@ module Common_argspecs = struct
       Arg.Set value_ref,
       " ignore hh_version check when loading saved states (default: false)" )
 
+  let saved_state_ignore_hhconfig value_ref =
+    ( "--saved-state-ignore-hhconfig",
+      Arg.Set value_ref,
+      " ignore hhconfig hash when loading saved states (default: false)" )
+
   let naming_table value_ref =
     ( "--naming-table",
       Arg.String (fun s -> value_ref := Some s),
@@ -93,6 +98,7 @@ let parse_command () =
     | "stop" -> CKStop
     | "restart" -> CKRestart
     | "lsp" -> CKLsp
+    | "saved-state-project-metadata" -> CKSavedStateProjectMetadata
     | "download-saved-state" -> CKDownloadSavedState
     | "rage" -> CKRage
     | _ -> CKNone
@@ -668,9 +674,7 @@ let parse_check_args cmd =
       ( "--save-human-readable-64bit-dep-map",
         Arg.String (fun x -> save_human_readable_64bit_dep_map := Some x),
         " save map of 64bit hashes to names to files in the given directory" );
-      ( "--saved-state-ignore-hhconfig",
-        Arg.Set saved_state_ignore_hhconfig,
-        " ignore hhconfig hash when loading saved states (default: false)" );
+      Common_argspecs.saved_state_ignore_hhconfig saved_state_ignore_hhconfig;
       ( "--search",
         Arg.String (fun x -> set_mode (MODE_SEARCH (x, ""))),
         " (mode) fuzzy search symbol definitions" );
@@ -925,9 +929,7 @@ let parse_start_env command =
       ( "--profile-log",
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         " enable profile logging" );
-      ( "--saved-state-ignore-hhconfig",
-        Arg.Set saved_state_ignore_hhconfig,
-        " ignore hhconfig hash when loading saved states (default: false)" );
+      Common_argspecs.saved_state_ignore_hhconfig saved_state_ignore_hhconfig;
       ( "--wait",
         Arg.Unit wait_deprecation_msg,
         " this flag is deprecated and does nothing!" );
@@ -965,6 +967,45 @@ let parse_start_env command =
     watchman_debug_logging = !watchman_debug_logging;
     allow_non_opt_build = !allow_non_opt_build;
   }
+
+let parse_saved_state_project_metadata_args () : command =
+  let command = "saved-state-project-metadata" in
+  let usage =
+    Printf.sprintf
+      "Usage: %s %s [OPTION]... [WWW-ROOT]\nOutput the project metadata for the current saved state\n\nWWW-ROOT is assumed to be current directory if unspecified\n"
+      command
+      Sys.argv.(0)
+  in
+  let ignore_hh_version = ref false in
+  let saved_state_ignore_hhconfig = ref false in
+  let config = ref [] in
+  let options =
+    [
+      (* Please keep these sorted in the alphabetical order *)
+      Common_argspecs.config config;
+      Common_argspecs.ignore_hh_version ignore_hh_version;
+      Common_argspecs.saved_state_ignore_hhconfig saved_state_ignore_hhconfig;
+      (* Please keep these sorted in the alphabetical order *)
+    ]
+  in
+  let args = parse_without_command options usage command in
+  let root =
+    match args with
+    | [] -> Wwwroot.get None
+    | [x] -> Wwwroot.get (Some x)
+    | _ ->
+      Printf.fprintf
+        stderr
+        "Error: please provide at most one www directory\n%!";
+      exit 1
+  in
+  CSavedStateProjectMetadata
+    {
+      ClientSavedStateProjectMetadata.config = !config;
+      ignore_hh_version = !ignore_hh_version;
+      saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
+      root;
+    }
 
 let parse_start_args () = CStart (parse_start_env "start")
 
@@ -1245,6 +1286,7 @@ let parse_args () : command =
   | CKRestart -> parse_restart_args ()
   | CKLsp -> parse_lsp_args ()
   | CKRage -> parse_rage_args ()
+  | CKSavedStateProjectMetadata -> parse_saved_state_project_metadata_args ()
   | CKDownloadSavedState -> parse_download_saved_state_args ()
 
 let root = function
@@ -1253,6 +1295,7 @@ let root = function
   | CRestart { ClientStart.root; _ }
   | CStop { ClientStop.root; _ }
   | CRage { ClientRage.root; _ }
+  | CSavedStateProjectMetadata { ClientSavedStateProjectMetadata.root; _ }
   | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
     Some root
   | CLsp _ -> None
@@ -1261,7 +1304,8 @@ let config = function
   | CCheck { ClientEnv.config; _ }
   | CStart { ClientStart.config; _ }
   | CRestart { ClientStart.config; _ }
-  | CLsp { ClientLsp.config; _ } ->
+  | CLsp { ClientLsp.config; _ }
+  | CSavedStateProjectMetadata { ClientSavedStateProjectMetadata.config; _ } ->
     Some config
   | CStop _
   | CDownloadSavedState _

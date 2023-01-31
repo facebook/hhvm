@@ -48,6 +48,7 @@ let () =
     | ClientCommand.CStop _ -> "Stop"
     | ClientCommand.CRestart _ -> "Restart"
     | ClientCommand.CLsp _ -> "Lsp"
+    | ClientCommand.CSavedStateProjectMetadata _ -> "SavedStateProjectMetadata"
     | ClientCommand.CDownloadSavedState _ -> "DownloadSavedState"
     | ClientCommand.CRage _ -> "Rage"
   in
@@ -129,6 +130,11 @@ let () =
       | ClientCommand.CRage env ->
         Lwt_utils.run_main (fun () ->
             ClientRage.main env (Option.value_exn local_config))
+      | ClientCommand.CSavedStateProjectMetadata env ->
+        Lwt_utils.run_main (fun () ->
+            ClientSavedStateProjectMetadata.main
+              env
+              (Option.value_exn local_config))
       | ClientCommand.CDownloadSavedState env ->
         Lwt_utils.run_main (fun () ->
             ClientDownloadSavedState.main env (Option.value_exn local_config))

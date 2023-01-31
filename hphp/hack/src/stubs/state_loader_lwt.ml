@@ -6,6 +6,14 @@
  *
  *)
 
+let get_project_metadata
+    ~progress_callback:_
+    ~saved_state_type:_
+    ~repo:_
+    ~saved_state_manifold_api_key:_
+    ~ignore_hh_version:_ =
+  failwith "Not implemented"
+
 let load
     ~ssopt:_
     ~progress_callback:_

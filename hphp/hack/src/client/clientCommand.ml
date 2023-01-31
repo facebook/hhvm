@@ -13,6 +13,7 @@ type command =
   | CStop of ClientStop.env
   | CRestart of ClientStart.env
   | CLsp of ClientLsp.args
+  | CSavedStateProjectMetadata of ClientSavedStateProjectMetadata.env
   | CDownloadSavedState of ClientDownloadSavedState.env
   | CRage of ClientRage.env
 
@@ -23,13 +24,19 @@ type command_keyword =
   | CKRestart
   | CKNone
   | CKLsp
+  | CKSavedStateProjectMetadata
   | CKDownloadSavedState
   | CKRage
 
 let get_custom_telemetry_data command =
   match command with
-  | CCheck { ClientEnv.custom_telemetry_data; _ } -> custom_telemetry_data
+  | CCheck { ClientEnv.custom_telemetry_data; _ }
   | CStart { ClientStart.custom_telemetry_data; _ }
   | CRestart { ClientStart.custom_telemetry_data; _ } ->
     custom_telemetry_data
-  | _ -> []
+  | CStop _
+  | CLsp _
+  | CSavedStateProjectMetadata _
+  | CDownloadSavedState _
+  | CRage _ ->
+    []

@@ -68,6 +68,8 @@ errors::Format
 errors::NameContext
 errors::Phase
 errors::NamingError
+errors::NastCheckError
+nast_check_error::Verb
 naming_error::Visibility
 naming_error::ReturnOnlyHint
 naming_error::UnsupportedFeature

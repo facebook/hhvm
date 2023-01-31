@@ -7,7 +7,7 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   SOURCE_URL
   "https://github.com/google/brotli/archive/refs/tags/v1.0.9.tar.gz"
   SOURCE_HASH
-  "SHA256=f9e8d81d0405ba66d181529af42a3354f838c939095ff99930da6aa9cdf6fe46"
+  "SHA256=43f9b6ef43c7471bac9d826118b30e35c46e11a090fc31712a28a3f7ebf405bb"
   FILENAME_PREFIX "brotli-"
 )
 

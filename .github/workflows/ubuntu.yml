@@ -24,7 +24,8 @@ env:
   OUT: ${{ format('{0}/out', github.workspace) }}
 
 jobs:
-  build_ubuntu_focal_nightly:
+  build_deb:
+    name: Build HHVM .deb
     runs-on: 16-core
     container:
       image: ubuntu:focal
@@ -40,8 +41,69 @@ jobs:
         submodules: 'recursive'
     - name: Installing HHVM deps and building HHVM
       run: ci/bin/make-debianish-package
+
+    - name: ls on output directory
+      run: "ls $OUT"
+
     - name: Uploading artifacts
       uses: actions/upload-artifact@v3
       with:
         name: out-directory
         path: ${{ env.OUT }}
+
+  run_quick_tests:
+    name: Run HHVM quick tests
+    runs-on: 16-core
+    container:
+      image: ubuntu:focal
+    steps:
+    - name: Checkout HHVM
+      uses: actions/checkout@v3
+
+    - name: Download .deb from build job
+      uses: actions/download-artifact@v2
+
+    - name: Install hhvm.deb
+      run: sudo apt-get install ./hhvm.deb
+
+    - name: Run HHVM quick tests
+      run: hhvm hphp/test/run.php quick
+
+  run_all_tests:
+    name: Run all HHVM tests
+    runs-on: 16-core
+    container:
+      image: ubuntu:focal
+    steps:
+    - name: Checkout HHVM
+      uses: actions/checkout@v3
+
+    - name: Download .deb from build job
+      uses: actions/download-artifact@v2
+
+    - name: Install hhvm.deb
+      run: sudo apt-get install ./hhvm.deb
+
+    - name: Run HHVM tests
+      run: hhvm hphp/test/run.php -x hphp/test/cmake_builds_excluded_tests slow
+
+  run_all_tests:
+    name: Run all HHVM tests (repo mode)
+    runs-on: 16-core
+    container:
+      image: ubuntu:focal
+    steps:
+    - name: Checkout HHVM
+      uses: actions/checkout@v3
+
+    - name: Download .deb from build job
+      uses: actions/download-artifact@v2
+
+    - name: Install hhvm.deb
+      run: sudo apt-get install ./hhvm.deb
+
+    - name: Run HHVM tests
+      run: hhvm hphp/test/run.php --repo -x hphp/test/cmake_builds_excluded_tests slow
+
+
+    

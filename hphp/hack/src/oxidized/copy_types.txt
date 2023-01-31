@@ -67,6 +67,11 @@ errors::ErrorCode
 errors::Format
 errors::NameContext
 errors::Phase
+errors::NamingError
+naming_error::Visibility
+naming_error::ReturnOnlyHint
+naming_error::UnsupportedFeature
+name_context::NameContext
 file_info::Mode
 file_info::NameType
 naming_types::KindOfType

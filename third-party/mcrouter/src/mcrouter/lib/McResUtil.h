@@ -67,8 +67,9 @@ inline int resultSeverity(carbon::Result result) {
  * Is this reply an error?
  */
 inline bool isErrorResult(const carbon::Result result) {
-  return (result == carbon::Result::DEADLINE_EXCEEDED) ||
-      (result >= carbon::Result::OOO && result < carbon::Result::WAITING);
+  return (
+      result >= carbon::Result::OOO && result < carbon::Result::NUM_RESULTS &&
+      result != carbon::Result::WAITING);
 }
 
 /**

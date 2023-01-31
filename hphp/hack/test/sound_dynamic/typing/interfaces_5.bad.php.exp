@@ -1,0 +1,2 @@
+File "interfaces_5.bad.php", line 9, characters 7-7:
+Class `C` must declare <<__SupportDynamicType>> because it implements interface `I` which does (Typing[4402])

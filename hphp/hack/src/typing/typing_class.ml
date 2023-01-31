@@ -1275,7 +1275,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
   ) else
     env
 
-let check_SupportDynamicType env c =
+let check_SupportDynamicType env c tc =
   if
     TypecheckerOptions.enable_sound_dynamic
       (Provider_context.get_tcopt (Env.get_ctx env))
@@ -1284,13 +1284,6 @@ let check_SupportDynamicType env c =
       Naming_attributes.mem
         SN.UserAttributes.uaSupportDynamicType
         c.c_user_attributes
-    in
-    let parent_names =
-      List.filter_map
-        (c.c_extends @ c.c_uses @ c.c_implements)
-        ~f:(function
-          | (_, Happly ((_, name), _)) -> Some name
-          | _ -> None)
     in
     let error_parent_support_dynamic_type parent child_support_dyn =
       Errors.add_typing_error
@@ -1313,7 +1306,7 @@ let check_SupportDynamicType env c =
     | Ast_defs.Cclass _
     | Ast_defs.Cinterface
     | Ast_defs.Ctrait ->
-      List.iter parent_names ~f:(fun name ->
+      List.iter (Cls.all_ancestor_names tc) ~f:(fun name ->
           match Env.get_class env name with
           | Some parent_type -> begin
             match Cls.kind parent_type with
@@ -1707,7 +1700,7 @@ let class_def_ env c tc =
   in
   let (env, tparams) = class_type_param env c.c_tparams in
   let (env, e1) = Typing_solver.solve_all_unsolved_tyvars env in
-  check_SupportDynamicType env c;
+  check_SupportDynamicType env c tc;
   Option.iter ~f:Errors.add_typing_error e1;
   ( {
       Aast.c_span = c.c_span;

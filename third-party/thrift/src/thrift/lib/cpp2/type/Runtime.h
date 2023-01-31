@@ -57,6 +57,9 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
   /* implicit */ ConstRef(const std::string& val) noexcept
       : ConstRef(binary_t{}, val) {}
 
+  template <typename Tag, typename T>
+  ConstRef(Tag, T&& val) : Base(op::detail::getAnyType<Tag, T>(), &val) {}
+
   template <typename IdT>
   ConstRef operator[](IdT&& id) const {
     return at(std::forward<IdT>(id));
@@ -66,9 +69,6 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
   friend Base;
   template <typename, typename, typename>
   friend class detail::BaseDyn;
-
-  template <typename Tag, typename T>
-  ConstRef(Tag, T&& val) : Base(op::detail::getAnyType<Tag, T>(), &val) {}
 };
 
 // A light weight (pass-by-value), non-owning reference to a runtime Thrift

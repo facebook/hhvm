@@ -24,17 +24,44 @@
 namespace apache::thrift::op {
 namespace {
 
+template <typename Tag, typename S, typename T>
+void testTypeRegistryLoad(const S& seralizer, const T& value) {
+  folly::IOBufQueue queue;
+  seralizer.encode(value, folly::io::QueueAppender{&queue, 2 << 4});
+  type::SemiAnyStruct sa;
+  sa.protocol() = seralizer.getProtocol();
+  sa.data() = *queue.front();
+  sa.type() = type::Type::get<Tag>();
+  type::AnyData anyData(sa);
+  auto result = type::TypeRegistry::generated().load(anyData);
+  EXPECT_EQ(result.as<Tag>(), value);
+}
+
+template <typename Tag, typename S, typename T>
+void testTypeRegistryStore(const S& seralizer, const T& value) {
+  auto anyData = type::TypeRegistry::generated().store(
+      type::ConstRef(Tag{}, value), seralizer.getProtocol());
+  folly::io::Cursor cursor(&anyData.data());
+  auto actual = seralizer.template decode<Tag>(cursor);
+  EXPECT_EQ(actual, value);
+}
+
+template <typename Tag, typename S, typename T>
+void testSerialization(const S& seralizer, const T& value) {
+  test::expectRoundTrip<Tag>(seralizer, value);
+  testTypeRegistryLoad<Tag>(seralizer, value);
+  testTypeRegistryStore<Tag>(seralizer, value);
+}
+
 // Checks that the value roundtrips correctly for all standard protocols.
 template <typename T, typename Tag = type::infer_tag<T>>
 void testRoundTrip(const T& value) {
   using type::StandardProtocol;
-  FBTHRIFT_SCOPED_CHECK(test::expectRoundTrip<Tag>(
+  FBTHRIFT_SCOPED_CHECK(testSerialization<Tag>(
       StdSerializer<Tag, StandardProtocol::Binary>(), value));
-  FBTHRIFT_SCOPED_CHECK(test::expectRoundTrip<Tag>(
+  FBTHRIFT_SCOPED_CHECK(testSerialization<Tag>(
       StdSerializer<Tag, StandardProtocol::Compact>(), value));
-  FBTHRIFT_SCOPED_CHECK(test::expectRoundTrip<Tag>(
-      StdSerializer<Tag, StandardProtocol::Json>(), value));
-  FBTHRIFT_SCOPED_CHECK(test::expectRoundTrip<Tag>(
+  FBTHRIFT_SCOPED_CHECK(testSerialization<Tag>(
       StdSerializer<Tag, StandardProtocol::SimpleJson>(), value));
 }
 

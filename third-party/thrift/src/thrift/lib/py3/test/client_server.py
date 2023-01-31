@@ -316,6 +316,8 @@ class ClientServerTests(unittest.TestCase):
                 await client.__aenter__()
                 self.assertTrue(await client.invert(False))
                 self.assertFalse(await client.invert(True))
+                # pyre-fixme[1001]: `client.__aexit__(None, None, None)` is never
+                #  awaited.
                 client.__aexit__(None, None, None)
                 del client  # If we do not abort here then good
 

@@ -54,6 +54,7 @@ jobs:
   run_quick_tests:
     name: Run HHVM quick tests
     runs-on: 16-core
+    needs: build_deb
     container:
       image: ubuntu:focal
     steps:
@@ -72,6 +73,7 @@ jobs:
   run_all_tests:
     name: Run all HHVM tests
     runs-on: 16-core
+    needs: build_deb
     container:
       image: ubuntu:focal
     steps:
@@ -83,6 +85,37 @@ jobs:
 
     - name: Install hhvm.deb
       run: sudo apt-get install ./hhvm.deb
+
+    - name: Set up locales
+      run: |
+        sudo tee -a /etc/locale.gen << EOF
+        de_DE.UTF-8 UTF-8
+        de_DE ISO-8859-1
+        de_DE@euro ISO-8859-15
+        en_GB.UTF-8 UTF-8
+        en_GB ISO-8859-1
+        en_GB.ISO-8859-15 ISO-8859-15
+        en_US.UTF-8 UTF-8
+        en_US ISO-8859-1
+        en_US.ISO-8859-15 ISO-8859-15
+        es_ES.UTF-8 UTF-8
+        es_ES ISO-8859-1
+        es_ES@euro ISO-8859-15
+        fr_FR.UTF-8 UTF-8
+        fr_FR ISO-8859-1
+        fr_FR@euro ISO-8859-15
+        pt_PT.UTF-8 UTF-8
+        pt_PT ISO-8859-1
+        pt_PT@euro ISO-8859-15
+        tr_TR.UTF-8 UTF-8
+        tr_TR ISO-8859-9
+        zh_CN.UTF-8 UTF-8
+        zh_CN.GB18030 GB18030
+        zh_CN.GBK GBK
+        zh_CN GB2312
+        EOF
+    - name: Configure locales
+      run: dpkg-reconfigure -frontend=noninteractive locales
 
     - name: Run HHVM tests
       run: hhvm hphp/test/run.php -x hphp/test/cmake_builds_excluded_tests slow
@@ -90,6 +123,7 @@ jobs:
   run_all_tests_repo:
     name: Run all HHVM tests (repo mode)
     runs-on: 16-core
+    needs: build_deb
     container:
       image: ubuntu:focal
     steps:
@@ -102,8 +136,36 @@ jobs:
     - name: Install hhvm.deb
       run: sudo apt-get install ./hhvm.deb
 
+    - name: Set up locales
+      run: |
+        sudo tee -a /etc/locale.gen << EOF
+        de_DE.UTF-8 UTF-8
+        de_DE ISO-8859-1
+        de_DE@euro ISO-8859-15
+        en_GB.UTF-8 UTF-8
+        en_GB ISO-8859-1
+        en_GB.ISO-8859-15 ISO-8859-15
+        en_US.UTF-8 UTF-8
+        en_US ISO-8859-1
+        en_US.ISO-8859-15 ISO-8859-15
+        es_ES.UTF-8 UTF-8
+        es_ES ISO-8859-1
+        es_ES@euro ISO-8859-15
+        fr_FR.UTF-8 UTF-8
+        fr_FR ISO-8859-1
+        fr_FR@euro ISO-8859-15
+        pt_PT.UTF-8 UTF-8
+        pt_PT ISO-8859-1
+        pt_PT@euro ISO-8859-15
+        tr_TR.UTF-8 UTF-8
+        tr_TR ISO-8859-9
+        zh_CN.UTF-8 UTF-8
+        zh_CN.GB18030 GB18030
+        zh_CN.GBK GBK
+        zh_CN GB2312
+        EOF
+    - name: Configure locales
+      run: dpkg-reconfigure -frontend=noninteractive locales
+
     - name: Run HHVM tests
       run: hhvm hphp/test/run.php --repo -x hphp/test/cmake_builds_excluded_tests slow
-
-
-    

@@ -599,7 +599,7 @@ class ThriftServerConfig {
   static constexpr int DEFAULT_LISTEN_BACKLOG = 1024;
 
   //! Prefix for pool thread names
-  ServerAttributeStatic<std::string> poolThreadName_{""};
+  ServerAttributeStatic<std::string> poolThreadName_{"ThriftSrv"};
 
   //! Number of io worker threads (may be set) (should be # of CPU cores)
   ServerAttributeStatic<size_t> nWorkers_{T_ASYNC_DEFAULT_WORKER_THREADS};

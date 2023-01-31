@@ -170,6 +170,7 @@ module.exports = {
           Beta: [
             ...fbInternalOnly(['fb/features/adapters']),
             'features/any',
+            'features/terse-write'
           ]
         },
         // Experimental features:
@@ -540,6 +541,7 @@ module.exports = {
           ]
         },
         'contributions/universal-name',
+        'contributions/terse-write',
         {
           type: 'category',
           label: 'Documentation',

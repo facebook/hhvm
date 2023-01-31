@@ -221,20 +221,29 @@ ocaml_ffi! {
     fn hh_rust_provider_backend_get_shallow_class(
         backend: Backend,
         name: UnsafeOcamlPtr,
-    ) -> Option<UnsafeOcamlPtr> {
+    ) -> UnsafeOcamlPtr {
         // SAFETY: We have to make sure not to use this value after calling into
         // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
         let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
             if let opt @ Some(_) = unsafe { backend.get_ocaml_shallow_class(name) } {
-                return opt;
+                return to_ocaml(&opt);
             }
-            let name = pos::TypeName::from(std::str::from_utf8(name).unwrap());
-            let c: Option<Arc<decl::ShallowClass<BReason>>> =
-                backend.shallow_decl_provider().get_class(name).unwrap();
-            c.as_ref().map(to_ocaml)
-        } else {
-            unimplemented!("get_shallow_class: {UNIMPLEMENTED_MESSAGE}")
+        }
+        let name = pos::TypeName::from(std::str::from_utf8(name).unwrap());
+        match &*backend {
+            BackendWrapper::Positioned(backend) => {
+                let res: Option<Arc<decl::ShallowClass<BReason>>> = backend.shallow_decl_provider()
+                    .get_class(name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+            BackendWrapper::PositionFree(backend) => {
+                let res: Option<Arc<decl::ShallowClass<NReason>>> = backend.shallow_decl_provider()
+                    .get_class(name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
         }
     }
 

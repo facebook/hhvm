@@ -12,6 +12,8 @@ pub trait RustProviderBackend<R: Reason> {
 
     fn naming_provider(&self) -> &dyn naming_provider::NamingProvider;
 
+    fn shallow_decl_provider(&self) -> &dyn shallow_decl_provider::ShallowDeclProvider<R>;
+
     fn folded_decl_provider(&self) -> &dyn folded_decl_provider::FoldedDeclProvider<R>;
 
     fn as_any(&self) -> &dyn std::any::Any;

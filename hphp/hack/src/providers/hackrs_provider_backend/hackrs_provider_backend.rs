@@ -228,6 +228,10 @@ impl rust_provider_backend_api::RustProviderBackend<BR> for HhServerProviderBack
         &*self.naming_table
     }
 
+    fn shallow_decl_provider(&self) -> &dyn ShallowDeclProvider<BR> {
+        &*self.lazy_shallow_decl_provider
+    }
+
     fn folded_decl_provider(&self) -> &dyn FoldedDeclProvider<BR> {
         &*self.folded_decl_provider
     }

@@ -36,14 +36,16 @@ let error_if_reified ~because_nested (pos, name) = function
   | SoftReified
   | Reified ->
     Errors.add_naming_error
-    @@ Naming_error.HKT_unsupported_feature
-         { pos; because_nested; var_name = name; feature = `reification }
+      Naming_error.(
+        HKT_unsupported_feature
+          { pos; because_nested; var_name = name; feature = Ft_reification })
 
 let error_if_user_attributes ~because_nested (pos, name) attrs =
   if not (List.is_empty attrs) then
     Errors.add_naming_error
-    @@ Naming_error.HKT_unsupported_feature
-         { pos; because_nested; var_name = name; feature = `user_attrs }
+      Naming_error.(
+        HKT_unsupported_feature
+          { pos; because_nested; var_name = name; feature = Ft_user_attrs })
 
 let error_if_not_invariant ~because_nested (pos, name) =
   let open Ast_defs in
@@ -52,14 +54,16 @@ let error_if_not_invariant ~because_nested (pos, name) =
   | Covariant
   | Contravariant ->
     Errors.add_naming_error
-    @@ Naming_error.HKT_unsupported_feature
-         { pos; because_nested; var_name = name; feature = `variance }
+      Naming_error.(
+        HKT_unsupported_feature
+          { pos; because_nested; var_name = name; feature = Ft_variance })
 
 let error_if_constraints_present ~because_nested (pos, name) constraints =
   if not (List.is_empty constraints) then
     Errors.add_naming_error
-    @@ Naming_error.HKT_unsupported_feature
-         { pos; because_nested; var_name = name; feature = `constraints }
+      Naming_error.(
+        HKT_unsupported_feature
+          { pos; because_nested; var_name = name; feature = Ft_constraints })
 
 let rec check_tparam ~nested (seen : tparam_info) tparam =
   let name = tparam.tp_name in
@@ -138,13 +142,14 @@ let check_where_constraints (seen : tparam_info) cstrs =
           (match SMap.find_opt t seen with
           | Some (_, true, true) ->
             Errors.add_naming_error
-            @@ Naming_error.HKT_unsupported_feature
-                 {
-                   pos;
-                   because_nested = false;
-                   var_name = t;
-                   feature = `where_constraints;
-                 }
+              Naming_error.(
+                HKT_unsupported_feature
+                  {
+                    pos;
+                    because_nested = false;
+                    var_name = t;
+                    feature = Ft_where_constraints;
+                  })
           | Some _
           | None ->
             ());

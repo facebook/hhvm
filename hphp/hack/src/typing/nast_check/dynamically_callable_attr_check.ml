@@ -50,10 +50,10 @@ let handler =
       | (Some p, _) ->
         let vis =
           match vis with
-          | Public -> `public
-          | Private -> `private_
-          | Protected -> `protected
-          | Internal -> `internal
+          | Public -> Naming_error.Vpublic
+          | Private -> Naming_error.Vprivate
+          | Protected -> Naming_error.Vprotected
+          | Internal -> Naming_error.Vinternal
         in
         Errors.add_naming_error
         @@ Naming_error.Illegal_use_of_dynamically_callable

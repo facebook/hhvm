@@ -5,6 +5,23 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+type visibility =
+  | Vprivate
+  | Vpublic
+  | Vinternal
+  | Vprotected
+
+type return_only_hint =
+  | Hvoid
+  | Hnoreturn
+
+type unsupported_feature =
+  | Ft_where_constraints
+  | Ft_constraints
+  | Ft_reification
+  | Ft_user_attrs
+  | Ft_variance
+
 type t =
   | Unsupported_trait_use_as of Pos.t
   | Unsupported_instead_of of Pos.t
@@ -143,7 +160,7 @@ type t =
   | Prop_without_typehint of {
       pos: Pos.t;
       prop_name: string;
-      vis: [ `public | `private_ | `internal | `protected ];
+      vis: visibility;
     }
   | Illegal_constant of Pos.t
   | Invalid_require_implements of Pos.t
@@ -175,7 +192,7 @@ type t =
   | Illegal_use_of_dynamically_callable of {
       attr_pos: Pos.t;
       meth_pos: Pos.t;
-      vis: [ `public | `private_ | `internal | `protected ];
+      vis: visibility;
     }
   | Parent_in_function_pointer of {
       pos: Pos.t;
@@ -190,7 +207,7 @@ type t =
   | Invalid_wildcard_context of Pos.t
   | Return_only_typehint of {
       pos: Pos.t;
-      kind: [ `noreturn | `void ];
+      kind: return_only_hint;
     }
   | Unexpected_type_arguments of Pos.t
   | Too_many_type_arguments of Pos.t
@@ -199,13 +216,7 @@ type t =
       pos: Pos.t;
       because_nested: bool;
       var_name: string;
-      feature:
-        [ `where_constraints
-        | `constraints
-        | `reification
-        | `user_attrs
-        | `variance
-        ];
+      feature: unsupported_feature;
     }
   | HKT_partial_application of {
       pos: Pos.t;

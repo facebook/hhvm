@@ -47,12 +47,12 @@ let on_hint on_error hint ~ctx =
   | (pos, Aast.(Hprim Tvoid)) when not allow_retonly ->
     on_error
       (Naming_phase_error.naming
-      @@ Naming_error.Return_only_typehint { pos; kind = `void });
+         Naming_error.(Return_only_typehint { pos; kind = Hvoid }));
     (ctx, Error (pos, Aast.Herr))
   | (pos, Aast.(Hprim Tnoreturn)) when not allow_retonly ->
     on_error
       (Naming_phase_error.naming
-      @@ Naming_error.Return_only_typehint { pos; kind = `noreturn });
+         Naming_error.(Return_only_typehint { pos; kind = Hnoreturn }));
     (ctx, Error (pos, Aast.Herr))
   | _ -> (ctx, Ok hint)
 

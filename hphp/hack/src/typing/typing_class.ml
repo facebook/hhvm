@@ -1088,10 +1088,10 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
   (if Option.is_none (hint_of_type_hint cv.cv_type) then
     let vis =
       match cv.cv_visibility with
-      | Public -> `public
-      | Private -> `private_
-      | Internal -> `internal
-      | Protected -> `protected
+      | Public -> Naming_error.Vpublic
+      | Private -> Naming_error.Vprivate
+      | Internal -> Naming_error.Vinternal
+      | Protected -> Naming_error.Vprotected
     in
     let (pos, prop_name) = cv.cv_id in
     Errors.add_naming_error

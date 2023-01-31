@@ -9,6 +9,29 @@ open Hh_prelude
 open String_utils
 module Error_code = Error_codes.Naming
 
+type visibility =
+  | Vprivate
+  | Vpublic
+  | Vinternal
+  | Vprotected
+
+type return_only_hint =
+  | Hvoid
+  | Hnoreturn
+
+type unsupported_feature =
+  | Ft_where_constraints
+  | Ft_constraints
+  | Ft_reification
+  | Ft_user_attrs
+  | Ft_variance
+
+let visibility_to_string = function
+  | Vpublic -> "public"
+  | Vprivate -> "private"
+  | Vinternal -> "internal"
+  | Vprotected -> "protected"
+
 type t =
   | Unsupported_trait_use_as of Pos.t
   | Unsupported_instead_of of Pos.t
@@ -147,7 +170,7 @@ type t =
   | Prop_without_typehint of {
       pos: Pos.t;
       prop_name: string;
-      vis: [ `public | `private_ | `internal | `protected ];
+      vis: visibility;
     }
   | Illegal_constant of Pos.t
   | Invalid_require_implements of Pos.t
@@ -179,7 +202,7 @@ type t =
   | Illegal_use_of_dynamically_callable of {
       attr_pos: Pos.t;
       meth_pos: Pos.t;
-      vis: [ `public | `private_ | `internal | `protected ];
+      vis: visibility;
     }
   | Parent_in_function_pointer of {
       pos: Pos.t;
@@ -194,7 +217,7 @@ type t =
   | Invalid_wildcard_context of Pos.t
   | Return_only_typehint of {
       pos: Pos.t;
-      kind: [ `noreturn | `void ];
+      kind: return_only_hint;
     }
   | Unexpected_type_arguments of Pos.t
   | Too_many_type_arguments of Pos.t
@@ -203,13 +226,7 @@ type t =
       pos: Pos.t;
       because_nested: bool;
       var_name: string;
-      feature:
-        [ `where_constraints
-        | `constraints
-        | `reification
-        | `user_attrs
-        | `variance
-        ];
+      feature: unsupported_feature;
     }
   | HKT_partial_application of {
       pos: Pos.t;
@@ -259,7 +276,7 @@ let const_without_typehint pos name type_ =
     []
 
 let prop_without_typehint pos name vis =
-  let visibility = Render.vis_to_string vis in
+  let visibility = visibility_to_string vis in
   let msg =
     Printf.sprintf "Please add a type hint `%s SomeType $%s`" visibility name
   in
@@ -369,7 +386,7 @@ let wildcard_param_disallowed pos =
     []
 
 let illegal_use_of_dynamically_callable attr_pos meth_pos vis =
-  let visibility = Render.vis_to_string vis in
+  let visibility = visibility_to_string vis in
   User_error.make
     Error_code.(to_enum IllegalUseOfDynamicallyCallable)
     (attr_pos, "`__DynamicallyCallable` can only be used on public methods")
@@ -933,8 +950,8 @@ let return_only_typehint pos kind =
     Markdown_lite.md_codify
     @@
     match kind with
-    | `void -> "void"
-    | `noreturn -> "noreturn"
+    | Hvoid -> "void"
+    | Hnoreturn -> "noreturn"
   in
   User_error.make
     Error_code.(to_enum ReturnOnlyTypehint)
@@ -974,11 +991,11 @@ let hkt_unsupported_feature pos because_nested var_name feature =
   in
   let feature_desc =
     match feature with
-    | `where_constraints -> "where constraints mentioning"
-    | `constraints -> "constraints on"
-    | `reification -> "reification of"
-    | `user_attrs -> "user attributes on"
-    | `variance -> "variance other than invariant for"
+    | Ft_where_constraints -> "where constraints mentioning"
+    | Ft_constraints -> "constraints on"
+    | Ft_reification -> "reification of"
+    | Ft_user_attrs -> "user attributes on"
+    | Ft_variance -> "variance other than invariant for"
   in
   User_error.make
     Error_code.(to_enum HigherKindedTypesUnsupportedFeature)

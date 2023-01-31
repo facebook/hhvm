@@ -74,15 +74,15 @@ use oxidized::aast_defs::XhpAttribute;
 use oxidized::aast_defs::XhpSimple;
 
 pub trait Pass {
-    type Ctx;
+    type Ctx: Copy;
 
     #[inline(always)]
     fn on_ty_program<Ex, En>(
         &self,
         _elem: &mut Program<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Def ------------------------------------------------------------------
@@ -91,9 +91,9 @@ pub trait Pass {
     fn on_ty_def<Ex, En>(
         &self,
         _elem: &mut Def<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- TypeDef --------------------------------------------------------------
@@ -102,9 +102,9 @@ pub trait Pass {
     fn on_ty_typedef<Ex, En>(
         &self,
         _elem: &mut Typedef<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- FunDef ---------------------------------------------------------------
@@ -113,9 +113,9 @@ pub trait Pass {
     fn on_ty_fun_def<Ex, En>(
         &self,
         _elem: &mut FunDef<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- ModuleDef ------------------------------------------------------------
@@ -124,9 +124,9 @@ pub trait Pass {
     fn on_ty_module_def<Ex, En>(
         &self,
         _elem: &mut ModuleDef<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Gconst ---------------------------------------------------------------
@@ -135,27 +135,27 @@ pub trait Pass {
     fn on_ty_gconst<Ex, En>(
         &self,
         _elem: &mut Gconst<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_fld_gconst_type_(
         &self,
         _elem: &mut Option<Hint>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_fld_gconst_value<Ex, En>(
         &self,
         _elem: &mut Expr<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Stmt -----------------------------------------------------------------
@@ -164,81 +164,81 @@ pub trait Pass {
     fn on_ty_stmt<Ex, En>(
         &self,
         _elem: &mut Stmt<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_stmt_<Ex, En>(
         &self,
         _elem: &mut Stmt_<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_block<Ex, En>(
         &self,
         _elem: &mut Block<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_using_stmt<Ex, En>(
         &self,
         _elem: &mut UsingStmt<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_gen_case<Ex, En>(
         &self,
         _elem: &mut GenCase<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_case<Ex, En>(
         &self,
         _elem: &mut Case<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_default_case<Ex, En>(
         &self,
         _elem: &mut DefaultCase<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_catch<Ex, En>(
         &self,
         _elem: &mut Catch<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_as_expr<Ex, En>(
         &self,
         _elem: &mut AsExpr<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- ClassId --------------------------------------------------------------
@@ -247,18 +247,18 @@ pub trait Pass {
     fn on_ty_class_id<Ex, En>(
         &self,
         _elem: &mut ClassId<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_class_id_<Ex, En>(
         &self,
         _elem: &mut ClassId_<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Expr -----------------------------------------------------------------
@@ -267,99 +267,99 @@ pub trait Pass {
     fn on_ty_expr<Ex, En>(
         &self,
         _elem: &mut Expr<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_expr_<Ex, En>(
         &self,
         _elem: &mut Expr_<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_collection_targ<Ex>(
         &self,
         _elem: &mut CollectionTarg<Ex>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_funcion_ptr_id<Ex, En>(
         &self,
         _elem: &mut FunctionPtrId<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_expression_tree<Ex, En>(
         &self,
         _elem: &mut ExpressionTree<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_class_get_expr<Ex, En>(
         &self,
         _elem: &mut ClassGetExpr<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_field<Ex, En>(
         &self,
         _elem: &mut Field<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_afield<Ex, En>(
         &self,
         _elem: &mut Afield<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_xhp_simple<Ex, En>(
         &self,
         _elem: &mut XhpSimple<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_xhp_attribute<Ex, En>(
         &self,
         _elem: &mut XhpAttribute<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_xhp_attr<Ex, En>(
         &self,
         _elem: &mut XhpAttr<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
     // -- Fun_ -----------------------------------------------------------------
 
@@ -367,9 +367,9 @@ pub trait Pass {
     fn on_ty_fun_<Ex, En>(
         &self,
         _elem: &mut Fun_<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -377,9 +377,9 @@ pub trait Pass {
     fn on_fld_fun__ret<Ex>(
         &self,
         _elem: &mut TypeHint<Ex>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Method_ --------------------------------------------------------------
@@ -388,9 +388,9 @@ pub trait Pass {
     fn on_ty_method_<Ex, En>(
         &self,
         _elem: &mut Method_<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -398,9 +398,9 @@ pub trait Pass {
     fn on_fld_method__ret<Ex>(
         &self,
         _elem: &mut TypeHint<Ex>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- FunParam -------------------------------------------------------------
@@ -409,9 +409,9 @@ pub trait Pass {
     fn on_ty_fun_param<Ex, En>(
         &self,
         _elem: &mut FunParam<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Efun -----------------------------------------------------------------
@@ -420,9 +420,9 @@ pub trait Pass {
     fn on_ty_efun<Ex, En>(
         &self,
         _elem: &mut Efun<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- FuncBody -------------------------------------------------------------
@@ -431,9 +431,9 @@ pub trait Pass {
     fn on_ty_func_body<Ex, En>(
         &self,
         _elem: &mut FuncBody<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Class_ ---------------------------------------------------------------
@@ -442,9 +442,9 @@ pub trait Pass {
     fn on_ty_class_<Ex, En>(
         &self,
         _elem: &mut Class_<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -452,9 +452,9 @@ pub trait Pass {
     fn on_fld_class__tparams<Ex, En>(
         &self,
         _elem: &mut Vec<Tparam<Ex, En>>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -462,9 +462,9 @@ pub trait Pass {
     fn on_fld_class__extends(
         &self,
         _elem: &mut Vec<ClassHint>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -472,9 +472,9 @@ pub trait Pass {
     fn on_fld_class__uses(
         &self,
         _elem: &mut Vec<TraitHint>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -482,9 +482,9 @@ pub trait Pass {
     fn on_fld_class__xhp_attr_uses(
         &self,
         _elem: &mut Vec<XhpAttrHint>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -492,9 +492,9 @@ pub trait Pass {
     fn on_fld_class__reqs(
         &self,
         _elem: &mut Vec<(ClassHint, RequireKind)>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -502,9 +502,9 @@ pub trait Pass {
     fn on_fld_class__implements(
         &self,
         _elem: &mut Vec<ClassHint>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -512,9 +512,9 @@ pub trait Pass {
     fn on_fld_class__where_constraints(
         &self,
         _elem: &mut Vec<WhereConstraintHint>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -522,9 +522,9 @@ pub trait Pass {
     fn on_fld_class__consts<Ex, En>(
         &self,
         _elem: &mut Vec<ClassConst<Ex, En>>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -532,9 +532,9 @@ pub trait Pass {
     fn on_fld_class__typeconsts<Ex, En>(
         &self,
         _elem: &mut Vec<ClassTypeconstDef<Ex, En>>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -542,9 +542,9 @@ pub trait Pass {
     fn on_fld_class__vars<Ex, En>(
         &self,
         _elem: &mut Vec<ClassVar<Ex, En>>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -552,9 +552,9 @@ pub trait Pass {
     fn on_fld_class__methods<Ex, En>(
         &self,
         _elem: &mut Vec<Method_<Ex, En>>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -562,9 +562,9 @@ pub trait Pass {
     fn on_fld_class__xhp_attrs<Ex, En>(
         &self,
         _elem: &mut Vec<XhpAttr<Ex, En>>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -572,9 +572,9 @@ pub trait Pass {
     fn on_fld_class__user_attributes<Ex, En>(
         &self,
         _elem: &mut UserAttributes<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
@@ -582,9 +582,9 @@ pub trait Pass {
     fn on_fld_class__enum_(
         &self,
         _elem: &mut Option<Enum_>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- ClassVar -------------------------------------------------------------
@@ -593,27 +593,27 @@ pub trait Pass {
     fn on_ty_class_var<Ex, En>(
         &self,
         _elem: &mut ClassVar<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_fld_class_var_type_<Ex>(
         &self,
         _elem: &mut TypeHint<Ex>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_fld_class_var_expr<Ex, En>(
         &self,
         _elem: &mut Option<Expr<Ex, En>>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- ClassConst -----------------------------------------------------------
@@ -622,18 +622,18 @@ pub trait Pass {
     fn on_ty_class_const<Ex, En>(
         &self,
         _elem: &mut ClassConst<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_class_const_kind<Ex, En>(
         &self,
         _elem: &mut ClassConstKind<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- ClassTypeconstDef ----------------------------------------------------
@@ -641,42 +641,46 @@ pub trait Pass {
     fn on_ty_class_typeconst_def<Ex, En>(
         &self,
         _elem: &mut ClassTypeconstDef<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
     #[inline(always)]
     fn on_ty_class_typeconst(
         &self,
         _elem: &mut ClassTypeconst,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_class_abstract_typeconst(
         &self,
         _elem: &mut ClassAbstractTypeconst,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_class_concrete_typeconst(
         &self,
         _elem: &mut ClassConcreteTypeconst,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Context(s) -----------------------------------------------------------
 
     #[inline(always)]
-    fn on_ty_context(&self, _elem: &mut Context, _ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+    fn on_ty_context(
+        &self,
+        _elem: &mut Context,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- WhereConstraintHint --------------------------------------------------
@@ -685,16 +689,16 @@ pub trait Pass {
     fn on_ty_where_constraint_hint(
         &self,
         _elem: &mut WhereConstraintHint,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Enum -----------------------------------------------------------------
 
     #[inline(always)]
-    fn on_ty_enum_(&self, _elem: &mut Enum_, _ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+    fn on_ty_enum_(&self, _elem: &mut Enum_, ctx: Self::Ctx) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- TypeHint<Ex> ---------------------------------------------------------
@@ -703,21 +707,29 @@ pub trait Pass {
     fn on_ty_type_hint<Ex>(
         &self,
         _elem: &mut TypeHint<Ex>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
-    fn on_ty_type_hint_(&self, _elem: &mut TypeHint_, _ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+    fn on_ty_type_hint_(
+        &self,
+        _elem: &mut TypeHint_,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Targ -----------------------------------------------------------------
 
     #[inline(always)]
-    fn on_ty_targ<Ex>(&self, _elem: &mut Targ<Ex>, _ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+    fn on_ty_targ<Ex>(
+        &self,
+        _elem: &mut Targ<Ex>,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Tparam ---------------------------------------------------------------
@@ -726,9 +738,9 @@ pub trait Pass {
     fn on_ty_tparam<Ex, En>(
         &self,
         _elem: &mut Tparam<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- UserAttribute(s) -----------------------------------------------------
@@ -737,18 +749,18 @@ pub trait Pass {
     fn on_ty_user_attributes<Ex, En>(
         &self,
         _elem: &mut UserAttributes<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_user_attribute<Ex, En>(
         &self,
         _elem: &mut UserAttribute<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- FileAttribute --------------------------------------------------------
@@ -757,154 +769,180 @@ pub trait Pass {
     fn on_ty_file_attribute<Ex, En>(
         &self,
         _elem: &mut FileAttribute<Ex, En>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     // -- Hints ----------------------------------------------------------------
     #[inline(always)]
-    fn on_ty_hint(&self, _elem: &mut Hint, _ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+    fn on_ty_hint(&self, _elem: &mut Hint, ctx: Self::Ctx) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
-    fn on_ty_hint_(&self, _elem: &mut Hint_, _ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+    fn on_ty_hint_(&self, _elem: &mut Hint_, ctx: Self::Ctx) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
-    fn on_ty_hint_fun(&self, _elem: &mut HintFun, _ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+    fn on_ty_hint_fun(
+        &self,
+        _elem: &mut HintFun,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_fld_hint_fun_param_tys(
         &self,
         _elem: &mut Vec<Hint>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_fld_hint_fun_variadic_ty(
         &self,
         _elem: &mut VariadicHint,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_fld_hint_fun_ctxs(
         &self,
         _elem: &mut Option<Contexts>,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_fld_hint_fun_return_ty(
         &self,
         _elem: &mut Hint,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_refinement(
         &self,
         _elem: &mut Refinement,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_type_refinement(
         &self,
         _elem: &mut TypeRefinement,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_type_refinement_bounds(
         &self,
         _elem: &mut TypeRefinementBounds,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_ctx_refinement(
         &self,
         _elem: &mut CtxRefinement,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_ctx_refinement_bounds(
         &self,
         _elem: &mut CtxRefinementBounds,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
-    fn on_ty_contexts(&self, _elem: &mut Contexts, _ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+    fn on_ty_contexts(
+        &self,
+        _elem: &mut Contexts,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_nast_shape_info(
         &self,
         _elem: &mut NastShapeInfo,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
     fn on_ty_shape_field_info(
         &self,
         _elem: &mut ShapeFieldInfo,
-        _ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
-    fn on_ty_class_hint(&self, _elem: &mut Hint, _ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+    fn on_ty_class_hint(
+        &self,
+        _elem: &mut Hint,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
-    fn on_ty_trait_hint(&self, _elem: &mut Hint, _ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+    fn on_ty_trait_hint(
+        &self,
+        _elem: &mut Hint,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 
     #[inline(always)]
-    fn on_ty_xhp_attr_hint(&self, _elem: &mut Hint, _ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        ControlFlow::Continue(())
+    fn on_ty_xhp_attr_hint(
+        &self,
+        _elem: &mut Hint,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        ControlFlow::Continue(ctx)
     }
 }
 
-struct Passes<Ctx, P: Pass<Ctx = Ctx>, Q: Pass<Ctx = Ctx>> {
+struct Passes<Ctx, P, Q>
+where
+    Ctx: Copy,
+    P: Pass<Ctx = Ctx>,
+    Q: Pass<Ctx = Ctx>,
+{
     fst: P,
     snd: Q,
 }
 
 impl<Ctx, P, Q> Pass for Passes<Ctx, P, Q>
 where
+    Ctx: Copy,
     P: Pass<Ctx = Ctx>,
     Q: Pass<Ctx = Ctx>,
 {
@@ -914,9 +952,9 @@ where
     fn on_ty_program<Ex, En>(
         &self,
         elem: &mut Program<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_program(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_program(elem, ctx)?;
         self.snd.on_ty_program(elem, ctx)
     }
 
@@ -926,9 +964,9 @@ where
     fn on_ty_def<Ex, En>(
         &self,
         elem: &mut Def<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_def(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_def(elem, ctx)?;
         self.snd.on_ty_def(elem, ctx)
     }
 
@@ -938,9 +976,9 @@ where
     fn on_ty_typedef<Ex, En>(
         &self,
         elem: &mut Typedef<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_typedef(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_typedef(elem, ctx)?;
         self.snd.on_ty_typedef(elem, ctx)
     }
 
@@ -950,9 +988,9 @@ where
     fn on_ty_fun_def<Ex, En>(
         &self,
         elem: &mut FunDef<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_fun_def(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_fun_def(elem, ctx)?;
         self.snd.on_ty_fun_def(elem, ctx)
     }
 
@@ -962,9 +1000,9 @@ where
     fn on_ty_module_def<Ex, En>(
         &self,
         elem: &mut ModuleDef<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_module_def(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_module_def(elem, ctx)?;
         self.snd.on_ty_module_def(elem, ctx)
     }
 
@@ -974,9 +1012,9 @@ where
     fn on_ty_gconst<Ex, En>(
         &self,
         elem: &mut Gconst<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_gconst(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_gconst(elem, ctx)?;
         self.snd.on_ty_gconst(elem, ctx)
     }
 
@@ -984,9 +1022,9 @@ where
     fn on_fld_gconst_type_(
         &self,
         elem: &mut Option<Hint>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_gconst_type_(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_gconst_type_(elem, ctx)?;
         self.snd.on_fld_gconst_type_(elem, ctx)
     }
 
@@ -994,9 +1032,9 @@ where
     fn on_fld_gconst_value<Ex, En>(
         &self,
         elem: &mut Expr<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_gconst_value(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_gconst_value(elem, ctx)?;
         self.snd.on_fld_gconst_value(elem, ctx)
     }
 
@@ -1006,9 +1044,9 @@ where
     fn on_ty_stmt<Ex, En>(
         &self,
         elem: &mut Stmt<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_stmt(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_stmt(elem, ctx)?;
         self.snd.on_ty_stmt(elem, ctx)
     }
 
@@ -1016,9 +1054,9 @@ where
     fn on_ty_stmt_<Ex, En>(
         &self,
         elem: &mut Stmt_<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_stmt_(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_stmt_(elem, ctx)?;
         self.snd.on_ty_stmt_(elem, ctx)
     }
 
@@ -1026,9 +1064,9 @@ where
     fn on_ty_block<Ex, En>(
         &self,
         elem: &mut Block<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_block(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_block(elem, ctx)?;
         self.snd.on_ty_block(elem, ctx)
     }
 
@@ -1036,9 +1074,9 @@ where
     fn on_ty_using_stmt<Ex, En>(
         &self,
         elem: &mut UsingStmt<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_using_stmt(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_using_stmt(elem, ctx)?;
         self.snd.on_ty_using_stmt(elem, ctx)
     }
 
@@ -1046,9 +1084,9 @@ where
     fn on_ty_gen_case<Ex, En>(
         &self,
         elem: &mut GenCase<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_gen_case(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_gen_case(elem, ctx)?;
         self.snd.on_ty_gen_case(elem, ctx)
     }
 
@@ -1056,9 +1094,9 @@ where
     fn on_ty_case<Ex, En>(
         &self,
         elem: &mut Case<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_case(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_case(elem, ctx)?;
         self.snd.on_ty_case(elem, ctx)
     }
 
@@ -1066,9 +1104,9 @@ where
     fn on_ty_default_case<Ex, En>(
         &self,
         elem: &mut DefaultCase<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_default_case(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_default_case(elem, ctx)?;
         self.snd.on_ty_default_case(elem, ctx)
     }
 
@@ -1076,9 +1114,9 @@ where
     fn on_ty_catch<Ex, En>(
         &self,
         elem: &mut Catch<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_catch(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_catch(elem, ctx)?;
         self.snd.on_ty_catch(elem, ctx)
     }
 
@@ -1086,9 +1124,9 @@ where
     fn on_ty_as_expr<Ex, En>(
         &self,
         elem: &mut AsExpr<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_as_expr(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_as_expr(elem, ctx)?;
         self.snd.on_ty_as_expr(elem, ctx)
     }
 
@@ -1098,9 +1136,9 @@ where
     fn on_ty_class_id<Ex, En>(
         &self,
         elem: &mut ClassId<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_id(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_id(elem, ctx)?;
         self.snd.on_ty_class_id(elem, ctx)
     }
 
@@ -1108,9 +1146,9 @@ where
     fn on_ty_class_id_<Ex, En>(
         &self,
         elem: &mut ClassId_<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_id_(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_id_(elem, ctx)?;
         self.snd.on_ty_class_id_(elem, ctx)
     }
 
@@ -1120,9 +1158,9 @@ where
     fn on_ty_expr<Ex, En>(
         &self,
         elem: &mut Expr<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_expr(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_expr(elem, ctx)?;
         self.snd.on_ty_expr(elem, ctx)
     }
 
@@ -1130,9 +1168,9 @@ where
     fn on_ty_expr_<Ex, En>(
         &self,
         elem: &mut Expr_<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_expr_(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_expr_(elem, ctx)?;
         self.snd.on_ty_expr_(elem, ctx)
     }
 
@@ -1140,9 +1178,9 @@ where
     fn on_ty_collection_targ<Ex>(
         &self,
         elem: &mut CollectionTarg<Ex>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_collection_targ(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_collection_targ(elem, ctx)?;
         self.snd.on_ty_collection_targ(elem, ctx)
     }
 
@@ -1150,9 +1188,9 @@ where
     fn on_ty_funcion_ptr_id<Ex, En>(
         &self,
         elem: &mut FunctionPtrId<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_funcion_ptr_id(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_funcion_ptr_id(elem, ctx)?;
         self.snd.on_ty_funcion_ptr_id(elem, ctx)
     }
 
@@ -1160,9 +1198,9 @@ where
     fn on_ty_expression_tree<Ex, En>(
         &self,
         elem: &mut ExpressionTree<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_expression_tree(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_expression_tree(elem, ctx)?;
         self.snd.on_ty_expression_tree(elem, ctx)
     }
 
@@ -1170,9 +1208,9 @@ where
     fn on_ty_class_get_expr<Ex, En>(
         &self,
         elem: &mut ClassGetExpr<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_get_expr(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_get_expr(elem, ctx)?;
         self.snd.on_ty_class_get_expr(elem, ctx)
     }
 
@@ -1180,9 +1218,9 @@ where
     fn on_ty_field<Ex, En>(
         &self,
         elem: &mut Field<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_field(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_field(elem, ctx)?;
         self.snd.on_ty_field(elem, ctx)
     }
 
@@ -1190,9 +1228,9 @@ where
     fn on_ty_afield<Ex, En>(
         &self,
         elem: &mut Afield<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_afield(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_afield(elem, ctx)?;
         self.snd.on_ty_afield(elem, ctx)
     }
 
@@ -1200,9 +1238,9 @@ where
     fn on_ty_xhp_simple<Ex, En>(
         &self,
         elem: &mut XhpSimple<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_xhp_simple(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_xhp_simple(elem, ctx)?;
         self.snd.on_ty_xhp_simple(elem, ctx)
     }
 
@@ -1210,9 +1248,9 @@ where
     fn on_ty_xhp_attribute<Ex, En>(
         &self,
         elem: &mut XhpAttribute<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_xhp_attribute(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_xhp_attribute(elem, ctx)?;
         self.snd.on_ty_xhp_attribute(elem, ctx)
     }
 
@@ -1220,9 +1258,9 @@ where
     fn on_ty_xhp_attr<Ex, En>(
         &self,
         elem: &mut XhpAttr<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_xhp_attr(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_xhp_attr(elem, ctx)?;
         self.snd.on_ty_xhp_attr(elem, ctx)
     }
     // -- Fun_ -----------------------------------------------------------------
@@ -1231,9 +1269,9 @@ where
     fn on_ty_fun_<Ex, En>(
         &self,
         elem: &mut Fun_<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_fun_(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_fun_(elem, ctx)?;
         self.snd.on_ty_fun_(elem, ctx)
     }
 
@@ -1242,9 +1280,9 @@ where
     fn on_fld_fun__ret<Ex>(
         &self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_fun__ret(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_fun__ret(elem, ctx)?;
         self.snd.on_fld_fun__ret(elem, ctx)
     }
 
@@ -1254,9 +1292,9 @@ where
     fn on_ty_method_<Ex, En>(
         &self,
         elem: &mut Method_<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_method_(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_method_(elem, ctx)?;
         self.snd.on_ty_method_(elem, ctx)
     }
 
@@ -1265,9 +1303,9 @@ where
     fn on_fld_method__ret<Ex>(
         &self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_method__ret(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_method__ret(elem, ctx)?;
         self.snd.on_fld_method__ret(elem, ctx)
     }
 
@@ -1277,9 +1315,9 @@ where
     fn on_ty_fun_param<Ex, En>(
         &self,
         elem: &mut FunParam<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_fun_param(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_fun_param(elem, ctx)?;
         self.snd.on_ty_fun_param(elem, ctx)
     }
 
@@ -1289,9 +1327,9 @@ where
     fn on_ty_efun<Ex, En>(
         &self,
         elem: &mut Efun<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_efun(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_efun(elem, ctx)?;
         self.snd.on_ty_efun(elem, ctx)
     }
 
@@ -1301,9 +1339,9 @@ where
     fn on_ty_func_body<Ex, En>(
         &self,
         elem: &mut FuncBody<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_func_body(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_func_body(elem, ctx)?;
         self.snd.on_ty_func_body(elem, ctx)
     }
 
@@ -1313,9 +1351,9 @@ where
     fn on_ty_class_<Ex, En>(
         &self,
         elem: &mut Class_<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_(elem, ctx)?;
         self.snd.on_ty_class_(elem, ctx)
     }
 
@@ -1324,9 +1362,9 @@ where
     fn on_fld_class__tparams<Ex, En>(
         &self,
         elem: &mut Vec<Tparam<Ex, En>>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__tparams(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__tparams(elem, ctx)?;
         self.snd.on_fld_class__tparams(elem, ctx)
     }
 
@@ -1335,9 +1373,9 @@ where
     fn on_fld_class__extends(
         &self,
         elem: &mut Vec<ClassHint>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__extends(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__extends(elem, ctx)?;
         self.snd.on_fld_class__extends(elem, ctx)
     }
 
@@ -1346,9 +1384,9 @@ where
     fn on_fld_class__uses(
         &self,
         elem: &mut Vec<TraitHint>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__uses(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__uses(elem, ctx)?;
         self.snd.on_fld_class__uses(elem, ctx)
     }
 
@@ -1357,9 +1395,9 @@ where
     fn on_fld_class__xhp_attr_uses(
         &self,
         elem: &mut Vec<XhpAttrHint>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__xhp_attr_uses(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__xhp_attr_uses(elem, ctx)?;
         self.snd.on_fld_class__xhp_attr_uses(elem, ctx)
     }
 
@@ -1368,9 +1406,9 @@ where
     fn on_fld_class__reqs(
         &self,
         elem: &mut Vec<(ClassHint, RequireKind)>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__reqs(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__reqs(elem, ctx)?;
         self.snd.on_fld_class__reqs(elem, ctx)
     }
 
@@ -1379,9 +1417,9 @@ where
     fn on_fld_class__implements(
         &self,
         elem: &mut Vec<ClassHint>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__implements(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__implements(elem, ctx)?;
         self.snd.on_fld_class__implements(elem, ctx)
     }
 
@@ -1390,9 +1428,9 @@ where
     fn on_fld_class__where_constraints(
         &self,
         elem: &mut Vec<WhereConstraintHint>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__where_constraints(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__where_constraints(elem, ctx)?;
         self.snd.on_fld_class__where_constraints(elem, ctx)
     }
 
@@ -1401,9 +1439,9 @@ where
     fn on_fld_class__consts<Ex, En>(
         &self,
         elem: &mut Vec<ClassConst<Ex, En>>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__consts(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__consts(elem, ctx)?;
         self.snd.on_fld_class__consts(elem, ctx)
     }
 
@@ -1412,9 +1450,9 @@ where
     fn on_fld_class__typeconsts<Ex, En>(
         &self,
         elem: &mut Vec<ClassTypeconstDef<Ex, En>>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__typeconsts(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__typeconsts(elem, ctx)?;
         self.snd.on_fld_class__typeconsts(elem, ctx)
     }
 
@@ -1423,9 +1461,9 @@ where
     fn on_fld_class__vars<Ex, En>(
         &self,
         elem: &mut Vec<ClassVar<Ex, En>>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__vars(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__vars(elem, ctx)?;
         self.snd.on_fld_class__vars(elem, ctx)
     }
 
@@ -1434,9 +1472,9 @@ where
     fn on_fld_class__methods<Ex, En>(
         &self,
         elem: &mut Vec<Method_<Ex, En>>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__methods(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__methods(elem, ctx)?;
         self.snd.on_fld_class__methods(elem, ctx)
     }
 
@@ -1445,9 +1483,9 @@ where
     fn on_fld_class__xhp_attrs<Ex, En>(
         &self,
         elem: &mut Vec<XhpAttr<Ex, En>>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__xhp_attrs(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__xhp_attrs(elem, ctx)?;
         self.snd.on_fld_class__xhp_attrs(elem, ctx)
     }
 
@@ -1456,9 +1494,9 @@ where
     fn on_fld_class__user_attributes<Ex, En>(
         &self,
         elem: &mut UserAttributes<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__user_attributes(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__user_attributes(elem, ctx)?;
         self.snd.on_fld_class__user_attributes(elem, ctx)
     }
 
@@ -1467,9 +1505,9 @@ where
     fn on_fld_class__enum_(
         &self,
         elem: &mut Option<Enum_>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__enum_(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class__enum_(elem, ctx)?;
         self.snd.on_fld_class__enum_(elem, ctx)
     }
 
@@ -1479,9 +1517,9 @@ where
     fn on_ty_class_var<Ex, En>(
         &self,
         elem: &mut ClassVar<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_var(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_var(elem, ctx)?;
         self.snd.on_ty_class_var(elem, ctx)
     }
 
@@ -1489,9 +1527,9 @@ where
     fn on_fld_class_var_type_<Ex>(
         &self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class_var_type_(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class_var_type_(elem, ctx)?;
         self.snd.on_fld_class_var_type_(elem, ctx)
     }
 
@@ -1499,9 +1537,9 @@ where
     fn on_fld_class_var_expr<Ex, En>(
         &self,
         elem: &mut Option<Expr<Ex, En>>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class_var_expr(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_class_var_expr(elem, ctx)?;
         self.snd.on_fld_class_var_expr(elem, ctx)
     }
 
@@ -1511,9 +1549,9 @@ where
     fn on_ty_class_const<Ex, En>(
         &self,
         elem: &mut ClassConst<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_const(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_const(elem, ctx)?;
         self.snd.on_ty_class_const(elem, ctx)
     }
 
@@ -1521,9 +1559,9 @@ where
     fn on_ty_class_const_kind<Ex, En>(
         &self,
         elem: &mut ClassConstKind<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_const_kind(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_const_kind(elem, ctx)?;
         self.snd.on_ty_class_const_kind(elem, ctx)
     }
 
@@ -1532,18 +1570,18 @@ where
     fn on_ty_class_typeconst_def<Ex, En>(
         &self,
         elem: &mut ClassTypeconstDef<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_typeconst_def(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_typeconst_def(elem, ctx)?;
         self.snd.on_ty_class_typeconst_def(elem, ctx)
     }
     #[inline(always)]
     fn on_ty_class_typeconst(
         &self,
         elem: &mut ClassTypeconst,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_typeconst(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_typeconst(elem, ctx)?;
         self.snd.on_ty_class_typeconst(elem, ctx)
     }
 
@@ -1551,9 +1589,9 @@ where
     fn on_ty_class_abstract_typeconst(
         &self,
         elem: &mut ClassAbstractTypeconst,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_abstract_typeconst(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_abstract_typeconst(elem, ctx)?;
         self.snd.on_ty_class_abstract_typeconst(elem, ctx)
     }
 
@@ -1561,23 +1599,31 @@ where
     fn on_ty_class_concrete_typeconst(
         &self,
         elem: &mut ClassConcreteTypeconst,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_concrete_typeconst(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_concrete_typeconst(elem, ctx)?;
         self.snd.on_ty_class_concrete_typeconst(elem, ctx)
     }
 
     // -- Context(s) -----------------------------------------------------------
 
     #[inline(always)]
-    fn on_ty_contexts(&self, elem: &mut Contexts, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_contexts(elem, ctx)?;
+    fn on_ty_contexts(
+        &self,
+        elem: &mut Contexts,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_contexts(elem, ctx)?;
         self.snd.on_ty_contexts(elem, ctx)
     }
 
     #[inline(always)]
-    fn on_ty_context(&self, elem: &mut Context, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_context(elem, ctx)?;
+    fn on_ty_context(
+        &self,
+        elem: &mut Context,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_context(elem, ctx)?;
         self.snd.on_ty_context(elem, ctx)
     }
 
@@ -1587,17 +1633,17 @@ where
     fn on_ty_where_constraint_hint(
         &self,
         elem: &mut WhereConstraintHint,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_where_constraint_hint(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_where_constraint_hint(elem, ctx)?;
         self.snd.on_ty_where_constraint_hint(elem, ctx)
     }
 
     // -- Enum -----------------------------------------------------------------
 
     #[inline(always)]
-    fn on_ty_enum_(&self, elem: &mut Enum_, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_enum_(elem, ctx)?;
+    fn on_ty_enum_(&self, elem: &mut Enum_, ctx: Self::Ctx) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_enum_(elem, ctx)?;
         self.snd.on_ty_enum_(elem, ctx)
     }
 
@@ -1607,23 +1653,31 @@ where
     fn on_ty_type_hint<Ex>(
         &self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_type_hint(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_type_hint(elem, ctx)?;
         self.snd.on_ty_type_hint(elem, ctx)
     }
 
     #[inline(always)]
-    fn on_ty_type_hint_(&self, elem: &mut TypeHint_, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_type_hint_(elem, ctx)?;
+    fn on_ty_type_hint_(
+        &self,
+        elem: &mut TypeHint_,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_type_hint_(elem, ctx)?;
         self.snd.on_ty_type_hint_(elem, ctx)
     }
 
     // -- Targ -----------------------------------------------------------------
 
     #[inline(always)]
-    fn on_ty_targ<Ex>(&self, elem: &mut Targ<Ex>, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_targ(elem, ctx)?;
+    fn on_ty_targ<Ex>(
+        &self,
+        elem: &mut Targ<Ex>,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_targ(elem, ctx)?;
         self.snd.on_ty_targ(elem, ctx)
     }
 
@@ -1633,9 +1687,9 @@ where
     fn on_ty_tparam<Ex, En>(
         &self,
         elem: &mut Tparam<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_tparam(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_tparam(elem, ctx)?;
         self.snd.on_ty_tparam(elem, ctx)
     }
 
@@ -1645,9 +1699,9 @@ where
     fn on_ty_user_attributes<Ex, En>(
         &self,
         elem: &mut UserAttributes<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_user_attributes(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_user_attributes(elem, ctx)?;
         self.snd.on_ty_user_attributes(elem, ctx)
     }
 
@@ -1655,9 +1709,9 @@ where
     fn on_ty_user_attribute<Ex, En>(
         &self,
         elem: &mut UserAttribute<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_user_attribute(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_user_attribute(elem, ctx)?;
         self.snd.on_ty_user_attribute(elem, ctx)
     }
 
@@ -1667,28 +1721,32 @@ where
     fn on_ty_file_attribute<Ex, En>(
         &self,
         elem: &mut FileAttribute<Ex, En>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_file_attribute(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_file_attribute(elem, ctx)?;
         self.snd.on_ty_file_attribute(elem, ctx)
     }
 
     // -- Hints ----------------------------------------------------------------
     #[inline(always)]
-    fn on_ty_hint(&self, elem: &mut Hint, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_hint(elem, ctx)?;
+    fn on_ty_hint(&self, elem: &mut Hint, ctx: Self::Ctx) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_hint(elem, ctx)?;
         self.snd.on_ty_hint(elem, ctx)
     }
 
     #[inline(always)]
-    fn on_ty_hint_(&self, elem: &mut Hint_, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_hint_(elem, ctx)?;
+    fn on_ty_hint_(&self, elem: &mut Hint_, ctx: Self::Ctx) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_hint_(elem, ctx)?;
         self.snd.on_ty_hint_(elem, ctx)
     }
 
     #[inline(always)]
-    fn on_ty_hint_fun(&self, elem: &mut HintFun, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_hint_fun(elem, ctx)?;
+    fn on_ty_hint_fun(
+        &self,
+        elem: &mut HintFun,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_hint_fun(elem, ctx)?;
         self.snd.on_ty_hint_fun(elem, ctx)
     }
 
@@ -1696,9 +1754,9 @@ where
     fn on_fld_hint_fun_param_tys(
         &self,
         elem: &mut Vec<Hint>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_hint_fun_param_tys(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_hint_fun_param_tys(elem, ctx)?;
         self.snd.on_fld_hint_fun_param_tys(elem, ctx)
     }
 
@@ -1706,9 +1764,9 @@ where
     fn on_fld_hint_fun_variadic_ty(
         &self,
         elem: &mut VariadicHint,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_hint_fun_variadic_ty(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_hint_fun_variadic_ty(elem, ctx)?;
         self.snd.on_fld_hint_fun_variadic_ty(elem, ctx)
     }
 
@@ -1716,9 +1774,9 @@ where
     fn on_fld_hint_fun_ctxs(
         &self,
         elem: &mut Option<Contexts>,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_hint_fun_ctxs(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_hint_fun_ctxs(elem, ctx)?;
         self.snd.on_fld_hint_fun_ctxs(elem, ctx)
     }
 
@@ -1726,15 +1784,19 @@ where
     fn on_fld_hint_fun_return_ty(
         &self,
         elem: &mut Hint,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_hint_fun_return_ty(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_fld_hint_fun_return_ty(elem, ctx)?;
         self.snd.on_fld_hint_fun_return_ty(elem, ctx)
     }
 
     #[inline(always)]
-    fn on_ty_refinement(&self, elem: &mut Refinement, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_refinement(elem, ctx)?;
+    fn on_ty_refinement(
+        &self,
+        elem: &mut Refinement,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_refinement(elem, ctx)?;
         self.snd.on_ty_refinement(elem, ctx)
     }
 
@@ -1742,9 +1804,9 @@ where
     fn on_ty_type_refinement(
         &self,
         elem: &mut TypeRefinement,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_type_refinement(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_type_refinement(elem, ctx)?;
         self.snd.on_ty_type_refinement(elem, ctx)
     }
 
@@ -1752,9 +1814,9 @@ where
     fn on_ty_type_refinement_bounds(
         &self,
         elem: &mut TypeRefinementBounds,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_type_refinement_bounds(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_type_refinement_bounds(elem, ctx)?;
         self.snd.on_ty_type_refinement_bounds(elem, ctx)
     }
 
@@ -1762,9 +1824,9 @@ where
     fn on_ty_ctx_refinement(
         &self,
         elem: &mut CtxRefinement,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_ctx_refinement(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_ctx_refinement(elem, ctx)?;
         self.snd.on_ty_ctx_refinement(elem, ctx)
     }
 
@@ -1772,9 +1834,9 @@ where
     fn on_ty_ctx_refinement_bounds(
         &self,
         elem: &mut CtxRefinementBounds,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_ctx_refinement_bounds(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_ctx_refinement_bounds(elem, ctx)?;
         self.snd.on_ty_ctx_refinement_bounds(elem, ctx)
     }
 
@@ -1782,9 +1844,9 @@ where
     fn on_ty_nast_shape_info(
         &self,
         elem: &mut NastShapeInfo,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_nast_shape_info(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_nast_shape_info(elem, ctx)?;
         self.snd.on_ty_nast_shape_info(elem, ctx)
     }
 
@@ -1792,27 +1854,39 @@ where
     fn on_ty_shape_field_info(
         &self,
         elem: &mut ShapeFieldInfo,
-        ctx: &mut Self::Ctx,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_shape_field_info(elem, ctx)?;
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_shape_field_info(elem, ctx)?;
         self.snd.on_ty_shape_field_info(elem, ctx)
     }
 
     #[inline(always)]
-    fn on_ty_class_hint(&self, elem: &mut Hint, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_hint(elem, ctx)?;
+    fn on_ty_class_hint(
+        &self,
+        elem: &mut Hint,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_class_hint(elem, ctx)?;
         self.snd.on_ty_class_hint(elem, ctx)
     }
 
     #[inline(always)]
-    fn on_ty_trait_hint(&self, elem: &mut Hint, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_trait_hint(elem, ctx)?;
+    fn on_ty_trait_hint(
+        &self,
+        elem: &mut Hint,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_trait_hint(elem, ctx)?;
         self.snd.on_ty_trait_hint(elem, ctx)
     }
 
     #[inline(always)]
-    fn on_ty_xhp_attr_hint(&self, elem: &mut Hint, ctx: &mut Self::Ctx) -> ControlFlow<(), ()> {
-        self.fst.on_ty_xhp_attr_hint(elem, ctx)?;
+    fn on_ty_xhp_attr_hint(
+        &self,
+        elem: &mut Hint,
+        ctx: Self::Ctx,
+    ) -> ControlFlow<Self::Ctx, Self::Ctx> {
+        let ctx = self.fst.on_ty_xhp_attr_hint(elem, ctx)?;
         self.snd.on_ty_xhp_attr_hint(elem, ctx)
     }
 }
@@ -1834,23 +1908,25 @@ macro_rules! passes{
 // -- Transform & traverse
 // -----------------------------------------------------------------------------
 
-pub fn transform_ty_program<Ctx, Ex, En>(
+pub fn transform_ty_program<Ctx: Copy, Ex, En>(
     elem: &mut Program<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_program(elem, ctx) {
-        return;
+    match &top_down.on_ty_program(elem, ctx) {
+        ControlFlow::Break(_) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_program(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_program(elem, *ctx);
+        }
     }
-    traverse_ty_program(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_program(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_program<Ctx, Ex, En>(
+fn traverse_ty_program<Ctx: Copy, Ex, En>(
     elem: &mut Program<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -1860,23 +1936,25 @@ fn traverse_ty_program<Ctx, Ex, En>(
 
 // -- Def ----------------------------------------------------------------------
 
-pub fn transform_ty_def<Ctx, Ex, En>(
+pub fn transform_ty_def<Ctx: Copy, Ex, En>(
     elem: &mut Def<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_def(elem, ctx) {
-        return;
+    match &top_down.on_ty_def(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_def(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_def(elem, *ctx);
+        }
     }
-    traverse_ty_def(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_def(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_def<Ctx, Ex, En>(
+fn traverse_ty_def<Ctx: Copy, Ex, En>(
     elem: &mut Def<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -1897,23 +1975,25 @@ fn traverse_ty_def<Ctx, Ex, En>(
 
 // -- TypeDef ------------------------------------------------------------------
 
-pub fn transform_ty_typedef<Ctx, Ex, En>(
+pub fn transform_ty_typedef<Ctx: Copy, Ex, En>(
     elem: &mut Typedef<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_typedef(elem, ctx) {
-        return;
+    match &top_down.on_ty_typedef(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_typedef(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_typedef(elem, *ctx);
+        }
     }
-    traverse_ty_typedef(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_typedef(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_typedef<Ctx, Ex, En>(
+fn traverse_ty_typedef<Ctx: Copy, Ex, En>(
     elem: &mut Typedef<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -1934,23 +2014,25 @@ fn traverse_ty_typedef<Ctx, Ex, En>(
 }
 // -- FunDef -------------------------------------------------------------------
 
-pub fn transform_ty_fun_def<Ctx, Ex, En>(
+pub fn transform_ty_fun_def<Ctx: Copy, Ex, En>(
     elem: &mut FunDef<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_fun_def(elem, ctx) {
-        return;
+    match &top_down.on_ty_fun_def(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_fun_def(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_fun_def(elem, *ctx);
+        }
     }
-    traverse_ty_fun_def(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_fun_def(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_fun_def<Ctx, Ex, En>(
+fn traverse_ty_fun_def<Ctx: Copy, Ex, En>(
     elem: &mut FunDef<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -1962,23 +2044,25 @@ fn traverse_ty_fun_def<Ctx, Ex, En>(
 
 // -- ModuleDef ----------------------------------------------------------------
 
-pub fn transform_ty_module_def<Ctx, Ex, En>(
+pub fn transform_ty_module_def<Ctx: Copy, Ex, En>(
     elem: &mut ModuleDef<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_module_def(elem, ctx) {
-        return;
+    match &top_down.on_ty_module_def(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_module_def(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_module_def(elem, *ctx);
+        }
     }
-    traverse_ty_module_def(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_module_def(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_module_def<Ctx, Ex, En>(
+fn traverse_ty_module_def<Ctx: Copy, Ex, En>(
     elem: &mut ModuleDef<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -1987,23 +2071,25 @@ fn traverse_ty_module_def<Ctx, Ex, En>(
 
 // -- Gconst -------------------------------------------------------------------
 
-pub fn transform_ty_gconst<Ctx, Ex, En>(
+pub fn transform_ty_gconst<Ctx: Copy, Ex, En>(
     elem: &mut Gconst<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_gconst(elem, ctx) {
-        return;
+    match &top_down.on_ty_gconst(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_gconst(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_gconst(elem, *ctx);
+        }
     }
-    traverse_ty_gconst(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_gconst(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_gconst<Ctx, Ex, En>(
+fn traverse_ty_gconst<Ctx: Copy, Ex, En>(
     elem: &mut Gconst<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2013,23 +2099,25 @@ fn traverse_ty_gconst<Ctx, Ex, En>(
     transform_ty_expr(&mut elem.value, ctx, top_down, bottom_up)
 }
 
-pub fn transform_fld_gconst_type_<Ctx>(
+pub fn transform_fld_gconst_type_<Ctx: Copy>(
     elem: &mut Option<Hint>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_gconst_type_(elem, ctx) {
-        return;
+    match &top_down.on_fld_gconst_type_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_gconst_type_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_gconst_type_(elem, *ctx);
+        }
     }
-    traverse_fld_gconst_type_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_gconst_type_(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_fld_gconst_type_<Ctx>(
+fn traverse_fld_gconst_type_<Ctx: Copy>(
     elem: &mut Option<Hint>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2037,23 +2125,25 @@ fn traverse_fld_gconst_type_<Ctx>(
         .for_each(|elem| transform_ty_hint(elem, ctx, top_down, bottom_up))
 }
 
-pub fn transform_fld_gconst_value_<Ctx, Ex, En>(
+pub fn transform_fld_gconst_value_<Ctx: Copy, Ex, En>(
     elem: &mut Expr<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_gconst_value(elem, ctx) {
-        return;
+    match &top_down.on_fld_gconst_value(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_gconst_value(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_gconst_value(elem, *ctx);
+        }
     }
-    traverse_fld_gconst_value(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_gconst_value(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_fld_gconst_value<Ctx, Ex, En>(
+fn traverse_fld_gconst_value<Ctx: Copy, Ex, En>(
     elem: &mut Expr<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2062,46 +2152,50 @@ fn traverse_fld_gconst_value<Ctx, Ex, En>(
 
 // -- Stmt ---------------------------------------------------------------------
 
-pub fn transform_ty_stmt<Ctx, Ex, En>(
+pub fn transform_ty_stmt<Ctx: Copy, Ex, En>(
     elem: &mut Stmt<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_stmt(elem, ctx) {
-        return;
+    match &top_down.on_ty_stmt(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_stmt(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_stmt(elem, *ctx);
+        }
     }
-    traverse_ty_stmt(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_stmt(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_stmt<Ctx, Ex, En>(
+fn traverse_ty_stmt<Ctx: Copy, Ex, En>(
     elem: &mut Stmt<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
     transform_ty_stmt_(&mut elem.1, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_stmt_<Ctx, Ex, En>(
+pub fn transform_ty_stmt_<Ctx: Copy, Ex, En>(
     elem: &mut Stmt_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_stmt_(elem, ctx) {
-        return;
+    match &top_down.on_ty_stmt_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_stmt_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_stmt_(elem, *ctx);
+        }
     }
-    traverse_ty_stmt_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_stmt_(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_stmt_<Ctx, Ex, En>(
+fn traverse_ty_stmt_<Ctx: Copy, Ex, En>(
     elem: &mut Stmt_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2176,23 +2270,25 @@ fn traverse_ty_stmt_<Ctx, Ex, En>(
     }
 }
 
-pub fn transform_ty_block<Ctx, Ex, En>(
+pub fn transform_ty_block<Ctx: Copy, Ex, En>(
     elem: &mut Block<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_block(elem, ctx) {
-        return;
+    match &top_down.on_ty_block(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_block(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_block(elem, *ctx);
+        }
     }
-    traverse_ty_block(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_block(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_block<Ctx, Ex, En>(
+fn traverse_ty_block<Ctx: Copy, Ex, En>(
     elem: &mut Block<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2200,22 +2296,24 @@ fn traverse_ty_block<Ctx, Ex, En>(
         .for_each(|elem| transform_ty_stmt(elem, ctx, top_down, bottom_up))
 }
 
-pub fn transform_ty_using_stmt<Ctx, Ex, En>(
+pub fn transform_ty_using_stmt<Ctx: Copy, Ex, En>(
     elem: &mut UsingStmt<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_using_stmt(elem, ctx) {
-        return;
+    match &top_down.on_ty_using_stmt(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_using_stmt(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_using_stmt(elem, *ctx);
+        }
     }
-    traverse_ty_using_stmt(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_using_stmt(elem, ctx);
 }
 #[inline(always)]
-fn traverse_ty_using_stmt<Ctx, Ex, En>(
+fn traverse_ty_using_stmt<Ctx: Copy, Ex, En>(
     elem: &mut UsingStmt<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2226,22 +2324,24 @@ fn traverse_ty_using_stmt<Ctx, Ex, En>(
     transform_ty_block(&mut elem.block, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_gen_case<Ctx, Ex, En>(
+pub fn transform_ty_gen_case<Ctx: Copy, Ex, En>(
     elem: &mut GenCase<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_gen_case(elem, ctx) {
-        return;
+    match &top_down.on_ty_gen_case(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_gen_case(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_gen_case(elem, *ctx);
+        }
     }
-    traverse_ty_gen_case(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_gen_case(elem, ctx);
 }
 #[inline(always)]
-fn traverse_ty_gen_case<Ctx, Ex, En>(
+fn traverse_ty_gen_case<Ctx: Copy, Ex, En>(
     elem: &mut GenCase<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2251,23 +2351,25 @@ fn traverse_ty_gen_case<Ctx, Ex, En>(
     }
 }
 
-pub fn transform_ty_case<Ctx, Ex, En>(
+pub fn transform_ty_case<Ctx: Copy, Ex, En>(
     elem: &mut Case<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_case(elem, ctx) {
-        return;
+    match &top_down.on_ty_case(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_case(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_case(elem, *ctx);
+        }
     }
-    traverse_ty_case(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_case(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_case<Ctx, Ex, En>(
+fn traverse_ty_case<Ctx: Copy, Ex, En>(
     elem: &mut Case<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2275,69 +2377,75 @@ fn traverse_ty_case<Ctx, Ex, En>(
     transform_ty_block(&mut elem.1, ctx, top_down, bottom_up);
 }
 
-pub fn transform_ty_default_case<Ctx, Ex, En>(
+pub fn transform_ty_default_case<Ctx: Copy, Ex, En>(
     elem: &mut DefaultCase<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_default_case(elem, ctx) {
-        return;
+    match &top_down.on_ty_default_case(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_default_case(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_default_case(elem, *ctx);
+        }
     }
-    traverse_ty_default_case(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_default_case(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_default_case<Ctx, Ex, En>(
+fn traverse_ty_default_case<Ctx: Copy, Ex, En>(
     elem: &mut DefaultCase<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
     transform_ty_block(&mut elem.1, ctx, top_down, bottom_up);
 }
 
-pub fn transform_ty_catch<Ctx, Ex, En>(
+pub fn transform_ty_catch<Ctx: Copy, Ex, En>(
     elem: &mut Catch<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_catch(elem, ctx) {
-        return;
+    match &top_down.on_ty_catch(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_catch(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_catch(elem, *ctx);
+        }
     }
-    traverse_ty_catch(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_catch(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_catch<Ctx, Ex, En>(
+fn traverse_ty_catch<Ctx: Copy, Ex, En>(
     elem: &mut Catch<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
     transform_ty_block(&mut elem.2, ctx, top_down, bottom_up);
 }
 
-pub fn transform_ty_as_expr<Ctx, Ex, En>(
+pub fn transform_ty_as_expr<Ctx: Copy, Ex, En>(
     elem: &mut AsExpr<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_as_expr(elem, ctx) {
-        return;
+    match &top_down.on_ty_as_expr(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_as_expr(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_as_expr(elem, *ctx);
+        }
     }
-    traverse_ty_as_expr(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_as_expr(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_as_expr<Ctx, Ex, En>(
+fn traverse_ty_as_expr<Ctx: Copy, Ex, En>(
     elem: &mut AsExpr<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2357,46 +2465,50 @@ fn traverse_ty_as_expr<Ctx, Ex, En>(
 
 // -- ClassId ------------------------------------------------------------------
 
-pub fn transform_ty_class_id<Ctx, Ex, En>(
+pub fn transform_ty_class_id<Ctx: Copy, Ex, En>(
     elem: &mut ClassId<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_id(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_id(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_id(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_id(elem, *ctx);
+        }
     }
-    traverse_ty_class_id(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_id(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_id<Ctx, Ex, En>(
+fn traverse_ty_class_id<Ctx: Copy, Ex, En>(
     elem: &mut ClassId<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
     transform_ty_class_id_(&mut elem.2, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_class_id_<Ctx, Ex, En>(
+pub fn transform_ty_class_id_<Ctx: Copy, Ex, En>(
     elem: &mut ClassId_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_id_(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_id_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_id_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_id_(elem, *ctx);
+        }
     }
-    traverse_ty_class_id_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_id_(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_id_<Ctx, Ex, En>(
+fn traverse_ty_class_id_<Ctx: Copy, Ex, En>(
     elem: &mut ClassId_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2408,46 +2520,50 @@ fn traverse_ty_class_id_<Ctx, Ex, En>(
 
 // -- Expr ---------------------------------------------------------------------
 
-pub fn transform_ty_expr<Ctx, Ex, En>(
+pub fn transform_ty_expr<Ctx: Copy, Ex, En>(
     elem: &mut Expr<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_expr(elem, ctx) {
-        return;
+    match &top_down.on_ty_expr(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_expr(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_expr(elem, *ctx);
+        }
     }
-    traverse_ty_expr(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_expr(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_expr<Ctx, Ex, En>(
+fn traverse_ty_expr<Ctx: Copy, Ex, En>(
     elem: &mut Expr<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
     transform_ty_expr_(&mut elem.2, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_expr_<Ctx, Ex, En>(
+pub fn transform_ty_expr_<Ctx: Copy, Ex, En>(
     elem: &mut Expr_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_expr_(elem, ctx) {
-        return;
+    match &top_down.on_ty_expr_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_expr_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_expr_(elem, *ctx);
+        }
     }
-    traverse_ty_expr_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_expr_(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_expr_<Ctx, Ex, En>(
+fn traverse_ty_expr_<Ctx: Copy, Ex, En>(
     elem: &mut Expr_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2674,23 +2790,25 @@ fn traverse_ty_expr_<Ctx, Ex, En>(
     }
 }
 
-pub fn transform_ty_collection_targ<Ctx, Ex>(
+pub fn transform_ty_collection_targ<Ctx: Copy, Ex>(
     elem: &mut CollectionTarg<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_collection_targ(elem, ctx) {
-        return;
+    match &top_down.on_ty_collection_targ(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_collection_targ(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_collection_targ(elem, *ctx);
+        }
     }
-    traverse_ty_collection_targ(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_collection_targ(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_collection_targ<Ctx, Ex>(
+fn traverse_ty_collection_targ<Ctx: Copy, Ex>(
     elem: &mut CollectionTarg<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2703,23 +2821,25 @@ fn traverse_ty_collection_targ<Ctx, Ex>(
     }
 }
 
-pub fn transform_ty_funcion_ptr_id<Ctx, Ex, En>(
+pub fn transform_ty_funcion_ptr_id<Ctx: Copy, Ex, En>(
     elem: &mut FunctionPtrId<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_funcion_ptr_id(elem, ctx) {
-        return;
+    match &top_down.on_ty_funcion_ptr_id(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_funcion_ptr_id(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_funcion_ptr_id(elem, *ctx);
+        }
     }
-    traverse_ty_funcion_ptr_id(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_funcion_ptr_id(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_funcion_ptr_id<Ctx, Ex, En>(
+fn traverse_ty_funcion_ptr_id<Ctx: Copy, Ex, En>(
     elem: &mut FunctionPtrId<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2731,23 +2851,25 @@ fn traverse_ty_funcion_ptr_id<Ctx, Ex, En>(
     }
 }
 
-pub fn transform_ty_expression_tree<Ctx, Ex, En>(
+pub fn transform_ty_expression_tree<Ctx: Copy, Ex, En>(
     elem: &mut ExpressionTree<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_expression_tree(elem, ctx) {
-        return;
+    match &top_down.on_ty_expression_tree(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_expression_tree(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_expression_tree(elem, *ctx);
+        }
     }
-    traverse_ty_expression_tree(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_expression_tree(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_expression_tree<Ctx, Ex, En>(
+fn traverse_ty_expression_tree<Ctx: Copy, Ex, En>(
     elem: &mut ExpressionTree<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2762,23 +2884,25 @@ fn traverse_ty_expression_tree<Ctx, Ex, En>(
     transform_ty_expr(&mut elem.runtime_expr, ctx, top_down, bottom_up);
 }
 
-pub fn transform_ty_class_get_expr<Ctx, Ex, En>(
+pub fn transform_ty_class_get_expr<Ctx: Copy, Ex, En>(
     elem: &mut ClassGetExpr<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_get_expr(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_get_expr(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_get_expr(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_get_expr(elem, *ctx);
+        }
     }
-    traverse_ty_class_get_expr(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_get_expr(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_get_expr<Ctx, Ex, En>(
+fn traverse_ty_class_get_expr<Ctx: Copy, Ex, En>(
     elem: &mut ClassGetExpr<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2788,23 +2912,25 @@ fn traverse_ty_class_get_expr<Ctx, Ex, En>(
     }
 }
 
-pub fn transform_ty_field<Ctx, Ex, En>(
+pub fn transform_ty_field<Ctx: Copy, Ex, En>(
     elem: &mut Field<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_field(elem, ctx) {
-        return;
+    match &top_down.on_ty_field(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_field(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_field(elem, *ctx);
+        }
     }
-    traverse_ty_field(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_field(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_field<Ctx, Ex, En>(
+fn traverse_ty_field<Ctx: Copy, Ex, En>(
     elem: &mut Field<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2812,23 +2938,25 @@ fn traverse_ty_field<Ctx, Ex, En>(
     traverse_ty_expr(&mut elem.1, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_afield<Ctx, Ex, En>(
+pub fn transform_ty_afield<Ctx: Copy, Ex, En>(
     elem: &mut Afield<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_afield(elem, ctx) {
-        return;
+    match &top_down.on_ty_afield(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_afield(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_afield(elem, *ctx);
+        }
     }
-    traverse_ty_afield(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_afield(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_afield<Ctx, Ex, En>(
+fn traverse_ty_afield<Ctx: Copy, Ex, En>(
     elem: &mut Afield<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2841,46 +2969,50 @@ fn traverse_ty_afield<Ctx, Ex, En>(
     }
 }
 
-pub fn transform_ty_xhp_simple<Ctx, Ex, En>(
+pub fn transform_ty_xhp_simple<Ctx: Copy, Ex, En>(
     elem: &mut XhpSimple<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_xhp_simple(elem, ctx) {
-        return;
+    match &top_down.on_ty_xhp_simple(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_xhp_simple(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_xhp_simple(elem, *ctx);
+        }
     }
-    traverse_ty_xhp_simple(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_xhp_simple(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_xhp_simple<Ctx, Ex, En>(
+fn traverse_ty_xhp_simple<Ctx: Copy, Ex, En>(
     elem: &mut XhpSimple<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
     transform_ty_expr(&mut elem.expr, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_xhp_attribute<Ctx, Ex, En>(
+pub fn transform_ty_xhp_attribute<Ctx: Copy, Ex, En>(
     elem: &mut XhpAttribute<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_xhp_attribute(elem, ctx) {
-        return;
+    match &top_down.on_ty_xhp_attribute(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_xhp_attribute(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_xhp_attribute(elem, *ctx);
+        }
     }
-    traverse_ty_xhp_attribute(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_xhp_attribute(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_xhp_attribute<Ctx, Ex, En>(
+fn traverse_ty_xhp_attribute<Ctx: Copy, Ex, En>(
     elem: &mut XhpAttribute<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2890,23 +3022,25 @@ fn traverse_ty_xhp_attribute<Ctx, Ex, En>(
     }
 }
 
-pub fn transform_ty_xhp_attr<Ctx, Ex, En>(
+pub fn transform_ty_xhp_attr<Ctx: Copy, Ex, En>(
     elem: &mut XhpAttr<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_xhp_attr(elem, ctx) {
-        return;
+    match &top_down.on_ty_xhp_attr(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_xhp_attr(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_xhp_attr(elem, *ctx);
+        }
     }
-    traverse_ty_xhp_attr(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_xhp_attr(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_xhp_attr<Ctx, Ex, En>(
+fn traverse_ty_xhp_attr<Ctx: Copy, Ex, En>(
     elem: &mut XhpAttr<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2920,23 +3054,25 @@ fn traverse_ty_xhp_attr<Ctx, Ex, En>(
 }
 // -- Fun_ ---------------------------------------------------------------------
 
-pub fn transform_ty_fun_<Ctx, Ex, En>(
+pub fn transform_ty_fun_<Ctx: Copy, Ex, En>(
     elem: &mut Fun_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_fun_(elem, ctx) {
-        return;
+    match &top_down.on_ty_fun_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_fun_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_fun_(elem, *ctx);
+        }
     }
-    traverse_ty_fun_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_fun_(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_fun_<Ctx, Ex, En>(
+fn traverse_ty_fun_<Ctx: Copy, Ex, En>(
     elem: &mut Fun_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2961,24 +3097,26 @@ fn traverse_ty_fun_<Ctx, Ex, En>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_fun__ret<Ctx, Ex>(
+pub fn transform_fld_fun__ret<Ctx: Copy, Ex>(
     elem: &mut TypeHint<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_fun__ret(elem, ctx) {
-        return;
+    match &top_down.on_fld_fun__ret(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_fun__ret(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_fun__ret(elem, *ctx);
+        }
     }
-    traverse_fld_fun__ret(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_fun__ret(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_fun__ret<Ctx, Ex>(
+fn traverse_fld_fun__ret<Ctx: Copy, Ex>(
     elem: &mut TypeHint<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -2987,23 +3125,25 @@ fn traverse_fld_fun__ret<Ctx, Ex>(
 
 // -- Method_ ------------------------------------------------------------------
 
-pub fn transform_ty_method_<Ctx, Ex, En>(
+pub fn transform_ty_method_<Ctx: Copy, Ex, En>(
     elem: &mut Method_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_method_(elem, ctx) {
-        return;
+    match &top_down.on_ty_method_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_method_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_method_(elem, *ctx);
+        }
     }
-    traverse_ty_method_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_method_(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_method_<Ctx, Ex, En>(
+fn traverse_ty_method_<Ctx: Copy, Ex, En>(
     elem: &mut Method_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3028,24 +3168,26 @@ fn traverse_ty_method_<Ctx, Ex, En>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_method__ret<Ctx, Ex>(
+pub fn transform_fld_method__ret<Ctx: Copy, Ex>(
     elem: &mut TypeHint<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_method__ret(elem, ctx) {
-        return;
+    match &top_down.on_fld_method__ret(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_method__ret(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_method__ret(elem, *ctx);
+        }
     }
-    traverse_fld_method__ret(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_method__ret(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_method__ret<Ctx, Ex>(
+fn traverse_fld_method__ret<Ctx: Copy, Ex>(
     elem: &mut TypeHint<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3054,23 +3196,25 @@ fn traverse_fld_method__ret<Ctx, Ex>(
 
 // -- FunParam -----------------------------------------------------------------
 
-pub fn transform_ty_fun_param<Ctx, Ex, En>(
+pub fn transform_ty_fun_param<Ctx: Copy, Ex, En>(
     elem: &mut FunParam<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_fun_param(elem, ctx) {
-        return;
+    match &top_down.on_ty_fun_param(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_fun_param(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_fun_param(elem, *ctx);
+        }
     }
-    traverse_ty_fun_param(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_fun_param(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_fun_param<Ctx, Ex, En>(
+fn traverse_ty_fun_param<Ctx: Copy, Ex, En>(
     elem: &mut FunParam<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3083,23 +3227,25 @@ fn traverse_ty_fun_param<Ctx, Ex, En>(
 
 // -- Efun ---------------------------------------------------------------------
 
-pub fn transform_ty_efun<Ctx, Ex, En>(
+pub fn transform_ty_efun<Ctx: Copy, Ex, En>(
     elem: &mut Efun<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_efun(elem, ctx) {
-        return;
+    match &top_down.on_ty_efun(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_efun(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_efun(elem, *ctx);
+        }
     }
-    traverse_ty_efun(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_efun(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_efun<Ctx, Ex, En>(
+fn traverse_ty_efun<Ctx: Copy, Ex, En>(
     elem: &mut Efun<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3108,23 +3254,25 @@ fn traverse_ty_efun<Ctx, Ex, En>(
 
 // -- FuncBody -----------------------------------------------------------------
 
-pub fn transform_ty_func_body<Ctx, Ex, En>(
+pub fn transform_ty_func_body<Ctx: Copy, Ex, En>(
     elem: &mut FuncBody<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_func_body(elem, ctx) {
-        return;
+    match &top_down.on_ty_func_body(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_func_body(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_func_body(elem, *ctx);
+        }
     }
-    traverse_ty_func_body(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_func_body(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_func_body<Ctx, Ex, En>(
+fn traverse_ty_func_body<Ctx: Copy, Ex, En>(
     elem: &mut FuncBody<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3133,23 +3281,25 @@ fn traverse_ty_func_body<Ctx, Ex, En>(
 
 // -- Class_ -------------------------------------------------------------------
 
-pub fn transform_ty_class_<Ctx, Ex, En>(
+pub fn transform_ty_class_<Ctx: Copy, Ex, En>(
     elem: &mut Class_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_(elem, *ctx);
+        }
     }
-    traverse_ty_class_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_<Ctx, Ex, En>(
+fn traverse_ty_class_<Ctx: Copy, Ex, En>(
     elem: &mut Class_<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3180,24 +3330,26 @@ fn traverse_ty_class_<Ctx, Ex, En>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__tparams<Ctx, Ex, En>(
+pub fn transform_fld_class__tparams<Ctx: Copy, Ex, En>(
     elem: &mut Vec<Tparam<Ex, En>>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__tparams(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__tparams(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__tparams(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__tparams(elem, *ctx);
+        }
     }
-    traverse_fld_class__tparams(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__tparams(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__tparams<Ctx, Ex, En>(
+fn traverse_fld_class__tparams<Ctx: Copy, Ex, En>(
     elem: &mut [Tparam<Ex, En>],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3206,23 +3358,25 @@ fn traverse_fld_class__tparams<Ctx, Ex, En>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__extends<Ctx>(
+pub fn transform_fld_class__extends<Ctx: Copy>(
     elem: &mut Vec<ClassHint>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__extends(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__extends(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__extends(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__extends(elem, *ctx);
+        }
     }
-    traverse_fld_class__extends(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__extends(elem, ctx);
 }
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__extends<Ctx>(
+fn traverse_fld_class__extends<Ctx: Copy>(
     elem: &mut [ClassHint],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3231,23 +3385,25 @@ fn traverse_fld_class__extends<Ctx>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__uses<Ctx>(
+pub fn transform_fld_class__uses<Ctx: Copy>(
     elem: &mut Vec<TraitHint>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__uses(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__uses(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__uses(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__uses(elem, *ctx);
+        }
     }
-    traverse_fld_class__uses(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__uses(elem, ctx);
 }
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__uses<Ctx>(
+fn traverse_fld_class__uses<Ctx: Copy>(
     elem: &mut [TraitHint],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3256,24 +3412,26 @@ fn traverse_fld_class__uses<Ctx>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__xhp_attr_uses<Ctx>(
+pub fn transform_fld_class__xhp_attr_uses<Ctx: Copy>(
     elem: &mut Vec<XhpAttrHint>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__xhp_attr_uses(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__xhp_attr_uses(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__xhp_attr_uses(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__xhp_attr_uses(elem, *ctx);
+        }
     }
-    traverse_fld_class__xhp_attr_uses(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__xhp_attr_uses(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__xhp_attr_uses<Ctx>(
+fn traverse_fld_class__xhp_attr_uses<Ctx: Copy>(
     elem: &mut [XhpAttrHint],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3282,24 +3440,26 @@ fn traverse_fld_class__xhp_attr_uses<Ctx>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__reqs<Ctx>(
+pub fn transform_fld_class__reqs<Ctx: Copy>(
     elem: &mut Vec<(ClassHint, RequireKind)>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__reqs(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__reqs(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__reqs(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__reqs(elem, *ctx);
+        }
     }
-    traverse_fld_class__reqs(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__reqs(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__reqs<Ctx>(
+fn traverse_fld_class__reqs<Ctx: Copy>(
     elem: &mut [(ClassHint, RequireKind)],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3308,24 +3468,26 @@ fn traverse_fld_class__reqs<Ctx>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__implements<Ctx>(
+pub fn transform_fld_class__implements<Ctx: Copy>(
     elem: &mut Vec<ClassHint>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__implements(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__implements(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__implements(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__implements(elem, *ctx);
+        }
     }
-    traverse_fld_class__implements(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__implements(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__implements<Ctx>(
+fn traverse_fld_class__implements<Ctx: Copy>(
     elem: &mut [ClassHint],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3334,24 +3496,26 @@ fn traverse_fld_class__implements<Ctx>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__where_constraints<Ctx>(
+pub fn transform_fld_class__where_constraints<Ctx: Copy>(
     elem: &mut Vec<WhereConstraintHint>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__where_constraints(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__where_constraints(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__where_constraints(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__where_constraints(elem, *ctx);
+        }
     }
-    traverse_fld_class__where_constraints(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__where_constraints(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__where_constraints<Ctx>(
+fn traverse_fld_class__where_constraints<Ctx: Copy>(
     elem: &mut [WhereConstraintHint],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3360,24 +3524,26 @@ fn traverse_fld_class__where_constraints<Ctx>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__consts<Ctx, Ex, En>(
+pub fn transform_fld_class__consts<Ctx: Copy, Ex, En>(
     elem: &mut Vec<ClassConst<Ex, En>>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__consts(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__consts(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__consts(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__consts(elem, *ctx);
+        }
     }
-    traverse_fld_class__consts(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__consts(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__consts<Ctx, Ex, En>(
+fn traverse_fld_class__consts<Ctx: Copy, Ex, En>(
     elem: &mut [ClassConst<Ex, En>],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3386,24 +3552,26 @@ fn traverse_fld_class__consts<Ctx, Ex, En>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__typeconsts<Ctx, Ex, En>(
+pub fn transform_fld_class__typeconsts<Ctx: Copy, Ex, En>(
     elem: &mut Vec<ClassTypeconstDef<Ex, En>>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__typeconsts(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__typeconsts(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__typeconsts(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__typeconsts(elem, *ctx);
+        }
     }
-    traverse_fld_class__typeconsts(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__typeconsts(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__typeconsts<Ctx, Ex, En>(
+fn traverse_fld_class__typeconsts<Ctx: Copy, Ex, En>(
     elem: &mut [ClassTypeconstDef<Ex, En>],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3412,24 +3580,26 @@ fn traverse_fld_class__typeconsts<Ctx, Ex, En>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__vars<Ctx, Ex, En>(
+pub fn transform_fld_class__vars<Ctx: Copy, Ex, En>(
     elem: &mut Vec<ClassVar<Ex, En>>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__vars(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__vars(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__vars(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__vars(elem, *ctx);
+        }
     }
-    traverse_fld_class__vars(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__vars(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__vars<Ctx, Ex, En>(
+fn traverse_fld_class__vars<Ctx: Copy, Ex, En>(
     elem: &mut [ClassVar<Ex, En>],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3438,24 +3608,26 @@ fn traverse_fld_class__vars<Ctx, Ex, En>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__methods<Ctx, Ex, En>(
+pub fn transform_fld_class__methods<Ctx: Copy, Ex, En>(
     elem: &mut Vec<Method_<Ex, En>>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__methods(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__methods(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__methods(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__methods(elem, *ctx);
+        }
     }
-    traverse_fld_class__methods(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__methods(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__methods<Ctx, Ex, En>(
+fn traverse_fld_class__methods<Ctx: Copy, Ex, En>(
     elem: &mut [Method_<Ex, En>],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3464,24 +3636,26 @@ fn traverse_fld_class__methods<Ctx, Ex, En>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__xhp_attrs<Ctx, Ex, En>(
+pub fn transform_fld_class__xhp_attrs<Ctx: Copy, Ex, En>(
     elem: &mut Vec<XhpAttr<Ex, En>>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__xhp_attrs(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__xhp_attrs(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__xhp_attrs(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__xhp_attrs(elem, *ctx);
+        }
     }
-    traverse_fld_class__xhp_attrs(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__xhp_attrs(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__xhp_attrs<Ctx, Ex, En>(
+fn traverse_fld_class__xhp_attrs<Ctx: Copy, Ex, En>(
     elem: &mut [XhpAttr<Ex, En>],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3490,24 +3664,26 @@ fn traverse_fld_class__xhp_attrs<Ctx, Ex, En>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__user_attributes<Ctx, Ex, En>(
+pub fn transform_fld_class__user_attributes<Ctx: Copy, Ex, En>(
     elem: &mut UserAttributes<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__user_attributes(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__user_attributes(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__user_attributes(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__user_attributes(elem, *ctx);
+        }
     }
-    traverse_fld_class__user_attributes(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__user_attributes(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__user_attributes<Ctx, Ex, En>(
+fn traverse_fld_class__user_attributes<Ctx: Copy, Ex, En>(
     elem: &mut UserAttributes<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3515,24 +3691,26 @@ fn traverse_fld_class__user_attributes<Ctx, Ex, En>(
 }
 
 #[allow(non_snake_case)]
-pub fn transform_fld_class__enum_<Ctx>(
+pub fn transform_fld_class__enum_<Ctx: Copy>(
     elem: &mut Option<Enum_>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class__enum_(elem, ctx) {
-        return;
+    match &top_down.on_fld_class__enum_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class__enum_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__enum_(elem, *ctx);
+        }
     }
-    traverse_fld_class__enum_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class__enum_(elem, ctx);
 }
 
 #[inline(always)]
 #[allow(non_snake_case)]
-fn traverse_fld_class__enum_<Ctx>(
+fn traverse_fld_class__enum_<Ctx: Copy>(
     elem: &mut Option<Enum_>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3541,23 +3719,25 @@ fn traverse_fld_class__enum_<Ctx>(
 }
 // -- ClassVar -----------------------------------------------------------------
 
-pub fn transform_ty_class_var<Ctx, Ex, En>(
+pub fn transform_ty_class_var<Ctx: Copy, Ex, En>(
     elem: &mut ClassVar<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_var(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_var(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_var(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_var(elem, *ctx);
+        }
     }
-    traverse_ty_class_var(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_var(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_var<Ctx, Ex, En>(
+fn traverse_ty_class_var<Ctx: Copy, Ex, En>(
     elem: &mut ClassVar<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3566,46 +3746,50 @@ fn traverse_ty_class_var<Ctx, Ex, En>(
     transform_ty_user_attributes(&mut elem.user_attributes, ctx, top_down, bottom_up)
 }
 
-pub fn transform_fld_class_var_type_<Ctx, Ex>(
+pub fn transform_fld_class_var_type_<Ctx: Copy, Ex>(
     elem: &mut TypeHint<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class_var_type_(elem, ctx) {
-        return;
+    match &top_down.on_fld_class_var_type_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class_var_type_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class_var_type_(elem, *ctx);
+        }
     }
-    traverse_fld_class_var_type_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class_var_type_(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_fld_class_var_type_<Ctx, Ex>(
+fn traverse_fld_class_var_type_<Ctx: Copy, Ex>(
     elem: &mut TypeHint<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
     transform_ty_type_hint(elem, ctx, top_down, bottom_up)
 }
 
-pub fn transform_fld_class_var_expr<Ctx, Ex, En>(
+pub fn transform_fld_class_var_expr<Ctx: Copy, Ex, En>(
     elem: &mut Option<Expr<Ex, En>>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_class_var_expr(elem, ctx) {
-        return;
+    match &top_down.on_fld_class_var_expr(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_class_var_expr(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_class_var_expr(elem, *ctx);
+        }
     }
-    traverse_fld_class_var_expr(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_class_var_expr(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_fld_class_var_expr<Ctx, Ex, En>(
+fn traverse_fld_class_var_expr<Ctx: Copy, Ex, En>(
     elem: &mut Option<Expr<Ex, En>>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3615,23 +3799,25 @@ fn traverse_fld_class_var_expr<Ctx, Ex, En>(
 
 // -- ClassConst ---------------------------------------------------------------
 
-pub fn transform_ty_class_const<Ctx, Ex, En>(
+pub fn transform_ty_class_const<Ctx: Copy, Ex, En>(
     elem: &mut ClassConst<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_const(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_const(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_const(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_const(elem, *ctx);
+        }
     }
-    traverse_ty_class_const(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_const(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_const<Ctx, Ex, En>(
+fn traverse_ty_class_const<Ctx: Copy, Ex, En>(
     elem: &mut ClassConst<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3642,23 +3828,25 @@ fn traverse_ty_class_const<Ctx, Ex, En>(
     transform_ty_class_const_kind(&mut elem.kind, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_class_const_kind<Ctx, Ex, En>(
+pub fn transform_ty_class_const_kind<Ctx: Copy, Ex, En>(
     elem: &mut ClassConstKind<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_const_kind(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_const_kind(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_const_kind(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_const_kind(elem, *ctx);
+        }
     }
-    traverse_ty_class_const_kind(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_const_kind(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_const_kind<Ctx, Ex, En>(
+fn traverse_ty_class_const_kind<Ctx: Copy, Ex, En>(
     elem: &mut ClassConstKind<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3671,23 +3859,25 @@ fn traverse_ty_class_const_kind<Ctx, Ex, En>(
 }
 
 // -- ClassTypeconstDef --------------------------------------------------------
-pub fn transform_ty_class_typeconst_def<Ctx, Ex, En>(
+pub fn transform_ty_class_typeconst_def<Ctx: Copy, Ex, En>(
     elem: &mut ClassTypeconstDef<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_typeconst_def(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_typeconst_def(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_typeconst_def(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_typeconst_def(elem, *ctx);
+        }
     }
-    traverse_ty_class_typeconst_def(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_typeconst_def(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_typeconst_def<Ctx, Ex, En>(
+fn traverse_ty_class_typeconst_def<Ctx: Copy, Ex, En>(
     elem: &mut ClassTypeconstDef<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3695,23 +3885,25 @@ fn traverse_ty_class_typeconst_def<Ctx, Ex, En>(
     transform_ty_class_typeconst(&mut elem.kind, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_class_typeconst<Ctx>(
+pub fn transform_ty_class_typeconst<Ctx: Copy>(
     elem: &mut ClassTypeconst,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_typeconst(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_typeconst(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_typeconst(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_typeconst(elem, *ctx);
+        }
     }
-    traverse_ty_class_typeconst(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_typeconst(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_typeconst<Ctx>(
+fn traverse_ty_class_typeconst<Ctx: Copy>(
     elem: &mut ClassTypeconst,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3725,23 +3917,25 @@ fn traverse_ty_class_typeconst<Ctx>(
     }
 }
 
-pub fn transform_ty_class_abstract_typeconst<Ctx>(
+pub fn transform_ty_class_abstract_typeconst<Ctx: Copy>(
     elem: &mut ClassAbstractTypeconst,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_abstract_typeconst(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_abstract_typeconst(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_abstract_typeconst(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_abstract_typeconst(elem, *ctx);
+        }
     }
-    traverse_ty_class_abstract_typeconst(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_abstract_typeconst(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_abstract_typeconst<Ctx>(
+fn traverse_ty_class_abstract_typeconst<Ctx: Copy>(
     elem: &mut ClassAbstractTypeconst,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3756,46 +3950,50 @@ fn traverse_ty_class_abstract_typeconst<Ctx>(
         .for_each(|elem| transform_ty_hint(elem, ctx, top_down, bottom_up))
 }
 
-pub fn transform_ty_class_concrete_typeconst<Ctx>(
+pub fn transform_ty_class_concrete_typeconst<Ctx: Copy>(
     elem: &mut ClassConcreteTypeconst,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_concrete_typeconst(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_concrete_typeconst(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_concrete_typeconst(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_concrete_typeconst(elem, *ctx);
+        }
     }
-    traverse_ty_class_concrete_typeconst(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_concrete_typeconst(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_concrete_typeconst<Ctx>(
+fn traverse_ty_class_concrete_typeconst<Ctx: Copy>(
     elem: &mut ClassConcreteTypeconst,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
     transform_ty_hint(&mut elem.c_tc_type, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_context<Ctx>(
+pub fn transform_ty_context<Ctx: Copy>(
     elem: &mut Context,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_context(elem, ctx) {
-        return;
+    match &top_down.on_ty_context(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_context(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_context(elem, *ctx);
+        }
     }
-    traverse_ty_context(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_context(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_context<Ctx>(
+fn traverse_ty_context<Ctx: Copy>(
     elem: &mut Context,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3804,23 +4002,25 @@ fn traverse_ty_context<Ctx>(
 
 // -- WhereConstraintHint ------------------------------------------------------
 
-pub fn transform_ty_where_constraint_hint<Ctx>(
+pub fn transform_ty_where_constraint_hint<Ctx: Copy>(
     elem: &mut WhereConstraintHint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_where_constraint_hint(elem, ctx) {
-        return;
+    match &top_down.on_ty_where_constraint_hint(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_where_constraint_hint(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_where_constraint_hint(elem, *ctx);
+        }
     }
-    traverse_ty_where_constraint_hint(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_where_constraint_hint(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_where_constraint_hint<Ctx>(
+fn traverse_ty_where_constraint_hint<Ctx: Copy>(
     elem: &mut WhereConstraintHint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3830,23 +4030,25 @@ fn traverse_ty_where_constraint_hint<Ctx>(
 
 // -- Enum ---------------------------------------------------------------------
 
-pub fn transform_ty_enum_<Ctx>(
+pub fn transform_ty_enum_<Ctx: Copy>(
     elem: &mut Enum_,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_enum_(elem, ctx) {
-        return;
+    match &top_down.on_ty_enum_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_enum_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_enum_(elem, *ctx);
+        }
     }
-    traverse_ty_enum_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_enum_(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_enum_<Ctx>(
+fn traverse_ty_enum_<Ctx: Copy>(
     elem: &mut Enum_,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3861,46 +4063,50 @@ fn traverse_ty_enum_<Ctx>(
 
 // -- TypeHint<Ex> -------------------------------------------------------------
 
-pub fn transform_ty_type_hint<Ctx, Ex>(
+pub fn transform_ty_type_hint<Ctx: Copy, Ex>(
     elem: &mut TypeHint<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_type_hint(elem, ctx) {
-        return;
+    match &top_down.on_ty_type_hint(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_type_hint(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_type_hint(elem, *ctx);
+        }
     }
-    traverse_ty_type_hint(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_type_hint(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_type_hint<Ctx, Ex>(
+fn traverse_ty_type_hint<Ctx: Copy, Ex>(
     elem: &mut TypeHint<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
     transform_ty_type_hint_(&mut elem.1, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_type_hint_<Ctx>(
+pub fn transform_ty_type_hint_<Ctx: Copy>(
     elem: &mut TypeHint_,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_type_hint_(elem, ctx) {
-        return;
+    match &top_down.on_ty_type_hint_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_type_hint_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_type_hint_(elem, *ctx);
+        }
     }
-    traverse_ty_type_hint_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_type_hint_(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_type_hint_<Ctx>(
+fn traverse_ty_type_hint_<Ctx: Copy>(
     elem: &mut TypeHint_,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3910,23 +4116,25 @@ fn traverse_ty_type_hint_<Ctx>(
 
 // -- Targ ---------------------------------------------------------------------
 
-pub fn transform_ty_targ<Ctx, Ex>(
+pub fn transform_ty_targ<Ctx: Copy, Ex>(
     elem: &mut Targ<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_targ(elem, ctx) {
-        return;
+    match &top_down.on_ty_targ(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_targ(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_targ(elem, *ctx);
+        }
     }
-    traverse_ty_targ(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_targ(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_targ<Ctx, Ex>(
+fn traverse_ty_targ<Ctx: Copy, Ex>(
     elem: &mut Targ<Ex>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3934,23 +4142,25 @@ fn traverse_ty_targ<Ctx, Ex>(
 }
 // -- Tparam -------------------------------------------------------------------
 
-pub fn transform_ty_tparam<Ctx, Ex, En>(
+pub fn transform_ty_tparam<Ctx: Copy, Ex, En>(
     elem: &mut Tparam<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_tparam(elem, ctx) {
-        return;
+    match &top_down.on_ty_tparam(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_tparam(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_tparam(elem, *ctx);
+        }
     }
-    traverse_ty_tparam(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_tparam(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_tparam<Ctx, Ex, En>(
+fn traverse_ty_tparam<Ctx: Copy, Ex, En>(
     elem: &mut Tparam<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3965,23 +4175,25 @@ fn traverse_ty_tparam<Ctx, Ex, En>(
 
 // -- UserAttribute(s) ---------------------------------------------------------
 
-pub fn transform_ty_user_attributes<Ctx, Ex, En>(
+pub fn transform_ty_user_attributes<Ctx: Copy, Ex, En>(
     elem: &mut UserAttributes<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_user_attributes(elem, ctx) {
-        return;
+    match &top_down.on_ty_user_attributes(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_user_attributes(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_user_attributes(elem, *ctx);
+        }
     }
-    traverse_ty_user_attributes(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_user_attributes(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_user_attributes<Ctx, Ex, En>(
+fn traverse_ty_user_attributes<Ctx: Copy, Ex, En>(
     elem: &mut UserAttributes<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -3989,23 +4201,25 @@ fn traverse_ty_user_attributes<Ctx, Ex, En>(
         .for_each(|elem| transform_ty_user_attribute(elem, ctx, top_down, bottom_up))
 }
 
-pub fn transform_ty_user_attribute<Ctx, Ex, En>(
+pub fn transform_ty_user_attribute<Ctx: Copy, Ex, En>(
     elem: &mut UserAttribute<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_user_attribute(elem, ctx) {
-        return;
+    match &top_down.on_ty_user_attribute(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_user_attribute(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_user_attribute(elem, *ctx);
+        }
     }
-    traverse_ty_user_attribute(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_user_attribute(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_user_attribute<Ctx, Ex, En>(
+fn traverse_ty_user_attribute<Ctx: Copy, Ex, En>(
     elem: &mut UserAttribute<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4016,23 +4230,25 @@ fn traverse_ty_user_attribute<Ctx, Ex, En>(
 
 // -- FileAttribute ------------------------------------------------------------
 
-pub fn transform_ty_file_attribute<Ctx, Ex, En>(
+pub fn transform_ty_file_attribute<Ctx: Copy, Ex, En>(
     elem: &mut FileAttribute<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_file_attribute(elem, ctx) {
-        return;
+    match &top_down.on_ty_file_attribute(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_file_attribute(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_file_attribute(elem, *ctx);
+        }
     }
-    traverse_ty_file_attribute(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_file_attribute(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_file_attribute<Ctx, Ex, En>(
+fn traverse_ty_file_attribute<Ctx: Copy, Ex, En>(
     elem: &mut FileAttribute<Ex, En>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4041,69 +4257,75 @@ fn traverse_ty_file_attribute<Ctx, Ex, En>(
 
 // -- Hints --------------------------------------------------------------------
 
-pub fn transform_ty_class_hint<Ctx>(
+pub fn transform_ty_class_hint<Ctx: Copy>(
     elem: &mut Hint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_class_hint(elem, ctx) {
-        return;
+    match &top_down.on_ty_class_hint(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_class_hint(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_hint(elem, *ctx);
+        }
     }
-    traverse_ty_class_hint(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_class_hint(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_class_hint<Ctx>(
+fn traverse_ty_class_hint<Ctx: Copy>(
     elem: &mut Hint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
     transform_ty_hint(elem, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_trait_hint<Ctx>(
+pub fn transform_ty_trait_hint<Ctx: Copy>(
     elem: &mut Hint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_trait_hint(elem, ctx) {
-        return;
+    match &top_down.on_ty_trait_hint(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_trait_hint(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_trait_hint(elem, *ctx);
+        }
     }
-    traverse_ty_trait_hint(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_trait_hint(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_trait_hint<Ctx>(
+fn traverse_ty_trait_hint<Ctx: Copy>(
     elem: &mut Hint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
     transform_ty_hint(elem, ctx, top_down, bottom_up)
 }
 
-pub fn transform_ty_xhp_attr_hint<Ctx>(
+pub fn transform_ty_xhp_attr_hint<Ctx: Copy>(
     elem: &mut Hint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_xhp_attr_hint(elem, ctx) {
-        return;
+    match &top_down.on_ty_xhp_attr_hint(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_xhp_attr_hint(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_xhp_attr_hint(elem, *ctx);
+        }
     }
-    traverse_ty_xhp_attr_hint(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_xhp_attr_hint(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_xhp_attr_hint<Ctx>(
+fn traverse_ty_xhp_attr_hint<Ctx: Copy>(
     elem: &mut Hint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4112,23 +4334,25 @@ fn traverse_ty_xhp_attr_hint<Ctx>(
 
 // -- Hint ---------------------------------------------------------------------
 
-pub fn transform_ty_hint<Ctx>(
+pub fn transform_ty_hint<Ctx: Copy>(
     elem: &mut Hint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_hint(elem, ctx) {
-        return;
+    match &top_down.on_ty_hint(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_hint(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_hint(elem, *ctx);
+        }
     }
-    traverse_ty_hint(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_hint(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_hint<Ctx>(
+fn traverse_ty_hint<Ctx: Copy>(
     elem: &mut Hint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4137,23 +4361,25 @@ fn traverse_ty_hint<Ctx>(
 
 // -- Hint_ --------------------------------------------------------------------
 
-pub fn transform_ty_hint_<Ctx>(
+pub fn transform_ty_hint_<Ctx: Copy>(
     elem: &mut Hint_,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_hint_(elem, ctx) {
-        return;
+    match &top_down.on_ty_hint_(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_hint_(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_hint_(elem, *ctx);
+        }
     }
-    traverse_ty_hint_(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_hint_(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_hint_<Ctx>(
+fn traverse_ty_hint_<Ctx: Copy>(
     elem: &mut Hint_,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4198,24 +4424,26 @@ fn traverse_ty_hint_<Ctx>(
 
 // -- HintFun ------------------------------------------------------------------
 
-pub fn transform_ty_hint_fun<Ctx>(
+pub fn transform_ty_hint_fun<Ctx: Copy>(
     elem: &mut HintFun,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_hint_fun(elem, ctx) {
-        return;
+    match &top_down.on_ty_hint_fun(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_hint_fun(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_hint_fun(elem, *ctx);
+        }
     }
-    traverse_ty_hint_fun(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_hint_fun(elem, ctx);
 }
 
 #[inline(always)]
 
-fn traverse_ty_hint_fun<Ctx>(
+fn traverse_ty_hint_fun<Ctx: Copy>(
     elem: &mut HintFun,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4227,24 +4455,26 @@ fn traverse_ty_hint_fun<Ctx>(
 
 // -- HintFun.param_tys --------------------------------------------------------
 
-pub fn transform_fld_hint_fun_param_tys<Ctx>(
+pub fn transform_fld_hint_fun_param_tys<Ctx: Copy>(
     elem: &mut Vec<Hint>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_hint_fun_param_tys(elem, ctx) {
-        return;
+    match &top_down.on_fld_hint_fun_param_tys(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_hint_fun_param_tys(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_hint_fun_param_tys(elem, *ctx);
+        }
     }
-    traverse_fld_hint_fun_param_tys(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_hint_fun_param_tys(elem, ctx);
 }
 
 #[inline(always)]
 
-fn traverse_fld_hint_fun_param_tys<Ctx>(
+fn traverse_fld_hint_fun_param_tys<Ctx: Copy>(
     elem: &mut [Hint],
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4254,24 +4484,26 @@ fn traverse_fld_hint_fun_param_tys<Ctx>(
 
 // -- HintFun.variadic_ty-------------------------------------------------------
 
-pub fn transform_fld_hint_fun_variadic_ty<Ctx>(
+pub fn transform_fld_hint_fun_variadic_ty<Ctx: Copy>(
     elem: &mut VariadicHint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_hint_fun_variadic_ty(elem, ctx) {
-        return;
+    match &top_down.on_fld_hint_fun_variadic_ty(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_hint_fun_variadic_ty(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_hint_fun_variadic_ty(elem, *ctx);
+        }
     }
-    traverse_fld_hint_fun_variadic_ty(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_hint_fun_variadic_ty(elem, ctx);
 }
 
 #[inline(always)]
 
-fn traverse_fld_hint_fun_variadic_ty<Ctx>(
+fn traverse_fld_hint_fun_variadic_ty<Ctx: Copy>(
     elem: &mut VariadicHint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4281,23 +4513,25 @@ fn traverse_fld_hint_fun_variadic_ty<Ctx>(
 
 // -- HintFun.ctxs--------------------------------------------------------------
 
-pub fn transform_fld_hint_fun_ctxs<Ctx>(
+pub fn transform_fld_hint_fun_ctxs<Ctx: Copy>(
     elem: &mut Option<Contexts>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_hint_fun_ctxs(elem, ctx) {
-        return;
+    match &top_down.on_fld_hint_fun_ctxs(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_hint_fun_ctxs(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_hint_fun_ctxs(elem, *ctx);
+        }
     }
-    traverse_fld_hint_fun_ctxs(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_hint_fun_ctxs(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_fld_hint_fun_ctxs<Ctx>(
+fn traverse_fld_hint_fun_ctxs<Ctx: Copy>(
     elem: &mut Option<Contexts>,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4307,23 +4541,25 @@ fn traverse_fld_hint_fun_ctxs<Ctx>(
 
 // -- HintFun.return_ty --------------------------------------------------------
 
-pub fn transform_fld_hint_fun_return_ty<Ctx>(
+pub fn transform_fld_hint_fun_return_ty<Ctx: Copy>(
     elem: &mut Hint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_fld_hint_fun_return_ty(elem, ctx) {
-        return;
+    match &top_down.on_fld_hint_fun_return_ty(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_fld_hint_fun_return_ty(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_fld_hint_fun_return_ty(elem, *ctx);
+        }
     }
-    traverse_fld_hint_fun_return_ty(elem, ctx, top_down, bottom_up);
-    bottom_up.on_fld_hint_fun_return_ty(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_fld_hint_fun_return_ty<Ctx>(
+fn traverse_fld_hint_fun_return_ty<Ctx: Copy>(
     elem: &mut Hint,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4332,23 +4568,25 @@ fn traverse_fld_hint_fun_return_ty<Ctx>(
 
 // -- Contexts -----------------------------------------------------------------
 
-pub fn transform_ty_contexts<Ctx>(
+pub fn transform_ty_contexts<Ctx: Copy>(
     elem: &mut Contexts,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_contexts(elem, ctx) {
-        return;
+    match &top_down.on_ty_contexts(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_contexts(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_contexts(elem, *ctx);
+        }
     }
-    traverse_ty_contexts(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_contexts(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_contexts<Ctx>(
+fn traverse_ty_contexts<Ctx: Copy>(
     elem: &mut Contexts,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4359,23 +4597,25 @@ fn traverse_ty_contexts<Ctx>(
 
 // -- Refinement ---------------------------------------------------------------
 
-pub fn transform_ty_refinement<Ctx>(
+pub fn transform_ty_refinement<Ctx: Copy>(
     elem: &mut Refinement,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_refinement(elem, ctx) {
-        return;
+    match &top_down.on_ty_refinement(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_refinement(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_refinement(elem, *ctx);
+        }
     }
-    traverse_ty_refinement(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_refinement(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_refinement<Ctx>(
+fn traverse_ty_refinement<Ctx: Copy>(
     elem: &mut Refinement,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4387,23 +4627,25 @@ fn traverse_ty_refinement<Ctx>(
 
 // -- CtxRefinement ------------------------------------------------------------
 
-pub fn transform_ty_ctx_refinement<Ctx>(
+pub fn transform_ty_ctx_refinement<Ctx: Copy>(
     elem: &mut CtxRefinement,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_ctx_refinement(elem, ctx) {
-        return;
+    match &top_down.on_ty_ctx_refinement(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_ctx_refinement(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_ctx_refinement(elem, *ctx);
+        }
     }
-    traverse_ty_ctx_refinement(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_ctx_refinement(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_ctx_refinement<Ctx>(
+fn traverse_ty_ctx_refinement<Ctx: Copy>(
     elem: &mut CtxRefinement,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4417,23 +4659,25 @@ fn traverse_ty_ctx_refinement<Ctx>(
 
 // -- TypeRefinement -----------------------------------------------------------
 
-pub fn transform_ty_type_refinement<Ctx>(
+pub fn transform_ty_type_refinement<Ctx: Copy>(
     elem: &mut TypeRefinement,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_type_refinement(elem, ctx) {
-        return;
+    match &top_down.on_ty_type_refinement(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_type_refinement(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_type_refinement(elem, *ctx);
+        }
     }
-    traverse_ty_type_refinement(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_type_refinement(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_type_refinement<Ctx>(
+fn traverse_ty_type_refinement<Ctx: Copy>(
     elem: &mut TypeRefinement,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4447,23 +4691,25 @@ fn traverse_ty_type_refinement<Ctx>(
 
 // -- CtxRefinementBounds ------------------------------------------------------
 
-pub fn transform_ty_ctx_refinement_bounds<Ctx>(
+pub fn transform_ty_ctx_refinement_bounds<Ctx: Copy>(
     elem: &mut CtxRefinementBounds,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_ctx_refinement_bounds(elem, ctx) {
-        return;
+    match &top_down.on_ty_ctx_refinement_bounds(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_ctx_refinement_bounds(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_ctx_refinement_bounds(elem, *ctx);
+        }
     }
-    traverse_ty_ctx_refinement_bounds(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_ctx_refinement_bounds(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_ctx_refinement_bounds<Ctx>(
+fn traverse_ty_ctx_refinement_bounds<Ctx: Copy>(
     elem: &mut CtxRefinementBounds,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4477,23 +4723,25 @@ fn traverse_ty_ctx_refinement_bounds<Ctx>(
 
 // -- TypeRefinementBounds -----------------------------------------------------
 
-pub fn transform_ty_type_refinement_bounds<Ctx>(
+pub fn transform_ty_type_refinement_bounds<Ctx: Copy>(
     elem: &mut TypeRefinementBounds,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_type_refinement_bounds(elem, ctx) {
-        return;
+    match &top_down.on_ty_type_refinement_bounds(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_type_refinement_bounds(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_type_refinement_bounds(elem, *ctx);
+        }
     }
-    traverse_ty_type_refinement_bounds(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_type_refinement_bounds(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_type_refinement_bounds<Ctx>(
+fn traverse_ty_type_refinement_bounds<Ctx: Copy>(
     elem: &mut TypeRefinementBounds,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4507,23 +4755,25 @@ fn traverse_ty_type_refinement_bounds<Ctx>(
 
 // -- NastShapeInfo ------------------------------------------------------------
 
-pub fn transform_ty_nast_shape_info<Ctx>(
+pub fn transform_ty_nast_shape_info<Ctx: Copy>(
     elem: &mut NastShapeInfo,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_nast_shape_info(elem, ctx) {
-        return;
+    match &top_down.on_ty_nast_shape_info(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_nast_shape_info(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_nast_shape_info(elem, *ctx);
+        }
     }
-    traverse_ty_nast_shape_info(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_nast_shape_info(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_nast_shape_info<Ctx>(
+fn traverse_ty_nast_shape_info<Ctx: Copy>(
     elem: &mut NastShapeInfo,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
@@ -4534,23 +4784,25 @@ fn traverse_ty_nast_shape_info<Ctx>(
 
 // -- ShapeFieldInfo -----------------------------------------------------------
 
-pub fn transform_ty_shape_field_info<Ctx>(
+pub fn transform_ty_shape_field_info<Ctx: Copy>(
     elem: &mut ShapeFieldInfo,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    if let ControlFlow::Break(..) = &top_down.on_ty_shape_field_info(elem, ctx) {
-        return;
+    match &top_down.on_ty_shape_field_info(elem, ctx) {
+        ControlFlow::Break(..) => (),
+        ControlFlow::Continue(ctx) => {
+            traverse_ty_shape_field_info(elem, *ctx, top_down, bottom_up);
+            bottom_up.on_ty_shape_field_info(elem, *ctx);
+        }
     }
-    traverse_ty_shape_field_info(elem, ctx, top_down, bottom_up);
-    bottom_up.on_ty_shape_field_info(elem, ctx);
 }
 
 #[inline(always)]
-fn traverse_ty_shape_field_info<Ctx>(
+fn traverse_ty_shape_field_info<Ctx: Copy>(
     elem: &mut ShapeFieldInfo,
-    ctx: &mut Ctx,
+    ctx: Ctx,
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {

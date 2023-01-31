@@ -91,15 +91,17 @@ RequestRpcMetadata makeRequestRpcMetadata(
     metadata.otherMetadata_ref() = std::move(writeHeaders);
   }
 
-  folly::dynamic logMessages = folly::dynamic::object();
-  auto frameworkMetadata = makeFrameworkMetadata(rpcOptions, logMessages);
-  if (frameworkMetadata) {
-    metadata.frameworkMetadata_ref() = std::move(frameworkMetadata);
-  }
-  if (!logMessages.empty()) {
-    THRIFT_APPLICATION_EVENT(framework_metadata_construction).log([&] {
-      return logMessages;
-    });
+  if (rpcOptions.getContextPropMask()) {
+    folly::dynamic logMessages = folly::dynamic::object();
+    auto frameworkMetadata = makeFrameworkMetadata(rpcOptions, logMessages);
+    if (frameworkMetadata) {
+      metadata.frameworkMetadata_ref() = std::move(frameworkMetadata);
+    }
+    if (!logMessages.empty()) {
+      THRIFT_APPLICATION_EVENT(framework_metadata_construction).log([&] {
+        return logMessages;
+      });
+    }
   }
 
   return metadata;

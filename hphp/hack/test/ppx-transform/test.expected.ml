@@ -96,22 +96,19 @@ end = struct
     and (transform :
           t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> t) =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_t with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-        | (_ctx, `Restart elem) ->
-          transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
+        | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_t with
@@ -119,8 +116,7 @@ end = struct
         | Some bu ->
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
     let _ = traverse
 
@@ -238,22 +234,19 @@ end = struct
           bottom_up:'ctx Pass.t ->
           'a t =
       fun (type a) (elem : a t) ~ctx ~top_down ~bottom_up : a t ->
-       let initial_ctx = ctx in
        match top_down.Pass.on_ty_t with
        | Some td ->
          (match td elem ~ctx with
          | (_ctx, `Stop elem) -> elem
-         | (ctx, `Continue elem) ->
-           let elem = traverse elem ~ctx ~top_down ~bottom_up in
+         | (td_ctx, `Continue elem) ->
+           let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
            (match bottom_up.Pass.on_ty_t with
            | None -> elem
            | Some bu ->
              (match bu elem ~ctx with
              | (_ctx, (`Continue elem | `Stop elem)) -> elem
-             | (_ctx, `Restart elem) ->
-               transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-         | (_ctx, `Restart elem) ->
-           transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+             | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
+         | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
        | _ ->
          let elem = traverse elem ~ctx ~top_down ~bottom_up in
          (match bottom_up.Pass.on_ty_t with
@@ -261,8 +254,7 @@ end = struct
          | Some bu ->
            (match bu elem ~ctx with
            | (_ctx, (`Continue elem | `Stop elem)) -> elem
-           | (_ctx, `Restart elem) ->
-             transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+           | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
     let _ = traverse
 
@@ -397,21 +389,20 @@ end = struct
               bottom_up:'ctx Pass.t ->
               'a bind =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_bind with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
+        | (_ctx, `Continue elem) ->
           (match bottom_up.Pass.on_ty_bind with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_bind elem ~ctx:initial_ctx ~top_down ~bottom_up))
+              transform_ty_bind elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ty_bind elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ty_bind elem ~ctx ~top_down ~bottom_up)
       | _ ->
         (match bottom_up.Pass.on_ty_bind with
         | None -> elem
@@ -419,7 +410,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_bind elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_bind elem ~ctx ~top_down ~bottom_up))
 
     let _ = transform_ty_bind
 
@@ -448,22 +439,21 @@ end = struct
           bottom_up:'ctx Pass.t ->
           'a term =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_term with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse_ty_term elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse_ty_term elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_term with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_term elem ~ctx:initial_ctx ~top_down ~bottom_up))
+              transform_ty_term elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ty_term elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ty_term elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ty_term elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_term with
@@ -472,7 +462,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_term elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_term elem ~ctx ~top_down ~bottom_up))
 
     let _ = traverse_ty_term
 
@@ -607,22 +597,21 @@ end = struct
           bottom_up:'ctx Pass.t ->
           'a two =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_two with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse_ty_two elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse_ty_two elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_two with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_two elem ~ctx:initial_ctx ~top_down ~bottom_up))
+              transform_ty_two elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ty_two elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ty_two elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ty_two elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_two with
@@ -631,7 +620,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_two elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_two elem ~ctx ~top_down ~bottom_up))
 
     and traverse_ty_one :
           'a.
@@ -654,22 +643,21 @@ end = struct
           bottom_up:'ctx Pass.t ->
           'a one =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_one with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse_ty_one elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse_ty_one elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_one with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_one elem ~ctx:initial_ctx ~top_down ~bottom_up))
+              transform_ty_one elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ty_one elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ty_one elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ty_one elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_one with
@@ -678,7 +666,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_one elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_one elem ~ctx ~top_down ~bottom_up))
 
     let _ = traverse_ty_two
 
@@ -817,22 +805,21 @@ end = struct
           bottom_up:'ctx Pass.t ->
           'a two =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_two with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse_ty_two elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse_ty_two elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_two with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_two elem ~ctx:initial_ctx ~top_down ~bottom_up))
+              transform_ty_two elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ty_two elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ty_two elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ty_two elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_two with
@@ -841,7 +828,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_two elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_two elem ~ctx ~top_down ~bottom_up))
 
     and traverse_ty_one :
           'a.
@@ -864,22 +851,21 @@ end = struct
           bottom_up:'ctx Pass.t ->
           'a one =
       fun (type a) (elem : a one) ~ctx ~top_down ~bottom_up : a one ->
-       let initial_ctx = ctx in
        match top_down.Pass.on_ty_one with
        | Some td ->
          (match td elem ~ctx with
          | (_ctx, `Stop elem) -> elem
-         | (ctx, `Continue elem) ->
-           let elem = traverse_ty_one elem ~ctx ~top_down ~bottom_up in
+         | (td_ctx, `Continue elem) ->
+           let elem = traverse_ty_one elem ~ctx:td_ctx ~top_down ~bottom_up in
            (match bottom_up.Pass.on_ty_one with
            | None -> elem
            | Some bu ->
              (match bu elem ~ctx with
              | (_ctx, (`Continue elem | `Stop elem)) -> elem
              | (_ctx, `Restart elem) ->
-               transform_ty_one elem ~ctx:initial_ctx ~top_down ~bottom_up))
+               transform_ty_one elem ~ctx ~top_down ~bottom_up))
          | (_ctx, `Restart elem) ->
-           transform_ty_one elem ~ctx:initial_ctx ~top_down ~bottom_up)
+           transform_ty_one elem ~ctx ~top_down ~bottom_up)
        | _ ->
          let elem = traverse_ty_one elem ~ctx ~top_down ~bottom_up in
          (match bottom_up.Pass.on_ty_one with
@@ -888,7 +874,7 @@ end = struct
            (match bu elem ~ctx with
            | (_ctx, (`Continue elem | `Stop elem)) -> elem
            | (_ctx, `Restart elem) ->
-             transform_ty_one elem ~ctx:initial_ctx ~top_down ~bottom_up))
+             transform_ty_one elem ~ctx ~top_down ~bottom_up))
 
     let _ = traverse_ty_two
 
@@ -980,29 +966,26 @@ module Composed = struct
                 bottom_up:'ctx Pass.t ->
                 t) =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
+          | (_ctx, `Continue elem) ->
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           (match bottom_up.Pass.on_ty_t with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = transform
     end [@@ocaml.doc "@inline"] [@@merlin.hide]
@@ -1085,29 +1068,26 @@ module Composed = struct
                 bottom_up:'ctx Pass.t ->
                 t) =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
+          | (_ctx, `Continue elem) ->
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           (match bottom_up.Pass.on_ty_t with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = transform
     end [@@ocaml.doc "@inline"] [@@merlin.hide]
@@ -1188,29 +1168,26 @@ module Composed = struct
                 bottom_up:'ctx Pass.t ->
                 t) =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
+          | (_ctx, `Continue elem) ->
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           (match bottom_up.Pass.on_ty_t with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = transform
     end [@@ocaml.doc "@inline"] [@@merlin.hide]
@@ -1391,22 +1368,20 @@ module Composed = struct
             t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> t)
           =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
-            let elem = traverse elem ~ctx ~top_down ~bottom_up in
+          | (td_ctx, `Continue elem) ->
+            let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           let elem = traverse elem ~ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
@@ -1414,8 +1389,7 @@ module Composed = struct
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = traverse
 
@@ -1609,22 +1583,20 @@ module Composed = struct
             bottom_up:'ctx Pass.t ->
             'a t =
         fun (type a) (elem : a t) ~ctx ~top_down ~bottom_up : a t ->
-         let initial_ctx = ctx in
          match top_down.Pass.on_ty_t with
          | Some td ->
            (match td elem ~ctx with
            | (_ctx, `Stop elem) -> elem
-           | (ctx, `Continue elem) ->
-             let elem = traverse elem ~ctx ~top_down ~bottom_up in
+           | (td_ctx, `Continue elem) ->
+             let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
              (match bottom_up.Pass.on_ty_t with
              | None -> elem
              | Some bu ->
                (match bu elem ~ctx with
                | (_ctx, (`Continue elem | `Stop elem)) -> elem
                | (_ctx, `Restart elem) ->
-                 transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-           | (_ctx, `Restart elem) ->
-             transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                 transform elem ~ctx ~top_down ~bottom_up))
+           | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
          | _ ->
            let elem = traverse elem ~ctx ~top_down ~bottom_up in
            (match bottom_up.Pass.on_ty_t with
@@ -1632,8 +1604,7 @@ module Composed = struct
            | Some bu ->
              (match bu elem ~ctx with
              | (_ctx, (`Continue elem | `Stop elem)) -> elem
-             | (_ctx, `Restart elem) ->
-               transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+             | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = traverse
 
@@ -1812,22 +1783,19 @@ end = struct
           bottom_up:'ctx Pass.t ->
           'a t =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_t with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-        | (_ctx, `Restart elem) ->
-          transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
+        | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_t with
@@ -1835,8 +1803,7 @@ end = struct
         | Some bu ->
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
     let _ = traverse
 
@@ -2015,22 +1982,21 @@ end = struct
           bottom_up:'ctx Pass.t ->
           alias) =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_alias with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse_ty_alias elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse_ty_alias elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_alias with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_alias elem ~ctx:initial_ctx ~top_down ~bottom_up))
+              transform_ty_alias elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ty_alias elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ty_alias elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ty_alias elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_alias with
@@ -2039,7 +2005,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_alias elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_alias elem ~ctx ~top_down ~bottom_up))
 
     and (traverse_ty_record :
           record ->
@@ -2060,22 +2026,21 @@ end = struct
           bottom_up:'ctx Pass.t ->
           record) =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_record with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse_ty_record elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse_ty_record elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_record with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_record elem ~ctx:initial_ctx ~top_down ~bottom_up))
+              transform_ty_record elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ty_record elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ty_record elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ty_record elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_record with
@@ -2084,7 +2049,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_record elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_record elem ~ctx ~top_down ~bottom_up))
 
     and (traverse_ty_variant :
           variant ->
@@ -2117,22 +2082,23 @@ end = struct
           bottom_up:'ctx Pass.t ->
           variant) =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_variant with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse_ty_variant elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem =
+            traverse_ty_variant elem ~ctx:td_ctx ~top_down ~bottom_up
+          in
           (match bottom_up.Pass.on_ty_variant with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_variant elem ~ctx:initial_ctx ~top_down ~bottom_up))
+              transform_ty_variant elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ty_variant elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ty_variant elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ty_variant elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_variant with
@@ -2141,7 +2107,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_variant elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_variant elem ~ctx ~top_down ~bottom_up))
 
     let _ = traverse_ty_alias
 
@@ -2421,22 +2387,21 @@ end = struct
           bottom_up:'ctx Pass.t ->
           alias) =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_alias with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse_ty_alias elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse_ty_alias elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_alias with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_alias elem ~ctx:initial_ctx ~top_down ~bottom_up))
+              transform_ty_alias elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ty_alias elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ty_alias elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ty_alias elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_alias with
@@ -2445,7 +2410,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_alias elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_alias elem ~ctx ~top_down ~bottom_up))
 
     and (traverse_ty_record :
           record ->
@@ -2465,22 +2430,21 @@ end = struct
           bottom_up:'ctx Pass.t ->
           record) =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_record with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse_ty_record elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse_ty_record elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_record with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_record elem ~ctx:initial_ctx ~top_down ~bottom_up))
+              transform_ty_record elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ty_record elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ty_record elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ty_record elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_record with
@@ -2489,7 +2453,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_record elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_record elem ~ctx ~top_down ~bottom_up))
 
     and (traverse_fld_record_variant :
           variant ->
@@ -2507,14 +2471,13 @@ end = struct
           bottom_up:'ctx Pass.t ->
           variant) =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_fld_record_variant with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
+        | (td_ctx, `Continue elem) ->
           let elem =
-            traverse_fld_record_variant elem ~ctx ~top_down ~bottom_up
+            traverse_fld_record_variant elem ~ctx:td_ctx ~top_down ~bottom_up
           in
           (match bottom_up.Pass.on_fld_record_variant with
           | None -> elem
@@ -2522,17 +2485,9 @@ end = struct
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_fld_record_variant
-                elem
-                ~ctx:initial_ctx
-                ~top_down
-                ~bottom_up))
+              transform_fld_record_variant elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_fld_record_variant
-            elem
-            ~ctx:initial_ctx
-            ~top_down
-            ~bottom_up)
+          transform_fld_record_variant elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_fld_record_variant elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_fld_record_variant with
@@ -2541,11 +2496,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_fld_record_variant
-              elem
-              ~ctx:initial_ctx
-              ~top_down
-              ~bottom_up))
+            transform_fld_record_variant elem ~ctx ~top_down ~bottom_up))
 
     and (traverse_ty_variant :
           variant ->
@@ -2581,22 +2532,23 @@ end = struct
           bottom_up:'ctx Pass.t ->
           variant) =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_variant with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse_ty_variant elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem =
+            traverse_ty_variant elem ~ctx:td_ctx ~top_down ~bottom_up
+          in
           (match bottom_up.Pass.on_ty_variant with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_variant elem ~ctx:initial_ctx ~top_down ~bottom_up))
+              transform_ty_variant elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ty_variant elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ty_variant elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ty_variant elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ty_variant with
@@ -2605,7 +2557,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_variant elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_variant elem ~ctx ~top_down ~bottom_up))
 
     and (traverse_ctor_variant_Single :
           record ->
@@ -2623,14 +2575,13 @@ end = struct
           bottom_up:'ctx Pass.t ->
           record) =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ctor_variant_Single with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
+        | (td_ctx, `Continue elem) ->
           let elem =
-            traverse_ctor_variant_Single elem ~ctx ~top_down ~bottom_up
+            traverse_ctor_variant_Single elem ~ctx:td_ctx ~top_down ~bottom_up
           in
           (match bottom_up.Pass.on_ctor_variant_Single with
           | None -> elem
@@ -2638,17 +2589,9 @@ end = struct
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ctor_variant_Single
-                elem
-                ~ctx:initial_ctx
-                ~top_down
-                ~bottom_up))
+              transform_ctor_variant_Single elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ctor_variant_Single
-            elem
-            ~ctx:initial_ctx
-            ~top_down
-            ~bottom_up)
+          transform_ctor_variant_Single elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem =
           traverse_ctor_variant_Single elem ~ctx ~top_down ~bottom_up
@@ -2659,11 +2602,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ctor_variant_Single
-              elem
-              ~ctx:initial_ctx
-              ~top_down
-              ~bottom_up))
+            transform_ctor_variant_Single elem ~ctx ~top_down ~bottom_up))
 
     and (traverse_ctor_variant_Tuple :
           alias * record ->
@@ -2682,14 +2621,13 @@ end = struct
           bottom_up:'ctx Pass.t ->
           alias * record) =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ctor_variant_Tuple with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
+        | (td_ctx, `Continue elem) ->
           let elem =
-            traverse_ctor_variant_Tuple elem ~ctx ~top_down ~bottom_up
+            traverse_ctor_variant_Tuple elem ~ctx:td_ctx ~top_down ~bottom_up
           in
           (match bottom_up.Pass.on_ctor_variant_Tuple with
           | None -> elem
@@ -2697,17 +2635,9 @@ end = struct
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ctor_variant_Tuple
-                elem
-                ~ctx:initial_ctx
-                ~top_down
-                ~bottom_up))
+              transform_ctor_variant_Tuple elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ctor_variant_Tuple
-            elem
-            ~ctx:initial_ctx
-            ~top_down
-            ~bottom_up)
+          transform_ctor_variant_Tuple elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ctor_variant_Tuple elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ctor_variant_Tuple with
@@ -2716,11 +2646,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ctor_variant_Tuple
-              elem
-              ~ctx:initial_ctx
-              ~top_down
-              ~bottom_up))
+            transform_ctor_variant_Tuple elem ~ctx ~top_down ~bottom_up))
 
     let _ = traverse_ty_alias
 
@@ -2942,21 +2868,19 @@ end = struct
               bottom_up:'ctx Pass.t ->
               z) =
      fun (elem : z) ~ctx ~top_down ~bottom_up : z ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ty_z with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
+        | (_ctx, `Continue elem) ->
           (match bottom_up.Pass.on_ty_z with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ty_z elem ~ctx:initial_ctx ~top_down ~bottom_up))
-        | (_ctx, `Restart elem) ->
-          transform_ty_z elem ~ctx:initial_ctx ~top_down ~bottom_up)
+              transform_ty_z elem ~ctx ~top_down ~bottom_up))
+        | (_ctx, `Restart elem) -> transform_ty_z elem ~ctx ~top_down ~bottom_up)
       | _ ->
         (match bottom_up.Pass.on_ty_z with
         | None -> elem
@@ -2964,7 +2888,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ty_z elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            transform_ty_z elem ~ctx ~top_down ~bottom_up))
 
     let _ = transform_ty_z
 
@@ -2976,21 +2900,20 @@ end = struct
               bottom_up:'ctx Pass.t ->
               'a s =
       fun (type a) (elem : a s) ~ctx ~top_down ~bottom_up : a s ->
-       let initial_ctx = ctx in
        match top_down.Pass.on_ty_s with
        | Some td ->
          (match td elem ~ctx with
          | (_ctx, `Stop elem) -> elem
-         | (ctx, `Continue elem) ->
+         | (_ctx, `Continue elem) ->
            (match bottom_up.Pass.on_ty_s with
            | None -> elem
            | Some bu ->
              (match bu elem ~ctx with
              | (_ctx, (`Continue elem | `Stop elem)) -> elem
              | (_ctx, `Restart elem) ->
-               transform_ty_s elem ~ctx:initial_ctx ~top_down ~bottom_up))
+               transform_ty_s elem ~ctx ~top_down ~bottom_up))
          | (_ctx, `Restart elem) ->
-           transform_ty_s elem ~ctx:initial_ctx ~top_down ~bottom_up)
+           transform_ty_s elem ~ctx ~top_down ~bottom_up)
        | _ ->
          (match bottom_up.Pass.on_ty_s with
          | None -> elem
@@ -2998,7 +2921,7 @@ end = struct
            (match bu elem ~ctx with
            | (_ctx, (`Continue elem | `Stop elem)) -> elem
            | (_ctx, `Restart elem) ->
-             transform_ty_s elem ~ctx:initial_ctx ~top_down ~bottom_up))
+             transform_ty_s elem ~ctx ~top_down ~bottom_up))
 
     let _ = transform_ty_s
 
@@ -3032,22 +2955,21 @@ end = struct
           ('a, 'b) gtree =
       fun (type a b) (elem : (a, b) gtree) ~ctx ~top_down ~bottom_up :
           (a, b) gtree ->
-       let initial_ctx = ctx in
        match top_down.Pass.on_ty_gtree with
        | Some td ->
          (match td elem ~ctx with
          | (_ctx, `Stop elem) -> elem
-         | (ctx, `Continue elem) ->
-           let elem = traverse_ty_gtree elem ~ctx ~top_down ~bottom_up in
+         | (td_ctx, `Continue elem) ->
+           let elem = traverse_ty_gtree elem ~ctx:td_ctx ~top_down ~bottom_up in
            (match bottom_up.Pass.on_ty_gtree with
            | None -> elem
            | Some bu ->
              (match bu elem ~ctx with
              | (_ctx, (`Continue elem | `Stop elem)) -> elem
              | (_ctx, `Restart elem) ->
-               transform_ty_gtree elem ~ctx:initial_ctx ~top_down ~bottom_up))
+               transform_ty_gtree elem ~ctx ~top_down ~bottom_up))
          | (_ctx, `Restart elem) ->
-           transform_ty_gtree elem ~ctx:initial_ctx ~top_down ~bottom_up)
+           transform_ty_gtree elem ~ctx ~top_down ~bottom_up)
        | _ ->
          let elem = traverse_ty_gtree elem ~ctx ~top_down ~bottom_up in
          (match bottom_up.Pass.on_ty_gtree with
@@ -3056,7 +2978,7 @@ end = struct
            (match bu elem ~ctx with
            | (_ctx, (`Continue elem | `Stop elem)) -> elem
            | (_ctx, `Restart elem) ->
-             transform_ty_gtree elem ~ctx:initial_ctx ~top_down ~bottom_up))
+             transform_ty_gtree elem ~ctx ~top_down ~bottom_up))
 
     and traverse_ctor_gtree_TreeG :
           'a 'n.
@@ -3078,26 +3000,23 @@ end = struct
           bottom_up:'ctx Pass.t ->
           ('a, 'n) gtree * 'a * ('a, 'n) gtree =
      fun elem ~ctx ~top_down ~bottom_up ->
-      let initial_ctx = ctx in
       match top_down.Pass.on_ctor_gtree_TreeG with
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse_ctor_gtree_TreeG elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem =
+            traverse_ctor_gtree_TreeG elem ~ctx:td_ctx ~top_down ~bottom_up
+          in
           (match bottom_up.Pass.on_ctor_gtree_TreeG with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
             | (_ctx, `Restart elem) ->
-              transform_ctor_gtree_TreeG
-                elem
-                ~ctx:initial_ctx
-                ~top_down
-                ~bottom_up))
+              transform_ctor_gtree_TreeG elem ~ctx ~top_down ~bottom_up))
         | (_ctx, `Restart elem) ->
-          transform_ctor_gtree_TreeG elem ~ctx:initial_ctx ~top_down ~bottom_up)
+          transform_ctor_gtree_TreeG elem ~ctx ~top_down ~bottom_up)
       | _ ->
         let elem = traverse_ctor_gtree_TreeG elem ~ctx ~top_down ~bottom_up in
         (match bottom_up.Pass.on_ctor_gtree_TreeG with
@@ -3106,11 +3025,7 @@ end = struct
           (match bu elem ~ctx with
           | (_ctx, (`Continue elem | `Stop elem)) -> elem
           | (_ctx, `Restart elem) ->
-            transform_ctor_gtree_TreeG
-              elem
-              ~ctx:initial_ctx
-              ~top_down
-              ~bottom_up))
+            transform_ctor_gtree_TreeG elem ~ctx ~top_down ~bottom_up))
 
     let _ = traverse_ty_gtree
 
@@ -3218,8 +3133,8 @@ end = struct
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, `Stop elem) -> elem
-        | (ctx, `Continue elem) ->
-          let elem = traverse elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
           | None -> elem
           | Some bu ->
@@ -3333,8 +3248,8 @@ end = struct
       | Some td ->
         (match td elem ~ctx with
         | (_ctx, Error elem) -> elem
-        | (ctx, Ok elem) ->
-          let elem = traverse elem ~ctx ~top_down ~bottom_up in
+        | (td_ctx, Ok elem) ->
+          let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
           | None -> elem
           | Some bu ->
@@ -3424,29 +3339,26 @@ module Variants = struct
                 bottom_up:'ctx Pass.t ->
                 t) =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
+          | (_ctx, `Continue elem) ->
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           (match bottom_up.Pass.on_ty_t with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = transform
     end [@@ocaml.doc "@inline"] [@@merlin.hide]
@@ -3578,22 +3490,20 @@ module Variants = struct
             t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> t)
           =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
-            let elem = traverse elem ~ctx ~top_down ~bottom_up in
+          | (td_ctx, `Continue elem) ->
+            let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           let elem = traverse elem ~ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
@@ -3601,8 +3511,7 @@ module Variants = struct
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = traverse
 
@@ -3746,22 +3655,20 @@ module Variants = struct
             t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> t)
           =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
-            let elem = traverse elem ~ctx ~top_down ~bottom_up in
+          | (td_ctx, `Continue elem) ->
+            let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           let elem = traverse elem ~ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
@@ -3769,8 +3676,7 @@ module Variants = struct
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = traverse
 
@@ -3908,22 +3814,20 @@ module Variants = struct
             bottom_up:'ctx Pass.t ->
             'a t =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
-            let elem = traverse elem ~ctx ~top_down ~bottom_up in
+          | (td_ctx, `Continue elem) ->
+            let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           let elem = traverse elem ~ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
@@ -3931,8 +3835,7 @@ module Variants = struct
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = traverse
 
@@ -4023,29 +3926,26 @@ module Variants = struct
                 bottom_up:'ctx Pass.t ->
                 'a t =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
+          | (_ctx, `Continue elem) ->
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           (match bottom_up.Pass.on_ty_t with
           | None -> elem
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = transform
     end [@@ocaml.doc "@inline"] [@@merlin.hide]
@@ -4165,22 +4065,20 @@ module Variants = struct
             bottom_up:'ctx Pass.t ->
             'a t =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
-            let elem = traverse elem ~ctx ~top_down ~bottom_up in
+          | (td_ctx, `Continue elem) ->
+            let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           let elem = traverse elem ~ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
@@ -4188,8 +4086,7 @@ module Variants = struct
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = traverse
 
@@ -4291,22 +4188,20 @@ module Polymorphic = struct
             bottom_up:'ctx Pass.t ->
             'a t =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
-            let elem = traverse elem ~ctx ~top_down ~bottom_up in
+          | (td_ctx, `Continue elem) ->
+            let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           let elem = traverse elem ~ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
@@ -4314,8 +4209,7 @@ module Polymorphic = struct
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = traverse
 
@@ -4423,22 +4317,20 @@ module Polymorphic = struct
             t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> t)
           =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
-            let elem = traverse elem ~ctx ~top_down ~bottom_up in
+          | (td_ctx, `Continue elem) ->
+            let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           let elem = traverse elem ~ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
@@ -4446,8 +4338,7 @@ module Polymorphic = struct
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = traverse
 
@@ -4561,22 +4452,20 @@ module Recursive_mod = struct
             t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> t)
           =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
-            let elem = traverse elem ~ctx ~top_down ~bottom_up in
+          | (td_ctx, `Continue elem) ->
+            let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           let elem = traverse elem ~ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
@@ -4584,8 +4473,7 @@ module Recursive_mod = struct
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = traverse
 
@@ -4697,22 +4585,20 @@ module Recursive_mod = struct
             t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> t)
           =
        fun elem ~ctx ~top_down ~bottom_up ->
-        let initial_ctx = ctx in
         match top_down.Pass.on_ty_t with
         | Some td ->
           (match td elem ~ctx with
           | (_ctx, `Stop elem) -> elem
-          | (ctx, `Continue elem) ->
-            let elem = traverse elem ~ctx ~top_down ~bottom_up in
+          | (td_ctx, `Continue elem) ->
+            let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
             (match bottom_up.Pass.on_ty_t with
             | None -> elem
             | Some bu ->
               (match bu elem ~ctx with
               | (_ctx, (`Continue elem | `Stop elem)) -> elem
               | (_ctx, `Restart elem) ->
-                transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
-          | (_ctx, `Restart elem) ->
-            transform elem ~ctx:initial_ctx ~top_down ~bottom_up)
+                transform elem ~ctx ~top_down ~bottom_up))
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
         | _ ->
           let elem = traverse elem ~ctx ~top_down ~bottom_up in
           (match bottom_up.Pass.on_ty_t with
@@ -4720,8 +4606,7 @@ module Recursive_mod = struct
           | Some bu ->
             (match bu elem ~ctx with
             | (_ctx, (`Continue elem | `Stop elem)) -> elem
-            | (_ctx, `Restart elem) ->
-              transform elem ~ctx:initial_ctx ~top_down ~bottom_up))
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
 
       let _ = traverse
 

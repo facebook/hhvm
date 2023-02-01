@@ -57,6 +57,9 @@ module Env = struct
   let implicit_sdt env = everything_sdt env && not (under_no_auto_dynamic env)
 end
 
+let under_no_auto_dyanmic ua =
+  Naming_attributes.mem SN.UserAttributes.uaNoAutoDynamic ua
+
 let wrap_supportdyn p h = Aast.Happly ((p, SN.Classes.cSupportDyn), [(p, h)])
 
 let wrap_like ((pos, _) as hint) = (pos, Aast.Hlike hint)
@@ -95,13 +98,17 @@ let on_fun_def_top_down fd ~ctx =
     Env.set_under_no_auto_dynamic
       ctx
       ~under_no_auto_dynamic:
-        (Naming_attributes.mem
-           SN.UserAttributes.uaNoAutoDynamic
-           Aast.(fd.fd_fun.f_user_attributes))
+        (under_no_auto_dyanmic Aast.(fd.fd_fun.f_user_attributes))
   in
   (ctx, Ok fd)
 
 let on_fun_def fd ~ctx =
+  let ctx =
+    Env.set_under_no_auto_dynamic
+      ctx
+      ~under_no_auto_dynamic:
+        (under_no_auto_dyanmic Aast.(fd.fd_fun.f_user_attributes))
+  in
   let fd_fun = fd.Aast.fd_fun in
   let fd_fun =
     if Env.implicit_sdt ctx then
@@ -139,14 +146,16 @@ let on_typedef_top_down t ~ctx =
   let ctx =
     Env.set_under_no_auto_dynamic
       ctx
-      ~under_no_auto_dynamic:
-        (Naming_attributes.mem
-           SN.UserAttributes.uaNoAutoDynamic
-           t.Aast.t_user_attributes)
+      ~under_no_auto_dynamic:(under_no_auto_dyanmic t.Aast.t_user_attributes)
   in
   (ctx, Ok t)
 
 let on_typedef t ~ctx =
+  let ctx =
+    Env.set_under_no_auto_dynamic
+      ctx
+      ~under_no_auto_dynamic:(under_no_auto_dyanmic t.Aast.t_user_attributes)
+  in
   Aast_defs.(
     let (pos, _) = t.Aast.t_name in
     let t_as_constraint =
@@ -169,14 +178,16 @@ let on_class_top_down c ~ctx =
   let ctx =
     Env.set_under_no_auto_dynamic
       ctx
-      ~under_no_auto_dynamic:
-        (Naming_attributes.mem
-           SN.UserAttributes.uaNoAutoDynamic
-           c.Aast.c_user_attributes)
+      ~under_no_auto_dynamic:(under_no_auto_dyanmic c.Aast.c_user_attributes)
   in
   (ctx, Ok c)
 
 let on_class_ c ~ctx =
+  let ctx =
+    Env.set_under_no_auto_dynamic
+      ctx
+      ~under_no_auto_dynamic:(under_no_auto_dyanmic c.Aast.c_user_attributes)
+  in
   let c =
     if Env.implicit_sdt ctx then
       let (pos, _) = c.Aast.c_name in

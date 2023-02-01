@@ -1588,7 +1588,7 @@ module Gen_transform = struct
             (match bu elem ~ctx with
             | (_ctx, [%p continue_stop_pat]) -> elem
             | (_ctx, [%p restart_pat]) ->
-              [%e fn_ident] elem ~ctx:initial_ctx ~top_down ~bottom_up)]
+              [%e fn_ident] elem ~ctx ~top_down ~bottom_up)]
       | Restart.(Disallow _) ->
         [%expr
           match [%e project_bottom] with
@@ -1597,35 +1597,40 @@ module Gen_transform = struct
             (match bu elem ~ctx with
             | (_ctx, [%p continue_stop_pat]) -> elem)]
     in
-    let rest =
+    let (rest, ctx_pat) =
       if not should_traverse then
-        rest_match
+        ((fun _ -> rest_match), ppat_var ~loc { loc; txt = "_ctx" })
       else
-        [%expr
-          let elem = [%e traverse_ident] elem ~ctx ~top_down ~bottom_up in
-          [%e rest_match]]
+        ( (fun ctx_expr ->
+            [%expr
+              let elem =
+                [%e traverse_ident] elem ~ctx:[%e ctx_expr] ~top_down ~bottom_up
+              in
+              [%e rest_match]]),
+          ppat_var ~loc { loc; txt = "td_ctx" } )
     in
     let body_expr =
       match allow_restart with
       | Restart.Allow ->
         [%expr
-          let initial_ctx = ctx in
           match [%e project_top] with
           | Some td ->
             (match td elem ~ctx with
             | (_ctx, [%p stop_pat]) -> elem
-            | (ctx, [%p continue_pat]) -> [%e rest]
+            | ([%p ctx_pat], [%p continue_pat]) ->
+              [%e rest @@ pexp_ident ~loc { loc; txt = lident "td_ctx" }]
             | (_ctx, [%p restart_pat]) ->
-              [%e fn_ident] elem ~ctx:initial_ctx ~top_down ~bottom_up)
-          | _ -> [%e rest]]
+              [%e fn_ident] elem ~ctx ~top_down ~bottom_up)
+          | _ -> [%e rest @@ pexp_ident ~loc { loc; txt = lident "ctx" }]]
       | Restart.(Disallow _) ->
         [%expr
           match [%e project_top] with
           | Some td ->
             (match td elem ~ctx with
             | (_ctx, [%p stop_pat]) -> elem
-            | (ctx, [%p continue_pat]) -> [%e rest])
-          | _ -> [%e rest]]
+            | ([%p ctx_pat], [%p continue_pat]) ->
+              [%e rest @@ pexp_ident ~loc { loc; txt = lident "td_ctx" }])
+          | _ -> [%e rest @@ pexp_ident ~loc { loc; txt = lident "ctx" }]]
     in
     let elem_pat = ppat_var ~loc { loc; txt = "elem" } in
     Gen_fn.gen_str fn_name ty tyvars type_info elem_pat body_expr loc

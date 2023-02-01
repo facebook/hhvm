@@ -1891,8 +1891,8 @@ std::string deserializeProfData(const std::string& filename,
     auto signature = read_raw<decltype(RepoFile::globalData().Signature)>(ser);
     if (signature != RepoFile::globalData().Signature) {
       auto const msg =
-        folly::sformat("Mismatched repo-schema (expected signature '{}')",
-                       RepoFile::globalData().Signature);
+        folly::sformat("Mismatched repo signature (expected signature '{}', got '{}')",
+                       RepoFile::globalData().Signature, signature);
 
       throw std::runtime_error(msg);
     }
@@ -1902,8 +1902,8 @@ std::string deserializeProfData(const std::string& filename,
     read_raw(ser, &schema[0], size);
     if (schema != repoSchemaId()) {
       auto const msg =
-        folly::sformat("Mismatched repo-schema (expected schema_id '{}')",
-          repoSchemaId());
+        folly::sformat("Mismatched repo-schema (expected schema_id '{}', got '{}')",
+          repoSchemaId(), schema);
 
       throw std::runtime_error(msg);
     }

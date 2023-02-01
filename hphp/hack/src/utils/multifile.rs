@@ -14,13 +14,9 @@ use anyhow::Result;
 use lazy_static::lazy_static;
 use regex::bytes::Regex;
 
-// Content type in return type can be improved to
-//     impl AsRef<[u8]> + Into<Vec<u8>> + 't
-// instead of Vec<u8>. After Either implements,
-//     impl<L: Into<T>, R: Into<T>> Into<T> for Either<L, R> { .. }
-pub fn to_files<'p, 't>(
+pub fn to_files<'p>(
     path: &'p Path,
-    content: impl AsRef<[u8]> + Into<Vec<u8>> + 't,
+    content: impl AsRef<[u8]> + Into<Vec<u8>>,
 ) -> Result<Vec<(Cow<'p, Path>, Vec<u8>)>> {
     lazy_static! {
         static ref DELIM: Regex = Regex::new(r#"(?m)^////\s*(.*)\n"#).unwrap();

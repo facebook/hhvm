@@ -27,6 +27,7 @@
 #include <fmt/core.h>
 
 #include <fizz/client/AsyncFizzClient.h>
+#include <folly/CPortability.h>
 #include <folly/Conv.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/Memory.h>
@@ -766,6 +767,10 @@ TEST(ThriftServer, EnforceEgressMemoryLimit) {
 }
 
 TEST(ThriftServer, SocketWriteTimeout) {
+  if (folly::kIsSanitizeThread) {
+    GTEST_SUCCEED() << "Disabled in TSAN mode";
+  }
+
   class TestServiceHandler
       : public apache::thrift::ServiceHandler<TestService> {
    public:

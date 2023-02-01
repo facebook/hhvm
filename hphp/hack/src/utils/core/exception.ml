@@ -60,6 +60,8 @@ let get_ctor_string { exn; backtrace = _ } =
     Printf.sprintf "Exit_status.Exit_with(%s)" (Exit_status.show status)
   | _ -> Printexc.to_string exn
 
+let register_printer printer = Printexc.register_printer printer
+
 let get_backtrace_string { exn = _; backtrace } =
   Printexc.raw_backtrace_to_string backtrace
 

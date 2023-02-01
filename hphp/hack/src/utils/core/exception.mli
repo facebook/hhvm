@@ -19,6 +19,8 @@ val to_exn : t -> exn
 
 val to_string : t -> string
 
+val register_printer : (exn -> string option) -> unit
+
 val get_ctor_string : t -> string
 
 val get_backtrace_string : t -> string

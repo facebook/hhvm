@@ -23,6 +23,13 @@ type decl_heap_elems_bug = {
 
 exception Decl_heap_elems_bug of decl_heap_elems_bug
 
+let () =
+  Exception.register_printer (function
+      | Decl_heap_elems_bug e ->
+        Some
+          (Printf.sprintf "Decl_heap_elems_bug %s" (show_decl_heap_elems_bug e))
+      | _ -> None)
+
 (** Raise an exception when the class element can't be found.
 
 Note that this exception can be raised in two modes:

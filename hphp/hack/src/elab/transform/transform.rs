@@ -1916,9 +1916,9 @@ pub fn transform_ty_program<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_program(elem, ctx) {
         ControlFlow::Break(_) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_program(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_program(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_program(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_program(elem, ctx);
         }
     }
 }
@@ -1944,9 +1944,9 @@ pub fn transform_ty_def<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_def(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_def(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_def(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_def(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_def(elem, ctx);
         }
     }
 }
@@ -1983,9 +1983,9 @@ pub fn transform_ty_typedef<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_typedef(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_typedef(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_typedef(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_typedef(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_typedef(elem, ctx);
         }
     }
 }
@@ -2022,9 +2022,9 @@ pub fn transform_ty_fun_def<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_fun_def(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_fun_def(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_fun_def(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_fun_def(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_fun_def(elem, ctx);
         }
     }
 }
@@ -2052,9 +2052,9 @@ pub fn transform_ty_module_def<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_module_def(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_module_def(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_module_def(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_module_def(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_module_def(elem, ctx);
         }
     }
 }
@@ -2079,9 +2079,9 @@ pub fn transform_ty_gconst<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_gconst(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_gconst(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_gconst(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_gconst(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_gconst(elem, ctx);
         }
     }
 }
@@ -2107,9 +2107,9 @@ pub fn transform_fld_gconst_type_<Ctx: Copy>(
 ) {
     match &top_down.on_fld_gconst_type_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_gconst_type_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_gconst_type_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_gconst_type_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_gconst_type_(elem, ctx);
         }
     }
 }
@@ -2133,9 +2133,9 @@ pub fn transform_fld_gconst_value_<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_fld_gconst_value(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_gconst_value(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_gconst_value(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_gconst_value(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_gconst_value(elem, ctx);
         }
     }
 }
@@ -2160,9 +2160,9 @@ pub fn transform_ty_stmt<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_stmt(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_stmt(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_stmt(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_stmt(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_stmt(elem, ctx);
         }
     }
 }
@@ -2185,9 +2185,9 @@ pub fn transform_ty_stmt_<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_stmt_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_stmt_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_stmt_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_stmt_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_stmt_(elem, ctx);
         }
     }
 }
@@ -2278,9 +2278,9 @@ pub fn transform_ty_block<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_block(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_block(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_block(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_block(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_block(elem, ctx);
         }
     }
 }
@@ -2304,9 +2304,9 @@ pub fn transform_ty_using_stmt<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_using_stmt(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_using_stmt(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_using_stmt(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_using_stmt(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_using_stmt(elem, ctx);
         }
     }
 }
@@ -2332,9 +2332,9 @@ pub fn transform_ty_gen_case<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_gen_case(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_gen_case(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_gen_case(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_gen_case(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_gen_case(elem, ctx);
         }
     }
 }
@@ -2359,9 +2359,9 @@ pub fn transform_ty_case<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_case(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_case(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_case(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_case(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_case(elem, ctx);
         }
     }
 }
@@ -2385,9 +2385,9 @@ pub fn transform_ty_default_case<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_default_case(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_default_case(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_default_case(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_default_case(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_default_case(elem, ctx);
         }
     }
 }
@@ -2410,9 +2410,9 @@ pub fn transform_ty_catch<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_catch(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_catch(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_catch(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_catch(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_catch(elem, ctx);
         }
     }
 }
@@ -2435,9 +2435,9 @@ pub fn transform_ty_as_expr<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_as_expr(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_as_expr(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_as_expr(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_as_expr(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_as_expr(elem, ctx);
         }
     }
 }
@@ -2473,9 +2473,9 @@ pub fn transform_ty_class_id<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_class_id(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_id(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_id(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_id(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_id(elem, ctx);
         }
     }
 }
@@ -2498,9 +2498,9 @@ pub fn transform_ty_class_id_<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_class_id_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_id_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_id_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_id_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_id_(elem, ctx);
         }
     }
 }
@@ -2528,9 +2528,9 @@ pub fn transform_ty_expr<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_expr(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_expr(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_expr(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_expr(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_expr(elem, ctx);
         }
     }
 }
@@ -2553,9 +2553,9 @@ pub fn transform_ty_expr_<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_expr_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_expr_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_expr_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_expr_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_expr_(elem, ctx);
         }
     }
 }
@@ -2798,9 +2798,9 @@ pub fn transform_ty_collection_targ<Ctx: Copy, Ex>(
 ) {
     match &top_down.on_ty_collection_targ(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_collection_targ(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_collection_targ(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_collection_targ(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_collection_targ(elem, ctx);
         }
     }
 }
@@ -2829,9 +2829,9 @@ pub fn transform_ty_funcion_ptr_id<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_funcion_ptr_id(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_funcion_ptr_id(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_funcion_ptr_id(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_funcion_ptr_id(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_funcion_ptr_id(elem, ctx);
         }
     }
 }
@@ -2859,9 +2859,9 @@ pub fn transform_ty_expression_tree<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_expression_tree(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_expression_tree(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_expression_tree(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_expression_tree(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_expression_tree(elem, ctx);
         }
     }
 }
@@ -2892,9 +2892,9 @@ pub fn transform_ty_class_get_expr<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_class_get_expr(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_get_expr(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_get_expr(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_get_expr(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_get_expr(elem, ctx);
         }
     }
 }
@@ -2920,9 +2920,9 @@ pub fn transform_ty_field<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_field(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_field(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_field(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_field(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_field(elem, ctx);
         }
     }
 }
@@ -2946,9 +2946,9 @@ pub fn transform_ty_afield<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_afield(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_afield(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_afield(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_afield(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_afield(elem, ctx);
         }
     }
 }
@@ -2977,9 +2977,9 @@ pub fn transform_ty_xhp_simple<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_xhp_simple(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_xhp_simple(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_xhp_simple(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_xhp_simple(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_xhp_simple(elem, ctx);
         }
     }
 }
@@ -3002,9 +3002,9 @@ pub fn transform_ty_xhp_attribute<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_xhp_attribute(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_xhp_attribute(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_xhp_attribute(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_xhp_attribute(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_xhp_attribute(elem, ctx);
         }
     }
 }
@@ -3030,9 +3030,9 @@ pub fn transform_ty_xhp_attr<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_xhp_attr(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_xhp_attr(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_xhp_attr(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_xhp_attr(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_xhp_attr(elem, ctx);
         }
     }
 }
@@ -3062,9 +3062,9 @@ pub fn transform_ty_fun_<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_fun_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_fun_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_fun_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_fun_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_fun_(elem, ctx);
         }
     }
 }
@@ -3105,9 +3105,9 @@ pub fn transform_fld_fun__ret<Ctx: Copy, Ex>(
 ) {
     match &top_down.on_fld_fun__ret(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_fun__ret(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_fun__ret(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_fun__ret(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_fun__ret(elem, ctx);
         }
     }
 }
@@ -3133,9 +3133,9 @@ pub fn transform_ty_method_<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_method_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_method_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_method_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_method_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_method_(elem, ctx);
         }
     }
 }
@@ -3176,9 +3176,9 @@ pub fn transform_fld_method__ret<Ctx: Copy, Ex>(
 ) {
     match &top_down.on_fld_method__ret(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_method__ret(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_method__ret(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_method__ret(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_method__ret(elem, ctx);
         }
     }
 }
@@ -3204,9 +3204,9 @@ pub fn transform_ty_fun_param<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_fun_param(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_fun_param(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_fun_param(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_fun_param(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_fun_param(elem, ctx);
         }
     }
 }
@@ -3235,9 +3235,9 @@ pub fn transform_ty_efun<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_efun(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_efun(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_efun(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_efun(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_efun(elem, ctx);
         }
     }
 }
@@ -3262,9 +3262,9 @@ pub fn transform_ty_func_body<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_func_body(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_func_body(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_func_body(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_func_body(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_func_body(elem, ctx);
         }
     }
 }
@@ -3289,9 +3289,9 @@ pub fn transform_ty_class_<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_class_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_(elem, ctx);
         }
     }
 }
@@ -3338,9 +3338,9 @@ pub fn transform_fld_class__tparams<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_fld_class__tparams(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__tparams(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__tparams(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__tparams(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__tparams(elem, ctx);
         }
     }
 }
@@ -3366,9 +3366,9 @@ pub fn transform_fld_class__extends<Ctx: Copy>(
 ) {
     match &top_down.on_fld_class__extends(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__extends(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__extends(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__extends(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__extends(elem, ctx);
         }
     }
 }
@@ -3393,9 +3393,9 @@ pub fn transform_fld_class__uses<Ctx: Copy>(
 ) {
     match &top_down.on_fld_class__uses(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__uses(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__uses(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__uses(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__uses(elem, ctx);
         }
     }
 }
@@ -3420,9 +3420,9 @@ pub fn transform_fld_class__xhp_attr_uses<Ctx: Copy>(
 ) {
     match &top_down.on_fld_class__xhp_attr_uses(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__xhp_attr_uses(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__xhp_attr_uses(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__xhp_attr_uses(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__xhp_attr_uses(elem, ctx);
         }
     }
 }
@@ -3448,9 +3448,9 @@ pub fn transform_fld_class__reqs<Ctx: Copy>(
 ) {
     match &top_down.on_fld_class__reqs(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__reqs(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__reqs(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__reqs(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__reqs(elem, ctx);
         }
     }
 }
@@ -3476,9 +3476,9 @@ pub fn transform_fld_class__implements<Ctx: Copy>(
 ) {
     match &top_down.on_fld_class__implements(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__implements(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__implements(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__implements(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__implements(elem, ctx);
         }
     }
 }
@@ -3504,9 +3504,9 @@ pub fn transform_fld_class__where_constraints<Ctx: Copy>(
 ) {
     match &top_down.on_fld_class__where_constraints(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__where_constraints(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__where_constraints(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__where_constraints(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__where_constraints(elem, ctx);
         }
     }
 }
@@ -3532,9 +3532,9 @@ pub fn transform_fld_class__consts<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_fld_class__consts(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__consts(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__consts(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__consts(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__consts(elem, ctx);
         }
     }
 }
@@ -3560,9 +3560,9 @@ pub fn transform_fld_class__typeconsts<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_fld_class__typeconsts(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__typeconsts(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__typeconsts(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__typeconsts(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__typeconsts(elem, ctx);
         }
     }
 }
@@ -3588,9 +3588,9 @@ pub fn transform_fld_class__vars<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_fld_class__vars(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__vars(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__vars(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__vars(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__vars(elem, ctx);
         }
     }
 }
@@ -3616,9 +3616,9 @@ pub fn transform_fld_class__methods<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_fld_class__methods(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__methods(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__methods(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__methods(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__methods(elem, ctx);
         }
     }
 }
@@ -3644,9 +3644,9 @@ pub fn transform_fld_class__xhp_attrs<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_fld_class__xhp_attrs(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__xhp_attrs(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__xhp_attrs(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__xhp_attrs(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__xhp_attrs(elem, ctx);
         }
     }
 }
@@ -3672,9 +3672,9 @@ pub fn transform_fld_class__user_attributes<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_fld_class__user_attributes(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__user_attributes(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__user_attributes(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__user_attributes(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__user_attributes(elem, ctx);
         }
     }
 }
@@ -3699,9 +3699,9 @@ pub fn transform_fld_class__enum_<Ctx: Copy>(
 ) {
     match &top_down.on_fld_class__enum_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class__enum_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class__enum_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class__enum_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class__enum_(elem, ctx);
         }
     }
 }
@@ -3727,9 +3727,9 @@ pub fn transform_ty_class_var<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_class_var(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_var(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_var(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_var(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_var(elem, ctx);
         }
     }
 }
@@ -3754,9 +3754,9 @@ pub fn transform_fld_class_var_type_<Ctx: Copy, Ex>(
 ) {
     match &top_down.on_fld_class_var_type_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class_var_type_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class_var_type_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class_var_type_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class_var_type_(elem, ctx);
         }
     }
 }
@@ -3779,9 +3779,9 @@ pub fn transform_fld_class_var_expr<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_fld_class_var_expr(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_class_var_expr(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_class_var_expr(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_class_var_expr(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_class_var_expr(elem, ctx);
         }
     }
 }
@@ -3807,9 +3807,9 @@ pub fn transform_ty_class_const<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_class_const(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_const(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_const(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_const(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_const(elem, ctx);
         }
     }
 }
@@ -3836,9 +3836,9 @@ pub fn transform_ty_class_const_kind<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_class_const_kind(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_const_kind(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_const_kind(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_const_kind(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_const_kind(elem, ctx);
         }
     }
 }
@@ -3867,9 +3867,9 @@ pub fn transform_ty_class_typeconst_def<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_class_typeconst_def(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_typeconst_def(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_typeconst_def(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_typeconst_def(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_typeconst_def(elem, ctx);
         }
     }
 }
@@ -3893,9 +3893,9 @@ pub fn transform_ty_class_typeconst<Ctx: Copy>(
 ) {
     match &top_down.on_ty_class_typeconst(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_typeconst(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_typeconst(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_typeconst(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_typeconst(elem, ctx);
         }
     }
 }
@@ -3925,9 +3925,9 @@ pub fn transform_ty_class_abstract_typeconst<Ctx: Copy>(
 ) {
     match &top_down.on_ty_class_abstract_typeconst(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_abstract_typeconst(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_abstract_typeconst(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_abstract_typeconst(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_abstract_typeconst(elem, ctx);
         }
     }
 }
@@ -3958,9 +3958,9 @@ pub fn transform_ty_class_concrete_typeconst<Ctx: Copy>(
 ) {
     match &top_down.on_ty_class_concrete_typeconst(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_concrete_typeconst(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_concrete_typeconst(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_concrete_typeconst(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_concrete_typeconst(elem, ctx);
         }
     }
 }
@@ -3983,9 +3983,9 @@ pub fn transform_ty_context<Ctx: Copy>(
 ) {
     match &top_down.on_ty_context(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_context(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_context(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_context(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_context(elem, ctx);
         }
     }
 }
@@ -4010,9 +4010,9 @@ pub fn transform_ty_where_constraint_hint<Ctx: Copy>(
 ) {
     match &top_down.on_ty_where_constraint_hint(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_where_constraint_hint(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_where_constraint_hint(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_where_constraint_hint(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_where_constraint_hint(elem, ctx);
         }
     }
 }
@@ -4038,9 +4038,9 @@ pub fn transform_ty_enum_<Ctx: Copy>(
 ) {
     match &top_down.on_ty_enum_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_enum_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_enum_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_enum_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_enum_(elem, ctx);
         }
     }
 }
@@ -4071,9 +4071,9 @@ pub fn transform_ty_type_hint<Ctx: Copy, Ex>(
 ) {
     match &top_down.on_ty_type_hint(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_type_hint(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_type_hint(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_type_hint(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_type_hint(elem, ctx);
         }
     }
 }
@@ -4096,9 +4096,9 @@ pub fn transform_ty_type_hint_<Ctx: Copy>(
 ) {
     match &top_down.on_ty_type_hint_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_type_hint_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_type_hint_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_type_hint_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_type_hint_(elem, ctx);
         }
     }
 }
@@ -4124,9 +4124,9 @@ pub fn transform_ty_targ<Ctx: Copy, Ex>(
 ) {
     match &top_down.on_ty_targ(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_targ(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_targ(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_targ(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_targ(elem, ctx);
         }
     }
 }
@@ -4150,9 +4150,9 @@ pub fn transform_ty_tparam<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_tparam(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_tparam(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_tparam(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_tparam(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_tparam(elem, ctx);
         }
     }
 }
@@ -4183,9 +4183,9 @@ pub fn transform_ty_user_attributes<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_user_attributes(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_user_attributes(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_user_attributes(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_user_attributes(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_user_attributes(elem, ctx);
         }
     }
 }
@@ -4209,9 +4209,9 @@ pub fn transform_ty_user_attribute<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_user_attribute(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_user_attribute(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_user_attribute(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_user_attribute(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_user_attribute(elem, ctx);
         }
     }
 }
@@ -4238,9 +4238,9 @@ pub fn transform_ty_file_attribute<Ctx: Copy, Ex, En>(
 ) {
     match &top_down.on_ty_file_attribute(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_file_attribute(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_file_attribute(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_file_attribute(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_file_attribute(elem, ctx);
         }
     }
 }
@@ -4265,9 +4265,9 @@ pub fn transform_ty_class_hint<Ctx: Copy>(
 ) {
     match &top_down.on_ty_class_hint(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_class_hint(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_class_hint(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_class_hint(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_class_hint(elem, ctx);
         }
     }
 }
@@ -4290,9 +4290,9 @@ pub fn transform_ty_trait_hint<Ctx: Copy>(
 ) {
     match &top_down.on_ty_trait_hint(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_trait_hint(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_trait_hint(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_trait_hint(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_trait_hint(elem, ctx);
         }
     }
 }
@@ -4315,9 +4315,9 @@ pub fn transform_ty_xhp_attr_hint<Ctx: Copy>(
 ) {
     match &top_down.on_ty_xhp_attr_hint(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_xhp_attr_hint(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_xhp_attr_hint(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_xhp_attr_hint(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_xhp_attr_hint(elem, ctx);
         }
     }
 }
@@ -4342,9 +4342,9 @@ pub fn transform_ty_hint<Ctx: Copy>(
 ) {
     match &top_down.on_ty_hint(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_hint(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_hint(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_hint(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_hint(elem, ctx);
         }
     }
 }
@@ -4369,9 +4369,9 @@ pub fn transform_ty_hint_<Ctx: Copy>(
 ) {
     match &top_down.on_ty_hint_(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_hint_(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_hint_(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_hint_(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_hint_(elem, ctx);
         }
     }
 }
@@ -4432,9 +4432,9 @@ pub fn transform_ty_hint_fun<Ctx: Copy>(
 ) {
     match &top_down.on_ty_hint_fun(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_hint_fun(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_hint_fun(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_hint_fun(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_hint_fun(elem, ctx);
         }
     }
 }
@@ -4463,9 +4463,9 @@ pub fn transform_fld_hint_fun_param_tys<Ctx: Copy>(
 ) {
     match &top_down.on_fld_hint_fun_param_tys(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_hint_fun_param_tys(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_hint_fun_param_tys(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_hint_fun_param_tys(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_hint_fun_param_tys(elem, ctx);
         }
     }
 }
@@ -4492,9 +4492,9 @@ pub fn transform_fld_hint_fun_variadic_ty<Ctx: Copy>(
 ) {
     match &top_down.on_fld_hint_fun_variadic_ty(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_hint_fun_variadic_ty(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_hint_fun_variadic_ty(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_hint_fun_variadic_ty(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_hint_fun_variadic_ty(elem, ctx);
         }
     }
 }
@@ -4521,9 +4521,9 @@ pub fn transform_fld_hint_fun_ctxs<Ctx: Copy>(
 ) {
     match &top_down.on_fld_hint_fun_ctxs(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_hint_fun_ctxs(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_hint_fun_ctxs(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_hint_fun_ctxs(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_hint_fun_ctxs(elem, ctx);
         }
     }
 }
@@ -4549,9 +4549,9 @@ pub fn transform_fld_hint_fun_return_ty<Ctx: Copy>(
 ) {
     match &top_down.on_fld_hint_fun_return_ty(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_fld_hint_fun_return_ty(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_fld_hint_fun_return_ty(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_fld_hint_fun_return_ty(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_fld_hint_fun_return_ty(elem, ctx);
         }
     }
 }
@@ -4576,9 +4576,9 @@ pub fn transform_ty_contexts<Ctx: Copy>(
 ) {
     match &top_down.on_ty_contexts(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_contexts(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_contexts(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_contexts(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_contexts(elem, ctx);
         }
     }
 }
@@ -4605,9 +4605,9 @@ pub fn transform_ty_refinement<Ctx: Copy>(
 ) {
     match &top_down.on_ty_refinement(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_refinement(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_refinement(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_refinement(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_refinement(elem, ctx);
         }
     }
 }
@@ -4635,9 +4635,9 @@ pub fn transform_ty_ctx_refinement<Ctx: Copy>(
 ) {
     match &top_down.on_ty_ctx_refinement(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_ctx_refinement(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_ctx_refinement(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_ctx_refinement(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_ctx_refinement(elem, ctx);
         }
     }
 }
@@ -4667,9 +4667,9 @@ pub fn transform_ty_type_refinement<Ctx: Copy>(
 ) {
     match &top_down.on_ty_type_refinement(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_type_refinement(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_type_refinement(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_type_refinement(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_type_refinement(elem, ctx);
         }
     }
 }
@@ -4699,9 +4699,9 @@ pub fn transform_ty_ctx_refinement_bounds<Ctx: Copy>(
 ) {
     match &top_down.on_ty_ctx_refinement_bounds(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_ctx_refinement_bounds(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_ctx_refinement_bounds(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_ctx_refinement_bounds(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_ctx_refinement_bounds(elem, ctx);
         }
     }
 }
@@ -4731,9 +4731,9 @@ pub fn transform_ty_type_refinement_bounds<Ctx: Copy>(
 ) {
     match &top_down.on_ty_type_refinement_bounds(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_type_refinement_bounds(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_type_refinement_bounds(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_type_refinement_bounds(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_type_refinement_bounds(elem, ctx);
         }
     }
 }
@@ -4763,9 +4763,9 @@ pub fn transform_ty_nast_shape_info<Ctx: Copy>(
 ) {
     match &top_down.on_ty_nast_shape_info(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_nast_shape_info(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_nast_shape_info(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_nast_shape_info(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_nast_shape_info(elem, ctx);
         }
     }
 }
@@ -4792,9 +4792,9 @@ pub fn transform_ty_shape_field_info<Ctx: Copy>(
 ) {
     match &top_down.on_ty_shape_field_info(elem, ctx) {
         ControlFlow::Break(..) => (),
-        ControlFlow::Continue(ctx) => {
-            traverse_ty_shape_field_info(elem, *ctx, top_down, bottom_up);
-            bottom_up.on_ty_shape_field_info(elem, *ctx);
+        ControlFlow::Continue(td_ctx) => {
+            traverse_ty_shape_field_info(elem, *td_ctx, top_down, bottom_up);
+            bottom_up.on_ty_shape_field_info(elem, ctx);
         }
     }
 }

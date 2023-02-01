@@ -816,7 +816,7 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
     }
     client()->logConnectionSuccess(
         db::CommonLoggingData(
-            getOperationType(), elapsed, getMaxThreadBlockTime()),
+            getOperationType(), elapsed, timeout_, getMaxThreadBlockTime()),
         *conn()->getKey(),
         context);
   } else {
@@ -828,7 +828,7 @@ void ConnectOperation::logConnectCompleted(OperationResult result) {
     }
     client()->logConnectionFailure(
         db::CommonLoggingData(
-            getOperationType(), elapsed, getMaxThreadBlockTime()),
+            getOperationType(), elapsed, timeout_, getMaxThreadBlockTime()),
         reason,
         *conn()->getKey(),
         mysql_errno(),
@@ -1475,6 +1475,7 @@ void FetchOperation::specializedCompleteOperation() {
     db::QueryLoggingData logging_data(
         getOperationType(),
         elapsed(),
+        timeout_,
         num_queries_executed_,
         rendered_query_.toString(),
         rows_received_,
@@ -1496,6 +1497,7 @@ void FetchOperation::specializedCompleteOperation() {
         db::QueryLoggingData(
             getOperationType(),
             elapsed(),
+            timeout_,
             num_queries_executed_,
             rendered_query_.toString(),
             rows_received_,

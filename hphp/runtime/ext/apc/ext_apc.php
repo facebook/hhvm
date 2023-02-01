@@ -27,7 +27,7 @@
 function apc_add(mixed $key_or_array,
                  mixed $var = null,
                  int $ttl = 0,
-                 int $bump_ttl = 0): mixed;
+                 int $bump_ttl = 0)[defaults]: mixed;
 
 <<__Native>>
 function apc_add_with_pure_sleep(mixed $key_or_array,
@@ -60,7 +60,7 @@ function apc_add_with_pure_sleep(mixed $key_or_array,
 function apc_store(mixed $key_or_array,
                    mixed $var = null,
                    int $ttl = 0,
-                   int $bump_ttl = 0): mixed;
+                   int $bump_ttl = 0)[defaults]: mixed;
 
 /**
  * Similar to apc_store but requires that any serialized objects' __sleep
@@ -85,7 +85,7 @@ function apc_store_with_pure_sleep(mixed $key_or_array,
  */
 <<__Native>>
 function apc_fetch(mixed $key,
-                   <<__OutOnly("KindOfBoolean")>> inout mixed $success): mixed;
+                   <<__OutOnly("KindOfBoolean")>> inout mixed $success)[defaults]: mixed;
 
 /**
  * Similar to apc_fetch but requires that any deserialized objects' __wakeup
@@ -106,7 +106,7 @@ function apc_fetch_with_pure_wakeup(
  *
  */
 <<__Native>>
-function apc_delete(mixed $key): mixed;
+function apc_delete(mixed $key)[globals]: mixed;
 
 /**
  * Retrieves cached information and meta-data from APC's data store.
@@ -127,7 +127,10 @@ function apc_delete(mixed $key): mixed;
  *
  */
 <<__Native>>
-function apc_cache_info(string $cache_type = "", bool $limited = false): shape(
+function apc_cache_info(
+  string $cache_type = "",
+  bool $limited = false,
+)[read_globals]: shape(
   'start_time' => int,
   ?'ttl' => int,
   ?'cache_list' => vec<shape(
@@ -151,7 +154,7 @@ function apc_cache_info(string $cache_type = "", bool $limited = false): shape(
  *
  */
 <<__Native>>
-function apc_clear_cache(string $cache_type = ""): bool;
+function apc_clear_cache(string $cache_type = "")[globals]: bool;
 
 /**
  * Retrieves APC's Shared Memory Allocation information.
@@ -162,7 +165,7 @@ function apc_clear_cache(string $cache_type = ""): bool;
  * @return array - Array of Shared Memory Allocation data; FALSE on failure.
  *
  */
-function apc_sma_info(bool $limited = false): darray<arraykey, mixed> {
+function apc_sma_info(bool $limited = false)[]: darray<arraykey, mixed> {
   return darray[];
 }
 
@@ -182,7 +185,7 @@ function apc_sma_info(bool $limited = false): darray<arraykey, mixed> {
 function apc_inc(string $key,
                  int $step,
                  <<__OutOnly("KindOfBoolean")>>
-                 inout mixed $success): mixed;
+                 inout mixed $success)[globals]: mixed;
 
 /**
  * Decreases a stored integer value.
@@ -200,7 +203,7 @@ function apc_inc(string $key,
 function apc_dec(string $key,
                  int $step,
                  <<__OutOnly("KindOfBoolean")>>
-                 inout mixed $success): mixed;
+                 inout mixed $success)[globals]: mixed;
 
 /**
  * Update an existing old value to a new value.
@@ -215,7 +218,7 @@ function apc_dec(string $key,
 <<__Native>>
 function apc_cas(string $key,
                  int $old_cas,
-                 int $new_cas): bool;
+                 int $new_cas)[globals]: bool;
 
 /**
  * Checks if one ore more APC keys exist.
@@ -229,7 +232,7 @@ function apc_cas(string $key,
  *
  */
 <<__Native>>
-function apc_exists(mixed $key): mixed;
+function apc_exists(mixed $key)[read_globals]: mixed;
 
 /**
  * Extend the TTL of a key in APC to now + a new ttl (or infinite). If the
@@ -244,7 +247,7 @@ function apc_exists(mixed $key): mixed;
  * @return bool - TRUE if the TTL was actually extended, FALSE otherwise.
  */
  <<__Native>>
- function apc_extend_ttl(string $key, int $new_ttl): bool;
+ function apc_extend_ttl(string $key, int $new_ttl)[globals]: bool;
 
 /**
  * Find the in-memory size of a key in APC, for debugging purposes.
@@ -255,4 +258,4 @@ function apc_exists(mixed $key): mixed;
  *
  */
 <<__Native>>
-function apc_size(string $key): ?int;
+function apc_size(string $key)[read_globals]: ?int;

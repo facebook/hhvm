@@ -29,6 +29,7 @@ type t =
         * of not, all edges will be written. *)
   | HhFanoutRustMode of {
       hh_fanout: Hh_fanout_rust_ffi_externs.hh_fanout_rust_ffi;
+      human_readable_dep_map_dir: string option;
     }  (** Mode that keeps track of edges via hh_fanout's Rust API **)
 
 let to_opaque_json (t : t) : Hh_json.json =
@@ -53,5 +54,5 @@ let to_opaque_json (t : t) : Hh_json.json =
                 opt_string_to_json (opaque human_readable_dep_map_dir) );
             ] );
       ]
-  | HhFanoutRustMode { hh_fanout = _ } -> failwith "TODO"
+  | HhFanoutRustMode _ -> failwith "TODO"
   [@@deriving show]

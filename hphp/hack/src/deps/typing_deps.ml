@@ -565,7 +565,9 @@ module SaveHumanReadableDepMap : sig
 end = struct
   let should_save mode =
     match mode with
-    | SaveToDiskMode { human_readable_dep_map_dir = Some _; _ } -> true
+    | SaveToDiskMode { human_readable_dep_map_dir = Some _; _ }
+    | HhFanoutRustMode { human_readable_dep_map_dir = Some _; _ } ->
+      true
     | _ -> false
 
   let human_readable_dep_map_channel_ref : Out_channel.t option ref = ref None
@@ -575,7 +577,9 @@ end = struct
     | None ->
       let directory =
         match mode with
-        | SaveToDiskMode { human_readable_dep_map_dir = Some d; _ } -> d
+        | SaveToDiskMode { human_readable_dep_map_dir = Some d; _ }
+        | HhFanoutRustMode { human_readable_dep_map_dir = Some d; _ } ->
+          d
         | _ -> failwith "programming error: no human_readable_dep_map_dir"
       in
       let () =
@@ -745,10 +749,7 @@ end
 
 module HhFanout : sig
   val add_idep :
-    Hh_fanout_rust_ffi_externs.hh_fanout_rust_ffi ->
-    Dep.dependent Dep.variant ->
-    Dep.dependency Dep.variant ->
-    unit
+    Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
 
   val flush_edges : Hh_fanout_rust_ffi_externs.hh_fanout_rust_ffi -> unit
 end = struct
@@ -774,7 +775,15 @@ end = struct
     commit_edges hh_fanout_ffi edges;
     Hashtbl.clear discovered_deps_batch
 
-  let add_idep hh_fanout_ffi dependent dependency =
+  let add_idep mode dependent dependency =
+    let hh_fanout_ffi =
+      (* TODO(toyang): ideally, this function would only take hh_fanout_ffi
+         instead of doing this match. For now, we keep this consistent with the
+         other `add_idep`s. *)
+      match mode with
+      | HhFanoutRustMode { hh_fanout; _ } -> hh_fanout
+      | _ -> failwith "programming error: wrong mode"
+    in
     let idependent = Dep.make dependent in
     let idependency = Dep.make dependency in
     if idependent = idependency then
@@ -788,7 +797,9 @@ end = struct
           ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
           flush_edges hh_fanout_ffi
-      end
+      end;
+      SaveHumanReadableDepMap.add mode (dependent, idependent);
+      SaveHumanReadableDepMap.add mode (dependency, idependency)
     )
 end
 
@@ -887,8 +898,7 @@ let add_idep mode dependent dependency =
   match mode with
   | InMemoryMode _ -> CustomGraph.add_idep mode dependent dependency
   | SaveToDiskMode _ -> SaveCustomGraph.add_idep mode dependent dependency
-  | HhFanoutRustMode { hh_fanout } ->
-    HhFanout.add_idep hh_fanout dependent dependency
+  | HhFanoutRustMode _ -> HhFanout.add_idep mode dependent dependency
 
 let dep_edges_make () : dep_edges = Some CustomGraph.DepEdgeSet.empty
 
@@ -912,7 +922,9 @@ let flush_ideps_batch mode : dep_edges =
 
 let hh_fanout_flush_ideps mode : unit =
   match mode with
-  | HhFanoutRustMode { hh_fanout } -> HhFanout.flush_edges hh_fanout
+  | HhFanoutRustMode { hh_fanout; _ } ->
+    HhFanout.flush_edges hh_fanout;
+    SaveHumanReadableDepMap.export_to_disk ~flush:true mode
   | _ -> failwith "should only be called in HhFanoutRustMode"
 
 let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =

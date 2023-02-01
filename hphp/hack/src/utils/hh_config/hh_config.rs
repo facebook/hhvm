@@ -184,6 +184,9 @@ impl HhConfig {
                 "pessimise_builtins" => {
                     go.tco_pessimise_builtins = parse_json(&value);
                 }
+                "union_intersection_type_hints" => {
+                    go.tco_union_intersection_type_hints = parse_json(&value);
+                }
                 _ => c.unknown.push((key, value)),
             }
         }

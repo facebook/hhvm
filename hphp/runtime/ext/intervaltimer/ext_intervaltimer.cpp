@@ -54,6 +54,8 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(TimerPool, s_timer_pool);
 
 namespace {
 
+bool Enabled;
+
 const StaticString
   s_IOWait("IOWait"),
   s_ResumeAwait("ResumeAwait"),
@@ -172,11 +174,13 @@ void HHVM_METHOD(IntervalTimer, __construct,
 }
 
 void HHVM_METHOD(IntervalTimer, start) {
+  if (!Enabled) return;
   auto data = Native::data<IntervalTimer>(this_);
   data->start();
 }
 
 void HHVM_METHOD(IntervalTimer, stop) {
+  if (!Enabled) return;
   auto data = Native::data<IntervalTimer>(this_);
   data->stop();
 }
@@ -185,6 +189,10 @@ void HHVM_METHOD(IntervalTimer, stop) {
 
 static struct IntervalTimerExtension final : Extension {
   IntervalTimerExtension() : Extension("intervaltimer") {}
+
+  void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
+    Config::Bind(Enabled, ini, hdf, "IntervalTimer.Enable", true);
+  }
 
   void moduleInit() override {
     HHVM_ME(IntervalTimer, __construct);

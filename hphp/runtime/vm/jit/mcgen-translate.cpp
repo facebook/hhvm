@@ -57,6 +57,8 @@
 
 #include "hphp/zend/zend-strtod.h"
 
+#include <folly/system/ThreadName.h>
+
 TRACE_SET_MOD(mcg);
 
 namespace HPHP::jit::mcgen {
@@ -214,13 +216,14 @@ struct TranslateWorker : JobQueueWorker<tc::FuncMetaInfo*, void*, true, true> {
     }
   }
 
-#if USE_JEMALLOC_EXTENT_HOOKS
   void onThreadEnter() override {
+    folly::setThreadName("jitworker");
+#if USE_JEMALLOC_EXTENT_HOOKS
     if (auto arena = next_extra_arena(s_numaNode)) {
       arena->bindCurrentThread();
     }
-  }
 #endif
+  }
 };
 
 using WorkerDispatcher = JobQueueDispatcher<TranslateWorker>;
@@ -655,6 +658,7 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
     Treadmill::enqueue([] {
       std::unique_lock<std::mutex> lock{s_rtaThreadMutex};
       s_retranslateAllThread = std::thread([] {
+        folly::setThreadName("jit.rta");
         rds::local::init();
         zend_get_bigint_data();
         SCOPE_EXIT { rds::local::fini(); };
@@ -664,6 +668,7 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
   } else {
     std::unique_lock<std::mutex> lock{s_rtaThreadMutex};
     s_retranslateAllThread = std::thread([skipSerialize] {
+      folly::setThreadName("jit.rta");
       BootStats::Block timer("retranslateall",
                              RuntimeOption::ServerExecutionMode());
       rds::local::init();

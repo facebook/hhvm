@@ -102,6 +102,9 @@ type t =
   | This_no_argument of Pos.t
   | Object_cast of Pos.t
   | This_hint_outside_class of Pos.t
+  | Parent_outside_class of Pos.t
+  | Self_outside_class of Pos.t
+  | Static_outside_class of Pos.t
   | This_type_forbidden of Pos.t
   | Nonstatic_property_with_lsb of Pos.t
   | Lowercase_this of {
@@ -248,6 +251,10 @@ type t =
   | Module_declaration_outside_allowed_files of Pos.t
   | Dynamic_method_access of Pos.t
   | Type_constant_in_enum_class_outside_allowed_locations of Pos.t
+  | Deprecated_use of {
+      pos: Pos.t;
+      msg: string;
+    }
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.Naming

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<65d1bb96512e484442211386d26f7477>>
+// @generated SignedSource<<9decb30dcf5180196654fb51c53851a5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -203,6 +203,12 @@ pub enum NamingError {
     ObjectCast(pos::Pos),
     #[rust_to_ocaml(name = "This_hint_outside_class")]
     ThisHintOutsideClass(pos::Pos),
+    #[rust_to_ocaml(name = "Parent_outside_class")]
+    ParentOutsideClass(pos::Pos),
+    #[rust_to_ocaml(name = "Self_outside_class")]
+    SelfOutsideClass(pos::Pos),
+    #[rust_to_ocaml(name = "Static_outside_class")]
+    StaticOutsideClass(pos::Pos),
     #[rust_to_ocaml(name = "This_type_forbidden")]
     ThisTypeForbidden(pos::Pos),
     #[rust_to_ocaml(name = "Nonstatic_property_with_lsb")]
@@ -372,4 +378,6 @@ pub enum NamingError {
     DynamicMethodAccess(pos::Pos),
     #[rust_to_ocaml(name = "Type_constant_in_enum_class_outside_allowed_locations")]
     TypeConstantInEnumClassOutsideAllowedLocations(pos::Pos),
+    #[rust_to_ocaml(name = "Deprecated_use")]
+    DeprecatedUse { pos: pos::Pos, msg: String },
 }

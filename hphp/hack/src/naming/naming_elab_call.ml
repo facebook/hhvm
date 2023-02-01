@@ -44,17 +44,15 @@ let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
       when String.equal fn_name SN.StdlibFunctions.call_user_func ->
       let errs =
         [
-          (Naming_phase_error.typing
-          @@ Typing_error.(
-               Primary.Deprecated_use
-                 {
-                   pos = fn_expr_pos;
-                   decl_pos_opt = None;
-                   msg =
-                     "The builtin "
-                     ^ Markdown_lite.md_codify (Utils.strip_ns fn_name)
-                     ^ " is deprecated.";
-                 }));
+          Naming_phase_error.naming
+          @@ Naming_error.Deprecated_use
+               {
+                 pos = fn_expr_pos;
+                 msg =
+                   "The builtin "
+                   ^ Markdown_lite.md_codify (Utils.strip_ns fn_name)
+                   ^ " is deprecated.";
+               };
         ]
       in
       begin

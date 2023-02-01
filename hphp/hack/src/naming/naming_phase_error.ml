@@ -9,7 +9,6 @@ open Hh_prelude
 
 type t =
   | Naming of Naming_error.t
-  | Typing of Typing_error.Primary.t
   | Nast_check of Nast_check_error.t
   | Like_type of Pos.t
   | Unexpected_hint of Pos.t
@@ -17,8 +16,6 @@ type t =
   | Supportdyn of Pos.t
 
 let naming err = Naming err
-
-let typing err = Typing err
 
 let nast_check err = Nast_check err
 
@@ -34,7 +31,6 @@ type agg = {
   naming: Naming_error.t list;
   (* TODO[mjt] either these errors shouldn't be raised in naming or they aren't
      really typing errors *)
-  typing: Typing_error.Primary.t list;
   (* TODO[mjt] as above, either these should be naming errors or we should
      be raising in NAST checks *)
   nast_check: Nast_check_error.t list;
@@ -49,7 +45,6 @@ type agg = {
 let empty =
   {
     naming = [];
-    typing = [];
     nast_check = [];
     like_types = [];
     unexpected_hints = [];
@@ -59,7 +54,6 @@ let empty =
 
 let add t = function
   | Naming err -> { t with naming = err :: t.naming }
-  | Typing err -> { t with typing = err :: t.typing }
   | Nast_check err -> { t with nast_check = err :: t.nast_check }
   | Like_type err -> { t with like_types = err :: t.like_types }
   | Unexpected_hint err ->
@@ -71,7 +65,6 @@ let add t = function
 let emit
     {
       naming;
-      typing;
       nast_check;
       like_types;
       unexpected_hints;
@@ -80,9 +73,6 @@ let emit
     } =
   List.iter ~f:Errors.add_naming_error naming;
   List.iter ~f:Errors.add_nast_check_error nast_check;
-  List.iter
-    ~f:(fun err -> Errors.add_typing_error @@ Typing_error.primary err)
-    typing;
   List.iter
     ~f:(fun pos -> Errors.experimental_feature pos "like-types")
     like_types;

@@ -112,6 +112,9 @@ type t =
   | This_no_argument of Pos.t
   | Object_cast of Pos.t
   | This_hint_outside_class of Pos.t
+  | Parent_outside_class of Pos.t
+  | Self_outside_class of Pos.t
+  | Static_outside_class of Pos.t
   | This_type_forbidden of Pos.t
   | Nonstatic_property_with_lsb of Pos.t
   | Lowercase_this of {
@@ -258,6 +261,10 @@ type t =
   | Module_declaration_outside_allowed_files of Pos.t
   | Dynamic_method_access of Pos.t
   | Type_constant_in_enum_class_outside_allowed_locations of Pos.t
+  | Deprecated_use of {
+      pos: Pos.t;
+      msg: string;
+    }
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -699,6 +706,24 @@ let this_hint_outside_class pos =
     (pos, "Cannot use `this` outside of a class")
     []
 
+let parent_outside_class pos =
+  User_error.make
+    Error_codes.Typing.(to_enum ParentOutsideClass)
+    (pos, "`parent` is undefined outside of a class")
+    []
+
+let self_outside_class pos =
+  User_error.make
+    Error_codes.Typing.(to_enum SelfOutsideClass)
+    (pos, "`self` is undefined outside of a class")
+    []
+
+let static_outside_class pos =
+  User_error.make
+    Error_codes.Typing.(to_enum StaticOutsideClass)
+    (pos, "`static` is undefined outside of a class")
+    []
+
 let this_type_forbidden pos =
   User_error.make
     Error_code.(to_enum ThisMustBeReturn)
@@ -1126,6 +1151,9 @@ let type_constant_in_enum_class_outside_allowed_locations pos =
       ^ "The set of approved locations is in .hhconfig" )
     []
 
+let deprecated_use pos msg =
+  User_error.make Error_codes.Typing.(to_enum DeprecatedUse) (pos, msg) []
+
 let to_user_error = function
   | Unsupported_trait_use_as pos -> unsupported_trait_use_as pos
   | Unsupported_instead_of pos -> unsupported_instead_of pos
@@ -1160,6 +1188,9 @@ let to_user_error = function
   | This_no_argument pos -> this_no_argument pos
   | Object_cast pos -> object_cast pos
   | This_hint_outside_class pos -> this_hint_outside_class pos
+  | Parent_outside_class pos -> parent_outside_class pos
+  | Self_outside_class pos -> self_outside_class pos
+  | Static_outside_class pos -> static_outside_class pos
   | This_type_forbidden pos -> this_type_forbidden pos
   | Nonstatic_property_with_lsb pos -> nonstatic_property_with_lsb pos
   | Lowercase_this { pos; ty_name } -> lowercase_this pos ty_name
@@ -1255,3 +1286,4 @@ let to_user_error = function
   | Dynamic_method_access pos -> dynamic_method_access pos
   | Type_constant_in_enum_class_outside_allowed_locations pos ->
     type_constant_in_enum_class_outside_allowed_locations pos
+  | Deprecated_use { pos; msg } -> deprecated_use pos msg

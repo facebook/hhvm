@@ -87,7 +87,7 @@ let on_hint on_error hint ~ctx =
         | _ ->
           Error
             ( (pos, Aast.Herr),
-              Err.typing @@ Typing_error.Primary.Self_outside_class tycon_pos )
+              Err.naming @@ Naming_error.Self_outside_class tycon_pos )
         (* TODO[mjt] is this ever exercised? The cases is handles appear to
            be a parse errors *)
       end

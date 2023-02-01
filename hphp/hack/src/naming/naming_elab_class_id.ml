@@ -48,22 +48,19 @@ let on_class_id on_error class_id ~ctx =
       if String.equal cname SN.Classes.cParent then
         if not in_class then
           ( (annot, expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
-            Some (Err.typing @@ Typing_error.Primary.Parent_outside_class id_pos)
-          )
+            Some (Err.naming @@ Naming_error.Parent_outside_class id_pos) )
         else
           ((annot, expr_pos, Aast.CIparent), None)
       else if String.equal cname SN.Classes.cSelf then
         if not in_class then
           ( (annot, expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
-            Some (Err.typing @@ Typing_error.Primary.Self_outside_class id_pos)
-          )
+            Some (Err.naming @@ Naming_error.Self_outside_class id_pos) )
         else
           ((annot, expr_pos, Aast.CIself), None)
       else if String.equal cname SN.Classes.cStatic then
         if not in_class then
           ( (annot, expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
-            Some (Err.typing @@ Typing_error.Primary.Static_outside_class id_pos)
-          )
+            Some (Err.naming @@ Naming_error.Static_outside_class id_pos) )
         else
           ((annot, expr_pos, Aast.CIstatic), None)
       else

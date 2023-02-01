@@ -14,8 +14,6 @@ val naming : Naming_error.t -> t
 
 val nast_check : Nast_check_error.t -> t
 
-val typing : Typing_error.Primary.t -> t
-
 val like_type : Pos.t -> t
 
 val unexpected_hint : Pos.t -> t

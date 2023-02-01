@@ -38,8 +38,7 @@ let canonical_shape_name current_class sfld =
       Ok (Ast_defs.SFclass_const ((class_pos, class_name), cst))
     | None ->
       let err =
-        Naming_phase_error.typing
-        @@ Typing_error.Primary.Self_outside_class class_pos
+        Naming_phase_error.naming @@ Naming_error.Self_outside_class class_pos
       in
       Error (Ast_defs.SFclass_const ((class_pos, SN.Classes.cUnknown), cst), err))
   | _ -> Ok sfld

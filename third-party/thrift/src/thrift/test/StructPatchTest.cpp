@@ -775,5 +775,109 @@ TEST(UnionPatchTest, PatchMergeEnsure) {
   test::expectPatch(patch, actual, expected1, expected2);
 }
 
+TEST(StructPatchTest, NestedEmpty) {
+  MyStructPatch patch;
+  EXPECT_FALSE(patch.modifies<ident::structVal>());
+  EXPECT_FALSE((patch.modifies<ident::structVal, ident::data1>()));
+  EXPECT_FALSE((patch.modifies<ident::structVal, ident::data2>()));
+}
+
+TEST(StructPatchTest, NestedAssign) {
+  auto patch = MyStructPatch::createAssign(testValue());
+  EXPECT_TRUE(patch.modifies<ident::structVal>());
+  EXPECT_TRUE((patch.modifies<ident::structVal, ident::data1>()));
+  EXPECT_TRUE((patch.modifies<ident::structVal, ident::data2>()));
+}
+
+TEST(StructPatchTest, NestedClear) {
+  auto patch = MyStructPatch::createClear();
+  EXPECT_TRUE(patch.modifies<ident::structVal>());
+  EXPECT_TRUE((patch.modifies<ident::structVal, ident::data1>()));
+  EXPECT_TRUE((patch.modifies<ident::structVal, ident::data2>()));
+}
+
+TEST(StructPatchTest, NestedEnsure) {
+  MyStructPatch patch;
+  patch.ensure<ident::structVal>();
+  EXPECT_TRUE(patch.modifies<ident::structVal>());
+  EXPECT_TRUE((patch.modifies<ident::structVal, ident::data1>()));
+  EXPECT_TRUE((patch.modifies<ident::structVal, ident::data2>()));
+}
+
+TEST(StructPatchTest, NestedPatch) {
+  MyStructPatch patch;
+  patch.patchIfSet<ident::structVal>().patchIfSet<ident::data1>() = "10";
+  EXPECT_TRUE(patch.modifies<ident::structVal>());
+  EXPECT_TRUE((patch.modifies<ident::structVal, ident::data1>()));
+  EXPECT_FALSE((patch.modifies<ident::structVal, ident::data2>()));
+
+  patch.patchIfSet<ident::structVal>().patchIfSet<ident::data1>() =
+      op::StringPatch{};
+  EXPECT_FALSE(patch.modifies<ident::structVal>());
+  EXPECT_FALSE((patch.modifies<ident::structVal, ident::data1>()));
+  EXPECT_FALSE((patch.modifies<ident::structVal, ident::data2>()));
+
+  patch.patchIfSet<ident::structVal>().patchIfSet<ident::data2>() = 20;
+  EXPECT_TRUE(patch.modifies<ident::structVal>());
+  EXPECT_FALSE((patch.modifies<ident::structVal, ident::data1>()));
+  EXPECT_TRUE((patch.modifies<ident::structVal, ident::data2>()));
+}
+
+enum class PatchLocation { Prior, After };
+
+template <typename Id, typename StructPatch>
+auto& get_inner_patch(StructPatch&& patch, PatchLocation loc) {
+  switch (loc) {
+    case PatchLocation::Prior:
+      return *op::get<Id>(patch.toThrift().patchPrior()->toThrift());
+    case PatchLocation::After:
+      return *op::get<Id>(patch.toThrift().patch()->toThrift());
+  }
+
+  CHECK(false);
+}
+
+TEST(StructPatchTest, NestedPatchWithDifferentLocation) {
+  auto locations = {PatchLocation::Prior, PatchLocation::After};
+  for (auto inner1 : locations) {
+    for (auto outer1 : locations) {
+      for (auto inner2 : locations) {
+        for (auto outer2 : locations) {
+          MyStructPatch patch;
+          EXPECT_FALSE(patch.modifies<ident::structVal>());
+          EXPECT_FALSE((patch.modifies<ident::structVal, ident::data1>()));
+          EXPECT_FALSE((patch.modifies<ident::structVal, ident::data2>()));
+
+          get_inner_patch<ident::data1>(
+              get_inner_patch<ident::structVal>(patch, outer1), inner1) = "10";
+          EXPECT_TRUE(patch.modifies<ident::structVal>());
+          EXPECT_TRUE((patch.modifies<ident::structVal, ident::data1>()));
+          EXPECT_FALSE((patch.modifies<ident::structVal, ident::data2>()));
+
+          get_inner_patch<ident::data2>(
+              get_inner_patch<ident::structVal>(patch, outer2), inner2) = 20;
+          EXPECT_TRUE(patch.modifies<ident::structVal>());
+          EXPECT_TRUE((patch.modifies<ident::structVal, ident::data1>()));
+          EXPECT_TRUE((patch.modifies<ident::structVal, ident::data2>()));
+
+          get_inner_patch<ident::data1>(
+              get_inner_patch<ident::structVal>(patch, outer1), inner1) =
+              op::StringPatch{};
+          EXPECT_TRUE(patch.modifies<ident::structVal>());
+          EXPECT_FALSE((patch.modifies<ident::structVal, ident::data1>()));
+          EXPECT_TRUE((patch.modifies<ident::structVal, ident::data2>()));
+
+          get_inner_patch<ident::data2>(
+              get_inner_patch<ident::structVal>(patch, outer2), inner2) =
+              op::I32Patch{};
+          EXPECT_FALSE(patch.modifies<ident::structVal>());
+          EXPECT_FALSE((patch.modifies<ident::structVal, ident::data1>()));
+          EXPECT_FALSE((patch.modifies<ident::structVal, ident::data2>()));
+        }
+      }
+    }
+  }
+}
+
 } // namespace
 } // namespace apache::thrift

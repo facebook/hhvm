@@ -133,6 +133,17 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
         !getRawPatch<Id>(data_.patch()).empty();
   }
 
+  template <typename Id, typename... Ids>
+  std::enable_if_t<sizeof...(Ids) != 0, bool> modifies() const {
+    // If hasAssign() == true, the whole struct (all fields) will be replaced.
+    if (hasAssign() || data_.clear() == true || getEnsure<Id>(data_)) {
+      return true;
+    }
+
+    return getRawPatch<Id>(data_.patchPrior()).template modifies<Ids...>() ||
+        getRawPatch<Id>(data_.patch()).template modifies<Ids...>();
+  }
+
   /// Ensures the given field is set, and return the associated patch object.
   template <typename Id>
   decltype(auto) ensure() {

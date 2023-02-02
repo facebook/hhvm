@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 apache.thrift.test
@@ -229,13 +230,12 @@ struct AlwaysThrowCppRefChild {
 } (cpp.allocator = "::ScopedAlwaysThrowAlloc<>")
 
 struct AlwaysThrowCppRefParent {
+  @cpp.Ref{type = cpp.RefType.Unique}
   1: AlwaysThrowCppRefChild (cpp.use_allocator) uniqueChild (
-    cpp.ref_type = "unique",
     cpp.template = "::AlwaysThrowUniquePtr",
   );
-  2: AlwaysThrowCppRefChild (cpp.use_allocator) sharedChild (
-    cpp.ref_type = "shared",
-  );
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: AlwaysThrowCppRefChild (cpp.use_allocator) sharedChild;
   3: i32 no_alloc;
 } (cpp.allocator = "::ScopedAlwaysThrowAlloc<>")
 
@@ -245,20 +245,22 @@ struct CountingCppRefChild {
 } (cpp.allocator = "::ScopedCountingAlloc<>")
 
 struct CountingCppRefParent {
+  @cpp.Ref{type = cpp.RefType.Unique}
   1: CountingCppRefChild (cpp.use_allocator) uniqueChild (
-    cpp.ref_type = "unique",
     cpp.template = "::CountingUniquePtr",
   );
-  2: CountingCppRefChild (cpp.use_allocator) sharedChild (
-    cpp.ref_type = "shared",
-  );
-  3: CountingCppRefChild noAllocUniqueChild (cpp.ref_type = "unique");
-  4: CountingCppRefChild noAllocSharedChild (cpp.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: CountingCppRefChild (cpp.use_allocator) sharedChild;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: CountingCppRefChild noAllocUniqueChild;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  4: CountingCppRefChild noAllocSharedChild;
   5: i32 no_alloc;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
   6: list<i32> (
     cpp.use_allocator,
     cpp.template = "::CountingVector",
-  ) allocVector (cpp.ref_type = "shared");
+  ) allocVector;
   @thrift.Box
   7: optional CountingCppRefChild noAllocBoxedChild;
 } (cpp.allocator = "::ScopedCountingAlloc<>")

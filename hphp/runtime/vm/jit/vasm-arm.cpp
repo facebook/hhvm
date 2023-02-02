@@ -309,9 +309,9 @@ struct Vgen {
   // extend their arguments--these instructions are lowered to cmp{lq}[i] if
   // the comparison is not narrow or not equality/inequality
   void emit(const cmpb& i) { a->Cmp(W(i.s1), W(i.s0)); }
-  void emit(const cmpbi& i) { a->Cmp(W(i.s1), static_cast<uint8_t>(i.s0.b())); }
+  void emit(const cmpbi& i) { a->Cmp(W(i.s1), i.s0.ub()); }
   void emit(const cmpw& i) { a->Cmp(W(i.s1), W(i.s0)); }
-  void emit(const cmpwi& i) { a->Cmp(W(i.s1), static_cast<uint16_t>(i.s0.w())); }
+  void emit(const cmpwi& i) { a->Cmp(W(i.s1), i.s0.uw()); }
   void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }

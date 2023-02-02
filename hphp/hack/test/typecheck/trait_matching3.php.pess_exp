@@ -1,6 +1,0 @@
-File "trait_matching3.php.pess", line 15, characters 12-16:
-Invalid return type (Typing[4110])
-  File "trait_matching3.php.pess", line 14, characters 25-29:
-  Expected `supportdyn<this>` because method must be callable in a dynamic context
-  File "trait_matching3.php.pess", line 15, characters 12-16:
-  But got `this as MyTrait`

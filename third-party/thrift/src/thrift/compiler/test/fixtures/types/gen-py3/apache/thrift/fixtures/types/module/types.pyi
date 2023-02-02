@@ -1067,18 +1067,23 @@ class AllocatorAware(thrift.py3.types.Struct, _typing.Hashable):
 class AllocatorAware2(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         not_a_container: bool
+        box_field: bool
         pass
 
     not_a_container: Final[int] = ...
 
+    box_field: Final[_typing.Optional[int]] = ...
+
     def __init__(
         self, *,
-        not_a_container: _typing.Optional[int]=None
+        not_a_container: _typing.Optional[int]=None,
+        box_field: _typing.Optional[int]=None
     ) -> None: ...
 
     def __call__(
         self, *,
-        not_a_container: _typing.Union[int, '__NotSet', None]=NOTSET
+        not_a_container: _typing.Union[int, '__NotSet', None]=NOTSET,
+        box_field: _typing.Union[int, '__NotSet', None]=NOTSET
     ) -> AllocatorAware2: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['AllocatorAware2'], bytes]]: ...

@@ -486,6 +486,8 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::AllocatorAware2> {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).not_a_container_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).box_field_ref());
     default:
       throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::AllocatorAware2");
     }

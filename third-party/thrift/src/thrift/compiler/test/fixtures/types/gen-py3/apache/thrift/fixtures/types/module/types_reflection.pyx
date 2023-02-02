@@ -1060,7 +1060,7 @@ cdef __StructSpec get_reflection__AllocatorAware():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref_type""": """unique""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1072,7 +1072,7 @@ cdef __StructSpec get_reflection__AllocatorAware():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref_type""": """shared""",            },
+            },
         ),
     )
     return spec
@@ -1095,6 +1095,18 @@ cdef __StructSpec get_reflection__AllocatorAware2():
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="box_field",
+            type=int,
+            kind=__NumberType.I32,
+            qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
             },

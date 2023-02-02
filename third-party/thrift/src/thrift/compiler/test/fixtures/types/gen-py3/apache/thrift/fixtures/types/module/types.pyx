@@ -3952,6 +3952,7 @@ cdef class AllocatorAware2(thrift.py3.types.Struct):
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("AllocatorAware2", {
           "not_a_container": deref(self._cpp_obj).not_a_container_ref().has_value(),
+          "box_field": deref(self._cpp_obj).box_field_ref().has_value(),
         })
 
     @staticmethod
@@ -3967,6 +3968,16 @@ cdef class AllocatorAware2(thrift.py3.types.Struct):
     @property
     def not_a_container(self):
         return self.not_a_container_impl()
+
+    cdef inline box_field_impl(self):
+        if not deref(self._cpp_obj).box_field_ref().has_value():
+            return None
+
+        return deref(self._cpp_obj).box_field_ref().value()
+
+    @property
+    def box_field(self):
+        return self.box_field_impl()
 
 
     def __hash__(AllocatorAware2 self):
@@ -4013,7 +4024,7 @@ cdef class AllocatorAware2(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 1
+        return 2
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(AllocatorAware2 self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data

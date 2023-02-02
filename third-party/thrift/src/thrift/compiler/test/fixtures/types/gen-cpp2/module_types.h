@@ -74,6 +74,7 @@ struct not_a_container;
 struct aa_unique;
 struct aa_shared;
 struct not_a_container;
+struct box_field;
 struct i32_field;
 struct IntTypedef_field;
 struct UintTypedef_field;
@@ -311,6 +312,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(aa_shared);
 #ifndef APACHE_THRIFT_ACCESSOR_not_a_container
 #define APACHE_THRIFT_ACCESSOR_not_a_container
 APACHE_THRIFT_DEFINE_ACCESSOR(not_a_container);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_box_field
+#define APACHE_THRIFT_ACCESSOR_box_field
+APACHE_THRIFT_DEFINE_ACCESSOR(box_field);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_i32_field
 #define APACHE_THRIFT_ACCESSOR_i32_field
@@ -6597,15 +6602,17 @@ class AllocatorAware2 final  {
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   using __fbthrift_reflection_ident_list = folly::tag_t<
-    ::apache::thrift::ident::not_a_container
+    ::apache::thrift::ident::not_a_container,
+    ::apache::thrift::ident::box_field
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
   using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
     ::apache::thrift::type::i32_t
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -6644,33 +6651,39 @@ class AllocatorAware2 final  {
 
   AllocatorAware2() :
     __fbthrift_alloc(allocator_type()),
-    __fbthrift_field_not_a_container() {
+    __fbthrift_field_not_a_container(),
+    __fbthrift_field_box_field(::std::int32_t()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  AllocatorAware2(apache::thrift::FragileConstructor, ::std::int32_t not_a_container__arg);
+  AllocatorAware2(apache::thrift::FragileConstructor, ::std::int32_t not_a_container__arg, ::apache::thrift::detail::boxed_value_ptr<::std::int32_t> box_field__arg);
 
   AllocatorAware2(AllocatorAware2&&) noexcept;
   AllocatorAware2(const AllocatorAware2& src);
 
   explicit AllocatorAware2(const allocator_type& alloc) noexcept :
     __fbthrift_alloc(alloc),
-    __fbthrift_field_not_a_container() {}
+    __fbthrift_field_not_a_container(),
+    __fbthrift_field_box_field(std::make_shared<::std::int32_t>()) {}
 
   explicit AllocatorAware2(const AllocatorAware2& other, const allocator_type& alloc) :
     __fbthrift_alloc(alloc),
     __fbthrift_field_not_a_container(other.__fbthrift_field_not_a_container),
+    __fbthrift_field_box_field(std::make_shared<::std::int32_t>(*other.__fbthrift_field_box_field)),
     __isset(other.__isset) {}
 
   explicit AllocatorAware2(AllocatorAware2&& other, const allocator_type& alloc) :
     __fbthrift_alloc(alloc),
     __fbthrift_field_not_a_container(std::move(other.__fbthrift_field_not_a_container)),
+    __fbthrift_field_box_field(std::make_shared<::std::int32_t>(std::move(*other.__fbthrift_field_box_field))),
     __isset(other.__isset) {}
 
   AllocatorAware2& operator=(AllocatorAware2&&) noexcept;
   AllocatorAware2& operator=(const AllocatorAware2& src);
  private:
   ::std::int32_t __fbthrift_field_not_a_container;
+ private:
+  ::apache::thrift::detail::boxed_value_ptr<::std::int32_t> __fbthrift_field_box_field;
  private:
   apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -6717,6 +6730,46 @@ class AllocatorAware2 final  {
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> not_a_container() && {
     return {static_cast<T&&>(this->__fbthrift_field_not_a_container), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> box_field_ref() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_box_field};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> box_field_ref() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_box_field)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> box_field_ref() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_box_field};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> box_field_ref() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_box_field)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> box_field() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_box_field};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> box_field() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_box_field)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> box_field() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_box_field};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> box_field() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_box_field)};
   }
 
   ::std::int32_t get_not_a_container() const {

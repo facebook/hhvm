@@ -172,6 +172,7 @@ cdef class AllocatorAware_Builder(thrift.py3.builder.StructBuilder):
 
 cdef class AllocatorAware2_Builder(thrift.py3.builder.StructBuilder):
     cdef public pint not_a_container
+    cdef public pint box_field
 
 
 cdef class TypedefStruct_Builder(thrift.py3.builder.StructBuilder):

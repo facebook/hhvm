@@ -889,6 +889,7 @@ cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_types_
         bint operator<=(cAllocatorAware2&)
         bint operator>=(cAllocatorAware2&)
         __field_ref[cint32_t] not_a_container_ref "not_a_container_ref" ()
+        __optional_field_ref[cint32_t] box_field_ref "box_field_ref" ()
 
 
     cdef cppclass cTypedefStruct "::apache::thrift::fixtures::types::TypedefStruct":
@@ -1277,6 +1278,7 @@ cdef class AllocatorAware2(thrift.py3.types.Struct):
     cdef shared_ptr[cAllocatorAware2] _cpp_obj
     cdef _fbthrift_types_fields.__AllocatorAware2_FieldsSetter _fields_setter
     cdef inline object not_a_container_impl(self)
+    cdef inline object box_field_impl(self)
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cAllocatorAware2])

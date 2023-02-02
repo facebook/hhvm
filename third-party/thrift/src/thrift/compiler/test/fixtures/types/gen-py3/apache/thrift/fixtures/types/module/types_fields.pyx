@@ -1065,6 +1065,7 @@ cdef class __AllocatorAware2_FieldsSetter(__StructFieldsSetter):
         cdef __AllocatorAware2_FieldsSetter __fbthrift_inst = __AllocatorAware2_FieldsSetter.__new__(__AllocatorAware2_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"not_a_container")] = __AllocatorAware2_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"box_field")] = __AllocatorAware2_FieldsSetter._set_field_1
         return __fbthrift_inst
 
     cdef void set_field(__AllocatorAware2_FieldsSetter self, const char* name, object value) except *:
@@ -1083,6 +1084,16 @@ cdef class __AllocatorAware2_FieldsSetter(__StructFieldsSetter):
             raise TypeError(f'not_a_container is not a { int !r}.')
         _fbthrift_value = <cint32_t> _fbthrift_value
         deref(self._struct_cpp_obj).not_a_container_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_1(self, _fbthrift_value) except *:
+        # for field box_field
+        if _fbthrift_value is None:
+            __reset_field[_apache_thrift_fixtures_types_module_types.cAllocatorAware2](deref(self._struct_cpp_obj), 1)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'box_field is not a { int !r}.')
+        _fbthrift_value = <cint32_t> _fbthrift_value
+        deref(self._struct_cpp_obj).box_field_ref().assign(_fbthrift_value)
 
 
 @__cython.auto_pickle(False)

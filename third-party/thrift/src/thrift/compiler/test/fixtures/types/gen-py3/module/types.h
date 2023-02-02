@@ -434,6 +434,9 @@ void reset_field<::apache::thrift::fixtures::types::AllocatorAware2>(
     case 0:
       obj.not_a_container_ref().copy_from(default_inst<::apache::thrift::fixtures::types::AllocatorAware2>().not_a_container_ref());
       return;
+    case 1:
+      obj.box_field_ref().copy_from(default_inst<::apache::thrift::fixtures::types::AllocatorAware2>().box_field_ref());
+      return;
   }
 }
 

@@ -299,6 +299,7 @@ struct ForEachField<::apache::thrift::fixtures::types::AllocatorAware2> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).not_a_container_ref()...);
+    f(1, static_cast<T&&>(t).box_field_ref()...);
   }
 };
 

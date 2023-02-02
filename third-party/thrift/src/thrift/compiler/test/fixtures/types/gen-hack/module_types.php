@@ -4779,6 +4779,26 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'aa_unique' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'aa_shared' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \thrift\annotation\cpp\RefType::SharedMutable,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -4883,24 +4903,36 @@ class AllocatorAware2 implements \IThriftSyncStruct, \IThriftStructMetadata {
       'var' => 'not_a_container',
       'type' => \TType::I32,
     ),
+    2 => shape(
+      'var' => 'box_field',
+      'type' => \TType::I32,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'not_a_container' => 1,
+    'box_field' => 2,
   ];
 
   const type TConstructorShape = shape(
     ?'not_a_container' => ?int,
+    ?'box_field' => ?int,
   );
 
-  const int STRUCTURAL_ID = 3476753821834683211;
+  const int STRUCTURAL_ID = 8535397751218300194;
   /**
    * Original thrift field:-
    * 1: i32 not_a_container
    */
   public int $not_a_container;
+  /**
+   * Original thrift field:-
+   * 2: i32 box_field
+   */
+  public ?int $box_field;
 
-  public function __construct(?int $not_a_container = null)[] {
+  public function __construct(?int $not_a_container = null, ?int $box_field = null)[] {
     $this->not_a_container = $not_a_container ?? 0;
+    $this->box_field = $box_field;
   }
 
   public static function withDefaultValues()[]: this {
@@ -4910,6 +4942,7 @@ class AllocatorAware2 implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'not_a_container'),
+      Shapes::idx($shape, 'box_field'),
     );
   }
 
@@ -4936,6 +4969,18 @@ class AllocatorAware2 implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "not_a_container",
             )
           ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "box_field",
+              "is_optional" => true,
+            )
+          ),
         ],
         "is_union" => false,
       )
@@ -4946,6 +4991,15 @@ class AllocatorAware2 implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'box_field' => shape(
+          'field' => dict[
+            '\thrift\annotation\Box' => \thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -4967,6 +5021,14 @@ class AllocatorAware2 implements \IThriftSyncStruct, \IThriftStructMetadata {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
         $this->not_a_container = (int)$_tmp0;
+      }
+    }
+    if (idx($parsed, 'box_field') !== null) {
+      $_tmp1 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['box_field']);
+      if ($_tmp1 > 0x7fffffff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->box_field = (int)$_tmp1;
       }
     }
   }

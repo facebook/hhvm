@@ -135,6 +135,7 @@ struct __fbthrift_strings_module {
   using __fbthrift_hash_ddbb5f5c6cda27e9cba90a7892f91c2724176d74b0d802d42c5b950bd8719a47 = ::fatal::sequence<char, 'M', 'i', 'n', 'P', 'a', 'd', 'd', 'i', 'n', 'g'>;
   using __fbthrift_hash_e3a3d7b658f4a9d27441f151b296f2d70d43f430bf424f52c4cfb58409d82bf3 = ::fatal::sequence<char, 'i', 's', '_', 'u', 'n', 's', 'c', 'o', 'p', 'e', 'd'>;
   using __fbthrift_hash_ea7bd83abd8b7b855031fc7f4e0e961fe4c408203a46f5126d609632ddf0c641 = ::fatal::sequence<char, 'l', 'i', 's', 't', '_', 'f', 'i', 'e', 'l', 'd'>;
+  using __fbthrift_hash_eb09df30c303344c1e4a4ebda8428a9b865358242230e1d1917b533b8e65c014 = ::fatal::sequence<char, 'b', 'o', 'x', '_', 'f', 'i', 'e', 'l', 'd'>;
   using __fbthrift_hash_efda3b7db6b44fe655cfcf36ce339c894e64337d7f192d6ad81a95d5c98a2359 = ::fatal::sequence<char, 'M', 'y', 'I', 'n', 't', 'F', 'i', 'e', 'l', 'd'>;
   using __fbthrift_hash_f119bbf23aedae2e52bbe52603d5596f495df52e77522ef10e4e47e6cef18e97 = ::fatal::sequence<char, 'a', 'a', '_', 's', 't', 'r', 'i', 'n', 'g'>;
   using __fbthrift_hash_f6db24d8a8de900ae31838bf4f66ecfa5ce280df4954ad1d3da4a0baef6450fc = ::fatal::sequence<char, 'n', 'o', 't', '_', 'a', '_', 'c', 'o', 'n', 't', 'a', 'i', 'n', 'e', 'r'>;
@@ -157,6 +158,7 @@ struct __fbthrift_strings_module {
   using binary_field = ::fatal::sequence<char, 'b', 'i', 'n', 'a', 'r', 'y', '_', 'f', 'i', 'e', 'l', 'd'>;
   using binary_keyed_map = ::fatal::sequence<char, 'b', 'i', 'n', 'a', 'r', 'y', '_', 'k', 'e', 'y', 'e', 'd', '_', 'm', 'a', 'p'>;
   using bounce_map = ::fatal::sequence<char, 'b', 'o', 'u', 'n', 'c', 'e', '_', 'm', 'a', 'p'>;
+  using box_field = ::fatal::sequence<char, 'b', 'o', 'x', '_', 'f', 'i', 'e', 'l', 'd'>;
   using cpp_allocator = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'a', 'l', 'l', 'o', 'c', 'a', 't', 'o', 'r'>;
   using cpp_declare_bitwise_ops = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'd', 'e', 'c', 'l', 'a', 'r', 'e', '_', 'b', 'i', 't', 'w', 'i', 's', 'e', '_', 'o', 'p', 's'>;
   using cpp_declare_equal_to = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'd', 'e', 'c', 'l', 'a', 'r', 'e', '_', 'e', 'q', 'u', 'a', 'l', '_', 't', 'o'>;

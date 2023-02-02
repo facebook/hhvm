@@ -411,6 +411,7 @@ cdef class __AllocatorAware2_FieldsSetter(__StructFieldsSetter):
     @staticmethod
     cdef __AllocatorAware2_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cAllocatorAware2* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
 
 
 ctypedef void (*__TypedefStruct_FieldsSetterFunc)(__TypedefStruct_FieldsSetter, object) except *

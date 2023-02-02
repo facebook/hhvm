@@ -392,6 +392,7 @@ pub struct AllocatorAware {
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AllocatorAware2 {
     pub not_a_container: ::std::primitive::i32,
+    pub box_field: ::std::option::Option<::std::boxed::Box<::std::primitive::i32>>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -3437,6 +3438,7 @@ impl ::std::default::Default for self::AllocatorAware2 {
     fn default() -> Self {
         Self {
             not_a_container: ::std::default::Default::default(),
+            box_field: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -3447,6 +3449,7 @@ impl ::std::fmt::Debug for self::AllocatorAware2 {
         formatter
             .debug_struct("AllocatorAware2")
             .field("not_a_container", &self.not_a_container)
+            .field("box_field", &self.box_field)
             .finish()
     }
 }
@@ -3473,6 +3476,11 @@ where
         p.write_field_begin("not_a_container", ::fbthrift::TType::I32, 1);
         ::fbthrift::Serialize::write(&self.not_a_container, p);
         p.write_field_end();
+        if let ::std::option::Option::Some(some) = &self.box_field {
+            p.write_field_begin("box_field", ::fbthrift::TType::I32, 2);
+            ::fbthrift::Serialize::write(some, p);
+            p.write_field_end();
+        }
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -3484,15 +3492,18 @@ where
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("box_field", ::fbthrift::TType::I32, 2),
             ::fbthrift::Field::new("not_a_container", ::fbthrift::TType::I32, 1),
         ];
         let mut field_not_a_container = ::std::option::Option::None;
+        let mut field_box_field = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::I32, 1) => field_not_a_container = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 2) => field_box_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3500,6 +3511,7 @@ where
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
             not_a_container: field_not_a_container.unwrap_or_default(),
+            box_field: field_box_field,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }

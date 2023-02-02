@@ -3576,6 +3576,7 @@ const folly::StringPiece AllocatorAware2::__fbthrift_get_field_name(::apache::th
 AllocatorAware2::AllocatorAware2(const AllocatorAware2& srcObj) :
     __fbthrift_alloc(srcObj.__fbthrift_alloc),
     __fbthrift_field_not_a_container(srcObj.__fbthrift_field_not_a_container),
+    __fbthrift_field_box_field(srcObj.__fbthrift_field_box_field),
     __isset(srcObj.__isset) {
 }
 
@@ -3589,19 +3590,22 @@ AllocatorAware2& AllocatorAware2::operator=(const AllocatorAware2& other) {
 AllocatorAware2::AllocatorAware2(FOLLY_MAYBE_UNUSED AllocatorAware2&& other) noexcept :
     __fbthrift_alloc(std::move(other.__fbthrift_alloc)),
     __fbthrift_field_not_a_container(std::move(other.__fbthrift_field_not_a_container)),
+    __fbthrift_field_box_field(std::move(other.__fbthrift_field_box_field)),
     __isset(other.__isset) {
 }
 
 AllocatorAware2& AllocatorAware2::operator=(FOLLY_MAYBE_UNUSED AllocatorAware2&& other) noexcept {
     this->__fbthrift_field_not_a_container = std::move(other.__fbthrift_field_not_a_container);
+    this->__fbthrift_field_box_field = std::move(other.__fbthrift_field_box_field);
     __isset = other.__isset;
   ::apache::thrift::detail::move_allocator(__fbthrift_alloc, other.__fbthrift_alloc);
     return *this;
 }
 
 
-AllocatorAware2::AllocatorAware2(apache::thrift::FragileConstructor, ::std::int32_t not_a_container__arg) :
-    __fbthrift_field_not_a_container(std::move(not_a_container__arg)) {
+AllocatorAware2::AllocatorAware2(apache::thrift::FragileConstructor, ::std::int32_t not_a_container__arg, ::apache::thrift::detail::boxed_value_ptr<::std::int32_t> box_field__arg) :
+    __fbthrift_field_not_a_container(std::move(not_a_container__arg)),
+    __fbthrift_field_box_field(std::move(box_field__arg)) {
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -3609,6 +3613,7 @@ AllocatorAware2::AllocatorAware2(apache::thrift::FragileConstructor, ::std::int3
 void AllocatorAware2::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_not_a_container = ::std::int32_t();
+  this->__fbthrift_field_box_field.reset();
   __isset = {};
 }
 
@@ -3624,6 +3629,9 @@ bool AllocatorAware2::operator==(FOLLY_MAYBE_UNUSED const AllocatorAware2& rhs) 
   if (!(lhs.not_a_container_ref() == rhs.not_a_container_ref())) {
     return false;
   }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.box_field_ref(), rhs.box_field_ref()))) {
+    return false;
+  }
   return true;
 }
 
@@ -3635,6 +3643,7 @@ bool AllocatorAware2::operator<(FOLLY_MAYBE_UNUSED const AllocatorAware2& rhs) c
 void swap(FOLLY_MAYBE_UNUSED AllocatorAware2& a, FOLLY_MAYBE_UNUSED AllocatorAware2& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_not_a_container, b.__fbthrift_field_not_a_container);
+  swap(a.__fbthrift_field_box_field, b.__fbthrift_field_box_field);
   swap(a.__isset, b.__isset);
   ::apache::thrift::detail::swap_allocators(a.__fbthrift_alloc, b.__fbthrift_alloc);
 }

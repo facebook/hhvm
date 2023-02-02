@@ -3710,6 +3710,7 @@ class AllocatorAware2:
   r"""
   Attributes:
    - not_a_container
+   - box_field
   """
 
   thrift_spec = None
@@ -3737,6 +3738,11 @@ class AllocatorAware2:
           self.not_a_container = iprot.readI32()
         else:
           iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.box_field = iprot.readI32()
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -3754,6 +3760,10 @@ class AllocatorAware2:
       oprot.writeFieldBegin('not_a_container', TType.I32, 1)
       oprot.writeI32(self.not_a_container)
       oprot.writeFieldEnd()
+    if self.box_field != None:
+      oprot.writeFieldBegin('box_field', TType.I32, 2)
+      oprot.writeI32(self.box_field)
+      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -3764,6 +3774,10 @@ class AllocatorAware2:
       value = pprint.pformat(self.not_a_container, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    not_a_container=%s' % (value))
+    if self.box_field is not None:
+      value = pprint.pformat(self.box_field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    box_field=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -3778,6 +3792,7 @@ class AllocatorAware2:
   def __dir__(self):
     return (
       'not_a_container',
+      'box_field',
     )
 
   # Override the __hash__ function for Python3 - t10434117
@@ -4789,12 +4804,6 @@ AllocatorAware.thrift_struct_annotations = {
   "cpp.allocator": "some_allocator",
 }
 AllocatorAware.thrift_field_annotations = {
-  6: {
-    "cpp.ref_type": "unique",
-  },
-  7: {
-    "cpp.ref_type": "shared",
-  },
 }
 
 def AllocatorAware__init__(self, aa_list=None, aa_set=None, aa_map=None, aa_string=None, not_a_container=None, aa_unique=None, aa_shared=None,):
@@ -4825,6 +4834,7 @@ all_structs.append(AllocatorAware2)
 AllocatorAware2.thrift_spec = (
   None, # 0
   (1, TType.I32, 'not_a_container', None, None, 2, ), # 1
+  (2, TType.I32, 'box_field', None, None, 1, ), # 2
 )
 
 AllocatorAware2.thrift_struct_annotations = {
@@ -4833,13 +4843,15 @@ AllocatorAware2.thrift_struct_annotations = {
 AllocatorAware2.thrift_field_annotations = {
 }
 
-def AllocatorAware2__init__(self, not_a_container=None,):
+def AllocatorAware2__init__(self, not_a_container=None, box_field=None,):
   self.not_a_container = not_a_container
+  self.box_field = box_field
 
 AllocatorAware2.__init__ = AllocatorAware2__init__
 
 def AllocatorAware2__setstate__(self, state):
   state.setdefault('not_a_container', None)
+  state.setdefault('box_field', None)
   self.__dict__ = state
 
 AllocatorAware2.__getstate__ = lambda self: self.__dict__.copy()

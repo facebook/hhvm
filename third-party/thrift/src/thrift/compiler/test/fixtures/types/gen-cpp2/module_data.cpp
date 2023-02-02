@@ -670,20 +670,25 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_names = {{
   "not_a_container",
+  "box_field",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_ids = {{
   1,
+  2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_types = {{
+  TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::storage_names = {{
   "__fbthrift_field_not_a_container",
+  "__fbthrift_field_box_field",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::isset_indexes = {{
   0,
+  -1,
 }};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_names = {{

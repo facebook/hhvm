@@ -220,6 +220,7 @@ cdef class AllocatorAware2_Builder(thrift.py3.builder.StructBuilder):
 
     def __iter__(self):
         yield "not_a_container", self.not_a_container
+        yield "box_field", self.box_field
 
 cdef class TypedefStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _apache_thrift_fixtures_types_module_types.TypedefStruct

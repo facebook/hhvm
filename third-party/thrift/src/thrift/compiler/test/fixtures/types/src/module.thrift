@@ -208,13 +208,17 @@ struct AllocatorAware {
   3: map<i32, i32> (cpp.use_allocator) aa_map;
   4: string (cpp.use_allocator) aa_string;
   5: i32 not_a_container;
-  6: i32 (cpp.use_allocator) aa_unique (cpp.ref_type = "unique");
-  7: i32 (cpp.use_allocator) aa_shared (cpp.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: i32 (cpp.use_allocator) aa_unique;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: i32 (cpp.use_allocator) aa_shared;
 } (cpp.allocator = "some_allocator")
 
 # Allocator-aware struct with no allocator-aware fields
 struct AllocatorAware2 {
   1: i32 not_a_container;
+  @thrift.Box
+  2: optional i32 box_field;
 } (cpp.allocator = "some_allocator")
 
 typedef i32 IntTypedef

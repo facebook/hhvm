@@ -1814,6 +1814,7 @@ class AllocatorAware2_struct_traits {
     class __fbthrift_members {
      public:
       using not_a_container = __fbthrift_refl_impl::reflected_no_annotations;
+      using box_field = __fbthrift_refl_impl::reflected_no_annotations;
     };
 
     struct __fbthrift_keys {
@@ -1845,16 +1846,30 @@ class AllocatorAware2_struct_traits {
     using type_class = ::apache::thrift::type_class::integral;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::not_a_container>;
   };
+  struct __fbthrift_member_box_field {
+    using owner = ::apache::thrift::fixtures::types::AllocatorAware2;
+    using name = __fbthrift_strings_module::__fbthrift_hash_eb09df30c303344c1e4a4ebda8428a9b865358242230e1d1917b533b8e65c014;
+    using type = ::std::int32_t;
+    using tag = ::apache::thrift::ident::box_field;
+    static constexpr ::apache::thrift::field_id_t id = 2;
+    static constexpr auto optional = ::apache::thrift::optionality::optional;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::box_field>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::box_field>;
+    using type_class = ::apache::thrift::type_class::integral;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::box_field>;
+  };
 
   struct __fbthrift_member {
     using not_a_container = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_not_a_container>;
+    using box_field = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_box_field>;
   };
  public:
   using type = ::apache::thrift::fixtures::types::AllocatorAware2;
   using name = __fbthrift_strings_module::AllocatorAware2;
   using member = __fbthrift_member;
   using members = ::fatal::list<
-      member::not_a_container
+      member::not_a_container,
+      member::box_field
   >;
   using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<

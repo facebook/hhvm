@@ -6427,6 +6427,7 @@ func (x *AllocatorAware) Read(p thrift.Protocol) error {
 
 type AllocatorAware2 struct {
     NotAContainer int32 `thrift:"not_a_container,1" json:"not_a_container" db:"not_a_container"`
+    BoxField *int32 `thrift:"box_field,2,optional" json:"box_field,omitempty" db:"box_field"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AllocatorAware2{}
@@ -6438,11 +6439,24 @@ func (x *AllocatorAware2) GetNotAContainer() int32 {
     return x.NotAContainer
 }
 
+func (x *AllocatorAware2) GetBoxField() *int32 {
+    return x.BoxField
+}
+
 func (x *AllocatorAware2) SetNotAContainer(value int32) *AllocatorAware2 {
     x.NotAContainer = value
     return x
 }
 
+func (x *AllocatorAware2) SetBoxField(value int32) *AllocatorAware2 {
+    x.BoxField = &value
+    return x
+}
+
+
+func (x *AllocatorAware2) IsSetBoxField() bool {
+    return x.BoxField != nil
+}
 
 func (x *AllocatorAware2) writeField1(p thrift.Protocol) error {  // NotAContainer
     if err := p.WriteFieldBegin("not_a_container", thrift.I32, 1); err != nil {
@@ -6450,6 +6464,26 @@ func (x *AllocatorAware2) writeField1(p thrift.Protocol) error {  // NotAContain
     }
 
     item := x.GetNotAContainer()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *AllocatorAware2) writeField2(p thrift.Protocol) error {  // BoxField
+    if !x.IsSetBoxField() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("box_field", thrift.I32, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetBoxField()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -6470,6 +6504,16 @@ if err != nil {
     return nil
 }
 
+func (x *AllocatorAware2) readField2(p thrift.Protocol) error {  // BoxField
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetBoxField(result)
+    return nil
+}
+
 
 // Deprecated: Use AllocatorAware2.Set* methods instead or set the fields directly.
 type AllocatorAware2Builder struct {
@@ -6487,6 +6531,11 @@ func (x *AllocatorAware2Builder) NotAContainer(value int32) *AllocatorAware2Buil
     return x
 }
 
+func (x *AllocatorAware2Builder) BoxField(value *int32) *AllocatorAware2Builder {
+    x.obj.BoxField = value
+    return x
+}
+
 func (x *AllocatorAware2Builder) Emit() *AllocatorAware2 {
     var objCopy AllocatorAware2 = *x.obj
     return &objCopy
@@ -6498,6 +6547,10 @@ func (x *AllocatorAware2) Write(p thrift.Protocol) error {
     }
 
     if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
         return err
     }
 
@@ -6529,6 +6582,10 @@ func (x *AllocatorAware2) Read(p thrift.Protocol) error {
         switch id {
         case 1:  // not_a_container
             if err := x.readField1(p); err != nil {
+                return err
+            }
+        case 2:  // box_field
+            if err := x.readField2(p); err != nil {
                 return err
             }
         default:

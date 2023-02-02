@@ -25,6 +25,8 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
 
     @ThriftConstructor
     public MyStructFieldPatch(
+        @com.facebook.swift.codec.ThriftField(value=-32, name="structWithCustomDefault", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataWithCustomDefaultPatch structWithCustomDefault,
+        @com.facebook.swift.codec.ThriftField(value=-31, name="i32WithCustomDefault", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.I32Patch i32WithCustomDefault,
         @com.facebook.swift.codec.ThriftField(value=-30, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyStructField30Patch mapMap,
         @com.facebook.swift.codec.ThriftField(value=-29, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyStructField29Patch listMap,
         @com.facebook.swift.codec.ThriftField(value=-28, name="optMapVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyStructField28Patch optMapVal,
@@ -54,8 +56,11 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
         @com.facebook.swift.codec.ThriftField(value=-4, name="i32Val", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.I32Patch i32Val,
         @com.facebook.swift.codec.ThriftField(value=-3, name="i16Val", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.I16Patch i16Val,
         @com.facebook.swift.codec.ThriftField(value=-2, name="byteVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.BytePatch byteVal,
-        @com.facebook.swift.codec.ThriftField(value=-1, name="boolVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.BoolPatch boolVal
+        @com.facebook.swift.codec.ThriftField(value=-1, name="boolVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.BoolPatch boolVal,
+        @com.facebook.swift.codec.ThriftField(value=1, name="structWithFieldCustomDefault", requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataPatch structWithFieldCustomDefault
     ) {
+        this.structWithCustomDefault = structWithCustomDefault;
+        this.i32WithCustomDefault = i32WithCustomDefault;
         this.mapMap = mapMap;
         this.listMap = listMap;
         this.optMapVal = optMapVal;
@@ -86,10 +91,13 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
         this.i16Val = i16Val;
         this.byteVal = byteVal;
         this.boolVal = boolVal;
+        this.structWithFieldCustomDefault = structWithFieldCustomDefault;
     }
     
     @ThriftConstructor
     protected MyStructFieldPatch() {
+      this.structWithCustomDefault = test.fixtures.patch.MyDataWithCustomDefaultPatch.defaultInstance();
+      this.i32WithCustomDefault = com.facebook.thrift.op.I32Patch.defaultInstance();
       this.mapMap = test.fixtures.patch.MyStructField30Patch.defaultInstance();
       this.listMap = test.fixtures.patch.MyStructField29Patch.defaultInstance();
       this.optMapVal = test.fixtures.patch.MyStructField28Patch.defaultInstance();
@@ -120,10 +128,13 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
       this.i16Val = com.facebook.thrift.op.I16Patch.defaultInstance();
       this.byteVal = com.facebook.thrift.op.BytePatch.defaultInstance();
       this.boolVal = com.facebook.thrift.op.BoolPatch.defaultInstance();
+      this.structWithFieldCustomDefault = test.fixtures.patch.MyDataPatch.defaultInstance();
     }
     
     public static class Builder {
     
+        private test.fixtures.patch.MyDataWithCustomDefaultPatch structWithCustomDefault = test.fixtures.patch.MyDataWithCustomDefaultPatch.defaultInstance();
+        private com.facebook.thrift.op.I32Patch i32WithCustomDefault = com.facebook.thrift.op.I32Patch.defaultInstance();
         private test.fixtures.patch.MyStructField30Patch mapMap = test.fixtures.patch.MyStructField30Patch.defaultInstance();
         private test.fixtures.patch.MyStructField29Patch listMap = test.fixtures.patch.MyStructField29Patch.defaultInstance();
         private test.fixtures.patch.MyStructField28Patch optMapVal = test.fixtures.patch.MyStructField28Patch.defaultInstance();
@@ -154,8 +165,25 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
         private com.facebook.thrift.op.I16Patch i16Val = com.facebook.thrift.op.I16Patch.defaultInstance();
         private com.facebook.thrift.op.BytePatch byteVal = com.facebook.thrift.op.BytePatch.defaultInstance();
         private com.facebook.thrift.op.BoolPatch boolVal = com.facebook.thrift.op.BoolPatch.defaultInstance();
+        private test.fixtures.patch.MyDataPatch structWithFieldCustomDefault = test.fixtures.patch.MyDataPatch.defaultInstance();
     
-        @com.facebook.swift.codec.ThriftField(value=-30, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+        @com.facebook.swift.codec.ThriftField(value=-32, name="structWithCustomDefault", isLegacyId=true, requiredness=Requiredness.TERSE)
+        public Builder setStructWithCustomDefault(test.fixtures.patch.MyDataWithCustomDefaultPatch structWithCustomDefault) {
+            this.structWithCustomDefault = structWithCustomDefault;
+            return this;
+        }
+    
+        public test.fixtures.patch.MyDataWithCustomDefaultPatch getStructWithCustomDefault() { return structWithCustomDefault; }
+    
+            @com.facebook.swift.codec.ThriftField(value=-31, name="i32WithCustomDefault", isLegacyId=true, requiredness=Requiredness.TERSE)
+        public Builder setI32WithCustomDefault(com.facebook.thrift.op.I32Patch i32WithCustomDefault) {
+            this.i32WithCustomDefault = i32WithCustomDefault;
+            return this;
+        }
+    
+        public com.facebook.thrift.op.I32Patch getI32WithCustomDefault() { return i32WithCustomDefault; }
+    
+            @com.facebook.swift.codec.ThriftField(value=-30, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE)
         public Builder setMapMap(test.fixtures.patch.MyStructField30Patch mapMap) {
             this.mapMap = mapMap;
             return this;
@@ -395,8 +423,18 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.BoolPatch getBoolVal() { return boolVal; }
     
+            @com.facebook.swift.codec.ThriftField(value=1, name="structWithFieldCustomDefault", requiredness=Requiredness.TERSE)
+        public Builder setStructWithFieldCustomDefault(test.fixtures.patch.MyDataPatch structWithFieldCustomDefault) {
+            this.structWithFieldCustomDefault = structWithFieldCustomDefault;
+            return this;
+        }
+    
+        public test.fixtures.patch.MyDataPatch getStructWithFieldCustomDefault() { return structWithFieldCustomDefault; }
+    
         public Builder() { }
         public Builder(MyStructFieldPatch other) {
+            this.structWithCustomDefault = other.structWithCustomDefault;
+            this.i32WithCustomDefault = other.i32WithCustomDefault;
             this.mapMap = other.mapMap;
             this.listMap = other.listMap;
             this.optMapVal = other.optMapVal;
@@ -427,11 +465,14 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
             this.i16Val = other.i16Val;
             this.byteVal = other.byteVal;
             this.boolVal = other.boolVal;
+            this.structWithFieldCustomDefault = other.structWithFieldCustomDefault;
         }
     
         @ThriftConstructor
         public MyStructFieldPatch build() {
             MyStructFieldPatch result = new MyStructFieldPatch (
+                this.structWithCustomDefault,
+                this.i32WithCustomDefault,
                 this.mapMap,
                 this.listMap,
                 this.optMapVal,
@@ -461,7 +502,8 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
                 this.i32Val,
                 this.i16Val,
                 this.byteVal,
-                this.boolVal
+                this.boolVal,
+                this.structWithFieldCustomDefault
             );
             return result;
         }
@@ -471,7 +513,13 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldPatch");
-    private final test.fixtures.patch.MyStructField30Patch mapMap;
+    private final test.fixtures.patch.MyDataWithCustomDefaultPatch structWithCustomDefault;
+    public static final int _STRUCTWITHCUSTOMDEFAULT = -32;
+    private static final TField STRUCT_WITH_CUSTOM_DEFAULT_FIELD_DESC = new TField("structWithCustomDefault", TType.STRUCT, (short)-32);
+        private final com.facebook.thrift.op.I32Patch i32WithCustomDefault;
+    public static final int _I32WITHCUSTOMDEFAULT = -31;
+    private static final TField I32_WITH_CUSTOM_DEFAULT_FIELD_DESC = new TField("i32WithCustomDefault", TType.STRUCT, (short)-31);
+        private final test.fixtures.patch.MyStructField30Patch mapMap;
     public static final int _MAPMAP = -30;
     private static final TField MAP_MAP_FIELD_DESC = new TField("mapMap", TType.STRUCT, (short)-30);
         private final test.fixtures.patch.MyStructField29Patch listMap;
@@ -561,7 +609,16 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
         private final com.facebook.thrift.op.BoolPatch boolVal;
     public static final int _BOOLVAL = -1;
     private static final TField BOOL_VAL_FIELD_DESC = new TField("boolVal", TType.STRUCT, (short)-1);
+        private final test.fixtures.patch.MyDataPatch structWithFieldCustomDefault;
+    public static final int _STRUCTWITHFIELDCUSTOMDEFAULT = 1;
+    private static final TField STRUCT_WITH_FIELD_CUSTOM_DEFAULT_FIELD_DESC = new TField("structWithFieldCustomDefault", TType.STRUCT, (short)1);
     static {
+      NAMES_TO_IDS.put("structWithCustomDefault", -32);
+      THRIFT_NAMES_TO_IDS.put("structWithCustomDefault", -32);
+      FIELD_METADATA.put(-32, STRUCT_WITH_CUSTOM_DEFAULT_FIELD_DESC);
+      NAMES_TO_IDS.put("i32WithCustomDefault", -31);
+      THRIFT_NAMES_TO_IDS.put("i32WithCustomDefault", -31);
+      FIELD_METADATA.put(-31, I32_WITH_CUSTOM_DEFAULT_FIELD_DESC);
       NAMES_TO_IDS.put("mapMap", -30);
       THRIFT_NAMES_TO_IDS.put("mapMap", -30);
       FIELD_METADATA.put(-30, MAP_MAP_FIELD_DESC);
@@ -652,10 +709,23 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
       NAMES_TO_IDS.put("boolVal", -1);
       THRIFT_NAMES_TO_IDS.put("boolVal", -1);
       FIELD_METADATA.put(-1, BOOL_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("structWithFieldCustomDefault", 1);
+      THRIFT_NAMES_TO_IDS.put("structWithFieldCustomDefault", 1);
+      FIELD_METADATA.put(1, STRUCT_WITH_FIELD_CUSTOM_DEFAULT_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
         new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructFieldPatch"), 
         MyStructFieldPatch.class, MyStructFieldPatch::read0));
     }
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=-32, name="structWithCustomDefault", isLegacyId=true, requiredness=Requiredness.TERSE)
+    public test.fixtures.patch.MyDataWithCustomDefaultPatch getStructWithCustomDefault() { return structWithCustomDefault; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=-31, name="i32WithCustomDefault", isLegacyId=true, requiredness=Requiredness.TERSE)
+    public com.facebook.thrift.op.I32Patch getI32WithCustomDefault() { return i32WithCustomDefault; }
+    
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=-30, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE)
@@ -806,9 +876,16 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     @com.facebook.swift.codec.ThriftField(value=-1, name="boolVal", isLegacyId=true, requiredness=Requiredness.TERSE)
     public com.facebook.thrift.op.BoolPatch getBoolVal() { return boolVal; }
     
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=1, name="structWithFieldCustomDefault", requiredness=Requiredness.TERSE)
+    public test.fixtures.patch.MyDataPatch getStructWithFieldCustomDefault() { return structWithFieldCustomDefault; }
+    
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
+        helper.add("structWithCustomDefault", structWithCustomDefault);
+        helper.add("i32WithCustomDefault", i32WithCustomDefault);
         helper.add("mapMap", mapMap);
         helper.add("listMap", listMap);
         helper.add("optMapVal", optMapVal);
@@ -839,6 +916,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
         helper.add("i16Val", i16Val);
         helper.add("byteVal", byteVal);
         helper.add("boolVal", boolVal);
+        helper.add("structWithFieldCustomDefault", structWithFieldCustomDefault);
         return helper.toString();
     }
     
@@ -854,6 +932,8 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
         MyStructFieldPatch other = (MyStructFieldPatch)o;
     
         return
+            Objects.equals(structWithCustomDefault, other.structWithCustomDefault) &&
+            Objects.equals(i32WithCustomDefault, other.i32WithCustomDefault) &&
             Objects.equals(mapMap, other.mapMap) &&
             Objects.equals(listMap, other.listMap) &&
             Objects.equals(optMapVal, other.optMapVal) &&
@@ -884,12 +964,15 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
             Objects.equals(i16Val, other.i16Val) &&
             Objects.equals(byteVal, other.byteVal) &&
             Objects.equals(boolVal, other.boolVal) &&
+            Objects.equals(structWithFieldCustomDefault, other.structWithFieldCustomDefault) &&
             true;
     }
     
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
+            structWithCustomDefault,
+            i32WithCustomDefault,
             mapMap,
             listMap,
             optMapVal,
@@ -919,7 +1002,8 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
             i32Val,
             i16Val,
             byteVal,
-            boolVal
+            boolVal,
+            structWithFieldCustomDefault
         });
     }
     
@@ -936,6 +1020,22 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
         __field = oprot.readFieldBegin();
         if (__field.type == TType.STOP) { break; }
         switch (__field.id) {
+        case _STRUCTWITHCUSTOMDEFAULT:
+          if (__field.type == TType.STRUCT) {
+            test.fixtures.patch.MyDataWithCustomDefaultPatch structWithCustomDefault = test.fixtures.patch.MyDataWithCustomDefaultPatch.read0(oprot);
+            builder.setStructWithCustomDefault(structWithCustomDefault);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _I32WITHCUSTOMDEFAULT:
+          if (__field.type == TType.STRUCT) {
+            com.facebook.thrift.op.I32Patch i32WithCustomDefault = com.facebook.thrift.op.I32Patch.read0(oprot);
+            builder.setI32WithCustomDefault(i32WithCustomDefault);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
         case _MAPMAP:
           if (__field.type == TType.STRUCT) {
             test.fixtures.patch.MyStructField30Patch mapMap = test.fixtures.patch.MyStructField30Patch.read0(oprot);
@@ -1176,6 +1276,14 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
+        case _STRUCTWITHFIELDCUSTOMDEFAULT:
+          if (__field.type == TType.STRUCT) {
+            test.fixtures.patch.MyDataPatch structWithFieldCustomDefault = test.fixtures.patch.MyDataPatch.read0(oprot);
+            builder.setStructWithFieldCustomDefault(structWithFieldCustomDefault);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(oprot, __field.type);
           break;
@@ -1191,6 +1299,26 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
       int structStart = 0;
       int pos = 0;
       com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
+      java.util.Objects.requireNonNull(structWithCustomDefault, "structWithCustomDefault must not be null");
+      structStart = p.mark();
+        oprot.writeFieldBegin(STRUCT_WITH_CUSTOM_DEFAULT_FIELD_DESC);
+        pos = p.mark();
+        this.structWithCustomDefault.write0(oprot);
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
+      java.util.Objects.requireNonNull(i32WithCustomDefault, "i32WithCustomDefault must not be null");
+      structStart = p.mark();
+        oprot.writeFieldBegin(I32_WITH_CUSTOM_DEFAULT_FIELD_DESC);
+        pos = p.mark();
+        this.i32WithCustomDefault.write0(oprot);
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
       java.util.Objects.requireNonNull(mapMap, "mapMap must not be null");
       structStart = p.mark();
         oprot.writeFieldBegin(MAP_MAP_FIELD_DESC);
@@ -1486,6 +1614,16 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
         oprot.writeFieldBegin(BOOL_VAL_FIELD_DESC);
         pos = p.mark();
         this.boolVal.write0(oprot);
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
+      java.util.Objects.requireNonNull(structWithFieldCustomDefault, "structWithFieldCustomDefault must not be null");
+      structStart = p.mark();
+        oprot.writeFieldBegin(STRUCT_WITH_FIELD_CUSTOM_DEFAULT_FIELD_DESC);
+        pos = p.mark();
+        this.structWithFieldCustomDefault.write0(oprot);
         if (p.mark() - pos > p.getEmptyStructSize()) {
           p.writeFieldEnd();    
         } else {

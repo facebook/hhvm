@@ -64,6 +64,19 @@ void reset_field<::test::fixtures::patch::MyData>(
 }
 
 template<>
+void reset_field<::test::fixtures::patch::MyDataWithCustomDefault>(
+    ::test::fixtures::patch::MyDataWithCustomDefault& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.data1_ref().copy_from(default_inst<::test::fixtures::patch::MyDataWithCustomDefault>().data1_ref());
+      return;
+    case 1:
+      obj.data2_ref().copy_from(default_inst<::test::fixtures::patch::MyDataWithCustomDefault>().data2_ref());
+      return;
+  }
+}
+
+template<>
 void reset_field<::test::fixtures::patch::MyStruct>(
     ::test::fixtures::patch::MyStruct& obj, uint16_t index) {
   switch (index) {
@@ -157,6 +170,15 @@ void reset_field<::test::fixtures::patch::MyStruct>(
     case 29:
       obj.mapMap_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().mapMap_ref());
       return;
+    case 30:
+      obj.i32WithCustomDefault_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().i32WithCustomDefault_ref());
+      return;
+    case 31:
+      obj.structWithCustomDefault_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().structWithCustomDefault_ref());
+      return;
+    case 32:
+      obj.structWithFieldCustomDefault_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().structWithFieldCustomDefault_ref());
+      return;
   }
 }
 
@@ -200,6 +222,16 @@ void reset_field<::test::fixtures::patch::Loop>(
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::patch::MyData>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::test::fixtures::patch::MyDataWithCustomDefault>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

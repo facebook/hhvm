@@ -63,6 +63,43 @@ cdef __StructSpec get_reflection__MyData():
         ),
     )
     return spec
+cdef __StructSpec get_reflection__MyDataWithCustomDefault():
+    cdef _test_fixtures_patch_module_types.MyDataWithCustomDefault defaults = _test_fixtures_patch_module_types.MyDataWithCustomDefault._fbthrift_create(
+        constant_shared_ptr[_test_fixtures_patch_module_types.cMyDataWithCustomDefault](
+            default_inst[_test_fixtures_patch_module_types.cMyDataWithCustomDefault]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="MyDataWithCustomDefault",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="data1",
+            type=str,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=defaults.data1,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="data2",
+            type=int,
+            kind=__NumberType.I32,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=defaults.data2,
+            annotations={
+            },
+        ),
+    )
+    return spec
 cdef __StructSpec get_reflection__InnerUnion():
     cdef __StructSpec spec = __StructSpec._fbthrift_create(
         name="InnerUnion",
@@ -495,6 +532,42 @@ cdef __StructSpec get_reflection__MyStruct():
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=-31,
+            name="i32WithCustomDefault",
+            type=int,
+            kind=__NumberType.I32,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=defaults.i32WithCustomDefault,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=-32,
+            name="structWithCustomDefault",
+            type=_test_fixtures_patch_module_types.MyDataWithCustomDefault,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="structWithFieldCustomDefault",
+            type=_test_fixtures_patch_module_types.MyData,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=defaults.structWithFieldCustomDefault,
             annotations={
             },
         ),

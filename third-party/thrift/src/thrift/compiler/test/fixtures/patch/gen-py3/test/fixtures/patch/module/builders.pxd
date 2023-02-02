@@ -24,6 +24,11 @@ cdef class MyData_Builder(thrift.py3.builder.StructBuilder):
     cdef public pint data2
 
 
+cdef class MyDataWithCustomDefault_Builder(thrift.py3.builder.StructBuilder):
+    cdef public str data1
+    cdef public pint data2
+
+
 cdef class InnerUnion_Builder(thrift.py3.builder.StructBuilder):
     cdef public bytes innerOption
 
@@ -65,6 +70,9 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public dict optMapVal
     cdef public list listMap
     cdef public dict mapMap
+    cdef public pint i32WithCustomDefault
+    cdef public object structWithCustomDefault
+    cdef public object structWithFieldCustomDefault
 
 
 cdef class LateDefStruct_Builder(thrift.py3.builder.StructBuilder):

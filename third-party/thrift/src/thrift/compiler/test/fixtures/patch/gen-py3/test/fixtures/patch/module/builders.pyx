@@ -11,6 +11,13 @@ cdef class MyData_Builder(thrift.py3.builder.StructBuilder):
         yield "data1", self.data1
         yield "data2", self.data2
 
+cdef class MyDataWithCustomDefault_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _test_fixtures_patch_module_types.MyDataWithCustomDefault
+
+    def __iter__(self):
+        yield "data1", self.data1
+        yield "data2", self.data2
+
 cdef class InnerUnion_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _test_fixtures_patch_module_types.InnerUnion
 
@@ -59,6 +66,9 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "optMapVal", self.optMapVal
         yield "listMap", self.listMap
         yield "mapMap", self.mapMap
+        yield "i32WithCustomDefault", self.i32WithCustomDefault
+        yield "structWithCustomDefault", self.structWithCustomDefault
+        yield "structWithFieldCustomDefault", self.structWithFieldCustomDefault
 
 cdef class LateDefStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _test_fixtures_patch_module_types.LateDefStruct

@@ -15,6 +15,7 @@ namespace patch {
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
   ::apache::thrift::detail::md::EnumMetadata<MyEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyData>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<MyDataWithCustomDefault>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<InnerUnion>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyUnion>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);

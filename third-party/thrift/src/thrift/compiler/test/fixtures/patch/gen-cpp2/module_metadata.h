@@ -31,6 +31,11 @@ class StructMetadata<::test::fixtures::patch::MyData> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::test::fixtures::patch::MyDataWithCustomDefault> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::test::fixtures::patch::InnerUnion> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
@@ -77,6 +82,21 @@ class StructMetadata<::test::fixtures::patch::MyDataFieldPatchStruct> {
 };
 template <>
 class StructMetadata<::test::fixtures::patch::MyDataPatchStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

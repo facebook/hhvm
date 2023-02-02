@@ -31,6 +31,11 @@ struct MyData {
   2: i32 data2;
 }
 
+struct MyDataWithCustomDefault {
+  1: string data1 = "1";
+  2: i32 data2 = 2;
+}
+
 union InnerUnion {
   1: binary innerOption;
 }
@@ -80,6 +85,10 @@ struct MyStruct {
 
   list<map<string, i32>> listMap;
   map<string, map<string, i32>> mapMap;
+
+  i32 i32WithCustomDefault = 1;
+  MyDataWithCustomDefault structWithCustomDefault;
+  1: MyData structWithFieldCustomDefault = {"data1": "1", "data2": 2};
 }
 
 // Intentionally defined after MyStruct, so it's patch types are generated after MyStruct's.

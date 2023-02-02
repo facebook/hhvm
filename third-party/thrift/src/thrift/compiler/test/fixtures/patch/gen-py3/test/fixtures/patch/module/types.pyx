@@ -310,6 +310,128 @@ cdef class MyData(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyData, self)
+@__cython.auto_pickle(False)
+cdef class MyDataWithCustomDefault(thrift.py3.types.Struct):
+    def __init__(MyDataWithCustomDefault self, **kwargs):
+        self._cpp_obj = make_shared[cMyDataWithCustomDefault]()
+        self._fields_setter = _fbthrift_types_fields.__MyDataWithCustomDefault_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(MyDataWithCustomDefault self, **kwargs):
+        if not kwargs:
+            return self
+        cdef MyDataWithCustomDefault __fbthrift_inst = MyDataWithCustomDefault.__new__(MyDataWithCustomDefault)
+        __fbthrift_inst._cpp_obj = make_shared[cMyDataWithCustomDefault](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__MyDataWithCustomDefault_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("MyDataWithCustomDefault", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cMyDataWithCustomDefault] cpp_obj):
+        __fbthrift_inst = <MyDataWithCustomDefault>MyDataWithCustomDefault.__new__(MyDataWithCustomDefault)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline data1_impl(self):
+
+        return (<bytes>deref(self._cpp_obj).data1_ref().value()).decode('UTF-8')
+
+    @property
+    def data1(self):
+        return self.data1_impl()
+
+    cdef inline data2_impl(self):
+
+        return deref(self._cpp_obj).data2_ref().value()
+
+    @property
+    def data2(self):
+        return self.data2_impl()
+
+
+    def __hash__(MyDataWithCustomDefault self):
+        return super().__hash__()
+
+    def __repr__(MyDataWithCustomDefault self):
+        return super().__repr__()
+
+    def __str__(MyDataWithCustomDefault self):
+        return super().__str__()
+
+
+    def __copy__(MyDataWithCustomDefault self):
+        cdef shared_ptr[cMyDataWithCustomDefault] cpp_obj = make_shared[cMyDataWithCustomDefault](
+            deref(self._cpp_obj)
+        )
+        return MyDataWithCustomDefault._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cMyDataWithCustomDefault](
+            self._cpp_obj,
+            (<MyDataWithCustomDefault>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__MyDataWithCustomDefault()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cMyDataWithCustomDefault].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyDataWithCustomDefault"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cMyDataWithCustomDefault](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 2
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyDataWithCustomDefault self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cMyDataWithCustomDefault](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(MyDataWithCustomDefault self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cMyDataWithCustomDefault]()
+        with nogil:
+            needed = serializer.cdeserialize[cMyDataWithCustomDefault](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "test.fixtures.patch.module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.MyDataWithCustomDefault, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataWithCustomDefault, self)
 
 
 @__cython.auto_pickle(False)
@@ -963,6 +1085,34 @@ cdef class MyStruct(thrift.py3.types.Struct):
     def mapMap(self):
         return self.mapMap_impl()
 
+    cdef inline i32WithCustomDefault_impl(self):
+
+        return deref(self._cpp_obj).i32WithCustomDefault_ref().value()
+
+    @property
+    def i32WithCustomDefault(self):
+        return self.i32WithCustomDefault_impl()
+
+    cdef inline structWithCustomDefault_impl(self):
+
+        if self.__fbthrift_cached_structWithCustomDefault is None:
+            self.__fbthrift_cached_structWithCustomDefault = MyDataWithCustomDefault._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).structWithCustomDefault_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_structWithCustomDefault
+
+    @property
+    def structWithCustomDefault(self):
+        return self.structWithCustomDefault_impl()
+
+    cdef inline structWithFieldCustomDefault_impl(self):
+
+        if self.__fbthrift_cached_structWithFieldCustomDefault is None:
+            self.__fbthrift_cached_structWithFieldCustomDefault = MyData._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).structWithFieldCustomDefault_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_structWithFieldCustomDefault
+
+    @property
+    def structWithFieldCustomDefault(self):
+        return self.structWithFieldCustomDefault_impl()
+
 
     def __hash__(MyStruct self):
         return super().__hash__()
@@ -1008,7 +1158,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 30
+        return 33
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data

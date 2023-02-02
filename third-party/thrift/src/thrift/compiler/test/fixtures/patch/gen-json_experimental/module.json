@@ -18,11 +18,11 @@
         "constants" : {
           "MyValue0" : {
             "name" : "MyValue0",
-            "lineno" : 45,
+            "lineno" : 50,
             "value" : 0
           }
         },
-        "lineno" : 44
+        "lineno" : 49
       }
       },
   "structs" :
@@ -47,20 +47,42 @@
         "is_union" : false,
         "lineno" : 29
       },
+      "MyDataWithCustomDefault" : {
+        "name" : "MyDataWithCustomDefault",
+        "fields" : {
+          "data1" : {
+            "name" : "data1",
+            "default_value" : "1",
+            "key" : 1,
+            "lineno" : 35,
+            "type" : "string"
+                  },
+          "data2" : {
+            "name" : "data2",
+            "default_value" : 2,
+            "key" : 2,
+            "lineno" : 36,
+            "type" : "i32"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 34
+      },
       "InnerUnion" : {
         "name" : "InnerUnion",
         "fields" : {
           "innerOption" : {
             "name" : "innerOption",
             "key" : 1,
-            "lineno" : 35,
+            "lineno" : 40,
             "required" : "opt-in-req-out",
             "type" : "binary"
                   }
         },
         "is_exception" : false,
         "is_union" : true,
-        "lineno" : 34
+        "lineno" : 39
       },
       "MyUnion" : {
         "name" : "MyUnion",
@@ -68,21 +90,21 @@
           "option1" : {
             "name" : "option1",
             "key" : 1,
-            "lineno" : 39,
+            "lineno" : 44,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "option2" : {
             "name" : "option2",
             "key" : 2,
-            "lineno" : 40,
+            "lineno" : 45,
             "required" : "opt-in-req-out",
             "type" : "i32"
                   },
           "option3" : {
             "name" : "option3",
             "key" : 3,
-            "lineno" : 41,
+            "lineno" : 46,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -92,7 +114,7 @@
         },
         "is_exception" : false,
         "is_union" : true,
-        "lineno" : 38
+        "lineno" : 43
       },
       "MyStruct" : {
         "name" : "MyStruct",
@@ -110,61 +132,61 @@
           "boolVal" : {
             "name" : "boolVal",
             "key" : -1,
-            "lineno" : 50,
+            "lineno" : 55,
             "type" : "bool"
                   },
           "byteVal" : {
             "name" : "byteVal",
             "key" : -2,
-            "lineno" : 51,
+            "lineno" : 56,
             "type" : "byte"
                   },
           "i16Val" : {
             "name" : "i16Val",
             "key" : -3,
-            "lineno" : 52,
+            "lineno" : 57,
             "type" : "i16"
                   },
           "i32Val" : {
             "name" : "i32Val",
             "key" : -4,
-            "lineno" : 53,
+            "lineno" : 58,
             "type" : "i32"
                   },
           "i64Val" : {
             "name" : "i64Val",
             "key" : -5,
-            "lineno" : 54,
+            "lineno" : 59,
             "type" : "i64"
                   },
           "floatVal" : {
             "name" : "floatVal",
             "key" : -6,
-            "lineno" : 55,
+            "lineno" : 60,
             "type" : "float"
                   },
           "doubleVal" : {
             "name" : "doubleVal",
             "key" : -7,
-            "lineno" : 56,
+            "lineno" : 61,
             "type" : "double"
                   },
           "stringVal" : {
             "name" : "stringVal",
             "key" : -8,
-            "lineno" : 57,
+            "lineno" : 62,
             "type" : "string"
                   },
           "binaryVal" : {
             "name" : "binaryVal",
             "key" : -9,
-            "lineno" : 58,
+            "lineno" : 63,
             "type" : "binary"
                   },
           "enumVal" : {
             "name" : "enumVal",
             "key" : -10,
-            "lineno" : 59,
+            "lineno" : 64,
             "type" : {
   "type" : "enum",
   "name" : "MyEnum"
@@ -173,7 +195,7 @@
           "structVal" : {
             "name" : "structVal",
             "key" : -11,
-            "lineno" : 60,
+            "lineno" : 65,
             "type" : {
   "type" : "struct",
   "name" : "MyData"
@@ -182,7 +204,7 @@
           "unionVal" : {
             "name" : "unionVal",
             "key" : -12,
-            "lineno" : 61,
+            "lineno" : 66,
             "type" : {
   "type" : "struct",
   "name" : "MyUnion"
@@ -191,7 +213,7 @@
           "lateStructVal" : {
             "name" : "lateStructVal",
             "key" : -13,
-            "lineno" : 62,
+            "lineno" : 67,
             "type" : {
   "type" : "struct",
   "name" : "LateDefStruct"
@@ -200,70 +222,70 @@
           "optBoolVal" : {
             "name" : "optBoolVal",
             "key" : -14,
-            "lineno" : 64,
+            "lineno" : 69,
             "required" : "optional",
             "type" : "bool"
                   },
           "optByteVal" : {
             "name" : "optByteVal",
             "key" : -15,
-            "lineno" : 65,
+            "lineno" : 70,
             "required" : "optional",
             "type" : "byte"
                   },
           "optI16Val" : {
             "name" : "optI16Val",
             "key" : -16,
-            "lineno" : 66,
+            "lineno" : 71,
             "required" : "optional",
             "type" : "i16"
                   },
           "optI32Val" : {
             "name" : "optI32Val",
             "key" : -17,
-            "lineno" : 67,
+            "lineno" : 72,
             "required" : "optional",
             "type" : "i32"
                   },
           "optI64Val" : {
             "name" : "optI64Val",
             "key" : -18,
-            "lineno" : 68,
+            "lineno" : 73,
             "required" : "optional",
             "type" : "i64"
                   },
           "optFloatVal" : {
             "name" : "optFloatVal",
             "key" : -19,
-            "lineno" : 69,
+            "lineno" : 74,
             "required" : "optional",
             "type" : "float"
                   },
           "optDoubleVal" : {
             "name" : "optDoubleVal",
             "key" : -20,
-            "lineno" : 70,
+            "lineno" : 75,
             "required" : "optional",
             "type" : "double"
                   },
           "optStringVal" : {
             "name" : "optStringVal",
             "key" : -21,
-            "lineno" : 71,
+            "lineno" : 76,
             "required" : "optional",
             "type" : "string"
                   },
           "optBinaryVal" : {
             "name" : "optBinaryVal",
             "key" : -22,
-            "lineno" : 72,
+            "lineno" : 77,
             "required" : "optional",
             "type" : "binary"
                   },
           "optEnumVal" : {
             "name" : "optEnumVal",
             "key" : -23,
-            "lineno" : 73,
+            "lineno" : 78,
             "required" : "optional",
             "type" : {
   "type" : "enum",
@@ -273,7 +295,7 @@
           "optStructVal" : {
             "name" : "optStructVal",
             "key" : -24,
-            "lineno" : 74,
+            "lineno" : 79,
             "required" : "optional",
             "type" : {
   "type" : "struct",
@@ -283,7 +305,7 @@
           "optLateStructVal" : {
             "name" : "optLateStructVal",
             "key" : -25,
-            "lineno" : 75,
+            "lineno" : 80,
             "required" : "optional",
             "type" : {
   "type" : "struct",
@@ -293,7 +315,7 @@
           "optListVal" : {
             "name" : "optListVal",
             "key" : -26,
-            "lineno" : 77,
+            "lineno" : 82,
             "required" : "optional",
             "type" : {
   "type" : "list",
@@ -303,7 +325,7 @@
           "optSetVal" : {
             "name" : "optSetVal",
             "key" : -27,
-            "lineno" : 78,
+            "lineno" : 83,
             "required" : "optional",
             "type" : {
   "type" : "set",
@@ -313,7 +335,7 @@
           "optMapVal" : {
             "name" : "optMapVal",
             "key" : -28,
-            "lineno" : 79,
+            "lineno" : 84,
             "required" : "optional",
             "type" : {
   "type" : "map",
@@ -324,7 +346,7 @@
           "listMap" : {
             "name" : "listMap",
             "key" : -29,
-            "lineno" : 81,
+            "lineno" : 86,
             "type" : {
   "type" : "list",
   "inner_type" : {
@@ -337,7 +359,7 @@
           "mapMap" : {
             "name" : "mapMap",
             "key" : -30,
-            "lineno" : 82,
+            "lineno" : 87,
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -347,17 +369,43 @@
   "value_type" : "i32"
 }
 }
+                  },
+          "i32WithCustomDefault" : {
+            "name" : "i32WithCustomDefault",
+            "default_value" : 1,
+            "key" : -31,
+            "lineno" : 89,
+            "type" : "i32"
+                  },
+          "structWithCustomDefault" : {
+            "name" : "structWithCustomDefault",
+            "key" : -32,
+            "lineno" : 90,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyDataWithCustomDefault"
+}
+                  },
+          "structWithFieldCustomDefault" : {
+            "name" : "structWithFieldCustomDefault",
+            "default_value" : {"\"data1\"" : "1","\"data2\"" : 2},
+            "key" : 1,
+            "lineno" : 91,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyData"
+}
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 48
+        "lineno" : 53
       },
       "LateDefStruct" : {
         "name" : "LateDefStruct",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 86
+        "lineno" : 95
       },
       "Recursive" : {
         "name" : "Recursive",
@@ -365,7 +413,7 @@
           "nodes" : {
             "name" : "nodes",
             "key" : -1,
-            "lineno" : 89,
+            "lineno" : 98,
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -389,7 +437,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 88
+        "lineno" : 97
       },
       "Bar" : {
         "name" : "Bar",
@@ -397,7 +445,7 @@
           "loop" : {
             "name" : "loop",
             "key" : -1,
-            "lineno" : 94,
+            "lineno" : 103,
             "type" : {
   "type" : "struct",
   "name" : "Loop"
@@ -406,7 +454,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 93
+        "lineno" : 102
       },
       "Loop" : {
         "name" : "Loop",
@@ -424,7 +472,7 @@
           "bar" : {
             "name" : "bar",
             "key" : -1,
-            "lineno" : 99,
+            "lineno" : 108,
             "type" : {
   "type" : "struct",
   "name" : "Bar"
@@ -444,7 +492,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 97
+        "lineno" : 106
       },
       "MyDataEnsureStruct" : {
         "name" : "MyDataEnsureStruct",
@@ -565,6 +613,132 @@
             "type" : {
   "type" : "struct",
   "name" : "MyDataFieldPatch"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "MyDataWithCustomDefaultEnsureStruct" : {
+        "name" : "MyDataWithCustomDefaultEnsureStruct",
+        "fields" : {
+          "data1" : {
+            "name" : "data1",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "string"
+                  },
+          "data2" : {
+            "name" : "data2",
+            "key" : 2,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "i32"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "MyDataWithCustomDefaultFieldPatch" : {
+        "name" : "MyDataWithCustomDefaultFieldPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyDataWithCustomDefaultFieldPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "data1" : {
+            "name" : "data1",
+            "key" : 1,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "StringPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
+}
+                  },
+          "data2" : {
+            "name" : "data2",
+            "key" : 2,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "I32Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "MyDataWithCustomDefaultPatch" : {
+        "name" : "MyDataWithCustomDefaultPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "MyDataWithCustomDefaultPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyDataWithCustomDefault"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 22,
+            "type" : "bool"
+                  },
+          "patchPrior" : {
+            "name" : "patchPrior",
+            "docstring" : "Patches any previously set values. Applies second.\n",
+            "key" : 3,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyDataWithCustomDefaultFieldPatch"
+}
+                  },
+          "ensure" : {
+            "name" : "ensure",
+            "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
+            "key" : 5,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyDataWithCustomDefaultEnsureStruct"
+}
+                  },
+          "patch" : {
+            "name" : "patch",
+            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
+            "key" : 6,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyDataWithCustomDefaultFieldPatch"
 }
                   }
         },
@@ -782,6 +956,23 @@
       "MyStructEnsureStruct" : {
         "name" : "MyStructEnsureStruct",
         "fields" : {
+          "structWithCustomDefault" : {
+            "name" : "structWithCustomDefault",
+            "key" : -32,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyDataWithCustomDefault"
+}
+                  },
+          "i32WithCustomDefault" : {
+            "name" : "i32WithCustomDefault",
+            "key" : -31,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "i32"
+                  },
           "mapMap" : {
             "name" : "mapMap",
             "key" : -30,
@@ -1037,6 +1228,16 @@
             "lineno" : 22,
             "required" : "optional",
             "type" : "bool"
+                  },
+          "structWithFieldCustomDefault" : {
+            "name" : "structWithFieldCustomDefault",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyData"
+}
                   }
         },
         "is_exception" : false,
@@ -1767,6 +1968,25 @@
       }
         },
         "fields" : {
+          "structWithCustomDefault" : {
+            "name" : "structWithCustomDefault",
+            "key" : -32,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyDataWithCustomDefaultPatch"
+}
+                  },
+          "i32WithCustomDefault" : {
+            "name" : "i32WithCustomDefault",
+            "key" : -31,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "I32Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
+}
+                  },
           "mapMap" : {
             "name" : "mapMap",
             "key" : -30,
@@ -2054,11 +2274,20 @@
   "name" : "BoolPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
+                  },
+          "structWithFieldCustomDefault" : {
+            "name" : "structWithFieldCustomDefault",
+            "key" : 1,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyDataPatch"
+}
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 22
+        "lineno" : 23
       },
       "MyStructPatch" : {
         "name" : "MyStructPatch",
@@ -2124,13 +2353,13 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 22
+        "lineno" : 23
       },
       "LateDefStructEnsureStruct" : {
         "name" : "LateDefStructEnsureStruct",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 22
+        "lineno" : 23
       },
       "LateDefStructFieldPatch" : {
         "name" : "LateDefStructFieldPatch",
@@ -2253,7 +2482,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
             "key" : 1,
-            "lineno" : 89,
+            "lineno" : 98,
             "required" : "optional",
             "type" : {
   "type" : "map",
@@ -2268,13 +2497,13 @@
             "name" : "clear",
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
-            "lineno" : 89,
+            "lineno" : 98,
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 90
+        "lineno" : 99
       },
       "RecursiveFieldPatch" : {
         "name" : "RecursiveFieldPatch",

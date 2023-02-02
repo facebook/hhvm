@@ -88,6 +88,19 @@ cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_types_
         __terse_field_ref[string] data1_ref "data1_ref" ()
         __terse_field_ref[cint32_t] data2_ref "data2_ref" ()
 
+
+    cdef cppclass cMyDataWithCustomDefault "::test::fixtures::patch::MyDataWithCustomDefault":
+        cMyDataWithCustomDefault() except +
+        cMyDataWithCustomDefault(const cMyDataWithCustomDefault&) except +
+        bint operator==(cMyDataWithCustomDefault&)
+        bint operator!=(cMyDataWithCustomDefault&)
+        bint operator<(cMyDataWithCustomDefault&)
+        bint operator>(cMyDataWithCustomDefault&)
+        bint operator<=(cMyDataWithCustomDefault&)
+        bint operator>=(cMyDataWithCustomDefault&)
+        __terse_field_ref[string] data1_ref "data1_ref" ()
+        __terse_field_ref[cint32_t] data2_ref "data2_ref" ()
+
     cdef enum cInnerUnion__type "::test::fixtures::patch::InnerUnion::Type":
         cInnerUnion__type___EMPTY__ "::test::fixtures::patch::InnerUnion::Type::__EMPTY__",
         cInnerUnion__type_innerOption "::test::fixtures::patch::InnerUnion::Type::innerOption",
@@ -168,6 +181,9 @@ cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_types_
         __optional_field_ref[cmap[string,string]] optMapVal_ref "optMapVal_ref" ()
         __terse_field_ref[vector[cmap[string,cint32_t]]] listMap_ref "listMap_ref" ()
         __terse_field_ref[cmap[string,cmap[string,cint32_t]]] mapMap_ref "mapMap_ref" ()
+        __terse_field_ref[cint32_t] i32WithCustomDefault_ref "i32WithCustomDefault_ref" ()
+        __terse_field_ref[cMyDataWithCustomDefault] structWithCustomDefault_ref "structWithCustomDefault_ref" ()
+        __terse_field_ref[cMyData] structWithFieldCustomDefault_ref "structWithFieldCustomDefault_ref" ()
 
 
     cdef cppclass cLateDefStruct "::test::fixtures::patch::LateDefStruct":
@@ -227,6 +243,17 @@ cdef class MyData(thrift.py3.types.Struct):
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cMyData])
+
+
+
+cdef class MyDataWithCustomDefault(thrift.py3.types.Struct):
+    cdef shared_ptr[cMyDataWithCustomDefault] _cpp_obj
+    cdef _fbthrift_types_fields.__MyDataWithCustomDefault_FieldsSetter _fields_setter
+    cdef inline object data1_impl(self)
+    cdef inline object data2_impl(self)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cMyDataWithCustomDefault])
 
 cdef class __InnerUnionType(thrift.py3.types.CompiledEnum):
     pass
@@ -307,6 +334,9 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline object optMapVal_impl(self)
     cdef inline object listMap_impl(self)
     cdef inline object mapMap_impl(self)
+    cdef inline object i32WithCustomDefault_impl(self)
+    cdef inline object structWithCustomDefault_impl(self)
+    cdef inline object structWithFieldCustomDefault_impl(self)
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_binaryVal
     cdef object __fbthrift_cached_enumVal
     cdef MyData __fbthrift_cached_structVal
@@ -321,6 +351,8 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef Map__string_string __fbthrift_cached_optMapVal
     cdef List__Map__string_i32 __fbthrift_cached_listMap
     cdef Map__string_Map__string_i32 __fbthrift_cached_mapMap
+    cdef MyDataWithCustomDefault __fbthrift_cached_structWithCustomDefault
+    cdef MyData __fbthrift_cached_structWithFieldCustomDefault
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cMyStruct])

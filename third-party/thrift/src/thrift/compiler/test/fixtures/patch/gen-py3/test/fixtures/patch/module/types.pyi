@@ -62,6 +62,39 @@ class MyData(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py3(self) -> MyData: ...
     def _to_py_deprecated(self) -> "module.ttypes.MyData": ...   # type: ignore
 
+class MyDataWithCustomDefault(thrift.py3.types.Struct, _typing.Hashable):
+    class __fbthrift_IsSet:
+        pass
+
+    data1: Final[str] = ...
+
+    data2: Final[int] = ...
+
+    def __init__(
+        self, *,
+        data1: _typing.Optional[str]=None,
+        data2: _typing.Optional[int]=None
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        data1: _typing.Union[str, '__NotSet', None]=NOTSET,
+        data2: _typing.Union[int, '__NotSet', None]=NOTSET
+    ) -> MyDataWithCustomDefault: ...
+
+    def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['MyDataWithCustomDefault'], bytes]]: ...
+    def __hash__(self) -> int: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __lt__(self, other: 'MyDataWithCustomDefault') -> bool: ...
+    def __gt__(self, other: 'MyDataWithCustomDefault') -> bool: ...
+    def __le__(self, other: 'MyDataWithCustomDefault') -> bool: ...
+    def __ge__(self, other: 'MyDataWithCustomDefault') -> bool: ...
+
+    def _to_python(self) -> "test.fixtures.patch.module.thrift_types.MyDataWithCustomDefault": ...   # type: ignore
+    def _to_py3(self) -> MyDataWithCustomDefault: ...
+    def _to_py_deprecated(self) -> "module.ttypes.MyDataWithCustomDefault": ...   # type: ignore
+
 _InnerUnionValueType = _typing.Union[None, bytes]
 
 class InnerUnion(thrift.py3.types.Union, _typing.Hashable):
@@ -225,6 +258,12 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     mapMap: Final[_typing.Mapping[str, _typing.Mapping[str, int]]] = ...
 
+    i32WithCustomDefault: Final[int] = ...
+
+    structWithCustomDefault: Final[MyDataWithCustomDefault] = ...
+
+    structWithFieldCustomDefault: Final[MyData] = ...
+
     def __init__(
         self, *,
         boolVal: _typing.Optional[bool]=None,
@@ -256,7 +295,10 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         optSetVal: _typing.Optional[_typing.AbstractSet[str]]=None,
         optMapVal: _typing.Optional[_typing.Mapping[str, str]]=None,
         listMap: _typing.Optional[_typing.Sequence[_typing.Mapping[str, int]]]=None,
-        mapMap: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=None
+        mapMap: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=None,
+        i32WithCustomDefault: _typing.Optional[int]=None,
+        structWithCustomDefault: _typing.Optional[MyDataWithCustomDefault]=None,
+        structWithFieldCustomDefault: _typing.Optional[MyData]=None
     ) -> None: ...
 
     def __call__(
@@ -290,7 +332,10 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         optSetVal: _typing.Union[_typing.AbstractSet[str], '__NotSet', None]=NOTSET,
         optMapVal: _typing.Union[_typing.Mapping[str, str], '__NotSet', None]=NOTSET,
         listMap: _typing.Union[_typing.Sequence[_typing.Mapping[str, int]], '__NotSet', None]=NOTSET,
-        mapMap: _typing.Union[_typing.Mapping[str, _typing.Mapping[str, int]], '__NotSet', None]=NOTSET
+        mapMap: _typing.Union[_typing.Mapping[str, _typing.Mapping[str, int]], '__NotSet', None]=NOTSET,
+        i32WithCustomDefault: _typing.Union[int, '__NotSet', None]=NOTSET,
+        structWithCustomDefault: _typing.Union[MyDataWithCustomDefault, '__NotSet', None]=NOTSET,
+        structWithFieldCustomDefault: _typing.Union[MyData, '__NotSet', None]=NOTSET
     ) -> MyStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['MyStruct'], bytes]]: ...

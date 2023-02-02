@@ -27,6 +27,13 @@ class MyData_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
+class MyDataWithCustomDefault_Builder(thrift.py3.builder.StructBuilder):
+    data1: _typing.Optional[str]
+    data2: _typing.Optional[int]
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
 class InnerUnion_Builder(thrift.py3.builder.StructBuilder):
     innerOption: _typing.Optional[bytes]
 
@@ -72,6 +79,9 @@ class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     optMapVal: _typing.Optional[dict]
     listMap: _typing.Optional[list]
     mapMap: _typing.Optional[dict]
+    i32WithCustomDefault: _typing.Optional[int]
+    structWithCustomDefault: _typing.Any
+    structWithFieldCustomDefault: _typing.Any
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 

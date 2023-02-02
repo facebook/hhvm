@@ -56,6 +56,9 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
   private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.MAP, (short)-28);
   private static final TField LIST_MAP_FIELD_DESC = new TField("listMap", TType.LIST, (short)-29);
   private static final TField MAP_MAP_FIELD_DESC = new TField("mapMap", TType.MAP, (short)-30);
+  private static final TField I32_WITH_CUSTOM_DEFAULT_FIELD_DESC = new TField("i32WithCustomDefault", TType.I32, (short)-31);
+  private static final TField STRUCT_WITH_CUSTOM_DEFAULT_FIELD_DESC = new TField("structWithCustomDefault", TType.STRUCT, (short)-32);
+  private static final TField STRUCT_WITH_FIELD_CUSTOM_DEFAULT_FIELD_DESC = new TField("structWithFieldCustomDefault", TType.STRUCT, (short)1);
 
   public boolean boolVal;
   public byte byteVal;
@@ -95,6 +98,9 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
   public Map<String,String> optMapVal;
   public List<Map<String,Integer>> listMap;
   public Map<String,Map<String,Integer>> mapMap;
+  public int i32WithCustomDefault;
+  public MyDataWithCustomDefault structWithCustomDefault;
+  public MyData structWithFieldCustomDefault;
   public static final int BOOLVAL = -1;
   public static final int BYTEVAL = -2;
   public static final int I16VAL = -3;
@@ -125,6 +131,9 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
   public static final int OPTMAPVAL = -28;
   public static final int LISTMAP = -29;
   public static final int MAPMAP = -30;
+  public static final int I32WITHCUSTOMDEFAULT = -31;
+  public static final int STRUCTWITHCUSTOMDEFAULT = -32;
+  public static final int STRUCTWITHFIELDCUSTOMDEFAULT = 1;
 
   // isset id assignments
   private static final int __BOOLVAL_ISSET_ID = 0;
@@ -141,7 +150,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
   private static final int __OPTI64VAL_ISSET_ID = 11;
   private static final int __OPTFLOATVAL_ISSET_ID = 12;
   private static final int __OPTDOUBLEVAL_ISSET_ID = 13;
-  private BitSet __isset_bit_vector = new BitSet(14);
+  private static final int __I32WITHCUSTOMDEFAULT_ISSET_ID = 14;
+  private BitSet __isset_bit_vector = new BitSet(15);
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -218,6 +228,12 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
             new MapMetaData(TType.MAP, 
                 new FieldValueMetaData(TType.STRING), 
                 new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(I32WITHCUSTOMDEFAULT, new FieldMetaData("i32WithCustomDefault", TFieldRequirementType.DEFAULT, 
+        new FieldValueMetaData(TType.I32)));
+    tmpMetaDataMap.put(STRUCTWITHCUSTOMDEFAULT, new FieldMetaData("structWithCustomDefault", TFieldRequirementType.DEFAULT, 
+        new StructMetaData(TType.STRUCT, MyDataWithCustomDefault.class)));
+    tmpMetaDataMap.put(STRUCTWITHFIELDCUSTOMDEFAULT, new FieldMetaData("structWithFieldCustomDefault", TFieldRequirementType.DEFAULT, 
+        new StructMetaData(TType.STRUCT, MyData.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -226,6 +242,12 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
   }
 
   public MyStruct() {
+    this.i32WithCustomDefault = 1;
+
+    this.structWithFieldCustomDefault = new MyData();
+    this.structWithFieldCustomDefault.setData1("1");
+    this.structWithFieldCustomDefault.setData2(2);
+
   }
 
   public MyStruct(
@@ -243,7 +265,10 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       MyUnion unionVal,
       LateDefStruct lateStructVal,
       List<Map<String,Integer>> listMap,
-      Map<String,Map<String,Integer>> mapMap) {
+      Map<String,Map<String,Integer>> mapMap,
+      int i32WithCustomDefault,
+      MyDataWithCustomDefault structWithCustomDefault,
+      MyData structWithFieldCustomDefault) {
     this();
     this.boolVal = boolVal;
     setBoolValIsSet(true);
@@ -267,6 +292,10 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     this.lateStructVal = lateStructVal;
     this.listMap = listMap;
     this.mapMap = mapMap;
+    this.i32WithCustomDefault = i32WithCustomDefault;
+    setI32WithCustomDefaultIsSet(true);
+    this.structWithCustomDefault = structWithCustomDefault;
+    this.structWithFieldCustomDefault = structWithFieldCustomDefault;
   }
 
   public MyStruct(
@@ -299,7 +328,10 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       Set<String> optSetVal,
       Map<String,String> optMapVal,
       List<Map<String,Integer>> listMap,
-      Map<String,Map<String,Integer>> mapMap) {
+      Map<String,Map<String,Integer>> mapMap,
+      int i32WithCustomDefault,
+      MyDataWithCustomDefault structWithCustomDefault,
+      MyData structWithFieldCustomDefault) {
     this();
     this.boolVal = boolVal;
     setBoolValIsSet(true);
@@ -345,6 +377,10 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     this.optMapVal = optMapVal;
     this.listMap = listMap;
     this.mapMap = mapMap;
+    this.i32WithCustomDefault = i32WithCustomDefault;
+    setI32WithCustomDefaultIsSet(true);
+    this.structWithCustomDefault = structWithCustomDefault;
+    this.structWithFieldCustomDefault = structWithFieldCustomDefault;
   }
 
   public static class Builder {
@@ -378,8 +414,11 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     private Map<String,String> optMapVal;
     private List<Map<String,Integer>> listMap;
     private Map<String,Map<String,Integer>> mapMap;
+    private int i32WithCustomDefault;
+    private MyDataWithCustomDefault structWithCustomDefault;
+    private MyData structWithFieldCustomDefault;
 
-    BitSet __optional_isset = new BitSet(14);
+    BitSet __optional_isset = new BitSet(15);
 
     public Builder() {
     }
@@ -548,6 +587,22 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       return this;
     }
 
+    public Builder setI32WithCustomDefault(final int i32WithCustomDefault) {
+      this.i32WithCustomDefault = i32WithCustomDefault;
+      __optional_isset.set(__I32WITHCUSTOMDEFAULT_ISSET_ID, true);
+      return this;
+    }
+
+    public Builder setStructWithCustomDefault(final MyDataWithCustomDefault structWithCustomDefault) {
+      this.structWithCustomDefault = structWithCustomDefault;
+      return this;
+    }
+
+    public Builder setStructWithFieldCustomDefault(final MyData structWithFieldCustomDefault) {
+      this.structWithFieldCustomDefault = structWithFieldCustomDefault;
+      return this;
+    }
+
     public MyStruct build() {
       MyStruct result = new MyStruct();
       if (__optional_isset.get(__BOOLVAL_ISSET_ID)) {
@@ -608,6 +663,11 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       result.setOptMapVal(this.optMapVal);
       result.setListMap(this.listMap);
       result.setMapMap(this.mapMap);
+      if (__optional_isset.get(__I32WITHCUSTOMDEFAULT_ISSET_ID)) {
+        result.setI32WithCustomDefault(this.i32WithCustomDefault);
+      }
+      result.setStructWithCustomDefault(this.structWithCustomDefault);
+      result.setStructWithFieldCustomDefault(this.structWithFieldCustomDefault);
       return result;
     }
   }
@@ -683,6 +743,13 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     }
     if (other.isSetMapMap()) {
       this.mapMap = TBaseHelper.deepCopy(other.mapMap);
+    }
+    this.i32WithCustomDefault = TBaseHelper.deepCopy(other.i32WithCustomDefault);
+    if (other.isSetStructWithCustomDefault()) {
+      this.structWithCustomDefault = TBaseHelper.deepCopy(other.structWithCustomDefault);
+    }
+    if (other.isSetStructWithFieldCustomDefault()) {
+      this.structWithFieldCustomDefault = TBaseHelper.deepCopy(other.structWithFieldCustomDefault);
     }
   }
 
@@ -1412,6 +1479,77 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     }
   }
 
+  public int getI32WithCustomDefault() {
+    return this.i32WithCustomDefault;
+  }
+
+  public MyStruct setI32WithCustomDefault(int i32WithCustomDefault) {
+    this.i32WithCustomDefault = i32WithCustomDefault;
+    setI32WithCustomDefaultIsSet(true);
+    return this;
+  }
+
+  public void unsetI32WithCustomDefault() {
+    __isset_bit_vector.clear(__I32WITHCUSTOMDEFAULT_ISSET_ID);
+  }
+
+  // Returns true if field i32WithCustomDefault is set (has been assigned a value) and false otherwise
+  public boolean isSetI32WithCustomDefault() {
+    return __isset_bit_vector.get(__I32WITHCUSTOMDEFAULT_ISSET_ID);
+  }
+
+  public void setI32WithCustomDefaultIsSet(boolean __value) {
+    __isset_bit_vector.set(__I32WITHCUSTOMDEFAULT_ISSET_ID, __value);
+  }
+
+  public MyDataWithCustomDefault getStructWithCustomDefault() {
+    return this.structWithCustomDefault;
+  }
+
+  public MyStruct setStructWithCustomDefault(MyDataWithCustomDefault structWithCustomDefault) {
+    this.structWithCustomDefault = structWithCustomDefault;
+    return this;
+  }
+
+  public void unsetStructWithCustomDefault() {
+    this.structWithCustomDefault = null;
+  }
+
+  // Returns true if field structWithCustomDefault is set (has been assigned a value) and false otherwise
+  public boolean isSetStructWithCustomDefault() {
+    return this.structWithCustomDefault != null;
+  }
+
+  public void setStructWithCustomDefaultIsSet(boolean __value) {
+    if (!__value) {
+      this.structWithCustomDefault = null;
+    }
+  }
+
+  public MyData getStructWithFieldCustomDefault() {
+    return this.structWithFieldCustomDefault;
+  }
+
+  public MyStruct setStructWithFieldCustomDefault(MyData structWithFieldCustomDefault) {
+    this.structWithFieldCustomDefault = structWithFieldCustomDefault;
+    return this;
+  }
+
+  public void unsetStructWithFieldCustomDefault() {
+    this.structWithFieldCustomDefault = null;
+  }
+
+  // Returns true if field structWithFieldCustomDefault is set (has been assigned a value) and false otherwise
+  public boolean isSetStructWithFieldCustomDefault() {
+    return this.structWithFieldCustomDefault != null;
+  }
+
+  public void setStructWithFieldCustomDefaultIsSet(boolean __value) {
+    if (!__value) {
+      this.structWithFieldCustomDefault = null;
+    }
+  }
+
   @SuppressWarnings("unchecked")
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
@@ -1655,6 +1793,30 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       }
       break;
 
+    case I32WITHCUSTOMDEFAULT:
+      if (__value == null) {
+        unsetI32WithCustomDefault();
+      } else {
+        setI32WithCustomDefault((Integer)__value);
+      }
+      break;
+
+    case STRUCTWITHCUSTOMDEFAULT:
+      if (__value == null) {
+        unsetStructWithCustomDefault();
+      } else {
+        setStructWithCustomDefault((MyDataWithCustomDefault)__value);
+      }
+      break;
+
+    case STRUCTWITHFIELDCUSTOMDEFAULT:
+      if (__value == null) {
+        unsetStructWithFieldCustomDefault();
+      } else {
+        setStructWithFieldCustomDefault((MyData)__value);
+      }
+      break;
+
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -1752,6 +1914,15 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     case MAPMAP:
       return getMapMap();
 
+    case I32WITHCUSTOMDEFAULT:
+      return new Integer(getI32WithCustomDefault());
+
+    case STRUCTWITHCUSTOMDEFAULT:
+      return getStructWithCustomDefault();
+
+    case STRUCTWITHFIELDCUSTOMDEFAULT:
+      return getStructWithFieldCustomDefault();
+
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -1827,12 +1998,18 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
 
     if (!TBaseHelper.equalsNobinary(this.isSetMapMap(), that.isSetMapMap(), this.mapMap, that.mapMap)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.i32WithCustomDefault, that.i32WithCustomDefault)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetStructWithCustomDefault(), that.isSetStructWithCustomDefault(), this.structWithCustomDefault, that.structWithCustomDefault)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetStructWithFieldCustomDefault(), that.isSetStructWithFieldCustomDefault(), this.structWithFieldCustomDefault, that.structWithFieldCustomDefault)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {boolVal, byteVal, i16Val, i32Val, i64Val, floatVal, doubleVal, stringVal, binaryVal, enumVal, structVal, unionVal, lateStructVal, optBoolVal, optByteVal, optI16Val, optI32Val, optI64Val, optFloatVal, optDoubleVal, optStringVal, optBinaryVal, optEnumVal, optStructVal, optLateStructVal, optListVal, optSetVal, optMapVal, listMap, mapMap});
+    return Arrays.deepHashCode(new Object[] {boolVal, byteVal, i16Val, i32Val, i64Val, floatVal, doubleVal, stringVal, binaryVal, enumVal, structVal, unionVal, lateStructVal, optBoolVal, optByteVal, optI16Val, optI32Val, optI64Val, optFloatVal, optDoubleVal, optStringVal, optBinaryVal, optEnumVal, optStructVal, optLateStructVal, optListVal, optSetVal, optMapVal, listMap, mapMap, i32WithCustomDefault, structWithCustomDefault, structWithFieldCustomDefault});
   }
 
   @Override
@@ -2084,6 +2261,30 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       return lastComparison;
     }
     lastComparison = TBaseHelper.compareTo(mapMap, other.mapMap);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetI32WithCustomDefault()).compareTo(other.isSetI32WithCustomDefault());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(i32WithCustomDefault, other.i32WithCustomDefault);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetStructWithCustomDefault()).compareTo(other.isSetStructWithCustomDefault());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(structWithCustomDefault, other.structWithCustomDefault);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetStructWithFieldCustomDefault()).compareTo(other.isSetStructWithFieldCustomDefault());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(structWithFieldCustomDefault, other.structWithFieldCustomDefault);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -2422,6 +2623,30 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case I32WITHCUSTOMDEFAULT:
+          if (__field.type == TType.I32) {
+            this.i32WithCustomDefault = iprot.readI32();
+            setI32WithCustomDefaultIsSet(true);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case STRUCTWITHCUSTOMDEFAULT:
+          if (__field.type == TType.STRUCT) {
+            this.structWithCustomDefault = new MyDataWithCustomDefault();
+            this.structWithCustomDefault.read(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case STRUCTWITHFIELDCUSTOMDEFAULT:
+          if (__field.type == TType.STRUCT) {
+            this.structWithFieldCustomDefault = new MyData();
+            this.structWithFieldCustomDefault.read(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -2439,6 +2664,14 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
+    if (this.structWithCustomDefault != null) {
+      oprot.writeFieldBegin(STRUCT_WITH_CUSTOM_DEFAULT_FIELD_DESC);
+      this.structWithCustomDefault.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    oprot.writeFieldBegin(I32_WITH_CUSTOM_DEFAULT_FIELD_DESC);
+    oprot.writeI32(this.i32WithCustomDefault);
+    oprot.writeFieldEnd();
     if (this.mapMap != null) {
       oprot.writeFieldBegin(MAP_MAP_FIELD_DESC);
       {
@@ -2637,6 +2870,11 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     oprot.writeFieldBegin(BOOL_VAL_FIELD_DESC);
     oprot.writeBool(this.boolVal);
     oprot.writeFieldEnd();
+    if (this.structWithFieldCustomDefault != null) {
+      oprot.writeFieldBegin(STRUCT_WITH_FIELD_CUSTOM_DEFAULT_FIELD_DESC);
+      this.structWithFieldCustomDefault.write(oprot);
+      oprot.writeFieldEnd();
+    }
     oprot.writeFieldStop();
     oprot.writeStructEnd();
   }
@@ -2999,6 +3237,35 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       sb.append("null");
     } else {
       sb.append(TBaseHelper.toString(this.getMapMap(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("i32WithCustomDefault");
+    sb.append(space);
+    sb.append(":").append(space);
+    sb.append(TBaseHelper.toString(this.getI32WithCustomDefault(), indent + 1, prettyPrint));
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("structWithCustomDefault");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getStructWithCustomDefault() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getStructWithCustomDefault(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("structWithFieldCustomDefault");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getStructWithFieldCustomDefault() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getStructWithFieldCustomDefault(), indent + 1, prettyPrint));
     }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));

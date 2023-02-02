@@ -11,12 +11,13 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_3027b24c implements TypeList {
+public class __fbthrift_TypeList_f5023485 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
   static {
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyData", "test.fixtures.patch.MyData"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataWithCustomDefault", "test.fixtures.patch.MyDataWithCustomDefault"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/InnerUnion", "test.fixtures.patch.InnerUnion"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnion", "test.fixtures.patch.MyUnion"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStruct", "test.fixtures.patch.MyStruct"));
@@ -27,6 +28,9 @@ public class __fbthrift_TypeList_3027b24c implements TypeList {
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataEnsureStruct", "test.fixtures.patch.MyDataEnsureStruct"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataFieldPatch", "test.fixtures.patch.MyDataFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataPatch", "test.fixtures.patch.MyDataPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataWithCustomDefaultEnsureStruct", "test.fixtures.patch.MyDataWithCustomDefaultEnsureStruct"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataWithCustomDefaultFieldPatch", "test.fixtures.patch.MyDataWithCustomDefaultFieldPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataWithCustomDefaultPatch", "test.fixtures.patch.MyDataWithCustomDefaultPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/InnerUnionFieldPatch", "test.fixtures.patch.InnerUnionFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/InnerUnionPatch", "test.fixtures.patch.InnerUnionPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnionFieldPatch", "test.fixtures.patch.MyUnionFieldPatch"));

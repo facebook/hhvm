@@ -26,6 +26,8 @@ import com.facebook.thrift.protocol.*;
 @SuppressWarnings({ "unused", "serial" })
 public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldPatch");
+  private static final TField STRUCT_WITH_CUSTOM_DEFAULT_FIELD_DESC = new TField("structWithCustomDefault", TType.STRUCT, (short)-32);
+  private static final TField I32_WITH_CUSTOM_DEFAULT_FIELD_DESC = new TField("i32WithCustomDefault", TType.STRUCT, (short)-31);
   private static final TField MAP_MAP_FIELD_DESC = new TField("mapMap", TType.STRUCT, (short)-30);
   private static final TField LIST_MAP_FIELD_DESC = new TField("listMap", TType.STRUCT, (short)-29);
   private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.STRUCT, (short)-28);
@@ -56,7 +58,10 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
   private static final TField I16_VAL_FIELD_DESC = new TField("i16Val", TType.STRUCT, (short)-3);
   private static final TField BYTE_VAL_FIELD_DESC = new TField("byteVal", TType.STRUCT, (short)-2);
   private static final TField BOOL_VAL_FIELD_DESC = new TField("boolVal", TType.STRUCT, (short)-1);
+  private static final TField STRUCT_WITH_FIELD_CUSTOM_DEFAULT_FIELD_DESC = new TField("structWithFieldCustomDefault", TType.STRUCT, (short)1);
 
+  public final MyDataWithCustomDefaultPatch structWithCustomDefault;
+  public final I32Patch i32WithCustomDefault;
   public final MyStructField30Patch mapMap;
   public final MyStructField29Patch listMap;
   public final MyStructField28Patch optMapVal;
@@ -87,6 +92,9 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
   public final I16Patch i16Val;
   public final BytePatch byteVal;
   public final BoolPatch boolVal;
+  public final MyDataPatch structWithFieldCustomDefault;
+  public static final int STRUCTWITHCUSTOMDEFAULT = -32;
+  public static final int I32WITHCUSTOMDEFAULT = -31;
   public static final int MAPMAP = -30;
   public static final int LISTMAP = -29;
   public static final int OPTMAPVAL = -28;
@@ -117,8 +125,11 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
   public static final int I16VAL = -3;
   public static final int BYTEVAL = -2;
   public static final int BOOLVAL = -1;
+  public static final int STRUCTWITHFIELDCUSTOMDEFAULT = 1;
 
   public MyStructFieldPatch(
+      MyDataWithCustomDefaultPatch structWithCustomDefault,
+      I32Patch i32WithCustomDefault,
       MyStructField30Patch mapMap,
       MyStructField29Patch listMap,
       MyStructField28Patch optMapVal,
@@ -148,7 +159,10 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
       I32Patch i32Val,
       I16Patch i16Val,
       BytePatch byteVal,
-      BoolPatch boolVal) {
+      BoolPatch boolVal,
+      MyDataPatch structWithFieldCustomDefault) {
+    this.structWithCustomDefault = structWithCustomDefault;
+    this.i32WithCustomDefault = i32WithCustomDefault;
     this.mapMap = mapMap;
     this.listMap = listMap;
     this.optMapVal = optMapVal;
@@ -179,12 +193,23 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     this.i16Val = i16Val;
     this.byteVal = byteVal;
     this.boolVal = boolVal;
+    this.structWithFieldCustomDefault = structWithFieldCustomDefault;
   }
 
   /**
    * Performs a deep copy on <i>other</i>.
    */
   public MyStructFieldPatch(MyStructFieldPatch other) {
+    if (other.isSetStructWithCustomDefault()) {
+      this.structWithCustomDefault = TBaseHelper.deepCopy(other.structWithCustomDefault);
+    } else {
+      this.structWithCustomDefault = null;
+    }
+    if (other.isSetI32WithCustomDefault()) {
+      this.i32WithCustomDefault = TBaseHelper.deepCopy(other.i32WithCustomDefault);
+    } else {
+      this.i32WithCustomDefault = null;
+    }
     if (other.isSetMapMap()) {
       this.mapMap = TBaseHelper.deepCopy(other.mapMap);
     } else {
@@ -335,10 +360,33 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     } else {
       this.boolVal = null;
     }
+    if (other.isSetStructWithFieldCustomDefault()) {
+      this.structWithFieldCustomDefault = TBaseHelper.deepCopy(other.structWithFieldCustomDefault);
+    } else {
+      this.structWithFieldCustomDefault = null;
+    }
   }
 
   public MyStructFieldPatch deepCopy() {
     return new MyStructFieldPatch(this);
+  }
+
+  public MyDataWithCustomDefaultPatch getStructWithCustomDefault() {
+    return this.structWithCustomDefault;
+  }
+
+  // Returns true if field structWithCustomDefault is set (has been assigned a value) and false otherwise
+  public boolean isSetStructWithCustomDefault() {
+    return this.structWithCustomDefault != null;
+  }
+
+  public I32Patch getI32WithCustomDefault() {
+    return this.i32WithCustomDefault;
+  }
+
+  // Returns true if field i32WithCustomDefault is set (has been assigned a value) and false otherwise
+  public boolean isSetI32WithCustomDefault() {
+    return this.i32WithCustomDefault != null;
   }
 
   public MyStructField30Patch getMapMap() {
@@ -611,6 +659,15 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.boolVal != null;
   }
 
+  public MyDataPatch getStructWithFieldCustomDefault() {
+    return this.structWithFieldCustomDefault;
+  }
+
+  // Returns true if field structWithFieldCustomDefault is set (has been assigned a value) and false otherwise
+  public boolean isSetStructWithFieldCustomDefault() {
+    return this.structWithFieldCustomDefault != null;
+  }
+
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
@@ -620,6 +677,10 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     if (!(_that instanceof MyStructFieldPatch))
       return false;
     MyStructFieldPatch that = (MyStructFieldPatch)_that;
+
+    if (!TBaseHelper.equalsNobinary(this.isSetStructWithCustomDefault(), that.isSetStructWithCustomDefault(), this.structWithCustomDefault, that.structWithCustomDefault)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetI32WithCustomDefault(), that.isSetI32WithCustomDefault(), this.i32WithCustomDefault, that.i32WithCustomDefault)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.isSetMapMap(), that.isSetMapMap(), this.mapMap, that.mapMap)) { return false; }
 
@@ -681,12 +742,14 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
 
     if (!TBaseHelper.equalsNobinary(this.isSetBoolVal(), that.isSetBoolVal(), this.boolVal, that.boolVal)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetStructWithFieldCustomDefault(), that.isSetStructWithFieldCustomDefault(), this.structWithFieldCustomDefault, that.structWithFieldCustomDefault)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {mapMap, listMap, optMapVal, optSetVal, optListVal, optLateStructVal, optStructVal, optEnumVal, optBinaryVal, optStringVal, optDoubleVal, optFloatVal, optI64Val, optI32Val, optI16Val, optByteVal, optBoolVal, lateStructVal, unionVal, structVal, enumVal, binaryVal, stringVal, doubleVal, floatVal, i64Val, i32Val, i16Val, byteVal, boolVal});
+    return Arrays.deepHashCode(new Object[] {structWithCustomDefault, i32WithCustomDefault, mapMap, listMap, optMapVal, optSetVal, optListVal, optLateStructVal, optStructVal, optEnumVal, optBinaryVal, optStringVal, optDoubleVal, optFloatVal, optI64Val, optI32Val, optI16Val, optByteVal, optBoolVal, lateStructVal, unionVal, structVal, enumVal, binaryVal, stringVal, doubleVal, floatVal, i64Val, i32Val, i16Val, byteVal, boolVal, structWithFieldCustomDefault});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -695,6 +758,8 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
   }
 
   public static MyStructFieldPatch deserialize(TProtocol iprot) throws TException {
+    MyDataWithCustomDefaultPatch tmp_structWithCustomDefault = null;
+    I32Patch tmp_i32WithCustomDefault = null;
     MyStructField30Patch tmp_mapMap = null;
     MyStructField29Patch tmp_listMap = null;
     MyStructField28Patch tmp_optMapVal = null;
@@ -725,6 +790,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     I16Patch tmp_i16Val = null;
     BytePatch tmp_byteVal = null;
     BoolPatch tmp_boolVal = null;
+    MyDataPatch tmp_structWithFieldCustomDefault = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -735,6 +801,20 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
       }
       switch (__field.id)
       {
+        case STRUCTWITHCUSTOMDEFAULT:
+          if (__field.type == TType.STRUCT) {
+            tmp_structWithCustomDefault = MyDataWithCustomDefaultPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case I32WITHCUSTOMDEFAULT:
+          if (__field.type == TType.STRUCT) {
+            tmp_i32WithCustomDefault = I32Patch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         case MAPMAP:
           if (__field.type == TType.STRUCT) {
             tmp_mapMap = MyStructField30Patch.deserialize(iprot);
@@ -945,6 +1025,13 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case STRUCTWITHFIELDCUSTOMDEFAULT:
+          if (__field.type == TType.STRUCT) {
+            tmp_structWithFieldCustomDefault = MyDataPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -955,7 +1042,9 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
 
     MyStructFieldPatch _that;
     _that = new MyStructFieldPatch(
-      tmp_mapMap
+      tmp_structWithCustomDefault
+      ,tmp_i32WithCustomDefault
+      ,tmp_mapMap
       ,tmp_listMap
       ,tmp_optMapVal
       ,tmp_optSetVal
@@ -985,6 +1074,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
       ,tmp_i16Val
       ,tmp_byteVal
       ,tmp_boolVal
+      ,tmp_structWithFieldCustomDefault
     );
     _that.validate();
     return _that;
@@ -994,6 +1084,16 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
+    if (this.structWithCustomDefault != null) {
+      oprot.writeFieldBegin(STRUCT_WITH_CUSTOM_DEFAULT_FIELD_DESC);
+      this.structWithCustomDefault.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.i32WithCustomDefault != null) {
+      oprot.writeFieldBegin(I32_WITH_CUSTOM_DEFAULT_FIELD_DESC);
+      this.i32WithCustomDefault.write(oprot);
+      oprot.writeFieldEnd();
+    }
     if (this.mapMap != null) {
       oprot.writeFieldBegin(MAP_MAP_FIELD_DESC);
       this.mapMap.write(oprot);
@@ -1142,6 +1242,11 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     if (this.boolVal != null) {
       oprot.writeFieldBegin(BOOL_VAL_FIELD_DESC);
       this.boolVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.structWithFieldCustomDefault != null) {
+      oprot.writeFieldBegin(STRUCT_WITH_FIELD_CUSTOM_DEFAULT_FIELD_DESC);
+      this.structWithFieldCustomDefault.write(oprot);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();

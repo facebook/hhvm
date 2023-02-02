@@ -57,6 +57,44 @@ cdef class __MyData_FieldsSetter(__StructFieldsSetter):
 
 
 @__cython.auto_pickle(False)
+cdef class __MyDataWithCustomDefault_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __MyDataWithCustomDefault_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cMyDataWithCustomDefault* struct_cpp_obj):
+        cdef __MyDataWithCustomDefault_FieldsSetter __fbthrift_inst = __MyDataWithCustomDefault_FieldsSetter.__new__(__MyDataWithCustomDefault_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"data1")] = __MyDataWithCustomDefault_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"data2")] = __MyDataWithCustomDefault_FieldsSetter._set_field_1
+        return __fbthrift_inst
+
+    cdef void set_field(__MyDataWithCustomDefault_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __MyDataWithCustomDefault_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field data1
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cMyDataWithCustomDefault](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, str):
+            raise TypeError(f'data1 is not a { str !r}.')
+        deref(self._struct_cpp_obj).data1_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
+
+    cdef void _set_field_1(self, _fbthrift_value) except *:
+        # for field data2
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cMyDataWithCustomDefault](deref(self._struct_cpp_obj), 1)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'data2 is not a { int !r}.')
+        _fbthrift_value = <cint32_t> _fbthrift_value
+        deref(self._struct_cpp_obj).data2_ref().assign(_fbthrift_value)
+
+
+@__cython.auto_pickle(False)
 cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
@@ -93,6 +131,9 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         __fbthrift_inst._setters[__cstring_view(<const char*>"optMapVal")] = __MyStruct_FieldsSetter._set_field_27
         __fbthrift_inst._setters[__cstring_view(<const char*>"listMap")] = __MyStruct_FieldsSetter._set_field_28
         __fbthrift_inst._setters[__cstring_view(<const char*>"mapMap")] = __MyStruct_FieldsSetter._set_field_29
+        __fbthrift_inst._setters[__cstring_view(<const char*>"i32WithCustomDefault")] = __MyStruct_FieldsSetter._set_field_30
+        __fbthrift_inst._setters[__cstring_view(<const char*>"structWithCustomDefault")] = __MyStruct_FieldsSetter._set_field_31
+        __fbthrift_inst._setters[__cstring_view(<const char*>"structWithFieldCustomDefault")] = __MyStruct_FieldsSetter._set_field_32
         return __fbthrift_inst
 
     cdef void set_field(__MyStruct_FieldsSetter self, const char* name, object value) except *:
@@ -369,6 +410,34 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 29)
             return
         deref(self._struct_cpp_obj).mapMap_ref().assign(deref(_test_fixtures_patch_module_types.Map__string_Map__string_i32(_fbthrift_value)._cpp_obj))
+
+    cdef void _set_field_30(self, _fbthrift_value) except *:
+        # for field i32WithCustomDefault
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 30)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'i32WithCustomDefault is not a { int !r}.')
+        _fbthrift_value = <cint32_t> _fbthrift_value
+        deref(self._struct_cpp_obj).i32WithCustomDefault_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_31(self, _fbthrift_value) except *:
+        # for field structWithCustomDefault
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 31)
+            return
+        if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyDataWithCustomDefault):
+            raise TypeError(f'structWithCustomDefault is not a { _test_fixtures_patch_module_types.MyDataWithCustomDefault !r}.')
+        deref(self._struct_cpp_obj).structWithCustomDefault_ref().assign(deref((<_test_fixtures_patch_module_types.MyDataWithCustomDefault?> _fbthrift_value)._cpp_obj))
+
+    cdef void _set_field_32(self, _fbthrift_value) except *:
+        # for field structWithFieldCustomDefault
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 32)
+            return
+        if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyData):
+            raise TypeError(f'structWithFieldCustomDefault is not a { _test_fixtures_patch_module_types.MyData !r}.')
+        deref(self._struct_cpp_obj).structWithFieldCustomDefault_ref().assign(deref((<_test_fixtures_patch_module_types.MyData?> _fbthrift_value)._cpp_obj))
 
 
 @__cython.auto_pickle(False)

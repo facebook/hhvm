@@ -242,6 +242,17 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         arg
     in
     localize ~ety_env env decl_ty
+  | Tapply ((p, x), [arg])
+    when String.equal x Naming_special_names.HH.FIXME.tSupportdynMarker ->
+    let decl_ty =
+      if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+        mk
+          ( get_reason dty,
+            Tapply ((p, Naming_special_names.Classes.cSupportDyn), [arg]) )
+      else
+        arg
+    in
+    localize ~ety_env env decl_ty
   | Tapply (((_p, cid) as cls), argl) -> begin
     match Env.get_class_or_typedef env cid with
     | Some (Env.ClassResult class_info) ->

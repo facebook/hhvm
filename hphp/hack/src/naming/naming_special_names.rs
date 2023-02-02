@@ -691,6 +691,7 @@ pub mod typehints {
 
     pub const TANY_MARKER: &str = "\\HH\\FIXME\\TANY_MARKER";
     pub const POISON_MARKER: &str = "\\HH\\FIXME\\POISON_MARKER";
+    pub const SUPPORTDYN_MARKER: &str = "\\HH\\FIXME\\SUPPORTDYN_MARKER";
 
     pub const WILDCARD: &str = "_";
 

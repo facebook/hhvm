@@ -19,6 +19,8 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
         # just use the default .hhconfig in the template repo
         pass
 
+    # pyre-fixme[14]: `check_cmd` overrides method defined in `CommonTestDriver`
+    #  inconsistently.
     def check_cmd(
         self,
         expected_output: Optional[List[str]],

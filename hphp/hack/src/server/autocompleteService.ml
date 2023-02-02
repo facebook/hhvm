@@ -263,7 +263,6 @@ let autocomplete_shape_key autocomplete_context env fields id =
             res_fullname = code;
             res_kind = kind;
             func_details = get_func_details_for env ty;
-            ranking_details = None;
             res_documentation = None;
           }
         in
@@ -296,7 +295,6 @@ let autocomplete_member ~is_static env class_ cid id =
           res_fullname = name;
           res_kind = kind;
           func_details = get_func_details_for env ty;
-          ranking_details = None;
           res_documentation = None;
         }
       in
@@ -407,7 +405,6 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
               res_fullname = name;
               res_kind = kind;
               func_details = get_func_details_for env ty;
-              ranking_details = None;
               res_documentation = None;
             }
           in
@@ -442,7 +439,6 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
           res_fullname = "true";
           res_kind = kind;
           func_details = None;
-          ranking_details = None;
           res_documentation = None;
         }
       in
@@ -493,7 +489,6 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
           res_fullname = name;
           res_kind = kind;
           func_details = get_func_details_for env ty;
-          ranking_details = None;
           res_documentation = None;
         }
       in
@@ -571,7 +566,6 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
                       res_fullname = name;
                       res_kind = kind;
                       func_details = get_func_details_for env dty;
-                      ranking_details = None;
                       res_documentation = None;
                     }
                   in
@@ -655,7 +649,6 @@ let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
             res_fullname = name;
             res_kind = kind;
             func_details = get_func_details_for env ty;
-            ranking_details = None;
             res_documentation = None;
           }
         in
@@ -749,7 +742,6 @@ let autocomplete_shape_literal_in_call
         res_fullname = key;
         res_kind = kind;
         func_details = get_func_details_for env lty;
-        ranking_details = None;
         res_documentation = None;
       }
     in
@@ -805,7 +797,6 @@ let add_builtin_attribute_result replace_pos ~doc ~name : unit =
       res_fullname = name;
       res_kind = SI_Class;
       func_details = None;
-      ranking_details = None;
       res_documentation = Some doc;
     }
   in
@@ -876,7 +867,6 @@ let add_enum_const_result env pos replace_pos prefix const_name =
       res_fullname = key;
       res_kind = kind;
       func_details = get_func_details_for env lty;
-      ranking_details = None;
       res_documentation = None;
     }
   in
@@ -1116,7 +1106,6 @@ let find_global_results
             res_fullname;
             res_kind = r.si_kind;
             func_details;
-            ranking_details = None;
             res_documentation = None;
           }
         in
@@ -1143,7 +1132,6 @@ let find_global_results
                  res_fullname = name;
                  res_kind = kind;
                  func_details = None;
-                 ranking_details = None;
                  res_documentation = Some documentation;
                })
     | _ -> ()
@@ -1493,7 +1481,6 @@ let compute_complete_local ctx tast =
           res_fullname = name;
           res_kind = kind;
           func_details;
-          ranking_details = None;
           res_documentation = None;
         }
       in
@@ -1524,7 +1511,6 @@ let complete_keywords_at possible_keywords text pos : unit =
                res_fullname = keyword;
                res_kind = kind;
                func_details = None;
-               ranking_details = None;
                res_documentation = None;
              }
            in
@@ -1826,11 +1812,6 @@ let go_ctx
       if completion_type = Some Acprop then compute_complete_local ctx tast;
 
       let complete_autocomplete_results = !autocomplete_results in
-      let replace_pos =
-        match List.hd complete_autocomplete_results with
-        | Some r -> r.res_replace_pos
-        | None -> Pos.none |> Pos.to_absolute |> Ide_api_types.pos_to_range
-      in
 
       let kind_filter =
         match completion_type with
@@ -1842,30 +1823,7 @@ let go_ctx
       let results =
         {
           With_complete_flag.is_complete = !autocomplete_is_complete;
-          value =
-            (if sienv.use_ranked_autocomplete then (
-              let ranking_start_time = Unix.gettimeofday () in
-              let ranked_results =
-                AutocompleteRankService.rank_autocomplete_result
-                  ~ctx
-                  ~entry
-                  ~query_text:!auto_complete_for_global
-                  ~results:complete_autocomplete_results
-                  ~max_results:3
-                  ~context:completion_type
-                  ~kind_filter
-                  ~replace_pos
-              in
-              AutocompleteRankService.log_ranked_autocomplete
-                ~sienv
-                ~results:(List.length complete_autocomplete_results)
-                ~context:completion_type
-                ~start_time:ranking_start_time;
-              HackEventLogger.ranked_autocomplete_duration
-                ~start_time:ranking_start_time;
-              ranked_results
-            ) else
-              complete_autocomplete_results);
+          value = complete_autocomplete_results;
         }
       in
       SymbolIndexCore.log_symbol_index_search

@@ -518,8 +518,6 @@ type t = {
       power users only. *)
   re_worker: bool;
   ide_serverless: bool;  (** whether clientLsp should use serverless-ide *)
-  ide_ranked_autocomplete: bool;
-      (** whether clientLsp should use ranked autocomplete *)
   ide_max_num_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_max_num_shallow_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_symbolindex_search_provider: string;
@@ -691,7 +689,6 @@ let default =
     enable_type_check_filter_files = false;
     re_worker = false;
     ide_serverless = false;
-    ide_ranked_autocomplete = false;
     ide_max_num_decls = 5000;
     ide_max_num_shallow_decls = 10000;
     predeclare_ide = false;
@@ -1075,13 +1072,6 @@ let load_
   (* ide_serverless CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
   let ide_serverless =
     bool_ "ide_serverless" ~default:default.ide_serverless config
-  in
-  (* ide_ranked_autocomplete CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
-  let ide_ranked_autocomplete =
-    bool_
-      "ide_ranked_autocomplete"
-      ~default:default.ide_ranked_autocomplete
-      config
   in
   let ide_max_num_decls =
     int_ "ide_max_num_decls" ~default:default.ide_max_num_decls config
@@ -1567,7 +1557,6 @@ let load_
     enable_type_check_filter_files;
     re_worker;
     ide_serverless;
-    ide_ranked_autocomplete;
     ide_max_num_decls;
     ide_max_num_shallow_decls;
     ide_symbolindex_search_provider;

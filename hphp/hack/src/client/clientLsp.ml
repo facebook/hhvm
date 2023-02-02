@@ -26,7 +26,6 @@ type env = {
   args: args;
   init_id: string;
   use_serverless_ide: bool;
-  use_ranked_autocomplete: bool;
 }
 
 (** This gets initialized to env.from, but maybe modified in the light of the initialize request *)
@@ -1591,7 +1590,6 @@ let run_ide_service
       ide_service
       ~root
       ~naming_table_load_info
-      ~use_ranked_autocomplete:env.use_ranked_autocomplete
       ~config:env.args.config
       ~ignore_hh_version:env.args.ignore_hh_version
       ~open_files
@@ -2478,22 +2476,12 @@ let make_ide_completion_response
         | Some base_class -> [("base_class", Hh_json.JSON_String base_class)]
         | None -> []
       in
-      let ranking_detail =
-        match completion.ranking_details with
-        | Some details ->
-          [
-            ("ranking_detail", Hh_json.JSON_String details.detail);
-            ("ranking_source", Hh_json.JSON_Number details.kind);
-          ]
-        | None -> []
-      in
       (* If we do not have a correct file position, skip sending that data *)
       if Int.equal line 0 && Int.equal start 0 then
         Some
           (Hh_json.JSON_Object
              ([("fullname", Hh_json.JSON_String completion.res_fullname)]
-             @ base_class
-             @ ranking_detail))
+             @ base_class))
       else
         Some
           (Hh_json.JSON_Object
@@ -2510,8 +2498,7 @@ let make_ide_completion_response
                 ("line", Hh_json.int_ line);
                 ("char", Hh_json.int_ start);
               ]
-             @ base_class
-             @ ranking_detail))
+             @ base_class))
     in
     let hack_to_sort_text (completion : complete_autocomplete_result) :
         string option =
@@ -2537,11 +2524,7 @@ let make_ide_completion_response
           "\\"
         else
           "");
-      kind =
-        (match completion.ranking_details with
-        | Some _ -> Some Completion.Event
-        | None ->
-          si_kind_to_completion_kind completion.AutocompleteTypes.res_kind);
+      kind = si_kind_to_completion_kind completion.AutocompleteTypes.res_kind;
       detail = Some (hack_to_detail completion);
       inlineDetail = Some (hack_to_inline_detail completion);
       itemType = hack_to_itemType completion;
@@ -2549,10 +2532,7 @@ let make_ide_completion_response
         Option.map completion.res_documentation ~f:(fun s ->
             MarkedStringsDocumentation [MarkedString s]);
       (* This will be filled in by completionItem/resolve. *)
-      sortText =
-        (match completion.ranking_details with
-        | Some detail -> Some detail.sort_text
-        | None -> hack_to_sort_text completion);
+      sortText = hack_to_sort_text completion;
       filterText = None;
       insertText;
       insertTextFormat = Some insertTextFormat;
@@ -4944,8 +4924,6 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
     {
       args;
       init_id;
-      use_ranked_autocomplete =
-        versionless_local_config.ServerLocalConfig.ide_ranked_autocomplete;
       use_serverless_ide =
         versionless_local_config.ServerLocalConfig.ide_serverless;
     }

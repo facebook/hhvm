@@ -306,7 +306,6 @@ let initialize_from_saved_state
     ~(naming_table_load_info :
        ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info
        option)
-    ~(use_ranked_autocomplete : bool)
     ~(config : (string * string) list)
     ~(ignore_hh_version : bool)
     ~(open_files : Path.t list) :
@@ -332,7 +331,6 @@ let initialize_from_saved_state
             {
               Initialize_from_saved_state.root;
               naming_table_load_info;
-              use_ranked_autocomplete;
               config;
               ignore_hh_version;
               open_files;

@@ -487,14 +487,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
       ~savedstate_file_opt:local_config.ServerLocalConfig.symbolindex_file
       ~workers:None
   in
-  let sienv =
-    {
-      sienv with
-      SearchUtils.sie_log_timings = true;
-      SearchUtils.use_ranked_autocomplete = param.use_ranked_autocomplete;
-    }
-  in
-  if param.use_ranked_autocomplete then AutocompleteRankService.initialize ();
+  let sienv = { sienv with SearchUtils.sie_log_timings = true } in
   let start_time = log_startup_time "symbol_index" start_time in
   (* We only ever serve requests on files that are open. That's why our caller
      passes an initial list of open files, the ones already open in the editor

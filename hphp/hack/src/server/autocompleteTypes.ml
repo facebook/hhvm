@@ -22,12 +22,6 @@ type func_details_result = {
 }
 [@@deriving show]
 
-type ranking_details_result = {
-  detail: string;
-  sort_text: string;
-  kind: string;
-}
-
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
   res_pos: Pos.absolute;
@@ -38,7 +32,6 @@ type complete_autocomplete_result = {
   res_fullname: string;
   res_kind: SearchUtils.si_kind;
   func_details: func_details_result option;
-  ranking_details: ranking_details_result option;
   res_documentation: string option;
 }
 

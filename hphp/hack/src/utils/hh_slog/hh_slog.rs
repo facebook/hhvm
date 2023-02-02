@@ -13,10 +13,10 @@ fn timestamp_format(io: &mut dyn std::io::Write) -> std::io::Result<()> {
 }
 
 #[derive(Clone, Debug)]
-pub struct Log {
-    /// Logs to both scuba and the log file.
+pub struct FileScubaLogger {
+    /// Logs to both scuba and file.
     pub scuba: slog::Logger,
-    /// Only logs to the log file.
+    /// Only logs to the file.
     pub file: slog::Logger,
 }
 
@@ -32,8 +32,8 @@ pub fn init_file(filename: &std::path::Path) -> (slog::Logger, slog_async::Async
         .thread_name("slog_logfile".to_owned())
         .build_with_guard();
 
-    let log = slog::Logger::root(drain.fuse(), o!());
-    (log, guard)
+    let logger = slog::Logger::root(drain.fuse(), o!());
+    (logger, guard)
 }
 
 pub fn init_file_sync(filename: &std::path::Path) -> slog::Logger {
@@ -58,12 +58,12 @@ pub fn init_term_envlogger(binary_name: &'static str) -> (slog::Logger, slog_asy
 
     let drain = drain.fuse();
 
-    let log = if binary_name.is_empty() {
+    let logger = if binary_name.is_empty() {
         slog::Logger::root(drain, o!())
     } else {
         slog::Logger::root(drain, o!("bin" => binary_name))
     };
-    (log, guard)
+    (logger, guard)
 }
 
 pub fn init_term_testing() -> slog::Logger {
@@ -78,10 +78,10 @@ pub fn init_term_testing() -> slog::Logger {
     slog::Logger::root(drain, o!())
 }
 
-/// Initializes a `Log` where each logger prints to stdout synchronously.
+/// Initializes a `FileScubaLogger` where each logger prints to stdout synchronously.
 /// Used for testing.
-pub fn init_testing() -> Log {
-    Log {
+pub fn init_testing() -> FileScubaLogger {
+    FileScubaLogger {
         scuba: init_term_testing(),
         file: init_term_testing(),
     }

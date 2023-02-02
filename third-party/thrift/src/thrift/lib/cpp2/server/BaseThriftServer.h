@@ -896,10 +896,11 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * Get the port.
    */
   uint16_t getPort() {
-    if (!getAddress().isInitialized()) {
+    auto addr = getAddress();
+    if (!addr.isInitialized()) {
       return port_.value_or(0);
     }
-    return getAddress().getPort();
+    return addr.isFamilyInet() ? addr.getPort() : 0;
   }
 
   /**

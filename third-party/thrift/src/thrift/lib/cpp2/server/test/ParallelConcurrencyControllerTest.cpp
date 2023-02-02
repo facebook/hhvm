@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <chrono>
+
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/portability/GTest.h>
 #include <folly/synchronization/Baton.h>
@@ -27,6 +29,7 @@
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 using namespace std;
+using namespace std::literals;
 using namespace apache::thrift;
 using namespace apache::thrift::test;
 using namespace apache::thrift::transport;
@@ -260,17 +263,32 @@ std::unique_ptr<AsyncProcessor> getEdgeTaskAP(
   return endingAP;
 }
 
+class LatchedParallelConcurrencyController
+    : public ParallelConcurrencyController {
+ public:
+  LatchedParallelConcurrencyController(
+      RequestPileInterface& pile, folly::Executor& ex, folly::Latch& latch)
+      : ParallelConcurrencyController(pile, ex), latch_{latch} {}
+
+  void onRequestFinished(ServerRequestData& requestData) override {
+    ParallelConcurrencyController::onRequestFinished(requestData);
+    latch_.count_down();
+  }
+
+ private:
+  folly::Latch& latch_;
+};
+
 TEST(ParallelConcurrencyControllerTest, DifferentOrdering1) {
   folly::EventBase eb;
 
   folly::CPUThreadPoolExecutor ex(2);
   FIFORequestPile pile;
-  ParallelConcurrencyController controller(pile, ex);
+  folly::Latch latch(6);
+  LatchedParallelConcurrencyController controller(pile, ex, latch);
   controller.setExecutionLimitRequests(2);
 
   ResourcePoolMock pool(&pile, &controller);
-
-  folly::Latch latch(3);
 
   folly::Baton baton1;
   folly::Baton baton2;
@@ -295,7 +313,7 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering1) {
   baton2.post();
   baton3.post();
 
-  latch.wait();
+  EXPECT_TRUE(latch.try_wait_for(1s));
   EXPECT_EQ(controller.requestCount(), 0);
   EXPECT_EQ(pile.requestCount(), 0);
 
@@ -307,12 +325,11 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
 
   folly::CPUThreadPoolExecutor ex(2);
   FIFORequestPile pile;
-  ParallelConcurrencyController controller(pile, ex);
+  folly::Latch latch(6);
+  LatchedParallelConcurrencyController controller(pile, ex, latch);
   controller.setExecutionLimitRequests(2);
 
   ResourcePoolMock pool(&pile, &controller);
-
-  folly::Latch latch(3);
 
   folly::Baton baton1;
   folly::Baton baton2;
@@ -335,7 +352,7 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
   baton2.post();
   baton3.post();
 
-  latch.wait();
+  EXPECT_TRUE(latch.try_wait_for(1s));
   EXPECT_EQ(controller.requestCount(), 0);
   EXPECT_EQ(pile.requestCount(), 0);
 

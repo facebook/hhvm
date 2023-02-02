@@ -1585,35 +1585,35 @@ class Baz final  {
 
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz> const& get_intField() const {
     if (getType() != Type::intField) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.intField;
   }
 
   ::facebook::thrift::test::SetWithAdapter const& get_setField() const {
     if (getType() != Type::setField) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.setField;
   }
 
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz> const& get_mapField() const {
     if (getType() != Type::mapField) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.mapField;
   }
 
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz> const& get_binaryField() const {
     if (getType() != Type::binaryField) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.binaryField;
   }
 
   ::facebook::thrift::test::MyI64 const& get_longField() const {
     if (getType() != Type::longField) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.longField;
   }
@@ -6084,14 +6084,14 @@ class ThriftAdaptTestUnion final  {
 
   ::facebook::thrift::test::DurationMs const& get_delay() const {
     if (getType() != Type::delay) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.delay;
   }
 
   ::facebook::thrift::test::CustomProtocolType const& get_custom() const {
     if (getType() != Type::custom) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.custom;
   }

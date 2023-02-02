@@ -2140,14 +2140,14 @@ class union1 final  {
 
   ::std::int32_t const& get_i() const {
     if (getType() != Type::i) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.i;
   }
 
   double const& get_d() const {
     if (getType() != Type::d) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.d;
   }
@@ -2548,28 +2548,28 @@ class union2 final  {
 
   ::std::int32_t const& get_i() const {
     if (getType() != Type::i) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.i;
   }
 
   double const& get_d() const {
     if (getType() != Type::d) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.d;
   }
 
   ::cpp2::struct1 const& get_s() const {
     if (getType() != Type::s) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.s;
   }
 
   ::cpp2::union1 const& get_u() const {
     if (getType() != Type::u) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.u;
   }

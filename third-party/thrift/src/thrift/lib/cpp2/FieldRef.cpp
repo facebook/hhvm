@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/BadFieldAccess.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 
-#include <thrift/lib/cpp2/BadFieldAccess.h>
-
-[[noreturn]] void apache::thrift::detail::throw_on_bad_field_access() {
-  throw bad_field_access();
+[[noreturn]] void apache::thrift::detail::throw_on_bad_optional_field_access() {
+  throw bad_optional_field_access();
 }
+
+[[noreturn]] void apache::thrift::detail::throw_on_bad_union_field_access() {
+  throw bad_union_field_access();
+}
+
 [[noreturn]] void apache::thrift::detail::throw_on_nullptr_dereferencing() {
   throw std::logic_error(
       "Trying to dereference a nullptr in union_field_ref. "

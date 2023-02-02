@@ -2434,14 +2434,14 @@ class SimpleUnion  {
 
   ::std::int64_t const& get_intValue() const {
     if (getType() != Type::intValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.intValue;
   }
 
   ::std::string const& get_stringValue() const {
     if (getType() != Type::stringValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.stringValue;
   }
@@ -3947,196 +3947,196 @@ class ComplexUnion final  {
 
   ::std::int64_t const& get_intValue() const {
     if (getType() != Type::intValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.intValue;
   }
 
   ::std::int64_t const& get_opt_intValue() const {
     if (getType() != Type::opt_intValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.opt_intValue;
   }
 
   ::std::string const& get_stringValue() const {
     if (getType() != Type::stringValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.stringValue;
   }
 
   ::std::string const& get_opt_stringValue() const {
     if (getType() != Type::opt_stringValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.opt_stringValue;
   }
 
   ::std::int16_t const& get_intValue2() const {
     if (getType() != Type::intValue2) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.intValue2;
   }
 
   ::std::int32_t const& get_intValue3() const {
     if (getType() != Type::intValue3) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.intValue3;
   }
 
   double const& get_doubelValue() const {
     if (getType() != Type::doubelValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.doubelValue;
   }
 
   bool const& get_boolValue() const {
     if (getType() != Type::boolValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.boolValue;
   }
 
   ::std::vector<::std::int32_t> const& get_union_list() const {
     if (getType() != Type::union_list) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.union_list;
   }
 
   ::std::set<::std::int64_t> const& get_union_set() const {
     if (getType() != Type::union_set) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.union_set;
   }
 
   ::std::map<::std::string, ::std::int32_t> const& get_union_map() const {
     if (getType() != Type::union_map) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.union_map;
   }
 
   ::std::map<::std::string, ::std::int32_t> const& get_opt_union_map() const {
     if (getType() != Type::opt_union_map) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.opt_union_map;
   }
 
   ::some::valid::ns::MyEnumA const& get_enum_field() const {
     if (getType() != Type::enum_field) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.enum_field;
   }
 
   ::std::vector<::some::valid::ns::MyEnumA> const& get_enum_container() const {
     if (getType() != Type::enum_container) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.enum_container;
   }
 
   ::some::valid::ns::MyStruct const& get_a_struct() const {
     if (getType() != Type::a_struct) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.a_struct;
   }
 
   ::std::set<::some::valid::ns::MyStruct> const& get_a_set_struct() const {
     if (getType() != Type::a_set_struct) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.a_set_struct;
   }
 
   ::some::valid::ns::SimpleUnion const& get_a_union() const {
     if (getType() != Type::a_union) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.a_union;
   }
 
   ::some::valid::ns::SimpleUnion const& get_opt_a_union() const {
     if (getType() != Type::opt_a_union) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.opt_a_union;
   }
 
   ::std::vector<::some::valid::ns::SimpleUnion> const& get_a_union_list() const {
     if (getType() != Type::a_union_list) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.a_union_list;
   }
 
   ::some::valid::ns::unionTypeDef const& get_a_union_typedef() const {
     if (getType() != Type::a_union_typedef) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.a_union_typedef;
   }
 
   ::std::vector<::some::valid::ns::unionTypeDef> const& get_a_union_typedef_list() const {
     if (getType() != Type::a_union_typedef_list) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.a_union_typedef_list;
   }
 
   ::std::string const& get_MyBinaryField() const {
     if (getType() != Type::MyBinaryField) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.MyBinaryField;
   }
 
   ::std::string const& get_MyBinaryField2() const {
     if (getType() != Type::MyBinaryField2) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.MyBinaryField2;
   }
 
   ::std::vector<::std::string> const& get_MyBinaryListField4() const {
     if (getType() != Type::MyBinaryListField4) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.MyBinaryListField4;
   }
 
   ::std::unique_ptr<::some::valid::ns::MyStruct> const& get_ref_field() const {
     if (getType() != Type::ref_field) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ref_field;
   }
 
   ::std::shared_ptr<const ::some::valid::ns::MyStruct> const& get_ref_field2() const {
     if (getType() != Type::ref_field2) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ref_field2;
   }
 
   ::some::valid::ns::AnException const& get_excp_field() const {
     if (getType() != Type::excp_field) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.excp_field;
   }
 
   ::some::valid::ns::CustomProtocolType const& get_MyCustomField() const {
     if (getType() != Type::MyCustomField) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.MyCustomField;
   }
@@ -10084,14 +10084,14 @@ class FloatUnion final  {
 
   float const& get_floatSide() const {
     if (getType() != Type::floatSide) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.floatSide;
   }
 
   double const& get_doubleSide() const {
     if (getType() != Type::doubleSide) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.doubleSide;
   }

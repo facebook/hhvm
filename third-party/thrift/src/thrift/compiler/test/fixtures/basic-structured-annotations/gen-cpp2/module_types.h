@@ -1845,14 +1845,14 @@ class MyUnion final  {
 
   ::test::fixtures::basic-structured-annotations::annotated_inline_string const& get_first() const {
     if (getType() != Type::first) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.first;
   }
 
   ::test::fixtures::basic-structured-annotations::annotated_inline_i64 const& get_second() const {
     if (getType() != Type::second) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.second;
   }

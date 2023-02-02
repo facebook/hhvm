@@ -1525,7 +1525,7 @@ class InnerUnion final  {
 
   ::std::string const& get_innerOption() const {
     if (getType() != Type::innerOption) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.innerOption;
   }
@@ -1865,21 +1865,21 @@ class MyUnion final  {
 
   ::std::string const& get_option1() const {
     if (getType() != Type::option1) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.option1;
   }
 
   ::std::int32_t const& get_option2() const {
     if (getType() != Type::option2) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.option2;
   }
 
   ::test::fixtures::patch::InnerUnion const& get_option3() const {
     if (getType() != Type::option3) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.option3;
   }

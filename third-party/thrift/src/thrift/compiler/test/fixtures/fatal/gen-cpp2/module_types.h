@@ -1374,28 +1374,28 @@ class union1 final  {
 
   ::std::int32_t const& get_ui() const {
     if (getType() != Type::ui) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ui;
   }
 
   double const& get_ud() const {
     if (getType() != Type::ud) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ud;
   }
 
   ::std::string const& get_us() const {
     if (getType() != Type::us) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.us;
   }
 
   ::test_cpp2::cpp_reflection::enum1 const& get_ue() const {
     if (getType() != Type::ue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ue;
   }
@@ -1837,28 +1837,28 @@ class union2 final  {
 
   ::std::int32_t const& get_ui_2() const {
     if (getType() != Type::ui_2) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ui_2;
   }
 
   double const& get_ud_2() const {
     if (getType() != Type::ud_2) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ud_2;
   }
 
   ::std::string const& get_us_2() const {
     if (getType() != Type::us_2) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.us_2;
   }
 
   ::test_cpp2::cpp_reflection::enum1 const& get_ue_2() const {
     if (getType() != Type::ue_2) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ue_2;
   }
@@ -2300,28 +2300,28 @@ class union3 final  {
 
   ::std::int32_t const& get_ui_3() const {
     if (getType() != Type::ui_3) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ui_3;
   }
 
   double const& get_ud_3() const {
     if (getType() != Type::ud_3) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ud_3;
   }
 
   ::std::string const& get_us_3() const {
     if (getType() != Type::us_3) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.us_3;
   }
 
   ::test_cpp2::cpp_reflection::enum1 const& get_ue_3() const {
     if (getType() != Type::ue_3) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ue_3;
   }
@@ -3019,35 +3019,35 @@ class unionA final  {
 
   ::std::int32_t const& get_i() const {
     if (getType() != Type::i) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.i;
   }
 
   double const& get_d() const {
     if (getType() != Type::d) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.d;
   }
 
   ::std::string const& get_s() const {
     if (getType() != Type::s) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.s;
   }
 
   ::test_cpp2::cpp_reflection::enum1 const& get_e() const {
     if (getType() != Type::e) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.e;
   }
 
   ::test_cpp2::cpp_reflection::structA const& get_a() const {
     if (getType() != Type::a) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.a;
   }
@@ -9644,196 +9644,196 @@ class union_with_special_names final  {
 
   ::std::int32_t const& get_get() const {
     if (getType() != Type::get) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.get;
   }
 
   ::std::int32_t const& get_getter() const {
     if (getType() != Type::getter) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.getter;
   }
 
   ::std::int32_t const& get_lists() const {
     if (getType() != Type::lists) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.lists;
   }
 
   ::std::int32_t const& get_maps() const {
     if (getType() != Type::maps) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.maps;
   }
 
   ::std::int32_t const& get_name() const {
     if (getType() != Type::name) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.name;
   }
 
   ::std::int32_t const& get_name_to_value() const {
     if (getType() != Type::name_to_value) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.name_to_value;
   }
 
   ::std::int32_t const& get_names() const {
     if (getType() != Type::names) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.names;
   }
 
   ::std::int32_t const& get_prefix_tree() const {
     if (getType() != Type::prefix_tree) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.prefix_tree;
   }
 
   ::std::int32_t const& get_sets() const {
     if (getType() != Type::sets) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.sets;
   }
 
   ::std::int32_t const& get_setter() const {
     if (getType() != Type::setter) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.setter;
   }
 
   ::std::int32_t const& get_str() const {
     if (getType() != Type::str) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.str;
   }
 
   ::std::int32_t const& get_strings() const {
     if (getType() != Type::strings) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.strings;
   }
 
   ::std::int32_t const& get_type() const {
     if (getType() != Type::type) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.type;
   }
 
   ::std::int32_t const& get_value() const {
     if (getType() != Type::value) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.value;
   }
 
   ::std::int32_t const& get_value_to_name() const {
     if (getType() != Type::value_to_name) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.value_to_name;
   }
 
   ::std::int32_t const& get_values() const {
     if (getType() != Type::values) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.values;
   }
 
   ::std::int32_t const& get_id() const {
     if (getType() != Type::id) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.id;
   }
 
   ::std::int32_t const& get_ids() const {
     if (getType() != Type::ids) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.ids;
   }
 
   ::std::int32_t const& get_descriptor() const {
     if (getType() != Type::descriptor) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.descriptor;
   }
 
   ::std::int32_t const& get_descriptors() const {
     if (getType() != Type::descriptors) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.descriptors;
   }
 
   ::std::int32_t const& get_key() const {
     if (getType() != Type::key) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.key;
   }
 
   ::std::int32_t const& get_keys() const {
     if (getType() != Type::keys) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.keys;
   }
 
   ::std::int32_t const& get_annotation() const {
     if (getType() != Type::annotation) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.annotation;
   }
 
   ::std::int32_t const& get_annotations() const {
     if (getType() != Type::annotations) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.annotations;
   }
 
   ::std::int32_t const& get_member() const {
     if (getType() != Type::member) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.member;
   }
 
   ::std::int32_t const& get_members() const {
     if (getType() != Type::members) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.members;
   }
 
   ::std::int32_t const& get_field() const {
     if (getType() != Type::field) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.field;
   }
 
   ::std::int32_t const& get_fields() const {
     if (getType() != Type::fields) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.fields;
   }
@@ -12990,7 +12990,7 @@ class UnionWithTypedefFieldAdapter final  {
 
   ::test_cpp2::cpp_reflection::I32 const& get_field() const {
     if (getType() != Type::field) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.field;
   }

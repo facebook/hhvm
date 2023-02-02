@@ -49,7 +49,8 @@ template <typename T>
 using is_set_t =
     std::conditional_t<std::is_const<T>::value, const uint8_t, uint8_t>;
 
-[[noreturn]] void throw_on_bad_field_access();
+[[noreturn]] void throw_on_bad_optional_field_access();
+[[noreturn]] void throw_on_bad_union_field_access();
 [[noreturn]] void throw_on_nullptr_dereferencing();
 
 struct ensure_isset_unsafe_fn;
@@ -694,7 +695,7 @@ class optional_field_ref {
  private:
   FOLLY_ERASE void throw_if_unset() const {
     if (!bitref_) {
-      apache::thrift::detail::throw_on_bad_field_access();
+      apache::thrift::detail::throw_on_bad_optional_field_access();
     }
   }
 
@@ -1008,7 +1009,7 @@ class optional_boxed_field_ref {
  private:
   FOLLY_ERASE void throw_if_unset() const {
     if (!has_value()) {
-      apache::thrift::detail::throw_on_bad_field_access();
+      apache::thrift::detail::throw_on_bad_optional_field_access();
     }
   }
 
@@ -2091,7 +2092,7 @@ class union_field_ref {
  private:
   FOLLY_ERASE void throw_if_unset() const {
     if (!has_value()) {
-      apache::thrift::detail::throw_on_bad_field_access();
+      apache::thrift::detail::throw_on_bad_union_field_access();
     }
   }
 

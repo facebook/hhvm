@@ -21,10 +21,27 @@
 namespace apache {
 namespace thrift {
 
-// An exception thrown when accessing an unset optional field value.
+// Base exception type for field access errors
 class bad_field_access : public std::runtime_error {
  public:
-  bad_field_access() : std::runtime_error("accessing unset optional value") {}
+  bad_field_access() = delete;
+  explicit bad_field_access(const char* what) : std::runtime_error(what) {}
 };
+
+// An exception thrown when accessing an unset optional field value
+class bad_optional_field_access : public bad_field_access {
+ public:
+  bad_optional_field_access()
+      : bad_field_access("accessing unset optional value") {}
+};
+
+// An exception thrown when accessing an unset union field value or using union
+// field accessors that do not match the union's type
+class bad_union_field_access : public bad_field_access {
+ public:
+  bad_union_field_access()
+      : bad_field_access("accessing unset or mismatched type union value") {}
+};
+
 } // namespace thrift
 } // namespace apache

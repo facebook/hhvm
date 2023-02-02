@@ -561,42 +561,42 @@ class ComplexUnion final  {
 
   ::std::int64_t const& get_intValue() const {
     if (getType() != Type::intValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.intValue;
   }
 
   ::std::string const& get_stringValue() const {
     if (getType() != Type::stringValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.stringValue;
   }
 
   ::std::vector<::std::int64_t> const& get_intListValue() const {
     if (getType() != Type::intListValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.intListValue;
   }
 
   ::std::vector<::std::string> const& get_stringListValue() const {
     if (getType() != Type::stringListValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.stringListValue;
   }
 
   ::cpp2::containerTypedef const& get_typedefValue() const {
     if (getType() != Type::typedefValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.typedefValue;
   }
 
   ::std::unique_ptr<::std::string> const& get_stringRef() const {
     if (getType() != Type::stringRef) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.stringRef;
   }
@@ -1045,14 +1045,14 @@ class ListUnion final  {
 
   ::std::vector<::std::int64_t> const& get_intListValue() const {
     if (getType() != Type::intListValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.intListValue;
   }
 
   ::std::vector<::std::string> const& get_stringListValue() const {
     if (getType() != Type::stringListValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.stringListValue;
   }
@@ -1385,14 +1385,14 @@ class DataUnion final  {
 
   ::std::string const& get_binaryData() const {
     if (getType() != Type::binaryData) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.binaryData;
   }
 
   ::std::string const& get_stringData() const {
     if (getType() != Type::stringData) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.stringData;
   }
@@ -1983,14 +1983,14 @@ class ValUnion final  {
 
   ::cpp2::Val const& get_v1() const {
     if (getType() != Type::v1) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.v1;
   }
 
   ::cpp2::Val const& get_v2() const {
     if (getType() != Type::v2) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.v2;
   }
@@ -2323,14 +2323,14 @@ class VirtualComplexUnion  {
 
   ::std::string const& get_thingOne() const {
     if (getType() != Type::thingOne) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.thingOne;
   }
 
   ::std::string const& get_thingTwo() const {
     if (getType() != Type::thingTwo) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.thingTwo;
   }
@@ -2703,7 +2703,7 @@ class NonCopyableUnion final  {
 
   ::cpp2::NonCopyableStruct const& get_s() const {
     if (getType() != Type::s) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.s;
   }

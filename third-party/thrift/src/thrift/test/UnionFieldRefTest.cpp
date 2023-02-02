@@ -28,53 +28,65 @@ TEST(UnionFieldTest, basic) {
 
   EXPECT_EQ(a.getType(), Basic::Type::__EMPTY__);
   EXPECT_FALSE(a.int64_ref());
-  EXPECT_THROW(a.int64_ref().value(), bad_field_access);
+  EXPECT_THROW(a.int64_ref().value(), bad_union_field_access);
+  EXPECT_THROW(a.get_int64(), bad_union_field_access);
   EXPECT_FALSE(a.list_i32_ref());
-  EXPECT_THROW(a.list_i32_ref().value(), bad_field_access);
+  EXPECT_THROW(a.list_i32_ref().value(), bad_union_field_access);
+  EXPECT_THROW(a.get_list_i32(), bad_union_field_access);
   EXPECT_FALSE(a.str_ref());
-  EXPECT_THROW(a.str_ref().value(), bad_field_access);
+  EXPECT_THROW(a.str_ref().value(), bad_union_field_access);
+  EXPECT_THROW(a.get_str(), bad_union_field_access);
 
   const int64_t int64 = 42LL << 42;
   a.int64_ref() = int64;
   EXPECT_EQ(a.getType(), Basic::Type::int64);
   EXPECT_TRUE(a.int64_ref());
   EXPECT_EQ(a.int64_ref().value(), int64);
+  EXPECT_EQ(a.get_int64(), int64);
   EXPECT_FALSE(a.list_i32_ref());
-  EXPECT_THROW(a.list_i32_ref().value(), bad_field_access);
+  EXPECT_THROW(a.list_i32_ref().value(), bad_union_field_access);
+  EXPECT_THROW(a.get_list_i32(), bad_union_field_access);
   EXPECT_FALSE(a.str_ref());
-  EXPECT_THROW(a.str_ref().value(), bad_field_access);
+  EXPECT_THROW(a.str_ref().value(), bad_union_field_access);
+  EXPECT_THROW(a.get_str(), bad_union_field_access);
 
   const vector<int32_t> list_i32 = {3, 1, 2};
   a.list_i32_ref() = list_i32;
   EXPECT_EQ(a.getType(), Basic::Type::list_i32);
   EXPECT_FALSE(a.int64_ref());
-  EXPECT_THROW(a.int64_ref().value(), bad_field_access);
+  EXPECT_THROW(a.int64_ref().value(), bad_union_field_access);
+  EXPECT_THROW(a.get_int64(), bad_union_field_access);
   EXPECT_TRUE(a.list_i32_ref());
   EXPECT_EQ(a.list_i32_ref().value(), list_i32);
+  EXPECT_EQ(a.get_list_i32(), list_i32);
   EXPECT_FALSE(a.str_ref());
-  EXPECT_THROW(a.str_ref().value(), bad_field_access);
+  EXPECT_THROW(a.str_ref().value(), bad_union_field_access);
+  EXPECT_THROW(a.get_str(), bad_union_field_access);
 
   const string str = "foo";
   a.str_ref() = str;
   EXPECT_EQ(a.getType(), Basic::Type::str);
   EXPECT_FALSE(a.int64_ref());
-  EXPECT_THROW(a.int64_ref().value(), bad_field_access);
+  EXPECT_THROW(a.int64_ref().value(), bad_union_field_access);
+  EXPECT_THROW(a.get_int64(), bad_union_field_access);
   EXPECT_FALSE(a.list_i32_ref());
-  EXPECT_THROW(a.list_i32_ref().value(), bad_field_access);
+  EXPECT_THROW(a.list_i32_ref().value(), bad_union_field_access);
+  EXPECT_THROW(a.get_list_i32(), bad_union_field_access);
   EXPECT_TRUE(a.str_ref());
   EXPECT_EQ(a.str_ref().value(), str);
+  EXPECT_EQ(a.get_str(), str);
 }
 
 TEST(UnionFieldTest, operator_deref) {
   Basic a;
-  EXPECT_THROW(*a.int64_ref(), bad_field_access);
-  EXPECT_THROW(*a.str_ref(), bad_field_access);
+  EXPECT_THROW(*a.int64_ref(), bad_union_field_access);
+  EXPECT_THROW(*a.str_ref(), bad_union_field_access);
   a.int64_ref() = 42;
   EXPECT_EQ(*a.int64_ref(), 42);
-  EXPECT_THROW(*a.str_ref(), bad_field_access);
+  EXPECT_THROW(*a.str_ref(), bad_union_field_access);
   a.str_ref() = "foo";
   EXPECT_EQ(*a.str_ref(), "foo");
-  EXPECT_THROW(*a.int64_ref(), bad_field_access);
+  EXPECT_THROW(*a.int64_ref(), bad_union_field_access);
 }
 
 TEST(UnionFieldTest, operator_assign) {
@@ -94,36 +106,36 @@ TEST(UnionFieldTest, duplicate_type) {
 
   EXPECT_EQ(a.getType(), DuplicateType::Type::__EMPTY__);
   EXPECT_FALSE(a.str1_ref());
-  EXPECT_THROW(a.str1_ref().value(), bad_field_access);
+  EXPECT_THROW(a.str1_ref().value(), bad_union_field_access);
   EXPECT_FALSE(a.list_i32_ref());
-  EXPECT_THROW(a.list_i32_ref().value(), bad_field_access);
+  EXPECT_THROW(a.list_i32_ref().value(), bad_union_field_access);
   EXPECT_FALSE(a.str2_ref());
-  EXPECT_THROW(a.str2_ref().value(), bad_field_access);
+  EXPECT_THROW(a.str2_ref().value(), bad_union_field_access);
 
   a.str1_ref() = string(1000, '1');
   EXPECT_EQ(a.getType(), DuplicateType::Type::str1);
   EXPECT_TRUE(a.str1_ref());
   EXPECT_EQ(a.str1_ref().value(), string(1000, '1'));
   EXPECT_FALSE(a.list_i32_ref());
-  EXPECT_THROW(a.list_i32_ref().value(), bad_field_access);
+  EXPECT_THROW(a.list_i32_ref().value(), bad_union_field_access);
   EXPECT_FALSE(a.str2_ref());
-  EXPECT_THROW(a.str2_ref().value(), bad_field_access);
+  EXPECT_THROW(a.str2_ref().value(), bad_union_field_access);
 
   a.list_i32_ref() = vector<int32_t>(1000, 2);
   EXPECT_EQ(a.getType(), DuplicateType::Type::list_i32);
   EXPECT_FALSE(a.str1_ref());
-  EXPECT_THROW(a.str1_ref().value(), bad_field_access);
+  EXPECT_THROW(a.str1_ref().value(), bad_union_field_access);
   EXPECT_TRUE(a.list_i32_ref());
   EXPECT_EQ(a.list_i32_ref().value(), vector<int32_t>(1000, 2));
   EXPECT_FALSE(a.str2_ref());
-  EXPECT_THROW(a.str2_ref().value(), bad_field_access);
+  EXPECT_THROW(a.str2_ref().value(), bad_union_field_access);
 
   a.str2_ref() = string(1000, '3');
   EXPECT_EQ(a.getType(), DuplicateType::Type::str2);
   EXPECT_FALSE(a.str1_ref());
-  EXPECT_THROW(a.str1_ref().value(), bad_field_access);
+  EXPECT_THROW(a.str1_ref().value(), bad_union_field_access);
   EXPECT_FALSE(a.list_i32_ref());
-  EXPECT_THROW(a.list_i32_ref().value(), bad_field_access);
+  EXPECT_THROW(a.list_i32_ref().value(), bad_union_field_access);
   EXPECT_TRUE(a.str2_ref());
   EXPECT_EQ(a.str2_ref().value(), string(1000, '3'));
 
@@ -132,18 +144,18 @@ TEST(UnionFieldTest, duplicate_type) {
   EXPECT_TRUE(a.str1_ref());
   EXPECT_EQ(a.str1_ref().value(), string(1000, '4'));
   EXPECT_FALSE(a.list_i32_ref());
-  EXPECT_THROW(a.list_i32_ref().value(), bad_field_access);
+  EXPECT_THROW(a.list_i32_ref().value(), bad_union_field_access);
   EXPECT_FALSE(a.str2_ref());
-  EXPECT_THROW(a.str2_ref().value(), bad_field_access);
+  EXPECT_THROW(a.str2_ref().value(), bad_union_field_access);
 
   a.str1_ref() = string(1000, '5');
   EXPECT_EQ(a.getType(), DuplicateType::Type::str1);
   EXPECT_TRUE(a.str1_ref());
   EXPECT_EQ(a.str1_ref().value(), string(1000, '5'));
   EXPECT_FALSE(a.list_i32_ref());
-  EXPECT_THROW(a.list_i32_ref().value(), bad_field_access);
+  EXPECT_THROW(a.list_i32_ref().value(), bad_union_field_access);
   EXPECT_FALSE(a.str2_ref());
-  EXPECT_THROW(a.str2_ref().value(), bad_field_access);
+  EXPECT_THROW(a.str2_ref().value(), bad_union_field_access);
 }
 
 TEST(UnionFieldTest, const_union) {
@@ -151,11 +163,11 @@ TEST(UnionFieldTest, const_union) {
     const Basic a;
     EXPECT_EQ(a.getType(), Basic::Type::__EMPTY__);
     EXPECT_FALSE(a.int64_ref());
-    EXPECT_THROW(a.int64_ref().value(), bad_field_access);
+    EXPECT_THROW(a.int64_ref().value(), bad_union_field_access);
     EXPECT_FALSE(a.list_i32_ref());
-    EXPECT_THROW(a.list_i32_ref().value(), bad_field_access);
+    EXPECT_THROW(a.list_i32_ref().value(), bad_union_field_access);
     EXPECT_FALSE(a.str_ref());
-    EXPECT_THROW(a.str_ref().value(), bad_field_access);
+    EXPECT_THROW(a.str_ref().value(), bad_union_field_access);
   }
 
   {
@@ -166,9 +178,9 @@ TEST(UnionFieldTest, const_union) {
     const Basic& a = b;
     EXPECT_EQ(a.getType(), Basic::Type::str);
     EXPECT_FALSE(a.int64_ref());
-    EXPECT_THROW(a.int64_ref().value(), bad_field_access);
+    EXPECT_THROW(a.int64_ref().value(), bad_union_field_access);
     EXPECT_FALSE(a.list_i32_ref());
-    EXPECT_THROW(a.list_i32_ref().value(), bad_field_access);
+    EXPECT_THROW(a.list_i32_ref().value(), bad_union_field_access);
     EXPECT_TRUE(a.str_ref());
     EXPECT_EQ(a.str_ref().value(), str);
   }
@@ -206,7 +218,7 @@ TEST(UnionFieldTest, ensure) {
 
 TEST(UnionFieldTest, member_of_pointer_operator) {
   Basic a;
-  EXPECT_THROW(a.list_i32_ref()->push_back(3), bad_field_access);
+  EXPECT_THROW(a.list_i32_ref()->push_back(3), bad_union_field_access);
   a.list_i32_ref().emplace({1, 2});
   a.list_i32_ref()->push_back(3);
   EXPECT_EQ(a.list_i32_ref(), (vector<int32_t>{1, 2, 3}));
@@ -271,9 +283,9 @@ TEST(UnionFieldTest, TreeNode) {
   EXPECT_EQ((*root.nodes_ref())[0].data_ref(), 10);
   EXPECT_EQ((*root.nodes_ref())[1].data_ref(), 20);
 
-  EXPECT_THROW(*root.data_ref(), bad_field_access);
-  EXPECT_THROW(*(*root.nodes_ref())[0].nodes_ref(), bad_field_access);
-  EXPECT_THROW(*(*root.nodes_ref())[1].nodes_ref(), bad_field_access);
+  EXPECT_THROW(*root.data_ref(), bad_union_field_access);
+  EXPECT_THROW(*(*root.nodes_ref())[0].nodes_ref(), bad_union_field_access);
+  EXPECT_THROW(*(*root.nodes_ref())[1].nodes_ref(), bad_union_field_access);
 }
 
 TEST(UnionFieldTest, CppRef) {
@@ -296,32 +308,32 @@ TEST(UnionFieldTest, CppRef) {
   EXPECT_EQ(std::as_const(s).str_ref(), "foo");
   EXPECT_EQ(s.str_ref(), "foo");
 
-  EXPECT_THROW(*std::as_const(s).cppref_ref(), bad_field_access);
-  EXPECT_THROW(*s.cppref_ref(), bad_field_access);
+  EXPECT_THROW(*std::as_const(s).cppref_ref(), bad_union_field_access);
+  EXPECT_THROW(*s.cppref_ref(), bad_union_field_access);
 
   s.cppref_ref().emplace().str_ref() = "ref";
 
   EXPECT_EQ(std::as_const(s).cppref_ref()->str_ref(), "ref");
   EXPECT_EQ(s.cppref_ref()->str_ref(), "ref");
-  EXPECT_THROW(*s.shared_const_ref(), bad_field_access);
+  EXPECT_THROW(*s.shared_const_ref(), bad_union_field_access);
 
   s.shared_mutable_ref().emplace().str_ref() = "shared";
 
   EXPECT_EQ(std::as_const(s).shared_mutable_ref()->str_ref(), "shared");
   EXPECT_EQ(s.shared_mutable_ref()->str_ref(), "shared");
-  EXPECT_THROW(*s.cppref_ref(), bad_field_access);
+  EXPECT_THROW(*s.cppref_ref(), bad_union_field_access);
 
   s.box_ref().emplace().str_ref() = "box";
 
   EXPECT_EQ(std::as_const(s).box_ref()->str_ref(), "box");
   EXPECT_EQ(s.box_ref()->str_ref(), "box");
-  EXPECT_THROW(*s.shared_mutable_ref(), bad_field_access);
+  EXPECT_THROW(*s.shared_mutable_ref(), bad_union_field_access);
 
   s.shared_const_ref().emplace("shared_const");
 
   EXPECT_EQ(std::as_const(s).shared_const_ref(), "shared_const");
   EXPECT_EQ(s.shared_const_ref(), "shared_const");
-  EXPECT_THROW(*s.box_ref(), bad_field_access);
+  EXPECT_THROW(*s.box_ref(), bad_union_field_access);
 }
 } // namespace test
 } // namespace thrift

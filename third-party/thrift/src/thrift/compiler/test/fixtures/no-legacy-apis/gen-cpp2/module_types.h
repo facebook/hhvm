@@ -517,7 +517,7 @@ class MyUnion final  {
  private:
   ::test::fixtures::basic::MyEnum const& get_myEnum() const {
     if (getType() != Type::myEnum) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.myEnum;
   }
@@ -526,7 +526,7 @@ class MyUnion final  {
  private:
   ::test::fixtures::basic::MyStruct const& get_myDataItem() const {
     if (getType() != Type::myDataItem) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.myDataItem;
   }

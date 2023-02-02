@@ -481,14 +481,14 @@ class U final  {
 
   ::std::int32_t const& get_i() const {
     if (getType() != Type::i) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.i;
   }
 
   ::std::string const& get_s() const {
     if (getType() != Type::s) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.s;
   }

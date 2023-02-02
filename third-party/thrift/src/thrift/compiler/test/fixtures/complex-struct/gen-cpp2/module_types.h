@@ -4498,42 +4498,42 @@ class MyUnion final  {
 
   ::cpp2::MyEnum const& get_myEnum() const {
     if (getType() != Type::myEnum) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.myEnum;
   }
 
   ::cpp2::MyStruct const& get_myStruct() const {
     if (getType() != Type::myStruct) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.myStruct;
   }
 
   ::cpp2::MyDataItem const& get_myDataItem() const {
     if (getType() != Type::myDataItem) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.myDataItem;
   }
 
   ::cpp2::ComplexNestedStruct const& get_complexNestedStruct() const {
     if (getType() != Type::complexNestedStruct) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.complexNestedStruct;
   }
 
   ::std::int64_t const& get_longValue() const {
     if (getType() != Type::longValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.longValue;
   }
 
   ::std::int32_t const& get_intValue() const {
     if (getType() != Type::intValue) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.intValue;
   }
@@ -6933,28 +6933,28 @@ class MyUnionFloatFieldThrowExp final  {
 
   ::cpp2::MyEnum const& get_myEnum() const {
     if (getType() != Type::myEnum) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.myEnum;
   }
 
   ::std::vector<::std::vector<float>> const& get_setFloat() const {
     if (getType() != Type::setFloat) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.setFloat;
   }
 
   ::cpp2::MyDataItem const& get_myDataItem() const {
     if (getType() != Type::myDataItem) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.myDataItem;
   }
 
   ::cpp2::ComplexNestedStruct const& get_complexNestedStruct() const {
     if (getType() != Type::complexNestedStruct) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.complexNestedStruct;
   }

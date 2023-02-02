@@ -1018,7 +1018,7 @@ class AdaptedUnion final  {
 
   ::std::int16_t const& get_best() const {
     if (getType() != Type::best) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.best;
   }
@@ -2489,7 +2489,7 @@ class BinaryUnion final  {
 
   ::py3::simple::IOBuf const& get_iobuf_val() const {
     if (getType() != Type::iobuf_val) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.iobuf_val;
   }

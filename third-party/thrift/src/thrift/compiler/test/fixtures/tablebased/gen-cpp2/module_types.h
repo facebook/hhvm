@@ -1314,14 +1314,14 @@ class ExampleUnion final  {
 
   ::test::fixtures::tablebased::ContainerStruct const& get_fieldA() const {
     if (getType() != Type::fieldA) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.fieldA;
   }
 
   ::test::fixtures::tablebased::TrivialTypesStruct const& get_fieldB() const {
     if (getType() != Type::fieldB) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.fieldB;
   }

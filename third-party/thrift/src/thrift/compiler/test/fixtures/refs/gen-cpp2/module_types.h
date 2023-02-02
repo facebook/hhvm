@@ -650,14 +650,14 @@ class MyUnion final  {
 
   ::std::unique_ptr<::std::int32_t> const& get_anInteger() const {
     if (getType() != Type::anInteger) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.anInteger;
   }
 
   ::std::unique_ptr<::std::string> const& get_aString() const {
     if (getType() != Type::aString) {
-      ::apache::thrift::detail::throw_on_bad_field_access();
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.aString;
   }

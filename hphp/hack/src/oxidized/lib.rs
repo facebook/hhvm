@@ -68,6 +68,7 @@ pub use gen::message;
 pub use gen::name_context;
 pub use gen::namespace_env;
 pub use gen::naming_error;
+pub use gen::naming_phase_error;
 pub use gen::nast;
 pub use gen::nast_check_error;
 pub use gen::parser_options;

@@ -60,6 +60,7 @@
     "loader-utils": "^2.0.3",
     "mermaid": "^9.1.2",
     "minimatch": "^3.0.5",
-    "trim": "^0.0.3"
+    "trim": "^0.0.3",
+    "mdast-util-to-hast": "Divine-Software/mdast-util-to-hast#0e709bd254f07bad424d74a1d98e727d1d7926e4"
   }
 }

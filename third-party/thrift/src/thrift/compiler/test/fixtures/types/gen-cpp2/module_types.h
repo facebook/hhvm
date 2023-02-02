@@ -6664,18 +6664,18 @@ class AllocatorAware2 final  {
   explicit AllocatorAware2(const allocator_type& alloc) noexcept :
     __fbthrift_alloc(alloc),
     __fbthrift_field_not_a_container(),
-    __fbthrift_field_box_field(std::make_shared<::std::int32_t>()) {}
+    __fbthrift_field_box_field() {}
 
   explicit AllocatorAware2(const AllocatorAware2& other, const allocator_type& alloc) :
     __fbthrift_alloc(alloc),
     __fbthrift_field_not_a_container(other.__fbthrift_field_not_a_container),
-    __fbthrift_field_box_field(std::make_shared<::std::int32_t>(*other.__fbthrift_field_box_field)),
+    __fbthrift_field_box_field(),
     __isset(other.__isset) {}
 
   explicit AllocatorAware2(AllocatorAware2&& other, const allocator_type& alloc) :
     __fbthrift_alloc(alloc),
     __fbthrift_field_not_a_container(std::move(other.__fbthrift_field_not_a_container)),
-    __fbthrift_field_box_field(std::make_shared<::std::int32_t>(std::move(*other.__fbthrift_field_box_field))),
+    __fbthrift_field_box_field(),
     __isset(other.__isset) {}
 
   AllocatorAware2& operator=(AllocatorAware2&&) noexcept;

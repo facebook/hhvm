@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
+
 namespace cpp2 apache.thrift.test
 
 cpp_include "thrift/test/CppAllocatorTest.h"
@@ -257,4 +259,6 @@ struct CountingCppRefParent {
     cpp.use_allocator,
     cpp.template = "::CountingVector",
   ) allocVector (cpp.ref_type = "shared");
+  @thrift.Box
+  7: optional CountingCppRefChild noAllocBoxedChild;
 } (cpp.allocator = "::ScopedCountingAlloc<>")

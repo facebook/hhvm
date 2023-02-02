@@ -388,7 +388,13 @@ class t_hack_generator : public t_concat_generator {
   void generate_adapter_type_checks(
       std::ofstream& out, const t_struct* tstruct);
 
-  void generate_php_type_spec(std::ofstream& out, const t_type* t);
+  void generate_php_type_spec(
+      std::ofstream& out, const t_type* t, uint32_t depth);
+  void generate_php_type_spec_shape_elt_helper(
+      std::ofstream& out,
+      const std::string& field_name,
+      const t_type* t,
+      uint32_t depth);
   void generate_php_struct_spec(std::ofstream& out, const t_struct* tstruct);
   void generate_php_struct_struct_trait(
       std::ofstream& out,
@@ -1168,6 +1174,11 @@ class t_hack_generator : public t_concat_generator {
   bool has_nested_ns;
 
   std::map<std::string, ThriftShapishStructType> struct_async_type_;
+
+  /**
+   * When to start emitting UNSAFE_CAST in $_TSPEC shape initializers.
+   */
+  uint32_t min_depth_for_unsafe_cast_ = 3;
 };
 
 void t_hack_generator::generate_json_enum(
@@ -2845,7 +2856,7 @@ void t_hack_generator::generate_xception(const t_struct* txception) {
 }
 
 void t_hack_generator::generate_php_type_spec(
-    std::ofstream& out, const t_type* t) {
+    std::ofstream& out, const t_type* t, uint32_t depth) {
   // Check the adapter before resolving typedefs.
   if (const auto* adapter = find_hack_adapter(t)) {
     indent(out) << "'adapter' => " << *adapter << "::class,\n";
@@ -2892,16 +2903,8 @@ void t_hack_generator::generate_php_type_spec(
     }
     indent(out) << "'ktype' => " << type_to_enum(ktype) << ",\n";
     indent(out) << "'vtype' => " << type_to_enum(vtype) << ",\n";
-    indent(out) << "'key' => shape(\n";
-    indent_up();
-    generate_php_type_spec(out, ktype);
-    indent_down();
-    indent(out) << "),\n";
-    indent(out) << "'val' => shape(\n";
-    indent_up();
-    generate_php_type_spec(out, vtype);
-    indent_down();
-    indent(out) << "),\n";
+    generate_php_type_spec_shape_elt_helper(out, "key", ktype, depth);
+    generate_php_type_spec_shape_elt_helper(out, "val", vtype, depth);
     if (arrays_) {
       indent(out) << "'format' => 'harray',\n";
     } else if (no_use_hack_collections_) {
@@ -2912,11 +2915,7 @@ void t_hack_generator::generate_php_type_spec(
   } else if (const auto* tlist = dynamic_cast<const t_list*>(t)) {
     const t_type* etype = tlist->get_elem_type();
     indent(out) << "'etype' => " << type_to_enum(etype) << ",\n";
-    indent(out) << "'elem' => shape(\n";
-    indent_up();
-    generate_php_type_spec(out, etype);
-    indent_down();
-    indent(out) << "),\n";
+    generate_php_type_spec_shape_elt_helper(out, "elem", etype, depth);
     if (arrays_) {
       indent(out) << "'format' => 'harray',\n";
     } else if (no_use_hack_collections_) {
@@ -2937,11 +2936,7 @@ void t_hack_generator::generate_php_type_spec(
           "using hack.Wrapper annotation with set keys is not supported yet");
     }
     indent(out) << "'etype' => " << type_to_enum(etype) << ",\n";
-    indent(out) << "'elem' => shape(\n";
-    indent_up();
-    generate_php_type_spec(out, etype);
-    indent_down();
-    indent(out) << "),\n";
+    generate_php_type_spec_shape_elt_helper(out, "elem", etype, depth);
     if (arrays_) {
       indent(out) << "'format' => 'harray',\n";
     } else if (arraysets_) {
@@ -2952,6 +2947,26 @@ void t_hack_generator::generate_php_type_spec(
   } else {
     throw std::runtime_error(
         "compiler error: no type for php struct spec field");
+  }
+}
+
+void t_hack_generator::generate_php_type_spec_shape_elt_helper(
+    std::ofstream& out,
+    const std::string& field_name,
+    const t_type* t,
+    uint32_t depth) {
+  indent(out) << "'" << field_name << "' => ";
+  if (depth >= min_depth_for_unsafe_cast_) {
+    out << "\\HH\\FIXME\\UNSAFE_CAST<mixed, \\HH_FIXME\\NON_DENOTABLE_TYPE>(";
+  }
+  out << "shape(\n";
+  indent_up();
+  generate_php_type_spec(out, t, depth + 1);
+  indent_down();
+  if (depth >= min_depth_for_unsafe_cast_) {
+    indent(out) << ")),\n";
+  } else {
+    indent(out) << "),\n";
   }
 }
 
@@ -2993,7 +3008,7 @@ void t_hack_generator::generate_php_struct_spec(
     if (field.qualifier() == t_field_qualifier::terse) {
       indent(out) << "'is_terse' => true,\n";
     }
-    generate_php_type_spec(out, &t);
+    generate_php_type_spec(out, &t, /* depth */ 0);
     indent_down();
     indent(out) << "),\n";
   }

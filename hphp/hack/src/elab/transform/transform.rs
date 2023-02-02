@@ -2850,8 +2850,8 @@ fn traverse_ty_field<Ctx: Clone, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx>,
     bottom_up: &impl Pass<Ctx = Ctx>,
 ) {
-    traverse_ty_expr(&mut elem.0, &mut ctx.clone(), top_down, bottom_up);
-    traverse_ty_expr(&mut elem.1, ctx, top_down, bottom_up)
+    transform_ty_expr(&mut elem.0, &mut ctx.clone(), top_down, bottom_up);
+    transform_ty_expr(&mut elem.1, ctx, top_down, bottom_up)
 }
 
 pub fn transform_ty_afield<Ctx: Clone, Ex, En>(

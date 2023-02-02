@@ -381,7 +381,7 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     if (t.subtypeOf(BObj)) return objcls(t);
     if (t.subtypeOf(BStr) && is_specialized_string(t)) {
       auto const str = sval_of(t);
-      auto const rcls = env.index.resolve_class(env.ctx, str);
+      auto const rcls = env.index.resolve_class(str);
       if (!rcls || !rcls->resolved()) {
         throws = TriBool::Maybe;
         return TCls;
@@ -390,7 +390,7 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     }
     if (t.subtypeOf(BLazyCls) && is_specialized_lazycls(t)) {
       auto const str = lazyclsval_of(t);
-      auto const rcls = env.index.resolve_class(env.ctx, str);
+      auto const rcls = env.index.resolve_class(str);
       if (!rcls || !rcls->resolved()) {
         throws = TriBool::Maybe;
         return TCls;

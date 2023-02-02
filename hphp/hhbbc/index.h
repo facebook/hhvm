@@ -842,29 +842,26 @@ struct Index {
     lookup_extra_methods(const php::Class*) const;
 
   /*
-   * Try to find a res::Class for a given php::Class.
+   * Find a res::Class for a given php::Class.
    *
-   * Note, the returned class may or may not be *defined* at the
-   * program point you care about (it could be non-hoistable, even
-   * though it's unique, for example).
-   *
-   * Returns a name-only resolution if there are no legal
-   * instantiations of the class, or if there is more than one.
+   * Returns std::nullopt if the given php::Class is not actually
+   * definable.
    */
-  res::Class resolve_class(const php::Class*) const;
+  Optional<res::Class> resolve_class(const php::Class*) const;
 
   /*
-   * Try to resolve which class will be the class named `name' from a
-   * given context, if we can resolve it to a single class.
+   * Resolve the given class name to a res::Class.
    *
-   * Note, the returned class may or may not be *defined* at the
-   * program point you care about (it could be non-hoistable, even
-   * though it's unique, for example).
-   *
-   * Returns std::nullopt if we can't prove the supplied name must be a
-   * object type.  (E.g. if there are type aliases.)
+   * Returns std::nullopt if no such class with that name exists, or
+   * if the class is not definable.
    */
-  Optional<res::Class> resolve_class(Context, SString name) const;
+  Optional<res::Class> resolve_class(SString name) const;
+
+  /*
+   * Resolve the given class name to a name-only res::Class. This is
+   * meant for use in tests.
+   */
+  res::Class resolve_class_name_only(SString name) const;
 
   /*
    * Find a type-alias with the given name. If a nullptr is returned,

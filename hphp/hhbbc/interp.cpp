@@ -537,8 +537,8 @@ namespace {
 bool shouldReduceToNonReifiedVerifyType(ISS& env, SArray ts) {
   if (get_ts_kind(ts) != TypeStructure::Kind::T_unresolved) return false;
   auto const clsName = get_ts_classname(ts);
-  auto const rcls = env.index.resolve_class(env.ctx, clsName);
-  if (rcls && rcls->resolved()) return !rcls->cls()->hasReifiedGenerics;
+  auto const rcls = env.index.resolve_class(clsName);
+  if (rcls) return !rcls->couldHaveReifiedGenerics();
   // Type aliases cannot have reified generics
   return env.index.lookup_type_alias(clsName) != nullptr;
 }
@@ -920,7 +920,7 @@ void clsCnsImpl(ISS& env, const Type& cls, const Type& name) {
   }
 
   auto lookup = env.index.lookup_class_constant(env.ctx, cls, name);
-  if (lookup.found == TriBool::No) {
+  if (lookup.found == TriBool::No || lookup.ty.is(BBottom)) {
     push(env, TBottom);
     unreachable(env);
     return;
@@ -968,9 +968,10 @@ void in(ISS& env, const bc::ClsCnsL& op) {
 }
 
 void in(ISS& env, const bc::ClsCnsD& op) {
-  auto const rcls = env.index.resolve_class(env.ctx, op.str2);
-  if (!rcls || !rcls->resolved()) {
-    push(env, TInitCell);
+  auto const rcls = env.index.resolve_class(op.str2);
+  if (!rcls) {
+    push(env, TBottom);
+    unreachable(env);
     return;
   }
   clsCnsImpl(env, clsExact(*rcls), sval(op.str1));
@@ -1859,7 +1860,7 @@ bool instanceOfJmpImpl(ISS& env,
   if (locId == NoLocalId || interface_supports_non_objects(inst.str1)) {
     return false;
   }
-  auto const rcls = env.index.resolve_class(env.ctx, inst.str1);
+  auto const rcls = env.index.resolve_class(inst.str1);
   if (!rcls) return false;
 
   auto const val = elem->type;
@@ -1915,7 +1916,7 @@ bool isTypeStructCJmpImpl(ISS& env,
   }
 
   auto const clsName = get_ts_classname(a->m_data.parr);
-  auto const rcls = env.index.resolve_class(env.ctx, clsName);
+  auto const rcls = env.index.resolve_class(clsName);
   if (!rcls ||
       !rcls->resolved() ||
       rcls->cls()->attrs & AttrEnum ||
@@ -2330,11 +2331,14 @@ void in(ISS& env, const bc::ClassGetC& op) {
   }
 
   if (auto const clsname = getNameFromType(t)) {
-    if (auto const rcls = env.index.resolve_class(env.ctx, clsname)) {
-      if (rcls->cls()) effect_free(env);
+    if (auto const rcls = env.index.resolve_class(clsname)) {
+      if (rcls->resolved()) effect_free(env);
       push(env, clsExact(*rcls));
       return;
     }
+    push(env, TBottom);
+    unreachable(env);
+    return;
   }
 
   push(env, TCls);
@@ -2431,7 +2435,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       }
     }
     if (tc.isObject()) {
-      if (auto const rcls = env.index.resolve_class(env.ctx, tc.clsName())) {
+      if (auto const rcls = env.index.resolve_class(tc.clsName())) {
         resolvedClsTy = subObj(*rcls);
       }
     }
@@ -2735,7 +2739,7 @@ void in(ISS& env, const bc::InstanceOfD& op) {
   auto t1 = topC(env);
   // Note: InstanceOfD can do autoload if the type might be a type
   // alias, so it's not nothrow unless we know it's an object type.
-  if (auto const rcls = env.index.resolve_class(env.ctx, op.str1)) {
+  if (auto const rcls = env.index.resolve_class(op.str1)) {
     auto result = [&] (const Type& r) {
       nothrow(env);
       if (r != TBool) constprop(env);
@@ -2754,6 +2758,12 @@ void in(ISS& env, const bc::InstanceOfD& op) {
       }
       return result(TBool);
     }
+  } else {
+    // The class doesn't exist, so we can never have an instance of
+    // it.
+    popC(env);
+    push(env, TFalse);
+    return;
   }
   popC(env);
   push(env, TBool);
@@ -2892,7 +2902,7 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
       auto clsname = get_ts_classname(ts);
-      auto const rcls = env.index.resolve_class(env.ctx, clsname);
+      auto const rcls = env.index.resolve_class(clsname);
       if (!rcls || !rcls->resolved() || (ts->exists(s_generic_types) &&
                                          (rcls->cls()->hasReifiedGenerics ||
                                          !isTSAllWildcards(ts)))) {
@@ -2908,7 +2918,7 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
       if (!has_generics && classname->isame(s_this.get())) {
         return reduce(env, bc::PopC {}, bc::IsLateBoundCls {});
       }
-      auto const rcls = env.index.resolve_class(env.ctx, classname);
+      auto const rcls = env.index.resolve_class(classname);
       // We can only reduce to instance of if we know for sure that this class
       // can be resolved since instanceof undefined class does not throw
       if (!rcls || !rcls->resolved() || rcls->cls()->attrs & AttrEnum) {
@@ -3942,7 +3952,7 @@ bool isBadContext(const FCallArgs& fca) {
 
 Context getCallContext(const ISS& env, const FCallArgs& fca) {
   if (auto const name = fca.context()) {
-    auto const rcls = env.index.resolve_class(env.ctx, name);
+    auto const rcls = env.index.resolve_class(name);
     if (rcls && rcls->cls()) {
       return Context { env.ctx.unit, env.ctx.func, rcls->cls() };
     }
@@ -4260,14 +4270,15 @@ void in(ISS& env, const bc::ResolveRClsMethodS& op) {
 }
 
 void in(ISS& env, const bc::ResolveClass& op) {
-  auto cls = env.index.resolve_class(env.ctx, op.str1);
-  if (cls && cls->resolved()) {
-    effect_free(env);
-    push(env, clsExact(*cls));
-  } else {
-    // If the class is not resolved, it might not be unique
-    push(env, TCls);
+  auto cls = env.index.resolve_class(op.str1);
+  if (!cls) {
+    push(env, TBottom);
+    unreachable(env);
+    return;
   }
+
+  if (cls->resolved()) effect_free(env);
+  push(env, clsExact(*cls));
 }
 
 void in(ISS& env, const bc::LazyClass& op) {
@@ -4382,8 +4393,21 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
 } // namespace
 
 void in(ISS& env, const bc::FCallClsMethodD& op) {
-  auto const rcls = env.index.resolve_class(env.ctx, op.str2);
-  auto const clsTy = rcls ? clsExact(*rcls) : TCls;
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    return bc::FCallClsMethodD { std::move(fca), op.str2, op.str3 };
+  };
+
+  auto const rcls = env.index.resolve_class(op.str2);
+  if (!rcls) {
+    if (op.fca.asyncEagerTarget() != NoBlockId) {
+      return reduce(env, updateBC(op.fca.withoutAsyncEagerTarget()));
+    }
+    fcallUnknownImpl(env, op.fca, TBottom);
+    unreachable(env);
+    return;
+  }
+
+  auto const clsTy = clsExact(*rcls);
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str3);
 
   if (op.fca.hasGenerics() && !rfunc.couldHaveReifiedGenerics()) {
@@ -4408,9 +4432,6 @@ void in(ISS& env, const bc::FCallClsMethodD& op) {
     }
   }
 
-  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
-    return bc::FCallClsMethodD { std::move(fca), op.str2, op.str3 };
-  };
   fcallClsMethodImpl(env, op, clsTy, op.str3, false, 0, nullptr, updateBC);
 }
 
@@ -4465,8 +4486,7 @@ bool module_check_always_passes(ISS& env, const res::Class& rcls) {
 } // namespace
 
 void in(ISS& env, const bc::FCallClsMethodM& op) {
-  auto const t = topC(env);
-  if (!t.couldBe(BObj | BCls | BStr | BLazyCls)) {
+  auto const throws = [&] {
     if (op.fca.asyncEagerTarget() != NoBlockId) {
       // Kill the async eager target if the function never returns.
       return reduce(
@@ -4482,20 +4502,25 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
     popC(env);
     fcallUnknownImpl(env, op.fca, TBottom);
     unreachable(env);
-    return;
-  }
+  };
+
+  auto const t = topC(env);
+  if (!t.couldBe(BObj | BCls | BStr | BLazyCls)) return throws();
+
   auto const clsTy = [&] {
     if (t.subtypeOf(BCls)) return t;
-    if (t.subtypeOf(BObj)) {
-      return objcls(t);
-    }
+    if (t.subtypeOf(BObj)) return objcls(t);
     if (auto const clsname = getNameFromType(t)) {
-      if (auto const rcls = env.index.resolve_class(env.ctx, clsname)) {
+      if (auto const rcls = env.index.resolve_class(clsname)) {
         return clsExact(*rcls);
+      } else {
+        return TBottom;
       }
     }
     return TCls;
   }();
+  if (clsTy.is(BBottom)) return throws();
+
   auto const methName = op.str4;
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
   auto const maybeDynamicCall = t.couldBe(TStr);
@@ -4616,10 +4641,11 @@ void in(ISS& env, const bc::FCallClsMethodS& op) {
 namespace {
 
 void newObjDImpl(ISS& env, const StringData* className, bool rflavor) {
-  auto const rcls = env.index.resolve_class(env.ctx, className);
+  auto const rcls = env.index.resolve_class(className);
   if (!rcls) {
     if (rflavor) popC(env);
-    push(env, TObj);
+    push(env, TBottom);
+    unreachable(env);
     return;
   }
   if (rflavor && !rcls->couldHaveReifiedGenerics()) {
@@ -4634,10 +4660,13 @@ void newObjDImpl(ISS& env, const StringData* className, bool rflavor) {
     return push(env, TBottom);
   }
 
-  auto const isCtx =
-    !rcls->couldBeOverriddenByRegular() &&
-    env.ctx.cls &&
-    obj == objExact(env.index.resolve_class(env.ctx.cls));
+  auto const isCtx = [&] {
+    if (!env.ctx.cls) return false;
+    if (rcls->couldBeOverriddenByRegular()) return false;
+    auto const r = env.index.resolve_class(env.ctx.cls);
+    if (!r) return false;
+    return obj == objExact(*r);
+  }();
   push(env, setctx(std::move(obj), isCtx));
 }
 
@@ -4999,8 +5028,9 @@ void in(ISS& env, const bc::OODeclExists& op) {
       if (!name.strictSubtypeOf(TStr)) return TBool;
       auto const v = tv(name);
       if (!v) return TBool;
-      auto rcls = env.index.resolve_class(env.ctx, v->m_data.pstr);
-      if (!rcls || !rcls->cls()) return TFalse;
+      auto rcls = env.index.resolve_class(v->m_data.pstr);
+      if (!rcls) return TFalse;
+      if (!rcls->cls()) return TBool;
       auto const exist = [&] () -> bool {
         switch (op.subop1) {
           case OODeclExistsOp::Class:
@@ -5539,18 +5569,23 @@ void in(ISS& env, const bc::CheckProp&) {
 void in(ISS& env, const bc::InitProp& op) {
   auto const t = topC(env);
   switch (op.subop2) {
-    case InitPropOp::Static:
+    case InitPropOp::Static: {
+      auto const rcls = env.index.resolve_class(env.ctx.cls);
+      // If class isn't instantiable, this bytecode isn't reachable
+      // anyways.
+      if (!rcls) break;
       env.index.merge_static_type(
         env.ctx,
         env.collect.publicSPropMutations,
         env.collect.props,
-        clsExact(env.index.resolve_class(env.ctx.cls)),
+        clsExact(*rcls),
         sval(op.str1),
         t,
         false,
         true
       );
       break;
+    }
     case InitPropOp::NonStatic:
       mergeThisProp(env, op.str1, t);
       break;

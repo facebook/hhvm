@@ -905,64 +905,64 @@ auto const primitives = folly::lazy([]{
 std::vector<Type> withData(const Index& index) {
   std::vector<Type> types;
 
-  auto const clsA = index.resolve_class(Context{}, s_A.get());
+  auto const clsA = index.resolve_class(s_A.get());
   if (!clsA || !clsA->resolved()) ADD_FAILURE();
-  auto const clsAA = index.resolve_class(Context{}, s_AA.get());
+  auto const clsAA = index.resolve_class(s_AA.get());
   if (!clsAA || !clsAA->resolved()) ADD_FAILURE();
-  auto const clsAB = index.resolve_class(Context{}, s_AB.get());
+  auto const clsAB = index.resolve_class(s_AB.get());
   if (!clsAB || !clsAB->resolved()) ADD_FAILURE();
 
-  auto const clsIBase = index.resolve_class(Context{}, s_IBase.get());
+  auto const clsIBase = index.resolve_class(s_IBase.get());
   if (!clsIBase || !clsIBase->resolved()) ADD_FAILURE();
-  auto const clsIA = index.resolve_class(Context{}, s_IA.get());
+  auto const clsIA = index.resolve_class(s_IA.get());
   if (!clsIA || !clsIA->resolved()) ADD_FAILURE();
-  auto const clsIAA = index.resolve_class(Context{}, s_IAA.get());
+  auto const clsIAA = index.resolve_class(s_IAA.get());
   if (!clsIAA || !clsIAA->resolved()) ADD_FAILURE();
-  auto const clsIB = index.resolve_class(Context{}, s_IB.get());
+  auto const clsIB = index.resolve_class(s_IB.get());
   if (!clsIB || !clsIB->resolved()) ADD_FAILURE();
 
-  auto const clsI_A = index.resolve_class(Context{}, s_I_A.get());
+  auto const clsI_A = index.resolve_class(s_I_A.get());
   if (!clsI_A || !clsI_A->resolved()) ADD_FAILURE();
-  auto const clsI_B = index.resolve_class(Context{}, s_I_B.get());
+  auto const clsI_B = index.resolve_class(s_I_B.get());
   if (!clsI_B || !clsI_B->resolved()) ADD_FAILURE();
-  auto const clsI_C = index.resolve_class(Context{}, s_I_C.get());
+  auto const clsI_C = index.resolve_class(s_I_C.get());
   if (!clsI_C || !clsI_C->resolved()) ADD_FAILURE();
-  auto const clsI_D = index.resolve_class(Context{}, s_I_D.get());
+  auto const clsI_D = index.resolve_class(s_I_D.get());
   if (!clsI_D || !clsI_D->resolved()) ADD_FAILURE();
-  auto const clsI_E = index.resolve_class(Context{}, s_I_E.get());
+  auto const clsI_E = index.resolve_class(s_I_E.get());
   if (!clsI_E || !clsI_E->resolved()) ADD_FAILURE();
-  auto const clsI_F = index.resolve_class(Context{}, s_I_F.get());
+  auto const clsI_F = index.resolve_class(s_I_F.get());
   if (!clsI_F || !clsI_F->resolved()) ADD_FAILURE();
-  auto const clsI_G = index.resolve_class(Context{}, s_I_G.get());
+  auto const clsI_G = index.resolve_class(s_I_G.get());
   if (!clsI_G || !clsI_G->resolved()) ADD_FAILURE();
-  auto const clsI_H = index.resolve_class(Context{}, s_I_H.get());
+  auto const clsI_H = index.resolve_class(s_I_H.get());
   if (!clsI_H || !clsI_H->resolved()) ADD_FAILURE();
-  auto const clsI_I = index.resolve_class(Context{}, s_I_I.get());
+  auto const clsI_I = index.resolve_class(s_I_I.get());
   if (!clsI_I || !clsI_I->resolved()) ADD_FAILURE();
-  auto const clsI_J = index.resolve_class(Context{}, s_I_J.get());
+  auto const clsI_J = index.resolve_class(s_I_J.get());
   if (!clsI_J || !clsI_J->resolved()) ADD_FAILURE();
-  auto const clsI_K = index.resolve_class(Context{}, s_I_K.get());
+  auto const clsI_K = index.resolve_class(s_I_K.get());
   if (!clsI_K || !clsI_K->resolved()) ADD_FAILURE();
 
-  auto const clsX1 = index.resolve_class(Context{}, s_X1.get());
+  auto const clsX1 = index.resolve_class(s_X1.get());
   if (!clsX1 || !clsX1->resolved()) ADD_FAILURE();
-  auto const clsX2 = index.resolve_class(Context{}, s_X2.get());
+  auto const clsX2 = index.resolve_class(s_X2.get());
   if (!clsX2 || !clsX2->resolved()) ADD_FAILURE();
-  auto const clsX3 = index.resolve_class(Context{}, s_X3.get());
+  auto const clsX3 = index.resolve_class(s_X3.get());
   if (!clsX3 || !clsX3->resolved()) ADD_FAILURE();
-  auto const clsX4 = index.resolve_class(Context{}, s_X4.get());
+  auto const clsX4 = index.resolve_class(s_X4.get());
   if (!clsX4 || !clsX4->resolved()) ADD_FAILURE();
-  auto const clsX7 = index.resolve_class(Context{}, s_X7.get());
+  auto const clsX7 = index.resolve_class(s_X7.get());
   if (!clsX7 || !clsX7->resolved()) ADD_FAILURE();
-  auto const clsX11 = index.resolve_class(Context{}, s_X11.get());
+  auto const clsX11 = index.resolve_class(s_X11.get());
   if (!clsX11 || !clsX11->resolved()) ADD_FAILURE();
-  auto const clsX21 = index.resolve_class(Context{}, s_X21.get());
+  auto const clsX21 = index.resolve_class(s_X21.get());
   if (!clsX21 || !clsX21->resolved()) ADD_FAILURE();
 
-  auto const clsFoo1 = index.resolve_class(Context{}, s_Foo1.get());
-  if (!clsFoo1 || clsFoo1->resolved()) ADD_FAILURE();
-  auto const clsFoo2 = index.resolve_class(Context{}, s_Foo2.get());
-  if (!clsFoo2 || clsFoo2->resolved()) ADD_FAILURE();
+  auto const clsFoo1 = index.resolve_class_name_only(s_Foo1.get());
+  if (clsFoo1.resolved()) ADD_FAILURE();
+  auto const clsFoo2 = index.resolve_class_name_only(s_Foo2.get());
+  if (clsFoo2.resolved()) ADD_FAILURE();
 
   auto const svec1 = static_vec(s_A.get(), s_B.get());
   auto const svec2 = static_vec(123, 456);
@@ -1067,10 +1067,10 @@ std::vector<Type> withData(const Index& index) {
       types.emplace_back(make_specialized_sub_object(b, *clsX11));
       types.emplace_back(make_specialized_sub_object(b, *clsX21));
 
-      types.emplace_back(make_specialized_exact_object(b, *clsFoo1));
-      types.emplace_back(make_specialized_sub_object(b, *clsFoo1));
-      types.emplace_back(make_specialized_exact_object(b, *clsFoo2));
-      types.emplace_back(make_specialized_sub_object(b, *clsFoo2));
+      types.emplace_back(make_specialized_exact_object(b, clsFoo1));
+      types.emplace_back(make_specialized_sub_object(b, clsFoo1));
+      types.emplace_back(make_specialized_exact_object(b, clsFoo2));
+      types.emplace_back(make_specialized_sub_object(b, clsFoo2));
     }
     if (couldBe(b, BCls) && subtypeOf(b, BCls | nonSupport)) {
       types.emplace_back(make_specialized_exact_class(b, *clsA));
@@ -1497,25 +1497,25 @@ std::vector<Type> specializedClasses(const Index& index) {
 
 #define X(name)                                                         \
   {                                                                     \
-    auto const cls = index.resolve_class(Context{}, s_##name.get());    \
+    auto const cls = index.resolve_class(s_##name.get());               \
     if (!cls || !cls->resolved()) ADD_FAILURE();                        \
     addExactSub(*cls);                                                  \
   }
 #define Y(name)                                                         \
   {                                                                     \
-    auto const cls = index.resolve_class(Context{}, s_##name.get());    \
-    if (!cls || cls->resolved()) ADD_FAILURE();                         \
-    addExactSub(*cls);                                                  \
+    auto const cls = index.resolve_class_name_only(s_##name.get());     \
+    if (cls.resolved()) ADD_FAILURE();                                  \
+    addExactSub(cls);                                                   \
   }
   TEST_CLASSES
 #undef Y
 #undef X
 
-  auto const childClo1 = index.resolve_class(Context{}, s_ChildClosure1.get());
+  auto const childClo1 = index.resolve_class(s_ChildClosure1.get());
   if (!childClo1 || !childClo1->resolved()) ADD_FAILURE();
-  auto const childClo2 = index.resolve_class(Context{}, s_ChildClosure2.get());
+  auto const childClo2 = index.resolve_class(s_ChildClosure2.get());
   if (!childClo2 || !childClo2->resolved()) ADD_FAILURE();
-  auto const childClo3 = index.resolve_class(Context{}, s_ChildClosure3.get());
+  auto const childClo3 = index.resolve_class(s_ChildClosure3.get());
   if (!childClo3 || !childClo3->resolved()) ADD_FAILURE();
 
   addExactSub(*childClo1);
@@ -1525,10 +1525,10 @@ std::vector<Type> specializedClasses(const Index& index) {
   auto const awaitable = index.wait_handle_class();
   addExactSub(awaitable);
 
-  auto const clsX2 = index.resolve_class(Context{}, s_X2.get());
-  auto const clsX6 = index.resolve_class(Context{}, s_X6.get());
-  auto const clsX18 = index.resolve_class(Context{}, s_X18.get());
-  auto const clsY3 = index.resolve_class(Context{}, s_Y3.get());
+  auto const clsX2 = index.resolve_class(s_X2.get());
+  auto const clsX6 = index.resolve_class(s_X6.get());
+  auto const clsX18 = index.resolve_class(s_X18.get());
+  auto const clsY3 = index.resolve_class(s_Y3.get());
 
   types.emplace(make_specialized_wait_handle(BObj, TInt, index));
   types.emplace(make_specialized_wait_handle(BObj, TStr, index));
@@ -1932,14 +1932,14 @@ TEST(Type, SpecializedClasses) {
 TEST(Type, Closure) {
   auto index = make_index();
 
-  auto const closureCls = index.resolve_class(Context{}, s_Closure.get());
+  auto const closureCls = index.resolve_class(s_Closure.get());
   if (!closureCls || closureCls->resolved()) ADD_FAILURE();
 
-  auto const childCls1 = index.resolve_class(Context{}, s_ChildClosure1.get());
+  auto const childCls1 = index.resolve_class(s_ChildClosure1.get());
   if (!childCls1 || !childCls1->resolved()) ADD_FAILURE();
-  auto const childCls2 = index.resolve_class(Context{}, s_ChildClosure2.get());
+  auto const childCls2 = index.resolve_class(s_ChildClosure2.get());
   if (!childCls2 || !childCls2->resolved()) ADD_FAILURE();
-  auto const childCls3 = index.resolve_class(Context{}, s_ChildClosure3.get());
+  auto const childCls3 = index.resolve_class(s_ChildClosure3.get());
   if (!childCls3 || !childCls3->resolved()) ADD_FAILURE();
 
   auto const closure = subObj(*closureCls);
@@ -2349,7 +2349,7 @@ TEST(Type, Split) {
   EXPECT_EQ(split.first, make_specialized_arrmapn(BDictN, TStr, TObj));
   EXPECT_EQ(split.second, TFalse);
 
-  auto const clsA = index.resolve_class(Context{}, s_A.get());
+  auto const clsA = index.resolve_class(s_A.get());
   if (!clsA || !clsA->resolved()) ADD_FAILURE();
 
   split = split_obj(Type{BObj|BInt});
@@ -2528,7 +2528,7 @@ TEST(Type, Remove) {
   EXPECT_EQ(remove_lazycls(lazyclsval(s_A)), TBottom);
   EXPECT_EQ(remove_lazycls(union_of(TInt,lazyclsval(s_A))), TInt);
 
-  auto const clsA = index.resolve_class(Context{}, s_A.get());
+  auto const clsA = index.resolve_class(s_A.get());
   if (!clsA || !clsA->resolved()) ADD_FAILURE();
 
   EXPECT_EQ(remove_cls(TInt), TInt);
@@ -2758,39 +2758,39 @@ TEST(Type, ObjToCls) {
     EXPECT_EQ(obj, obj2);
   }
 
-  auto const clsA = index.resolve_class(Context{}, s_A.get());
+  auto const clsA = index.resolve_class(s_A.get());
   if (!clsA || !clsA->resolved()) ADD_FAILURE();
-  auto const clsICanon1 = index.resolve_class(Context{}, s_ICanon1.get());
+  auto const clsICanon1 = index.resolve_class(s_ICanon1.get());
   if (!clsICanon1 || !clsICanon1->resolved()) ADD_FAILURE();
-  auto const clsICanon5 = index.resolve_class(Context{}, s_ICanon5.get());
+  auto const clsICanon5 = index.resolve_class(s_ICanon5.get());
   if (!clsICanon5 || !clsICanon5->resolved()) ADD_FAILURE();
-  auto const clsCanon3 = index.resolve_class(Context{}, s_Canon3.get());
+  auto const clsCanon3 = index.resolve_class(s_Canon3.get());
   if (!clsCanon3 || !clsCanon3->resolved()) ADD_FAILURE();
-  auto const clsT1 = index.resolve_class(Context{}, s_T1.get());
+  auto const clsT1 = index.resolve_class(s_T1.get());
   if (!clsT1 || !clsT1->resolved()) ADD_FAILURE();
-  auto const clsT4_C1 = index.resolve_class(Context{}, s_T4_C1.get());
+  auto const clsT4_C1 = index.resolve_class(s_T4_C1.get());
   if (!clsT4_C1 || !clsT4_C1->resolved()) ADD_FAILURE();
-  auto const clsICanon8 = index.resolve_class(Context{}, s_ICanon8.get());
+  auto const clsICanon8 = index.resolve_class(s_ICanon8.get());
   if (!clsICanon8 || !clsICanon8->resolved()) ADD_FAILURE();
-  auto const clsAbs4 = index.resolve_class(Context{}, s_Abs4.get());
+  auto const clsAbs4 = index.resolve_class(s_Abs4.get());
   if (!clsAbs4 || !clsAbs4->resolved()) ADD_FAILURE();
-  auto const clsAbs5_P = index.resolve_class(Context{}, s_Abs5_P.get());
+  auto const clsAbs5_P = index.resolve_class(s_Abs5_P.get());
   if (!clsAbs5_P || !clsAbs5_P->resolved()) ADD_FAILURE();
-  auto const clsAbs6_P = index.resolve_class(Context{}, s_Abs6_P.get());
+  auto const clsAbs6_P = index.resolve_class(s_Abs6_P.get());
   if (!clsAbs6_P || !clsAbs6_P->resolved()) ADD_FAILURE();
-  auto const clsICanon11 = index.resolve_class(Context{}, s_ICanon11.get());
+  auto const clsICanon11 = index.resolve_class(s_ICanon11.get());
   if (!clsICanon11 || !clsICanon11->resolved()) ADD_FAILURE();
-  auto const clsICanon12 = index.resolve_class(Context{}, s_ICanon12.get());
+  auto const clsICanon12 = index.resolve_class(s_ICanon12.get());
   if (!clsICanon12 || !clsICanon12->resolved()) ADD_FAILURE();
-  auto const clsICanon13 = index.resolve_class(Context{}, s_ICanon13.get());
+  auto const clsICanon13 = index.resolve_class(s_ICanon13.get());
   if (!clsICanon13 || !clsICanon13->resolved()) ADD_FAILURE();
-  auto const clsCanon10 = index.resolve_class(Context{}, s_Canon10.get());
+  auto const clsCanon10 = index.resolve_class(s_Canon10.get());
   if (!clsCanon10 || !clsCanon10->resolved()) ADD_FAILURE();
 
-  auto const clsFoo1 = index.resolve_class(Context{}, s_Foo1.get());
-  if (!clsFoo1 || clsFoo1->resolved()) ADD_FAILURE();
-  auto const clsFoo2 = index.resolve_class(Context{}, s_Foo2.get());
-  if (!clsFoo2 || clsFoo2->resolved()) ADD_FAILURE();
+  auto const clsFoo1 = index.resolve_class_name_only(s_Foo1.get());
+  if (clsFoo1.resolved()) ADD_FAILURE();
+  auto const clsFoo2 = index.resolve_class_name_only(s_Foo2.get());
+  if (clsFoo2.resolved()) ADD_FAILURE();
 
   auto const awaitable = index.wait_handle_class();
 
@@ -2853,20 +2853,20 @@ TEST(Type, ObjToCls) {
     make_specialized_sub_object(BObj, *clsAbs6_P, false, false)
   );
   EXPECT_EQ(
-    toobj(make_specialized_sub_class(BCls, *clsFoo1, false, false)),
-    make_specialized_sub_object(BObj, *clsFoo1, false, false)
+    toobj(make_specialized_sub_class(BCls, clsFoo1, false, false)),
+    make_specialized_sub_object(BObj, clsFoo1, false, false)
   );
 
   EXPECT_EQ(
     toobj(
       intersection_of(
-        make_specialized_sub_class(BCls, *clsFoo1, false, false),
-        make_specialized_sub_class(BCls, *clsFoo2, false, false)
+        make_specialized_sub_class(BCls, clsFoo1, false, false),
+        make_specialized_sub_class(BCls, clsFoo2, false, false)
       )
     ),
     intersection_of(
-      make_specialized_sub_object(BObj, *clsFoo1, false, false),
-      make_specialized_sub_object(BObj, *clsFoo2, false, false)
+      make_specialized_sub_object(BObj, clsFoo1, false, false),
+      make_specialized_sub_object(BObj, clsFoo2, false, false)
     )
   );
 
@@ -4441,21 +4441,10 @@ TEST(Type, SpecificExamples) {
 
 TEST(Type, IndexBased) {
   auto idx = make_index();
-  auto const& program = idx.program();
-  auto const unit = program.units.back().get();
-  auto const func = [&]() -> php::Func* {
-    for (auto& f : program.funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
 
-  auto const ctx = Context { unit, func };
-
-  auto const cls = idx.resolve_class(ctx, s_TestClass.get());
+  auto const cls = idx.resolve_class(s_TestClass.get());
   if (!cls) ADD_FAILURE();
-  auto const clsBase = idx.resolve_class(ctx, s_Base.get());
+  auto const clsBase = idx.resolve_class(s_Base.get());
   if (!clsBase) ADD_FAILURE();
 
   auto const objExactTy = objExact(*cls);
@@ -4556,36 +4545,25 @@ TEST(Type, IndexBased) {
 
 TEST(Type, Hierarchies) {
   auto idx = make_index();
-  auto const& program = idx.program();
-  auto const unit = program.units.back().get();
-  auto const func = [&]() -> php::Func* {
-    for (auto& f : program.funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
-
-  auto const ctx = Context { unit, func };
 
   // load classes in hierarchy
-  auto const clsBase = idx.resolve_class(ctx, s_Base.get());
+  auto const clsBase = idx.resolve_class(s_Base.get());
   if (!clsBase) ADD_FAILURE();
-  auto const clsA = idx.resolve_class(ctx, s_A.get());
+  auto const clsA = idx.resolve_class(s_A.get());
   if (!clsA) ADD_FAILURE();
-  auto const clsB = idx.resolve_class(ctx, s_B.get());
+  auto const clsB = idx.resolve_class(s_B.get());
   if (!clsB) ADD_FAILURE();
-  auto const clsAA = idx.resolve_class(ctx, s_AA.get());
+  auto const clsAA = idx.resolve_class(s_AA.get());
   if (!clsAA) ADD_FAILURE();
-  auto const clsAB = idx.resolve_class(ctx, s_AB.get());
+  auto const clsAB = idx.resolve_class(s_AB.get());
   if (!clsAB) ADD_FAILURE();
-  auto const clsBA = idx.resolve_class(ctx, s_BA.get());
+  auto const clsBA = idx.resolve_class(s_BA.get());
   if (!clsBA) ADD_FAILURE();
-  auto const clsBB = idx.resolve_class(ctx, s_BB.get());
+  auto const clsBB = idx.resolve_class(s_BB.get());
   if (!clsBB) ADD_FAILURE();
-  auto const clsBAA = idx.resolve_class(ctx, s_BAA.get());
+  auto const clsBAA = idx.resolve_class(s_BAA.get());
   if (!clsBAA) ADD_FAILURE();
-  auto const clsTestClass = idx.resolve_class(ctx, s_TestClass.get());
+  auto const clsTestClass = idx.resolve_class(s_TestClass.get());
   if (!clsTestClass) ADD_FAILURE();
 
   // make *exact type* and *sub type* types and objects for all loaded classes
@@ -4879,28 +4857,17 @@ TEST(Type, Hierarchies) {
 
 TEST(Type, Interface) {
   auto idx = make_index();
-  auto const& program = idx.program();
-  auto const unit = program.units.back().get();
-  auto const func = [&]() -> php::Func* {
-    for (auto& f : program.funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
-
-  auto const ctx = Context { unit, func };
 
   // load classes in hierarchy
-  auto const clsIA = idx.resolve_class(ctx, s_IA.get());
+  auto const clsIA = idx.resolve_class(s_IA.get());
   if (!clsIA) ADD_FAILURE();
-  auto const clsIB = idx.resolve_class(ctx, s_IB.get());
+  auto const clsIB = idx.resolve_class(s_IB.get());
   if (!clsIB) ADD_FAILURE();
-  auto const clsIAA = idx.resolve_class(ctx, s_IAA.get());
+  auto const clsIAA = idx.resolve_class(s_IAA.get());
   if (!clsIAA) ADD_FAILURE();
-  auto const clsA = idx.resolve_class(ctx, s_A.get());
+  auto const clsA = idx.resolve_class(s_A.get());
   if (!clsA) ADD_FAILURE();
-  auto const clsAA = idx.resolve_class(ctx, s_AA.get());
+  auto const clsAA = idx.resolve_class(s_AA.get());
   if (!clsAA) ADD_FAILURE();
 
   // make sometypes and objects
@@ -4944,67 +4911,56 @@ TEST(Type, Interface) {
 
 TEST(Type, Canonicalization) {
   auto idx = make_index();
-  auto const& program = idx.program();
-  auto const unit = program.units.back().get();
-  auto const func = [&]() -> php::Func* {
-    for (auto& f : program.funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
 
-  auto const ctx = Context { unit, func };
-
-  auto const clsICanon1 = idx.resolve_class(ctx, s_ICanon1.get());
+  auto const clsICanon1 = idx.resolve_class(s_ICanon1.get());
   if (!clsICanon1) ADD_FAILURE();
-  auto const clsICanon2 = idx.resolve_class(ctx, s_ICanon2.get());
+  auto const clsICanon2 = idx.resolve_class(s_ICanon2.get());
   if (!clsICanon2) ADD_FAILURE();
-  auto const clsICanon3 = idx.resolve_class(ctx, s_ICanon3.get());
+  auto const clsICanon3 = idx.resolve_class(s_ICanon3.get());
   if (!clsICanon3) ADD_FAILURE();
-  auto const clsICanon4 = idx.resolve_class(ctx, s_ICanon4.get());
+  auto const clsICanon4 = idx.resolve_class(s_ICanon4.get());
   if (!clsICanon4) ADD_FAILURE();
-  auto const clsICanon5 = idx.resolve_class(ctx, s_ICanon5.get());
+  auto const clsICanon5 = idx.resolve_class(s_ICanon5.get());
   if (!clsICanon5) ADD_FAILURE();
-  auto const clsICanon6 = idx.resolve_class(ctx, s_ICanon6.get());
+  auto const clsICanon6 = idx.resolve_class(s_ICanon6.get());
   if (!clsICanon6) ADD_FAILURE();
-  auto const clsCanon3 = idx.resolve_class(ctx, s_Canon3.get());
+  auto const clsCanon3 = idx.resolve_class(s_Canon3.get());
   if (!clsCanon3) ADD_FAILURE();
-  auto const clsT1 = idx.resolve_class(ctx, s_T1.get());
+  auto const clsT1 = idx.resolve_class(s_T1.get());
   if (!clsT1) ADD_FAILURE();
-  auto const clsICanon7 = idx.resolve_class(ctx, s_ICanon7.get());
+  auto const clsICanon7 = idx.resolve_class(s_ICanon7.get());
   if (!clsICanon7) ADD_FAILURE();
-  auto const clsAbs1 = idx.resolve_class(ctx, s_Abs1.get());
+  auto const clsAbs1 = idx.resolve_class(s_Abs1.get());
   if (!clsAbs1) ADD_FAILURE();
-  auto const clsICanon8 = idx.resolve_class(ctx, s_ICanon8.get());
+  auto const clsICanon8 = idx.resolve_class(s_ICanon8.get());
   if (!clsICanon8) ADD_FAILURE();
-  auto const clsT4_C1 = idx.resolve_class(ctx, s_T4_C1.get());
+  auto const clsT4_C1 = idx.resolve_class(s_T4_C1.get());
   if (!clsT4_C1) ADD_FAILURE();
-  auto const clsAbs3 = idx.resolve_class(ctx, s_Abs3.get());
+  auto const clsAbs3 = idx.resolve_class(s_Abs3.get());
   if (!clsAbs3) ADD_FAILURE();
-  auto const clsAbs3_C1 = idx.resolve_class(ctx, s_Abs3_C1.get());
+  auto const clsAbs3_C1 = idx.resolve_class(s_Abs3_C1.get());
   if (!clsAbs3_C1) ADD_FAILURE();
-  auto const clsAbs4 = idx.resolve_class(ctx, s_Abs4.get());
+  auto const clsAbs4 = idx.resolve_class(s_Abs4.get());
   if (!clsAbs4) ADD_FAILURE();
-  auto const clsAbs5_P = idx.resolve_class(ctx, s_Abs5_P.get());
+  auto const clsAbs5_P = idx.resolve_class(s_Abs5_P.get());
   if (!clsAbs5_P) ADD_FAILURE();
-  auto const clsAbs6_P = idx.resolve_class(ctx, s_Abs6_P.get());
+  auto const clsAbs6_P = idx.resolve_class(s_Abs6_P.get());
   if (!clsAbs6_P) ADD_FAILURE();
-  auto const clsICanon9 = idx.resolve_class(ctx, s_ICanon9.get());
+  auto const clsICanon9 = idx.resolve_class(s_ICanon9.get());
   if (!clsICanon9) ADD_FAILURE();
-  auto const clsICanon10 = idx.resolve_class(ctx, s_ICanon10.get());
+  auto const clsICanon10 = idx.resolve_class(s_ICanon10.get());
   if (!clsICanon10) ADD_FAILURE();
-  auto const clsCanon4 = idx.resolve_class(ctx, s_Canon4.get());
+  auto const clsCanon4 = idx.resolve_class(s_Canon4.get());
   if (!clsCanon4) ADD_FAILURE();
-  auto const clsZ1 = idx.resolve_class(ctx, s_Z1.get());
+  auto const clsZ1 = idx.resolve_class(s_Z1.get());
   if (!clsZ1) ADD_FAILURE();
-  auto const clsIZ1 = idx.resolve_class(ctx, s_I_Z1.get());
+  auto const clsIZ1 = idx.resolve_class(s_I_Z1.get());
   if (!clsIZ1) ADD_FAILURE();
-  auto const clsCanon14 = idx.resolve_class(ctx, s_Canon14.get());
+  auto const clsCanon14 = idx.resolve_class(s_Canon14.get());
   if (!clsCanon14) ADD_FAILURE();
 
-  auto const clsFoo1 = idx.resolve_class(ctx, s_Foo1.get());
-  if (!clsFoo1 || clsFoo1->resolved()) ADD_FAILURE();
+  auto const clsFoo1 = idx.resolve_class_name_only(s_Foo1.get());
+  if (clsFoo1.resolved()) ADD_FAILURE();
 
   EXPECT_EQ(subObj(*clsICanon1), TBottom);
   EXPECT_EQ(objExact(*clsICanon1), TBottom);
@@ -5048,12 +5004,12 @@ TEST(Type, Canonicalization) {
   EXPECT_EQ(subCls(*clsICanon6, false), make_specialized_exact_class(BCls, *clsCanon3, false, false, false));
   EXPECT_EQ(clsExact(*clsICanon6, false), TBottom);
 
-  EXPECT_EQ(subObj(*clsFoo1), make_specialized_sub_object(BObj, *clsFoo1, false, false));
-  EXPECT_EQ(objExact(*clsFoo1), make_specialized_sub_object(BObj, *clsFoo1, false, false));
-  EXPECT_EQ(subCls(*clsFoo1), make_specialized_sub_class(BCls, *clsFoo1, false, false));
-  EXPECT_EQ(clsExact(*clsFoo1), make_specialized_sub_class(BCls, *clsFoo1, false, false));
-  EXPECT_EQ(subCls(*clsFoo1, false), make_specialized_sub_class(BCls, *clsFoo1, false, false, false));
-  EXPECT_EQ(clsExact(*clsFoo1, false), make_specialized_sub_class(BCls, *clsFoo1, false, false, false));
+  EXPECT_EQ(subObj(clsFoo1), make_specialized_sub_object(BObj, clsFoo1, false, false));
+  EXPECT_EQ(objExact(clsFoo1), make_specialized_sub_object(BObj, clsFoo1, false, false));
+  EXPECT_EQ(subCls(clsFoo1), make_specialized_sub_class(BCls, clsFoo1, false, false));
+  EXPECT_EQ(clsExact(clsFoo1), make_specialized_sub_class(BCls, clsFoo1, false, false));
+  EXPECT_EQ(subCls(clsFoo1, false), make_specialized_sub_class(BCls, clsFoo1, false, false, false));
+  EXPECT_EQ(clsExact(clsFoo1, false), make_specialized_sub_class(BCls, clsFoo1, false, false, false));
 
   EXPECT_EQ(subObj(*clsT1), TBottom);
   EXPECT_EQ(objExact(*clsT1), TBottom);
@@ -6293,7 +6249,7 @@ TEST(Type, AssertEmptiness) {
 TEST(Type, LoosenEmptiness) {
   auto index = make_index();
 
-  auto const clsA = index.resolve_class(Context{}, s_A.get());
+  auto const clsA = index.resolve_class(s_A.get());
 
   auto const& all = allCases(index);
 
@@ -6356,17 +6312,6 @@ TEST(Type, LoosenEmptiness) {
 
 TEST(Type, LoosenValues) {
   auto index = make_index();
-  auto const& program = index.program();
-  auto const unit = program.units.back().get();
-    auto const func = [&]() -> php::Func* {
-    for (auto& f : program.funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
-
-  auto const ctx = Context { unit, func };
 
   auto const& all = allCases(index);
 
@@ -6418,7 +6363,7 @@ TEST(Type, LoosenValues) {
     EXPECT_EQ(loosen_mark_for_testing(loosen_values(opt(p.first))), opt(p.second));
   }
 
-  auto const cls = index.resolve_class(ctx, s_TestClass.get());
+  auto const cls = index.resolve_class(s_TestClass.get());
   EXPECT_TRUE(!!cls);
 
   EXPECT_TRUE(loosen_values(objExact(*cls)) == objExact(*cls));
@@ -6963,27 +6908,16 @@ TEST(Type, ContextDependent) {
   // This only covers basic cases involving objects.  More testing should
   // be added for non object types, and nested types.
   auto idx = make_index();
-  auto const& program = idx.program();
-  auto const unit = program.units.back().get();
-  auto const func = [&]() -> php::Func* {
-    for (auto& f : program.funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
-
-  auto const ctx = Context { unit, func };
 
   // load classes in hierarchy  Base -> B -> BB
-  auto const clsBase = idx.resolve_class(ctx, s_Base.get());
+  auto const clsBase = idx.resolve_class(s_Base.get());
   if (!clsBase) ADD_FAILURE();
-  auto const clsB = idx.resolve_class(ctx, s_B.get());
+  auto const clsB = idx.resolve_class(s_B.get());
   if (!clsB) ADD_FAILURE();
-  auto const clsBB = idx.resolve_class(ctx, s_BB.get());
+  auto const clsBB = idx.resolve_class(s_BB.get());
   if (!clsBB) ADD_FAILURE();
   // Unrelated class.
-  auto const clsUn = idx.resolve_class(ctx, s_TestClass.get());
+  auto const clsUn = idx.resolve_class(s_TestClass.get());
   if (!clsUn) ADD_FAILURE();
 
   auto const objExactBaseTy     = objExact(*clsBase);

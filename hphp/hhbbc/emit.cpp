@@ -1184,7 +1184,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       }();
     }
 
-    if (!everModified && (attrs & AttrStatic)) {
+    if (!everModified && (attrs & AttrStatic) && !propTy.is(BBottom)) {
       attrs |= AttrPersistent;
     }
 

@@ -4058,7 +4058,7 @@ Optional<Type> type_of_type_structure(const Index& index,
             auto const matched = folly::split("::", key->data(), cls, cns);
             always_assert(matched);
 
-            auto const rcls = index.resolve_class(ctx, makeStaticString(cls));
+            auto const rcls = index.resolve_class(makeStaticString(cls));
             if (!rcls) return std::nullopt;
 
             auto const lookup = index.lookup_class_constant(

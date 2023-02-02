@@ -363,12 +363,12 @@ struct Cache {
 Type name_to_cls_type(ResolveCtx& ctx, SString name) {
   auto const resolveCls = [&] (const php::Class* cls) {
     auto const rcls = ctx.index->resolve_class(cls);
-    if (!rcls.resolved()) return TBottom;
-    return clsExact(rcls);
+    if (!rcls) return TBottom;
+    return clsExact(*rcls);
   };
   auto const resolveStr = [&] (const StringData* str) {
-    auto const rcls = ctx.index->resolve_class(Context{}, str);
-    if (!rcls || !rcls->resolved()) return TBottom;
+    auto const rcls = ctx.index->resolve_class(str);
+    if (!rcls) return TBottom;
     return clsExact(*rcls);
   };
 
@@ -376,8 +376,8 @@ Type name_to_cls_type(ResolveCtx& ctx, SString name) {
     if (name->isame(s_hh_this.get())) {
       if (ctx.thisCls) return resolveCls(ctx.thisCls);
       auto const rcls = ctx.index->resolve_class(ctx.selfCls);
-      if (!rcls.resolved()) return TBottom;
-      return subCls(rcls);
+      if (!rcls) return TBottom;
+      return subCls(*rcls);
     }
 
     if (name->isame(s_self.get())) return resolveCls(ctx.selfCls);
@@ -614,8 +614,8 @@ Resolution resolve_type_access_list(ResolveCtx& ctx,
         return Resolution{ TDictN, true };
       }
 
-      auto const rcls = ctx.index->resolve_class(Context{}, val(*clsName).pstr);
-      if (!rcls || !rcls->resolved()) return Resolution{ TBottom, true };
+      auto const rcls = ctx.index->resolve_class(val(*clsName).pstr);
+      if (!rcls) return Resolution{ TBottom, true };
 
       auto next =
         resolve_type_access_list(ctx, clsExact(*rcls), accessList, idx+1);
@@ -684,10 +684,11 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       }
 
       auto const rcls = ctx.index->resolve_class(ctx.selfCls);
-      if (!rcls.resolved()) return Resolution{ TBottom, true };
+      if (!rcls) return Resolution{ TBottom, true };
+      if (!rcls->resolved()) return Resolution{ TDictN, true };
 
       Optional<Resolution> resolution;
-      rcls.forEachSubclass(
+      rcls->forEachSubclass(
         [&] (const php::Class* sub) {
           if (!resolution) {
             resolution.emplace(resolvedCls(sub, true));
@@ -704,17 +705,17 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
 
     if (clsName->isame(s_parent.get())) {
       if (!ctx.selfCls->parentName) return Resolution { TBottom, true };
-      auto const rcls = ctx.index->resolve_class(
-        Context{},
-        ctx.selfCls->parentName
-      );
-      if (!rcls || !rcls->resolved()) return Resolution { TBottom, true };
+      auto const rcls = ctx.index->resolve_class(ctx.selfCls->parentName);
+      if (!rcls) return Resolution { TBottom, true };
+      if (!rcls->resolved()) return Resolution{ TDictN, true };
       return resolvedCls(rcls->cls(), false);
     }
   }
 
-  auto const rcls = ctx.index->resolve_class(Context{}, clsName);
-  if (rcls && rcls->resolved()) return resolvedCls(rcls->cls(), false);
+  if (auto const rcls = ctx.index->resolve_class(clsName)) {
+    if (rcls->resolved()) return resolvedCls(rcls->cls(), false);
+    return Resolution{ TDictN, true };
+  }
 
   auto const typeAlias = ctx.index->lookup_type_alias(clsName);
   if (!typeAlias) return Resolution { TBottom, true };

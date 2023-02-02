@@ -6030,6 +6030,7 @@ private:
 
   static bool enforce_sealing(const ClassInfo2& cinfo,
                               const php::Class& parent) {
+    if (cinfo.isMockClass) return true;
     if (!(parent.attrs & AttrSealed)) return true;
     auto const it = parent.userAttributes.find(s___Sealed.get());
     assertx(it != parent.userAttributes.end());
@@ -11655,8 +11656,8 @@ void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
 
   auto currentCls = [&]() -> const ClassInfo* {
     auto const rcls = resolve_class(&cls);
-    if (rcls.val.left()) return nullptr;
-    return rcls.val.right();
+    if (!rcls || rcls->val.left()) return nullptr;
+    return rcls->val.right();
   }();
   // If there's one more than one resolution for the class, be conservative and
   // we'll treat everything as possibly redeclaring.
@@ -12135,70 +12136,36 @@ Index::lookup_extra_methods(const php::Class* cls) const {
 
 //////////////////////////////////////////////////////////////////////
 
-res::Class Index::resolve_class(const php::Class* cls) const {
+Optional<res::Class> Index::resolve_class(const php::Class* cls) const {
   auto const it = m_data->classInfo.find(cls->name);
-  if (it != end(m_data->classInfo)) {
-    auto const cinfo = it->second;
-    // Force Closure to be unresolved
-    if (is_closure_base(*cinfo->cls)) {
-      return res::Class { cls->name.get() };
-    }
-    if (cinfo->cls == cls) {
-      return res::Class { cinfo };
-    }
-  }
+  if (it == end(m_data->classInfo)) return std::nullopt;
+  auto const cinfo = it->second;
 
-  // We know its a class, not an enum or type alias, so return
-  // by name
-  return res::Class { cls->name.get() };
+  assertx(cinfo->cls == cls);
+  if (is_closure_base(*cinfo->cls)) {
+    // Force Closure to be unresolved
+    return res::Class { cls->name.get() };
+  }
+  return res::Class { cinfo };
 }
 
-Optional<res::Class> Index::resolve_class(Context ctx,
-                                          SString clsName) const {
+Optional<res::Class> Index::resolve_class(SString clsName) const {
   clsName = normalizeNS(clsName);
 
-  if (ctx.cls) {
-    if (ctx.cls->name->isame(clsName)) {
-      return resolve_class(ctx.cls);
-    }
-    if (ctx.cls->parentName && ctx.cls->parentName->isame(clsName)) {
-      if (auto const parent = resolve_class(ctx.cls).parent()) return parent;
-    }
-  }
-
   auto const it = m_data->classInfo.find(clsName);
-  if (it != end(m_data->classInfo)) {
-    auto const tinfo = it->second;
-    /*
-     * If the preresolved ClassInfo is Unique we can give it out.
-     */
-    assertx(tinfo->cls->attrs & AttrUnique);
-    if (debug && m_data->typeAliases.count(clsName)) {
-      std::fprintf(stderr, "non unique \"unique\" class: %s\n",
-                   tinfo->cls->name->data());
+  if (it == end(m_data->classInfo)) return std::nullopt;
+  auto const cinfo = it->second;
 
-      auto const ta = m_data->typeAliases.find(clsName);
-      if (ta != end(m_data->typeAliases)) {
-        std::fprintf(stderr, "   and type-alias %s\n",
-                      ta->second->name->data());
-      }
-      always_assert(false);
-    }
-
+  if (is_closure_base(*cinfo->cls)) {
     // Force Closure to be unresolved
-    if (is_closure_base(*tinfo->cls)) {
-      return res::Class { clsName };
-    }
-    return res::Class { tinfo };
-  }
-  // We refuse to have name-only resolutions of enums and typeAliases,
-  // so that all name only resolutions can be treated as classes.
-  if (!m_data->enums.count(clsName) &&
-      !m_data->typeAliases.count(clsName)) {
     return res::Class { clsName };
   }
+  return res::Class { cinfo };
+}
 
-  return std::nullopt;
+res::Class Index::resolve_class_name_only(SString clsName) const {
+  clsName = normalizeNS(clsName);
+  return res::Class { clsName };
 }
 
 Optional<res::Class> Index::selfCls(const Context& ctx) const {
@@ -12208,8 +12175,10 @@ Optional<res::Class> Index::selfCls(const Context& ctx) const {
 
 Optional<res::Class> Index::parentCls(const Context& ctx) const {
   if (!ctx.cls || !ctx.cls->parentName) return std::nullopt;
-  if (auto const parent = resolve_class(ctx.cls).parent()) return parent;
-  return resolve_class(ctx, ctx.cls->parentName);
+  if (auto const rcls = resolve_class(ctx.cls)) {
+    if (auto const parent = rcls->parent()) return parent;
+  }
+  return resolve_class(ctx.cls->parentName);
 }
 
 const php::TypeAlias* Index::lookup_type_alias(SString name) const {
@@ -12346,16 +12315,16 @@ Index::resolve_closure_class(Context ctx, SString name) const {
   // Closure classes must be unique and defined in the unit that uses
   // the CreateCl opcode, so resolution must succeed.
   always_assert_flog(
-    rcls.resolved(),
+    rcls && rcls->resolved(),
     "A closure class ({}) failed to resolve",
     cls->name
   );
 
-  return { rcls, cls };
+  return { *rcls, cls };
 }
 
 res::Class Index::builtin_class(SString name) const {
-  auto const rcls = resolve_class(Context {}, name);
+  auto const rcls = resolve_class(name);
   // Builtin classes should always be resolved, except for Closure,
   // which are force to be unresolved.
   always_assert_flog(
@@ -14064,8 +14033,8 @@ PropLookupResult<> Index::lookup_static(Context ctx,
     // resolve the class since we're currently processing it). If it
     // does, be conservative.
     auto const rCtx = resolve_class(ctx.cls);
-    if (rCtx.val.left()) return conservative();
-    ctxCls = rCtx.val.right();
+    if (!rCtx || rCtx->val.left()) return conservative();
+    ctxCls = rCtx->val.right();
   }
 
   auto const& dcls = dcls_of(cls);
@@ -14231,8 +14200,9 @@ PropMergeResult<> Index::merge_static_type(
     // We should only be not able to resolve our own context if the
     // class is not instantiable. In that case, the merge can't
     // happen.
-    if (rCtx.val.left()) return R{ TBottom, TriBool::No };
-    ctxCls = rCtx.val.right();
+    if (!rCtx) return R{ TBottom, TriBool::No };
+    if (rCtx->val.left()) return unknownCls();
+    ctxCls = rCtx->val.right();
   }
 
   auto const mergePublic = [&] (const ClassInfo* ci,

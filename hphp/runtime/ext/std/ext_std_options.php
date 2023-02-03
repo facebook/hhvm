@@ -168,12 +168,12 @@ function clock_gettime_ns(int $clk_id)[leak_safe]: int;
 /* Gets number of processors.
  */
 <<__Native>>
-function cpu_get_count(): int;
+function cpu_get_count()[read_globals]: int;
 
 /* Gets processor model.
  */
 <<__Native>>
-function cpu_get_model(): string;
+function cpu_get_model()[read_globals]: string;
 
 /* Returns the value of the configuration option on success.
  */

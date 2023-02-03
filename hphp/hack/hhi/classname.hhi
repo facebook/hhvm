@@ -8,12 +8,14 @@ namespace HH {
    * classname, typename does not support invoking static method or the new
    * operator, only that it is string representing the name of a type.
    */
+  <<__NoAutoDynamic>>
   newtype typename<+T> as string = string;
 
   /**
    * For any class C, C::class creates a classname<C>. Due to the properties
    * of opaque types, C::class is the only way of obtaining a classname.
    */
+  <<__NoAutoDynamic>>
   newtype classname<+T> as typename<T> = typename<T>;
 
   /**

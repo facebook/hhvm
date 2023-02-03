@@ -449,7 +449,6 @@ type _ t =
   | CALL_HIERARCHY_OUTGOING_CALLS :
       Lsp.CallHierarchyItem.t
       -> Lsp.CallHierarchyOutgoingCalls.result t
-  | BIGCODE : string -> string t
   | PAUSE : bool -> unit t
   | GLOBAL_INFERENCE :
       ServerGlobalInferenceTypes.mode * string list

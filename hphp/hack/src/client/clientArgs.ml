@@ -204,9 +204,6 @@ let parse_check_args cmd =
       ( "--autostart-server",
         Arg.Bool (fun x -> autostart := x),
         " automatically start hh_server if it's not running (default: true)" );
-      ( "--bigcode",
-        Arg.String (fun filename -> set_mode (MODE_BIGCODE filename)),
-        " (mode) source code indexing functionalities for Big Code analysis" );
       ( "--color",
         Arg.String (fun x -> set_mode (MODE_COLORING x)),
         " (mode) pretty prints the file content showing what is checked (give '-' for stdin)"

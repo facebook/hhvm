@@ -941,17 +941,6 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       else
         List.iter responses ~f:(Printf.printf "%s\n");
       Lwt.return (Exit_status.No_error, telemetry)
-    | MODE_BIGCODE arg ->
-      let filename = arg in
-      let fn =
-        try expand_path filename with
-        | _ ->
-          Printf.eprintf "Invalid filename: %s\n" filename;
-          raise Exit_status.(Exit_with Input_error)
-      in
-      let%lwt (result, telemetry) = rpc args @@ Rpc.BIGCODE fn in
-      print_endline result;
-      Lwt.return (Exit_status.No_error, telemetry)
     | MODE_PAUSE pause ->
       let%lwt ((), telemetry) = rpc args @@ Rpc.PAUSE pause in
       if pause then (

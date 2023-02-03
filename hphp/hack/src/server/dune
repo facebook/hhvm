@@ -441,7 +441,6 @@
  (modules
   fullFidelityParseService
   searchServiceRunner
-  serverBigCode
   serverBusyStatus
   serverCheckUtils
   serverCheckpoint

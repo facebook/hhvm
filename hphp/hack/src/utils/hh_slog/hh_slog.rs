@@ -12,6 +12,15 @@ fn timestamp_format(io: &mut dyn std::io::Write) -> std::io::Result<()> {
     write!(io, "{}", chrono::Local::now().format(TIMESTAMP_FORMAT))
 }
 
+/// We want multiple components and even multiple *processes* to all be able to
+/// write to the same log destinations (scuba and/or file). This struct achieves
+/// two things:
+/// * It allows sharing between multiple processes. The initial creator writes config
+///   information to a config file, and subsequent processes can instantiate it from
+///   that config file.
+/// * It combines a scuba logger and a file logger.
+/// If multiple processes or multiple threads concurrently log to the file,
+/// items will be interleaved in the file.
 #[derive(Clone, Debug)]
 pub struct FileScubaLogger {
     /// Logs to both scuba and file.
@@ -85,6 +94,11 @@ pub fn init_testing() -> FileScubaLogger {
         scuba: init_term_testing(),
         file: init_term_testing(),
     }
+}
+
+/// Essentially a /dev/null logger
+pub fn null() -> slog::Logger {
+    slog::Logger::root(slog::Discard, o!())
 }
 
 /// Helper class to print up to the first 'n' items of a slice or BTreeSet.

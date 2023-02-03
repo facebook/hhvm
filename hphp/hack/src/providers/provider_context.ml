@@ -281,3 +281,7 @@ let noautodynamic this_class =
 let implicit_sdt_for_class ctx this_class =
   TypecheckerOptions.everything_sdt (get_tcopt ctx)
   && not (noautodynamic this_class)
+
+let implicit_sdt_for_fun ctx fe =
+  TypecheckerOptions.everything_sdt (get_tcopt ctx)
+  && not fe.Typing_defs.fe_no_auto_dynamic

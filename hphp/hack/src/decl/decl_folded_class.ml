@@ -295,6 +295,7 @@ let build_constructor_fun_elt
       fe_type = method_.sm_type;
       fe_php_std_lib = false;
       fe_support_dynamic_type = false;
+      fe_no_auto_dynamic = false;
     }
   in
   (if member_heaps_enabled ctx then
@@ -684,6 +685,7 @@ let build_method_fun_elt
             m.sm_type);
       fe_php_std_lib = false;
       fe_support_dynamic_type = support_dynamic_type;
+      fe_no_auto_dynamic = false;
     }
   in
   (if member_heaps_enabled ctx then

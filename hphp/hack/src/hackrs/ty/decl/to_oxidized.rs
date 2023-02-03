@@ -750,6 +750,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::FunDecl<R> {
             pos,
             php_std_lib,
             support_dynamic_type,
+            no_auto_dynamic,
         } = self;
         arena.alloc(obr::shallow_decl_defs::FunDecl {
             deprecated: deprecated.as_ref().map(|s| {
@@ -761,6 +762,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::FunDecl<R> {
             pos: pos.to_oxidized(arena),
             php_std_lib: *php_std_lib,
             support_dynamic_type: *support_dynamic_type,
+            no_auto_dynamic: *no_auto_dynamic,
             module: module.as_ref().map(|m| {
                 let (pos, id) = m.to_oxidized(arena);
                 oxidized_by_ref::ast_defs::Id(pos, id)

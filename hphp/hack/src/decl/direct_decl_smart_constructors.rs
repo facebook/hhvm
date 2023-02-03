@@ -3707,6 +3707,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     php_std_lib: parsed_attributes.php_std_lib,
                     support_dynamic_type: self.implicit_sdt()
                         || parsed_attributes.support_dynamic_type,
+                    no_auto_dynamic: self.under_no_auto_dynamic,
                 });
                 let this = Rc::make_mut(&mut self.state);
                 this.add_fun(name, fun_elt);

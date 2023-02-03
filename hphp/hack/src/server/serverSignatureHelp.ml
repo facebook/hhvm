@@ -127,6 +127,7 @@ let get_occurrence_info
                  fe_php_std_lib = false;
                  fe_support_dynamic_type =
                    Typing_defs.get_ce_support_dynamic_type class_elt;
+                 fe_no_auto_dynamic = false;
                })
       in
       (ft, occurrence)

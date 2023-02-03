@@ -226,3 +226,5 @@ val ctx_with_pessimisation_info_exn :
   t -> Provider_backend.pessimisation_info -> t
 
 val implicit_sdt_for_class : t -> Shallow_decl_defs.shallow_class option -> bool
+
+val implicit_sdt_for_fun : t -> Shallow_decl_defs.fun_decl -> bool

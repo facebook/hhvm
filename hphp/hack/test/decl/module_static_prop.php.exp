@@ -46,7 +46,7 @@ File root|module_static_prop.php--A.php
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [12:10-11]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }))
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }))
   ]
 
 File root|module_static_prop.php--B.php
@@ -68,7 +68,7 @@ File root|module_static_prop.php--B.php
                ~readonly_this:false ~is_memoized:false ~variadic:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [8:10-11]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false }))
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false }))
   ]
 
 File root|module_static_prop.php--no-module.php
@@ -90,5 +90,5 @@ File root|module_static_prop.php--no-module.php
                ~readonly_this:false ~is_memoized:false ~variadic:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [4:10-14]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false }))
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false }))
   ]

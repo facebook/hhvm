@@ -477,6 +477,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::FunDecl<'_>> for shallow::FunDecl<
             internal: sf.internal,
             php_std_lib: sf.php_std_lib,
             support_dynamic_type: sf.support_dynamic_type,
+            no_auto_dynamic: sf.no_auto_dynamic,
         }
     }
 }

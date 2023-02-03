@@ -64,6 +64,7 @@ type fun_elt = {
   fe_pos: Pos_or_decl.t;
   fe_php_std_lib: bool;
   fe_support_dynamic_type: bool;
+  fe_no_auto_dynamic: bool;
 }
 [@@deriving show]
 

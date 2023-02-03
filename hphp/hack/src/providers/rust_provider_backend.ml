@@ -191,6 +191,7 @@ module Decl = struct
         fe_type;
         fe_php_std_lib = false;
         fe_support_dynamic_type = false;
+        fe_no_auto_dynamic = false;
       }
 
   module Methods =

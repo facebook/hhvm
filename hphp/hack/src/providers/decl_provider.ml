@@ -131,7 +131,7 @@ let get_class
   end
 
 let maybe_pessimise_fun_decl ctx fun_decl =
-  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+  if Provider_context.implicit_sdt_for_fun ctx fun_decl then
     Typing_defs.
       {
         fun_decl with

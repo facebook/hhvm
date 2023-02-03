@@ -17,7 +17,7 @@
                ~readonly_this:false ~is_memoized:false ~variadic:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [4:10-22]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false }));
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\doubledouble",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
@@ -37,7 +37,7 @@
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [7:10-22]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }));
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\singledouble",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
@@ -57,7 +57,7 @@
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [10:10-22]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }));
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\singledoublesingle",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
@@ -77,7 +77,7 @@
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [13:10-28]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }));
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\heredoc",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
@@ -97,7 +97,7 @@
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [19:10-17]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }));
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\nowdoc",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
@@ -117,5 +117,5 @@
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [25:10-16]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }))
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }))
   ]

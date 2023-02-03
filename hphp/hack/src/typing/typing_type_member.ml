@@ -92,9 +92,9 @@ let lookup_class_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
   let refined_type_member =
     match exact with
     | Nonexact cr -> begin
-      match Class_refinement.get_type_ref type_id cr with
-      | Some (TRexact ty) -> Exact ty
-      | Some (TRloose { tr_lower; tr_upper }) ->
+      match Class_refinement.get_refined_const type_id cr with
+      | Some { rc_bound = TRexact ty; _ } -> Exact ty
+      | Some { rc_bound = TRloose { tr_lower; tr_upper }; _ } ->
         let lower = combine_lower tr_lower in
         let upper = combine_upper tr_upper in
         (* FIXME(refinements): The position is pointing at

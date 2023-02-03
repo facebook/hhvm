@@ -53,8 +53,6 @@ use oxidized_by_ref::typing_defs::AbstractTypeconst;
 use oxidized_by_ref::typing_defs::Capability::*;
 use oxidized_by_ref::typing_defs::ClassConstKind;
 use oxidized_by_ref::typing_defs::ClassRefinement;
-use oxidized_by_ref::typing_defs::ClassTypeRefinement;
-use oxidized_by_ref::typing_defs::ClassTypeRefinementBounds;
 use oxidized_by_ref::typing_defs::ConcreteTypeconst;
 use oxidized_by_ref::typing_defs::ConstDecl;
 use oxidized_by_ref::typing_defs::Enforcement;
@@ -70,6 +68,9 @@ use oxidized_by_ref::typing_defs::PosByteString;
 use oxidized_by_ref::typing_defs::PosId;
 use oxidized_by_ref::typing_defs::PosString;
 use oxidized_by_ref::typing_defs::PossiblyEnforcedTy;
+use oxidized_by_ref::typing_defs::RefinedConst;
+use oxidized_by_ref::typing_defs::RefinedConstBound;
+use oxidized_by_ref::typing_defs::RefinedConstBounds;
 use oxidized_by_ref::typing_defs::ShapeFieldType;
 use oxidized_by_ref::typing_defs::ShapeKind;
 use oxidized_by_ref::typing_defs::TaccessType;
@@ -974,7 +975,7 @@ pub enum Node<'a> {
     Expr(&'a nast::Expr<'a>),
     TypeParameters(&'a &'a [&'a Tparam<'a>]),
     WhereConstraint(&'a WhereConstraint<'a>),
-    ClassTypeRefinement(&'a (&'a str, ClassTypeRefinement<'a>)),
+    RefinedConst(&'a (&'a str, RefinedConst<'a>)),
 
     // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
     Token(FixedWidthToken),
@@ -2239,31 +2240,39 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 Ty_::Tunion(self.slice(tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty))))
             }
             Ty_::Trefinement(&(root_ty, class_ref)) => {
-                let convert_class_type_ref = |ctr: &'a ClassTypeRefinement<'a>| match ctr {
-                    ClassTypeRefinement::TRexact(ty) => {
-                        ClassTypeRefinement::TRexact(self.convert_tapply_to_tgeneric(ty))
-                    }
-
-                    ClassTypeRefinement::TRloose(bnds) => {
-                        let convert_tys = |tys: &'a [&'a Ty<'a>]| {
-                            self.slice(tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty)))
-                        };
-                        ClassTypeRefinement::TRloose(self.alloc(ClassTypeRefinementBounds {
-                            lower: convert_tys(bnds.lower),
-                            upper: convert_tys(bnds.upper),
-                        }))
+                let convert_refined_const = |rc: &'a RefinedConst<'a>| {
+                    let RefinedConst { bound, is_ctx } = rc;
+                    let bound = match bound {
+                        RefinedConstBound::TRexact(ty) => {
+                            RefinedConstBound::TRexact(self.convert_tapply_to_tgeneric(ty))
+                        }
+                        RefinedConstBound::TRloose(bnds) => {
+                            let convert_tys = |tys: &'a [&'a Ty<'a>]| {
+                                self.slice(
+                                    tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty)),
+                                )
+                            };
+                            RefinedConstBound::TRloose(self.alloc(RefinedConstBounds {
+                                lower: convert_tys(bnds.lower),
+                                upper: convert_tys(bnds.upper),
+                            }))
+                        }
+                    };
+                    RefinedConst {
+                        bound,
+                        is_ctx: *is_ctx,
                     }
                 };
                 Ty_::Trefinement(
                     self.alloc((
                         self.convert_tapply_to_tgeneric(root_ty),
                         ClassRefinement {
-                            cr_types: arena_collections::map::Map::from(
+                            cr_consts: arena_collections::map::Map::from(
                                 self.arena,
                                 class_ref
-                                    .cr_types
+                                    .cr_consts
                                     .iter()
-                                    .map(|(id, ctr)| (*id, convert_class_type_ref(ctr))),
+                                    .map(|(id, ctr)| (*id, convert_refined_const(ctr))),
                             ),
                         },
                     )),
@@ -5773,24 +5782,28 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             Some(id) => id,
             None => return Node::Ignored(SK::TypeInRefinement),
         };
-        if type_specifier.is_ignored() {
+        let bound = if type_specifier.is_ignored() {
             // A loose refinement, with bounds
             let (lower, upper) = self.partition_type_bounds_into_lower_and_upper(constraints);
-            Node::ClassTypeRefinement(self.alloc((
-                id,
-                ClassTypeRefinement::TRloose(self.alloc(ClassTypeRefinementBounds {
-                    lower: lower.into_bump_slice(),
-                    upper: upper.into_bump_slice(),
-                })),
-            )))
+            RefinedConstBound::TRloose(self.alloc(RefinedConstBounds {
+                lower: lower.into_bump_slice(),
+                upper: upper.into_bump_slice(),
+            }))
         } else {
             // An exact refinement
             let ty = match self.node_to_ty(type_specifier) {
                 Some(ty) => ty,
                 None => return Node::Ignored(SK::TypeInRefinement),
             };
-            Node::ClassTypeRefinement(self.alloc((id, ClassTypeRefinement::TRexact(ty))))
-        }
+            RefinedConstBound::TRexact(ty)
+        };
+        Node::RefinedConst(self.alloc((
+            id,
+            RefinedConst {
+                bound,
+                is_ctx: false,
+            },
+        )))
     }
 
     fn make_ctx_in_refinement(
@@ -5806,24 +5819,28 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             Some(id) => id,
             None => return Node::Ignored(SK::TypeInRefinement),
         };
-        if ctx_list.is_ignored() {
+        let bound = if ctx_list.is_ignored() {
             // A loose refinement, with bounds
             let (lower, upper) = self.partition_ctx_bounds_into_lower_and_upper(constraints);
-            Node::ClassTypeRefinement(self.alloc((
-                id,
-                ClassTypeRefinement::TRloose(self.alloc(ClassTypeRefinementBounds {
-                    lower: lower.into_bump_slice(),
-                    upper: upper.into_bump_slice(),
-                })),
-            )))
+            RefinedConstBound::TRloose(self.alloc(RefinedConstBounds {
+                lower: lower.into_bump_slice(),
+                upper: upper.into_bump_slice(),
+            }))
         } else {
             // An exact refinement
             let ty = match self.node_to_ty(ctx_list) {
                 Some(ty) => ty,
                 None => return Node::Ignored(SK::TypeInRefinement),
             };
-            Node::ClassTypeRefinement(self.alloc((id, ClassTypeRefinement::TRexact(ty))))
-        }
+            RefinedConstBound::TRexact(ty)
+        };
+        Node::RefinedConst(self.alloc((
+            id,
+            RefinedConst {
+                bound,
+                is_ctx: true,
+            },
+        )))
     }
 
     fn make_type_refinement(
@@ -5840,17 +5857,17 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             Some(ty) => ty,
             None => return Node::Ignored(SK::TypeRefinement),
         };
-        let type_members = arena_collections::map::Map::from(
+        let const_members = arena_collections::map::Map::from(
             self.arena,
             members.iter().filter_map(|node| match node {
                 Node::ListItem(&(node, _)) | &node => match node {
-                    Node::ClassTypeRefinement(&(id, ctr)) => Some((id, ctr)),
+                    Node::RefinedConst(&(id, ctr)) => Some((id, ctr)),
                     _ => None,
                 },
             }),
         );
         let class_ref = ClassRefinement {
-            cr_types: type_members,
+            cr_consts: const_members,
         };
         Node::Ty(self.alloc(Ty(
             reason,

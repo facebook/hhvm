@@ -171,7 +171,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
             Ty_::TvecOrDict(x) => typing_defs::Ty_::TvecOrDict(x.to_oxidized(arena)),
             Ty_::Taccess(x) => typing_defs::Ty_::Taccess(x.to_oxidized(arena)),
             Ty_::Trefinement(tr) => typing_defs::Ty_::Trefinement(
-                arena.alloc((tr.ty.to_oxidized(arena), tr.typeconsts.to_oxidized(arena))),
+                arena.alloc((tr.ty.to_oxidized(arena), tr.refinement.to_oxidized(arena))),
             ),
         }
     }
@@ -181,28 +181,39 @@ impl<'a, R: Reason> ToOxidized<'a> for ClassRefinement<Ty<R>> {
     type Output = obr::typing_defs::ClassRefinement<'a>;
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         obr::typing_defs::ClassRefinement {
-            cr_types: self.types.to_oxidized(arena),
+            cr_consts: self.consts.to_oxidized(arena),
         }
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for ClassTypeRefinement<Ty<R>> {
-    type Output = obr::typing_defs::ClassTypeRefinement<'a>;
+impl<'a, R: Reason> ToOxidized<'a> for RefinedConstBound<Ty<R>> {
+    type Output = &'a obr::typing_defs::RefinedConstBound<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use obr::typing_defs::ClassTypeRefinement::*;
-        match self {
+        use obr::typing_defs::RefinedConstBound::*;
+        arena.alloc(match self {
             Self::Exact(ty) => TRexact(ty.to_oxidized(arena)),
             Self::Loose(bounds) => TRloose(bounds.to_oxidized(arena)),
+        })
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for RefinedConst<Ty<R>> {
+    type Output = obr::typing_defs::RefinedConst<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        obr::typing_defs::RefinedConst {
+            bound: *self.bound.to_oxidized(arena),
+            is_ctx: self.is_ctx,
         }
     }
 }
 
-impl<'a, R: Reason> ToOxidized<'a> for ClassTypeRefinementBounds<Ty<R>> {
-    type Output = &'a obr::typing_defs::ClassTypeRefinementBounds<'a>;
+impl<'a, R: Reason> ToOxidized<'a> for RefinedConstBounds<Ty<R>> {
+    type Output = &'a obr::typing_defs::RefinedConstBounds<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        arena.alloc(obr::typing_defs::ClassTypeRefinementBounds {
+        arena.alloc(obr::typing_defs::RefinedConstBounds {
             lower: self.lower.to_oxidized(arena),
             upper: self.upper.to_oxidized(arena),
         })

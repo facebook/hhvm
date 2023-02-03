@@ -212,27 +212,34 @@ and hint_ p env = function
     let class_ref =
       (* We do not err on duplicate refinements as the parser will
        * already have *)
-      let cr_types =
-        List.fold members ~init:SMap.empty ~f:(fun map r ->
+      List.fold
+        members
+        ~init:{ cr_consts = SMap.empty }
+        ~f:(fun { cr_consts } r ->
+          let (id, rc) =
             match r with
             | Rctx ((_, id), CRexact h) ->
-              SMap.add id (TRexact (context_hint env h)) map
+              (id, { rc_bound = TRexact (context_hint env h); rc_is_ctx = true })
             | Rctx (((_, id) as _pos), CRloose { cr_lower; cr_upper }) ->
               let decl_bounds h =
                 Option.map ~f:(context_hint env) h |> Option.to_list
               in
               let tr_lower = decl_bounds cr_lower in
               let tr_upper = decl_bounds cr_upper in
-              SMap.add id (TRloose { tr_lower; tr_upper }) map
+              ( id,
+                { rc_bound = TRloose { tr_lower; tr_upper }; rc_is_ctx = true }
+              )
             | Rtype ((_, id), TRexact h) ->
-              SMap.add id (TRexact (hint env h)) map
+              (id, { rc_bound = TRexact (hint env h); rc_is_ctx = false })
             | Rtype ((_, id), TRloose { tr_lower; tr_upper }) ->
               let decl_bounds = List.map ~f:(hint env) in
               let tr_lower = decl_bounds tr_lower in
               let tr_upper = decl_bounds tr_upper in
-              SMap.add id (TRloose { tr_lower; tr_upper }) map)
-      in
-      { cr_types }
+              ( id,
+                { rc_bound = TRloose { tr_lower; tr_upper }; rc_is_ctx = false }
+              )
+          in
+          { cr_consts = SMap.add id rc cr_consts })
     in
     Trefinement (root_ty, class_ref)
   | Htuple hl ->

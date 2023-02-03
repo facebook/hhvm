@@ -410,10 +410,10 @@ let rec expand ctx env root =
       let name = Printf.sprintf "<cls#%s>" name in
       ((env, ty_err_opt), update_class_name env ctx.id name res)
     | Tclass (cid, Nonexact cr, targs)
-      when Class_refinement.has_type_ref ctx.id cr -> begin
-      match Class_refinement.get_type_ref ctx.id cr with
-      | Some (TRexact ty) -> ((env, None), Exact ty)
-      | Some (TRloose { tr_lower; tr_upper }) ->
+      when Class_refinement.has_refined_const ctx.id cr -> begin
+      match Class_refinement.get_refined_const ctx.id cr with
+      | Some { rc_bound = TRexact ty; _ } -> ((env, None), Exact ty)
+      | Some { rc_bound = TRloose { tr_lower; tr_upper }; _ } ->
         let alt_root = mk (get_reason root, Tclass (cid, nonexact, targs)) in
         let ((env, ty_err_opt), result) = expand ctx env alt_root in
         (match result with

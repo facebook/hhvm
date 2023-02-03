@@ -59,7 +59,7 @@ impl<R: Reason> Display for Ty_<R> {
             Ttuple(tys) => list(f, "(", ", ", ")", tys.iter()),
             Trefinement(r) => {
                 write!(f, "({} with ", r.ty)?;
-                trefinements(f, &r.typeconsts.types)?;
+                trefinements(f, &r.refinement.consts)?;
                 write!(f, ")")
             }
             Tunion(tys) => {
@@ -177,19 +177,20 @@ impl<TY: Display> Display for PossiblyEnforcedTy<TY> {
 
 fn trefinements<TY: Display>(
     f: &mut Formatter<'_>,
-    typeconsts: &BTreeMap<pos::TypeConstName, ClassTypeRefinement<TY>>,
+    consts: &BTreeMap<pos::TypeConstName, RefinedConst<TY>>,
 ) -> fmt::Result {
     write!(f, "{{")?;
     let mut is_first = true;
-    for (name, tr) in typeconsts {
+    for (name, rc) in consts {
         if !is_first {
             write!(f, "; ")?;
         }
         is_first = false;
-        write!(f, "type {}", name)?;
-        match tr {
-            ClassTypeRefinement::Exact(ref ty) => write!(f, " = {}", ty)?,
-            ClassTypeRefinement::Loose(bounds) => {
+        let kind = if rc.is_ctx { "ctx" } else { "type" };
+        write!(f, "{} {}", kind, name)?;
+        match &rc.bound {
+            RefinedConstBound::Exact(ref ty) => write!(f, " = {}", ty)?,
+            RefinedConstBound::Loose(bounds) => {
                 for ty in bounds.lower.iter() {
                     write!(f, " super {}", ty)?;
                 }

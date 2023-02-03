@@ -143,6 +143,7 @@ t_shape_map::TShapeMap
 typing_cont_key::TypingContKey
 typing_defs_core::Capability
 typing_defs_core::CeVisibility
+typing_defs_core::ClassRefinement
 typing_defs_core::CollectionStyle
 typing_defs_core::ConsistentKind
 typing_defs_core::ConstraintType
@@ -164,9 +165,8 @@ typing_defs_core::PosByteString
 typing_defs_core::PosId
 typing_defs_core::PosString
 typing_defs_core::Reactivity
-typing_defs_core::ClassRefinement
-typing_defs_core::ClassTypeRefinement
-typing_defs_core::ClassTypeRefinementBounds
+typing_defs_core::RefinedConst
+typing_defs_core::RefinedConstBound
 typing_defs_core::ShapeKind
 typing_defs_core::TshapeFieldName
 typing_defs_core::Ty_

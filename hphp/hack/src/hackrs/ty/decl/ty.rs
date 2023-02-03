@@ -409,33 +409,44 @@ pub struct TrefinementType<TY> {
     /// Type expression to the left of `::`
     pub ty: TY,
 
-    /// The type refinements
-    pub typeconsts: ClassRefinement<TY>,
+    /// The refinement
+    pub refinement: ClassRefinement<TY>,
 }
 
-walkable!(impl<R: Reason> for TrefinementType<Ty<R>> => [ty, typeconsts]);
+walkable!(impl<R: Reason> for TrefinementType<Ty<R>> => [ty, refinement]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
 #[derive(Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "TY: Serialize + DeserializeOwned")]
 pub struct ClassRefinement<TY> {
-    pub types: BTreeMap<TypeConstName, ClassTypeRefinement<TY>>,
+    pub consts: BTreeMap<TypeConstName, RefinedConst<TY>>,
 }
 
-walkable!(impl<R: Reason> for ClassRefinement<Ty<R>> => [types]);
+walkable!(impl<R: Reason> for ClassRefinement<Ty<R>> => [consts]);
 
-/// Type constant refinements
+/// Constant refinements (either `type` or `ctx`)
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
 #[derive(Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "TY: Serialize + DeserializeOwned")]
-pub enum ClassTypeRefinement<TY> {
-    Exact(TY),
-    Loose(ClassTypeRefinementBounds<TY>),
+pub struct RefinedConst<TY> {
+    pub bound: RefinedConstBound<TY>,
+    pub is_ctx: bool,
 }
 
-walkable!(impl<R: Reason, TY> for ClassTypeRefinement<TY> => {
+walkable!(impl<R: Reason> for RefinedConst<Ty<R>> => [bound]);
+
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
+#[serde(bound = "TY: Serialize + DeserializeOwned")]
+pub enum RefinedConstBound<TY> {
+    Exact(TY),
+    Loose(RefinedConstBounds<TY>),
+}
+
+walkable!(impl<R: Reason, TY> for RefinedConstBound<TY> => {
     Self::Exact(ty) => [ty],
     Self::Loose(bounds) => [bounds],
 });
@@ -444,12 +455,12 @@ walkable!(impl<R: Reason, TY> for ClassTypeRefinement<TY> => {
 #[derive(Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "TY: Serialize + DeserializeOwned")]
-pub struct ClassTypeRefinementBounds<TY> {
+pub struct RefinedConstBounds<TY> {
     pub lower: Box<[TY]>,
     pub upper: Box<[TY]>,
 }
 
-walkable!(impl<R: Reason, TY> for ClassTypeRefinementBounds<TY> => [lower, upper]);
+walkable!(impl<R: Reason, TY> for RefinedConstBounds<TY> => [lower, upper]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]

@@ -67,12 +67,12 @@ let check_hrefinement unchecked_tparams env h =
       let on_error =
         Some (Typing_error.Reasons_callback.invalid_class_refinement hint_pos)
       in
-      Class_refinement.fold_type_refs
+      Class_refinement.fold_refined_consts
         cr
         ~init:(env, None)
-        ~f:(fun type_id type_ref (env, ty_err_opt) ->
+        ~f:(fun type_id { rc_bound; _ } (env, ty_err_opt) ->
           let (lo_ty, up_ty) =
-            match type_ref with
+            match rc_bound with
             | TRexact ty -> (ty, ty)
             | TRloose { tr_lower = lo_tys; tr_upper = up_tys } ->
               let r = get_reason locl_ty in

@@ -10,11 +10,12 @@ use ty::decl::subst::Subst;
 use ty::decl::AbstractTypeconst;
 use ty::decl::ClassConst;
 use ty::decl::ClassRefinement;
-use ty::decl::ClassTypeRefinement;
 use ty::decl::ConcreteTypeconst;
 use ty::decl::FunParam;
 use ty::decl::FunType;
 use ty::decl::PossiblyEnforcedTy;
+use ty::decl::RefinedConst;
+use ty::decl::RefinedConstBound;
 use ty::decl::ShapeFieldType;
 use ty::decl::TaccessType;
 use ty::decl::Tparam;
@@ -214,8 +215,8 @@ impl<'a, R: Reason> Substitution<'a, R> {
             }
             Ty_::Trefinement(tr) => Ty_::Trefinement(Box::new(TrefinementType {
                 ty: self.instantiate(&tr.ty),
-                typeconsts: ClassRefinement {
-                    types: (tr.typeconsts.types.iter())
+                refinement: ClassRefinement {
+                    consts: (tr.refinement.consts.iter())
                         .map(|(k, v)| (*k, self.instantiate_class_type_refinement(v)))
                         .collect(),
                 },
@@ -223,18 +224,18 @@ impl<'a, R: Reason> Substitution<'a, R> {
         }
     }
 
-    fn instantiate_class_type_refinement(
-        &self,
-        tr: &ClassTypeRefinement<Ty<R>>,
-    ) -> ClassTypeRefinement<Ty<R>> {
-        use ClassTypeRefinement::Exact;
-        use ClassTypeRefinement::Loose;
-        match tr {
+    fn instantiate_class_type_refinement(&self, rc: &RefinedConst<Ty<R>>) -> RefinedConst<Ty<R>> {
+        use RefinedConstBound::*;
+        let bound = match &rc.bound {
             Exact(ty) => Exact(self.instantiate(ty)),
-            Loose(bounds) => Loose(ty::decl::ClassTypeRefinementBounds {
+            Loose(bounds) => Loose(ty::decl::RefinedConstBounds {
                 lower: bounds.lower.iter().map(|ty| self.instantiate(ty)).collect(),
                 upper: bounds.upper.iter().map(|ty| self.instantiate(ty)).collect(),
             }),
+        };
+        RefinedConst {
+            bound,
+            is_ctx: rc.is_ctx,
         }
     }
 

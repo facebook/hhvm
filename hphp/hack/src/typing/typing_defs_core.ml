@@ -352,15 +352,18 @@ and exact =
   | Exact
   | Nonexact of locl_phase class_refinement
 
-and 'phase class_refinement = { cr_types: 'phase class_type_refinement SMap.t }
+and 'phase class_refinement = { cr_consts: 'phase refined_const SMap.t }
 
-and 'phase class_type_refinement =
-  | TRexact : 'phase ty -> 'phase class_type_refinement
-  | TRloose :
-      'phase class_type_refinement_bounds
-      -> 'phase class_type_refinement
+and 'phase refined_const = {
+  rc_bound: 'phase refined_const_bound;
+  rc_is_ctx: bool;
+}
 
-and 'phase class_type_refinement_bounds = {
+and 'phase refined_const_bound =
+  | TRexact : 'phase ty -> 'phase refined_const_bound
+  | TRloose : 'phase refined_const_bounds -> 'phase refined_const_bound
+
+and 'phase refined_const_bounds = {
   tr_lower: 'phase ty list;
   tr_upper: 'phase ty list;
 }
@@ -400,11 +403,18 @@ and 'ty fun_param = {
 
 and 'ty fun_params = 'ty fun_param list
 
-let nonexact = Nonexact { cr_types = SMap.empty }
+let nonexact = Nonexact { cr_consts = SMap.empty }
 
 let is_nonexact = function
   | Nonexact _ -> true
   | Exact -> false
+
+let refined_const_kind_str : type a. a refined_const -> string =
+ fun { rc_is_ctx; _ } ->
+  if rc_is_ctx then
+    "ctx"
+  else
+    "type"
 
 module Flags = struct
   open Typing_defs_flags
@@ -676,12 +686,13 @@ module Pp = struct
          l);
     Format.fprintf fmt "@,]@]"
 
-  and pp_class_type_refinement :
-      type a. Format.formatter -> a class_type_refinement -> unit =
-   fun fmt r ->
-    match r with
+  and pp_refined_const : type a. Format.formatter -> a refined_const -> unit =
+   fun fmt { rc_bound; rc_is_ctx } ->
+    Format.fprintf fmt "@[<2>{";
+    Format.fprintf fmt "rc_bound = ";
+    (match rc_bound with
     | TRexact exact ->
-      Format.pp_print_string fmt "TRexact ";
+      Format.fprintf fmt "TRexact ";
       pp_ty fmt exact
     | TRloose { tr_lower = lower; tr_upper = upper } ->
       Format.fprintf fmt "TRloose @[<2>{";
@@ -689,16 +700,17 @@ module Pp = struct
       pp_list pp_ty fmt lower;
       Format.fprintf fmt ";@ ";
       Format.pp_print_string fmt "tr_upper = ";
-      pp_list pp_ty fmt upper;
-      Format.fprintf fmt ";@ ";
-      Format.fprintf fmt "}@]"
+      pp_list pp_ty fmt upper);
+    Format.fprintf fmt ";@ ";
+    Format.fprintf fmt "rc_is_ctx = %B" rc_is_ctx;
+    Format.fprintf fmt "}@]"
 
   and pp_class_refinement :
       type a. Format.formatter -> a class_refinement -> unit =
-   fun fmt { cr_types = trs } ->
+   fun fmt { cr_consts } ->
     Format.fprintf fmt "@[<2>{";
-    Format.fprintf fmt "cr_types = ";
-    SMap.pp pp_class_type_refinement fmt trs;
+    Format.fprintf fmt "cr_consts = ";
+    SMap.pp pp_refined_const fmt cr_consts;
     Format.fprintf fmt ";@ ";
     Format.fprintf fmt "}@]"
 
@@ -926,7 +938,6 @@ module Pp = struct
       pp_fp_flags fmt x;
       Format.fprintf fmt "@]";
       Format.fprintf fmt ";@ ";
-
       Format.fprintf fmt "@ }@]"
 
   and pp_tparam_ : type a. Format.formatter -> a ty tparam -> unit =
@@ -987,9 +998,9 @@ type decl_class_refinement = decl_phase class_refinement
 
 type locl_class_refinement = locl_phase class_refinement
 
-type decl_type_refinement = decl_phase class_type_refinement
+type decl_refined_const = decl_phase refined_const
 
-type locl_type_refinement = locl_phase class_type_refinement
+type locl_refined_const = locl_phase refined_const
 
 type destructure_kind =
   | ListDestructure

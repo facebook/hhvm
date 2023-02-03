@@ -1080,10 +1080,10 @@ and localize_refinement ~ety_env env r root decl_cr =
   | Tclass (cid, Nonexact cr, tyl) ->
     let both_err e1 e2 = Option.merge e1 e2 ~f:Typing_error.both in
     let ((env, ty_err_opt), cr) =
-      Class_refinement.fold_type_refs
-        ~f:(fun id type_ref ((env, ty_err_opt), cr) ->
-          let ((env, ty_err_opt'), type_ref) =
-            match type_ref with
+      Class_refinement.fold_refined_consts
+        ~f:(fun id { rc_bound; rc_is_ctx } ((env, ty_err_opt), cr) ->
+          let ((env, ty_err_opt'), rc_bound) =
+            match rc_bound with
             | TRexact ty ->
               let (env_err, ty) = localize ~ety_env env ty in
               (env_err, TRexact ty)
@@ -1098,7 +1098,9 @@ and localize_refinement ~ety_env env r root decl_cr =
               ( (env, both_err ty_err_opt1 ty_err_opt2),
                 TRloose { tr_lower; tr_upper } )
           in
-          let cr = Class_refinement.add_type_ref id type_ref cr in
+          let cr =
+            Class_refinement.add_refined_const id { rc_bound; rc_is_ctx } cr
+          in
           ((env, both_err ty_err_opt ty_err_opt'), cr))
         ~init:((env, ty_err_opt), cr)
         decl_cr

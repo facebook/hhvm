@@ -310,15 +310,18 @@ and exact =
   | Exact
   | Nonexact of locl_phase class_refinement
 
-and 'phase class_refinement = { cr_types: 'phase class_type_refinement SMap.t }
+and 'phase class_refinement = { cr_consts: 'phase refined_const SMap.t }
 
-and 'phase class_type_refinement =
-  | TRexact : 'phase ty -> 'phase class_type_refinement
-  | TRloose :
-      'phase class_type_refinement_bounds
-      -> 'phase class_type_refinement
+and 'phase refined_const = {
+  rc_bound: 'phase refined_const_bound;
+  rc_is_ctx: bool;
+}
 
-and 'phase class_type_refinement_bounds = {
+and 'phase refined_const_bound =
+  | TRexact : 'phase ty -> 'phase refined_const_bound
+  | TRloose : 'phase refined_const_bounds -> 'phase refined_const_bound
+
+and 'phase refined_const_bounds = {
   tr_lower: 'phase ty list;
   tr_upper: 'phase ty list;
 }
@@ -366,6 +369,8 @@ and 'ty fun_params = 'ty fun_param list
 val nonexact : exact
 
 val is_nonexact : exact -> bool
+
+val refined_const_kind_str : 'phase refined_const -> string
 
 module Flags : sig
   val get_ft_return_disposable : 'a fun_type -> bool
@@ -501,9 +506,9 @@ type decl_class_refinement = decl_phase class_refinement
 
 type locl_class_refinement = locl_phase class_refinement
 
-type decl_type_refinement = decl_phase class_type_refinement
+type decl_refined_const = decl_phase refined_const
 
-type locl_type_refinement = locl_phase class_type_refinement
+type locl_refined_const = locl_phase refined_const
 
 type has_member = {
   hm_name: Nast.sid;

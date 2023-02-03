@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e62ea32120cf9da6b6464ebd5b1f6449>>
+// @generated SignedSource<<6a5659add5f46c9fdc4636a39f7d52f1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -677,7 +677,30 @@ pub enum Exact {
 #[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct ClassRefinement {
-    pub cr_types: s_map::SMap<ClassTypeRefinement>,
+    pub cr_consts: s_map::SMap<RefinedConst>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "rc_")]
+#[repr(C)]
+pub struct RefinedConst {
+    pub bound: RefinedConstBound,
+    pub is_ctx: bool,
 }
 
 #[derive(
@@ -697,9 +720,9 @@ pub struct ClassRefinement {
 )]
 #[rust_to_ocaml(and)]
 #[repr(C, u8)]
-pub enum ClassTypeRefinement {
+pub enum RefinedConstBound {
     TRexact(Ty),
-    TRloose(ClassTypeRefinementBounds),
+    TRloose(RefinedConstBounds),
 }
 
 #[derive(
@@ -720,7 +743,7 @@ pub enum ClassTypeRefinement {
 #[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "tr_")]
 #[repr(C)]
-pub struct ClassTypeRefinementBounds {
+pub struct RefinedConstBounds {
     pub lower: Vec<Ty>,
     pub upper: Vec<Ty>,
 }

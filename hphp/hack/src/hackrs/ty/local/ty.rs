@@ -420,7 +420,7 @@ impl<'a> ToOxidized<'a> for Exact {
             Exact::Exact => E::Exact,
             Exact::Nonexact => {
                 let r = oxidized_by_ref::decl_defs::ClassRefinement {
-                    cr_types: arena_collections::map::Map::empty(),
+                    cr_consts: arena_collections::map::Map::empty(),
                 };
                 E::Nonexact(&*arena.alloc(r))
             }

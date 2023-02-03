@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c6aba82ce9af47a6950c0029a2742253>>
+// @generated SignedSource<<d8772625f072c272f3826b54dff327c7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -613,7 +613,7 @@ arena_deserializer::impl_deserialize_in_arena!(Exact<'arena>);
 #[repr(C)]
 pub struct ClassRefinement<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub cr_types: s_map::SMap<'a, ClassTypeRefinement<'a>>,
+    pub cr_consts: s_map::SMap<'a, RefinedConst<'a>>,
 }
 impl<'a> TrivialDrop for ClassRefinement<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassRefinement<'arena>);
@@ -635,15 +635,15 @@ arena_deserializer::impl_deserialize_in_arena!(ClassRefinement<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[repr(C, u8)]
-pub enum ClassTypeRefinement<'a> {
+#[rust_to_ocaml(prefix = "rc_")]
+#[repr(C)]
+pub struct RefinedConst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    TRexact(&'a Ty<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    TRloose(&'a ClassTypeRefinementBounds<'a>),
+    pub bound: RefinedConstBound<'a>,
+    pub is_ctx: bool,
 }
-impl<'a> TrivialDrop for ClassTypeRefinement<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(ClassTypeRefinement<'arena>);
+impl<'a> TrivialDrop for RefinedConst<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(RefinedConst<'arena>);
 
 #[derive(
     Clone,
@@ -662,16 +662,42 @@ arena_deserializer::impl_deserialize_in_arena!(ClassTypeRefinement<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[repr(C, u8)]
+pub enum RefinedConstBound<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    TRexact(&'a Ty<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    TRloose(&'a RefinedConstBounds<'a>),
+}
+impl<'a> TrivialDrop for RefinedConstBound<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(RefinedConstBound<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "tr_")]
 #[repr(C)]
-pub struct ClassTypeRefinementBounds<'a> {
+pub struct RefinedConstBounds<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub lower: &'a [&'a Ty<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub upper: &'a [&'a Ty<'a>],
 }
-impl<'a> TrivialDrop for ClassTypeRefinementBounds<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(ClassTypeRefinementBounds<'arena>);
+impl<'a> TrivialDrop for RefinedConstBounds<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(RefinedConstBounds<'arena>);
 
 #[derive(
     Clone,

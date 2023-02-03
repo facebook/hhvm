@@ -2273,14 +2273,14 @@ and simplify_subtype_i
               TUtils.is_class_i ety_sub) ->
       (* We discharge class refinements before anything
        * else ... *)
-      Class_refinement.fold_type_refs
+      Class_refinement.fold_refined_consts
         cr_super
         ~init:(valid env)
-        ~f:(fun type_id type_ref (env, prop) ->
+        ~f:(fun type_id { rc_bound; _ } (env, prop) ->
           (env, prop)
           &&&
           let (htm_lower, htm_upper) =
-            match type_ref with
+            match rc_bound with
             | TRexact ty -> (ty, ty)
             | TRloose { tr_lower; tr_upper } ->
               let loty = MakeType.union r_super tr_lower in

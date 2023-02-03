@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<194b7f7d7115fb03ace9b985412196e3>>
+// @generated SignedSource<<6bcffffb0dc1b2c6ddad7c6b5f631990>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -153,37 +153,8 @@ impl<'a> Node<'a> for ClassRefinement<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             ClassRefinement {
-                cr_types: ref __binding_0,
+                cr_consts: ref __binding_0,
             } => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for ClassTypeRefinement<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_class_type_refinement(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ClassTypeRefinement::TRexact(ref __binding_0) => __binding_0.accept(v),
-            ClassTypeRefinement::TRloose(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for ClassTypeRefinementBounds<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_class_type_refinement_bounds(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ClassTypeRefinementBounds {
-                lower: ref __binding_0,
-                upper: ref __binding_1,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
         }
     }
 }
@@ -573,6 +544,53 @@ impl<'a> Node<'a> for PossiblyEnforcedTy<'a> {
             PossiblyEnforcedTy {
                 enforced: ref __binding_0,
                 type_: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for RefinedConst<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_refined_const(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            RefinedConst {
+                bound: ref __binding_0,
+                is_ctx: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for RefinedConstBound<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_refined_const_bound(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            RefinedConstBound::TRexact(ref __binding_0) => __binding_0.accept(v),
+            RefinedConstBound::TRloose(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for RefinedConstBounds<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_refined_const_bounds(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            RefinedConstBounds {
+                lower: ref __binding_0,
+                upper: ref __binding_1,
             } => {
                 {
                     __binding_0.accept(v)

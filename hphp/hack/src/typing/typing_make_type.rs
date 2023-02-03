@@ -150,7 +150,7 @@ impl<'a> TypeBuilder<'a> {
         tys: &'a [&'a Ty<'a>],
     ) -> &'a Ty<'a> {
         let r = oxidized_by_ref::decl_defs::ClassRefinement {
-            cr_types: SMap::empty(),
+            cr_consts: SMap::empty(),
         };
         self.mk(
             reason,

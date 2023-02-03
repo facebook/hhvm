@@ -156,12 +156,12 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
                     })
                     .collect(),
             ))),
-            typing_defs_core::Ty_::Trefinement(&(ty, tr)) => {
+            typing_defs_core::Ty_::Trefinement(&(ty, cr)) => {
                 Trefinement(Box::new(decl::TrefinementType {
                     ty: ty.into(),
-                    typeconsts: ty::ClassRefinement {
-                        types: (tr.cr_types.iter())
-                            .map(|(k, v)| ((*k).into(), v.into()))
+                    refinement: ty::ClassRefinement {
+                        consts: (cr.cr_consts.iter())
+                            .map(|(k, v)| ((*k).into(), (*v).into()))
                             .collect(),
                     },
                 }))
@@ -188,22 +188,27 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
     }
 }
 
-impl<R: Reason> From<&obr::typing_defs::ClassTypeRefinement<'_>>
-    for ty::ClassTypeRefinement<Ty<R>>
-{
-    fn from(ctr: &obr::typing_defs::ClassTypeRefinement<'_>) -> Self {
-        use obr::typing_defs::ClassTypeRefinement::*;
-        match *ctr {
+impl<R: Reason> From<obr::typing_defs::RefinedConst<'_>> for ty::RefinedConst<Ty<R>> {
+    fn from(rc: obr::typing_defs::RefinedConst<'_>) -> Self {
+        Self {
+            bound: rc.bound.into(),
+            is_ctx: rc.is_ctx.into(),
+        }
+    }
+}
+
+impl<R: Reason> From<obr::typing_defs::RefinedConstBound<'_>> for ty::RefinedConstBound<Ty<R>> {
+    fn from(ctr: obr::typing_defs::RefinedConstBound<'_>) -> Self {
+        use obr::typing_defs::RefinedConstBound::*;
+        match ctr {
             TRexact(ty) => Self::Exact(ty.into()),
             TRloose(bounds) => Self::Loose(bounds.into()),
         }
     }
 }
 
-impl<R: Reason> From<&obr::typing_defs::ClassTypeRefinementBounds<'_>>
-    for ty::ClassTypeRefinementBounds<Ty<R>>
-{
-    fn from(bounds: &obr::typing_defs::ClassTypeRefinementBounds<'_>) -> Self {
+impl<R: Reason> From<&obr::typing_defs::RefinedConstBounds<'_>> for ty::RefinedConstBounds<Ty<R>> {
+    fn from(bounds: &obr::typing_defs::RefinedConstBounds<'_>) -> Self {
         Self {
             lower: slice(bounds.lower),
             upper: slice(bounds.upper),

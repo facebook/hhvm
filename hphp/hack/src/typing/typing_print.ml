@@ -348,10 +348,10 @@ module Full = struct
     in
     list ~fuel "shape(" id fields_doc ")"
 
-  let refinement (type a) ~fuel k ({ cr_types = trs } : a class_refinement) =
-    let tref ~fuel (name, (tr : a class_type_refinement)) =
-      let (fuel, tr_doc) =
-        match tr with
+  let refinement (type a) ~fuel k ({ cr_consts } : a class_refinement) =
+    let f_rc ~fuel (name, (rc : a refined_const)) =
+      let (fuel, rc_doc) =
+        match rc.rc_bound with
         | TRexact ty ->
           let (fuel, ty_doc) = k ~fuel ty in
           (fuel, Concat [text "= "; ty_doc])
@@ -364,9 +364,9 @@ module Full = struct
           let (fuel, docs) = List.fold ~init:(fuel, docs) ~f:(bound "as") us in
           list_sep ~fuel Space id docs
       in
-      (fuel, text ("type " ^ name ^ " ") ^^ tr_doc)
+      (fuel, text (refined_const_kind_str rc ^ " " ^ name ^ " ") ^^ rc_doc)
     in
-    delimited_list ~fuel semi_sep "{ " tref (SMap.bindings trs) " }"
+    delimited_list ~fuel semi_sep "{ " f_rc (SMap.bindings cr_consts) " }"
 
   let refinements ~fuel k e =
     match e with
@@ -1283,20 +1283,28 @@ module Json = struct
       match e with
       | Exact -> []
       | Nonexact r when Class_refinement.is_empty r -> []
-      | Nonexact { cr_types = trs } ->
-        let ref = function
-          | (id, TRexact ty) ->
-            obj [("type", JSON_String id); ("equal", from_type env ty)]
-          | (id, TRloose { tr_lower; tr_upper }) ->
+      | Nonexact { cr_consts } ->
+        let ref_const (id, { rc_bound; rc_is_ctx }) =
+          let is_ctx_json = ("is_ctx", JSON_Bool rc_is_ctx) in
+          match rc_bound with
+          | TRexact ty ->
+            obj
+              [
+                ("type", JSON_String id);
+                ("equal", from_type env ty);
+                is_ctx_json;
+              ]
+          | TRloose { tr_lower; tr_upper } ->
             let ty_list tys = JSON_Array (List.map tys ~f:(from_type env)) in
             obj
               [
                 ("type", JSON_String id);
                 ("lower", ty_list tr_lower);
                 ("upper", ty_list tr_upper);
+                is_ctx_json;
               ]
         in
-        [("refs", JSON_Array (List.map (SMap.bindings trs) ~f:ref))]
+        [("refs", JSON_Array (List.map (SMap.bindings cr_consts) ~f:ref_const))]
     in
     let typ ty = [("type", from_type env ty)] in
     let result ty = [("result", from_type env ty)] in
@@ -1761,21 +1769,23 @@ module Json = struct
     and aux_refs
         (refs : Hh_json.json list) ~(keytrace : Hh_json.Access.keytrace) :
         (locl_class_refinement, deserialization_error) result =
-      let of_type_refs trs = { cr_types = SMap.of_list trs } in
-      Result.map ~f:of_type_refs (map_array refs ~keytrace ~f:aux_ref)
+      let of_refined_consts consts = { cr_consts = SMap.of_list consts } in
+      Result.map ~f:of_refined_consts (map_array refs ~keytrace ~f:aux_ref)
     and aux_ref (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
-        (string * locl_type_refinement, deserialization_error) result =
+        (string * locl_refined_const, deserialization_error) result =
       Result.Monad_infix.(
+        get_bool "is_ctx" (json, keytrace) >>= fun (rc_is_ctx, _) ->
         get_string "type" (json, keytrace) >>= fun (id, _) ->
         match Hh_json.Access.get_obj "equal" (json, keytrace) with
         | Ok (ty_json, ty_keytrace) ->
-          aux ty_json ~keytrace:ty_keytrace >>= fun ty -> Ok (id, TRexact ty)
+          aux ty_json ~keytrace:ty_keytrace >>= fun ty ->
+          Ok (id, { rc_bound = TRexact ty; rc_is_ctx })
         | Error (Hh_json.Access.Missing_key_error _) ->
           get_array "lower" (json, keytrace) >>= fun (los_json, los_keytrace) ->
           get_array "upper" (json, keytrace) >>= fun (ups_json, ups_keytrace) ->
           map_array los_json ~keytrace:los_keytrace ~f:aux >>= fun tr_lower ->
           map_array ups_json ~keytrace:ups_keytrace ~f:aux >>= fun tr_upper ->
-          Ok (id, TRloose { tr_lower; tr_upper })
+          Ok (id, { rc_bound = TRloose { tr_lower; tr_upper }; rc_is_ctx })
         | Error _ as e -> wrap_json_accessor (fun _ -> e) ())
     and aux_as (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
         (locl_ty, deserialization_error) result =

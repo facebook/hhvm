@@ -341,8 +341,8 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
     get_typarams ty
   | Trefinement (ty, rs) ->
     SMap.fold
-      (fun _ r acc ->
-        match r with
+      (fun _ { rc_bound; _ } acc ->
+        match rc_bound with
         | TRexact bnd ->
           let tp = get_typarams bnd in
           union acc @@ union (flip tp) tp
@@ -358,7 +358,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
           union
             (flip (get_typarams_list bnds.tr_lower))
             (get_typarams_list bnds.tr_upper))
-      rs.cr_types
+      rs.cr_consts
       (get_typarams ty)
   | Tunion tyl
   | Tintersection tyl

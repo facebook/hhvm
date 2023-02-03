@@ -936,10 +936,10 @@ and ft_params_compare :
  fun ?(normalize_lists = false) params1 params2 ->
   List.compare (ft_param_compare ~normalize_lists) params1 params2
 
-and type_refinement_compare :
-    type a. a class_type_refinement -> a class_type_refinement -> int =
+and refined_const_compare : type a. a refined_const -> a refined_const -> int =
  fun a b ->
-  match (a, b) with
+  (* Note: `rc_is_ctx` is not used for typing inference, so we can safely ignore it *)
+  match (a.rc_bound, b.rc_bound) with
   | (TRexact _, TRloose _) -> -1
   | (TRloose _, TRexact _) -> 1
   | (TRloose b1, TRloose b2) -> begin
@@ -951,8 +951,8 @@ and type_refinement_compare :
 
 and class_refinement_compare :
     type a. a class_refinement -> a class_refinement -> int =
- fun { cr_types = trs1 } { cr_types = trs2 } ->
-  SMap.compare type_refinement_compare trs1 trs2
+ fun { cr_consts = rcs1 } { cr_consts = rcs2 } ->
+  SMap.compare refined_const_compare rcs1 rcs2
 
 and exact_compare e1 e2 =
   match (e1, e2) with

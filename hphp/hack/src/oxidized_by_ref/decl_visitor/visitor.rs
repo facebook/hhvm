@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fc79ec95527c1346ba4c51511ad59460>>
+// @generated SignedSource<<3a23daebd2de479b7d26aaee0d7f04a3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -58,12 +58,6 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_class_refinement(&mut self, p: &'a ClassRefinement<'a>) {
-        p.recurse(self.object())
-    }
-    fn visit_class_type_refinement(&mut self, p: &'a ClassTypeRefinement<'a>) {
-        p.recurse(self.object())
-    }
-    fn visit_class_type_refinement_bounds(&mut self, p: &'a ClassTypeRefinementBounds<'a>) {
         p.recurse(self.object())
     }
     fn visit_classish_kind(&mut self, p: &'a ClassishKind) {
@@ -136,6 +130,15 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_possibly_enforced_ty(&mut self, p: &'a PossiblyEnforcedTy<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_refined_const(&mut self, p: &'a RefinedConst<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_refined_const_bound(&mut self, p: &'a RefinedConstBound<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_refined_const_bounds(&mut self, p: &'a RefinedConstBounds<'a>) {
         p.recurse(self.object())
     }
     fn visit_reify_kind(&mut self, p: &'a ReifyKind) {

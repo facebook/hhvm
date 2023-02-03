@@ -263,7 +263,7 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
             Ty_::Trefinement(x) => {
                 let mut block = alloc.block_with_size_and_tag(2usize, 1u8);
                 alloc.set_field(&mut block, 0, alloc.add(&x.ty));
-                alloc.set_field(&mut block, 1, alloc.add(&x.typeconsts));
+                alloc.set_field(&mut block, 1, alloc.add(&x.refinement));
                 block.build()
             }
             Ty_::Tmixed => ocamlrep::Value::int(1),
@@ -380,7 +380,7 @@ impl<R: Reason> FromOcamlRep for Ty_<R> {
                     ocamlrep::from::expect_block_size(block, 2)?;
                     Ok(Ty_::Trefinement(Box::new(TrefinementType {
                         ty: ocamlrep::from::field(block, 0)?,
-                        typeconsts: ocamlrep::from::field(block, 1)?,
+                        refinement: ocamlrep::from::field(block, 1)?,
                     })))
                 }
                 2 => {

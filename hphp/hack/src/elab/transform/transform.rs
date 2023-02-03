@@ -133,12 +133,18 @@ fn traverse_ty_def<Ctx: Clone, Err, Ex, En>(
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
     match elem {
-        Def::Fun(elem) => transform_ty_fun_def(elem, ctx, errs, top_down, bottom_up),
-        Def::Class(elem) => transform_ty_class_(elem, ctx, errs, top_down, bottom_up),
-        Def::Stmt(elem) => transform_ty_stmt(elem, ctx, errs, top_down, bottom_up),
-        Def::Typedef(elem) => transform_ty_typedef(elem, ctx, errs, top_down, bottom_up),
-        Def::Constant(elem) => transform_ty_gconst(elem, ctx, errs, top_down, bottom_up),
-        Def::Module(elem) => transform_ty_module_def(elem, ctx, errs, top_down, bottom_up),
+        Def::Fun(elem) => transform_ty_fun_def(elem, &mut ctx.clone(), errs, top_down, bottom_up),
+        Def::Class(elem) => transform_ty_class_(elem, &mut ctx.clone(), errs, top_down, bottom_up),
+        Def::Stmt(elem) => transform_ty_stmt(elem, &mut ctx.clone(), errs, top_down, bottom_up),
+        Def::Typedef(elem) => {
+            transform_ty_typedef(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
+        Def::Constant(elem) => {
+            transform_ty_gconst(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
+        Def::Module(elem) => {
+            transform_ty_module_def(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
         Def::Namespace(_)
         | Def::NamespaceUse(_)
         | Def::SetNamespaceEnv(_)
@@ -221,7 +227,7 @@ fn traverse_ty_fun_def<Ctx: Clone, Err, Ex, En>(
     elem.file_attributes.iter_mut().for_each(|elem| {
         transform_ty_file_attribute(elem, &mut ctx.clone(), errs, top_down, bottom_up)
     });
-    transform_ty_fun_(&mut elem.fun, ctx, errs, top_down, bottom_up)
+    transform_ty_fun_(&mut elem.fun, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 // -- ModuleDef ----------------------------------------------------------------
@@ -249,7 +255,13 @@ fn traverse_ty_module_def<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_user_attributes(&mut elem.user_attributes, ctx, errs, top_down, bottom_up);
+    transform_ty_user_attributes(
+        &mut elem.user_attributes,
+        &mut ctx.clone(),
+        errs,
+        top_down,
+        bottom_up,
+    );
 }
 
 // -- Gconst -------------------------------------------------------------------
@@ -280,7 +292,7 @@ fn traverse_ty_gconst<Ctx: Clone, Err, Ex, En>(
     elem.type_
         .iter_mut()
         .for_each(|elem| transform_ty_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up));
-    transform_ty_expr(&mut elem.value, ctx, errs, top_down, bottom_up)
+    transform_ty_expr(&mut elem.value, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_fld_gconst_type_<Ctx: Clone, Err>(
@@ -361,7 +373,7 @@ fn traverse_ty_stmt<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_stmt_(&mut elem.1, ctx, errs, top_down, bottom_up)
+    transform_ty_stmt_(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_ty_stmt_<Ctx: Clone, Err, Ex, En>(
@@ -389,7 +401,7 @@ fn traverse_ty_stmt_<Ctx: Clone, Err, Ex, En>(
 ) {
     match elem {
         Stmt_::Expr(elem) | Stmt_::Throw(elem) => {
-            transform_ty_expr(elem, ctx, errs, top_down, bottom_up)
+            transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)
         }
         Stmt_::Return(elem) => elem
             .iter_mut()
@@ -398,12 +410,12 @@ fn traverse_ty_stmt_<Ctx: Clone, Err, Ex, En>(
             elem.0.iter_mut().for_each(|(_elem00, elem01)| {
                 transform_ty_expr(elem01, &mut ctx.clone(), errs, top_down, bottom_up)
             });
-            transform_ty_block(&mut elem.1, ctx, errs, top_down, bottom_up)
+            transform_ty_block(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up)
         }
         Stmt_::If(elem) => {
             transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
             transform_ty_block(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_block(&mut elem.2, ctx, errs, top_down, bottom_up)
+            transform_ty_block(&mut elem.2, &mut ctx.clone(), errs, top_down, bottom_up)
         }
         Stmt_::Do(elem) => {
             transform_ty_block(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
@@ -411,10 +423,10 @@ fn traverse_ty_stmt_<Ctx: Clone, Err, Ex, En>(
         }
         Stmt_::While(elem) => {
             transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_block(&mut elem.1, ctx, errs, top_down, bottom_up);
+            transform_ty_block(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
         }
         Stmt_::Using(elem) => {
-            transform_ty_using_stmt(elem, ctx, errs, top_down, bottom_up);
+            transform_ty_using_stmt(elem, &mut ctx.clone(), errs, top_down, bottom_up);
         }
         Stmt_::For(elem) => {
             elem.0.iter_mut().for_each(|elem| {
@@ -426,7 +438,7 @@ fn traverse_ty_stmt_<Ctx: Clone, Err, Ex, En>(
             elem.2.iter_mut().for_each(|elem| {
                 transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)
             });
-            transform_ty_block(&mut elem.3, ctx, errs, top_down, bottom_up)
+            transform_ty_block(&mut elem.3, &mut ctx.clone(), errs, top_down, bottom_up)
         }
         Stmt_::Switch(elem) => {
             transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
@@ -440,16 +452,16 @@ fn traverse_ty_stmt_<Ctx: Clone, Err, Ex, En>(
         Stmt_::Foreach(elem) => {
             transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
             transform_ty_as_expr(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_block(&mut elem.2, ctx, errs, top_down, bottom_up)
+            transform_ty_block(&mut elem.2, &mut ctx.clone(), errs, top_down, bottom_up)
         }
         Stmt_::Try(elem) => {
             transform_ty_block(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
             elem.1.iter_mut().for_each(|elem| {
                 transform_ty_catch(elem, &mut ctx.clone(), errs, top_down, bottom_up)
             });
-            transform_ty_block(&mut elem.2, ctx, errs, top_down, bottom_up)
+            transform_ty_block(&mut elem.2, &mut ctx.clone(), errs, top_down, bottom_up)
         }
-        Stmt_::Block(elem) => transform_ty_block(elem, ctx, errs, top_down, bottom_up),
+        Stmt_::Block(elem) => transform_ty_block(elem, &mut ctx.clone(), errs, top_down, bottom_up),
         Stmt_::Noop
         | Stmt_::Fallthrough
         | Stmt_::Break
@@ -513,7 +525,7 @@ fn traverse_ty_using_stmt<Ctx: Clone, Err, Ex, En>(
         .1
         .iter_mut()
         .for_each(|elem| transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up));
-    transform_ty_block(&mut elem.block, ctx, errs, top_down, bottom_up)
+    transform_ty_block(&mut elem.block, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_ty_gen_case<Ctx: Clone, Err, Ex, En>(
@@ -539,8 +551,10 @@ fn traverse_ty_gen_case<Ctx: Clone, Err, Ex, En>(
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
     match elem {
-        GenCase::Case(elem) => transform_ty_case(elem, ctx, errs, top_down, bottom_up),
-        GenCase::Default(elem) => transform_ty_default_case(elem, ctx, errs, top_down, bottom_up),
+        GenCase::Case(elem) => transform_ty_case(elem, &mut ctx.clone(), errs, top_down, bottom_up),
+        GenCase::Default(elem) => {
+            transform_ty_default_case(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
     }
 }
 
@@ -568,7 +582,7 @@ fn traverse_ty_case<Ctx: Clone, Err, Ex, En>(
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
     transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
-    transform_ty_block(&mut elem.1, ctx, errs, top_down, bottom_up);
+    transform_ty_block(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
 }
 
 pub fn transform_ty_default_case<Ctx: Clone, Err, Ex, En>(
@@ -594,7 +608,7 @@ fn traverse_ty_default_case<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_block(&mut elem.1, ctx, errs, top_down, bottom_up);
+    transform_ty_block(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
 }
 
 pub fn transform_ty_catch<Ctx: Clone, Err, Ex, En>(
@@ -620,7 +634,7 @@ fn traverse_ty_catch<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_block(&mut elem.2, ctx, errs, top_down, bottom_up);
+    transform_ty_block(&mut elem.2, &mut ctx.clone(), errs, top_down, bottom_up);
 }
 
 pub fn transform_ty_as_expr<Ctx: Clone, Err, Ex, En>(
@@ -647,15 +661,15 @@ fn traverse_ty_as_expr<Ctx: Clone, Err, Ex, En>(
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
     match elem {
-        AsExpr::AsV(elem) => transform_ty_expr(elem, ctx, errs, top_down, bottom_up),
+        AsExpr::AsV(elem) => transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up),
         AsExpr::AsKv(elem0, elem1) => {
             transform_ty_expr(elem0, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_expr(elem1, ctx, errs, top_down, bottom_up)
+            transform_ty_expr(elem1, &mut ctx.clone(), errs, top_down, bottom_up)
         }
         AsExpr::AwaitAsV(_, elem1) => transform_ty_expr(elem1, ctx, errs, top_down, bottom_up),
         AsExpr::AwaitAsKv(_, elem1, elem2) => {
             transform_ty_expr(elem1, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_expr(elem2, ctx, errs, top_down, bottom_up)
+            transform_ty_expr(elem2, &mut ctx.clone(), errs, top_down, bottom_up)
         }
     }
 }
@@ -685,7 +699,7 @@ fn traverse_ty_class_id<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_class_id_(&mut elem.2, ctx, errs, top_down, bottom_up)
+    transform_ty_class_id_(&mut elem.2, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_ty_class_id_<Ctx: Clone, Err, Ex, En>(
@@ -713,7 +727,9 @@ fn traverse_ty_class_id_<Ctx: Clone, Err, Ex, En>(
 ) {
     match elem {
         ClassId_::CIparent | ClassId_::CIself | ClassId_::CIstatic | ClassId_::CI(_) => (),
-        ClassId_::CIexpr(elem) => transform_ty_expr(elem, ctx, errs, top_down, bottom_up),
+        ClassId_::CIexpr(elem) => {
+            transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
     }
 }
 
@@ -742,7 +758,7 @@ fn traverse_ty_expr<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_expr_(&mut elem.2, ctx, errs, top_down, bottom_up)
+    transform_ty_expr_(&mut elem.2, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_ty_expr_<Ctx: Clone, Err, Ex, En>(
@@ -814,7 +830,7 @@ fn traverse_ty_expr_<Ctx: Clone, Err, Ex, En>(
             .iter_mut()
             .for_each(|elem| transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)),
 
-        Expr_::Clone(elem) => transform_ty_expr(elem, ctx, errs, top_down, bottom_up),
+        Expr_::Clone(elem) => transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up),
 
         Expr_::ArrayGet(elem) => {
             transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
@@ -825,16 +841,16 @@ fn traverse_ty_expr_<Ctx: Clone, Err, Ex, En>(
 
         Expr_::ObjGet(elem) => {
             transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_expr(&mut elem.1, ctx, errs, top_down, bottom_up);
+            transform_ty_expr(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
         }
 
         Expr_::ClassGet(elem) => {
             transform_ty_class_id(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_class_get_expr(&mut elem.1, ctx, errs, top_down, bottom_up);
+            transform_ty_class_get_expr(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
         }
 
         Expr_::ClassConst(elem) => {
-            transform_ty_class_id(&mut elem.0, ctx, errs, top_down, bottom_up);
+            transform_ty_class_id(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
         }
 
         Expr_::Call(elem) => {
@@ -862,14 +878,18 @@ fn traverse_ty_expr_<Ctx: Clone, Err, Ex, En>(
             .for_each(|elem| transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)),
 
         Expr_::PrefixedString(elem) => {
-            transform_ty_expr(&mut elem.1, ctx, errs, top_down, bottom_up)
+            transform_ty_expr(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up)
         }
 
-        Expr_::Yield(elem) => transform_ty_afield(elem, ctx, errs, top_down, bottom_up),
+        Expr_::Yield(elem) => {
+            transform_ty_afield(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
 
-        Expr_::Await(elem) => transform_ty_expr(elem, ctx, errs, top_down, bottom_up),
+        Expr_::Await(elem) => transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up),
 
-        Expr_::ReadonlyExpr(elem) => transform_ty_expr(elem, ctx, errs, top_down, bottom_up),
+        Expr_::ReadonlyExpr(elem) => {
+            transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
 
         Expr_::Tuple(elem) => elem
             .iter_mut()
@@ -881,19 +901,21 @@ fn traverse_ty_expr_<Ctx: Clone, Err, Ex, En>(
 
         Expr_::Cast(elem) => {
             transform_ty_hint(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_expr(&mut elem.1, ctx, errs, top_down, bottom_up);
+            transform_ty_expr(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
         }
 
-        Expr_::Unop(elem) => transform_ty_expr(&mut elem.1, ctx, errs, top_down, bottom_up),
+        Expr_::Unop(elem) => {
+            transform_ty_expr(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
 
         Expr_::Binop(elem) => {
             transform_ty_expr(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_expr(&mut elem.2, ctx, errs, top_down, bottom_up)
+            transform_ty_expr(&mut elem.2, &mut ctx.clone(), errs, top_down, bottom_up)
         }
 
         Expr_::Pipe(elem) => {
             transform_ty_expr(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_expr(&mut elem.2, ctx, errs, top_down, bottom_up)
+            transform_ty_expr(&mut elem.2, &mut ctx.clone(), errs, top_down, bottom_up)
         }
 
         Expr_::Eif(elem) => {
@@ -901,22 +923,22 @@ fn traverse_ty_expr_<Ctx: Clone, Err, Ex, En>(
             elem.1.iter_mut().for_each(|elem| {
                 transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)
             });
-            transform_ty_expr(&mut elem.2, ctx, errs, top_down, bottom_up)
+            transform_ty_expr(&mut elem.2, &mut ctx.clone(), errs, top_down, bottom_up)
         }
 
         Expr_::Is(elem) => {
             transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_hint(&mut elem.1, ctx, errs, top_down, bottom_up);
+            transform_ty_hint(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
         }
 
         Expr_::As(elem) => {
             transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_hint(&mut elem.1, ctx, errs, top_down, bottom_up);
+            transform_ty_hint(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
         }
 
         Expr_::Upcast(elem) => {
             transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_hint(&mut elem.1, ctx, errs, top_down, bottom_up);
+            transform_ty_hint(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
         }
 
         Expr_::New(elem) => {
@@ -932,9 +954,11 @@ fn traverse_ty_expr_<Ctx: Clone, Err, Ex, En>(
             })
         }
 
-        Expr_::Efun(elem) => transform_ty_efun(elem, ctx, errs, top_down, bottom_up),
+        Expr_::Efun(elem) => transform_ty_efun(elem, &mut ctx.clone(), errs, top_down, bottom_up),
 
-        Expr_::Lfun(elem) => transform_ty_fun_(&mut elem.0, ctx, errs, top_down, bottom_up),
+        Expr_::Lfun(elem) => {
+            transform_ty_fun_(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
 
         Expr_::Xml(elem) => {
             elem.1.iter_mut().for_each(|elem| {
@@ -945,7 +969,9 @@ fn traverse_ty_expr_<Ctx: Clone, Err, Ex, En>(
             });
         }
 
-        Expr_::Import(elem) => transform_ty_expr(&mut elem.1, ctx, errs, top_down, bottom_up),
+        Expr_::Import(elem) => {
+            transform_ty_expr(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
 
         Expr_::Collection(elem) => {
             elem.1.iter_mut().for_each(|elem| {
@@ -957,13 +983,15 @@ fn traverse_ty_expr_<Ctx: Clone, Err, Ex, En>(
         }
 
         Expr_::ExpressionTree(elem) => {
-            transform_ty_expression_tree(elem, ctx, errs, top_down, bottom_up)
+            transform_ty_expression_tree(elem, &mut ctx.clone(), errs, top_down, bottom_up)
         }
 
-        Expr_::MethodId(elem) => transform_ty_expr(&mut elem.0, ctx, errs, top_down, bottom_up),
+        Expr_::MethodId(elem) => {
+            transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
 
         Expr_::SmethodId(elem) => {
-            transform_ty_class_id(&mut elem.0, ctx, errs, top_down, bottom_up)
+            transform_ty_class_id(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up)
         }
 
         Expr_::Pair(elem) => {
@@ -972,12 +1000,16 @@ fn traverse_ty_expr_<Ctx: Clone, Err, Ex, En>(
                 transform_ty_targ(elem01, &mut ctx.clone(), errs, top_down, bottom_up)
             });
             transform_ty_expr(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_expr(&mut elem.2, ctx, errs, top_down, bottom_up)
+            transform_ty_expr(&mut elem.2, &mut ctx.clone(), errs, top_down, bottom_up)
         }
 
-        Expr_::ETSplice(elem) => transform_ty_expr(elem, ctx, errs, top_down, bottom_up),
+        Expr_::ETSplice(elem) => {
+            transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
 
-        Expr_::Hole(elem) => transform_ty_expr(&mut elem.0, ctx, errs, top_down, bottom_up),
+        Expr_::Hole(elem) => {
+            transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
 
         Expr_::Null
         | Expr_::This
@@ -1022,11 +1054,11 @@ fn traverse_ty_collection_targ<Ctx: Clone, Err, Ex>(
 ) {
     match elem {
         CollectionTarg::CollectionTV(elem) => {
-            transform_ty_targ(elem, ctx, errs, top_down, bottom_up)
+            transform_ty_targ(elem, &mut ctx.clone(), errs, top_down, bottom_up)
         }
         CollectionTarg::CollectionTKV(elem0, elem1) => {
             transform_ty_targ(elem0, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_targ(elem1, ctx, errs, top_down, bottom_up)
+            transform_ty_targ(elem1, &mut ctx.clone(), errs, top_down, bottom_up)
         }
     }
 }
@@ -1056,7 +1088,7 @@ fn traverse_ty_funcion_ptr_id<Ctx: Clone, Err, Ex, En>(
 ) {
     match elem {
         FunctionPtrId::FPClassConst(elem0, _elem1) => {
-            transform_ty_class_id(elem0, ctx, errs, top_down, bottom_up)
+            transform_ty_class_id(elem0, &mut ctx.clone(), errs, top_down, bottom_up)
         }
         FunctionPtrId::FPId(_) => (),
     }
@@ -1099,7 +1131,13 @@ fn traverse_ty_expression_tree<Ctx: Clone, Err, Ex, En>(
         top_down,
         bottom_up,
     );
-    transform_ty_expr(&mut elem.runtime_expr, ctx, errs, top_down, bottom_up);
+    transform_ty_expr(
+        &mut elem.runtime_expr,
+        &mut ctx.clone(),
+        errs,
+        top_down,
+        bottom_up,
+    );
 }
 
 pub fn transform_ty_class_get_expr<Ctx: Clone, Err, Ex, En>(
@@ -1126,7 +1164,9 @@ fn traverse_ty_class_get_expr<Ctx: Clone, Err, Ex, En>(
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
     match elem {
-        ClassGetExpr::CGexpr(elem) => transform_ty_expr(elem, ctx, errs, top_down, bottom_up),
+        ClassGetExpr::CGexpr(elem) => {
+            transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
         ClassGetExpr::CGstring(_) => (),
     }
 }
@@ -1155,7 +1195,7 @@ fn traverse_ty_field<Ctx: Clone, Err, Ex, En>(
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
     transform_ty_expr(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
-    transform_ty_expr(&mut elem.1, ctx, errs, top_down, bottom_up)
+    transform_ty_expr(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_ty_afield<Ctx: Clone, Err, Ex, En>(
@@ -1182,10 +1222,12 @@ fn traverse_ty_afield<Ctx: Clone, Err, Ex, En>(
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
     match elem {
-        Afield::AFvalue(elem) => transform_ty_expr(elem, ctx, errs, top_down, bottom_up),
+        Afield::AFvalue(elem) => {
+            transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
         Afield::AFkvalue(elem0, elem1) => {
             transform_ty_expr(elem0, &mut ctx.clone(), errs, top_down, bottom_up);
-            transform_ty_expr(elem1, ctx, errs, top_down, bottom_up);
+            transform_ty_expr(elem1, &mut ctx.clone(), errs, top_down, bottom_up);
         }
     }
 }
@@ -1213,7 +1255,7 @@ fn traverse_ty_xhp_simple<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_expr(&mut elem.expr, ctx, errs, top_down, bottom_up)
+    transform_ty_expr(&mut elem.expr, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_ty_xhp_attribute<Ctx: Clone, Err, Ex, En>(
@@ -1241,9 +1283,11 @@ fn traverse_ty_xhp_attribute<Ctx: Clone, Err, Ex, En>(
 ) {
     match elem {
         XhpAttribute::XhpSimple(elem) => {
-            transform_ty_xhp_simple(elem, ctx, errs, top_down, bottom_up)
+            transform_ty_xhp_simple(elem, &mut ctx.clone(), errs, top_down, bottom_up)
         }
-        XhpAttribute::XhpSpread(elem) => transform_ty_expr(elem, ctx, errs, top_down, bottom_up),
+        XhpAttribute::XhpSpread(elem) => {
+            transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
     }
 }
 
@@ -1320,7 +1364,13 @@ fn traverse_ty_fun_<Ctx: Clone, Err, Ex, En>(
         .iter_mut()
         .for_each(|elem| transform_ty_contexts(elem, &mut ctx.clone(), errs, top_down, bottom_up));
     transform_ty_func_body(&mut elem.body, &mut ctx.clone(), errs, top_down, bottom_up);
-    transform_ty_user_attributes(&mut elem.user_attributes, ctx, errs, top_down, bottom_up);
+    transform_ty_user_attributes(
+        &mut elem.user_attributes,
+        &mut ctx.clone(),
+        errs,
+        top_down,
+        bottom_up,
+    );
 }
 
 #[allow(non_snake_case)]
@@ -1348,7 +1398,7 @@ fn traverse_fld_fun__ret<Ctx: Clone, Err, Ex>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_type_hint(elem, ctx, errs, top_down, bottom_up)
+    transform_ty_type_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 // -- Method_ ------------------------------------------------------------------
@@ -1393,7 +1443,13 @@ fn traverse_ty_method_<Ctx: Clone, Err, Ex, En>(
         .iter_mut()
         .for_each(|elem| transform_ty_contexts(elem, &mut ctx.clone(), errs, top_down, bottom_up));
     transform_ty_func_body(&mut elem.body, &mut ctx.clone(), errs, top_down, bottom_up);
-    transform_ty_user_attributes(&mut elem.user_attributes, ctx, errs, top_down, bottom_up);
+    transform_ty_user_attributes(
+        &mut elem.user_attributes,
+        &mut ctx.clone(),
+        errs,
+        top_down,
+        bottom_up,
+    );
 }
 
 #[allow(non_snake_case)]
@@ -1421,7 +1477,7 @@ fn traverse_fld_method__ret<Ctx: Clone, Err, Ex>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_type_hint(elem, ctx, errs, top_down, bottom_up)
+    transform_ty_type_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 // -- FunParam -----------------------------------------------------------------
@@ -1459,7 +1515,13 @@ fn traverse_ty_fun_param<Ctx: Clone, Err, Ex, En>(
     elem.expr
         .iter_mut()
         .for_each(|elem| transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up));
-    transform_ty_user_attributes(&mut elem.user_attributes, ctx, errs, top_down, bottom_up)
+    transform_ty_user_attributes(
+        &mut elem.user_attributes,
+        &mut ctx.clone(),
+        errs,
+        top_down,
+        bottom_up,
+    )
 }
 
 // -- Efun ---------------------------------------------------------------------
@@ -1487,7 +1549,7 @@ fn traverse_ty_efun<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_fun_(&mut elem.fun, ctx, errs, top_down, bottom_up)
+    transform_ty_fun_(&mut elem.fun, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 // -- FuncBody -----------------------------------------------------------------
@@ -1515,7 +1577,13 @@ fn traverse_ty_func_body<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_block(&mut elem.fb_ast, ctx, errs, top_down, bottom_up)
+    transform_ty_block(
+        &mut elem.fb_ast,
+        &mut ctx.clone(),
+        errs,
+        top_down,
+        bottom_up,
+    )
 }
 
 // -- Class_ -------------------------------------------------------------------
@@ -1987,7 +2055,7 @@ fn traverse_fld_class__user_attributes<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_user_attributes(elem, ctx, errs, top_down, bottom_up)
+    transform_ty_user_attributes(elem, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 #[allow(non_snake_case)]
@@ -2045,7 +2113,13 @@ fn traverse_ty_class_var<Ctx: Clone, Err, Ex, En>(
 ) {
     transform_fld_class_var_type_(&mut elem.type_, &mut ctx.clone(), errs, top_down, bottom_up);
     transform_fld_class_var_expr(&mut elem.expr, &mut ctx.clone(), errs, top_down, bottom_up);
-    transform_ty_user_attributes(&mut elem.user_attributes, ctx, errs, top_down, bottom_up)
+    transform_ty_user_attributes(
+        &mut elem.user_attributes,
+        &mut ctx.clone(),
+        errs,
+        top_down,
+        bottom_up,
+    )
 }
 
 pub fn transform_fld_class_var_type_<Ctx: Clone, Err, Ex>(
@@ -2071,7 +2145,7 @@ fn traverse_fld_class_var_type_<Ctx: Clone, Err, Ex>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_type_hint(elem, ctx, errs, top_down, bottom_up)
+    transform_ty_type_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_fld_class_var_expr<Ctx: Clone, Err, Ex, En>(
@@ -2136,7 +2210,7 @@ fn traverse_ty_class_const<Ctx: Clone, Err, Ex, En>(
     elem.type_
         .iter_mut()
         .for_each(|elem| transform_ty_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up));
-    transform_ty_class_const_kind(&mut elem.kind, ctx, errs, top_down, bottom_up)
+    transform_ty_class_const_kind(&mut elem.kind, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_ty_class_const_kind<Ctx: Clone, Err, Ex, En>(
@@ -2166,7 +2240,9 @@ fn traverse_ty_class_const_kind<Ctx: Clone, Err, Ex, En>(
         ClassConstKind::CCAbstract(elem) => elem
             .iter_mut()
             .for_each(|elem| transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)),
-        ClassConstKind::CCConcrete(elem) => transform_ty_expr(elem, ctx, errs, top_down, bottom_up),
+        ClassConstKind::CCConcrete(elem) => {
+            transform_ty_expr(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
     }
 }
 
@@ -2201,7 +2277,7 @@ fn traverse_ty_class_typeconst_def<Ctx: Clone, Err, Ex, En>(
         top_down,
         bottom_up,
     );
-    transform_ty_class_typeconst(&mut elem.kind, ctx, errs, top_down, bottom_up)
+    transform_ty_class_typeconst(&mut elem.kind, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_ty_class_typeconst<Ctx: Clone, Err>(
@@ -2229,10 +2305,10 @@ fn traverse_ty_class_typeconst<Ctx: Clone, Err>(
 ) {
     match elem {
         ClassTypeconst::TCAbstract(elem) => {
-            transform_ty_class_abstract_typeconst(elem, ctx, errs, top_down, bottom_up)
+            transform_ty_class_abstract_typeconst(elem, &mut ctx.clone(), errs, top_down, bottom_up)
         }
         ClassTypeconst::TCConcrete(elem) => {
-            transform_ty_class_concrete_typeconst(elem, ctx, errs, top_down, bottom_up)
+            transform_ty_class_concrete_typeconst(elem, &mut ctx.clone(), errs, top_down, bottom_up)
         }
     }
 }
@@ -2294,7 +2370,13 @@ fn traverse_ty_class_concrete_typeconst<Ctx: Clone, Err>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_hint(&mut elem.c_tc_type, ctx, errs, top_down, bottom_up)
+    transform_ty_hint(
+        &mut elem.c_tc_type,
+        &mut ctx.clone(),
+        errs,
+        top_down,
+        bottom_up,
+    )
 }
 
 pub fn transform_ty_context<Ctx: Clone, Err>(
@@ -2320,7 +2402,7 @@ fn traverse_ty_context<Ctx: Clone, Err>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_hint(elem, ctx, errs, top_down, bottom_up)
+    transform_ty_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 // -- WhereConstraintHint ------------------------------------------------------
@@ -2349,7 +2431,7 @@ fn traverse_ty_where_constraint_hint<Ctx: Clone, Err>(
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
     transform_ty_hint(&mut elem.0, &mut ctx.clone(), errs, top_down, bottom_up);
-    transform_ty_hint(&mut elem.2, ctx, errs, top_down, bottom_up)
+    transform_ty_hint(&mut elem.2, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 // -- Enum ---------------------------------------------------------------------
@@ -2411,7 +2493,7 @@ fn traverse_ty_type_hint<Ctx: Clone, Err, Ex>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_type_hint_(&mut elem.1, ctx, errs, top_down, bottom_up)
+    transform_ty_type_hint_(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_ty_type_hint_<Ctx: Clone, Err>(
@@ -2466,7 +2548,7 @@ fn traverse_ty_targ<Ctx: Clone, Err, Ex>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_hint(&mut elem.1, ctx, errs, top_down, bottom_up)
+    transform_ty_hint(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 // -- Tparam -------------------------------------------------------------------
 
@@ -2499,7 +2581,13 @@ fn traverse_ty_tparam<Ctx: Clone, Err, Ex, En>(
     elem.constraints.iter_mut().for_each(|(_elem0, elem1)| {
         transform_ty_hint(elem1, &mut ctx.clone(), errs, top_down, bottom_up)
     });
-    transform_ty_user_attributes(&mut elem.user_attributes, ctx, errs, top_down, bottom_up)
+    transform_ty_user_attributes(
+        &mut elem.user_attributes,
+        &mut ctx.clone(),
+        errs,
+        top_down,
+        bottom_up,
+    )
 }
 
 // -- UserAttribute(s) ---------------------------------------------------------
@@ -2585,7 +2673,13 @@ fn traverse_ty_file_attribute<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_user_attributes(&mut elem.user_attributes, ctx, errs, top_down, bottom_up)
+    transform_ty_user_attributes(
+        &mut elem.user_attributes,
+        &mut ctx.clone(),
+        errs,
+        top_down,
+        bottom_up,
+    )
 }
 
 // -- Hints --------------------------------------------------------------------
@@ -2613,7 +2707,7 @@ fn traverse_ty_class_hint<Ctx: Clone, Err>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_hint(elem, ctx, errs, top_down, bottom_up)
+    transform_ty_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_ty_trait_hint<Ctx: Clone, Err>(
@@ -2639,7 +2733,7 @@ fn traverse_ty_trait_hint<Ctx: Clone, Err>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_hint(elem, ctx, errs, top_down, bottom_up)
+    transform_ty_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 pub fn transform_ty_xhp_attr_hint<Ctx: Clone, Err>(
@@ -2665,7 +2759,7 @@ fn traverse_ty_xhp_attr_hint<Ctx: Clone, Err>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_hint(elem, ctx, errs, top_down, bottom_up)
+    transform_ty_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 // -- Hint ---------------------------------------------------------------------
@@ -2693,7 +2787,7 @@ fn traverse_ty_hint<Ctx: Clone, Err>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_hint_(&mut elem.1, ctx, errs, top_down, bottom_up)
+    transform_ty_hint_(&mut elem.1, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 // -- Hint_ --------------------------------------------------------------------
@@ -2725,7 +2819,9 @@ fn traverse_ty_hint_<Ctx: Clone, Err>(
         Hint_::Hoption(elem)
         | Hint_::Hlike(elem)
         | Hint_::Hsoft(elem)
-        | Hint_::Haccess(elem, _) => transform_ty_hint(elem, ctx, errs, top_down, bottom_up),
+        | Hint_::Haccess(elem, _) => {
+            transform_ty_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
         Hint_::Htuple(elem)
         | Hint_::Hunion(elem)
         | Hint_::Hintersection(elem)
@@ -2743,10 +2839,14 @@ fn traverse_ty_hint_<Ctx: Clone, Err>(
             elem0.iter_mut().for_each(|elem| {
                 transform_ty_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
             });
-            transform_ty_hint(elem1, ctx, errs, top_down, bottom_up)
+            transform_ty_hint(elem1, &mut ctx.clone(), errs, top_down, bottom_up)
         }
-        Hint_::Hfun(elem) => transform_ty_hint_fun(elem, ctx, errs, top_down, bottom_up),
-        Hint_::Hshape(elem) => transform_ty_nast_shape_info(elem, ctx, errs, top_down, bottom_up),
+        Hint_::Hfun(elem) => {
+            transform_ty_hint_fun(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
+        Hint_::Hshape(elem) => {
+            transform_ty_nast_shape_info(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
         Hint_::Hany
         | Hint_::Herr
         | Hint_::Hmixed
@@ -2800,7 +2900,13 @@ fn traverse_ty_hint_fun<Ctx: Clone, Err>(
         bottom_up,
     );
     transform_fld_hint_fun_ctxs(&mut elem.ctxs, &mut ctx.clone(), errs, top_down, bottom_up);
-    transform_fld_hint_fun_return_ty(&mut elem.return_ty, ctx, errs, top_down, bottom_up);
+    transform_fld_hint_fun_return_ty(
+        &mut elem.return_ty,
+        &mut ctx.clone(),
+        errs,
+        top_down,
+        bottom_up,
+    );
 }
 
 // -- HintFun.param_tys --------------------------------------------------------
@@ -2915,7 +3021,7 @@ fn traverse_fld_hint_fun_return_ty<Ctx: Clone, Err>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_hint(elem, ctx, errs, top_down, bottom_up)
+    transform_ty_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
 }
 
 // -- Contexts -----------------------------------------------------------------
@@ -2975,10 +3081,10 @@ fn traverse_ty_refinement<Ctx: Clone, Err>(
 ) {
     match elem {
         Refinement::Rctx(_, elem) => {
-            transform_ty_ctx_refinement(elem, ctx, errs, top_down, bottom_up)
+            transform_ty_ctx_refinement(elem, &mut ctx.clone(), errs, top_down, bottom_up)
         }
         Refinement::Rtype(_, elem) => {
-            transform_ty_type_refinement(elem, ctx, errs, top_down, bottom_up)
+            transform_ty_type_refinement(elem, &mut ctx.clone(), errs, top_down, bottom_up)
         }
     }
 }
@@ -3009,9 +3115,11 @@ fn traverse_ty_ctx_refinement<Ctx: Clone, Err>(
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
     match elem {
-        CtxRefinement::CRexact(elem) => transform_ty_hint(elem, ctx, errs, top_down, bottom_up),
+        CtxRefinement::CRexact(elem) => {
+            transform_ty_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
         CtxRefinement::CRloose(elem) => {
-            transform_ty_ctx_refinement_bounds(elem, ctx, errs, top_down, bottom_up)
+            transform_ty_ctx_refinement_bounds(elem, &mut ctx.clone(), errs, top_down, bottom_up)
         }
     }
 }
@@ -3042,9 +3150,11 @@ fn traverse_ty_type_refinement<Ctx: Clone, Err>(
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
     match elem {
-        TypeRefinement::TRexact(elem) => transform_ty_hint(elem, ctx, errs, top_down, bottom_up),
+        TypeRefinement::TRexact(elem) => {
+            transform_ty_hint(elem, &mut ctx.clone(), errs, top_down, bottom_up)
+        }
         TypeRefinement::TRloose(elem) => {
-            transform_ty_type_refinement_bounds(elem, ctx, errs, top_down, bottom_up)
+            transform_ty_type_refinement_bounds(elem, &mut ctx.clone(), errs, top_down, bottom_up)
         }
     }
 }
@@ -3170,5 +3280,5 @@ fn traverse_ty_shape_field_info<Ctx: Clone, Err>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    transform_ty_hint(&mut elem.hint, ctx, errs, top_down, bottom_up)
+    transform_ty_hint(&mut elem.hint, &mut ctx.clone(), errs, top_down, bottom_up)
 }

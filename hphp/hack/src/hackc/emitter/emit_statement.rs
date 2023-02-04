@@ -395,23 +395,21 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     scope::with_unnamed_locals(e, |e| {
         let mut instrs = vec![];
-        for (_, expr) in el.iter() {
-            instrs.push(emit_expr::emit_expr(e, env, expr)?)
-        }
-        let load_args = InstrSeq::gather(instrs);
-
         let mut locals: Vec<Local> = vec![];
-        for (lvar, _) in el.iter() {
-            locals.push(match lvar {
+        for (lvar, expr) in el.iter() {
+            let local = match lvar {
                 None => e.local_gen_mut().get_unnamed(),
                 Some(ast::Lid(_, id)) => e
                     .local_gen_mut()
                     .init_unnamed_for_tempname(local_id::get_name(id))
                     .to_owned(),
-            });
+            };
+            instrs.push(emit_expr::emit_expr(e, env, expr)?);
+            instrs.push(instr::pop_l(local));
+            locals.push(local);
         }
 
-        let init_locals = InstrSeq::gather(locals.iter().rev().map(|l| instr::pop_l(*l)).collect());
+        let load_args = InstrSeq::gather(instrs);
         let unset_locals = InstrSeq::gather(locals.iter().map(|l| instr::unset_l(*l)).collect());
         let mut instrs = vec![];
         for l in locals.iter() {
@@ -434,9 +432,15 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
         let block_instrs = emit_stmts(e, env, block)?;
         Ok((
             // before
-            InstrSeq::gather(vec![load_args, init_locals]),
+            instr::empty(),
             // inner
-            InstrSeq::gather(vec![emit_pos(pos), await_all, unpack, block_instrs]),
+            InstrSeq::gather(vec![
+                load_args,
+                emit_pos(pos),
+                await_all,
+                unpack,
+                block_instrs,
+            ]),
             // after
             unset_locals,
         ))

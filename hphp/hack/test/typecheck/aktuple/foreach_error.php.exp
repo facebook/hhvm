@@ -4,7 +4,7 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "foreach_error.php", line 9, characters 18-21:
   But got `num`
-  File "hackarray.hhi", line 52, characters 75-75:
+  File "hackarray.hhi", line 52, characters 54-54:
     via this generic `T`
   File "hackarray.hhi", line 22, characters 35-36:
     via this generic `Tv`

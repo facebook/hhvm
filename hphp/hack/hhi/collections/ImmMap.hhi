@@ -44,8 +44,8 @@ namespace HH {
    */
   <<__SupportDynamicType>>
   final class ImmMap<
-    <<__RequireDynamic>> Tk as arraykey,
-    <<__RequireDynamic>> +Tv,
+    Tk as arraykey,
+    +Tv,
   > implements \ConstMap<Tk, Tv> {
     /**
      * Creates an `ImmMap` from the given `KeyedTraversable`, or an empty

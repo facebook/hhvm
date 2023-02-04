@@ -6,7 +6,7 @@ File "dict2.php", line 13, characters 16-34:
 Invalid argument (Typing[4110])
   File "dict2.php", line 23, characters 28-30:
   Expected `int`
-  File "hackarray.hhi", line 33, characters 33-40:
+  File "hackarray.hhi", line 33, characters 12-19:
   But got `arraykey`
 File "dict2.php", line 13, characters 31-34:
 Wrong number of type arguments (expected 2, got 0) (Typing[4101])
@@ -16,5 +16,5 @@ File "dict2.php", line 16, characters 16-40:
 Invalid argument (Typing[4110])
   File "dict2.php", line 23, characters 28-30:
   Expected `int`
-  File "hackarray.hhi", line 33, characters 33-40:
+  File "hackarray.hhi", line 33, characters 12-19:
   But got `arraykey`

@@ -17,8 +17,8 @@ namespace HH {
    */
   <<__Sealed(dict::class, keyset::class, vec::class), __SupportDynamicType>>
   abstract class AnyArray<
-    <<__RequireDynamic>> +Tk as arraykey,
-    <<__RequireDynamic>> +Tv,
+    +Tk as arraykey,
+    +Tv,
   > implements KeyedContainer<Tk, Tv>, \XHPChild {
 
   }
@@ -30,8 +30,8 @@ namespace HH {
    */
   <<__SupportDynamicType>>
   abstract final class dict<
-    <<__RequireDynamic>> +Tk as arraykey,
-    <<__RequireDynamic>> +Tv,
+    +Tk as arraykey,
+    +Tv,
   > extends AnyArray<Tk, Tv> {}
 
   /**
@@ -40,7 +40,7 @@ namespace HH {
    * `keyset` is a value type, so any mutation produces a new value.
    */
   <<__SupportDynamicType>>
-  abstract final class keyset<<<__RequireDynamic>> +T as arraykey>
+  abstract final class keyset<+T as arraykey>
     extends AnyArray<T, T> {}
 
   /**
@@ -49,6 +49,6 @@ namespace HH {
    * `vec` is a value type, so any mutation produces a new value.
    */
   <<__SupportDynamicType>>
-  abstract final class vec<<<__RequireDynamic>> +T> extends AnyArray<int, T> {}
+  abstract final class vec<+T> extends AnyArray<int, T> {}
 
 } // namespace HH

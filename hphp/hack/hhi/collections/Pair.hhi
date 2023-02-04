@@ -43,7 +43,7 @@ namespace HH {
    * @guide /hack/collections/classes
    */
   <<__SupportDynamicType>>
-  final class Pair<<<__RequireDynamic>> +Tv1, <<__RequireDynamic>> +Tv2>
+  final class Pair<+Tv1, +Tv2>
     implements \ConstVector<(Tv1 | Tv2)> {
     /**
      * @internal

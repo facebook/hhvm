@@ -125,22 +125,22 @@ namespace HH {
     ),
     __SupportDynamicType,
   >>
-  abstract class WaitableWaitHandle<<<__RequireDynamic>> +T>
+  abstract class WaitableWaitHandle<+T>
     extends Awaitable<T> {
   }
   <<__SupportDynamicType>>
-  final class StaticWaitHandle<<<__RequireDynamic>> +T> extends Awaitable<T> {
+  final class StaticWaitHandle<+T> extends Awaitable<T> {
   }
 
   <<__SupportDynamicType>>
-  final class AsyncFunctionWaitHandle<<<__RequireDynamic>> +T>
+  final class AsyncFunctionWaitHandle<+T>
     extends ResumableWaitHandle<T> {
   }
 
   <<__SupportDynamicType>>
   final class AsyncGeneratorWaitHandle<
-    <<__RequireDynamic>> +Tk,
-    <<__RequireDynamic>> +Tv,
+    +Tk,
+    +Tv,
   > extends ResumableWaitHandle<?(Tk, Tv)> {
   }
 
@@ -162,7 +162,7 @@ namespace HH {
     __Sealed(StaticWaitHandle::class, WaitableWaitHandle::class),
     __SupportDynamicType,
   >>
-  abstract class Awaitable<<<__RequireDynamic>> +T> {
+  abstract class Awaitable<+T> {
     public static function setOnIOWaitEnterCallback(
       ?(function(): void) $callback,
     ): \HH\FIXME\MISSING_RETURN_TYPE {}
@@ -178,7 +178,7 @@ namespace HH {
     __Sealed(AsyncFunctionWaitHandle::class, AsyncGeneratorWaitHandle::class),
     __SupportDynamicType,
   >>
-  abstract class ResumableWaitHandle<<<__RequireDynamic>> +T>
+  abstract class ResumableWaitHandle<+T>
     extends WaitableWaitHandle<T> {
     public static function setOnCreateCallback(
       ?(function(
@@ -261,7 +261,7 @@ namespace HH {
   }
 
   <<__SupportDynamicType>>
-  final class ExternalThreadEventWaitHandle<<<__RequireDynamic>> +T>
+  final class ExternalThreadEventWaitHandle<+T>
     extends WaitableWaitHandle<T> {
     public static function setOnCreateCallback(
       ?(function(ExternalThreadEventWaitHandle<mixed>): void) $callback,

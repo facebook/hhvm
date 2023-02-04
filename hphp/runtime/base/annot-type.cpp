@@ -35,9 +35,7 @@ using StdStrToTypeMap = hphp_string_imap<AnnotType>;
 
 const StaticString
   s_HH_Traversable("HH\\Traversable"),
-  s_HH_RX_Traversable("HH\\Rx\\Traversable"),
   s_HH_KeyedTraversable("HH\\KeyedTraversable"),
-  s_HH_RX_KeyedTraversable("HH\\Rx\\KeyedTraversable"),
   s_HH_Container("HH\\Container"),
   s_HH_KeyedContainer("HH\\KeyedContainer"),
   s_XHPChild("XHPChild"),
@@ -139,8 +137,6 @@ bool interface_supports_arrlike(const StringData* s) {
 bool interface_supports_arrlike(folly::StringPiece s) {
   return isame(s, s_HH_Traversable.slice()) ||
          isame(s, s_HH_KeyedTraversable.slice()) ||
-         isame(s, s_HH_RX_Traversable.slice()) ||
-         isame(s, s_HH_RX_KeyedTraversable.slice()) ||
          isame(s, s_HH_Container.slice()) ||
          isame(s, s_HH_KeyedContainer.slice()) ||
          isame(s, s_XHPChild.slice());

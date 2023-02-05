@@ -269,6 +269,12 @@ impl NamingProvider for NamingTable {
     fn get_module_path(&self, name: pos::ModuleName) -> Result<Option<RelativePath>> {
         Ok(self.get_module_pos(name)?.map(|pos| pos.path().into()))
     }
+    fn get_canon_type_name(&self, name: TypeName) -> Result<Option<TypeName>> {
+        self.get_canon_type_name(name)
+    }
+    fn get_canon_fun_name(&self, name: FunName) -> Result<Option<FunName>> {
+        self.get_canon_fun_name(name)
+    }
 }
 
 impl std::fmt::Debug for NamingTable {

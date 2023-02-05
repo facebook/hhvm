@@ -8,6 +8,7 @@ use std::fmt::Debug;
 use std::path::Path;
 
 use anyhow::Result;
+use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use oxidized::file_info::NameType;
 use oxidized::naming_types::KindOfType;
@@ -29,6 +30,11 @@ pub trait NamingProvider: Debug + Send + Sync {
     fn get_fun_path(&self, name: FunName) -> Result<Option<RelativePath>>;
     fn get_const_path(&self, name: ConstName) -> Result<Option<RelativePath>>;
     fn get_module_path(&self, name: ModuleName) -> Result<Option<RelativePath>>;
+
+    /// Case-insensitive lookup. Fetch the correct casing according to the
+    /// symbol table.
+    fn get_canon_type_name(&self, name: TypeName) -> Result<Option<TypeName>>;
+    fn get_canon_fun_name(&self, name: FunName) -> Result<Option<FunName>>;
 }
 
 /// A naming table in a SQLite database (with the same database schema as
@@ -80,6 +86,20 @@ impl NamingProvider for SqliteNamingTable {
             .lock()
             .get_path_by_symbol_hash(ToplevelSymbolHash::from_module(name.as_str()))?;
         Ok(path_opt.map(|path| RelativePath::new(path.prefix(), path.path())))
+    }
+    fn get_canon_type_name(&self, name: TypeName) -> Result<Option<TypeName>> {
+        Ok(self
+            .names
+            .lock()
+            .get_type_name_case_insensitive(ToplevelCanonSymbolHash::from(name))?
+            .map(Into::into))
+    }
+    fn get_canon_fun_name(&self, name: FunName) -> Result<Option<FunName>> {
+        Ok(self
+            .names
+            .lock()
+            .get_fun_name_case_insensitive(ToplevelCanonSymbolHash::from(name))?
+            .map(Into::into))
     }
 }
 

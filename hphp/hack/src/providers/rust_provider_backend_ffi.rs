@@ -694,13 +694,7 @@ ocaml_ffi! {
         backend: Backend,
         name: pos::TypeName,
     ) -> Option<pos::TypeName> {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.naming_table().get_canon_type_name(name).unwrap()
-        } else {
-            // TODO: raise an exception or change NamingProvider to include
-            // canon methods; this implementation is incorrect
-            Some(name)
-        }
+        backend.naming_provider().get_canon_type_name(name).unwrap()
     }
 
     fn hh_rust_provider_backend_naming_funs_add(
@@ -753,13 +747,7 @@ ocaml_ffi! {
         backend: Backend,
         name: pos::FunName,
     ) -> Option<pos::FunName> {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.naming_table().get_canon_fun_name(name).unwrap()
-        } else {
-            // TODO: raise an exception or change NamingProvider to include
-            // canon methods; this implementation is incorrect
-            Some(name)
-        }
+        backend.naming_provider().get_canon_fun_name(name).unwrap()
     }
 
     fn hh_rust_provider_backend_naming_consts_add(

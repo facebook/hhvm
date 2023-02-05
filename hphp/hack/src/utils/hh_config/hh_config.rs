@@ -29,6 +29,14 @@ pub struct HhConfig {
 
     /// Config settings that did not match any setting known to this parser.
     pub unknown: Vec<(String, String)>,
+
+    pub gc_minor_heap_size: usize,
+    pub gc_space_overhead: usize,
+    pub hackfmt_version: usize,
+    pub sharedmem_dep_table_pow: usize,
+    pub sharedmem_global_size: usize,
+    pub sharedmem_hash_table_pow: usize,
+    pub sharedmem_heap_size: usize,
 }
 
 impl HhConfig {
@@ -54,7 +62,7 @@ impl HhConfig {
 
     pub fn from_config(config: ConfigFile) -> Self {
         let mut c = Self::default();
-        for (key, value) in config {
+        for (key, mut value) in config {
             let go = &mut c.opts;
             match key.as_str() {
                 "auto_namespace_map" => {
@@ -186,6 +194,30 @@ impl HhConfig {
                 }
                 "union_intersection_type_hints" => {
                     go.tco_union_intersection_type_hints = parse_json(&value);
+                }
+                "gc_minor_heap_size" => {
+                    value.retain(|c| c != '_');
+                    c.gc_minor_heap_size = parse_json(&value);
+                }
+                "gc_space_overhead" => {
+                    c.gc_space_overhead = parse_json(&value);
+                }
+                "hackfmt.version" => {
+                    c.hackfmt_version = parse_json(&value);
+                }
+                "sharedmem_dep_table_pow" => {
+                    c.sharedmem_dep_table_pow = parse_json(&value);
+                }
+                "sharedmem_global_size" => {
+                    value.retain(|c| c != '_');
+                    c.sharedmem_global_size = parse_json(&value);
+                }
+                "sharedmem_hash_table_pow" => {
+                    c.sharedmem_hash_table_pow = parse_json(&value);
+                }
+                "sharedmem_heap_size" => {
+                    value.retain(|c| c != '_');
+                    c.sharedmem_heap_size = parse_json(&value);
                 }
                 _ => c.unknown.push((key, value)),
             }

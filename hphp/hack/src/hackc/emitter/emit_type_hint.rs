@@ -190,7 +190,7 @@ fn can_be_nullable(hint: &Hint_) -> bool {
             if let Haccess(_, _) = **h {
                 true
             } else {
-                can_be_nullable(&**h)
+                can_be_nullable(h)
             }
         }
         Happly(Id(_, id), _) => {
@@ -368,7 +368,7 @@ fn try_add_nullable(
     flags: TypeConstraintFlags,
 ) -> TypeConstraintFlags {
     let Hint(_, h) = hint;
-    add_nullable(nullable && can_be_nullable(&**h), flags)
+    add_nullable(nullable && can_be_nullable(h), flags)
 }
 
 fn make_type_info<'arena>(
@@ -504,11 +504,11 @@ fn get_flags(tparams: &[&str], flags: TypeConstraintFlags, hint: &Hint_) -> Type
             let Hint(_, h) = x;
             TypeConstraintFlags::Nullable
                 | TypeConstraintFlags::DisplayNullable
-                | get_flags(tparams, flags, &**h)
+                | get_flags(tparams, flags, h)
         }
         Hsoft(x) => {
             let Hint(_, h) = x;
-            TypeConstraintFlags::Soft | get_flags(tparams, flags, &**h)
+            TypeConstraintFlags::Soft | get_flags(tparams, flags, h)
         }
         Haccess(_, _) => TypeConstraintFlags::TypeConstant | flags,
         Happly(Id(_, s), _) if tparams.contains(&s.as_str()) => {

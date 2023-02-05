@@ -245,12 +245,12 @@ fn emit_xhp_child_decl(unary: &str, child: &XhpChild) -> Result<Expr_> {
             }
         }
         XhpChild::ChildUnary(c, op) => {
-            emit_xhp_child_decl(xhp_child_op_to_int(Some(op)).to_string().as_str(), &**c)
+            emit_xhp_child_decl(xhp_child_op_to_int(Some(op)).to_string().as_str(), c)
         }
         XhpChild::ChildBinary(c1, c2) => get_array3(
             Expr_::Int("5".into()),
-            emit_xhp_child_decl(unary, &**c1)?,
-            emit_xhp_child_decl(unary, &**c2)?,
+            emit_xhp_child_decl(unary, c1)?,
+            emit_xhp_child_decl(unary, c2)?,
         ),
     }
 }

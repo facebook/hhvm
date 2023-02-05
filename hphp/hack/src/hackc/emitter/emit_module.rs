@@ -85,7 +85,7 @@ pub fn emit_module_use_from_program<'arena, 'decl>(
 ) -> Maybe<Str<'arena>> {
     for node in prog.iter() {
         if let ast::Def::SetModule(s) = node {
-            return Maybe::Just(Str::new_str(e.alloc, &*s.1));
+            return Maybe::Just(Str::new_str(e.alloc, &s.1));
         }
     }
     Maybe::Nothing

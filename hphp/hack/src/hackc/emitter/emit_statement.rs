@@ -118,7 +118,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
         a::Stmt_::Block(b) => emit_block(env, e, b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
         a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),
-        a::Stmt_::Using(x) => emit_using(e, env, &**x),
+        a::Stmt_::Using(x) => emit_using(e, env, x),
         a::Stmt_::Break => Ok(emit_break(e, env, pos)),
         a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
         a::Stmt_::Do(x) => emit_do(e, env, &x.0, &x.1),

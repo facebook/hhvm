@@ -124,7 +124,7 @@ impl<'arena> ClassName<'arena> {
     ) -> Self {
         ClassName(Str::new_str(
             alloc,
-            &*format!(
+            &format!(
                 "__module_{}",
                 hhbc_string_utils::strip_global_ns(&hhbc_string_utils::mangle(s.into()))
             ),

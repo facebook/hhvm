@@ -160,12 +160,12 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<
 
     newline(w)?;
     print_module_use(w, &prog.module_use)?;
-    concat(w, &prog.adata, |w, a| print_adata_region(ctx, w, a))?;
-    concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
-    concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
-    concat(w, &prog.modules, |w, cd| print_module_def(ctx, w, cd))?;
-    concat(w, &prog.constants, |w, c| print_constant(ctx, w, c))?;
-    concat(w, &prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
+    concat(w, prog.adata, |w, a| print_adata_region(ctx, w, a))?;
+    concat(w, prog.functions, |w, f| print_fun_def(ctx, w, f))?;
+    concat(w, prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
+    concat(w, prog.modules, |w, cd| print_module_def(ctx, w, cd))?;
+    concat(w, prog.constants, |w, c| print_constant(ctx, w, c))?;
+    concat(w, prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
     print_file_attributes(ctx, w, prog.file_attributes.as_ref())?;
     print_include_region(w, &prog.symbol_refs.includes)?;
     print_symbol_ref_regions(ctx, w, &prog.symbol_refs)?;
@@ -292,7 +292,7 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function<'_>) -
     let body = &fun_def.body;
     newline(w)?;
     w.write_all(b".function ")?;
-    print_upper_bounds_(w, &body.upper_bounds)?;
+    print_upper_bounds_(w, body.upper_bounds)?;
     w.write_all(b" ")?;
     print_special_and_user_attrs(
         ctx,
@@ -492,8 +492,8 @@ fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method<'_
     let body = &method_def.body;
     newline(w)?;
     w.write_all(b"  .method ")?;
-    print_shadowed_tparams(w, &body.shadowed_tparams)?;
-    print_upper_bounds_(w, &body.upper_bounds)?;
+    print_shadowed_tparams(w, body.shadowed_tparams)?;
+    print_upper_bounds_(w, body.upper_bounds)?;
     w.write_all(b" ")?;
     print_special_and_user_attrs(
         ctx,
@@ -709,7 +709,7 @@ fn print_adata_collection_argument(
     loc: Option<&ast_defs::Pos>,
     values: &[TypedValue<'_>],
 ) -> Result<()> {
-    print_adata_mapped_argument(ctx, w, col_type, loc, values, &print_adata)
+    print_adata_mapped_argument(ctx, w, col_type, loc, values, print_adata)
 }
 
 fn print_adata_dict_collection_argument(
@@ -778,7 +778,7 @@ fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &Attribute<'_>) -> R
         Adata::VEC_PREFIX,
         a.arguments.len()
     )?;
-    concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
+    concat(w, a.arguments, |w, arg| print_adata(ctx, w, arg))?;
     w.write_all(b"}\"\"\")")
 }
 
@@ -844,7 +844,7 @@ fn print_body(
     if !body.decl_vars.is_empty() {
         ctx.newline(w)?;
         w.write_all(b".declvars ")?;
-        concat_by(w, " ", &body.decl_vars, |w, var| {
+        concat_by(w, " ", body.decl_vars, |w, var| {
             if var.iter().all(is_bareword_char) {
                 w.write_all(var)
             } else {
@@ -1109,7 +1109,7 @@ fn print_upper_bounds<'arena>(
 fn print_upper_bound<'arena>(w: &mut dyn Write, ub: &UpperBound<'arena>) -> Result<()> {
     paren(w, |w| {
         write_bytes!(w, "{} as ", ub.name)?;
-        concat_by(w, ", ", &ub.bounds, print_type_info)
+        concat_by(w, ", ", ub.bounds, print_type_info)
     })
 }
 
@@ -1123,7 +1123,7 @@ fn print_upper_bounds_<'arena>(
 fn print_upper_bound_<'arena>(w: &mut dyn Write, ub: &UpperBound<'arena>) -> Result<()> {
     paren(w, |w| {
         write_bytes!(w, "{} as ", ub.name)?;
-        concat_by(w, ", ", &ub.bounds, print_type_info)
+        concat_by(w, ", ", ub.bounds, print_type_info)
     })
 }
 

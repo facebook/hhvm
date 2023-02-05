@@ -178,7 +178,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
     }
 
     pub fn is_in_lambda(&self) -> bool {
-        self.items.last().map_or(false, &ScopeItem::is_in_lambda)
+        self.items.last().map_or(false, ScopeItem::is_in_lambda)
     }
 
     pub fn coeffects_of_scope(&self, alloc: &'arena bumpalo::Bump) -> Coeffects<'arena> {

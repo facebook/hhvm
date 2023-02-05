@@ -738,7 +738,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         alloc,
         emitter,
         &mut properties,
-        &pinit_filter,
+        pinit_filter,
         "86pinit",
         span,
     )?;
@@ -746,7 +746,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         alloc,
         emitter,
         &mut properties,
-        &sinit_filter,
+        sinit_filter,
         "86sinit",
         span,
     )?;
@@ -754,7 +754,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         alloc,
         emitter,
         &mut properties,
-        &linit_filter,
+        linit_filter,
         "86linit",
         span,
     )?;

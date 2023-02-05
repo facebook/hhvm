@@ -856,7 +856,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
         Some((ast::Expr(_, _, ast::Expr_::Id(id)), _, args, None))
             if (cant_inline_gen_functions
                 && args.len() == 1
-                && string_utils::strip_global_ns(&(*id.1)) == "gena") =>
+                && string_utils::strip_global_ns(&id.1) == "gena") =>
         {
             inline_gena_call(emitter, env, error::expect_normal_paramkind(&args[0])?)
         }

@@ -91,11 +91,10 @@ fn parse_macro(input: TokenStream) -> Result<TokenStream> {
         return Err(t.error("Unexpected input"));
     }
 
-    let state = State { tokenizer };
-
     let mut var_decl = TokenStream::new();
-    state.collect_var_decl(&tree, &mut var_decl);
+    State::collect_var_decl(&tree, &mut var_decl);
 
+    let state = State { tokenizer };
     let body = state.emit_ast(tree, Context::None);
 
     let result = quote!(
@@ -520,7 +519,7 @@ struct State {
 }
 
 impl State {
-    fn collect_var_decl(&self, ast: &Ast, output: &mut TokenStream) {
+    fn collect_var_decl(ast: &Ast, output: &mut TokenStream) {
         match ast {
             Ast::Code { .. } | Ast::FnCall { .. } | Ast::Predicate(_) => {}
 
@@ -528,14 +527,14 @@ impl State {
             | Ast::OneOrMore(sub)
             | Ast::ZeroOrMore(sub)
             | Ast::ZeroOrOne(sub) => {
-                self.collect_var_decl(sub, output);
+                Self::collect_var_decl(sub, output);
             }
             Ast::Select { .. } => {
                 // Select declares new vars in each case.
             }
             Ast::Sequence(subs) => {
                 for sub in subs {
-                    self.collect_var_decl(sub, output);
+                    Self::collect_var_decl(sub, output);
                 }
             }
             Ast::VarBind { name_decl, .. } => {
@@ -602,7 +601,7 @@ impl State {
                     let what = case.predicate.what();
 
                     let mut var_decl = TokenStream::new();
-                    self.collect_var_decl(&case.pattern, &mut var_decl);
+                    Self::collect_var_decl(&case.pattern, &mut var_decl);
 
                     let pat = self.emit_ast(case.pattern, Context::None);
                     result.extend(quote!(if #predicate { #var_decl #pat } else));
@@ -612,7 +611,7 @@ impl State {
                 // else
                 if let Some(box else_case) = else_case {
                     let mut var_decl = TokenStream::new();
-                    self.collect_var_decl(&else_case, &mut var_decl);
+                    Self::collect_var_decl(&else_case, &mut var_decl);
 
                     let else_case = self.emit_ast(else_case, Context::None);
                     result.extend(quote!({ #var_decl #else_case }));

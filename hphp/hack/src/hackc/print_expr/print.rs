@@ -303,7 +303,7 @@ fn print_expr(
             Some((
                 ast::ClassId(_, _, ast::ClassId_::CIexpr(ast::Expr(_, _, ast::Expr_::Id(id)))),
                 (_, s2),
-            )) if is_class(&s2) && !(is_self(&id.1) || is_parent(&id.1) || is_static(&id.1)) => {
+            )) if is_class(s2) && !(is_self(&id.1) || is_parent(&id.1) || is_static(&id.1)) => {
                 Ok(Some({
                     let s1 = get_class_name_from_id(ctx, env.codegen_env, false, false, &id.1);
                     if is_array_get {
@@ -407,7 +407,7 @@ fn print_expr(
                 }
             };
             write::paren(w, |w| {
-                write::concat_by(w, ", ", &es, |w, (pk, e)| match pk {
+                write::concat_by(w, ", ", es, |w, (pk, e)| match pk {
                     ParamKind::Pnormal => print_expr(ctx, w, env, e),
                     ParamKind::Pinout(_) => Err(Error::fail("illegal default value").into()),
                 })?;
@@ -840,12 +840,10 @@ fn print_statement(
             })
         }),
         S_::Expr(expr) => {
-            print_expr(ctx, w, env, &**expr)?;
+            print_expr(ctx, w, env, expr)?;
             w.write_all(b";\n")
         }
-        S_::Throw(expr) => {
-            write::wrap_by_(w, "throw ", ";\n", |w| print_expr(ctx, w, env, &**expr))
-        }
+        S_::Throw(expr) => write::wrap_by_(w, "throw ", ";\n", |w| print_expr(ctx, w, env, expr)),
         S_::Break => w.write_all(b"break;\n"),
         S_::Continue => w.write_all(b"continue;\n"),
         S_::While(x) => {

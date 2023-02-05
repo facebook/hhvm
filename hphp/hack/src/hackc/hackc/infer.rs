@@ -82,7 +82,7 @@ fn process_single_file(path: &Path, opts: &Opts, writer: &SyncWrite) -> Result<(
 }
 
 fn convert_single_file(path: &Path, opts: &Opts) -> Result<Vec<u8>> {
-    let content = fs::read(&path)?;
+    let content = fs::read(path)?;
 
     let action = || {
         let pre_alloc = bumpalo::Bump::default();

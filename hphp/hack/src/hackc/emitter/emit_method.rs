@@ -190,7 +190,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
             .get(&class_name)
             .unwrap_or(&class.namespace),
     );
-    let mut coeffects = if method.ctxs == None && is_closure_body {
+    let mut coeffects = if method.ctxs.is_none() && is_closure_body {
         let parent_coeffects = emitter
             .global_state()
             .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1);

@@ -101,9 +101,11 @@
   ast
   db_path_provider
   file_info
+  full_fidelity
   naming_heap
   pos
   relative_path
+  rust_provider_backend_stubs
   shallow_decl_defs
   typing_defs)
  (preprocess

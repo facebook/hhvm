@@ -135,6 +135,12 @@ ocaml_ffi! {
             unimplemented!("pop_local_changes: {UNIMPLEMENTED_MESSAGE}");
         }
     }
+
+    fn hh_rust_provider_backend_set_ctx_empty(backend: Backend, is_empty: bool) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.set_ctx_empty(is_empty);
+        }
+    }
 }
 
 // Decl_provider ////////////////////////////////////////////////////////////
@@ -655,7 +661,7 @@ ocaml_ffi! {
         // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
         let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
-            let ocaml_value = if let Some(opt) = unsafe { backend.naming_table().get_ocaml_type_pos(name) } {
+            let ocaml_value = if let Some(opt) = unsafe { backend.get_ocaml_type_pos(name) } {
                 // Subtle: `get_ocaml_*_pos` returns `Option<UnsafeOcamlPtr>` where
                 // the `UnsafeOcamlPtr` is a value of OCaml type `FileInfo.pos option`.
                 // We want to just convert `opt` to an OCaml value here, not
@@ -663,7 +669,7 @@ ocaml_ffi! {
                 to_ocaml(&opt)
             } else {
                 let name = pos::TypeName::from(std::str::from_utf8(name).unwrap());
-                to_ocaml(&backend.naming_table().get_type_pos(name).unwrap())
+                to_ocaml(&backend.naming_table_with_context().get_type_pos(name).unwrap())
             };
             return ocaml_value;
         }
@@ -717,11 +723,11 @@ ocaml_ffi! {
         // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
         let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
-            let ocaml_value = if let Some(opt) = unsafe { backend.naming_table().get_ocaml_fun_pos(name) } {
+            let ocaml_value = if let Some(opt) = unsafe { backend.get_ocaml_fun_pos(name) } {
                 to_ocaml(&opt)
             } else {
                 let name = pos::FunName::from(std::str::from_utf8(name).unwrap());
-                to_ocaml(&backend.naming_table().get_fun_pos(name).unwrap())
+                to_ocaml(&backend.naming_table_with_context().get_fun_pos(name).unwrap())
             };
             return ocaml_value;
         }
@@ -770,11 +776,11 @@ ocaml_ffi! {
         // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
         let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
-            let ocaml_value = if let Some(opt) = unsafe { backend.naming_table().get_ocaml_const_pos(name) } {
+            let ocaml_value = if let Some(opt) = unsafe { backend.get_ocaml_const_pos(name) } {
                 to_ocaml(&opt)
             } else {
                 let name = pos::ConstName::from(std::str::from_utf8(name).unwrap());
-                to_ocaml(&backend.naming_table().get_const_pos(name).unwrap())
+                to_ocaml(&backend.naming_table_with_context().get_const_pos(name).unwrap())
             };
             return ocaml_value;
         }
@@ -816,11 +822,11 @@ ocaml_ffi! {
         // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
         let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
-            let ocaml_value = if let Some(opt) = unsafe { backend.naming_table().get_ocaml_module_pos(name) } {
+            let ocaml_value = if let Some(opt) = unsafe { backend.get_ocaml_module_pos(name) } {
                 to_ocaml(&opt)
             } else {
                 let name = pos::ModuleName::from(std::str::from_utf8(name).unwrap());
-                to_ocaml(&backend.naming_table().get_module_pos(name).unwrap())
+                to_ocaml(&backend.naming_table_with_context().get_module_pos(name).unwrap())
             };
             return ocaml_value;
         }

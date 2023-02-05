@@ -59,19 +59,129 @@ let find_symbol_in_context
                None))
   |> Relative_path.Map.choose_opt
 
+let find_const_in_context (ctx : Provider_context.t) (name : string) :
+    (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
+  find_symbol_in_context
+    ~ctx
+    ~get_entry_symbols:(fun { FileInfo.consts; _ } ->
+      List.map consts ~f:(attach_name_type FileInfo.Const))
+    ~is_symbol:(String.equal name)
+
+let find_fun_in_context (ctx : Provider_context.t) (name : string) :
+    (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
+  find_symbol_in_context
+    ~ctx
+    ~get_entry_symbols:(fun { FileInfo.funs; _ } ->
+      List.map funs ~f:(attach_name_type FileInfo.Fun))
+    ~is_symbol:(String.equal name)
+
+let compute_fun_canon_name ctx path name =
+  let open Option.Monad_infix in
+  let canon_name fd = snd fd.Aast.fd_name in
+  Ast_provider.find_ifun_in_file ctx path name >>| canon_name
+
+let find_fun_canon_name_in_context (ctx : Provider_context.t) (name : string) :
+    string option =
+  let name = String.lowercase name in
+  let symbol_opt =
+    find_symbol_in_context
+      ~ctx
+      ~get_entry_symbols:(fun { FileInfo.funs; _ } ->
+        List.map funs ~f:(attach_name_type FileInfo.Fun))
+      ~is_symbol:(fun symbol_name ->
+        String.equal (Naming_sqlite.to_canon_name_key symbol_name) name)
+  in
+  match symbol_opt with
+  | Some (path, _pos) -> compute_fun_canon_name ctx path name
+  | None -> None
+
+let get_entry_symbols_for_type { FileInfo.classes; typedefs; _ } =
+  let classes = List.map classes ~f:(attach_name_type FileInfo.Class) in
+  let typedefs = List.map typedefs ~f:(attach_name_type FileInfo.Typedef) in
+  List.concat [classes; typedefs]
+
+let find_type_in_context (ctx : Provider_context.t) (name : string) :
+    (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
+  find_symbol_in_context
+    ~ctx
+    ~get_entry_symbols:get_entry_symbols_for_type
+    ~is_symbol:(String.equal name)
+
+let compute_type_canon_name ctx path kind name =
+  let open Option.Monad_infix in
+  match kind with
+  | Naming_types.TClass ->
+    Ast_provider.find_iclass_in_file ctx path name
+    >>| fun { Aast.c_name = (_, canon_name); _ } -> canon_name
+  | Naming_types.TTypedef ->
+    Ast_provider.find_itypedef_in_file ctx path name
+    >>| fun { Aast.t_name = (_, canon_name); _ } -> canon_name
+
+let find_type_canon_name_in_context (ctx : Provider_context.t) (name : string) :
+    string option =
+  let name = String.lowercase name in
+  let symbol_opt =
+    find_symbol_in_context
+      ~ctx
+      ~get_entry_symbols:get_entry_symbols_for_type
+      ~is_symbol:(fun symbol_name ->
+        String.equal (Naming_sqlite.to_canon_name_key symbol_name) name)
+  in
+  match symbol_opt with
+  | Some (path, (_pos, name_type)) ->
+    compute_type_canon_name ctx path (name_type_to_kind name_type) name
+  | None -> None
+
+let find_module_in_context (ctx : Provider_context.t) (name : string) :
+    (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
+  find_symbol_in_context
+    ~ctx
+    ~get_entry_symbols:(fun { FileInfo.modules; _ } ->
+      List.map modules ~f:(attach_name_type FileInfo.Module))
+    ~is_symbol:(String.equal name)
+
+let get_entry_contents ctx filename =
+  match
+    Relative_path.Map.find_opt (Provider_context.get_entries ctx) filename
+  with
+  | None -> None
+  | Some entry ->
+    let source_text = Ast_provider.compute_source_text ~entry in
+    Some (Full_fidelity_source_text.text source_text)
+
 let is_path_in_ctx ~(ctx : Provider_context.t) (path : Relative_path.t) : bool =
   Relative_path.Map.mem (Provider_context.get_entries ctx) path
 
 let is_pos_in_ctx ~(ctx : Provider_context.t) (pos : FileInfo.pos) : bool =
   is_path_in_ctx ~ctx (FileInfo.get_pos_filename pos)
 
+let rust_backend_ctx_proxy (ctx : Provider_context.t) :
+    Rust_provider_backend.ctx_proxy option =
+  if Relative_path.Map.is_empty (Provider_context.get_entries ctx) then
+    None
+  else
+    Some
+      Rust_provider_backend.
+        {
+          get_entry_contents = get_entry_contents ctx;
+          is_pos_in_ctx = is_pos_in_ctx ~ctx;
+          find_fun_canon_name_in_context = find_fun_canon_name_in_context ctx;
+          find_type_canon_name_in_context = find_type_canon_name_in_context ctx;
+          find_const_in_context = find_const_in_context ctx;
+          find_fun_in_context = find_fun_in_context ctx;
+          find_type_in_context = find_type_in_context ctx;
+          find_module_in_context = find_module_in_context ctx;
+        }
+
 let find_symbol_in_context_with_suppression
     ~(ctx : Provider_context.t)
-    ~(get_entry_symbols : FileInfo.t -> (FileInfo.id * FileInfo.name_type) list)
-    ~(is_symbol : string -> bool)
-    ~(fallback : unit -> (FileInfo.pos * FileInfo.name_type) option) :
-    (FileInfo.pos * FileInfo.name_type) option =
-  match find_symbol_in_context ~ctx ~get_entry_symbols ~is_symbol with
+    ~(find_symbol_in_context :
+       Provider_context.t ->
+       string ->
+       (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option)
+    ~(fallback : unit -> (FileInfo.pos * FileInfo.name_type) option)
+    (name : string) : (FileInfo.pos * FileInfo.name_type) option =
+  match find_symbol_in_context ctx name with
   | Some (_path, pos) -> Some pos
   | None ->
     (match fallback () with
@@ -106,36 +216,40 @@ let get_and_cache
 
 let get_const_pos (ctx : Provider_context.t) (name : string) :
     FileInfo.pos option =
-  let open Option.Monad_infix in
-  find_symbol_in_context_with_suppression
-    ~ctx
-    ~get_entry_symbols:(fun { FileInfo.consts; _ } ->
-      List.map consts ~f:(attach_name_type FileInfo.Const))
-    ~is_symbol:(String.equal name)
-    ~fallback:(fun () ->
-      match Provider_context.get_backend ctx with
-      | Provider_backend.Analysis
-      | Provider_backend.Pessimised_shared_memory _
-      | Provider_backend.Shared_memory ->
-        Naming_heap.Consts.get_pos (db_path_of_ctx ctx) name
-        >>| attach_name_type FileInfo.Const
-      | Provider_backend.Rust_provider_backend backend ->
-        Rust_provider_backend.Naming.Consts.get_pos backend name
-        >>| attach_name_type FileInfo.Const
-      | Provider_backend.Local_memory
-          { Provider_backend.reverse_naming_table_delta; _ } ->
-        let open Provider_backend.Reverse_naming_table_delta in
-        get_and_cache
-          ~ctx
-          ~name
-          ~cache:reverse_naming_table_delta.consts
-          ~fallback:(fun db_path ->
-            Naming_sqlite.get_const_path_by_name db_path name
-            |> Option.map ~f:(fun path -> (FileInfo.Const, path)))
-        >>| attach_name_type_to_tuple
-      | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.Slow.rpc_get_gconst_path decl name)
-  >>| remove_name_type
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Naming.Consts.get_pos
+      backend
+      (rust_backend_ctx_proxy ctx)
+      name
+  | _ ->
+    let open Option.Monad_infix in
+    find_symbol_in_context_with_suppression
+      name
+      ~ctx
+      ~find_symbol_in_context:find_const_in_context
+      ~fallback:(fun () ->
+        match Provider_context.get_backend ctx with
+        | Provider_backend.Analysis
+        | Provider_backend.Pessimised_shared_memory _
+        | Provider_backend.Shared_memory ->
+          Naming_heap.Consts.get_pos (db_path_of_ctx ctx) name
+          >>| attach_name_type FileInfo.Const
+        | Provider_backend.Rust_provider_backend _ -> failwith "unreachable"
+        | Provider_backend.Local_memory
+            { Provider_backend.reverse_naming_table_delta; _ } ->
+          let open Provider_backend.Reverse_naming_table_delta in
+          get_and_cache
+            ~ctx
+            ~name
+            ~cache:reverse_naming_table_delta.consts
+            ~fallback:(fun db_path ->
+              Naming_sqlite.get_const_path_by_name db_path name
+              |> Option.map ~f:(fun path -> (FileInfo.Const, path)))
+          >>| attach_name_type_to_tuple
+        | Provider_backend.Decl_service { decl; _ } ->
+          Decl_service_client.Slow.rpc_get_gconst_path decl name)
+    >>| remove_name_type
 
 let const_exists (ctx : Provider_context.t) (name : string) : bool =
   match Provider_context.get_backend ctx with
@@ -187,36 +301,40 @@ let remove_const_batch (backend : Provider_backend.t) (names : string list) :
 
 let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
     =
-  let open Option.Monad_infix in
-  find_symbol_in_context_with_suppression
-    ~ctx
-    ~get_entry_symbols:(fun { FileInfo.funs; _ } ->
-      List.map funs ~f:(attach_name_type FileInfo.Fun))
-    ~is_symbol:(String.equal name)
-    ~fallback:(fun () ->
-      match Provider_context.get_backend ctx with
-      | Provider_backend.Analysis
-      | Provider_backend.Pessimised_shared_memory _
-      | Provider_backend.Shared_memory ->
-        Naming_heap.Funs.get_pos (db_path_of_ctx ctx) name
-        >>| attach_name_type FileInfo.Fun
-      | Provider_backend.Rust_provider_backend backend ->
-        Rust_provider_backend.Naming.Funs.get_pos backend name
-        >>| attach_name_type FileInfo.Fun
-      | Provider_backend.Local_memory
-          { Provider_backend.reverse_naming_table_delta; _ } ->
-        let open Provider_backend.Reverse_naming_table_delta in
-        get_and_cache
-          ~ctx
-          ~name
-          ~cache:reverse_naming_table_delta.funs
-          ~fallback:(fun db_path ->
-            Naming_sqlite.get_fun_path_by_name db_path name
-            |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
-        >>| attach_name_type_to_tuple
-      | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.Slow.rpc_get_fun_path decl name)
-  >>| remove_name_type
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Naming.Funs.get_pos
+      backend
+      (rust_backend_ctx_proxy ctx)
+      name
+  | _ ->
+    let open Option.Monad_infix in
+    find_symbol_in_context_with_suppression
+      name
+      ~ctx
+      ~find_symbol_in_context:find_fun_in_context
+      ~fallback:(fun () ->
+        match Provider_context.get_backend ctx with
+        | Provider_backend.Analysis
+        | Provider_backend.Pessimised_shared_memory _
+        | Provider_backend.Shared_memory ->
+          Naming_heap.Funs.get_pos (db_path_of_ctx ctx) name
+          >>| attach_name_type FileInfo.Fun
+        | Provider_backend.Rust_provider_backend _ -> failwith "unreachable"
+        | Provider_backend.Local_memory
+            { Provider_backend.reverse_naming_table_delta; _ } ->
+          let open Provider_backend.Reverse_naming_table_delta in
+          get_and_cache
+            ~ctx
+            ~name
+            ~cache:reverse_naming_table_delta.funs
+            ~fallback:(fun db_path ->
+              Naming_sqlite.get_fun_path_by_name db_path name
+              |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
+          >>| attach_name_type_to_tuple
+        | Provider_backend.Decl_service { decl; _ } ->
+          Decl_service_client.Slow.rpc_get_fun_path decl name)
+    >>| remove_name_type
 
 let fun_exists (ctx : Provider_context.t) (name : string) : bool =
   match Provider_context.get_backend ctx with
@@ -230,56 +348,49 @@ let get_fun_path (ctx : Provider_context.t) (name : string) :
 
 let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
-  let open Option.Monad_infix in
-  let name = String.lowercase name in
-  let symbol_opt =
-    find_symbol_in_context
-      ~ctx
-      ~get_entry_symbols:(fun { FileInfo.funs; _ } ->
-        List.map funs ~f:(attach_name_type FileInfo.Fun))
-      ~is_symbol:(fun symbol_name ->
-        String.equal (Naming_sqlite.to_canon_name_key symbol_name) name)
-  in
-  let canon_name fd = snd fd.Aast.fd_name in
-  let compute_symbol_canon_name path =
-    Ast_provider.find_ifun_in_file ctx path name >>| canon_name
-  in
-
-  match symbol_opt with
-  | Some (path, _pos) -> compute_symbol_canon_name path
-  | None ->
-    (match Provider_context.get_backend ctx with
-    | Provider_backend.Analysis -> failwith "invalid"
-    | Provider_backend.Pessimised_shared_memory _
-    | Provider_backend.Shared_memory ->
-      (* NB: as written, this code may return a canon name even when the
-         given symbol has been deleted in a context entry. We're relying on
-         the caller to have called `remove_fun_batch` on any deleted symbols
-         before having called this function. `get_fun_canon_name` is only
-         called in some functions in `Naming_global`, which expects the caller
-         to have called `Naming_global.remove_decls` already. *)
-      Naming_heap.Funs.get_canon_name ctx name
-    | Provider_backend.Rust_provider_backend backend ->
-      Rust_provider_backend.Naming.Funs.get_canon_name backend name
-    | Provider_backend.Local_memory
-        { Provider_backend.reverse_naming_table_delta; _ } ->
-      let open Provider_backend.Reverse_naming_table_delta in
-      get_and_cache
-        ~ctx
-        ~name
-        ~cache:reverse_naming_table_delta.funs_canon_key
-        ~fallback:(fun db_path ->
-          Naming_sqlite.get_ifun_path_by_name db_path name
-          |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
-      >>= fun (_name_type, path) ->
-      (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
-         know that it isn't, then it isn't. *)
-      if is_path_in_ctx ~ctx path then
-        None
-      else
-        compute_symbol_canon_name path
-    | Provider_backend.Decl_service { decl; _ } ->
-      Decl_service_client.Slow.rpc_get_fun_canon_name decl name)
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Naming.Funs.get_canon_name
+      backend
+      (rust_backend_ctx_proxy ctx)
+      name
+  | _ ->
+    let open Option.Monad_infix in
+    let name = String.lowercase name in
+    (match find_fun_canon_name_in_context ctx name with
+    | Some _ as name_opt -> name_opt
+    | None ->
+      (match Provider_context.get_backend ctx with
+      | Provider_backend.Analysis -> failwith "invalid"
+      | Provider_backend.Pessimised_shared_memory _
+      | Provider_backend.Shared_memory ->
+        (* NB: as written, this code may return a canon name even when the
+           given symbol has been deleted in a context entry. We're relying on
+           the caller to have called `remove_fun_batch` on any deleted symbols
+           before having called this function. `get_fun_canon_name` is only
+           called in some functions in `Naming_global`, which expects the caller
+           to have called `Naming_global.remove_decls` already. *)
+        Naming_heap.Funs.get_canon_name ctx name
+      | Provider_backend.Rust_provider_backend _ -> failwith "unreachable"
+      | Provider_backend.Local_memory
+          { Provider_backend.reverse_naming_table_delta; _ } ->
+        let open Provider_backend.Reverse_naming_table_delta in
+        get_and_cache
+          ~ctx
+          ~name
+          ~cache:reverse_naming_table_delta.funs_canon_key
+          ~fallback:(fun db_path ->
+            Naming_sqlite.get_ifun_path_by_name db_path name
+            |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
+        >>= fun (_name_type, path) ->
+        (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
+           know that it isn't, then it isn't. *)
+        if is_path_in_ctx ~ctx path then
+          None
+        else
+          compute_fun_canon_name ctx path name
+      | Provider_backend.Decl_service { decl; _ } ->
+        Decl_service_client.Slow.rpc_get_fun_canon_name decl name))
 
 let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
     : unit =
@@ -394,43 +505,44 @@ let remove_type_batch (backend : Provider_backend.t) (names : string list) :
     (* Removing cache items is not the responsibility of hh_worker. *)
     not_implemented backend
 
-let get_entry_symbols_for_type { FileInfo.classes; typedefs; _ } =
-  let classes = List.map classes ~f:(attach_name_type FileInfo.Class) in
-  let typedefs = List.map typedefs ~f:(attach_name_type FileInfo.Typedef) in
-  List.concat [classes; typedefs]
-
 let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
     (FileInfo.pos * Naming_types.kind_of_type) option =
-  let open Option.Monad_infix in
-  find_symbol_in_context_with_suppression
-    ~ctx
-    ~get_entry_symbols:get_entry_symbols_for_type
-    ~is_symbol:(String.equal name)
-    ~fallback:(fun () ->
-      match Provider_context.get_backend ctx with
-      | Provider_backend.Analysis
-      | Provider_backend.Pessimised_shared_memory _
-      | Provider_backend.Shared_memory ->
-        Naming_heap.Types.get_pos (db_path_of_ctx ctx) name
-        >>| fun (pos, kind) -> (pos, kind_to_name_type kind)
-      | Provider_backend.Rust_provider_backend backend ->
-        Rust_provider_backend.Naming.Types.get_pos backend name
-        >>| fun (pos, kind) -> (pos, kind_to_name_type kind)
-      | Provider_backend.Local_memory
-          { Provider_backend.reverse_naming_table_delta; _ } ->
-        let open Provider_backend.Reverse_naming_table_delta in
-        get_and_cache
-          ~ctx
-          ~name
-          ~cache:reverse_naming_table_delta.types
-          ~fallback:(fun db_path ->
-            Naming_sqlite.get_type_path_by_name db_path name
-            |> Option.map ~f:(fun (path, kind) ->
-                   (kind_to_name_type kind, path)))
-        >>| fun (name_type, path) -> (FileInfo.File (name_type, path), name_type)
-      | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.Slow.rpc_get_type_path decl name)
-  >>| fun (pos, name_type) -> (pos, name_type_to_kind name_type)
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Naming.Types.get_pos
+      backend
+      (rust_backend_ctx_proxy ctx)
+      name
+  | _ ->
+    let open Option.Monad_infix in
+    find_symbol_in_context_with_suppression
+      name
+      ~ctx
+      ~find_symbol_in_context:find_type_in_context
+      ~fallback:(fun () ->
+        match Provider_context.get_backend ctx with
+        | Provider_backend.Analysis
+        | Provider_backend.Pessimised_shared_memory _
+        | Provider_backend.Shared_memory ->
+          Naming_heap.Types.get_pos (db_path_of_ctx ctx) name
+          >>| fun (pos, kind) -> (pos, kind_to_name_type kind)
+        | Provider_backend.Rust_provider_backend _ -> failwith "unreachable"
+        | Provider_backend.Local_memory
+            { Provider_backend.reverse_naming_table_delta; _ } ->
+          let open Provider_backend.Reverse_naming_table_delta in
+          get_and_cache
+            ~ctx
+            ~name
+            ~cache:reverse_naming_table_delta.types
+            ~fallback:(fun db_path ->
+              Naming_sqlite.get_type_path_by_name db_path name
+              |> Option.map ~f:(fun (path, kind) ->
+                     (kind_to_name_type kind, path)))
+          >>| fun (name_type, path) ->
+          (FileInfo.File (name_type, path), name_type)
+        | Provider_backend.Decl_service { decl; _ } ->
+          Decl_service_client.Slow.rpc_get_type_path decl name)
+    >>| fun (pos, name_type) -> (pos, name_type_to_kind name_type)
 
 let get_type_pos (ctx : Provider_context.t) (name : string) :
     FileInfo.pos option =
@@ -462,62 +574,50 @@ let get_type_kind (ctx : Provider_context.t) (name : string) :
 
 let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
-  let open Option.Monad_infix in
-  let name = String.lowercase name in
-  let symbol_opt =
-    find_symbol_in_context
-      ~ctx
-      ~get_entry_symbols:get_entry_symbols_for_type
-      ~is_symbol:(fun symbol_name ->
-        String.equal (Naming_sqlite.to_canon_name_key symbol_name) name)
-  in
-  let compute_symbol_canon_name path kind =
-    match kind with
-    | Naming_types.TClass ->
-      Ast_provider.find_iclass_in_file ctx path name
-      >>| fun { Aast.c_name = (_, canon_name); _ } -> canon_name
-    | Naming_types.TTypedef ->
-      Ast_provider.find_itypedef_in_file ctx path name
-      >>| fun { Aast.t_name = (_, canon_name); _ } -> canon_name
-  in
-
-  match symbol_opt with
-  | Some (path, (_pos, name_type)) ->
-    compute_symbol_canon_name path (name_type_to_kind name_type)
-  | None ->
-    (match Provider_context.get_backend ctx with
-    | Provider_backend.Analysis -> failwith "invalid"
-    | Provider_backend.Pessimised_shared_memory _
-    | Provider_backend.Shared_memory ->
-      (* NB: as written, this code may return a canon name even when the
-         given symbol has been deleted in a context entry. We're relying on
-         the caller to have called `remove_fun_batch` on any deleted symbols
-         before having called this function. `get_type_canon_name` is only
-         called in some functions in `Naming_global`, which expects the caller
-         to have called `Naming_global.remove_decls` already. *)
-      Naming_heap.Types.get_canon_name ctx name
-    | Provider_backend.Rust_provider_backend backend ->
-      Rust_provider_backend.Naming.Types.get_canon_name backend name
-    | Provider_backend.Local_memory
-        { Provider_backend.reverse_naming_table_delta; _ } ->
-      let open Option.Monad_infix in
-      let open Provider_backend.Reverse_naming_table_delta in
-      get_and_cache
-        ~ctx
-        ~name
-        ~cache:reverse_naming_table_delta.types_canon_key
-        ~fallback:(fun db_path ->
-          Naming_sqlite.get_itype_path_by_name db_path name
-          |> Option.map ~f:(fun (path, kind) -> (kind_to_name_type kind, path)))
-      >>= fun (name_type, path) ->
-      (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
-         know that it isn't, then it isn't. *)
-      if is_path_in_ctx ~ctx path then
-        None
-      else
-        compute_symbol_canon_name path (name_type_to_kind name_type)
-    | Provider_backend.Decl_service { decl; _ } ->
-      Decl_service_client.Slow.rpc_get_type_canon_name decl name)
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Naming.Types.get_canon_name
+      backend
+      (rust_backend_ctx_proxy ctx)
+      name
+  | _ ->
+    let name = String.lowercase name in
+    (match find_type_canon_name_in_context ctx name with
+    | Some _ as name_opt -> name_opt
+    | None ->
+      (match Provider_context.get_backend ctx with
+      | Provider_backend.Analysis -> failwith "invalid"
+      | Provider_backend.Pessimised_shared_memory _
+      | Provider_backend.Shared_memory ->
+        (* NB: as written, this code may return a canon name even when the
+           given symbol has been deleted in a context entry. We're relying on
+           the caller to have called `remove_fun_batch` on any deleted symbols
+           before having called this function. `get_type_canon_name` is only
+           called in some functions in `Naming_global`, which expects the caller
+           to have called `Naming_global.remove_decls` already. *)
+        Naming_heap.Types.get_canon_name ctx name
+      | Provider_backend.Rust_provider_backend _ -> failwith "unreachable"
+      | Provider_backend.Local_memory
+          { Provider_backend.reverse_naming_table_delta; _ } ->
+        let open Option.Monad_infix in
+        let open Provider_backend.Reverse_naming_table_delta in
+        get_and_cache
+          ~ctx
+          ~name
+          ~cache:reverse_naming_table_delta.types_canon_key
+          ~fallback:(fun db_path ->
+            Naming_sqlite.get_itype_path_by_name db_path name
+            |> Option.map ~f:(fun (path, kind) ->
+                   (kind_to_name_type kind, path)))
+        >>= fun (name_type, path) ->
+        (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
+           know that it isn't, then it isn't. *)
+        if is_path_in_ctx ~ctx path then
+          None
+        else
+          compute_type_canon_name ctx path (name_type_to_kind name_type) name
+      | Provider_backend.Decl_service { decl; _ } ->
+        Decl_service_client.Slow.rpc_get_type_canon_name decl name))
 
 let get_class_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
@@ -551,36 +651,40 @@ let add_typedef
 
 let get_module_pos (ctx : Provider_context.t) (name : string) :
     FileInfo.pos option =
-  let open Option.Monad_infix in
-  find_symbol_in_context_with_suppression
-    ~ctx
-    ~get_entry_symbols:(fun { FileInfo.modules; _ } ->
-      List.map modules ~f:(attach_name_type FileInfo.Module))
-    ~is_symbol:(String.equal name)
-    ~fallback:(fun () ->
-      match Provider_context.get_backend ctx with
-      | Provider_backend.Analysis
-      | Provider_backend.Pessimised_shared_memory _
-      | Provider_backend.Shared_memory ->
-        Naming_heap.Modules.get_pos (db_path_of_ctx ctx) name
-        >>| attach_name_type FileInfo.Module
-      | Provider_backend.Rust_provider_backend backend ->
-        Rust_provider_backend.Naming.Modules.get_pos backend name
-        >>| attach_name_type FileInfo.Module
-      | Provider_backend.Local_memory
-          { Provider_backend.reverse_naming_table_delta; _ } ->
-        let open Provider_backend.Reverse_naming_table_delta in
-        get_and_cache
-          ~ctx
-          ~name
-          ~cache:reverse_naming_table_delta.modules
-          ~fallback:(fun db_path ->
-            Naming_sqlite.get_module_path_by_name db_path name
-            |> Option.map ~f:(fun path -> (FileInfo.Module, path)))
-        >>| attach_name_type_to_tuple
-      | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.Slow.rpc_get_module_path decl name)
-  >>| remove_name_type
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Naming.Modules.get_pos
+      backend
+      (rust_backend_ctx_proxy ctx)
+      name
+  | _ ->
+    let open Option.Monad_infix in
+    find_symbol_in_context_with_suppression
+      name
+      ~ctx
+      ~find_symbol_in_context:find_module_in_context
+      ~fallback:(fun () ->
+        match Provider_context.get_backend ctx with
+        | Provider_backend.Analysis
+        | Provider_backend.Pessimised_shared_memory _
+        | Provider_backend.Shared_memory ->
+          Naming_heap.Modules.get_pos (db_path_of_ctx ctx) name
+          >>| attach_name_type FileInfo.Module
+        | Provider_backend.Rust_provider_backend _ -> failwith "unreachable"
+        | Provider_backend.Local_memory
+            { Provider_backend.reverse_naming_table_delta; _ } ->
+          let open Provider_backend.Reverse_naming_table_delta in
+          get_and_cache
+            ~ctx
+            ~name
+            ~cache:reverse_naming_table_delta.modules
+            ~fallback:(fun db_path ->
+              Naming_sqlite.get_module_path_by_name db_path name
+              |> Option.map ~f:(fun path -> (FileInfo.Module, path)))
+          >>| attach_name_type_to_tuple
+        | Provider_backend.Decl_service { decl; _ } ->
+          Decl_service_client.Slow.rpc_get_module_path decl name)
+    >>| remove_name_type
 
 let get_module_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =

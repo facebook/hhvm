@@ -67,6 +67,21 @@ impl From<KindOfType> for NameType {
     }
 }
 
+#[derive(Copy, Clone, Debug, thiserror::Error)]
+#[error("Expected type kind, but got: {0:?}")]
+pub struct FromNameTypeError(NameType);
+
+impl TryFrom<NameType> for KindOfType {
+    type Error = FromNameTypeError;
+    fn try_from(name_type: NameType) -> Result<Self, Self::Error> {
+        match name_type {
+            NameType::Class => Ok(KindOfType::TClass),
+            NameType::Typedef => Ok(KindOfType::TTypedef),
+            _ => Err(FromNameTypeError(name_type)),
+        }
+    }
+}
+
 impl From<NameType> for typing_deps_hash::DepType {
     fn from(name_type: NameType) -> Self {
         match name_type {

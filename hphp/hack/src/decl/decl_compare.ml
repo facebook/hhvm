@@ -309,12 +309,16 @@ let get_extend_deps mode cid_hash acc =
  * the old and the new type signature of "fid" (function identifier).
  *)
 (*****************************************************************************)
-let get_fun_deps ~mode old_funs fid ((changed, to_recheck), old_funs_missing) =
+let get_fun_deps
+    ~ctx ~mode old_funs fid ((changed, to_recheck), old_funs_missing) =
   match
     ( SMap.find fid old_funs,
       match Provider_backend.get () with
       | Provider_backend.Rust_provider_backend backend ->
-        Rust_provider_backend.Decl.get_fun backend fid
+        Rust_provider_backend.Decl.get_fun
+          backend
+          (Naming_provider.rust_backend_ctx_proxy ctx)
+          fid
       | _ -> Decl_heap.Funs.get fid )
   with
   (* Note that we must include all dependencies even if we get the None, None
@@ -343,7 +347,7 @@ let get_fun_deps ~mode old_funs fid ((changed, to_recheck), old_funs_missing) =
 let get_funs_deps ~ctx old_funs funs =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
-    (get_fun_deps ~mode old_funs)
+    (get_fun_deps ~ctx ~mode old_funs)
     funs
     ((DepSet.make (), DepSet.make ()), 0)
 
@@ -352,13 +356,16 @@ let get_funs_deps ~ctx old_funs funs =
  * the old and the new typedef
  *)
 (*****************************************************************************)
-let get_type_deps ~mode old_types tid ((changed, to_recheck), old_types_missing)
-    =
+let get_type_deps
+    ~ctx ~mode old_types tid ((changed, to_recheck), old_types_missing) =
   match
     ( SMap.find tid old_types,
       match Provider_backend.get () with
       | Provider_backend.Rust_provider_backend backend ->
-        Rust_provider_backend.Decl.get_typedef backend tid
+        Rust_provider_backend.Decl.get_typedef
+          backend
+          (Naming_provider.rust_backend_ctx_proxy ctx)
+          tid
       | _ -> Decl_heap.Typedefs.get tid )
   with
   | (None, _)
@@ -382,7 +389,7 @@ let get_type_deps ~mode old_types tid ((changed, to_recheck), old_types_missing)
 let get_types_deps ~ctx old_types types =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
-    (get_type_deps ~mode old_types)
+    (get_type_deps ~ctx ~mode old_types)
     types
     ((DepSet.make (), DepSet.make ()), 0)
 
@@ -392,12 +399,15 @@ let get_types_deps ~ctx old_types types =
  *)
 (*****************************************************************************)
 let get_gconst_deps
-    ~mode old_gconsts cst_id ((changed, to_recheck), old_gconsts_missing) =
+    ~ctx ~mode old_gconsts cst_id ((changed, to_recheck), old_gconsts_missing) =
   let cst1 = SMap.find cst_id old_gconsts in
   let cst2 =
     match Provider_backend.get () with
     | Provider_backend.Rust_provider_backend backend ->
-      Rust_provider_backend.Decl.get_gconst backend cst_id
+      Rust_provider_backend.Decl.get_gconst
+        backend
+        (Naming_provider.rust_backend_ctx_proxy ctx)
+        cst_id
     | _ -> Decl_heap.GConsts.get cst_id
   in
   match (cst1, cst2) with
@@ -422,7 +432,7 @@ let get_gconst_deps
 let get_gconsts_deps ~ctx old_gconsts gconsts =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
-    (get_gconst_deps ~mode old_gconsts)
+    (get_gconst_deps ~ctx ~mode old_gconsts)
     gconsts
     ((DepSet.make (), DepSet.make ()), 0)
 
@@ -445,12 +455,15 @@ let rules_changed rules1 rules2 =
     | List.Or_unequal_lengths.Unequal_lengths -> true)
 
 let get_module_deps
-    ~mode old_modules mid ((changed, to_recheck), old_modules_missing) =
+    ~ctx ~mode old_modules mid ((changed, to_recheck), old_modules_missing) =
   match
     ( SMap.find mid old_modules,
       match Provider_backend.get () with
       | Provider_backend.Rust_provider_backend backend ->
-        Rust_provider_backend.Decl.get_module backend mid
+        Rust_provider_backend.Decl.get_module
+          backend
+          (Naming_provider.rust_backend_ctx_proxy ctx)
+          mid
       | _ -> Decl_heap.Modules.get mid )
   with
   | (None, _)
@@ -474,6 +487,6 @@ let get_module_deps
 let get_modules_deps ~ctx ~old_modules ~modules =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
-    (get_module_deps ~mode old_modules)
+    (get_module_deps ~ctx ~mode old_modules)
     modules
     ((DepSet.make (), DepSet.make ()), 0)

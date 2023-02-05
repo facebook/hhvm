@@ -10,6 +10,8 @@ mod test_naming_table;
 
 use std::collections::BTreeMap;
 use std::path::PathBuf;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -26,6 +28,7 @@ use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
+use oxidized::naming_types;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use pos::RelativePath;
 use pos::RelativePathCtx;
@@ -44,8 +47,9 @@ pub struct HhServerProviderBackend {
     opts: GlobalOptions,
     decl_parser: DeclParser<BR>,
     file_store: Arc<ChangesStore<RelativePath, FileType>>,
-    file_provider: Arc<FileProviderWithChanges>,
-    naming_table: Arc<NamingTable>,
+    file_provider: Arc<FileProviderWithContext>,
+    naming_table: Arc<NamingTableWithContext>,
+    ctx_is_empty: Arc<AtomicBool>,
     /// Collection of Arcs pointing to the backing stores for the
     /// ShallowDeclStore below, allowing us to invoke push/pop_local_changes.
     shallow_decl_changes_store: Arc<ShallowStoreWithChanges>,
@@ -76,12 +80,19 @@ impl HhServerProviderBackend {
             shm_store::Evictability::NonEvictable,
             shm_store::Compression::default(),
         ))));
-        let file_provider = Arc::new(FileProviderWithChanges {
-            delta_and_changes: Arc::clone(&file_store),
-            disk: DiskProvider::new(Arc::clone(&path_ctx), None),
+        let ctx_is_empty = Arc::new(AtomicBool::new(true));
+        let file_provider = Arc::new(FileProviderWithContext {
+            ctx_is_empty: Arc::clone(&ctx_is_empty),
+            backend: FileProviderWithChanges {
+                delta_and_changes: Arc::clone(&file_store),
+                disk: DiskProvider::new(Arc::clone(&path_ctx), None),
+            },
         });
         let decl_parser = DeclParser::with_options(Arc::clone(&file_provider) as _, opts.clone());
-        let naming_table = Arc::new(NamingTable::new(db_path)?);
+        let naming_table = Arc::new(NamingTableWithContext {
+            ctx_is_empty: Arc::clone(&ctx_is_empty),
+            fallback: NamingTable::new(db_path)?,
+        });
 
         let shallow_decl_changes_store = Arc::new(ShallowStoreWithChanges::new());
         let shallow_decl_store = shallow_decl_changes_store.as_shallow_decl_store();
@@ -114,6 +125,7 @@ impl HhServerProviderBackend {
             decl_parser,
             folded_decl_provider,
             naming_table,
+            ctx_is_empty,
             shallow_decl_changes_store,
             shallow_decl_store,
             lazy_shallow_decl_provider,
@@ -125,7 +137,7 @@ impl HhServerProviderBackend {
     pub fn config(&self) -> Config {
         Config {
             path_ctx: (*self.path_ctx).clone(),
-            db_path: self.naming_table.db_path(),
+            db_path: self.naming_table.fallback.db_path(),
             opts: self.opts.clone(),
         }
     }
@@ -134,8 +146,16 @@ impl HhServerProviderBackend {
         &self.opts
     }
 
-    pub fn naming_table(&self) -> &NamingTable {
+    /// Get our implementation of NamingProvider, which calls into OCaml to
+    /// provide results which take IDE buffers into consideration.
+    pub fn naming_table_with_context(&self) -> &NamingTableWithContext {
         &self.naming_table
+    }
+
+    /// Get the underlying naming table (which includes the SQL database, our
+    /// sharedmem cache layer, and the ChangesStore layer used in tests).
+    pub fn naming_table(&self) -> &NamingTable {
+        &self.naming_table.fallback
     }
 
     pub fn file_store(&self) -> &dyn Store<RelativePath, FileType> {
@@ -175,16 +195,20 @@ impl HhServerProviderBackend {
 
     pub fn push_local_changes(&self) {
         self.file_store.push_local_changes();
-        self.naming_table.push_local_changes();
+        self.naming_table.fallback.push_local_changes();
         self.shallow_decl_changes_store.push_local_changes();
         self.folded_classes_store.push_local_changes();
     }
 
     pub fn pop_local_changes(&self) {
         self.file_store.pop_local_changes();
-        self.naming_table.pop_local_changes();
+        self.naming_table.fallback.pop_local_changes();
         self.shallow_decl_changes_store.pop_local_changes();
         self.folded_classes_store.pop_local_changes();
+    }
+
+    pub fn set_ctx_empty(&self, is_empty: bool) {
+        self.ctx_is_empty.store(is_empty, Ordering::SeqCst);
     }
 
     pub fn oldify_defs(&self, names: &file_info::Names) -> Result<()> {
@@ -272,6 +296,27 @@ impl HhServerProviderBackend {
     pub unsafe fn get_ocaml_folded_class(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         if self.folded_classes_store.has_local_changes() { None }
         else { self.folded_classes_shm.get_ocaml_by_byte_string(name) }
+    }
+
+    /// Returns `Option<UnsafeOcamlPtr>` where the `UnsafeOcamlPtr` is a value
+    /// of OCaml type `FileInfo.pos option`.
+    pub unsafe fn get_ocaml_type_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        // If the context is non-empty, fall back to the slow path by returning None.
+        // `self.naming_table.fallback` returns None when there are local changes.
+        if !self.ctx_is_empty.load(Ordering::SeqCst) { None }
+        else { self.naming_table.fallback.get_ocaml_type_pos(name) }
+    }
+    pub unsafe fn get_ocaml_fun_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        if !self.ctx_is_empty.load(Ordering::SeqCst) { None }
+        else { self.naming_table.fallback.get_ocaml_fun_pos(name) }
+    }
+    pub unsafe fn get_ocaml_const_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        if !self.ctx_is_empty.load(Ordering::SeqCst) { None }
+        else { self.naming_table.fallback.get_ocaml_const_pos(name) }
+    }
+    pub unsafe fn get_ocaml_module_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        if !self.ctx_is_empty.load(Ordering::SeqCst) { None }
+        else { self.naming_table.fallback.get_ocaml_module_pos(name) }
     }
 }
 
@@ -457,6 +502,49 @@ impl ShallowStoreWithChanges {
     }
 }
 
+/// Invoke the callback registered with the given name (via
+/// `Callback.register`).
+///
+/// # Panics
+///
+/// Raises a panic if no callback is registered with the given name, the
+/// callback raises an exception, or the returned value cannot be converted to
+/// type `T`.
+///
+/// # Safety
+///
+/// Calls into the OCaml runtime and may trigger a GC, which may invalidate any
+/// unrooted ocaml values (e.g., `UnsafeOcamlPtr`, `ocamlrep::Value`).
+unsafe fn call_ocaml<T: FromOcamlRep>(callback_name: &'static str, args: &impl ToOcamlRep) -> T {
+    let callback = ocaml_runtime::named_value(callback_name).unwrap();
+    let args = ocamlrep_ocamlpool::to_ocaml(args);
+    let ocaml_result = ocaml_runtime::callback_exn(callback, args).unwrap();
+    T::from_ocaml(ocaml_result).unwrap()
+}
+
+/// An implementation of `FileProvider` which calls into
+/// `Provider_context.get_entries` in order to read from IDE entries before
+/// falling back to reading from ChangesStore/sharedmem/disk.
+#[derive(Debug)]
+pub struct FileProviderWithContext {
+    ctx_is_empty: Arc<AtomicBool>,
+    backend: FileProviderWithChanges,
+}
+
+impl FileProvider for FileProviderWithContext {
+    fn get(&self, file: RelativePath) -> Result<bstr::BString> {
+        if !self.ctx_is_empty.load(Ordering::SeqCst) {
+            // SAFETY: We must have no unrooted values.
+            if let Some(s) =
+                unsafe { call_ocaml("hh_rust_provider_backend_get_entry_contents", &file) }
+            {
+                return Ok(s);
+            }
+        }
+        self.backend.get(file)
+    }
+}
+
 #[derive(Clone, Debug, ToOcamlRep, FromOcamlRep)]
 #[derive(serde::Serialize, serde::Deserialize)]
 pub enum FileType {
@@ -464,6 +552,7 @@ pub enum FileType {
     Ide(bstr::BString),
 }
 
+/// Port of `File_provider.ml`.
 #[derive(Debug)]
 struct FileProviderWithChanges {
     // We could use DeltaStore here if not for the fact that the OCaml
@@ -485,5 +574,148 @@ impl FileProvider for FileProviderWithChanges {
                 Err(e) => Err(e.into()),
             },
         }
+    }
+}
+
+/// An implementation of `NamingProvider` which calls into `Provider_context` to
+/// give naming results reflecting the contents of IDE buffers.
+#[derive(Debug)]
+pub struct NamingTableWithContext {
+    ctx_is_empty: Arc<AtomicBool>,
+    fallback: NamingTable,
+}
+
+impl NamingTableWithContext {
+    fn ctx_is_empty(&self) -> bool {
+        self.ctx_is_empty.load(Ordering::SeqCst)
+    }
+
+    fn find_symbol_in_context_with_suppression(
+        &self,
+        find_symbol_callback_name: &'static str,
+        fallback: impl Fn() -> Result<Option<(RelativePath, (naming_table::Pos, file_info::NameType))>>,
+        name: pos::Symbol,
+    ) -> Result<Option<(RelativePath, (naming_table::Pos, file_info::NameType))>> {
+        if self.ctx_is_empty() {
+            fallback()
+        } else {
+            // SAFETY: We must have no unrooted values.
+            match unsafe { call_ocaml(find_symbol_callback_name, &name) } {
+                pos_opt @ Some(_) => Ok(pos_opt),
+                None => match fallback()? {
+                    None => Ok(None),
+                    Some((path, (pos, name_type))) => {
+                        // If fallback said it thought the symbol was in ctx, but we definitively
+                        // know that it isn't, then the answer is None.
+                        if unsafe { call_ocaml("hh_rust_provider_backend_is_pos_in_ctx", &pos) } {
+                            Ok(None)
+                        } else {
+                            Ok(Some((path, (pos, name_type))))
+                        }
+                    }
+                },
+            }
+        }
+    }
+
+    pub fn get_type_pos(
+        &self,
+        name: TypeName,
+    ) -> Result<Option<(naming_table::Pos, naming_types::KindOfType)>> {
+        Ok(self
+            .find_symbol_in_context_with_suppression(
+                "hh_rust_provider_backend_find_type_in_context",
+                || {
+                    let pos_opt = self.fallback.get_type_pos(name)?;
+                    Ok(pos_opt.map(|(pos, kind)| (pos.path(), (pos, kind.into()))))
+                },
+                name.as_symbol(),
+            )?
+            .map(|(_, (pos, name_type))| (pos, name_type.try_into().unwrap())))
+    }
+
+    pub fn get_fun_pos(&self, name: pos::FunName) -> Result<Option<naming_table::Pos>> {
+        Ok(self
+            .find_symbol_in_context_with_suppression(
+                "hh_rust_provider_backend_find_fun_in_context",
+                || {
+                    let pos_opt = self.fallback.get_fun_pos(name)?;
+                    Ok(pos_opt.map(|pos| (pos.path(), (pos, file_info::NameType::Fun))))
+                },
+                name.as_symbol(),
+            )?
+            .map(|(_, (pos, _))| pos))
+    }
+
+    pub fn get_const_pos(&self, name: pos::ConstName) -> Result<Option<naming_table::Pos>> {
+        Ok(self
+            .find_symbol_in_context_with_suppression(
+                "hh_rust_provider_backend_find_const_in_context",
+                || {
+                    let pos_opt = self.fallback.get_const_pos(name)?;
+                    Ok(pos_opt.map(|pos| (pos.path(), (pos, file_info::NameType::Const))))
+                },
+                name.as_symbol(),
+            )?
+            .map(|(_, (pos, _))| pos))
+    }
+
+    pub fn get_module_pos(&self, name: pos::ModuleName) -> Result<Option<naming_table::Pos>> {
+        Ok(self
+            .find_symbol_in_context_with_suppression(
+                "hh_rust_provider_backend_find_module_in_context",
+                || {
+                    let pos_opt = self.fallback.get_module_pos(name)?;
+                    Ok(pos_opt.map(|pos| (pos.path(), (pos, file_info::NameType::Module))))
+                },
+                name.as_symbol(),
+            )?
+            .map(|(_, (pos, _))| pos))
+    }
+}
+
+impl NamingProvider for NamingTableWithContext {
+    fn get_type_path_and_kind(
+        &self,
+        name: pos::TypeName,
+    ) -> Result<Option<(RelativePath, naming_types::KindOfType)>> {
+        Ok(self.get_type_pos(name)?.map(|(pos, k)| (pos.path(), k)))
+    }
+    fn get_fun_path(&self, name: pos::FunName) -> Result<Option<RelativePath>> {
+        Ok(self.get_fun_pos(name)?.map(|pos| pos.path()))
+    }
+    fn get_const_path(&self, name: pos::ConstName) -> Result<Option<RelativePath>> {
+        Ok(self.get_const_pos(name)?.map(|pos| pos.path()))
+    }
+    fn get_module_path(&self, name: pos::ModuleName) -> Result<Option<RelativePath>> {
+        Ok(self.get_module_pos(name)?.map(|pos| pos.path()))
+    }
+    fn get_canon_type_name(&self, name: pos::TypeName) -> Result<Option<pos::TypeName>> {
+        if !self.ctx_is_empty() {
+            // SAFETY: We must have no unrooted values.
+            if let name_opt @ Some(..) = unsafe {
+                call_ocaml(
+                    "hh_rust_provider_backend_find_type_canon_name_in_context",
+                    &name,
+                )
+            } {
+                return Ok(name_opt);
+            }
+        }
+        self.fallback.get_canon_type_name(name)
+    }
+    fn get_canon_fun_name(&self, name: pos::FunName) -> Result<Option<pos::FunName>> {
+        if !self.ctx_is_empty() {
+            // SAFETY: We must have no unrooted values.
+            if let name_opt @ Some(..) = unsafe {
+                call_ocaml(
+                    "hh_rust_provider_backend_find_fun_canon_name_in_context",
+                    &name,
+                )
+            } {
+                return Ok(name_opt);
+            }
+        }
+        self.fallback.get_canon_fun_name(name)
     }
 }

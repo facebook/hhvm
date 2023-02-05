@@ -148,7 +148,9 @@
   decl_defs
   decl_heap
   decl_pos_utils
+  naming_provider
   provider_context
+  rust_provider_backend_stubs
   typechecker_options
   typing_defs
   typing_deps)

@@ -20,7 +20,9 @@ folded_decl_provider = { path = "../../hackrs/folded_decl_provider/cargo/folded_
 hh24_types = { path = "../../utils/hh24_types" }
 names = { path = "../../naming/names_rust" }
 naming_provider = { path = "../../hackrs/naming_provider/cargo/naming_provider" }
+ocaml_runtime = { path = "../../utils/ocaml_runtime" }
 ocamlrep = { path = "../../ocamlrep" }
+ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }

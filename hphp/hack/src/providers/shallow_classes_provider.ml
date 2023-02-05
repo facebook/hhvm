@@ -52,7 +52,10 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
     | Some _ as decl_opt -> decl_opt
     | None -> failwith (Printf.sprintf "failed to get shallow class %S" name))
   | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.Decl.get_shallow_class backend name
+    Rust_provider_backend.Decl.get_shallow_class
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      name
   | Provider_backend.Pessimised_shared_memory info ->
     (match Shallow_classes_heap.Classes.get name with
     | Some _ as decl_opt -> decl_opt
@@ -95,7 +98,13 @@ let get_batch (ctx : Provider_context.t) (names : SSet.t) :
   | Provider_backend.Rust_provider_backend be ->
     SSet.fold
       (fun name acc ->
-        SMap.add name (Rust_provider_backend.Decl.get_shallow_class be name) acc)
+        SMap.add
+          name
+          (Rust_provider_backend.Decl.get_shallow_class
+             be
+             (Naming_provider.rust_backend_ctx_proxy ctx)
+             name)
+          acc)
       names
       SMap.empty
   | Provider_backend.Shared_memory ->

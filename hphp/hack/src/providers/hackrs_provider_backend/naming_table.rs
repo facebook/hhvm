@@ -13,6 +13,7 @@ use datastore::ReadonlyStore;
 use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use naming_provider::NamingProvider;
+use naming_types::KindOfType;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::rc::RcOc;
 use oxidized::file_info::NameType;
@@ -28,7 +29,7 @@ use shm_store::OcamlShmStore;
 
 /// Designed after naming_heap.ml.
 pub struct NamingTable {
-    types: ReverseNamingTable<TypeName, (Pos, naming_types::KindOfType)>,
+    types: ReverseNamingTable<TypeName, (Pos, KindOfType)>,
     funs: ReverseNamingTable<FunName, Pos>,
     consts: ChangesStore<ToplevelSymbolHash, Pos>,
     consts_shm: Arc<OcamlShmStore<ToplevelSymbolHash, Option<Pos>>>,
@@ -89,27 +90,21 @@ impl NamingTable {
     pub fn add_type(
         &self,
         name: TypeName,
-        pos_and_kind: &(file_info::Pos, naming_types::KindOfType),
+        pos_and_kind: &(file_info::Pos, KindOfType),
     ) -> Result<()> {
         self.types
             .insert(name, ((&pos_and_kind.0).into(), pos_and_kind.1))
     }
 
-    pub fn get_type_pos(
-        &self,
-        name: TypeName,
-    ) -> Result<Option<(file_info::Pos, naming_types::KindOfType)>> {
-        Ok(self
-            .types
-            .get_pos(name)?
-            .map(|(pos, kind)| (pos.into(), kind)))
+    pub(crate) fn get_type_pos(&self, name: TypeName) -> Result<Option<(Pos, KindOfType)>> {
+        self.types.get_pos(name)
     }
 
     pub fn remove_type_batch(&self, names: &[TypeName]) -> Result<()> {
         self.types.remove_batch(names.iter().copied())
     }
 
-    pub fn get_canon_type_name(&self, name: TypeName) -> Result<Option<TypeName>> {
+    pub(crate) fn get_canon_type_name(&self, name: TypeName) -> Result<Option<TypeName>> {
         self.types.get_canon_name(name)
     }
 
@@ -117,15 +112,15 @@ impl NamingTable {
         self.funs.insert(name, pos.into())
     }
 
-    pub fn get_fun_pos(&self, name: FunName) -> Result<Option<file_info::Pos>> {
-        Ok(self.funs.get_pos(name)?.map(Into::into))
+    pub(crate) fn get_fun_pos(&self, name: FunName) -> Result<Option<Pos>> {
+        self.funs.get_pos(name)
     }
 
     pub fn remove_fun_batch(&self, names: &[FunName]) -> Result<()> {
         self.funs.remove_batch(names.iter().copied())
     }
 
-    pub fn get_canon_fun_name(&self, name: FunName) -> Result<Option<FunName>> {
+    pub(crate) fn get_canon_fun_name(&self, name: FunName) -> Result<Option<FunName>> {
         self.funs.get_canon_name(name)
     }
 
@@ -133,8 +128,8 @@ impl NamingTable {
         self.consts.insert(name.into(), pos.into())
     }
 
-    pub fn get_const_pos(&self, name: ConstName) -> Result<Option<file_info::Pos>> {
-        Ok(self.consts.get(name.into())?.map(Into::into))
+    pub(crate) fn get_const_pos(&self, name: ConstName) -> Result<Option<Pos>> {
+        self.consts.get(name.into())
     }
 
     pub fn remove_const_batch(&self, names: &[ConstName]) -> Result<()> {
@@ -146,8 +141,8 @@ impl NamingTable {
         self.modules.insert(name.into(), pos.into())
     }
 
-    pub fn get_module_pos(&self, name: ModuleName) -> Result<Option<file_info::Pos>> {
-        Ok(self.modules.get(name.into())?.map(Into::into))
+    pub(crate) fn get_module_pos(&self, name: ModuleName) -> Result<Option<Pos>> {
+        self.modules.get(name.into())
     }
 
     pub fn remove_module_batch(&self, names: &[ModuleName]) -> Result<()> {
@@ -182,11 +177,11 @@ impl NamingTable {
     fn get_filename_by_hash(&self, hash: deps_rust::Dep) -> Result<Option<RelativePath>> {
         let hash = ToplevelSymbolHash::from_u64(hash.into());
         if let Some((pos, _kind)) = self.types.get_pos_by_hash(hash)? {
-            return Ok(Some(pos.into_filename()));
+            return Ok(Some(pos.path()));
         } else if let Some(pos) = self.funs.get_pos_by_hash(hash)? {
-            return Ok(Some(pos.into_filename()));
+            return Ok(Some(pos.path()));
         } else if let Some(pos) = self.consts.get(hash)? {
-            return Ok(Some(pos.into_filename()));
+            return Ok(Some(pos.path()));
         };
         Ok(self
             .db
@@ -205,7 +200,7 @@ impl NamingTable {
     /// with no concurrent interaction with the OCaml runtime. The returned
     /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
     /// triggered after this method returns.
-    pub unsafe fn get_ocaml_type_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    pub(crate) unsafe fn get_ocaml_type_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         self.types
             .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
                 // NameType::Class and NameType::Typedef are handled the same here
@@ -217,7 +212,7 @@ impl NamingTable {
             // `None` so that the caller doesn't need to inspect the value.
             .filter(|ptr| ptr.is_block())
     }
-    pub unsafe fn get_ocaml_fun_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    pub(crate) unsafe fn get_ocaml_fun_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         self.funs
             .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
                 file_info::NameType::Fun,
@@ -225,7 +220,7 @@ impl NamingTable {
             ))
             .filter(|ptr| ptr.is_block())
     }
-    pub unsafe fn get_ocaml_const_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    pub(crate) unsafe fn get_ocaml_const_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         if self.consts.has_local_changes() {
             None
         } else {
@@ -237,7 +232,7 @@ impl NamingTable {
                 .filter(|ptr| ptr.is_block())
         }
     }
-    pub unsafe fn get_ocaml_module_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    pub(crate) unsafe fn get_ocaml_module_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         if self.modules.has_local_changes() {
             None
         } else {
@@ -255,7 +250,7 @@ impl NamingProvider for NamingTable {
     fn get_type_path_and_kind(
         &self,
         name: pos::TypeName,
-    ) -> Result<Option<(RelativePath, naming_types::KindOfType)>> {
+    ) -> Result<Option<(RelativePath, KindOfType)>> {
         Ok(self
             .get_type_pos(name)?
             .map(|(pos, kind)| (pos.path().into(), kind)))
@@ -283,18 +278,18 @@ impl std::fmt::Debug for NamingTable {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[derive(ocamlrep::ToOcamlRep, ocamlrep::FromOcamlRep)]
-enum Pos {
+pub enum Pos {
     Full(pos::BPos),
     File(NameType, RelativePath),
 }
 
 impl Pos {
-    fn into_filename(self) -> RelativePath {
+    pub fn path(&self) -> RelativePath {
         match self {
             Self::Full(pos) => pos.file(),
-            Self::File(_, path) => path,
+            &Self::File(_, path) => path,
         }
     }
 }
@@ -350,16 +345,12 @@ impl std::fmt::Debug for MaybeNamingDb {
 #[derive(Clone, Debug)]
 struct TypeDb(Arc<MaybeNamingDb>);
 
-impl ReadonlyStore<ToplevelSymbolHash, (Pos, naming_types::KindOfType)> for TypeDb {
-    fn get(&self, key: ToplevelSymbolHash) -> Result<Option<(Pos, naming_types::KindOfType)>> {
+impl ReadonlyStore<ToplevelSymbolHash, (Pos, KindOfType)> for TypeDb {
+    fn get(&self, key: ToplevelSymbolHash) -> Result<Option<(Pos, KindOfType)>> {
         self.0.with_db(|db| {
             Ok(db.get_filename(key)?.and_then(|(path, name_type)| {
-                let kind = match name_type {
-                    NameType::Class => naming_types::KindOfType::TClass,
-                    NameType::Typedef => naming_types::KindOfType::TTypedef,
-                    _ => return None,
-                };
-                Some((Pos::File(kind.into(), (&path).into()), kind))
+                let kind = KindOfType::try_from(name_type).ok()?;
+                Some((Pos::File(name_type, (&path).into()), kind))
             }))
         })
     }

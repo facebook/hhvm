@@ -16,24 +16,38 @@ let push_local_changes _ : unit = failwith "unimplemented"
 
 let pop_local_changes _ : unit = failwith "unimplemented"
 
+type find_symbol_fn =
+  string -> (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option
+
+type ctx_proxy = {
+  get_entry_contents: Relative_path.t -> string option;
+  is_pos_in_ctx: FileInfo.pos -> bool;
+  find_fun_canon_name_in_context: string -> string option;
+  find_type_canon_name_in_context: string -> string option;
+  find_const_in_context: find_symbol_fn;
+  find_fun_in_context: find_symbol_fn;
+  find_type_in_context: find_symbol_fn;
+  find_module_in_context: find_symbol_fn;
+}
+
 module Decl = struct
   let direct_decl_parse_and_cache _ _ _ = failwith "unimplemented"
 
   let add_shallow_decls _ _ = failwith "unimplemented"
 
-  let get_fun _ _ = failwith "unimplemented"
+  let get_fun _ _ _ = failwith "unimplemented"
 
-  let get_shallow_class _ _ = failwith "unimplemented"
+  let get_shallow_class _ _ _ = failwith "unimplemented"
 
-  let get_typedef _ _ = failwith "unimplemented"
+  let get_typedef _ _ _ = failwith "unimplemented"
 
-  let get_gconst _ _ = failwith "unimplemented"
+  let get_gconst _ _ _ = failwith "unimplemented"
 
-  let get_module _ _ = failwith "unimplemented"
+  let get_module _ _ _ = failwith "unimplemented"
 
-  let get_folded_class _ _ = failwith "unimplemented"
+  let get_folded_class _ _ _ = failwith "unimplemented"
 
-  let declare_folded_class _ _ = failwith "unimplemented"
+  let declare_folded_class _ _ _ = failwith "unimplemented"
 
   let get_old_shallow_classes_batch _ _ = failwith "unimplemented"
 
@@ -68,27 +82,27 @@ module Naming = struct
   module Types = struct
     let add _ _ _ = failwith "unimplemented"
 
-    let get_pos _ _ = failwith "unimplemented"
+    let get_pos _ _ _ = failwith "unimplemented"
 
     let remove_batch _ _ = failwith "unimplemented"
 
-    let get_canon_name _ _ = failwith "unimplemented"
+    let get_canon_name _ _ _ = failwith "unimplemented"
   end
 
   module Funs = struct
     let add _ _ _ = failwith "unimplemented"
 
-    let get_pos _ _ = failwith "unimplemented"
+    let get_pos _ _ _ = failwith "unimplemented"
 
     let remove_batch _ _ = failwith "unimplemented"
 
-    let get_canon_name _ _ = failwith "unimplemented"
+    let get_canon_name _ _ _ = failwith "unimplemented"
   end
 
   module Consts = struct
     let add _ _ _ = failwith "unimplemented"
 
-    let get_pos _ _ = failwith "unimplemented"
+    let get_pos _ _ _ = failwith "unimplemented"
 
     let remove_batch _ _ = failwith "unimplemented"
   end
@@ -96,7 +110,7 @@ module Naming = struct
   module Modules = struct
     let add _ _ _ = failwith "unimplemented"
 
-    let get_pos _ _ = failwith "unimplemented"
+    let get_pos _ _ _ = failwith "unimplemented"
 
     let remove_batch _ _ = failwith "unimplemented"
   end

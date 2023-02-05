@@ -25,6 +25,108 @@ external push_local_changes_ffi : t -> unit
 external pop_local_changes_ffi : t -> unit
   = "hh_rust_provider_backend_pop_local_changes"
 
+external set_ctx_empty : t -> bool -> unit
+  = "hh_rust_provider_backend_set_ctx_empty"
+  [@@noalloc]
+
+type find_symbol_fn =
+  string -> (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option
+
+type ctx_proxy = {
+  get_entry_contents: Relative_path.t -> string option;
+  is_pos_in_ctx: FileInfo.pos -> bool;
+  find_fun_canon_name_in_context: string -> string option;
+  find_type_canon_name_in_context: string -> string option;
+  find_const_in_context: find_symbol_fn;
+  find_fun_in_context: find_symbol_fn;
+  find_type_in_context: find_symbol_fn;
+  find_module_in_context: find_symbol_fn;
+}
+
+let ctx_proxy_ref : ctx_proxy option ref = ref None
+
+let with_ctx_proxy_opt t ctx_proxy_opt f =
+  assert (Option.is_none !ctx_proxy_ref);
+  ctx_proxy_ref := ctx_proxy_opt;
+  set_ctx_empty t (Option.is_none ctx_proxy_opt);
+  try
+    let result = f () in
+    ctx_proxy_ref := None;
+    set_ctx_empty t true;
+    result
+  with
+  | e ->
+    ctx_proxy_ref := None;
+    set_ctx_empty t true;
+    raise e
+
+let get_entry_contents x =
+  match !ctx_proxy_ref with
+  | None -> None
+  | Some { get_entry_contents; _ } -> get_entry_contents x
+
+let is_pos_in_ctx x =
+  match !ctx_proxy_ref with
+  | None -> false
+  | Some { is_pos_in_ctx; _ } -> is_pos_in_ctx x
+
+let find_fun_canon_name_in_context x =
+  match !ctx_proxy_ref with
+  | None -> None
+  | Some { find_fun_canon_name_in_context; _ } ->
+    find_fun_canon_name_in_context x
+
+let find_type_canon_name_in_context x =
+  match !ctx_proxy_ref with
+  | None -> None
+  | Some { find_type_canon_name_in_context; _ } ->
+    find_type_canon_name_in_context x
+
+let find_const_in_context x =
+  match !ctx_proxy_ref with
+  | None -> None
+  | Some { find_const_in_context; _ } -> find_const_in_context x
+
+let find_fun_in_context x =
+  match !ctx_proxy_ref with
+  | None -> None
+  | Some { find_fun_in_context; _ } -> find_fun_in_context x
+
+let find_type_in_context x =
+  match !ctx_proxy_ref with
+  | None -> None
+  | Some { find_type_in_context; _ } -> find_type_in_context x
+
+let find_module_in_context x =
+  match !ctx_proxy_ref with
+  | None -> None
+  | Some { find_module_in_context; _ } -> find_module_in_context x
+
+let () =
+  Callback.register
+    "hh_rust_provider_backend_get_entry_contents"
+    get_entry_contents;
+  Callback.register "hh_rust_provider_backend_is_pos_in_ctx" is_pos_in_ctx;
+  Callback.register
+    "hh_rust_provider_backend_find_fun_canon_name_in_context"
+    find_fun_canon_name_in_context;
+  Callback.register
+    "hh_rust_provider_backend_find_type_canon_name_in_context"
+    find_type_canon_name_in_context;
+  Callback.register
+    "hh_rust_provider_backend_find_const_in_context"
+    find_const_in_context;
+  Callback.register
+    "hh_rust_provider_backend_find_fun_in_context"
+    find_fun_in_context;
+  Callback.register
+    "hh_rust_provider_backend_find_type_in_context"
+    find_type_in_context;
+  Callback.register
+    "hh_rust_provider_backend_find_module_in_context"
+    find_module_in_context;
+  ()
+
 module Decl = struct
   module type Store = sig
     type key
@@ -305,29 +407,29 @@ module Decl = struct
     set_decl_store t;
     add_shallow_decls t
 
-  let get_fun t =
+  let get_fun t ctx name =
     set_decl_store t;
-    Funs.get t
+    with_ctx_proxy_opt t ctx @@ fun () -> Funs.get t name
 
-  let get_shallow_class t =
+  let get_shallow_class t ctx name =
     set_decl_store t;
-    ShallowClasses.get t
+    with_ctx_proxy_opt t ctx @@ fun () -> ShallowClasses.get t name
 
-  let get_typedef t =
+  let get_typedef t ctx name =
     set_decl_store t;
-    Typedefs.get t
+    with_ctx_proxy_opt t ctx @@ fun () -> Typedefs.get t name
 
-  let get_gconst t =
+  let get_gconst t ctx name =
     set_decl_store t;
-    GConsts.get t
+    with_ctx_proxy_opt t ctx @@ fun () -> GConsts.get t name
 
-  let get_module t =
+  let get_module t ctx name =
     set_decl_store t;
-    Modules.get t
+    with_ctx_proxy_opt t ctx @@ fun () -> Modules.get t name
 
-  let get_folded_class t =
+  let get_folded_class t ctx name =
     set_decl_store t;
-    FoldedClasses.get t
+    with_ctx_proxy_opt t ctx @@ fun () -> FoldedClasses.get t name
 
   external oldify_defs_ffi : t -> FileInfo.names -> unit
     = "hh_rust_provider_backend_oldify_defs"
@@ -387,9 +489,9 @@ module Decl = struct
   external declare_folded_class : t -> string -> unit
     = "hh_rust_provider_backend_declare_folded_class"
 
-  let declare_folded_class t =
+  let declare_folded_class t ctx name =
     set_decl_store t;
-    declare_folded_class t
+    with_ctx_proxy_opt t ctx @@ fun () -> declare_folded_class t name
 end
 
 let make popt =
@@ -443,7 +545,7 @@ module Naming = struct
 
     val add : t -> string -> pos -> unit
 
-    val get_pos : t -> string -> pos option
+    val get_pos : t -> ctx_proxy option -> string -> pos option
 
     val remove_batch : t -> string list -> unit
   end
@@ -462,6 +564,12 @@ module Naming = struct
 
     external get_canon_name : t -> string -> string option
       = "hh_rust_provider_backend_naming_types_get_canon_name"
+
+    let get_pos t ctx name =
+      with_ctx_proxy_opt t ctx @@ fun () -> get_pos t name
+
+    let get_canon_name t ctx name =
+      with_ctx_proxy_opt t ctx @@ fun () -> get_canon_name t name
   end
 
   module Funs = struct
@@ -478,6 +586,12 @@ module Naming = struct
 
     external get_canon_name : t -> string -> string option
       = "hh_rust_provider_backend_naming_funs_get_canon_name"
+
+    let get_pos t ctx name =
+      with_ctx_proxy_opt t ctx @@ fun () -> get_pos t name
+
+    let get_canon_name t ctx name =
+      with_ctx_proxy_opt t ctx @@ fun () -> get_canon_name t name
   end
 
   module Consts = struct
@@ -491,6 +605,9 @@ module Naming = struct
 
     external remove_batch : t -> string list -> unit
       = "hh_rust_provider_backend_naming_consts_remove_batch"
+
+    let get_pos t ctx name =
+      with_ctx_proxy_opt t ctx @@ fun () -> get_pos t name
   end
 
   module Modules = struct
@@ -504,6 +621,9 @@ module Naming = struct
 
     external remove_batch : t -> string list -> unit
       = "hh_rust_provider_backend_naming_modules_remove_batch"
+
+    let get_pos t ctx name =
+      with_ctx_proxy_opt t ctx @@ fun () -> get_pos t name
   end
 
   external get_db_path_ffi : t -> string option

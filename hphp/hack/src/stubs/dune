@@ -32,6 +32,9 @@
  (name rust_provider_backend_stubs)
  (wrapped false)
  (modules rust_provider_backend)
+ (libraries
+  file_info
+  relative_path)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 

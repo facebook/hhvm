@@ -167,12 +167,10 @@ let get_file_contents ~ignore_file_content_caches ctx filename =
     if ignore_file_content_caches then
       None
     else
-      Relative_path.Map.find_opt (Provider_context.get_entries ctx) filename
+      Naming_provider.get_entry_contents ctx filename
   in
   match from_entries with
-  | Some entry ->
-    let source_text = Ast_provider.compute_source_text ~entry in
-    Some (Full_fidelity_source_text.text source_text)
+  | Some _ as contents_opt -> contents_opt
   | None ->
     File_provider.get_contents
       ~force_read_disk:ignore_file_content_caches

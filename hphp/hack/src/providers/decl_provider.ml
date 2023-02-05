@@ -123,7 +123,10 @@ let get_class
   | Provider_backend.Rust_provider_backend backend -> begin
     match
       lookup_or_populate_class_cache class_name (fun class_name ->
-          Rust_provider_backend.Decl.get_folded_class backend class_name
+          Rust_provider_backend.Decl.get_folded_class
+            backend
+            (Naming_provider.rust_backend_ctx_proxy ctx)
+            class_name
           |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
     with
     | None -> None
@@ -210,7 +213,10 @@ let get_fun
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_fun decl fun_name
   | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.Decl.get_fun backend fun_name
+    Rust_provider_backend.Decl.get_fun
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      fun_name
 
 let maybe_pessimise_typedef_decl ctx typedef_decl =
   if
@@ -289,7 +295,10 @@ let get_typedef
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_typedef decl typedef_name
   | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.Decl.get_typedef backend typedef_name
+    Rust_provider_backend.Decl.get_typedef
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      typedef_name
 
 let get_gconst
     ?(tracing_info : Decl_counters.tracing_info option)
@@ -353,7 +362,10 @@ let get_gconst
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_gconst decl gconst_name
   | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.Decl.get_gconst backend gconst_name
+    Rust_provider_backend.Decl.get_gconst
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      gconst_name
 
 let get_module
     ?(tracing_info : Decl_counters.tracing_info option)
@@ -386,7 +398,10 @@ let get_module
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_module decl module_name
   | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.Decl.get_module backend module_name
+    Rust_provider_backend.Decl.get_module
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      module_name
 
 let get_overridden_method ctx ~class_name ~method_name ~is_static :
     Typing_defs.class_elt option =

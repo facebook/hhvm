@@ -1711,6 +1711,7 @@ dependencies = [
  "relative_path",
  "rusqlite",
  "serde",
+ "thiserror",
  "typing_deps_hash",
 ]
 

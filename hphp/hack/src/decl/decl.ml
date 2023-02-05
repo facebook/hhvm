@@ -19,7 +19,10 @@ let make_env
         | (name, Shallow_decl_defs.Class _, _) ->
           (match Provider_context.get_backend ctx with
           | Provider_backend.Rust_provider_backend backend ->
-            Rust_provider_backend.Decl.declare_folded_class backend name
+            Rust_provider_backend.Decl.declare_folded_class
+              backend
+              (Naming_provider.rust_backend_ctx_proxy ctx)
+              name
           | _ ->
             let (_ : _ option) =
               Decl_folded_class.class_decl_if_missing ~sh ctx name

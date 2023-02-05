@@ -18,6 +18,20 @@ val push_local_changes : t -> unit
 
 val pop_local_changes : t -> unit
 
+type find_symbol_fn =
+  string -> (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option
+
+type ctx_proxy = {
+  get_entry_contents: Relative_path.t -> string option;
+  is_pos_in_ctx: FileInfo.pos -> bool;
+  find_fun_canon_name_in_context: string -> string option;
+  find_type_canon_name_in_context: string -> string option;
+  find_const_in_context: find_symbol_fn;
+  find_fun_in_context: find_symbol_fn;
+  find_type_in_context: find_symbol_fn;
+  find_module_in_context: find_symbol_fn;
+}
+
 module Decl : sig
   val direct_decl_parse_and_cache :
     t -> Relative_path.t -> string -> Direct_decl_parser.parsed_file_with_hashes
@@ -26,19 +40,25 @@ module Decl : sig
       removing php_stdlib decls, deduping, or removing naming conflict losers) *)
   val add_shallow_decls : t -> (string * Shallow_decl_defs.decl) list -> unit
 
-  val get_fun : t -> string -> Shallow_decl_defs.fun_decl option
+  val get_fun :
+    t -> ctx_proxy option -> string -> Shallow_decl_defs.fun_decl option
 
-  val get_shallow_class : t -> string -> Shallow_decl_defs.class_decl option
+  val get_shallow_class :
+    t -> ctx_proxy option -> string -> Shallow_decl_defs.class_decl option
 
-  val get_typedef : t -> string -> Shallow_decl_defs.typedef_decl option
+  val get_typedef :
+    t -> ctx_proxy option -> string -> Shallow_decl_defs.typedef_decl option
 
-  val get_gconst : t -> string -> Shallow_decl_defs.const_decl option
+  val get_gconst :
+    t -> ctx_proxy option -> string -> Shallow_decl_defs.const_decl option
 
-  val get_module : t -> string -> Shallow_decl_defs.module_decl option
+  val get_module :
+    t -> ctx_proxy option -> string -> Shallow_decl_defs.module_decl option
 
-  val get_folded_class : t -> string -> Decl_defs.decl_class_type option
+  val get_folded_class :
+    t -> ctx_proxy option -> string -> Decl_defs.decl_class_type option
 
-  val declare_folded_class : t -> string -> unit
+  val declare_folded_class : t -> ctx_proxy option -> string -> unit
 
   val get_old_defs :
     t ->
@@ -80,7 +100,7 @@ module Naming : sig
 
     val add : t -> string -> pos -> unit
 
-    val get_pos : t -> string -> pos option
+    val get_pos : t -> ctx_proxy option -> string -> pos option
 
     val remove_batch : t -> string list -> unit
   end
@@ -90,13 +110,13 @@ module Naming : sig
       ReverseNamingTable
         with type pos = FileInfo.pos * Naming_types.kind_of_type
 
-    val get_canon_name : t -> string -> string option
+    val get_canon_name : t -> ctx_proxy option -> string -> string option
   end
 
   module Funs : sig
     include ReverseNamingTable with type pos = FileInfo.pos
 
-    val get_canon_name : t -> string -> string option
+    val get_canon_name : t -> ctx_proxy option -> string -> string option
   end
 
   module Consts : sig

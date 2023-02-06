@@ -547,8 +547,10 @@ fn int_expr_to_typed_value<'arena>(s: &str) -> Result<TypedValue<'arena>, Error>
 
 fn update_duplicates_in_map<'arena>(
     kvs: Vec<(TypedValue<'arena>, TypedValue<'arena>)>,
-) -> impl IntoIterator<Item = DictEntry<'arena>, IntoIter = impl ExactSizeIterator + 'arena> + 'arena
-{
+) -> impl IntoIterator<
+    Item = DictEntry<'arena>,
+    IntoIter = impl Iterator<Item = DictEntry<'arena>> + ExactSizeIterator + 'arena,
+> + 'arena {
     kvs.into_iter()
         .collect::<IndexMap<_, _, RandomState>>()
         .into_iter()

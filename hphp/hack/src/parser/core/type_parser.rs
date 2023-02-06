@@ -1100,7 +1100,7 @@ where
         let is_closing_token =
             |x: TokenKind| x == TokenKind::RightParen || x == TokenKind::DotDotDot;
         let fields = self.parse_comma_list_opt_allow_trailing_predicate(
-            &is_closing_token,
+            is_closing_token,
             Errors::error1025,
             |x: &mut Self| x.parse_field_specifier(),
         );

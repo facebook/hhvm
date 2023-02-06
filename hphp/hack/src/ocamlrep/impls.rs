@@ -723,8 +723,8 @@ impl<K: ToOcamlRep + Ord, V: ToOcamlRep, S: BuildHasher + Default> ToOcamlRep
         vec.sort_unstable_by_key(|&(k, _)| k);
         let len = vec.len();
         let mut iter = vec.iter().map(|(k, v)| {
-            let k: &'a K = *k;
-            let v: &'a V = *v;
+            let k: &'a K = k;
+            let v: &'a V = v;
             (k.to_ocamlrep(alloc), v.to_ocamlrep(alloc))
         });
         let (res, _) = sorted_iter_to_ocaml_map(&mut iter, alloc, len);

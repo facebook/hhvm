@@ -207,7 +207,7 @@ pub mod members {
 
     /// Not really a PropName, but it's treated as one in deferred_init_members
     /// of folded decls.
-    pub static parentConstruct: Lazy<PropName> = lazy!(concat(&"parent::", *__construct));
+    pub static parentConstruct: Lazy<PropName> = lazy!(concat("parent::", *__construct));
 }
 
 pub mod attribute_kinds {

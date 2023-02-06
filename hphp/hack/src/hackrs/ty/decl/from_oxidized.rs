@@ -192,7 +192,7 @@ impl<R: Reason> From<obr::typing_defs::RefinedConst<'_>> for ty::RefinedConst<Ty
     fn from(rc: obr::typing_defs::RefinedConst<'_>) -> Self {
         Self {
             bound: rc.bound.into(),
-            is_ctx: rc.is_ctx.into(),
+            is_ctx: rc.is_ctx,
         }
     }
 }
@@ -733,7 +733,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
                 .copied()
                 .map(Into::into)
                 .collect(),
-            decl_errors: slice(*decl_errors),
+            decl_errors: slice(decl_errors),
             docs_url: docs_url.map(Into::into),
         }
     }

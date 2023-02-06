@@ -83,7 +83,7 @@ where
     V: Clone,
 {
     fn get(&self, key: K) -> Option<V> {
-        self.store.get(&key).map(|x| V::clone(&*x))
+        self.store.get(&key).map(|x| V::clone(x))
     }
 
     fn insert(&mut self, key: K, val: V) {

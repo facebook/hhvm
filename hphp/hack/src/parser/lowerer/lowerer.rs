@@ -1732,7 +1732,7 @@ fn p_lambda_expression<'a>(
     };
     let external = c.body.is_external();
     let fun = ast::Fun_ {
-        span: pos.clone(),
+        span: pos,
         readonly_this: None, // filled in by mk_unop
         annotation: (),
         readonly_ret,

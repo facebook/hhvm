@@ -64,7 +64,7 @@ impl RelativePath {
 
     pub fn to_absolute(&self, ctx: &RelativePathCtx) -> PathBuf {
         let mut buf = ctx.prefix_path(self.prefix).to_owned();
-        buf.push(&OsStr::from_bytes(self.suffix.as_bytes()));
+        buf.push(OsStr::from_bytes(self.suffix.as_bytes()));
         buf
     }
 

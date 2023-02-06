@@ -451,14 +451,10 @@ fn syntax_to_list<'a>(
         };
     match &node.children {
         Missing => Left(Left(empty())),
-        SyntaxList(s) => Left(Right(
-            s.iter()
-                .map(move |x| match &x.children {
-                    ListItem(x) => Left(on_list_item(x)),
-                    _ => Right(once(x)),
-                })
-                .flatten(),
-        )),
+        SyntaxList(s) => Left(Right(s.iter().flat_map(move |x| match &x.children {
+            ListItem(x) => Left(on_list_item(x)),
+            _ => Right(once(x)),
+        }))),
         ListItem(x) => Right(Left(on_list_item(x))),
         _ => Right(Right(once(node))),
     }
@@ -478,7 +474,7 @@ where
 {
     let mut iter = syntax_to_list_no_separators(node);
     iter.next_back();
-    iter.find(|x| assert_fun(*x))
+    iter.find(|x| assert_fun(x))
 }
 
 fn attr_spec_to_node_list<'a>(node: S<'a>) -> impl DoubleEndedIterator<Item = S<'a>> {
@@ -525,12 +521,12 @@ where
 
 fn is_variadic_expression(node: S<'_>) -> bool {
     is_decorated_expression(node, |x| x.is_ellipsis())
-        || test_decorated_expression_child(node, &is_variadic_expression)
+        || test_decorated_expression_child(node, is_variadic_expression)
 }
 
 fn is_double_variadic(node: S<'_>) -> bool {
     is_decorated_expression(node, |x| x.is_ellipsis())
-        && test_decorated_expression_child(node, &is_variadic_expression)
+        && test_decorated_expression_child(node, is_variadic_expression)
 }
 
 fn is_variadic_parameter_variable(node: S<'_>) -> bool {
@@ -547,10 +543,10 @@ fn is_variadic_parameter_declaration(node: S<'_>) -> bool {
     }
 }
 fn misplaced_variadic_param<'a>(param: S<'a>) -> Option<S<'a>> {
-    assert_last_in_list(&is_variadic_parameter_declaration, param)
+    assert_last_in_list(is_variadic_parameter_declaration, param)
 }
 fn misplaced_variadic_arg<'a>(args: S<'a>) -> Option<S<'a>> {
-    assert_last_in_list(&is_variadic_expression, args)
+    assert_last_in_list(is_variadic_expression, args)
 }
 // If a list ends with a variadic parameter followed by a comma, return it
 fn ends_with_variadic_comma<'a>(params: S<'a>) -> Option<S<'a>> {
@@ -761,7 +757,7 @@ where
     F: Fn(S<'a>) -> bool,
 {
     get_modifiers_of_declaration(declaration_node).and_then(|modifiers_list| {
-        syntax_to_list_no_separators(modifiers_list).find(|x: &S<'a>| modifier(*x))
+        syntax_to_list_no_separators(modifiers_list).find(|x: &S<'a>| modifier(x))
     })
 }
 
@@ -1503,8 +1499,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         match &node.children {
             FunctionDeclarationHeader(node) if node.name.is_construct() => {
                 let class_var_names: Vec<_> = class_elts(self.env.context.active_classish)
-                    .map(prop_names)
-                    .flatten()
+                    .flat_map(prop_names)
                     .collect();
                 let params = syntax_to_list_no_separators(&node.parameter_list);
                 let mut promoted_param_names = promoted_params(params).filter_map(param_name);
@@ -1629,7 +1624,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             if let SyntaxList(modifiers) = &modifiers.children {
                 let modifiers: Vec<S<'a>> = modifiers
                     .iter()
-                    .filter(|x: &S<'a>| is_visibility(*x))
+                    .filter(|x: &S<'a>| is_visibility(x))
                     .collect();
                 if modifiers.len() > 1 {
                     self.errors.push(make_error_from_node(
@@ -2204,15 +2199,15 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn params_errors(&mut self, params: S<'a>) {
-        self.produce_error_from_check(&ends_with_variadic_comma, params, || errors::error2022);
-        self.produce_error_from_check(&misplaced_variadic_param, params, || errors::error2021);
+        self.produce_error_from_check(ends_with_variadic_comma, params, || errors::error2022);
+        self.produce_error_from_check(misplaced_variadic_param, params, || errors::error2021);
 
-        self.produce_error_from_check(&variadic_param_with_default_value, params, || {
+        self.produce_error_from_check(variadic_param_with_default_value, params, || {
             errors::error2065
         });
 
-        self.produce_error_from_check(&variadic_param_with_callconv, params, || errors::error2073);
-        self.produce_error_from_check(&variadic_param_with_readonly, params, || {
+        self.produce_error_from_check(variadic_param_with_callconv, params, || errors::error2073);
+        self.produce_error_from_check(variadic_param_with_readonly, params, || {
             errors::variadic_readonly_param
         });
     }
@@ -2294,7 +2289,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         match &node.children {
             ParameterDeclaration(p) => {
                 let callconv_text = self.text(extract_callconv_node(node).unwrap_or(node));
-                self.produce_error_from_check(&param_with_callconv_has_default, node, || {
+                self.produce_error_from_check(param_with_callconv_has_default, node, || {
                     errors::error2074(callconv_text)
                 });
 
@@ -3404,7 +3399,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
                     ValidClass(name)
                         if !use_key_value_initializers(name)
-                            && initializer_list().any(|i| is_key_value(i)) =>
+                            && initializer_list().any(is_key_value) =>
                     {
                         self.errors.push(make_error_from_node(
                             node,
@@ -3680,7 +3675,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     where
         I: Iterator<Item = S<'a>>,
     {
-        let mut iter = elts.filter(|x| matches!(&(*x).children, XHPCategoryDeclaration(_)));
+        let mut iter = elts.filter(|x| matches!(&x.children, XHPCategoryDeclaration(_)));
         iter.next();
         if let Some(node) = iter.last() {
             self.errors.push(make_error_from_node(
@@ -3696,7 +3691,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     where
         I: Iterator<Item = S<'a>>,
     {
-        let mut iter = elts.filter(|x| matches!(&(*x).children, XHPChildrenDeclaration(_)));
+        let mut iter = elts.filter(|x| matches!(&x.children, XHPChildrenDeclaration(_)));
         iter.next();
         if let Some(node) = iter.last() {
             self.errors.push(make_error_from_node(

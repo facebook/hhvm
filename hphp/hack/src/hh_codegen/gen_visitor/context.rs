@@ -117,7 +117,7 @@ impl<'a> Context<'a> {
     pub fn non_alias_types(&'a self) -> impl Iterator<Item = impl AsRef<str> + 'a> {
         self.types
             .iter()
-            .filter(move |ty| self.defs.get(*ty).map_or(false, |def| !is_alias(*def)))
+            .filter(move |ty| self.defs.get(*ty).map_or(false, |def| !is_alias(def)))
     }
 
     fn get_ty_names_<'b>(defs: &'b HashMap<String, &'b Item>) -> HashSet<&'b str> {

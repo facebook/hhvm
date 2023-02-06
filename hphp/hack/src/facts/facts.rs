@@ -537,8 +537,8 @@ fn add_or_update_module_decl(name: String, delta: ModuleFacts, types: &mut Modul
 // TODO: move to typing_defs_core_impl.rs once completed
 fn extract_type_name<'a>(ty: &Ty<'a>) -> String {
     match ty.get_node() {
-        Ty_::Tapply(((_, id), _)) => format(*id),
-        Ty_::Tgeneric((id, _)) => format(*id),
+        Ty_::Tapply(((_, id), _)) => format(id),
+        Ty_::Tgeneric((id, _)) => format(id),
         _ => unimplemented!("{:?}", ty),
     }
 }
@@ -580,7 +580,7 @@ fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attribute
                     attr_name,
                     ua.classname_params
                         .iter()
-                        .map(|param| format(*param))
+                        .map(|param| format(param))
                         .collect::<Vec<String>>(),
                 ))
             }

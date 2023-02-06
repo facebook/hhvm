@@ -133,22 +133,20 @@ fn batch(
     min_bytes: u64,
     path_iter: impl Iterator<Item = String>,
 ) -> impl Iterator<Item = Vec<String>> {
-    path_iter
-        .batching(move |path_it| {
-            let mut paths = Vec::<String>::new();
-            let mut byte_count: u64 = 0;
-            while let Some(path) = path_it.next() {
-                byte_count += std::fs::metadata(&path)
-                    .unwrap_or_else(|_| panic!("failed to get file size of: {}", path))
-                    .len();
-                paths.push(path);
-                if byte_count >= min_bytes {
-                    break;
-                }
+    path_iter.batching(move |path_it| {
+        let mut paths = Vec::<String>::new();
+        let mut byte_count: u64 = 0;
+        for path in path_it.by_ref() {
+            byte_count += std::fs::metadata(&path)
+                .unwrap_or_else(|_| panic!("failed to get file size of: {}", path))
+                .len();
+            paths.push(path);
+            if byte_count >= min_bytes {
+                break;
             }
-            if paths.is_empty() { None } else { Some(paths) }
-        })
-        .into_iter()
+        }
+        if paths.is_empty() { None } else { Some(paths) }
+    })
 }
 
 fn main() {

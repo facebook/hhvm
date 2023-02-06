@@ -180,7 +180,7 @@ fn shape_field_name_to_ocamlrep<'a, A: ocamlrep::Allocator, P: ToOcamlRep>(
         TshapeFieldName::TSFlitInt(x) => {
             let mut pos_string = alloc.block_with_size(2);
             alloc.set_field(&mut pos_string, 0, simple_pos());
-            alloc.set_field(&mut pos_string, 1, alloc.add(&*x));
+            alloc.set_field(&mut pos_string, 1, alloc.add(x));
             let pos_string = pos_string.build();
 
             let mut block = alloc.block_with_size_and_tag(1usize, 0u8);
@@ -190,7 +190,7 @@ fn shape_field_name_to_ocamlrep<'a, A: ocamlrep::Allocator, P: ToOcamlRep>(
         TshapeFieldName::TSFlitStr(x) => {
             let mut pos_string = alloc.block_with_size(2);
             alloc.set_field(&mut pos_string, 0, simple_pos());
-            alloc.set_field(&mut pos_string, 1, alloc.add(&*x));
+            alloc.set_field(&mut pos_string, 1, alloc.add(x));
             let pos_string = pos_string.build();
 
             let mut block = alloc.block_with_size_and_tag(1usize, 1u8);
@@ -207,12 +207,12 @@ fn shape_field_name_to_ocamlrep<'a, A: ocamlrep::Allocator, P: ToOcamlRep>(
 
             let mut cls_pos_id = alloc.block_with_size(2);
             alloc.set_field(&mut cls_pos_id, 0, pos1);
-            alloc.set_field(&mut cls_pos_id, 1, alloc.add(&*cls));
+            alloc.set_field(&mut cls_pos_id, 1, alloc.add(cls));
             let cls_pos_id = cls_pos_id.build();
 
             let mut const_pos_string = alloc.block_with_size(2);
             alloc.set_field(&mut const_pos_string, 0, pos2);
-            alloc.set_field(&mut const_pos_string, 1, alloc.add(&*name));
+            alloc.set_field(&mut const_pos_string, 1, alloc.add(name));
             let const_pos_string = const_pos_string.build();
 
             let mut block = alloc.block_with_size_and_tag(2usize, 2u8);
@@ -269,7 +269,7 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
             Ty_::Tmixed => ocamlrep::Value::int(1),
             Ty_::Tlike(x) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 2u8);
-                alloc.set_field(&mut block, 0, alloc.add(&*x));
+                alloc.set_field(&mut block, 0, alloc.add(x));
                 block.build()
             }
             Ty_::Tany => {
@@ -281,12 +281,12 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
             Ty_::Tdynamic => ocamlrep::Value::int(3),
             Ty_::Toption(x) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 4u8);
-                alloc.set_field(&mut block, 0, alloc.add(&*x));
+                alloc.set_field(&mut block, 0, alloc.add(x));
                 block.build()
             }
             Ty_::Tprim(x) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 5u8);
-                alloc.set_field(&mut block, 0, alloc.add(&*x));
+                alloc.set_field(&mut block, 0, alloc.add(x));
                 block.build()
             }
             Ty_::Tfun(x) => {
@@ -314,13 +314,13 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
                 };
 
                 let mut block = alloc.block_with_size_and_tag(2usize, 8u8);
-                alloc.set_field(&mut block, 0, alloc.add(&*shape_kind));
+                alloc.set_field(&mut block, 0, alloc.add(shape_kind));
                 alloc.set_field(&mut block, 1, map);
                 block.build()
             }
             Ty_::Tvar(ident) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 9u8);
-                alloc.set_field(&mut block, 0, alloc.add(&*ident));
+                alloc.set_field(&mut block, 0, alloc.add(ident));
                 block.build()
             }
             Ty_::Tgeneric(x) => {

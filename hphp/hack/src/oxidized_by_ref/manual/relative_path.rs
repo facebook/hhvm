@@ -148,7 +148,7 @@ fn parse(value: &str) -> Result<RelativePath<'_>, String> {
     let mut split = value.splitn(2, '|');
     let prefix_str = split.next();
     let path_str = split.next();
-    assert!(split.next() == None, "splitn(2) should yield <=2 results");
+    assert!(split.next().is_none(), "splitn(2) should yield <=2 results");
     let prefix = match prefix_str {
         Some("root") => Prefix::Root,
         Some("hhi") => Prefix::Hhi,

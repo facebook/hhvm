@@ -1521,7 +1521,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     };
                     match *ty {
                         Ty(r, Ty_::Tapply(&(id, [ty1]))) if id.1 == "\\HH\\Awaitable" => {
-                            let ty1 = this.alloc(create_vars_for_reinfer_types(this, *ty1, tvar));
+                            let ty1 = this.alloc(create_vars_for_reinfer_types(this, ty1, tvar));
                             mk(r, Ty_::Tapply(this.alloc((id, std::slice::from_ref(ty1)))))
                         }
                         Ty(r, Ty_::Toption(ty1)) => {
@@ -5390,7 +5390,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 if self.retain_or_omit_user_attributes_for_facts =>
             {
                 Some(ClassNameParam {
-                    name: Id(NO_POS, self.str_from_utf8_for_bytes_in_arena(*name)),
+                    name: Id(NO_POS, self.str_from_utf8_for_bytes_in_arena(name)),
                     full_pos,
                 })
             }

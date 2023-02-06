@@ -77,14 +77,14 @@ impl<R: Reason, T: Walkable<R>> Walkable<R> for Option<T> {
 
 impl<R: Reason, T: Walkable<R> + ?Sized> Walkable<R> for &T {
     fn recurse(&self, v: &mut dyn Visitor<R>) {
-        let obj: &T = &**self;
+        let obj: &T = self;
         obj.accept(v)
     }
 }
 
 impl<R: Reason, T: Walkable<R> + ?Sized> Walkable<R> for Box<T> {
     fn recurse(&self, v: &mut dyn Visitor<R>) {
-        let obj: &T = &**self;
+        let obj: &T = self;
         obj.accept(v)
     }
 }
@@ -116,7 +116,7 @@ impl<R: Reason, K: Walkable<R>, V: Walkable<R>> Walkable<R> for std::collections
 
 impl<R: Reason, T: Walkable<R>> Walkable<R> for hcons::Hc<T> {
     fn recurse(&self, v: &mut dyn Visitor<R>) {
-        let obj: &T = &**self;
+        let obj: &T = self;
         obj.accept(v)
     }
 }

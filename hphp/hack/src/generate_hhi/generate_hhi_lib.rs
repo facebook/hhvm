@@ -18,7 +18,7 @@ use relative_path::Prefix;
 use relative_path::RelativePath;
 
 pub fn run(out: &mut impl std::io::Write, filename: &Path) -> anyhow::Result<()> {
-    let text = std::fs::read(&filename)?;
+    let text = std::fs::read(filename)?;
     let source_text = SourceText::make(
         RcOc::new(RelativePath::make(Prefix::Dummy, filename.to_path_buf())),
         &text,

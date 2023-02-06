@@ -258,9 +258,9 @@ fn wrap_return(e: Expr, pos: &Pos) -> Stmt {
 }
 
 /// Wrap a FuncBody into an anonymous Fun_
-fn wrap_fun_(body: ast::FuncBody, params: Vec<ast::FunParam>, pos: Pos) -> ast::Fun_ {
+fn wrap_fun_(body: ast::FuncBody, params: Vec<ast::FunParam>, span: Pos) -> ast::Fun_ {
     ast::Fun_ {
-        span: pos.clone(),
+        span,
         readonly_this: None,
         annotation: (),
         readonly_ret: None,

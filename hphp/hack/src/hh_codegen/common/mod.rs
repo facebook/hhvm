@@ -17,7 +17,7 @@ pub fn parse_all(files: &[PathBuf]) -> Result<Vec<(&Path, Vec<syn::Item>)>> {
     files
         .iter()
         .map(|filename| -> Result<(&Path, Vec<syn::Item>)> {
-            let src = std::fs::read_to_string(&filename)?;
+            let src = std::fs::read_to_string(filename)?;
             let file = syn::parse_file(&src)?;
             Ok((filename, file.items.into_iter().collect()))
         })

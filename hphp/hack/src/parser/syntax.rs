@@ -436,7 +436,7 @@ pub struct SyntaxChildrenIterator<'a, T, V> {
     pub index_back: usize,
 }
 
-impl<'src, T, V> SyntaxVariant<T, V> {
+impl<T, V> SyntaxVariant<T, V> {
     pub fn iter_children<'a>(&'a self) -> SyntaxChildrenIterator<'a, T, V> {
         SyntaxChildrenIterator {
             syntax: self,

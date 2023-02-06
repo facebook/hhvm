@@ -304,5 +304,5 @@ fn unbox(ty: &Type) -> Vec<&Type> {
             }
         }
     }
-    return vec![];
+    vec![]
 }

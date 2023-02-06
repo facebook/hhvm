@@ -204,12 +204,7 @@ impl<'a, T: Ord> Iterator for Intersection<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        for x in self.iter.by_ref() {
-            if self.other.mem(x) {
-                return Some(x);
-            }
-        }
-        None
+        self.iter.by_ref().find(|&x| self.other.mem(x))
     }
 }
 

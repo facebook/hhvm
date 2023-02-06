@@ -350,11 +350,11 @@ where
     }
 
     fn skip_whitespace(&mut self) {
-        self.skip_while(&Self::is_whitespace_no_newline);
+        self.skip_while(Self::is_whitespace_no_newline);
     }
 
     fn str_skip_whitespace(s: &[u8], i: usize) -> usize {
-        Self::str_skip_while(s, i, &Self::is_whitespace_no_newline)
+        Self::str_skip_while(s, i, Self::is_whitespace_no_newline)
     }
 
     fn not_newline(ch: char) -> bool {
@@ -362,11 +362,11 @@ where
     }
 
     fn skip_to_end_of_line(&mut self) {
-        self.skip_while(&Self::not_newline)
+        self.skip_while(Self::not_newline)
     }
 
     fn skip_name_end(&mut self) {
-        self.skip_while(&Self::is_name_letter)
+        self.skip_while(Self::is_name_letter)
     }
 
     fn skip_end_of_line(&mut self) {
@@ -419,23 +419,23 @@ where
     }
 
     fn scan_decimal_digits_with_underscores(&mut self) {
-        self.scan_with_underscores(&Self::is_decimal_digit);
+        self.scan_with_underscores(Self::is_decimal_digit);
     }
 
     fn scan_octal_digits_with_underscores(&mut self) {
-        self.scan_with_underscores(&Self::is_octal_digit)
+        self.scan_with_underscores(Self::is_octal_digit)
     }
 
     fn scan_binary_digits_with_underscores(&mut self) {
-        self.scan_with_underscores(&Self::is_binary_digit)
+        self.scan_with_underscores(Self::is_binary_digit)
     }
 
     fn scan_hexadecimal_digits(&mut self) {
-        self.skip_while(&Self::is_hexadecimal_digit)
+        self.skip_while(Self::is_hexadecimal_digit)
     }
 
     fn scan_hexadecimal_digits_with_underscores(&mut self) {
-        self.scan_with_underscores(&Self::is_hexadecimal_digit)
+        self.scan_with_underscores(Self::is_hexadecimal_digit)
     }
 
     fn scan_hex_literal(&mut self) -> TokenKind {
@@ -687,7 +687,7 @@ where
             ch if ('0'..='9').contains(&ch) => false,
             ch => ch != '"' && !Self::is_name_nondigit(ch),
         };
-        self.skip_while(&is_uninteresting);
+        self.skip_while(is_uninteresting);
     }
 
     fn scan_integer_literal_in_string(&mut self) -> TokenKind {
@@ -1943,22 +1943,22 @@ where
         &mut self,
         width: usize,
     ) -> <TF::Token as LexableToken>::Trivia {
-        self.scan_leading_trivia_with_width(&Self::scan_php_trivium, width)
+        self.scan_leading_trivia_with_width(Self::scan_php_trivium, width)
     }
 
     pub fn scan_leading_xhp_trivia_with_width(
         &mut self,
         width: usize,
     ) -> <TF::Token as LexableToken>::Trivia {
-        self.scan_leading_trivia_with_width(&Self::scan_xhp_trivium, width)
+        self.scan_leading_trivia_with_width(Self::scan_xhp_trivium, width)
     }
 
     pub(crate) fn scan_leading_php_trivia(&mut self) -> <TF::Token as LexableToken>::Trivia {
-        self.scan_leading_trivia(&Self::scan_php_trivium)
+        self.scan_leading_trivia(Self::scan_php_trivium)
     }
 
     pub(crate) fn scan_leading_xhp_trivia(&mut self) -> <TF::Token as LexableToken>::Trivia {
-        self.scan_leading_trivia(&Self::scan_xhp_trivium)
+        self.scan_leading_trivia(Self::scan_xhp_trivium)
     }
 
     fn scan_trailing_trivia(
@@ -1992,11 +1992,11 @@ where
     }
 
     pub fn scan_trailing_php_trivia(&mut self) -> <TF::Token as LexableToken>::Trivia {
-        self.scan_trailing_trivia(&Self::scan_php_trivium)
+        self.scan_trailing_trivia(Self::scan_php_trivium)
     }
 
     pub fn scan_trailing_xhp_trivia(&mut self) -> <TF::Token as LexableToken>::Trivia {
-        self.scan_trailing_trivia(&Self::scan_xhp_trivium)
+        self.scan_trailing_trivia(Self::scan_xhp_trivium)
     }
 
     pub fn is_next_name(&self) -> bool {
@@ -2167,7 +2167,7 @@ where
         as_name: KwSet,
     ) -> TF::Token {
         let tokenizer = |x: &mut Self| x.scan_token_and_trivia(&scanner, as_name);
-        self.scan_assert_progress(&tokenizer)
+        self.scan_assert_progress(tokenizer)
     }
 
     fn scan_next_token_as_name(&mut self, scanner: impl Fn(&mut Self) -> TokenKind) -> TF::Token {
@@ -2190,9 +2190,9 @@ where
 
     fn next_token_impl(&mut self) -> TF::Token {
         if self.in_type {
-            self.scan_next_token_as_keyword(&Self::scan_token_inside_type)
+            self.scan_next_token_as_keyword(Self::scan_token_inside_type)
         } else {
-            self.scan_next_token_as_keyword(&Self::scan_token_outside_type)
+            self.scan_next_token_as_keyword(Self::scan_token_outside_type)
         }
     }
 
@@ -2239,12 +2239,12 @@ where
         let tokenizer = |x: &mut Self| {
             let token_start = x.offset;
             let (kind, w, leading) =
-                x.scan_token_and_leading_trivia(&Self::scan_token_outside_type, KwSet::NoKeywords);
+                x.scan_token_and_leading_trivia(Self::scan_token_outside_type, KwSet::NoKeywords);
             let trailing = x.token_factory.trivia_factory_mut().make();
             x.token_factory
                 .make(kind, token_start, w, leading, trailing)
         };
-        self.scan_assert_progress(&tokenizer)
+        self.scan_assert_progress(tokenizer)
     }
 
     pub fn next_token_in_string(&mut self, literal_kind: &StringLiteralKind) -> TF::Token {
@@ -2285,11 +2285,11 @@ where
     }
 
     pub fn next_token_as_name(&mut self) -> TF::Token {
-        self.scan_next_token_as_name(&Self::scan_token_outside_type)
+        self.scan_next_token_as_name(Self::scan_token_outside_type)
     }
 
     pub fn next_token_non_reserved_as_name(&mut self) -> TF::Token {
-        self.scan_next_token_nonreserved_as_name(&Self::scan_token_outside_type)
+        self.scan_next_token_nonreserved_as_name(Self::scan_token_outside_type)
     }
 
     pub fn next_xhp_element_token(&mut self, no_trailing: bool) -> (TF::Token, &[u8]) {
@@ -2297,7 +2297,7 @@ where
         let tokenizer = |lexer: &mut Self| {
             let token_start = lexer.offset;
             let (kind, w, leading) =
-                lexer.scan_token_and_leading_trivia(&Self::scan_xhp_token, KwSet::AllKeywords);
+                lexer.scan_token_and_leading_trivia(Self::scan_xhp_token, KwSet::AllKeywords);
             // We do not scan trivia after an XHPOpen's >. If that is the beginning of
             // an XHP body then we want any whitespace or newlines to be leading trivia
             // of the body token.
@@ -2316,7 +2316,7 @@ where
                 }
             }
         };
-        let token = self.scan_assert_progress(&tokenizer);
+        let token = self.scan_assert_progress(tokenizer);
         let token_width = token.width();
         let trailing_width = token.trailing_width();
         let token_start_offset = (self.offset) - trailing_width - token_width;
@@ -2346,7 +2346,7 @@ where
                 .token_factory
                 .make(kind, token_start, w, leading, trailing)
         };
-        self.scan_assert_progress(&scanner)
+        self.scan_assert_progress(scanner)
     }
 
     //
@@ -2436,7 +2436,7 @@ where
             // tests use magic comments in leading markup to set flags, but blank
             // them out before parsing; the newlines are kept to provide correct line
             // numbers in errors
-            self.skip_while_to_offset(&|x| Self::is_newline(x) || Self::is_whitespace_no_newline(x))
+            self.skip_while_to_offset(|x| Self::is_newline(x) || Self::is_whitespace_no_newline(x))
         };
         let hashbang = if self.peek_def(start_offset, INVALID) == '#'
             && self.peek_def(start_offset + 1, INVALID) == '!'
@@ -2447,8 +2447,8 @@ where
             None
         };
 
-        let start_offset = self
-            .skip_while_to_offset(&|x| Self::is_newline(x) || Self::is_whitespace_no_newline(x));
+        let start_offset =
+            self.skip_while_to_offset(|x| Self::is_newline(x) || Self::is_whitespace_no_newline(x));
         let suffix = if self.peek_def(start_offset, INVALID) == '<'
             && self.peek_def(start_offset + 1, INVALID) == '?'
         {

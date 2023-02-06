@@ -11,7 +11,7 @@ pub fn write_hhi_contents_file(
     out_filename: &Path,
     hhi_contents: &[(PathBuf, String)],
 ) -> std::io::Result<()> {
-    let mut out_file = std::fs::File::create(&out_filename)?;
+    let mut out_file = std::fs::File::create(out_filename)?;
     writeln!(out_file, "pub const HHI_CONTENTS: &[(&str, &str)] = &[")?;
     for (path, contents) in hhi_contents {
         writeln!(

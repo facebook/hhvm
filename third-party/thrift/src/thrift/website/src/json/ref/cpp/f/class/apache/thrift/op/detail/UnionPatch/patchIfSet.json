@@ -17,11 +17,11 @@
       "name_html": "patchIfSet",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "408",
+        "line": "435",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "408",
-        "bodyend": "415"
+        "bodystart": "435",
+        "bodyend": "442"
       },
       "definition": {
         "simple_html": "FOLLY_NODISCARD P&amp; patchIfSet()",

@@ -17,11 +17,11 @@
       "name_html": "operator*",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1661",
+        "line": "1464",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1661",
-        "bodyend": "1661"
+        "bodystart": "1464",
+        "bodyend": "1464"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type operator*()",
@@ -50,11 +50,11 @@
       "name_html": "operator*",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1662",
+        "line": "1465",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1662",
-        "bodyend": "1662"
+        "bodystart": "1465",
+        "bodyend": "1465"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type operator*() const",

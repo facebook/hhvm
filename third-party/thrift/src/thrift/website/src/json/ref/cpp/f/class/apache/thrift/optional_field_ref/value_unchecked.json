@@ -17,11 +17,11 @@
       "name_html": "value_unchecked",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "637",
+        "line": "638",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "637",
-        "bodyend": "639"
+        "bodystart": "638",
+        "bodyend": "640"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type value_unchecked() const",

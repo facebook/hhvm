@@ -51,7 +51,7 @@
       "compoundname_html": "apache::thrift::test::MultiSerializer::encode"
     },
     {
-      "refid": "classapache_1_1thrift_1_1test_1_1MultiSerializer_1a89447e20311a7f0b771d5100b618bba2",
+      "refid": "classapache_1_1thrift_1_1test_1_1MultiSerializer_1aa8d950721c75da04a276ac67c14b0e03",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -60,15 +60,15 @@
       "virtual": "virtual",
       "type_html": "void",
       "definition_html": "void apache::thrift::test::MultiSerializer::encode",
-      "argsstring_html": "(const type::AnyValue &amp;value, folly::io::QueueAppender &amp;&amp;appender) const override",
+      "argsstring_html": "(type::AnyConstRef value, folly::io::QueueAppender &amp;&amp;appender) const override",
       "name_html": "encode",
       "reimplements": {
-        "refid": "classapache_1_1thrift_1_1op_1_1Serializer_1ad2cbfea373314dba10cf80356663af53",
+        "refid": "classapache_1_1thrift_1_1op_1_1Serializer_1ad6d654079be29fed2b2bd5b59f6102e1",
         "text_html": "encode"
       },
       "param": [
         {
-          "type_html": "const type::AnyValue &amp;",
+          "type_html": "type::AnyConstRef",
           "declname_html": "value"
         },
         {
@@ -85,12 +85,12 @@
         "bodyend": "70"
       },
       "definition": {
-        "simple_html": "virtual void encode(\n    const type::AnyValue&amp; value, folly::io::QueueAppender&amp;&amp; appender) const",
-        "simple_raw": "virtual void encode(\n    const type::AnyValue& value, folly::io::QueueAppender&& appender) const",
-        "detailed_html": "virtual void encode(\n    const type::AnyValue&amp; value,\n    folly::io::QueueAppender&amp;&amp; appender) const override",
-        "detailed_raw": "virtual void encode(\n    const type::AnyValue& value,\n    folly::io::QueueAppender&& appender) const override",
+        "simple_html": "virtual void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&amp;&amp; appender) const",
+        "simple_raw": "virtual void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&& appender) const",
+        "detailed_html": "virtual void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&amp;&amp; appender) const override",
+        "detailed_raw": "virtual void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&& appender) const override",
         "original_definition_html": "void apache::thrift::test::MultiSerializer::encode",
-        "original_argsstring_html": "(const type::AnyValue &amp;value, folly::io::QueueAppender &amp;&amp;appender) const override"
+        "original_argsstring_html": "(type::AnyConstRef value, folly::io::QueueAppender &amp;&amp;appender) const override"
       },
       "filepath": "fns/class/apache/thrift/test/MultiSerializer/encode",
       "href": "/ref/cpp/fns/class/apache/thrift/test/MultiSerializer/encode",
@@ -128,7 +128,7 @@
       "compoundname_html": "apache::thrift::test::MultiSerializer::encode"
     },
     {
-      "refid": "classapache_1_1thrift_1_1test_1_1MultiSerializer_1ab2b604add337b8977488e6fee76a10d9",
+      "refid": "classapache_1_1thrift_1_1test_1_1MultiSerializer_1af6bd2c539f14b5f04f1429dbe3dd94da",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -137,7 +137,7 @@
       "virtual": "non-virtual",
       "type_html": "void",
       "definition_html": "virtual void apache::thrift::op::Serializer::encode",
-      "argsstring_html": "(const type::AnyValue &amp;value, folly::io::QueueAppender &amp;&amp;appender) const=0",
+      "argsstring_html": "(type::AnyConstRef value, folly::io::QueueAppender &amp;&amp;appender) const=0",
       "name_html": "encode",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
@@ -145,12 +145,12 @@
         "column": "1"
       },
       "definition": {
-        "simple_html": "void encode(\n    const type::AnyValue&amp; value, folly::io::QueueAppender&amp;&amp; appender) const = 0",
-        "simple_raw": "void encode(\n    const type::AnyValue& value, folly::io::QueueAppender&& appender) const = 0",
-        "detailed_html": "void encode(\n    const type::AnyValue&amp; value, folly::io::QueueAppender&amp;&amp; appender) const = 0",
-        "detailed_raw": "void encode(\n    const type::AnyValue& value, folly::io::QueueAppender&& appender) const = 0",
+        "simple_html": "void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&amp;&amp; appender) const = 0",
+        "simple_raw": "void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&& appender) const = 0",
+        "detailed_html": "void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&amp;&amp; appender) const = 0",
+        "detailed_raw": "void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&& appender) const = 0",
         "original_definition_html": "virtual void apache::thrift::op::Serializer::encode",
-        "original_argsstring_html": "(const type::AnyValue &amp;value, folly::io::QueueAppender &amp;&amp;appender) const=0"
+        "original_argsstring_html": "(type::AnyConstRef value, folly::io::QueueAppender &amp;&amp;appender) const=0"
       },
       "filepath": "fns/class/apache/thrift/test/MultiSerializer/encode",
       "href": "/ref/cpp/fns/class/apache/thrift/test/MultiSerializer/encode",
@@ -207,7 +207,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "line": "58",
+        "line": "59",
         "column": "1"
       },
       "definition": {
@@ -224,7 +224,7 @@
       "compoundname_html": "apache::thrift::test::MultiSerializer::encode"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1Serializer_1ad2cbfea373314dba10cf80356663af53",
+      "refid": "classapache_1_1thrift_1_1op_1_1Serializer_1ad6d654079be29fed2b2bd5b59f6102e1",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -233,37 +233,37 @@
       "virtual": "pure-virtual",
       "type_html": "void",
       "definition_html": "virtual void apache::thrift::op::Serializer::encode",
-      "argsstring_html": "(const type::AnyValue &amp;value, folly::io::QueueAppender &amp;&amp;appender) const =0",
+      "argsstring_html": "(type::AnyConstRef value, folly::io::QueueAppender &amp;&amp;appender) const =0",
       "name_html": "encode",
       "reimplementedby": [
         {
-          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a064613a90e27c0f75685a35c28f3918f",
+          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
           "text_html": "encode"
         },
         {
-          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a064613a90e27c0f75685a35c28f3918f",
+          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
           "text_html": "encode"
         },
         {
-          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a064613a90e27c0f75685a35c28f3918f",
+          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
           "text_html": "encode"
         },
         {
-          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a064613a90e27c0f75685a35c28f3918f",
+          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
           "text_html": "encode"
         },
         {
-          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a064613a90e27c0f75685a35c28f3918f",
+          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
           "text_html": "encode"
         },
         {
-          "refid": "classapache_1_1thrift_1_1test_1_1MultiSerializer_1a89447e20311a7f0b771d5100b618bba2",
+          "refid": "classapache_1_1thrift_1_1test_1_1MultiSerializer_1aa8d950721c75da04a276ac67c14b0e03",
           "text_html": "encode"
         }
       ],
       "param": [
         {
-          "type_html": "const type::AnyValue &amp;",
+          "type_html": "type::AnyConstRef",
           "declname_html": "value"
         },
         {
@@ -273,16 +273,16 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "line": "60",
+        "line": "61",
         "column": "1"
       },
       "definition": {
-        "simple_html": "void encode(\n    const type::AnyValue&amp; value, folly::io::QueueAppender&amp;&amp; appender) const = 0",
-        "simple_raw": "void encode(\n    const type::AnyValue& value, folly::io::QueueAppender&& appender) const = 0",
-        "detailed_html": "void encode(\n    const type::AnyValue&amp; value, folly::io::QueueAppender&amp;&amp; appender) const = 0",
-        "detailed_raw": "void encode(\n    const type::AnyValue& value, folly::io::QueueAppender&& appender) const = 0",
+        "simple_html": "void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&amp;&amp; appender) const = 0",
+        "simple_raw": "void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&& appender) const = 0",
+        "detailed_html": "void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&amp;&amp; appender) const = 0",
+        "detailed_raw": "void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&& appender) const = 0",
         "original_definition_html": "virtual void apache::thrift::op::Serializer::encode",
-        "original_argsstring_html": "(const type::AnyValue &amp;value, folly::io::QueueAppender &amp;&amp;appender) const =0"
+        "original_argsstring_html": "(type::AnyConstRef value, folly::io::QueueAppender &amp;&amp;appender) const =0"
       },
       "filepath": "fns/class/apache/thrift/op/Serializer/encode",
       "href": "/ref/cpp/fns/class/apache/thrift/op/Serializer/encode",

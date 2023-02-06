@@ -33,11 +33,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2312",
+        "line": "2115",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2312",
-        "bodyend": "2314"
+        "bodystart": "2115",
+        "bodyend": "2117"
       },
       "definition": {
         "simple_html": "template &lt;class... Args&gt;\nFOLLY_ERASE void emplace_impl(std::false_type, Args&amp;&amp;... args)",
@@ -82,11 +82,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2317",
+        "line": "2120",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2317",
-        "bodyend": "2321"
+        "bodystart": "2120",
+        "bodyend": "2124"
       },
       "definition": {
         "simple_html": "template &lt;class... Args&gt;\nFOLLY_ERASE void emplace_impl(std::true_type, Args&amp;&amp;... args)",

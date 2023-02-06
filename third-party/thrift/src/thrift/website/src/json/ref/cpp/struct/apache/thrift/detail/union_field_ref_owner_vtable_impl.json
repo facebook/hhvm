@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2138",
+        "line": "1941",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2138",
-        "bodyend": "2140"
+        "bodystart": "1941",
+        "bodyend": "1943"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstatic void reset(void* obj)",
@@ -55,11 +55,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "2136",
+    "line": "1939",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "2136",
-    "bodyend": "2141"
+    "bodystart": "1939",
+    "bodyend": "1944"
   },
   "namespacednames_html": [
     "apache",
@@ -109,11 +109,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2138",
+                "line": "1941",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2138",
-                "bodyend": "2140"
+                "bodystart": "1941",
+                "bodyend": "1943"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nstatic void reset(void* obj)",

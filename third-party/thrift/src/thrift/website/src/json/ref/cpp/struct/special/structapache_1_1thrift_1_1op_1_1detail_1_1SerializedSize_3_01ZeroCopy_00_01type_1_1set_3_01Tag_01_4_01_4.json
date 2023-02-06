@@ -52,11 +52,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "294",
+        "line": "298",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "294",
-        "bodyend": "303"
+        "bodystart": "298",
+        "bodyend": "307"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename SetType&gt;\nuint32_t operator()(Protocol&amp; prot, const SetType&amp; set) const",
@@ -72,11 +72,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "292",
+    "line": "296",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "292",
-    "bodyend": "304"
+    "bodystart": "296",
+    "bodyend": "308"
   },
   "namespacednames_html": [
     "apache",
@@ -135,11 +135,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "294",
+                "line": "298",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "294",
-                "bodyend": "303"
+                "bodystart": "298",
+                "bodyend": "307"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename SetType&gt;\nuint32_t operator()(Protocol&amp; prot, const SetType&amp; set) const",

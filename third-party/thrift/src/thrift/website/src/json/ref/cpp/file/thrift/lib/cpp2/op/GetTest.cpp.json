@@ -32,7 +32,7 @@
     },
     {
       "local": "no",
-      "text_html": "thrift/lib/thrift/gen-cpp2/standard_types.h"
+      "text_html": "thrift/lib/thrift/gen-cpp2/schema_types.h"
     },
     {
       "local": "no",

@@ -22,11 +22,11 @@
       "name_html": "patchIfSet",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "264",
+        "line": "285",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "264",
-        "bodyend": "266"
+        "bodystart": "285",
+        "bodyend": "287"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchIfSet()",

@@ -1,0 +1,324 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;",
+  "includes": {
+    "refid": "detail_2Encode_8h",
+    "local": "no",
+    "text_html": "Encode.h"
+  },
+  "tparams": [
+    {
+      "type_html": "typename Adapter"
+    },
+    {
+      "type_html": "typename Tag"
+    },
+    {
+      "type_html": "typename Struct"
+    },
+    {
+      "type_html": "int16_t",
+      "declname_html": "FieldId",
+      "defname_html": "FieldId"
+    }
+  ],
+  "types": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211_1a1b54442745ab0c55b6bd48b7baedced8",
+      "prot": "public",
+      "type_html": "type::field&lt;type::adapted&lt;Adapter, Tag&gt;, FieldContext&lt;Struct, <code>FieldId</code>&gt;&gt;",
+      "definition_html": "using apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::field_adapted_tag =  type::field&lt;type::adapted&lt;Adapter, Tag&gt;, FieldContext&lt;Struct, FieldId&gt; &gt;",
+      "argsstring_html": "",
+      "name_html": "field_adapted_tag",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "line": "807",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "bodystart": "808",
+        "bodyend": "-1"
+      },
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211"
+    }
+  ],
+  "functions": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211_1aec92499906d51ab482528d9f48d97ad5",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Protocol"
+        },
+        {
+          "type_html": "typename U"
+        },
+        {
+          "type_html": "typename AdapterT",
+          "defval_html": "Adapter"
+        }
+      ],
+      "type_html": "constexpr adapt_detail::if_not_field_adapter&lt; AdapterT, type::native_type&lt; Tag &gt;, Struct, void &gt;",
+      "definition_html": "constexpr adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+      "argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "Protocol &amp;",
+          "declname_html": "prot"
+        },
+        {
+          "type_html": "U &amp;",
+          "declname_html": "m"
+        },
+        {
+          "type_html": "Struct &amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "line": "814",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "bodystart": "814",
+        "bodyend": "816"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp;) const",
+        "simple_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct&) const",
+        "detailed_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp;) const",
+        "detailed_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct&) const",
+        "original_definition_html": "constexpr adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+        "original_argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;) const"
+      },
+      "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+      "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211_1af5fd5e4da2bff1c385d8501994dc0025",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Protocol"
+        },
+        {
+          "type_html": "typename U"
+        },
+        {
+          "type_html": "typename AdapterT",
+          "defval_html": "Adapter"
+        }
+      ],
+      "type_html": "constexpr adapt_detail::if_field_adapter&lt; AdapterT, <code>FieldId</code>, type::native_type&lt; Tag &gt;, Struct, void &gt;",
+      "definition_html": "constexpr adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+      "argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;strct) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "Protocol &amp;",
+          "declname_html": "prot"
+        },
+        {
+          "type_html": "U &amp;",
+          "declname_html": "m"
+        },
+        {
+          "type_html": "Struct &amp;",
+          "declname_html": "strct"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "line": "821",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "bodystart": "821",
+        "bodyend": "826"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp; strct) const",
+        "simple_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct& strct) const",
+        "detailed_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp; strct) const",
+        "detailed_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct& strct) const",
+        "original_definition_html": "constexpr adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+        "original_argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;strct) const"
+      },
+      "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+      "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+    "line": "806",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+    "bodystart": "805",
+    "bodyend": "827"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "detail",
+    "Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;"
+  ],
+  "enums": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "template <\n  typename Adapter,\n  typename Tag,\n  typename Struct,\n  int16_t FieldId\n> struct Decode< type::field< type::adapted< Adapter, Tag >, FieldContext< Struct, FieldId > > >;",
+  "declaration_html": "template &lt;\n  typename Adapter,\n  typename Tag,\n  typename Struct,\n  int16_t FieldId\n&gt; struct Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;;",
+  "filepath": "struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211",
+  "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211",
+  "specializes": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "operator()",
+          "compoundname_html": "apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211_1aec92499906d51ab482528d9f48d97ad5",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                },
+                {
+                  "type_html": "typename U"
+                },
+                {
+                  "type_html": "typename AdapterT",
+                  "defval_html": "Adapter"
+                }
+              ],
+              "type_html": "constexpr adapt_detail::if_not_field_adapter&lt; AdapterT, type::native_type&lt; Tag &gt;, Struct, void &gt;",
+              "definition_html": "constexpr adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "U &amp;",
+                  "declname_html": "m"
+                },
+                {
+                  "type_html": "Struct &amp;"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "814",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "814",
+                "bodyend": "816"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp;) const",
+                "simple_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct&) const",
+                "detailed_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp;) const",
+                "detailed_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct&) const",
+                "original_definition_html": "constexpr adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211",
+              "compoundname_html": "apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211_1af5fd5e4da2bff1c385d8501994dc0025",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                },
+                {
+                  "type_html": "typename U"
+                },
+                {
+                  "type_html": "typename AdapterT",
+                  "defval_html": "Adapter"
+                }
+              ],
+              "type_html": "constexpr adapt_detail::if_field_adapter&lt; AdapterT, <code>FieldId</code>, type::native_type&lt; Tag &gt;, Struct, void &gt;",
+              "definition_html": "constexpr adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;strct) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "U &amp;",
+                  "declname_html": "m"
+                },
+                {
+                  "type_html": "Struct &amp;",
+                  "declname_html": "strct"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "821",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "821",
+                "bodyend": "826"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp; strct) const",
+                "simple_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct& strct) const",
+                "detailed_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp; strct) const",
+                "detailed_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct& strct) const",
+                "original_definition_html": "constexpr adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;strct) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211",
+              "compoundname_html": "apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()"
+            }
+          ],
+          "filepath": "f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+          "minprot": "public",
+          "displayname_html": "operator()",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+          "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call"
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

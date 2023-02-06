@@ -23,11 +23,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "826",
+    "line": "827",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "826",
-    "bodyend": "826"
+    "bodystart": "827",
+    "bodyend": "827"
   },
   "namespacednames_html": [
     "apache",

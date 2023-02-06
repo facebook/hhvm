@@ -73,7 +73,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "line": "51",
+        "line": "52",
         "column": "1"
       },
       "definition": {

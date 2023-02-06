@@ -20,8 +20,8 @@
         "line": "316",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "283",
-        "bodyend": "291"
+        "bodystart": "298",
+        "bodyend": "306"
       },
       "definition": {
         "simple_html": "bool applyAssignOrClear(T&amp; val) const",
@@ -59,11 +59,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "283",
+        "line": "298",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "283",
-        "bodyend": "291"
+        "bodystart": "298",
+        "bodyend": "306"
       },
       "definition": {
         "simple_html": "bool applyAssignOrClear(T&amp; val) const",

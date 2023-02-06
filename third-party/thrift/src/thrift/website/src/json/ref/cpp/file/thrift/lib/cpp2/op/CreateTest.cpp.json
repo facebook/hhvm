@@ -59,10 +59,6 @@
     {
       "refid": "namespaceapache_1_1thrift_1_1op",
       "text_html": "apache::thrift::op"
-    },
-    {
-      "refid": "namespaceapache_1_1thrift_1_1type",
-      "text_html": "apache::thrift::type"
     }
   ],
   "vars": [

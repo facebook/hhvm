@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "166",
+        "line": "176",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "166",
-        "bodyend": "172"
+        "bodystart": "176",
+        "bodyend": "182"
       },
       "definition": {
         "simple_html": "bool applyAssign(value_type&amp; val) const",

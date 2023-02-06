@@ -29,6 +29,11 @@
       "text_html": "folly/io/IOBufQueue.h"
     },
     {
+      "refid": "Encode_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/Encode.h"
+    },
+    {
       "local": "no",
       "text_html": "thrift/lib/cpp2/type/AnyValue.h"
     },

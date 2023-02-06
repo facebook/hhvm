@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "762",
+        "line": "782",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "762",
-        "bodyend": "781"
+        "bodystart": "782",
+        "bodyend": "801"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename U&gt;\nvoid operator()(Protocol&amp; prot, U&amp; m) const",
@@ -48,70 +48,6 @@
         "detailed_raw": "template <typename Protocol, typename U>\ninline void operator()(Protocol& prot, U& m) const",
         "original_definition_html": "void apache::thrift::op::detail::Decode&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
         "original_argsstring_html": "(Protocol &amp;prot, U &amp;m) const"
-      },
-      "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
-      "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
-      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
-      "compoundname_html": "apache::thrift::op::detail::Decode::operator()"
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4_1a107299795d6cff57a285784cedb78392",
-      "prot": "public",
-      "static": "no",
-      "const": "yes",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename <code>FieldId</code>"
-        },
-        {
-          "type_html": "class Struct"
-        },
-        {
-          "type_html": "class Protocol"
-        },
-        {
-          "type_html": "class U"
-        }
-      ],
-      "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::Decode&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
-      "argsstring_html": "(FieldId, Struct &amp;strct, Protocol &amp;prot, U &amp;m) const",
-      "name_html": "operator()",
-      "param": [
-        {
-          "type_html": "<code>FieldId</code>"
-        },
-        {
-          "type_html": "Struct &amp;",
-          "declname_html": "strct"
-        },
-        {
-          "type_html": "Protocol &amp;",
-          "declname_html": "prot"
-        },
-        {
-          "type_html": "U &amp;",
-          "declname_html": "m"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "784",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "784",
-        "bodyend": "791"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename FieldId, class Struct, class Protocol, class U&gt;\nvoid operator()(FieldId, Struct&amp; strct, Protocol&amp; prot, U&amp; m) const",
-        "simple_raw": "template <typename FieldId, class Struct, class Protocol, class U>\nvoid operator()(FieldId, Struct& strct, Protocol& prot, U& m) const",
-        "detailed_html": "template &lt;typename FieldId, class Struct, class Protocol, class U&gt;\ninline void operator()(FieldId, Struct&amp; strct, Protocol&amp; prot, U&amp; m) const",
-        "detailed_raw": "template <typename FieldId, class Struct, class Protocol, class U>\ninline void operator()(FieldId, Struct& strct, Protocol& prot, U& m) const",
-        "original_definition_html": "void apache::thrift::op::detail::Decode&lt; type::adapted&lt; Adapter, Tag &gt; &gt;::operator()",
-        "original_argsstring_html": "(FieldId, Struct &amp;strct, Protocol &amp;prot, U &amp;m) const"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
       "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4/operator.call",
@@ -150,11 +86,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "601",
+        "line": "605",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "601",
-        "bodyend": "603"
+        "bodystart": "605",
+        "bodyend": "607"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename StrType&gt;\nvoid operator()(Protocol&amp; prot, StrType&amp; s) const",
@@ -198,11 +134,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "530",
+        "line": "534",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "530",
-        "bodyend": "532"
+        "bodystart": "534",
+        "bodyend": "536"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, bool&amp; b) const",
@@ -246,11 +182,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "535",
+        "line": "539",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "535",
-        "bodyend": "539"
+        "bodystart": "539",
+        "bodyend": "543"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, std::vector&lt;bool&gt;::reference t) const",
@@ -294,11 +230,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "545",
+        "line": "549",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "545",
-        "bodyend": "547"
+        "bodystart": "549",
+        "bodyend": "551"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, int8_t&amp; i) const",
@@ -314,7 +250,7 @@
       "compoundname_html": "apache::thrift::op::detail::Decode::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4_1ae45e10240c1100cd191e35e5c70b64ea",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4_1a775f94050db207ee46a92ef808f22d3e",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -329,8 +265,8 @@
           "type_html": "class U"
         }
       ],
-      "type_html": "std::enable_if_t&lt; <code>kIsStrongType</code>&lt; U, Tag &gt; &gt;",
-      "definition_html": "std::enable_if_t&lt;kIsStrongType&lt;U, Tag&gt; &gt; apache::thrift::op::detail::Decode&lt; type::cpp_type&lt; T, Tag &gt; &gt;::operator()",
+      "type_html": "std::enable_if_t&lt; <code>kIsIntegral</code>&lt; U, Tag &gt; &gt;",
+      "definition_html": "std::enable_if_t&lt;kIsIntegral&lt;U, Tag&gt; &gt; apache::thrift::op::detail::Decode&lt; type::cpp_type&lt; T, Tag &gt; &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, U &amp;m) const",
       "name_html": "operator()",
       "param": [
@@ -345,18 +281,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "746",
+        "line": "767",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "746",
-        "bodyend": "751"
+        "bodystart": "767",
+        "bodyend": "771"
       },
       "definition": {
-        "simple_html": "template &lt;class Protocol, class U&gt;\nstd::enable_if_t&lt;kIsStrongType&lt;U, Tag&gt;&gt; operator()(Protocol&amp; prot, U&amp; m) const",
-        "simple_raw": "template <class Protocol, class U>\nstd::enable_if_t<kIsStrongType<U, Tag>> operator()(Protocol& prot, U& m) const",
-        "detailed_html": "template &lt;class Protocol, class U&gt;\ninline std::enable_if_t&lt;kIsStrongType&lt;U, Tag&gt;&gt; operator()(\n    Protocol&amp; prot, U&amp; m) const",
-        "detailed_raw": "template <class Protocol, class U>\ninline std::enable_if_t<kIsStrongType<U, Tag>> operator()(\n    Protocol& prot, U& m) const",
-        "original_definition_html": "std::enable_if_t&lt;kIsStrongType&lt;U, Tag&gt; &gt; apache::thrift::op::detail::Decode&lt; type::cpp_type&lt; T, Tag &gt; &gt;::operator()",
+        "simple_html": "template &lt;class Protocol, class U&gt;\nstd::enable_if_t&lt;kIsIntegral&lt;U, Tag&gt;&gt; operator()(Protocol&amp; prot, U&amp; m) const",
+        "simple_raw": "template <class Protocol, class U>\nstd::enable_if_t<kIsIntegral<U, Tag>> operator()(Protocol& prot, U& m) const",
+        "detailed_html": "template &lt;class Protocol, class U&gt;\ninline std::enable_if_t&lt;kIsIntegral&lt;U, Tag&gt;&gt; operator()(\n    Protocol&amp; prot, U&amp; m) const",
+        "detailed_raw": "template <class Protocol, class U>\ninline std::enable_if_t<kIsIntegral<U, Tag>> operator()(\n    Protocol& prot, U& m) const",
+        "original_definition_html": "std::enable_if_t&lt;kIsIntegral&lt;U, Tag&gt; &gt; apache::thrift::op::detail::Decode&lt; type::cpp_type&lt; T, Tag &gt; &gt;::operator()",
         "original_argsstring_html": "(Protocol &amp;prot, U &amp;m) const"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4/operator.call",
@@ -365,7 +301,7 @@
       "compoundname_html": "apache::thrift::op::detail::Decode::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4_1acede4e5206f7030c10c71f77fb0d1175",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4_1a708ce5a279ae8711e3c6218b765751bd",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -380,8 +316,8 @@
           "type_html": "class U"
         }
       ],
-      "type_html": "std::enable_if_t&lt;!<code>kIsStrongType</code>&lt; U, Tag &gt; &gt;",
-      "definition_html": "std::enable_if_t&lt;!kIsStrongType&lt;U, Tag&gt; &gt; apache::thrift::op::detail::Decode&lt; type::cpp_type&lt; T, Tag &gt; &gt;::operator()",
+      "type_html": "std::enable_if_t&lt;!<code>kIsIntegral</code>&lt; U, Tag &gt; &gt;",
+      "definition_html": "std::enable_if_t&lt;!kIsIntegral&lt;U, Tag&gt; &gt; apache::thrift::op::detail::Decode&lt; type::cpp_type&lt; T, Tag &gt; &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, U &amp;m) const",
       "name_html": "operator()",
       "param": [
@@ -396,18 +332,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "753",
+        "line": "773",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "753",
-        "bodyend": "756"
+        "bodystart": "773",
+        "bodyend": "776"
       },
       "definition": {
-        "simple_html": "template &lt;class Protocol, class U&gt;\nstd::enable_if_t&lt;!kIsStrongType&lt;U, Tag&gt;&gt; operator()(Protocol&amp; prot, U&amp; m) const",
-        "simple_raw": "template <class Protocol, class U>\nstd::enable_if_t<!kIsStrongType<U, Tag>> operator()(Protocol& prot, U& m) const",
-        "detailed_html": "template &lt;class Protocol, class U&gt;\ninline std::enable_if_t&lt;!kIsStrongType&lt;U, Tag&gt;&gt; operator()(\n    Protocol&amp; prot, U&amp; m) const",
-        "detailed_raw": "template <class Protocol, class U>\ninline std::enable_if_t<!kIsStrongType<U, Tag>> operator()(\n    Protocol& prot, U& m) const",
-        "original_definition_html": "std::enable_if_t&lt;!kIsStrongType&lt;U, Tag&gt; &gt; apache::thrift::op::detail::Decode&lt; type::cpp_type&lt; T, Tag &gt; &gt;::operator()",
+        "simple_html": "template &lt;class Protocol, class U&gt;\nstd::enable_if_t&lt;!kIsIntegral&lt;U, Tag&gt;&gt; operator()(Protocol&amp; prot, U&amp; m) const",
+        "simple_raw": "template <class Protocol, class U>\nstd::enable_if_t<!kIsIntegral<U, Tag>> operator()(Protocol& prot, U& m) const",
+        "detailed_html": "template &lt;class Protocol, class U&gt;\ninline std::enable_if_t&lt;!kIsIntegral&lt;U, Tag&gt;&gt; operator()(\n    Protocol&amp; prot, U&amp; m) const",
+        "detailed_raw": "template <class Protocol, class U>\ninline std::enable_if_t<!kIsIntegral<U, Tag>> operator()(\n    Protocol& prot, U& m) const",
+        "original_definition_html": "std::enable_if_t&lt;!kIsIntegral&lt;U, Tag&gt; &gt; apache::thrift::op::detail::Decode&lt; type::cpp_type&lt; T, Tag &gt; &gt;::operator()",
         "original_argsstring_html": "(Protocol &amp;prot, U &amp;m) const"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4/operator.call",
@@ -444,11 +380,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "585",
+        "line": "589",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "585",
-        "bodyend": "587"
+        "bodystart": "589",
+        "bodyend": "591"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, double&amp; d) const",
@@ -492,11 +428,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "633",
+        "line": "637",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "633",
-        "bodyend": "637"
+        "bodystart": "637",
+        "bodyend": "641"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, T&amp; t) const",
@@ -540,11 +476,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "625",
+        "line": "629",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "625",
-        "bodyend": "627"
+        "bodystart": "629",
+        "bodyend": "631"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, T&amp; s) const",
@@ -557,6 +493,123 @@
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1exception__t_3_01T_01_4_01_4/operator.call",
       "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1exception__t_3_01T_01_4_01_4/operator.call",
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1exception__t_3_01T_01_4_01_4",
+      "compoundname_html": "apache::thrift::op::detail::Decode::operator()"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211_1aec92499906d51ab482528d9f48d97ad5",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Protocol"
+        },
+        {
+          "type_html": "typename U"
+        },
+        {
+          "type_html": "typename AdapterT",
+          "defval_html": "Adapter"
+        }
+      ],
+      "type_html": "constexpr adapt_detail::if_not_field_adapter&lt; AdapterT, type::native_type&lt; Tag &gt;, Struct, void &gt;",
+      "definition_html": "constexpr adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+      "argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "Protocol &amp;",
+          "declname_html": "prot"
+        },
+        {
+          "type_html": "U &amp;",
+          "declname_html": "m"
+        },
+        {
+          "type_html": "Struct &amp;"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "line": "814",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "bodystart": "814",
+        "bodyend": "816"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp;) const",
+        "simple_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct&) const",
+        "detailed_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp;) const",
+        "detailed_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct&) const",
+        "original_definition_html": "constexpr adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+        "original_argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;) const"
+      },
+      "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+      "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211",
+      "compoundname_html": "apache::thrift::op::detail::Decode::operator()"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211_1af5fd5e4da2bff1c385d8501994dc0025",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Protocol"
+        },
+        {
+          "type_html": "typename U"
+        },
+        {
+          "type_html": "typename AdapterT",
+          "defval_html": "Adapter"
+        }
+      ],
+      "type_html": "constexpr adapt_detail::if_field_adapter&lt; AdapterT, <code>FieldId</code>, type::native_type&lt; Tag &gt;, Struct, void &gt;",
+      "definition_html": "constexpr adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+      "argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;strct) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "Protocol &amp;",
+          "declname_html": "prot"
+        },
+        {
+          "type_html": "U &amp;",
+          "declname_html": "m"
+        },
+        {
+          "type_html": "Struct &amp;",
+          "declname_html": "strct"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "line": "821",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+        "bodystart": "821",
+        "bodyend": "826"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp; strct) const",
+        "simple_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct& strct) const",
+        "detailed_html": "template &lt;typename Protocol, typename U, typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt;\n    operator()(Protocol&amp; prot, U&amp; m, Struct&amp; strct) const",
+        "detailed_raw": "template <typename Protocol, typename U, typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct, void>\n    operator()(Protocol& prot, U& m, Struct& strct) const",
+        "original_definition_html": "constexpr adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct, void&gt; apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+        "original_argsstring_html": "(Protocol &amp;prot, U &amp;m, Struct &amp;strct) const"
+      },
+      "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+      "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211/operator.call",
+      "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211",
       "compoundname_html": "apache::thrift::op::detail::Decode::operator()"
     },
     {
@@ -588,11 +641,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "577",
+        "line": "581",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "577",
-        "bodyend": "579"
+        "bodystart": "581",
+        "bodyend": "583"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, float&amp; f) const",
@@ -636,11 +689,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "553",
+        "line": "557",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "553",
-        "bodyend": "555"
+        "bodystart": "557",
+        "bodyend": "559"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, int16_t&amp; i) const",
@@ -684,11 +737,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "561",
+        "line": "565",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "561",
-        "bodyend": "563"
+        "bodystart": "565",
+        "bodyend": "567"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, int32_t&amp; i) const",
@@ -732,11 +785,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "569",
+        "line": "573",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "569",
-        "bodyend": "571"
+        "bodystart": "573",
+        "bodyend": "575"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, int64_t&amp; i) const",
@@ -783,11 +836,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "644",
+        "line": "648",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "644",
-        "bodyend": "671"
+        "bodystart": "648",
+        "bodyend": "676"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename ListType&gt;\nvoid operator()(Protocol&amp; prot, ListType&amp; list) const",
@@ -834,11 +887,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "709",
+        "line": "729",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "709",
-        "bodyend": "740"
+        "bodystart": "729",
+        "bodyend": "761"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename MapType&gt;\nvoid operator()(Protocol&amp; prot, MapType&amp; map) const",
@@ -885,11 +938,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "677",
+        "line": "696",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "677",
-        "bodyend": "703"
+        "bodystart": "696",
+        "bodyend": "723"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename SetType&gt;\nvoid operator()(Protocol&amp; prot, SetType&amp; set) const",
@@ -936,11 +989,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "593",
+        "line": "597",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "593",
-        "bodyend": "595"
+        "bodystart": "597",
+        "bodyend": "599"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename StrType&gt;\nvoid operator()(Protocol&amp; prot, StrType&amp; s) const",
@@ -984,11 +1037,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "609",
+        "line": "613",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "609",
-        "bodyend": "611"
+        "bodystart": "613",
+        "bodyend": "615"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, T&amp; s) const",
@@ -1032,11 +1085,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "617",
+        "line": "621",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "617",
-        "bodyend": "619"
+        "bodystart": "621",
+        "bodyend": "623"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol&gt;\nvoid operator()(Protocol&amp; prot, T&amp; s) const",

@@ -17,11 +17,11 @@
       "name_html": "operator bool",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "940",
+        "line": "941",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "940",
-        "bodyend": "940"
+        "bodystart": "941",
+        "bodyend": "941"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE operator bool() const",

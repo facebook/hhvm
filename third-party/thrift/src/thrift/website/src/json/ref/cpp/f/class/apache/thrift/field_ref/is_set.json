@@ -17,11 +17,11 @@
       "name_html": "is_set",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "324",
+        "line": "325",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "324",
-        "bodyend": "324"
+        "bodystart": "325",
+        "bodyend": "325"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE bool is_set() const",

@@ -94,10 +94,10 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
 /// The `Patch` template parameter must be a Thrift struct with the following
 /// fields:
 /// * `optional T assign`
-/// * `bool clear`
-/// * `P patchPrior`
-/// * `T ensure`
-/// * `P patch`
+/// * `terse bool clear`
+/// * `terse P patchPrior`
+/// * `terse T ensure`
+/// * `terse P patch`
 /// Where `P` is the field patch type for the struct type `T`.
 template <typename Patch, typename Derived>
 class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
@@ -241,10 +241,10 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 /// The `Patch` template parameter must be a Thrift struct with the following
 /// fields:
 /// * `optional T assign`
-/// * `bool clear`
-/// * `P patchPrior`
-/// * `T ensure`
-/// * `P patch`
+/// * `terse bool clear`
+/// * `terse P patchPrior`
+/// * `terse T ensure`
+/// * `terse P patch`
 /// Where `P` is the field patch type for the struct type `T`.
 template <typename Patch>
 class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
@@ -390,10 +390,10 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
 /// The `Patch` template parameter must be a Thrift struct with the following
 /// fields:
 /// * `optional T assign`
-/// * `bool clear`
-/// * `P patchPrior`
-/// * `T ensure`
-/// * `P patch`
+/// * `terse bool clear`
+/// * `terse P patchPrior`
+/// * `terse T ensure`
+/// * `terse P patch`
 /// Where `P` is the field patch type for the union type `T`.
 template <typename Patch>
 class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {

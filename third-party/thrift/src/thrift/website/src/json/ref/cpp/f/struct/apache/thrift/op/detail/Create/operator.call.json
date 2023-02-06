@@ -126,7 +126,7 @@
       "compoundname_html": "apache::thrift::op::detail::Create::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d_1a5b7b71d82ede3a848e4af92a2a6e89eb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d_1a65f19878ee4876b8c08693bf3f4b4cff",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -139,8 +139,8 @@
           "defval_html": "Adapter"
         }
       ],
-      "type_html": "constexpr adapt_detail::FromThriftFieldIdType&lt; AdapterT, <code>FieldId</code>, type::native_type&lt; Tag &gt;, Struct &gt;",
-      "definition_html": "constexpr adapt_detail:: FromThriftFieldIdType&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt; apache::thrift::op::detail::Create&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+      "type_html": "constexpr adapt_detail::if_field_adapter&lt; AdapterT, <code>FieldId</code>, type::native_type&lt; Tag &gt;, Struct &gt;",
+      "definition_html": "constexpr adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt; apache::thrift::op::detail::Create&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
       "argsstring_html": "(Struct &amp;object) const",
       "name_html": "operator()",
       "param": [
@@ -158,11 +158,11 @@
         "bodyend": "227"
       },
       "definition": {
-        "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    FromThriftFieldIdType&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp; object) const",
-        "simple_raw": "template <typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    FromThriftFieldIdType<AdapterT, FieldId, type::native_type<Tag>, Struct>\n    operator()(Struct& object) const",
-        "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    FromThriftFieldIdType&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp; object) const",
-        "detailed_raw": "template <typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    FromThriftFieldIdType<AdapterT, FieldId, type::native_type<Tag>, Struct>\n    operator()(Struct& object) const",
-        "original_definition_html": "constexpr adapt_detail:: FromThriftFieldIdType&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt; apache::thrift::op::detail::Create&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+        "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconstexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp; object) const",
+        "simple_raw": "template <typename AdapterT = Adapter>\nconstexpr adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct>\n    operator()(Struct& object) const",
+        "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline constexpr adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt;\n    operator()(Struct&amp; object) const",
+        "detailed_raw": "template <typename AdapterT = Adapter>\ninline constexpr adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct>\n    operator()(Struct& object) const",
+        "original_definition_html": "constexpr adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;Tag&gt;, Struct&gt; apache::thrift::op::detail::Create&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
         "original_argsstring_html": "(Struct &amp;object) const"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt8931f06d0c4c4706c424c7754371f09d/operator.call",

@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "293",
+        "line": "320",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "293",
-        "bodyend": "332"
+        "bodystart": "320",
+        "bodyend": "359"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid merge(U&amp;&amp; next)",

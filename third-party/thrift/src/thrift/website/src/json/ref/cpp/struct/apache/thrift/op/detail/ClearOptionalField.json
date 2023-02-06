@@ -6,10 +6,10 @@
   "compoundname_html": "apache::thrift::op::detail::ClearOptionalField",
   "derivedcompoundref": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTf530edb4d9f73d26400a52a7fba4b36a",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01adapted__field__tag_3_01Adapter_00_01UTef57b2b55d5a07b9debb870fcf8318f8",
       "prot": "public",
       "virtual": "non-virtual",
-      "text_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, id &gt; &gt;"
+      "text_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;"
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ClearField_3_01type_1_1field_3_01Tag_00_01Context_01_4_01_4",

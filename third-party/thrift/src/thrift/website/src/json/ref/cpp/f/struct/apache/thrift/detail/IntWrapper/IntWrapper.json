@@ -17,7 +17,7 @@
       "name_html": "IntWrapper",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "65",
+        "line": "66",
         "column": "1"
       },
       "definition": {
@@ -54,11 +54,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "66",
+        "line": "67",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "66",
-        "bodyend": "66"
+        "bodystart": "67",
+        "bodyend": "67"
       },
       "definition": {
         "simple_html": "IntWrapper(T t)",
@@ -88,7 +88,7 @@
       "name_html": "IntWrapper",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "73",
+        "line": "74",
         "column": "1"
       },
       "definition": {
@@ -124,11 +124,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "75",
+        "line": "76",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "75",
-        "bodyend": "75"
+        "bodystart": "76",
+        "bodyend": "76"
       },
       "definition": {
         "simple_html": "IntWrapper(const IntWrapper&amp; other)",
@@ -163,11 +163,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "76",
+        "line": "77",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "76",
-        "bodyend": "76"
+        "bodystart": "77",
+        "bodyend": "77"
       },
       "definition": {
         "simple_html": "IntWrapper(IntWrapper&amp;&amp; other)",

@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1838",
+        "line": "1641",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1838",
-        "bodyend": "1843"
+        "bodystart": "1641",
+        "bodyend": "1646"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F&gt;   auto operator() (optional_field_ref&lt; T &gt; ref, F functor) const noexcept(",

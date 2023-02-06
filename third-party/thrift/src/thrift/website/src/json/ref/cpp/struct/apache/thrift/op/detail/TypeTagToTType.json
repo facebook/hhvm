@@ -16,10 +16,10 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "41",
+    "line": "45",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "41",
+    "bodystart": "45",
     "bodyend": "-1"
   },
   "namespacednames_html": [

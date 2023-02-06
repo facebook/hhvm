@@ -433,6 +433,11 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
       "prot": "public",
       "text_html": "apache::thrift::op::detail::Decode&lt; type::adapted&lt; Adapter, Tag &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;"
     }
   ],
   "innernamespace": [

@@ -62,7 +62,7 @@
           "compoundname_html": "apache::thrift::op::detail::GetIntrinsicDefault&lt; type::field&lt; Tag, Context &gt; &gt;::operator()",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte128aaa608f3bd4f3aed2daa09830c905_1a6e3c320526ec234f90847f7270ccd2c8",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c_1a69724ce05c5178b3067ff70ff0c16a06",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -76,7 +76,7 @@
                 }
               ],
               "type_html": "const adapt_detail::if_not_field_adapter&lt; AdapterT, type::native_type&lt; UTag &gt;, Struct &gt; &amp;",
-              "definition_html": "const adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetIntrinsicDefault&lt; adapted_field_tag&lt; Adapter, UTag, Struct, id &gt; &gt;::operator()",
+              "definition_html": "const adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetIntrinsicDefault&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
               "location": {
@@ -92,16 +92,16 @@
                 "simple_raw": "template <typename AdapterT = Adapter>\nconst adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&\n    operator()() const",
                 "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline const adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
                 "detailed_raw": "template <typename AdapterT = Adapter>\ninline const adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&\n    operator()() const",
-                "original_definition_html": "const adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetIntrinsicDefault&lt; adapted_field_tag&lt; Adapter, UTag, Struct, id &gt; &gt;::operator()",
+                "original_definition_html": "const adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetIntrinsicDefault&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
-              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte128aaa608f3bd4f3aed2daa09830c905/operator.call",
-              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte128aaa608f3bd4f3aed2daa09830c905/operator.call",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte128aaa608f3bd4f3aed2daa09830c905",
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c",
               "compoundname_html": "apache::thrift::op::detail::GetIntrinsicDefault&lt; type::field&lt; Tag, Context &gt; &gt;::operator()"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte128aaa608f3bd4f3aed2daa09830c905_1a2f95ce2b6622d796edf6993f7b8ea7c5",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c_1aa23b36378e3b13a9cb0810f935a6730e",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -114,8 +114,8 @@
                   "defval_html": "Adapter"
                 }
               ],
-              "type_html": "const adapt_detail::FromThriftFieldIdType&lt; AdapterT, id, type::native_type&lt; UTag &gt;, Struct &gt; &amp;",
-              "definition_html": "const adapt_detail:: FromThriftFieldIdType&lt;AdapterT, id, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetIntrinsicDefault&lt; adapted_field_tag&lt; Adapter, UTag, Struct, id &gt; &gt;::operator()",
+              "type_html": "const adapt_detail::if_field_adapter&lt; AdapterT, <code>FieldId</code>, type::native_type&lt; UTag &gt;, Struct &gt; &amp;",
+              "definition_html": "const adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetIntrinsicDefault&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
               "location": {
@@ -127,16 +127,16 @@
                 "bodyend": "256"
               },
               "definition": {
-                "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    FromThriftFieldIdType&lt;AdapterT, id, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
-                "simple_raw": "template <typename AdapterT = Adapter>\nconst adapt_detail::\n    FromThriftFieldIdType<AdapterT, id, type::native_type<UTag>, Struct>&\n    operator()() const",
-                "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline const adapt_detail::\n    FromThriftFieldIdType&lt;AdapterT, id, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
-                "detailed_raw": "template <typename AdapterT = Adapter>\ninline const adapt_detail::\n    FromThriftFieldIdType<AdapterT, id, type::native_type<UTag>, Struct>&\n    operator()() const",
-                "original_definition_html": "const adapt_detail:: FromThriftFieldIdType&lt;AdapterT, id, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetIntrinsicDefault&lt; adapted_field_tag&lt; Adapter, UTag, Struct, id &gt; &gt;::operator()",
+                "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
+                "simple_raw": "template <typename AdapterT = Adapter>\nconst adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&\n    operator()() const",
+                "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline const adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
+                "detailed_raw": "template <typename AdapterT = Adapter>\ninline const adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&\n    operator()() const",
+                "original_definition_html": "const adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetIntrinsicDefault&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
-              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte128aaa608f3bd4f3aed2daa09830c905/operator.call",
-              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte128aaa608f3bd4f3aed2daa09830c905/operator.call",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte128aaa608f3bd4f3aed2daa09830c905",
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01adapted__field__tag_3_01Adapte80074ffa608f1717c009239c55b9324c",
               "compoundname_html": "apache::thrift::op::detail::GetIntrinsicDefault&lt; type::field&lt; Tag, Context &gt; &gt;::operator()"
             },
             {
@@ -371,7 +371,7 @@
               "compoundname_html": "apache::thrift::op::detail::GetIntrinsicDefault&lt; type::field&lt; Tag, Context &gt; &gt;::operator()"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01Ab60b176556a610b8d7732f833fb24ef9_1a6411c4a98e013029d680e026921f1796",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7_1a84f34b1a6d0bbd35d7d7f1727c9eca38",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -385,7 +385,7 @@
                 }
               ],
               "type_html": "const adapt_detail::if_not_field_adapter&lt; AdapterT, type::native_type&lt; UTag &gt;, Struct &gt; &amp;",
-              "definition_html": "const adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, id &gt; &gt; &gt;::operator()",
+              "definition_html": "const adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
               "location": {
@@ -401,16 +401,16 @@
                 "simple_raw": "template <typename AdapterT = Adapter>\nconst adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&\n    operator()() const",
                 "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline const adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
                 "detailed_raw": "template <typename AdapterT = Adapter>\ninline const adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&\n    operator()() const",
-                "original_definition_html": "const adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, id &gt; &gt; &gt;::operator()",
+                "original_definition_html": "const adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
-              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01Ab60b176556a610b8d7732f833fb24ef9/operator.call",
-              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01Ab60b176556a610b8d7732f833fb24ef9/operator.call",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01Ab60b176556a610b8d7732f833fb24ef9",
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7",
               "compoundname_html": "apache::thrift::op::detail::GetIntrinsicDefault&lt; type::field&lt; Tag, Context &gt; &gt;::operator()"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01Ab60b176556a610b8d7732f833fb24ef9_1a8332299c39ceef0eff7f05df3cc5a5af",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7_1adf63c82cfb7a74de7b7ab9f4d5903877",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -423,8 +423,8 @@
                   "defval_html": "Adapter"
                 }
               ],
-              "type_html": "const adapt_detail::FromThriftFieldIdType&lt; AdapterT, id, type::native_type&lt; UTag &gt;, Struct &gt; &amp;",
-              "definition_html": "const adapt_detail:: FromThriftFieldIdType&lt;AdapterT, id, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, id &gt; &gt; &gt;::operator()",
+              "type_html": "const adapt_detail::if_field_adapter&lt; AdapterT, <code>FieldId</code>, type::native_type&lt; UTag &gt;, Struct &gt; &amp;",
+              "definition_html": "const adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
               "location": {
@@ -436,16 +436,16 @@
                 "bodyend": "217"
               },
               "definition": {
-                "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    FromThriftFieldIdType&lt;AdapterT, id, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
-                "simple_raw": "template <typename AdapterT = Adapter>\nconst adapt_detail::\n    FromThriftFieldIdType<AdapterT, id, type::native_type<UTag>, Struct>&\n    operator()() const",
-                "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline const adapt_detail::\n    FromThriftFieldIdType&lt;AdapterT, id, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
-                "detailed_raw": "template <typename AdapterT = Adapter>\ninline const adapt_detail::\n    FromThriftFieldIdType<AdapterT, id, type::native_type<UTag>, Struct>&\n    operator()() const",
-                "original_definition_html": "const adapt_detail:: FromThriftFieldIdType&lt;AdapterT, id, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, id &gt; &gt; &gt;::operator()",
+                "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
+                "simple_raw": "template <typename AdapterT = Adapter>\nconst adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&\n    operator()() const",
+                "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline const adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
+                "detailed_raw": "template <typename AdapterT = Adapter>\ninline const adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&\n    operator()() const",
+                "original_definition_html": "const adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
-              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01Ab60b176556a610b8d7732f833fb24ef9/operator.call",
-              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01Ab60b176556a610b8d7732f833fb24ef9/operator.call",
-              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01Ab60b176556a610b8d7732f833fb24ef9",
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7",
               "compoundname_html": "apache::thrift::op::detail::GetIntrinsicDefault&lt; type::field&lt; Tag, Context &gt; &gt;::operator()"
             },
             {

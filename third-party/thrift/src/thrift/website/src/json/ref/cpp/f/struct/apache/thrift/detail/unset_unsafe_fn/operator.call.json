@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1826",
+        "line": "1629",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1826",
-        "bodyend": "1828"
+        "bodystart": "1629",
+        "bodyend": "1631"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid operator()(field_ref&lt;T&gt; ref) const",
@@ -72,11 +72,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1831",
+        "line": "1634",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1831",
-        "bodyend": "1833"
+        "bodystart": "1634",
+        "bodyend": "1636"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid operator()(optional_field_ref&lt;T&gt; ref) const",

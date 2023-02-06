@@ -134,7 +134,7 @@ let rec parse_and_format_until (delimiter : delimiter) (state : parse_state) :
        now try and see if there are nested delimited sections
        in that larger section. *)
     let parsed =
-      parse_markdown (List.map ~f:snd parsed |> String.of_char_list)
+      parse_markdown (List.map ~f:snd parsed |> String.of_char_list) []
       |> List.map
            ~f:
              (List.map ~f:(fun (delims, c) ->
@@ -162,9 +162,10 @@ and parse_and_format_section ~(delimiter : delimiter) (s : parse_state) =
     >>= (eat_prefix " " |> fail)
     >>= parse_and_format_until delimiter)
 
-and parse_markdown (msg : string) : tagged_char list list =
+and parse_markdown (msg : string) (acc : tagged_char list list) :
+    tagged_char list list =
   if String.is_empty msg then
-    []
+    List.rev acc
   else
     let parse =
       parse_and_format_section ~delimiter:DoubleAsterisk
@@ -176,10 +177,11 @@ and parse_markdown (msg : string) : tagged_char list list =
     match parse { parsed = []; remaining = msg } with
     | None ->
       failwith "Impossible: unable to parse a single character in error message"
-    | Some { parsed; remaining } -> List.rev parsed :: parse_markdown remaining
+    | Some { parsed; remaining } ->
+      parse_markdown remaining (List.rev parsed :: acc)
 
 let render ?(add_bold = false) ?(color = Tty.Red) (msg : string) =
-  parse_markdown msg |> List.concat |> format_markdown ~add_bold ~color
+  parse_markdown msg [] |> List.concat |> format_markdown ~add_bold ~color
 
 let md_codify s = "`" ^ s ^ "`"
 

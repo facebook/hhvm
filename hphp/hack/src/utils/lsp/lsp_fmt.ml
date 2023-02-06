@@ -674,8 +674,6 @@ let parse_completionItem (params : json option) : CompletionItemResolve.params =
       kind =
         Option.bind (Jget.int_opt params "kind") ~f:completionItemKind_of_enum;
       detail = Jget.string_opt params "detail";
-      inlineDetail = Jget.string_opt params "inlineDetail";
-      itemType = Jget.string_opt params "itemType";
       documentation;
       sortText = Jget.string_opt params "sortText";
       filterText = Jget.string_opt params "filterText";
@@ -703,8 +701,6 @@ let print_completionItem (item : Completion.completionItem) : json =
           Option.map item.kind ~f:(fun x ->
               int_ @@ completionItemKind_to_enum x) );
         ("detail", Option.map item.detail ~f:string_);
-        ("inlineDetail", Option.map item.inlineDetail ~f:string_);
-        ("itemType", Option.map item.itemType ~f:string_);
         ( "documentation",
           match item.documentation with
           | None -> None

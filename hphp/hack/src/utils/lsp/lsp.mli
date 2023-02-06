@@ -642,10 +642,6 @@ module Completion : sig
     (* tells editor which icon to use *)
     detail: string option;
     (* human-readable string like type/symbol info *)
-    inlineDetail: string option;
-    (* nuclide-specific, right column *)
-    itemType: string option;
-    (* nuclide-specific, left column *)
     documentation: completionDocumentation option;
     (* human-readable doc-comment *)
     sortText: string option;

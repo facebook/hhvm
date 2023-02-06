@@ -408,8 +408,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "doStuff",
                             "kind": 2,
                             "detail": "function(int $x, int $y=_): void",
-                            "inlineDetail": "(int $x)",
-                            "itemType": "void",
                             "sortText": "doStuff",
                             # We don't want to require the user to provide optional arguments, so
                             # only insert $x, not $y.
@@ -482,8 +480,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "doStuff",
                             "kind": 2,
                             "detail": "function(int $x=_, int $y=_): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "doStuff",
                             "insertText": "doStuff()",
                             "insertTextFormat": 2,
@@ -552,7 +548,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'x'",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'x'",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -573,7 +568,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'y'",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'y'",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -625,7 +619,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'x",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'x",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -646,7 +639,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'y",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'y",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -698,7 +690,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -714,7 +705,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -730,7 +720,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "xhp:enum-attribute",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "xhp:enum-attribute",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -746,7 +735,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "xhp:generic",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "xhp:generic",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -793,7 +781,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -809,7 +796,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -856,7 +842,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -872,7 +857,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -919,7 +903,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "width",
                             "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": "width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -941,7 +924,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "color",
                             "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": "color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -994,7 +976,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "width",
                             "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": "width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1016,7 +997,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "color",
                             "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": "color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1069,7 +1049,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1085,7 +1064,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1101,7 +1079,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":xhp:enum-attribute",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":xhp:enum-attribute",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1117,7 +1094,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":xhp:generic",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":xhp:generic",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1164,7 +1140,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1180,7 +1155,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1205,8 +1179,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": ":ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
                     "insertText": ":ab:cd:alpha",
                     "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
@@ -1215,8 +1187,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": ":ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
                     "documentation": {
                         "kind": "markdown",
                         "value": ":ab:cd:alpha docblock",
@@ -1259,7 +1229,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1275,7 +1244,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1299,7 +1267,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
                     "insertText": "ab:cd:alpha",
                     "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
@@ -1308,7 +1275,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
                     "documentation": {
                         "kind": "markdown",
                         "value": ":ab:cd:alpha docblock",
@@ -1350,7 +1316,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":width",
                             "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": ":width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1372,7 +1337,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":color",
                             "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": ":color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1425,7 +1389,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":width",
                             "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": ":width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1447,7 +1410,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":color",
                             "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": ":color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1500,7 +1462,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_function",
                             "kind": 3,
                             "detail": "function",
-                            "inlineDetail": "function",
                             "sortText": "test_function",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1524,8 +1485,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "test_function",
                     "kind": 3,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "insertText": "test_function",
                     "insertTextFormat": 1,
                     "data": {
@@ -1538,8 +1497,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "test_function",
                     "kind": 3,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "documentation": {
                         "kind": "markdown",
                         "value": "test_function docblock.",
@@ -1612,7 +1569,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "class",
                             "kind": 21,
                             "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1634,7 +1590,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Bard",
                             "kind": 21,
                             "detail": "Elsa",
-                            "inlineDetail": "Elsa",
                             "sortText": "Bard",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1656,7 +1611,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Alonso",
                             "kind": 21,
                             "detail": "Elsa",
-                            "inlineDetail": "Elsa",
                             "sortText": "Alonso",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1678,8 +1632,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "isValid",
                             "kind": 2,
                             "detail": "function(mixed $value): bool",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "bool",
                             "sortText": "isValid",
                             "insertText": "isValid(${1:\\$value})",
                             "insertTextFormat": 2,
@@ -1695,8 +1647,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getValues",
                             "kind": 2,
                             "detail": "function(): dict<string, Elsa>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<string, Elsa>",
                             "sortText": "getValues",
                             "insertText": "getValues()",
                             "insertTextFormat": 2,
@@ -1712,8 +1662,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getNames",
                             "kind": 2,
                             "detail": "function(): dict<Elsa, string>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<Elsa, string>",
                             "sortText": "getNames",
                             "insertText": "getNames()",
                             "insertTextFormat": 2,
@@ -1729,8 +1677,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "coerce",
                             "kind": 2,
                             "detail": "function(mixed $value): ?Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "?Elsa",
                             "sortText": "coerce",
                             "insertText": "coerce(${1:\\$value})",
                             "insertTextFormat": 2,
@@ -1746,8 +1692,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "assertAll",
                             "kind": 2,
                             "detail": "function(Traversable<mixed> $values): Container<Elsa>",
-                            "inlineDetail": "(Traversable<mixed> $values)",
-                            "itemType": "Container<Elsa>",
                             "sortText": "assertAll",
                             "insertText": "assertAll(${1:\\$values})",
                             "insertTextFormat": 2,
@@ -1763,8 +1707,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "assert",
                             "kind": 2,
                             "detail": "function(mixed $value): Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "Elsa",
                             "sortText": "assert",
                             "insertText": "assert(${1:\\$value})",
                             "insertTextFormat": 2,
@@ -1804,8 +1746,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "isValid",
                     "kind": 2,
                     "detail": "function(mixed $value): bool",
-                    "inlineDetail": "(mixed $value)",
-                    "itemType": "bool",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -1824,8 +1764,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "isValid",
                     "kind": 2,
                     "detail": "function(mixed $value): bool",
-                    "inlineDetail": "(mixed $value)",
-                    "itemType": "bool",
                     "documentation": {
                         "kind": "markdown",
                         "value": "Returns whether or not the value is defined as a constant.",
@@ -1888,7 +1826,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_func",
                             "kind": 3,
                             "detail": "function",
-                            "inlineDetail": "function",
                             "sortText": "test_func",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1935,8 +1872,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "interfaceDocBlockMethod",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "interfaceDocBlockMethod",
                             "insertText": "interfaceDocBlockMethod()",
                             "insertTextFormat": 2,
@@ -1960,8 +1895,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "interfaceDocBlockMethod",
                     "kind": 2,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -1980,8 +1913,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "interfaceDocBlockMethod",
                     "kind": 2,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -2029,7 +1960,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "class",
                             "kind": 21,
                             "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2051,8 +1981,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_do_not_use",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~test_do_not_use",
                             "insertText": "test_do_not_use()",
                             "insertTextFormat": 2,
@@ -2068,8 +1996,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getName",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "getName",
                             "insertText": "getName()",
                             "insertTextFormat": 2,
@@ -2085,8 +2011,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getAttributes_DO_NOT_USE",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~getAttributes_DO_NOT_USE",
                             "insertText": "getAttributes_DO_NOT_USE()",
                             "insertTextFormat": 2,
@@ -2102,8 +2026,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "__getLoader",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~__getLoader",
                             "insertText": "__getLoader()",
                             "insertTextFormat": 2,
@@ -2150,8 +2072,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "$mylambda",
                             "kind": 6,
                             "detail": "local variable",
-                            "inlineDetail": "(int $n)",
-                            "itemType": "int",
                             "sortText": "$mylambda",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2180,8 +2100,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "$mylambda",
                     "kind": 6,
                     "detail": "local variable",
-                    "inlineDetail": "(num $n)",
-                    "itemType": "int",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -2200,8 +2118,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "$mylambda",
                     "kind": 6,
                     "detail": "local variable",
-                    "inlineDetail": "(num $n)",
-                    "itemType": "int",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -2250,7 +2166,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "MyEnum::TYPE_C",
                             "kind": 13,
                             "detail": "enum",
-                            "inlineDetail": "enum",
                             "sortText": "MyEnum::TYPE_C",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2272,7 +2187,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "MyEnum::TYPE_B",
                             "kind": 13,
                             "detail": "enum",
-                            "inlineDetail": "enum",
                             "sortText": "MyEnum::TYPE_B",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2294,7 +2208,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "MyEnum::TYPE_A",
                             "kind": 13,
                             "detail": "enum",
-                            "inlineDetail": "enum",
                             "sortText": "MyEnum::TYPE_A",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2347,7 +2260,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "string",
                             "kind": 25,
                             "detail": "builtin",
-                            "inlineDetail": "builtin",
                             "documentation": {
                                 "kind": "markdown",
                                 "value": "A sequence of characters.",
@@ -2367,7 +2279,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "StringBuffer",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "StringBuffer",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2383,7 +2294,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Stringish",
                             "kind": 8,
                             "detail": "interface",
-                            "inlineDetail": "interface",
                             "sortText": "Stringish",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2399,7 +2309,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "StringishObject",
                             "kind": 8,
                             "detail": "interface",
-                            "inlineDetail": "interface",
                             "sortText": "StringishObject",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2426,7 +2335,6 @@ class TestLsp(TestCase[LspTestDriver]):
                         "kind": "markdown",
                         "value": "A sequence of characters.",
                     },
-                    "inlineDetail": "builtin",
                     "insertText": "string",
                     "insertTextFormat": 1,
                     "kind": 25,
@@ -2440,7 +2348,6 @@ class TestLsp(TestCase[LspTestDriver]):
                         "kind": "markdown",
                         "value": "A sequence of characters.",
                     },
-                    "inlineDetail": "builtin",
                     "insertText": "string",
                     "insertTextFormat": 1,
                     "kind": 25,
@@ -2505,7 +2412,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2521,7 +2427,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2537,7 +2442,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "xhp:enum-attribute",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "xhp:enum-attribute",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2553,7 +2457,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "xhp:generic",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "xhp:generic",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2600,7 +2503,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2616,7 +2518,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2663,7 +2564,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2679,7 +2579,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2726,7 +2625,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "width",
                             "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": "width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2748,7 +2646,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "color",
                             "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": "color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2801,7 +2698,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "width",
                             "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": "width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2823,7 +2719,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "color",
                             "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": "color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2876,7 +2771,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2892,7 +2786,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2908,7 +2801,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":xhp:enum-attribute",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":xhp:enum-attribute",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2924,7 +2816,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":xhp:generic",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":xhp:generic",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2971,7 +2862,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2987,7 +2877,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3012,8 +2901,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": ":ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
                     "insertText": ":ab:cd:alpha",
                     "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
@@ -3022,8 +2909,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": ":ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
                     "documentation": {
                         "kind": "markdown",
                         "value": ":ab:cd:alpha docblock",
@@ -3065,7 +2950,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":width",
                             "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": ":width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3087,7 +2971,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":color",
                             "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": ":color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3140,7 +3023,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":width",
                             "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": ":width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3162,7 +3044,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":color",
                             "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": ":color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3215,7 +3096,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_function",
                             "kind": 3,
                             "detail": "function",
-                            "inlineDetail": "function",
                             "sortText": "test_function",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3239,8 +3119,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "test_function",
                     "kind": 3,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "insertText": "test_function",
                     "insertTextFormat": 1,
                     "data": {
@@ -3253,8 +3131,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "test_function",
                     "kind": 3,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "documentation": {
                         "kind": "markdown",
                         "value": "test_function docblock.",
@@ -3327,7 +3203,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "class",
                             "kind": 21,
                             "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3349,7 +3224,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Bard",
                             "kind": 21,
                             "detail": "Elsa",
-                            "inlineDetail": "Elsa",
                             "sortText": "Bard",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3371,7 +3245,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Alonso",
                             "kind": 21,
                             "detail": "Elsa",
-                            "inlineDetail": "Elsa",
                             "sortText": "Alonso",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3393,8 +3266,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "isValid",
                             "kind": 2,
                             "detail": "function(mixed $value): bool",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "bool",
                             "sortText": "isValid",
                             "insertText": "isValid(${1:\\$value})",
                             "insertTextFormat": 2,
@@ -3410,8 +3281,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getValues",
                             "kind": 2,
                             "detail": "function(): dict<string, Elsa>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<string, Elsa>",
                             "sortText": "getValues",
                             "insertText": "getValues()",
                             "insertTextFormat": 2,
@@ -3427,8 +3296,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getNames",
                             "kind": 2,
                             "detail": "function(): dict<Elsa, string>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<Elsa, string>",
                             "sortText": "getNames",
                             "insertText": "getNames()",
                             "insertTextFormat": 2,
@@ -3444,8 +3311,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "coerce",
                             "kind": 2,
                             "detail": "function(mixed $value): ?Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "?Elsa",
                             "sortText": "coerce",
                             "insertText": "coerce(${1:\\$value})",
                             "insertTextFormat": 2,
@@ -3461,8 +3326,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "assertAll",
                             "kind": 2,
                             "detail": "function(Traversable<mixed> $values): Container<Elsa>",
-                            "inlineDetail": "(Traversable<mixed> $values)",
-                            "itemType": "Container<Elsa>",
                             "sortText": "assertAll",
                             "insertText": "assertAll(${1:\\$values})",
                             "insertTextFormat": 2,
@@ -3478,8 +3341,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "assert",
                             "kind": 2,
                             "detail": "function(mixed $value): Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "Elsa",
                             "sortText": "assert",
                             "insertText": "assert(${1:\\$value})",
                             "insertTextFormat": 2,
@@ -3553,7 +3414,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "class",
                             "kind": 21,
                             "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -3575,8 +3435,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_do_not_use",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~test_do_not_use",
                             "insertText": "test_do_not_use()",
                             "insertTextFormat": 2,
@@ -3592,8 +3450,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getName",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "getName",
                             "insertText": "getName()",
                             "insertTextFormat": 2,
@@ -3609,8 +3465,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getAttributes_DO_NOT_USE",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~getAttributes_DO_NOT_USE",
                             "insertText": "getAttributes_DO_NOT_USE()",
                             "insertTextFormat": 2,
@@ -3626,8 +3480,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "__getLoader",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~__getLoader",
                             "insertText": "__getLoader()",
                             "insertTextFormat": 2,

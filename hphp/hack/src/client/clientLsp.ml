@@ -2398,12 +2398,7 @@ let make_ide_completion_response
   (* there's nothing after the caret: no "$c->|(1)" -> "$c->foo($arg1)(1)"    *)
   let is_caret_followed_by_lparen = Char.equal result.char_at_pos '(' in
   let p = initialize_params_exc () in
-  let hack_to_itemType (completion : complete_autocomplete_result) :
-      string option =
-    (* TODO: we're using itemType (left column) for function return types, and *)
-    (* the inlineDetail (right column) for variable/field types. Is that good? *)
-    Option.map completion.func_details ~f:(fun details -> details.return_ty)
-  in
+
   let hack_to_detail (completion : complete_autocomplete_result) : string =
     (* TODO: retrieve the actual signature including name+modifiers     *)
     (* For now we just return the type of the completion. In the case   *)
@@ -2413,17 +2408,6 @@ let make_ide_completion_response
     | None -> completion.res_ty
     | Some _ ->
       String_utils.rstrip (String_utils.lstrip completion.res_ty "(") ")"
-  in
-  let hack_to_inline_detail (completion : complete_autocomplete_result) : string
-      =
-    match completion.func_details with
-    | None -> hack_to_detail completion
-    | Some details ->
-      (* "(type1 $param1, ...)" *)
-      let f param = Printf.sprintf "%s %s" param.param_ty param.param_name in
-      let params = String.concat ~sep:", " (List.map details.params ~f) in
-      Printf.sprintf "(%s)" params
-    (* Returns a tuple of (insertText, insertTextFormat, textEdits). *)
   in
   let hack_to_insert (completion : complete_autocomplete_result) :
       [ `InsertText of string | `TextEdit of TextEdit.t list ]
@@ -2526,8 +2510,6 @@ let make_ide_completion_response
           "");
       kind = si_kind_to_completion_kind completion.AutocompleteTypes.res_kind;
       detail = Some (hack_to_detail completion);
-      inlineDetail = Some (hack_to_inline_detail completion);
-      itemType = hack_to_itemType completion;
       documentation =
         Option.map completion.res_documentation ~f:(fun s ->
             MarkedStringsDocumentation [MarkedString s]);

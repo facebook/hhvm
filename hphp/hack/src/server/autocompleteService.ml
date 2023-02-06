@@ -670,8 +670,8 @@ let rec zip_truncate (xs : 'a list) (ys : 'b list) : ('a * 'b) list =
  * Leverage function type information to infer the right enum class.
  *)
 let autocomplete_enum_class_label_call env f args =
-  argument_global_type := Some Acclass_get;
   let suggest_members_from_ty env ty pos_labelname expected_ty =
+    argument_global_type := Some Acclass_get;
     match get_node ty with
     | Tclass ((p, enum_name), _, _) when Tast_env.is_enum_class env enum_name ->
       autocomplete_enum_class_label

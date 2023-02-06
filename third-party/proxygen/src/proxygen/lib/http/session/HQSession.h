@@ -194,7 +194,7 @@ class HQSession
     }
   };
 
-  virtual ~HQSession();
+  ~HQSession() override;
 
   HTTPTransaction::Transport::Type getType() const noexcept override {
     return HTTPTransaction::Transport::Type::QUIC;

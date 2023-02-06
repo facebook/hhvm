@@ -55,7 +55,7 @@ pub fn find_hack_files<'a>(
     root: &'a Path,
     prefix: relative_path::Prefix,
 ) -> impl Iterator<Item = anyhow::Result<RelativePath>> + 'a {
-    jwalk::WalkDir::new(&root)
+    jwalk::WalkDir::new(root)
         .into_iter()
         .filter_map(move |entry_result| {
             let entry = match entry_result {
@@ -69,8 +69,8 @@ pub fn find_hack_files<'a>(
             if !is_hack(&path) {
                 return None;
             }
-            let suffix = path.strip_prefix(&root).unwrap();
-            if files_to_ignore.should_ignore(&suffix) {
+            let suffix = path.strip_prefix(root).unwrap();
+            if files_to_ignore.should_ignore(suffix) {
                 return None;
             }
             let path = RelativePath::make(prefix, suffix.to_owned());

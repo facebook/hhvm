@@ -348,7 +348,7 @@ impl<'a, T> AtomicArena<'a, T> {
         unsafe {
             *e_ptr = MaybeUninit::new(element);
         }
-        let e: &T = unsafe { &*(&*e_ptr).as_ptr() };
+        let e: &T = unsafe { &*(*e_ptr).as_ptr() };
         (
             Ref {
                 phantom: PhantomData,

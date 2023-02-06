@@ -126,7 +126,7 @@ impl Value {
     /// or an Error in case of an internal Hdf format error.
     pub fn get(&self, name: &str) -> Result<Option<Value>> {
         let_cxx_string!(name = name);
-        let inner = ffi::hdf_new_child(&*self.inner, &name);
+        let inner = ffi::hdf_new_child(&self.inner, &name);
         match inner.exists()? {
             true => Ok(Some(Self { inner })),
             false => Ok(None),

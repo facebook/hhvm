@@ -292,7 +292,7 @@ impl<Id: InternId> InternTable<Id, Id::Intern> {
     /// Usually you can rely on `deref` to do this implicitly.
     #[inline]
     fn get(&'static self, r: Id) -> &Id::Intern {
-        &*self.arena.get(r.unwrap())
+        self.arena.get(r.unwrap())
     }
 
     /// Getter that checks for the need to allocate.

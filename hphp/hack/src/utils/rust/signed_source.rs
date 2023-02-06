@@ -105,7 +105,7 @@ static TOKEN_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(&regex::escape(TOKEN))
 fn hash(data: &[u8]) -> String {
     use md5::Digest;
     let mut digest = md5::Md5::new();
-    digest.update(&data);
+    digest.update(data);
     hex::encode(digest.finalize())
 }
 

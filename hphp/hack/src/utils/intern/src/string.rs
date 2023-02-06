@@ -43,7 +43,7 @@ impl BytesId {
         // Safe because BytesId can only be generated
         // by a call to intern, which returns the result
         // of id_to_bytes.push.
-        &*self.get()
+        self.get()
     }
 }
 

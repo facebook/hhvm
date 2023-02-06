@@ -107,7 +107,7 @@ impl Default for Tracker {
 
 impl Tracker {
     fn depth(&self, sp: *const u8) -> usize {
-        self.depth + (self.base as isize - sp as isize).abs() as usize
+        self.depth + (self.base as usize).abs_diff(sp as usize)
     }
 }
 

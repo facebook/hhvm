@@ -806,7 +806,7 @@ mod tests {
         assert_eq!(decode("oline".as_bytes()).unwrap(), "‾".as_bytes());
         assert_eq!(decode("Mu".as_bytes()).unwrap(), "Μ".as_bytes());
         assert_eq!(decode("sub".as_bytes()).unwrap(), "⊂".as_bytes());
-        assert_eq!(decode("shy".as_bytes()).unwrap(), "­".as_bytes());
+        assert_eq!(decode("shy".as_bytes()).unwrap(), "\u{AD}".as_bytes());
         assert_eq!(decode("nsim".as_bytes()).unwrap(), "≁".as_bytes());
         assert_eq!(decode("thetasym".as_bytes()).unwrap(), "ϑ".as_bytes());
         assert_eq!(decode("Omega".as_bytes()).unwrap(), "Ω".as_bytes());

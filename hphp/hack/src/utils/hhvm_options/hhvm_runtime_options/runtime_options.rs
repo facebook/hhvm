@@ -24,7 +24,7 @@ pub fn apply_tier_overrides(mut config: hdf::Value) -> Result<hdf::Value> {
 
     let cpu: String = config
         .get_str("Machine.cpu")?
-        .map_or_else(cxx_ffi::Process_GetCPUModel, |s| s.to_string());
+        .unwrap_or_else(cxx_ffi::Process_GetCPUModel);
 
     let tiers: String = config
         .get_str("Machine.tiers")?

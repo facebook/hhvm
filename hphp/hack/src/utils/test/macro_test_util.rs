@@ -43,7 +43,7 @@ pub fn assert_pat_eq<E: Display>(a: Result<TokenStream, E>, b: TokenStream) {
             let t_b = t_b.unwrap();
 
             match (&t_a, &t_b) {
-                (TokenTree::Ident(a), TokenTree::Ident(b)) if *a == b.to_string() => {}
+                (TokenTree::Ident(a), TokenTree::Ident(b)) if a == b => {}
                 (TokenTree::Literal(a), TokenTree::Literal(b))
                     if a.to_string() == b.to_string() => {}
                 (TokenTree::Punct(a), TokenTree::Punct(b)) if a.to_string() == b.to_string() => {}

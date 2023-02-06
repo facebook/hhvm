@@ -1,2 +1,4 @@
-number ?string
-nomenclature ?string
+number
+  ?string
+nomenclature
+  ?string

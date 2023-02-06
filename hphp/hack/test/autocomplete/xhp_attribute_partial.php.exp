@@ -1,1 +1,2 @@
-my-attribute ?MyEnum
+my-attribute
+  ?MyEnum

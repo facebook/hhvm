@@ -1,2 +1,4 @@
-function keyword
-static keyword
+function
+  keyword
+static
+  keyword

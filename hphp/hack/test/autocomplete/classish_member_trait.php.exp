@@ -1,10 +1,20 @@
-use keyword
-require class keyword
-require implements keyword
-require extends keyword
-final keyword
-private keyword
-abstract keyword
-const keyword
-protected keyword
-public keyword
+use
+  keyword
+require class
+  keyword
+require implements
+  keyword
+require extends
+  keyword
+final
+  keyword
+private
+  keyword
+abstract
+  keyword
+const
+  keyword
+protected
+  keyword
+public
+  keyword

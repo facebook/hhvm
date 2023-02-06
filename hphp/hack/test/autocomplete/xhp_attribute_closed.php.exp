@@ -1,2 +1,4 @@
-style ?string
-number int
+style
+  ?string
+number
+  int

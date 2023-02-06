@@ -1,8 +1,16 @@
-valid (function(): bool)
-send (function(?Ts $v): void)
-rewind (function(): void)
-raise (function(Exception $e): void)
-next (function(): void)
-key (function(): Tk)
-getOrigFuncName (function(): string)
-current (function(): Tv)
+valid
+  (function(): bool)
+send
+  (function(?Ts $v): void)
+rewind
+  (function(): void)
+raise
+  (function(Exception $e): void)
+next
+  (function(): void)
+key
+  (function(): Tk)
+getOrigFuncName
+  (function(): string)
+current
+  (function(): Tv)

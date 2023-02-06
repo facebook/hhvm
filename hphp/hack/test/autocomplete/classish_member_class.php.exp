@@ -1,7 +1,14 @@
-use keyword
-final keyword
-private keyword
-abstract keyword
-const keyword
-protected keyword
-public keyword
+use
+  keyword
+final
+  keyword
+private
+  keyword
+abstract
+  keyword
+const
+  keyword
+protected
+  keyword
+public
+  keyword

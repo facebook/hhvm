@@ -1,2 +1,5 @@
-string builtin
-StringBuilder class
+string
+  builtin
+  A sequence of characters.
+StringBuilder
+  class

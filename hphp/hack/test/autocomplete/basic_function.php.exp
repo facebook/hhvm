@@ -1,1 +1,2 @@
-my_favorite (function(): void)
+my_favorite
+  (function(): void)

@@ -1,3 +1,6 @@
-MyEnum::TYPE_C class constant
-MyEnum::TYPE_B class constant
-MyEnum::TYPE_A class constant
+MyEnum::TYPE_C
+  class constant
+MyEnum::TYPE_B
+  class constant
+MyEnum::TYPE_A
+  class constant

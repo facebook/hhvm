@@ -1,8 +1,16 @@
-function keyword
-async keyword
-final keyword
-abstract keyword
-static keyword
-private keyword
-protected keyword
-public keyword
+function
+  keyword
+async
+  keyword
+final
+  keyword
+abstract
+  keyword
+static
+  keyword
+private
+  keyword
+protected
+  keyword
+public
+  keyword

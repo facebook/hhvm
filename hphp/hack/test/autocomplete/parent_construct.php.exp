@@ -1,2 +1,4 @@
-__construct (function(): void)
-class classname<this>
+__construct
+  (function(): void)
+class
+  classname<this>

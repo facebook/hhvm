@@ -1,2 +1,4 @@
-class classname<this>
-bar (function(): void)
+class
+  classname<this>
+bar
+  (function(): void)

@@ -1,3 +1,6 @@
-:name ?string
-:color ?string
-genRender (function(): _)
+:name
+  ?string
+:color
+  ?string
+genRender
+  (function(): _)

@@ -1,2 +1,4 @@
-other_bool MyBox<bool>
-a_bool MyBox<bool>
+other_bool
+  MyBox<bool>
+a_bool
+  MyBox<bool>

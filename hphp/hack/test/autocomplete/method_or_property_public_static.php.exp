@@ -1,20 +1,63 @@
-noreturn builtin
-arraykey builtin
-num builtin
-resource builtin
-string builtin
-float builtin
-bool builtin
-int builtin
-void builtin
-null builtin
-shape builtin
-nonnull builtin
-nothing builtin
-dynamic builtin
-mixed builtin
-Foo class
-function keyword
-async keyword
-final keyword
-abstract keyword
+noreturn
+  builtin
+  A `noreturn` function always errors or loops forever.
+arraykey
+  builtin
+  An `int` or a `string`. `arraykey` is a common key type for `dict`s.
+num
+  builtin
+  An `int` or a `float`.
+resource
+  builtin
+  An external resource, such as a file handle or database connection.
+string
+  builtin
+  A sequence of characters.
+float
+  builtin
+  A 64-bit floating-point number.
+bool
+  builtin
+  A boolean value, `true` or `false`.
+int
+  builtin
+  A 64-bit integer.
+void
+  builtin
+  A `void` return type indicates a function that never returns a value. `void` functions usually have side effects.
+null
+  builtin
+  The value `null`. The opposite of `nonnull`.
+shape
+  builtin
+  A shape is a key-value data structure where the keys are known. Shapes are value types, just like `dict` and `vec`.
+  
+   A closed shape, such as `shape('x' => int)`, has a fixed number of keys.  An open shape, such as `shape('x' => int, ...)`, may have additional keys.
+nonnull
+  builtin
+  Any value except `null`.
+nothing
+  builtin
+  The `nothing` type has no values, it's the empty type.
+  
+  A function returning `nothing` either loops forever or throws an exception. A `vec<nothing>` is always empty.
+dynamic
+  builtin
+  Any value at all. Unlike `mixed`, the type checker allows any operation on a `dynamic` value, even if e.g. a method doesn't actually exist.
+  
+  All operations on a `dynamic` value return another `dynamic` value. Prefer more specific types so the type checker can help you.
+  
+  To convert a `generic` value to something specific, use `$foo as SomeSpecificType`. This will check the type at runtime and the type checker will verify types after this point.
+mixed
+  builtin
+  Any value at all. It's usually better to use a more specific type, or a generic.
+Foo
+  class
+function
+  keyword
+async
+  keyword
+final
+  keyword
+abstract
+  keyword

@@ -2171,12 +2171,6 @@ void HTTPSession::runLoopCallback() noexcept {
 
   for (uint32_t i = 0; i < kMaxWritesPerLoop; ++i) {
     bodyBytesPerWriteBuf_ = 0;
-    if (isPrioritySampled()) {
-      invokeOnAllTransactions([this](HTTPTransaction* txn) {
-        txn->updateContentionsCount(txnEgressQueue_.numPendingEgress());
-      });
-    }
-
     bool cork = true;
     bool timestampTx = false;
     bool timestampAck = false;
@@ -2193,12 +2187,6 @@ void HTTPSession::runLoopCallback() noexcept {
     if (len == 0) {
       checkForShutdown();
       return;
-    }
-
-    if (isPrioritySampled()) {
-      invokeOnAllTransactions([this](HTTPTransaction* txn) {
-        txn->updateSessionBytesSheduled(bodyBytesPerWriteBuf_);
-      });
     }
 
     folly::WriteFlags flags = folly::WriteFlags::NONE;
@@ -2688,10 +2676,6 @@ HTTPTransaction* HTTPSession::createTransaction(
   transactionIds_.emplace(streamID);
 
   HTTPTransaction* txn = &matchPair.first->second;
-
-  if (isPrioritySampled()) {
-    txn->setPrioritySampled(true /* sampled */);
-  }
 
   if (getNumTxnServed() > 0) {
     auto stats = txn->getSessionStats();

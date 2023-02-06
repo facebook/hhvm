@@ -53,10 +53,7 @@ class HTTPDownstreamTest : public testing::Test {
 
     {
       InSequence s;
-      EXPECT_CALL(mockController_, attachSession(_))
-          .WillRepeatedly(Invoke([&](HTTPSessionBase* session) {
-            session->setPrioritySampled(true);
-          }));
+      EXPECT_CALL(mockController_, attachSession(_));
       EXPECT_CALL(mockController_, onTransportReady(_));
     }
 
@@ -3475,92 +3472,10 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityWeightsTinyRatio) {
   handler4->expectHeaders();
   handler4->expectEOM([&] { handler4->sendReplyWithBody(200, 1); });
 
-  handler1->expectDetachTransaction([&] {
-    HTTPTransaction::PrioritySampleSummary summary;
-    EXPECT_EQ(handler1->txn_->getPrioritySampleSummary(summary), true);
-    EXPECT_EQ(handler1->txn_->getTransport().getHTTP2PrioritiesEnabled(), true);
-    // id1 had no egress when id2 was running, so id1 was contending only with
-    // id3 and id4. Average number of contentions for id1 is 3
-    EXPECT_EQ(summary.contentions_.byTransactionBytes_, 3);
-    EXPECT_EQ(summary.contentions_.bySessionBytes_, 3);
-    // this is a first level transaction, depth == 1
-    EXPECT_EQ(summary.depth_.byTransactionBytes_, 1);
-    EXPECT_EQ(summary.depth_.bySessionBytes_, 1);
-    // the expected relative weight is 256/257 ~= 0.9961
-    EXPECT_GT(summary.expected_weight_, 0.996);
-    EXPECT_LT(summary.expected_weight_, 0.9962);
-    // the measured relative weight is 4096/(4096+15) ~= 0.99635
-    // This value is higher than the expected relative weight of 0.9961.
-    // Due to the arithmetical rounding to the lowest integer, the measured
-    // relative weight tends to be higher for transactions with high relative
-    // weights and lower for transactions with the low relative weights.
-    EXPECT_GT(summary.measured_weight_, 0.9963);
-    EXPECT_LT(summary.measured_weight_, 0.9964);
-  });
-  handler3->expectDetachTransaction([&] {
-    HTTPTransaction::PrioritySampleSummary summary;
-    EXPECT_EQ(handler3->txn_->getPrioritySampleSummary(summary), true);
-    EXPECT_EQ(handler3->txn_->getTransport().getHTTP2PrioritiesEnabled(), true);
-    // Similarly, id3 was contenting with id1 and id4
-    // Average number of contentions for id3 is 3
-    EXPECT_EQ(summary.contentions_.byTransactionBytes_, 3);
-    EXPECT_EQ(summary.contentions_.bySessionBytes_, 3);
-    // this is a second level transaction where parent has
-    // no egress, depth == 2
-    EXPECT_EQ(summary.depth_.byTransactionBytes_, 2);
-    EXPECT_EQ(summary.depth_.bySessionBytes_, 2);
-    // the expected relative weight should be
-    // 1/257 * 256/257 ~= 0.00388. However, in the calculation of the
-    // allowed bytes to send we rounding to the lowest positive integer.
-    // Therefore, the measured relative weight tends to be less than
-    // it should be.  In this example, the allowed bytes sent is
-    // 4096 * 0.00388 ~= 15.89, which is rounded to 15. Hence the measured
-    // relative weight is 15/(4096+15) ~= 0.00365
-    EXPECT_GT(summary.expected_weight_, 0.00388);
-    EXPECT_LT(summary.expected_weight_, 0.0039);
-    EXPECT_GT(summary.measured_weight_, 0.00364);
-    EXPECT_LT(summary.measured_weight_, 0.00366);
-  });
-  handler4->expectDetachTransaction([&] {
-    HTTPTransaction::PrioritySampleSummary summary;
-    EXPECT_EQ(handler4->txn_->getPrioritySampleSummary(summary), true);
-    EXPECT_EQ(handler4->txn_->getTransport().getHTTP2PrioritiesEnabled(), true);
-    // This is the priority-based blocking situation. id4 was blocked by
-    // higher priority transactions id1 and id3. Only when id1 and id3
-    // finished, id4 had a chance to transfer its data.
-    // Average contention number weighted by transaction bytes is 1, which
-    // means that when id4 had a chance to transfer bytes it did not contend
-    // with any other transactions.
-    // id4 was waiting for id1 and id3 during transfer of 4256 bytes (encoded)
-    // after which it tranferred 10 bytes (encoded) without contention.
-    // Therefore, the average number contentions weighted by session bytes is
-    // (4111*3 + 1*1)/(4111 + 1) = 12334/4112 ~= 2.999
-    // The difference in average contentions weighted by transaction and
-    // session bytes tells that id4 was mostly blocked by rather than blocking
-    // other transactions.
-    EXPECT_EQ(summary.contentions_.byTransactionBytes_, 1);
-    EXPECT_GT(summary.contentions_.bySessionBytes_, 2.99);
-    EXPECT_LT(summary.contentions_.bySessionBytes_, 3.00);
-    // this is a second level transaction where parent has
-    // no egress, depth == 2
-    EXPECT_EQ(summary.depth_.byTransactionBytes_, 2);
-    EXPECT_EQ(summary.depth_.bySessionBytes_, 2);
-    // the expected relative weight should be
-    // 1/257 * 1/257 ~= 0.000015.
-    // Because no bytes of this transaction were sent during the previous
-    // egress, the expected relative weight was calculated as:
-    // (0*4111 + 1*1)/(4111 + 1) ~= 0.000243
-    EXPECT_GT(summary.expected_weight_, 0.000243);
-    EXPECT_LT(summary.expected_weight_, 0.000244);
-    // The measured weight is (0+1)/(4111+1)  ~= 0.000243
-    // The difference between the theoretical value of 0.000015 and the
-    // measured one is not because of the arithmetical rounding, but because
-    // all other transactions are completed and the relative waight for the
-    // only survived transaction was elevated to 1.0
-    EXPECT_GT(summary.measured_weight_, 0.000243);
-    EXPECT_LT(summary.measured_weight_, 0.000244);
-    handler2->txn_->sendAbort();
-  });
+  handler1->expectDetachTransaction();
+  handler3->expectDetachTransaction();
+  handler4->expectDetachTransaction(
+      [&handler2] { handler2->txn_->sendAbort(); });
   handler2->expectDetachTransaction();
   flushRequestsAndLoop();
   httpSession_->closeWhenIdle();
@@ -3593,47 +3508,8 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityDependentTransactions) {
   handler2->expectHeaders();
   handler2->expectEOM([&] { handler2->sendReplyWithBody(200, 1024); });
 
-  handler1->expectDetachTransaction([&] {
-    HTTPTransaction::PrioritySampleSummary summary;
-    EXPECT_EQ(handler1->txn_->getPrioritySampleSummary(summary), true);
-    EXPECT_EQ(handler1->txn_->getTransport().getHTTP2PrioritiesEnabled(), true);
-    // id1 is contending with id2 during the entire transfer.
-    // Average number of contentions for id1 is 2 in both cases.
-    // The same number of average contentions weighted by both transaction
-    // and session bytes tells that id1 was not blocked by any other
-    // transaction during the entire transfer.
-    EXPECT_EQ(summary.contentions_.byTransactionBytes_, 2);
-    EXPECT_EQ(summary.contentions_.bySessionBytes_, 2);
-    // this is a first level transaction, depth == 1
-    EXPECT_EQ(summary.depth_.byTransactionBytes_, 1);
-    EXPECT_EQ(summary.depth_.bySessionBytes_, 1);
-    // dependent transaction is blocked, the parent is egressing on 100%
-    EXPECT_EQ(summary.expected_weight_, 1);
-    EXPECT_EQ(summary.measured_weight_, 1);
-  });
-  handler2->expectDetachTransaction([&] {
-    HTTPTransaction::PrioritySampleSummary summary;
-    EXPECT_EQ(handler2->txn_->getPrioritySampleSummary(summary), true);
-    EXPECT_EQ(handler2->txn_->getTransport().getHTTP2PrioritiesEnabled(), true);
-    // This is the dependency-based blocking. id2 is blocked by id1.
-    // When id2 had a chance to transfer bytes, it was no longer contended
-    // with any other transaction. Hence the average contention weighted by
-    // transaction bytes is 1.
-    // The average number of contentions weighted by the session bytes is
-    // computed as (1024*2 + 1024*1)/(1024 + 1024) = 3072/2048 = 1.5
-    EXPECT_EQ(summary.contentions_.byTransactionBytes_, 1);
-    EXPECT_EQ(summary.contentions_.bySessionBytes_, 1.5);
-    // The transaction transferred bytes only when its parent transaction
-    // completed. At that time its level decreased to 1. The average depth
-    // weighted by session bytes is (2*1024 + 1*1024)/(2048) = 1.5.
-    EXPECT_EQ(summary.depth_.byTransactionBytes_, 1);
-    EXPECT_EQ(summary.depth_.bySessionBytes_, 1.5);
-    // this dependent transaction was bloted, so it was egressiong only 1/2
-    // of the session bytes.
-    EXPECT_EQ(summary.expected_weight_, 0.5);
-    EXPECT_EQ(summary.measured_weight_, 0.5);
-    handler2->txn_->sendAbort();
-  });
+  handler1->expectDetachTransaction();
+  handler2->expectDetachTransaction([&] { handler2->txn_->sendAbort(); });
   flushRequestsAndLoop();
   httpSession_->closeWhenIdle();
   expectDetachSession();

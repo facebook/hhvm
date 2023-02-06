@@ -266,8 +266,6 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         self.write_hhconfig()
         self.write_watchman_config()
 
-    # pyre-fixme[14]: `start_hh_server` overrides method defined in
-    #  `CommonTestDriver` inconsistently.
     def start_hh_server(
         self,
         changed_files: Optional[Iterable[ChangedFile]] = None,

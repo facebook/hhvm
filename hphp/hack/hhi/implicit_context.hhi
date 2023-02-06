@@ -33,12 +33,37 @@ namespace HH {
   }
 
   /**
-   * Options for memoization to be used with dynamically enforced implicit context
+   * Options for memoization to be used with dynamically enforced implicit
+   * context
    */
   enum class MemoizeOption: string {
+    /**
+     * Incorporate the Implicit Context state into the memoization cache key.
+     */
     string KeyedByIC = 'KeyedByIC';
+    /**
+     * Do not incorporate the Implicit Context state into the memoization cache
+     * key.
+     * Attempting to fetch the Implicit Context in this function or a recursive
+     * callee will result in an exception.
+     * Calling an "uncategorized" memoized function including one using
+     * #SoftMakeICInaccessible will result in an exception.
+     */
     string MakeICInaccessible = 'MakeICInaccessible';
+    /**
+     * Will throw if called with an Implicit Context value.
+     * Do not incorporate the Implicit Context state into the memoization cache
+     * key.
+     * Behaviors that would result in an exception under #MakeICInaccessible
+     * will log instead.
+     */
     string SoftMakeICInaccessible = 'SoftMakeICInaccessible';
+    /**
+     * Default option for memoization attributes.
+     * Will throw if called with an Implicit Context value.
+     * Do not incorporate the Implicit Context state into the memoization cache
+     * key.
+     */
     string Uncategorized = 'Uncategorized';
   }
 

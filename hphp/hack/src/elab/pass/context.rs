@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use bitflags::bitflags;
 use hash::HashSet;
 use oxidized::aast_defs::Tparam;
 
@@ -9,6 +10,14 @@ use oxidized::aast_defs::Tparam;
 pub struct Context {
     tparams: HashSet<String>,
     mode: file_info::Mode,
+    flags: Flags,
+}
+
+bitflags! {
+    #[derive(Default)]
+    pub struct Flags: u8 {
+        const SOFT_AS_LIKE= 1 << 0;
+    }
 }
 
 impl Default for Context {
@@ -16,11 +25,19 @@ impl Default for Context {
         Context {
             tparams: HashSet::default(),
             mode: file_info::Mode::Mstrict,
+            flags: Flags::empty(),
         }
     }
 }
 
 impl Context {
+    pub fn new(flags: Flags) -> Self {
+        Context {
+            flags,
+            ..Default::default()
+        }
+    }
+
     pub fn extend_tparams<Ex, En>(&mut self, tps: &[Tparam<Ex, En>]) {
         tps.iter().for_each(|tparam| {
             self.tparams.insert(tparam.name.1.clone());
@@ -42,5 +59,9 @@ impl Context {
     }
     pub fn mode(&self) -> &file_info::Mode {
         &self.mode
+    }
+
+    pub fn soft_as_like(&self) -> bool {
+        self.flags.contains(Flags::SOFT_AS_LIKE)
     }
 }

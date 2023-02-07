@@ -67,9 +67,11 @@ class HTTP1xCodec : public HTTPCodec {
             // count egress busy for non-upgraded upstream codecs with a
             // pending response.  HTTP/1.x servers are inconsistent in how they
             // interpret an EOF with a pending response, so don't trigger one
-            // unless the connection was upgraded.
+            // unless the connection was upgraded or if it's explicitly
+            // required.
             (transportDirection_ == TransportDirection::UPSTREAM &&
-             (requestPending_ || (!egressUpgrade_ && responsePending_))));
+             (requestPending_ || (!egressUpgrade_ && responsePending_ &&
+                                  !releaseEgressAfterRequest_))));
   }
   // True if the session requires an EOF (or RST) to terminate the message
   bool closeOnEgressComplete() const override {
@@ -123,6 +125,10 @@ class HTTP1xCodec : public HTTPCodec {
 
   void setStrictValidation(bool strict) {
     strictValidation_ = strict;
+  }
+
+  void setReleaseEgressAfterRequest(bool releaseEgress) {
+    releaseEgressAfterRequest_ = releaseEgress;
   }
 
   /**
@@ -241,6 +247,7 @@ class HTTP1xCodec : public HTTPCodec {
   bool egressUpgrade_ : 1;
   bool nativeUpgrade_ : 1;
   bool headersComplete_ : 1;
+  bool releaseEgressAfterRequest_ : 1;
 
   // C-callable wrappers for the http_parser callbacks
   static int onMessageBeginCB(http_parser* parser);

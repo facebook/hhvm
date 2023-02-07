@@ -110,7 +110,8 @@ HTTP1xCodec::HTTP1xCodec(TransportDirection direction,
       ingressUpgradeComplete_(false),
       egressUpgrade_(false),
       nativeUpgrade_(false),
-      headersComplete_(false) {
+      headersComplete_(false),
+      releaseEgressAfterRequest_(false) {
   switch (direction) {
     case TransportDirection::DOWNSTREAM:
       http_parser_init(&parser_, HTTP_REQUEST);

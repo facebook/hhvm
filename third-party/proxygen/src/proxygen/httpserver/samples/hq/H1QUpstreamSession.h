@@ -46,6 +46,7 @@ class H1QUpstreamSession
     auto codec = std::make_unique<proxygen::HTTP1xCodec>(
         proxygen::TransportDirection::UPSTREAM,
         /*force1_1=*/false);
+    codec->setReleaseEgressAfterRequest(true);
     wangle::TransportInfo tinfo;
     auto session = new proxygen::HTTPUpstreamSession(
         proxygen::WheelTimerInstance(std::chrono::seconds(5),

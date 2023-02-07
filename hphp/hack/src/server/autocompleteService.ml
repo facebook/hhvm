@@ -1136,6 +1136,110 @@ let find_global_results
                })
     | _ -> ()
 
+let auto_complete_suffix_finder =
+  object
+    inherit [_] Aast.reduce
+
+    method zero = false
+
+    method plus = ( || )
+
+    method! on_Lvar () (_, id) =
+      matches_auto_complete_suffix (Local_id.get_name id)
+  end
+
+let method_contains_cursor = auto_complete_suffix_finder#on_method_ ()
+
+let fun_contains_cursor = auto_complete_suffix_finder#on_fun_ ()
+
+(* Find all the local variables before the cursor, so we can offer them as completion candidates. *)
+class local_types =
+  object (self)
+    inherit Tast_visitor.iter as super
+
+    val mutable results = Local_id.Map.empty
+
+    val mutable id_at_cursor = None
+
+    method get_types ctx tast =
+      self#go ctx tast;
+      (results, id_at_cursor)
+
+    method add env id ty =
+      (* If we already have a type for this identifier, don't overwrite it with
+         results from after the cursor position. *)
+      if not (Local_id.Map.mem id results && Option.is_some id_at_cursor) then
+        let ty = LoclTy ty in
+        results <-
+          Local_id.Map.add
+            id
+            (get_func_details_for env ty, get_pos_for env ty)
+            results
+
+    method! on_fun_ env f = if fun_contains_cursor f then super#on_fun_ env f
+
+    method! on_method_ env m =
+      if method_contains_cursor m then (
+        if not m.Aast.m_static then
+          self#add env Typing_defs.this (Tast_env.get_self_ty_exn env);
+        super#on_method_ env m
+      )
+
+    method! on_expr env e =
+      let (ty, _, e_) = e in
+      match e_ with
+      | Aast.Lvar (pos, id) ->
+        let name = Local_id.get_name id in
+        if matches_auto_complete_suffix name then
+          id_at_cursor <- Some (pos, name)
+        else
+          self#add env id ty
+      | Aast.Binop (Ast_defs.Eq _, e1, e2) ->
+        (* Process the rvalue before the lvalue, since the lvalue is annotated
+           with its type after the assignment. *)
+        self#on_expr env e2;
+        self#on_expr env e1
+      | _ -> super#on_expr env e
+
+    method! on_fun_param env fp =
+      let id = Local_id.make_unscoped fp.Aast.param_name in
+      let ty = fp.Aast.param_annotation in
+      self#add env id ty
+  end
+
+let compute_complete_local ctx tast =
+  let (locals, id_at_cursor) = (new local_types)#get_types ctx tast in
+  let id_at_cursor = Option.value id_at_cursor ~default:(Pos.none, "") in
+  let replace_pos = replace_pos_of_id id_at_cursor in
+
+  let id_prefix =
+    if is_auto_complete (snd id_at_cursor) then
+      strip_suffix (snd id_at_cursor)
+    else
+      ""
+  in
+
+  Local_id.Map.iter
+    (fun id (func_details, pos) ->
+      let kind = SearchUtils.SI_LocalVariable in
+      let name = Local_id.get_name id in
+      if String.is_prefix name ~prefix:id_prefix then
+        let complete =
+          {
+            res_pos = pos;
+            res_replace_pos = replace_pos;
+            res_base_class = None;
+            res_ty = kind_to_string kind;
+            res_name = name;
+            res_fullname = name;
+            res_kind = kind;
+            func_details;
+            res_documentation = None;
+          }
+        in
+        add_res complete)
+    locals
+
 let visitor ctx autocomplete_context sienv =
   object (self)
     inherit Tast_visitor.iter as super
@@ -1390,110 +1494,6 @@ let visitor ctx autocomplete_context sienv =
       autocomplete_enum_case env expr cases;
       super#on_Switch env expr cases default_case
   end
-
-let auto_complete_suffix_finder =
-  object
-    inherit [_] Aast.reduce
-
-    method zero = false
-
-    method plus = ( || )
-
-    method! on_Lvar () (_, id) =
-      matches_auto_complete_suffix (Local_id.get_name id)
-  end
-
-let method_contains_cursor = auto_complete_suffix_finder#on_method_ ()
-
-let fun_contains_cursor = auto_complete_suffix_finder#on_fun_ ()
-
-(* Find all the local variables before the cursor, so we can offer them as completion candidates. *)
-class local_types =
-  object (self)
-    inherit Tast_visitor.iter as super
-
-    val mutable results = Local_id.Map.empty
-
-    val mutable id_at_cursor = None
-
-    method get_types ctx tast =
-      self#go ctx tast;
-      (results, id_at_cursor)
-
-    method add env id ty =
-      (* If we already have a type for this identifier, don't overwrite it with
-         results from after the cursor position. *)
-      if not (Local_id.Map.mem id results && Option.is_some id_at_cursor) then
-        let ty = LoclTy ty in
-        results <-
-          Local_id.Map.add
-            id
-            (get_func_details_for env ty, get_pos_for env ty)
-            results
-
-    method! on_fun_ env f = if fun_contains_cursor f then super#on_fun_ env f
-
-    method! on_method_ env m =
-      if method_contains_cursor m then (
-        if not m.Aast.m_static then
-          self#add env Typing_defs.this (Tast_env.get_self_ty_exn env);
-        super#on_method_ env m
-      )
-
-    method! on_expr env e =
-      let (ty, _, e_) = e in
-      match e_ with
-      | Aast.Lvar (pos, id) ->
-        let name = Local_id.get_name id in
-        if matches_auto_complete_suffix name then
-          id_at_cursor <- Some (pos, name)
-        else
-          self#add env id ty
-      | Aast.Binop (Ast_defs.Eq _, e1, e2) ->
-        (* Process the rvalue before the lvalue, since the lvalue is annotated
-           with its type after the assignment. *)
-        self#on_expr env e2;
-        self#on_expr env e1
-      | _ -> super#on_expr env e
-
-    method! on_fun_param env fp =
-      let id = Local_id.make_unscoped fp.Aast.param_name in
-      let ty = fp.Aast.param_annotation in
-      self#add env id ty
-  end
-
-let compute_complete_local ctx tast =
-  let (locals, id_at_cursor) = (new local_types)#get_types ctx tast in
-  let id_at_cursor = Option.value id_at_cursor ~default:(Pos.none, "") in
-  let replace_pos = replace_pos_of_id id_at_cursor in
-
-  let id_prefix =
-    if is_auto_complete (snd id_at_cursor) then
-      strip_suffix (snd id_at_cursor)
-    else
-      ""
-  in
-
-  Local_id.Map.iter
-    (fun id (func_details, pos) ->
-      let kind = SearchUtils.SI_LocalVariable in
-      let name = Local_id.get_name id in
-      if String.is_prefix name ~prefix:id_prefix then
-        let complete =
-          {
-            res_pos = pos;
-            res_replace_pos = replace_pos;
-            res_base_class = None;
-            res_ty = kind_to_string kind;
-            res_name = name;
-            res_fullname = name;
-            res_kind = kind;
-            func_details;
-            res_documentation = None;
-          }
-        in
-        add_res complete)
-    locals
 
 let reset () =
   auto_complete_for_global := "";

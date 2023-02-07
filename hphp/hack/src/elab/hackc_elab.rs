@@ -1,4 +1,4 @@
-// RUST_LOG=info buck2 run fbcode//hphp/hack/src/elab:hackc-elab -- files $HOME/fbsource/fbcode/hphp/hack/test/typecheck/tuple_hints.php $HOME/fbsource/fbcode/hphp/hack/test/typecheck/num_type_hint.php
+// HACKC_ELAB_LOG=info buck2 run fbcode//hphp/hack/src/elab:hackc-elab -- files $HOME/fbsource/fbcode/hphp/hack/test/typecheck/tuple_hints.php $HOME/fbsource/fbcode/hphp/hack/test/typecheck/num_type_hint.php
 
 //use log::info;
 use std::path::PathBuf;
@@ -21,7 +21,9 @@ enum Command {
 }
 
 fn main() -> Result<()> {
-    env_logger::init();
+    let mut builder = env_logger::Builder::from_env("HACKC_ELAB_LOG");
+    builder.init();
+
     let mut opts = Opts::parse();
 
     rayon::ThreadPoolBuilder::new()

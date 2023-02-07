@@ -9,10 +9,6 @@
 
 exception Incorrect_format
 
-let soi = string_of_int
-
-let string_of_char = String.make 1
-
 let string_before s n = String.sub s 0 n
 
 let string_after s n = String.sub s n (String.length s - n)
@@ -124,41 +120,6 @@ let index_not_from_opt =
 (** [index_not_opt str chars] is like [index_opt], but returns the index of the first char in
     [str] that is not in [chars] if it exists, or [None] otherwise. *)
 let index_not_opt str chars = index_not_from_opt str 0 chars
-
-(** [rindex_not_from_opt str i chars] is like [rindex_from_opt], but returns the index of the last
-    char in [str] before position [i+1] that is not in [chars] if it exists, or [None] otherwise. *)
-let rec rindex_not_from_opt str i chars =
-  if i < 0 then
-    None
-  else if not (String.contains chars str.[i]) then
-    Some i
-  else
-    rindex_not_from_opt str (i - 1) chars
-
-(** [rindex_not_opt str chars] is like [rindex_opt], but returns the index of the last char in
-    [str] that is not in [chars] if it exists, or [None] otherwise. *)
-let rindex_not_opt str chars =
-  rindex_not_from_opt str (String.length str - 1) chars
-
-let (zero_code, nine_code) = (Char.code '0', Char.code '9')
-
-let is_decimal_digit chr =
-  let code = Char.code chr in
-  zero_code <= code && code <= nine_code
-
-let is_lowercase_char =
-  let (a_code, z_code) = (Char.code 'a', Char.code 'z') in
-  fun chr ->
-    let code = Char.code chr in
-    a_code <= code && code <= z_code
-
-let rec is_not_lowercase str i j =
-  if is_lowercase_char str.[i] then
-    false
-  else if i = j then
-    true
-  else
-    is_not_lowercase str (i + 1) j
 
 (* String provides map and iter but not fold. It also is missing a char_list_of
  * function. Oh well. You can use fold to simulate anything you need, I suppose

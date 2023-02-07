@@ -196,7 +196,7 @@ let read_choice message choices =
     Stdio.printf
       "%s (%s)%!"
       message
-      (String.concat ~sep:"|" (List.map choices ~f:String_utils.string_of_char));
+      (String.concat ~sep:"|" (List.map choices ~f:(String.make 1)));
     let choice = read_char () in
     Stdio.print_endline "";
     if List.mem ~equal:Char.equal choices choice then

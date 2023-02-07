@@ -15,10 +15,6 @@
 
 exception Incorrect_format
 
-val soi : int -> string
-
-val string_of_char : char -> string
-
 val string_before : string -> int -> string
 
 val string_after : string -> int -> string
@@ -39,25 +35,7 @@ val rpartition : string -> char -> string * string
 
 val truncate : int -> string -> string
 
-val index_not_from_opt : string -> int -> string -> int option
-
 val index_not_opt : string -> string -> int option
-
-val rindex_not_from_opt : string -> int -> string -> int option
-
-val rindex_not_opt : string -> string -> int option
-
-val zero_code : int
-
-val nine_code : int
-
-val is_decimal_digit : char -> bool
-
-val is_lowercase_char : char -> bool
-
-val is_not_lowercase : string -> int -> int -> bool
-
-val fold_left : f:('a -> char -> 'a) -> acc:'a -> string -> 'a
 
 val split : char -> string -> string list
 

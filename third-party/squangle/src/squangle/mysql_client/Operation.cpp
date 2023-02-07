@@ -13,7 +13,6 @@
 #include <folly/ssl/OpenSSLPtrTypes.h>
 #include <gflags/gflags.h>
 #include <mysql_async.h>
-#include <openssl/ssl.h>
 #include <cmath>
 
 #include "squangle/base/ExceptionUtil.h"

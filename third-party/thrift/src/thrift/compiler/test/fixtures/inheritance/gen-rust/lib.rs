@@ -497,6 +497,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_root::DoRootError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyRoot_do_root<'a> {
@@ -549,6 +551,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyRoot for S
@@ -564,10 +570,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyRootExt<T> for S
+    impl<S, T> MyRootExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyRoot + 'a>,
-        S: ::std::convert::AsRef<dyn MyRootExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyRoot + 'static>,
+        S: ::std::convert::AsRef<dyn MyRootExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -578,6 +584,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyRootExt<T>>>::as_ref(self).do_root_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyRootExt<T> as MyRootExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyRootExt<T>>>::as_ref(self))
         }
     }
 
@@ -796,6 +806,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_node::DoMidError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyNode_do_mid<'a> {
@@ -848,6 +860,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyNode for S
@@ -864,10 +880,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyNodeExt<T> for S
+    impl<S, T> MyNodeExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyNode + 'a>,
-        S: ::std::convert::AsRef<dyn MyNodeExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyNode + 'static>,
+        S: ::std::convert::AsRef<dyn MyNodeExt<T> + 'static>,
         S: crate::client::MyRoot,
         S: crate::client::MyRootExt<T>,
         S: ::std::marker::Send,
@@ -880,6 +896,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyNodeExt<T>>>::as_ref(self).do_mid_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyNodeExt<T> as MyNodeExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyNodeExt<T>>>::as_ref(self))
         }
     }
 
@@ -1128,6 +1148,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_leaf::DoLeafError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyLeaf_do_leaf<'a> {
@@ -1180,6 +1202,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyLeaf for S
@@ -1197,10 +1223,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyLeafExt<T> for S
+    impl<S, T> MyLeafExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyLeaf + 'a>,
-        S: ::std::convert::AsRef<dyn MyLeafExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyLeaf + 'static>,
+        S: ::std::convert::AsRef<dyn MyLeafExt<T> + 'static>,
         S: crate::client::MyNode,
         S: crate::client::MyNodeExt<T>,
         S: crate::client::MyRoot,
@@ -1215,6 +1241,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyLeafExt<T>>>::as_ref(self).do_leaf_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyLeafExt<T> as MyLeafExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyLeafExt<T>>>::as_ref(self))
         }
     }
 

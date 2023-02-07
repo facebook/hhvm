@@ -2568,6 +2568,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction::EncodeError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyInteraction_frobnicate<'a> {
@@ -2710,6 +2712,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyInteraction for S
@@ -2743,10 +2749,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyInteractionExt<T> for S
+    impl<S, T> MyInteractionExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyInteraction + 'a>,
-        S: ::std::convert::AsRef<dyn MyInteractionExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyInteraction + 'static>,
+        S: ::std::convert::AsRef<dyn MyInteractionExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -2781,6 +2787,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).encode_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyInteractionExt<T> as MyInteractionExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self))
         }
     }
 
@@ -3154,6 +3164,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction_fast::EncodeError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyInteractionFast_frobnicate<'a> {
@@ -3296,6 +3308,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyInteractionFast for S
@@ -3329,10 +3345,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyInteractionFastExt<T> for S
+    impl<S, T> MyInteractionFastExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyInteractionFast + 'a>,
-        S: ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyInteractionFast + 'static>,
+        S: ::std::convert::AsRef<dyn MyInteractionFastExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -3367,6 +3383,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).encode_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyInteractionFastExt<T> as MyInteractionFastExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self))
         }
     }
 
@@ -3559,6 +3579,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::serial_interaction::FrobnicateError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_SerialInteraction_frobnicate<'a> {
@@ -3611,6 +3633,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> SerialInteraction for S
@@ -3626,10 +3652,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> SerialInteractionExt<T> for S
+    impl<S, T> SerialInteractionExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn SerialInteraction + 'a>,
-        S: ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn SerialInteraction + 'static>,
+        S: ::std::convert::AsRef<dyn SerialInteractionExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -3640,6 +3666,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn SerialInteractionExt<T>>>::as_ref(self).frobnicate_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn SerialInteractionExt<T> as SerialInteractionExt<T>>::transport(<Self as ::std::convert::AsRef<dyn SerialInteractionExt<T>>>::as_ref(self))
         }
     }
 
@@ -4052,6 +4082,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyService_foo<'a> {
@@ -4250,6 +4282,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyService for S
@@ -4300,10 +4336,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyServiceExt<T> for S
+    impl<S, T> MyServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyService + 'a>,
-        S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyService + 'static>,
+        S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -4340,6 +4376,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).serialize_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyServiceExt<T> as MyServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self))
         }
     }
 

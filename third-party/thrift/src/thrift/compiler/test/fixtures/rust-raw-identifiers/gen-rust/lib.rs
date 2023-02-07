@@ -429,6 +429,8 @@ pub mod client {
             arg_bar: &crate::types::ThereAreNoPascalCaseKeywords,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo::SuperError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_Foo_return<'a> {
@@ -527,6 +529,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> Foo for S
@@ -552,10 +558,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> FooExt<T> for S
+    impl<S, T> FooExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn Foo + 'a>,
-        S: ::std::convert::AsRef<dyn FooExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn Foo + 'static>,
+        S: ::std::convert::AsRef<dyn FooExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -578,6 +584,10 @@ pub mod client {
                 arg_bar,
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn FooExt<T> as FooExt<T>>::transport(<Self as ::std::convert::AsRef<dyn FooExt<T>>>::as_ref(self))
         }
     }
 

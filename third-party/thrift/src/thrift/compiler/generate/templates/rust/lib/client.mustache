@@ -307,6 +307,8 @@
         ) -> {{>lib/client_return_type}};
         {{/function:starts_interaction?}}
         {{/service:rustFunctions}}
+
+        fn transport(&self) -> &T;
     }
     {{#service:rustFunctions}}{{^function:starts_interaction?}}
 
@@ -415,6 +417,10 @@
         }
         {{/function:starts_interaction?}}
         {{/service:rustFunctions}}
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> {{service:name}} for S
@@ -452,10 +458,10 @@
         {{/function:starts_interaction?}}{{/service:rustFunctions}}
     }
 
-    impl<'a, S, T> {{service:name}}Ext<T> for S
+    impl<S, T> {{service:name}}Ext<T> for S
     where
-        S: ::std::convert::AsRef<dyn {{service:name}} + 'a>,
-        S: ::std::convert::AsRef<dyn {{service:name}}Ext<T> + 'a>,
+        S: ::std::convert::AsRef<dyn {{service:name}} + 'static>,
+        S: ::std::convert::AsRef<dyn {{service:name}}Ext<T> + 'static>,
         {{#service:extendedServices}}
         {{#extendedService:service}}
         S: {{extendedService:packagePrefix}}::client::{{service:name}},
@@ -483,6 +489,10 @@
         }
         {{/function:starts_interaction?}}
         {{/service:rustFunctions}}
+
+        fn transport(&self) -> &T {
+            <dyn {{service:name}}Ext<T> as {{service:name}}Ext<T>>::transport(<Self as ::std::convert::AsRef<dyn {{service:name}}Ext<T>>>::as_ref(self))
+        }
     }
 
     #[derive(Clone)]

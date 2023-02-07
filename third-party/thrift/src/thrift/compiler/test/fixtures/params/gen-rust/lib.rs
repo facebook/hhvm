@@ -987,6 +987,8 @@ pub mod client {
             arg_foo: &[::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>],
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::nested_containers::TurtlesError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_NestedContainers_mapList<'a> {
@@ -1199,6 +1201,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> NestedContainers for S
@@ -1248,10 +1254,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> NestedContainersExt<T> for S
+    impl<S, T> NestedContainersExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn NestedContainers + 'a>,
-        S: ::std::convert::AsRef<dyn NestedContainersExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn NestedContainers + 'static>,
+        S: ::std::convert::AsRef<dyn NestedContainersExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -1304,6 +1310,10 @@ pub mod client {
                 arg_foo,
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn NestedContainersExt<T> as NestedContainersExt<T>>::transport(<Self as ::std::convert::AsRef<dyn NestedContainersExt<T>>>::as_ref(self))
         }
     }
 

@@ -868,6 +868,8 @@ pub mod client {
             arg_c: &::std::collections::BTreeSet<::std::primitive::i32>,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::c::ThingError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_C_f<'a> {
@@ -1004,6 +1006,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> C for S
@@ -1037,10 +1043,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> CExt<T> for S
+    impl<S, T> CExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn C + 'a>,
-        S: ::std::convert::AsRef<dyn CExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn C + 'static>,
+        S: ::std::convert::AsRef<dyn CExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -1073,6 +1079,10 @@ pub mod client {
                 arg_c,
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn CExt<T> as CExt<T>>::transport(<Self as ::std::convert::AsRef<dyn CExt<T>>>::as_ref(self))
         }
     }
 

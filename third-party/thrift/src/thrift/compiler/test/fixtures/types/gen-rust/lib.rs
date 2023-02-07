@@ -444,6 +444,8 @@ pub mod client {
             arg_r: &[::std::primitive::i64],
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::errors::some_service::BinaryKeyedMapError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_SomeService_bounce_map<'a> {
@@ -542,6 +544,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> SomeService for S
@@ -567,10 +573,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> SomeServiceExt<T> for S
+    impl<S, T> SomeServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn SomeService + 'a>,
-        S: ::std::convert::AsRef<dyn SomeServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn SomeService + 'static>,
+        S: ::std::convert::AsRef<dyn SomeServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -593,6 +599,10 @@ pub mod client {
                 arg_r,
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn SomeServiceExt<T> as SomeServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn SomeServiceExt<T>>>::as_ref(self))
         }
     }
 

@@ -248,6 +248,8 @@ pub mod client {
             arg_int1: ::std::primitive::i64,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i64, crate::errors::test_service::InitError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_TestService_init<'a> {
@@ -308,6 +310,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> TestService for S
@@ -325,10 +331,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> TestServiceExt<T> for S
+    impl<S, T> TestServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn TestService + 'a>,
-        S: ::std::convert::AsRef<dyn TestServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn TestService + 'static>,
+        S: ::std::convert::AsRef<dyn TestServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -341,6 +347,10 @@ pub mod client {
                 arg_int1,
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn TestServiceExt<T> as TestServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn TestServiceExt<T>>>::as_ref(self))
         }
     }
 

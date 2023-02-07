@@ -2082,6 +2082,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::DoNothingError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyService_ping<'a> {
@@ -2362,6 +2364,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyService for S
@@ -2425,10 +2431,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyServiceExt<T> for S
+    impl<S, T> MyServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyService + 'a>,
-        S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyService + 'static>,
+        S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -2499,6 +2505,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).doNothing_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyServiceExt<T> as MyServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self))
         }
     }
 
@@ -2744,6 +2754,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service_prio_parent::PongError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyServicePrioParent_ping<'a> {
@@ -2826,6 +2838,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyServicePrioParent for S
@@ -2847,10 +2863,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyServicePrioParentExt<T> for S
+    impl<S, T> MyServicePrioParentExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyServicePrioParent + 'a>,
-        S: ::std::convert::AsRef<dyn MyServicePrioParentExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyServicePrioParent + 'static>,
+        S: ::std::convert::AsRef<dyn MyServicePrioParentExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -2869,6 +2885,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyServicePrioParentExt<T>>>::as_ref(self).pong_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyServicePrioParentExt<T> as MyServicePrioParentExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServicePrioParentExt<T>>>::as_ref(self))
         }
     }
 
@@ -3088,6 +3108,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service_prio_child::PangError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyServicePrioChild_pang<'a> {
@@ -3140,6 +3162,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyServicePrioChild for S
@@ -3156,10 +3182,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyServicePrioChildExt<T> for S
+    impl<S, T> MyServicePrioChildExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyServicePrioChild + 'a>,
-        S: ::std::convert::AsRef<dyn MyServicePrioChildExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyServicePrioChild + 'static>,
+        S: ::std::convert::AsRef<dyn MyServicePrioChildExt<T> + 'static>,
         S: crate::client::MyServicePrioParent,
         S: crate::client::MyServicePrioParentExt<T>,
         S: ::std::marker::Send,
@@ -3172,6 +3198,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyServicePrioChildExt<T>>>::as_ref(self).pang_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyServicePrioChildExt<T> as MyServicePrioChildExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServicePrioChildExt<T>>>::as_ref(self))
         }
     }
 
@@ -3363,6 +3393,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::bad_interaction::FooError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_BadInteraction_foo<'a> {
@@ -3415,6 +3447,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> BadInteraction for S
@@ -3430,10 +3466,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> BadInteractionExt<T> for S
+    impl<S, T> BadInteractionExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn BadInteraction + 'a>,
-        S: ::std::convert::AsRef<dyn BadInteractionExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn BadInteraction + 'static>,
+        S: ::std::convert::AsRef<dyn BadInteractionExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -3444,6 +3480,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn BadInteractionExt<T>>>::as_ref(self).foo_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn BadInteractionExt<T> as BadInteractionExt<T>>::transport(<Self as ::std::convert::AsRef<dyn BadInteractionExt<T>>>::as_ref(self))
         }
     }
 
@@ -3640,6 +3680,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::primitive::i32, crate::errors::bad_service::BarError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_BadService_bar<'a> {
@@ -3708,6 +3750,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> BadService for S
@@ -3728,10 +3774,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> BadServiceExt<T> for S
+    impl<S, T> BadServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn BadService + 'a>,
-        S: ::std::convert::AsRef<dyn BadServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn BadService + 'static>,
+        S: ::std::convert::AsRef<dyn BadServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -3742,6 +3788,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn BadServiceExt<T>>>::as_ref(self).bar_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn BadServiceExt<T> as BadServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn BadServiceExt<T>>>::as_ref(self))
         }
     }
 

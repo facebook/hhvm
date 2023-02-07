@@ -2110,6 +2110,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::PingError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyInteraction_ping<'a> {
@@ -2162,6 +2164,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyInteraction for S
@@ -2177,10 +2183,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyInteractionExt<T> for S
+    impl<S, T> MyInteractionExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyInteraction + 'a>,
-        S: ::std::convert::AsRef<dyn MyInteractionExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyInteraction + 'static>,
+        S: ::std::convert::AsRef<dyn MyInteractionExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -2191,6 +2197,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).ping_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyInteractionExt<T> as MyInteractionExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self))
         }
     }
 
@@ -2976,6 +2986,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyService_ping<'a> {
@@ -3386,6 +3398,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyService for S
@@ -3478,10 +3494,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyServiceExt<T> for S
+    impl<S, T> MyServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyService + 'a>,
-        S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyService + 'static>,
+        S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -3582,6 +3598,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).startPingInteraction_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyServiceExt<T> as MyServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self))
         }
     }
 

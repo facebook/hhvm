@@ -600,6 +600,8 @@ pub mod client {
             arg_arg3: &crate::types::Foo,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::MyI32, crate::errors::service::FuncError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_Service_func<'a> {
@@ -676,6 +678,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> Service for S
@@ -697,10 +703,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> ServiceExt<T> for S
+    impl<S, T> ServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn Service + 'a>,
-        S: ::std::convert::AsRef<dyn ServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn Service + 'static>,
+        S: ::std::convert::AsRef<dyn ServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -717,6 +723,10 @@ pub mod client {
                 arg_arg3,
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn ServiceExt<T> as ServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn ServiceExt<T>>>::as_ref(self))
         }
     }
 
@@ -966,6 +976,8 @@ pub mod client {
             arg_arg: &crate::types::HeapAllocated,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::HeapAllocated, crate::errors::adapter_service::AdaptedTypesError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_AdapterService_count<'a> {
@@ -1056,6 +1068,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> AdapterService for S
@@ -1079,10 +1095,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> AdapterServiceExt<T> for S
+    impl<S, T> AdapterServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn AdapterService + 'a>,
-        S: ::std::convert::AsRef<dyn AdapterServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn AdapterService + 'static>,
+        S: ::std::convert::AsRef<dyn AdapterServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -1103,6 +1119,10 @@ pub mod client {
                 arg_arg,
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn AdapterServiceExt<T> as AdapterServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn AdapterServiceExt<T>>>::as_ref(self))
         }
     }
 

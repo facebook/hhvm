@@ -1964,6 +1964,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_service::SimpleRpcError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_FooService_simple_rpc<'a> {
@@ -2016,6 +2018,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> FooService for S
@@ -2031,10 +2037,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> FooServiceExt<T> for S
+    impl<S, T> FooServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn FooService + 'a>,
-        S: ::std::convert::AsRef<dyn FooServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn FooService + 'static>,
+        S: ::std::convert::AsRef<dyn FooServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -2045,6 +2051,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn FooServiceExt<T>>>::as_ref(self).simple_rpc_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn FooServiceExt<T> as FooServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn FooServiceExt<T>>>::as_ref(self))
         }
     }
 
@@ -2240,6 +2250,8 @@ pub mod client {
             arg_int_parameter: ::std::primitive::i32,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ReservedKeyword, crate::errors::f_b303_service::SimpleRpcError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_FB303Service_simple_rpc<'a> {
@@ -2300,6 +2312,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> FB303Service for S
@@ -2317,10 +2333,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> FB303ServiceExt<T> for S
+    impl<S, T> FB303ServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn FB303Service + 'a>,
-        S: ::std::convert::AsRef<dyn FB303ServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn FB303Service + 'static>,
+        S: ::std::convert::AsRef<dyn FB303ServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -2333,6 +2349,10 @@ pub mod client {
                 arg_int_parameter,
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn FB303ServiceExt<T> as FB303ServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn FB303ServiceExt<T>>>::as_ref(self))
         }
     }
 
@@ -3042,6 +3062,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::RpcSkippedCodegenError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyService_ping<'a> {
@@ -3428,6 +3450,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyService for S
@@ -3513,10 +3539,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyServiceExt<T> for S
+    impl<S, T> MyServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyService + 'a>,
-        S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyService + 'static>,
+        S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -3615,6 +3641,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).rpc_skipped_codegen_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyServiceExt<T> as MyServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self))
         }
     }
 
@@ -3868,6 +3898,8 @@ pub mod client {
             arg_key: &::std::primitive::str,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::errors::db_mixed_stack_arguments::GetDataByKey1Error>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_DbMixedStackArguments_getDataByKey0<'a> {
@@ -3966,6 +3998,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> DbMixedStackArguments for S
@@ -3991,10 +4027,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> DbMixedStackArgumentsExt<T> for S
+    impl<S, T> DbMixedStackArgumentsExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'a>,
-        S: ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn DbMixedStackArguments + 'static>,
+        S: ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -4017,6 +4053,10 @@ pub mod client {
                 arg_key,
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn DbMixedStackArgumentsExt<T> as DbMixedStackArgumentsExt<T>>::transport(<Self as ::std::convert::AsRef<dyn DbMixedStackArgumentsExt<T>>>::as_ref(self))
         }
     }
 

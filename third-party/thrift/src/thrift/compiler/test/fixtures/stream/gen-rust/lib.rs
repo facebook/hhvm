@@ -3846,6 +3846,8 @@ pub mod client {
             arg_i32_to: ::std::primitive::i32,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_PubSubStreamingService_returnstream<'a> {
@@ -4226,6 +4228,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> PubSubStreamingService for S
@@ -4311,10 +4317,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> PubSubStreamingServiceExt<T> for S
+    impl<S, T> PubSubStreamingServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn PubSubStreamingService + 'a>,
-        S: ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn PubSubStreamingService + 'static>,
+        S: ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -4411,6 +4417,10 @@ pub mod client {
                 arg_i32_to,
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn PubSubStreamingServiceExt<T> as PubSubStreamingServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self))
         }
     }
 

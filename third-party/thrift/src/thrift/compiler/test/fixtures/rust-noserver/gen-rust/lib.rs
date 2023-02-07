@@ -1195,6 +1195,8 @@ pub mod client {
             arg_data: &::std::primitive::str,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_service::LobDataByIdError>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_MyService_ping<'a> {
@@ -1445,6 +1447,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> MyService for S
@@ -1502,10 +1508,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> MyServiceExt<T> for S
+    impl<S, T> MyServiceExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn MyService + 'a>,
-        S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn MyService + 'static>,
+        S: ::std::convert::AsRef<dyn MyServiceExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -1568,6 +1574,10 @@ pub mod client {
                 arg_data,
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn MyServiceExt<T> as MyServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self))
         }
     }
 

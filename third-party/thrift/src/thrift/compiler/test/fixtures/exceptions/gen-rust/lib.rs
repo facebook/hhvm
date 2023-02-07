@@ -956,6 +956,8 @@ pub mod client {
             &self,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::std::string::String, crate::errors::raiser::Get500Error>>;
+
+        fn transport(&self) -> &T;
     }
 
     struct Args_Raiser_doBland<'a> {
@@ -1098,6 +1100,10 @@ pub mod client {
                 rpc_options,
             )
         }
+
+        fn transport(&self) -> &T {
+          self.transport()
+        }
     }
 
     impl<'a, S> Raiser for S
@@ -1131,10 +1137,10 @@ pub mod client {
         }
     }
 
-    impl<'a, S, T> RaiserExt<T> for S
+    impl<S, T> RaiserExt<T> for S
     where
-        S: ::std::convert::AsRef<dyn Raiser + 'a>,
-        S: ::std::convert::AsRef<dyn RaiserExt<T> + 'a>,
+        S: ::std::convert::AsRef<dyn Raiser + 'static>,
+        S: ::std::convert::AsRef<dyn RaiserExt<T> + 'static>,
         S: ::std::marker::Send,
         T: ::fbthrift::Transport,
     {
@@ -1169,6 +1175,10 @@ pub mod client {
             <Self as ::std::convert::AsRef<dyn RaiserExt<T>>>::as_ref(self).get500_with_rpc_opts(
                 rpc_options,
             )
+        }
+
+        fn transport(&self) -> &T {
+            <dyn RaiserExt<T> as RaiserExt<T>>::transport(<Self as ::std::convert::AsRef<dyn RaiserExt<T>>>::as_ref(self))
         }
     }
 

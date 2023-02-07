@@ -9,3 +9,4 @@ pub mod elab_block;
 pub mod elab_defs;
 pub mod elab_func_body;
 pub mod elab_happly_hint;
+pub mod guard_invalid;

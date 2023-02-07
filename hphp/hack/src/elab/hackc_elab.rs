@@ -1,4 +1,4 @@
-// RUST_LOG=info buck2 run fbcode//hphp/hack/src/elab:elab -- files $HOME/fbsource/fbcode/hphp/hack/test/typecheck/tuple_hints.php $HOME/fbsource/fbcode/hphp/hack/test/typecheck/num_type_hint.php
+// RUST_LOG=info buck2 run fbcode//hphp/hack/src/elab:hackc-elab -- files $HOME/fbsource/fbcode/hphp/hack/test/typecheck/tuple_hints.php $HOME/fbsource/fbcode/hphp/hack/test/typecheck/num_type_hint.php
 
 //use log::info;
 use std::path::PathBuf;

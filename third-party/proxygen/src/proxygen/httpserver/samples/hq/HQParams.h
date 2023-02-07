@@ -57,7 +57,7 @@ struct HQBaseParams {
                                           proxygen::kHQCurrentDraft};
   quic::TransportSettings transportSettings;
   std::string congestionControlName;
-  folly::Optional<quic::CongestionControlType> congestionControl;
+  std::optional<quic::CongestionControlType> congestionControl;
   bool sendKnobFrame{false};
 
   // HTTP section

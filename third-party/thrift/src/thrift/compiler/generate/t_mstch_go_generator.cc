@@ -59,6 +59,12 @@ struct go_codegen_data {
   const t_program* current_program;
 };
 
+// To avoid conflict with methods (e.g. Error(), String())
+static const std::set<std::string> reserved_field_names = {
+    "Error",
+    "String",
+};
+
 std::string doc_comment(const t_node* node) {
   auto in = std::istringstream(node->get_doc());
 
@@ -308,7 +314,13 @@ class mstch_go_field : public mstch_field {
         });
   }
 
-  mstch::node go_name() { return go::munge_ident(field_->name()); }
+  mstch::node go_name() {
+    auto name = go::munge_ident(field_->name());
+    if (reserved_field_names.count(name) > 0) {
+      name += "_";
+    }
+    return name;
+  }
   mstch::node go_arg_name() { return go::munge_arg(field_->name()); }
   mstch::node is_pointer() {
     // Whether this field is a pointer '*':

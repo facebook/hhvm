@@ -11,53 +11,49 @@ open Bad_type_logger_types
 open Bad_type_logger_file
 open Bad_type_logger_scuba
 
-(* A bad type is a Tany or Terr *)
+(* A bad type is a Tany *)
 
 let log_info env (infos : info list) : unit =
   List.iter ~f:(log_info_to_file env) infos;
   log_info_to_scuba env infos
 
-let extract_bad_type_indicator ty =
+let _extract_bad_type_indicator ty =
   let finder =
     object
-      inherit [bad_type_indicator] Type_visitor.locl_type_visitor
+      inherit [bool] Type_visitor.locl_type_visitor
 
-      method! on_tany indicator _ = { indicator with has_tany = true }
+      method! on_tany _ _ = true
     end
   in
-  let init_indicator = { has_tany = false; has_terr = false } in
-  finder#on_type init_indicator ty
+  finder#on_type false ty
 
-let mk_common_info ~context_id ~indicator pos =
+let mk_common_info ~context_id pos =
   let path = Pos.filename pos |> Relative_path.suffix in
   let is_generated = String_utils.is_substring "generated" path in
   let is_test = String_utils.is_substring "test" path in
-  { context_id; indicator; is_generated; is_test; pos }
+  { context_id; is_generated; is_test; pos }
 
-let mk_ret_decl_info_internal ~context_id ~indicator env ty =
+let mk_ret_decl_info_internal ~context_id env ty =
   let pos =
     Typing_defs.get_pos ty
     |> Pos_or_decl.fill_in_filename (Tast_env.get_file env)
   in
-  let common_info = mk_common_info ~context_id ~indicator pos in
+  let common_info = mk_common_info ~context_id pos in
   let position = Return in
   let context = Declaration { position } in
   { common_info; context }
 
 let mk_ret_decl_info
     ~context_id env ((ty, _hint) : Typing_defs.locl_ty Aast.type_hint) =
-  let indicator = extract_bad_type_indicator ty in
-  if has_bad_type indicator then
-    let ret_decl_info =
-      mk_ret_decl_info_internal ~context_id ~indicator env ty
-    in
+  let bad_type = Typing_defs.is_any ty in
+  if bad_type then
+    let ret_decl_info = mk_ret_decl_info_internal ~context_id env ty in
     Some ret_decl_info
   else
     None
 
-let mk_param_decl_info_internal ~context_id ~indicator ~is_variadic pos callconv
-    =
-  let common_info = mk_common_info ~context_id ~indicator pos in
+let mk_param_decl_info_internal ~context_id ~is_variadic pos callconv =
+  let common_info = mk_common_info ~context_id pos in
   let is_inout =
     match callconv with
     | Ast_defs.Pinout _ -> true
@@ -77,12 +73,11 @@ let mk_param_decl_info
         param_is_variadic;
         _;
       } =
-  let indicator = extract_bad_type_indicator ty in
-  if has_bad_type indicator then
+  let bad_type = Typing_defs.is_any ty in
+  if bad_type then
     let param_decl_info =
       mk_param_decl_info_internal
         ~context_id
-        ~indicator
         ~is_variadic:param_is_variadic
         param_pos
         param_callconv
@@ -95,8 +90,8 @@ let mk_callable_decl_infos ~context_id env params ret =
   let param_infos = List.map ~f:(mk_param_decl_info ~context_id) params in
   List.filter_opt @@ (mk_ret_decl_info ~context_id env ret :: param_infos)
 
-let mk_expr_info_internal ~context_id ~indicator pos ty exp =
-  let common_info = mk_common_info ~context_id ~indicator pos in
+let mk_expr_info_internal ~context_id pos ty exp =
+  let common_info = mk_common_info ~context_id pos in
   let producer_id = function
     | Aast.Id (_, id) -> Some id
     | Aast.Class_const ((_, _, Aast.CI (_, class_id)), (_, id)) ->
@@ -131,9 +126,9 @@ let mk_expr_info_internal ~context_id ~indicator pos ty exp =
   { common_info; context }
 
 let mk_expr_info ~context_id (ty, pos, exp) =
-  let indicator = extract_bad_type_indicator ty in
-  if has_bad_type indicator then
-    let expr_info = mk_expr_info_internal ~context_id ~indicator pos ty exp in
+  let bad_type = Typing_defs.is_any ty in
+  if bad_type then
+    let expr_info = mk_expr_info_internal ~context_id pos ty exp in
     Some expr_info
   else
     None

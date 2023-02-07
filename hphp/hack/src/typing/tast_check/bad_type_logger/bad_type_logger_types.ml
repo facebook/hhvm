@@ -41,15 +41,6 @@ type declaration_info = {
   position: position;  (** Where in a declaration a bad type appears? *)
 }
 
-(** A bit vector to indicate if a type has a bad type in it and if so which
-    one. *)
-type bad_type_indicator = {
-  has_tany: bool;
-  has_terr: bool;
-}
-
-let has_bad_type { has_tany; has_terr } = has_tany || has_terr
-
 (** A context is either a function name or a method name qualified by the
     enclosing class. *)
 type context_id =
@@ -57,7 +48,6 @@ type context_id =
   | Method of string * string
 
 type common_info = {
-  indicator: bad_type_indicator;  (** Does the type contain bad types? *)
   is_generated: bool;  (** Is it in a generated file (based on path)? *)
   is_test: bool;  (** Is it in a test file (based on path)? *)
   pos: Relative_path.t Pos.pos;  (** Position of a bad type *)

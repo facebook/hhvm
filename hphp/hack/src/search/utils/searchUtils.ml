@@ -21,9 +21,6 @@ type autocomplete_type =
   | Acid
   | Acnew
   | Actype
-  | Acclass_get
-  | Acprop
-  | Acshape_key
   | Actrait_only
   | Ac_workspace_symbol (* Excludes namespaces; used for symbol search *)
 [@@deriving eq, show]

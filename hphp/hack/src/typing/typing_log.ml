@@ -764,15 +764,20 @@ let log_localize ~level ety_env (decl_ty : decl_ty) (env, result_ty) =
   (env, result_ty)
 
 let log_pessimise_ ?(level = 1) env kind pos name =
-  log_with_level env "pessimise" ~level @@ fun () ->
-  let p = Pos_or_decl.unsafe_to_raw_pos pos in
-  let (file, line) =
-    let p = Pos.to_absolute p in
-    (Pos.filename p, Pos.line p)
-  in
-  lnewline ();
-  lprintf (Normal Yellow) "pessimise:\t%s,%s,%d,%s" kind file line name;
-  lnewline ()
+  let log_level = Typing_env_types.get_log_level env "pessimise" in
+  if log_level >= level then
+    let p = Pos_or_decl.unsafe_to_raw_pos pos in
+    let (file, line) =
+      let p = Pos.to_absolute p in
+      (Pos.filename p, Pos.line p)
+    in
+    if log_level > 1 then
+      Hh_logger.log "pessimise:\t%s,%s,%d,%s" kind file line name
+    else (
+      lnewline ();
+      lprintf (Normal Yellow) "pessimise:\t%s,%s,%d,%s" kind file line name;
+      lnewline ()
+    )
 
 let log_pessimise_prop env pos prop_name =
   log_pessimise_ env "prop" (Pos_or_decl.of_raw_pos pos) ("$" ^ prop_name)

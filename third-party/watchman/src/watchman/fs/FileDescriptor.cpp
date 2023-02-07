@@ -8,6 +8,7 @@
 #include "watchman/fs/FileDescriptor.h"
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
+#include <folly/Try.h>
 #include <folly/system/Pid.h>
 #include <system_error>
 #include "watchman/fs/FSDetect.h"
@@ -374,7 +375,7 @@ w_string FileDescriptor::readSymbolicLink() const {
   throw std::system_error(
       errno, std::generic_category(), "readlink for readSymbolicLink");
 #else // _WIN32
-  auto rep = facebook::eden::getReparseData((HANDLE)fd_);
+  auto rep = facebook::eden::getReparseData((HANDLE)fd_).value();
   WCHAR* target;
   USHORT targetlen;
   switch (rep->ReparseTag) {
@@ -511,7 +512,7 @@ const FileDescriptor& FileDescriptor::stdErr() {
 #ifdef _WIN32
 
 ULONG FileDescriptor::getReparseTag() const {
-  return facebook::eden::getReparseData((HANDLE)fd_)->ReparseTag;
+  return facebook::eden::getReparseData((HANDLE)fd_).value()->ReparseTag;
 }
 #endif
 } // namespace watchman

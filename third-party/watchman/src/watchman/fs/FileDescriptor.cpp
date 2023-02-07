@@ -27,90 +27,6 @@
 #endif
 
 namespace watchman {
-#ifdef _WIN32
-// We declare our own copy here because Ntifs.h is not included in the
-// standard install of the Visual Studio Community compiler.
-namespace {
-struct REPARSE_DATA_BUFFER {
-  ULONG ReparseTag;
-  USHORT ReparseDataLength;
-  USHORT Reserved;
-  union {
-    struct {
-      USHORT SubstituteNameOffset;
-      USHORT SubstituteNameLength;
-      USHORT PrintNameOffset;
-      USHORT PrintNameLength;
-      ULONG Flags;
-      WCHAR PathBuffer[1];
-    } SymbolicLinkReparseBuffer;
-    struct {
-      USHORT SubstituteNameOffset;
-      USHORT SubstituteNameLength;
-      USHORT PrintNameOffset;
-      USHORT PrintNameLength;
-      WCHAR PathBuffer[1];
-    } MountPointReparseBuffer;
-    struct {
-      UCHAR DataBuffer[1];
-    } GenericReparseBuffer;
-  };
-};
-#ifdef _WIN32
-struct ReparseDataDeleter {
-  void operator()(void* p) {
-    free(p);
-  }
-};
-
-using ReparseDataBuffer =
-    std::unique_ptr<REPARSE_DATA_BUFFER, ReparseDataDeleter>;
-#endif
-
-ReparseDataBuffer getReparseData(FileDescriptor::system_handle_type fd) {
-  auto buffer = ReparseDataBuffer(static_cast<REPARSE_DATA_BUFFER*>(
-      malloc(MAXIMUM_REPARSE_DATA_BUFFER_SIZE)));
-  if (!buffer) {
-    throw std::bad_alloc();
-  }
-
-  DWORD written;
-  auto result = DeviceIoControl(
-      (HANDLE)fd,
-      FSCTL_GET_REPARSE_POINT,
-      nullptr,
-      0,
-      buffer.get(),
-      MAXIMUM_REPARSE_DATA_BUFFER_SIZE,
-      &written,
-      nullptr);
-
-  if (!result && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-    buffer.reset(static_cast<REPARSE_DATA_BUFFER*>(malloc(written)));
-    if (!buffer) {
-      throw std::bad_alloc();
-    }
-
-    result = DeviceIoControl(
-        (HANDLE)fd,
-        FSCTL_GET_REPARSE_POINT,
-        nullptr,
-        0,
-        buffer.get(),
-        MAXIMUM_REPARSE_DATA_BUFFER_SIZE,
-        &written,
-        nullptr);
-  }
-
-  if (!result) {
-    throw std::system_error(
-        GetLastError(), std::system_category(), "FSCTL_GET_REPARSE_POINT");
-  }
-
-  return buffer;
-}
-} // namespace
-#endif
 
 FileDescriptor::~FileDescriptor() {
   close();
@@ -458,7 +374,7 @@ w_string FileDescriptor::readSymbolicLink() const {
   throw std::system_error(
       errno, std::generic_category(), "readlink for readSymbolicLink");
 #else // _WIN32
-  auto rep = getReparseData(fd_);
+  auto rep = facebook::eden::getReparseData((HANDLE)fd_);
   WCHAR* target;
   USHORT targetlen;
   switch (rep->ReparseTag) {
@@ -595,7 +511,7 @@ const FileDescriptor& FileDescriptor::stdErr() {
 #ifdef _WIN32
 
 ULONG FileDescriptor::getReparseTag() const {
-  return getReparseData(fd_)->ReparseTag;
+  return facebook::eden::getReparseData((HANDLE)fd_)->ReparseTag;
 }
 #endif
 } // namespace watchman

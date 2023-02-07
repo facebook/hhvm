@@ -7,6 +7,7 @@
 
 #pragma once
 #include <system_error>
+#include "eden/common/utils/FileUtils.h"
 #include "watchman/Result.h"
 #include "watchman/watchman_system.h"
 

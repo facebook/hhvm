@@ -542,6 +542,7 @@ module.exports = {
         },
         'contributions/universal-name',
         'contributions/terse-write',
+        'contributions/patch',
         {
           type: 'category',
           label: 'Documentation',

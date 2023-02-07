@@ -92,10 +92,17 @@ std::string get_go_package_base_name(
   auto go_package = get_go_package_name(program, name_override);
   std::vector<std::string> parts;
   boost::split(parts, go_package, boost::is_any_of("."));
+  auto base_name = go_package;
   if (parts.size() > 0) {
-    return parts.back();
+    base_name = parts.back();
   }
-  return go_package;
+
+  // Avoid package base name collisions with reserved words
+  if (is_go_reserved_word(base_name)) {
+    base_name += "_";
+  }
+
+  return base_name;
 }
 
 // Convert snake_case to UpperCamelCase and captialize common initialisms.

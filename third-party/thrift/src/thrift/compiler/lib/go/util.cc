@@ -58,28 +58,13 @@ std::string get_go_package_base_name(
 // Convert snake_case to UpperCamelCase and captialize common initialisms.
 std::string munge_ident(const std::string& ident, bool exported, bool compat) {
   // common_initialisms from https://github.com/golang/lint/blob/master/lint.go
-  // Initialims not yet compatible with the old generator.
-  static const std::set<std::string> common_initialisms_non_compat = {
-      "API",
-      "CPU",
-      "ID",
-      "TTL",
-      "UUID",
-  };
   static const std::set<std::string> common_initialisms = {
-      "ACL",  "ASCII", "CSS", "DNS",  "EOF",  "GUID", "HTML", "HTTP", "HTTPS",
-      "IP",   "JSON",  "LHS", "QPS",  "RAM",  "RHS",  "RPC",  "SLA",  "SMTP",
-      "SQL",  "SSH",   "TCP", "TLS",  "UDP",  "UI",   "UID",  "URI",  "URL",
-      "UTF8", "VM",    "XML", "XMPP", "XSRF", "XSS",
+      "ACL",  "API",  "ASCII", "CPU",  "CSS",  "DNS",  "EOF", "GUID",
+      "HTML", "HTTP", "HTTPS", "ID",   "IP",   "JSON", "LHS", "QPS",
+      "RAM",  "RHS",  "RPC",   "SLA",  "SMTP", "SQL",  "SSH", "TCP",
+      "TLS",  "TTL",  "UDP",   "UI",   "UID",  "URI",  "URL", "UTF8",
+      "UUID", "VM",   "XML",   "XMPP", "XSRF", "XSS",
   };
-
-  std::set<std::string> initialisms;
-  initialisms.insert(common_initialisms.cbegin(), common_initialisms.cend());
-  if (!compat) {
-    initialisms.insert(
-        common_initialisms_non_compat.cbegin(),
-        common_initialisms_non_compat.cend());
-  }
 
   bool allUpper = std::all_of(ident.begin(), ident.end(), [](unsigned char c) {
     return !std::isalpha(c) || std::isupper(c);
@@ -100,7 +85,7 @@ std::string munge_ident(const std::string& ident, bool exported, bool compat) {
     } else if (ident.at(i + 1) == '_') {
       eow = true;
       i++;
-    } else if (islower(ident.at(i)) && !islower(ident.at(i + 1))) {
+    } else if (islower(ident.at(i)) && !islower(ident.at(i + 1)) && !compat) {
       eow = true;
     }
     i++;
@@ -113,15 +98,21 @@ std::string munge_ident(const std::string& ident, bool exported, bool compat) {
     auto word = ident.substr(word_start, word_len);
 
     // check for initialism
-    std::string upper(word.length(), ' ');
-    std::transform(word.begin(), word.end(), upper.begin(), ::toupper);
-    bool is_initialism = (initialisms.count(upper) > 0);
+    std::string upper = boost::algorithm::to_upper_copy(word);
+    bool is_initialism = (common_initialisms.count(upper) > 0);
 
-    // "Ip" hack for fbcode/libfb/go/sr/protocol.go:193:3
-    if (is_initialism && ident != "ip" && compat) {
+    // Compatibility workarounds for the legacy generator (i.e. bugs):
+    //  * word_start != 0
+    //    * Legacy generator does not change initialisms at the beginning of the
+    //    string to uppercase.
+    //  * word_len != ident.size()
+    //    * Legacy generator does not change whole-string initialisms to
+    //    uppercase.
+    if (is_initialism && compat && word_len != ident.size() &&
+        word_start != 0) {
       word = upper;
       if (word_start == 0 && !exported) {
-        std::transform(word.begin(), word.end(), word.begin(), ::tolower);
+        boost::algorithm::to_lower(word);
       }
     } else if (exported || word_start > 0) {
       word.at(0) = toupper(word.at(0));

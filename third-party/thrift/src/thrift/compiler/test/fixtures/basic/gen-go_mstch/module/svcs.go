@@ -837,7 +837,7 @@ type MyService interface {
     DeleteDataById(ctx context.Context, id int64) error
     LobDataById(ctx context.Context, id int64, data string) error
     InvalidReturnForHack(ctx context.Context) ([]float32, error)
-    RPCSkippedCodegen(ctx context.Context) error
+    RpcSkippedCodegen(ctx context.Context) error
 }
 
 // Deprecated: Use MyService instead.
@@ -852,7 +852,7 @@ type MyServiceClientInterface interface {
   DeleteDataById(id int64) error
   LobDataById(id int64, data string) error
   InvalidReturnForHack() ([]float32, error)
-  RPCSkippedCodegen() error
+  RpcSkippedCodegen() error
 }
 
 type MyServiceChannelClient struct {
@@ -1063,16 +1063,16 @@ func (c *MyServiceClient) InvalidReturnForHack() ([]float32, error) {
 }
 
 
-func (c *MyServiceChannelClient) RPCSkippedCodegen(ctx context.Context) error {
-    in := &reqMyServiceRPCSkippedCodegen{
+func (c *MyServiceChannelClient) RpcSkippedCodegen(ctx context.Context) error {
+    in := &reqMyServiceRpcSkippedCodegen{
     }
-    out := newRespMyServiceRPCSkippedCodegen()
+    out := newRespMyServiceRpcSkippedCodegen()
     err := c.ch.Call(ctx, "rpc_skipped_codegen", in, out)
     return err
 }
 
-func (c *MyServiceClient) RPCSkippedCodegen() error {
-    return c.chClient.RPCSkippedCodegen(nil)
+func (c *MyServiceClient) RpcSkippedCodegen() error {
+    return c.chClient.RpcSkippedCodegen(nil)
 }
 
 
@@ -3220,7 +3220,7 @@ func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p.AddToProcessorMap("deleteDataById", &procFuncMyServiceDeleteDataById{handler: handler})
     p.AddToProcessorMap("lobDataById", &procFuncMyServiceLobDataById{handler: handler})
     p.AddToProcessorMap("invalid_return_for_hack", &procFuncMyServiceInvalidReturnForHack{handler: handler})
-    p.AddToProcessorMap("rpc_skipped_codegen", &procFuncMyServiceRPCSkippedCodegen{handler: handler})
+    p.AddToProcessorMap("rpc_skipped_codegen", &procFuncMyServiceRpcSkippedCodegen{handler: handler})
     p.AddToFunctionServiceMap("ping", "MyService")
     p.AddToFunctionServiceMap("getRandomData", "MyService")
     p.AddToFunctionServiceMap("sink", "MyService")
@@ -3668,14 +3668,14 @@ func (p *procFuncMyServiceInvalidReturnForHack) Run(reqStruct thrift.Struct) (th
 }
 
 
-type procFuncMyServiceRPCSkippedCodegen struct {
+type procFuncMyServiceRpcSkippedCodegen struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceRPCSkippedCodegen{}
+var _ thrift.ProcessorFunction = &procFuncMyServiceRpcSkippedCodegen{}
 
-func (p *procFuncMyServiceRPCSkippedCodegen) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
-    args := newReqMyServiceRPCSkippedCodegen()
+func (p *procFuncMyServiceRpcSkippedCodegen) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReqMyServiceRpcSkippedCodegen()
     if err := args.Read(iprot); err != nil {
         return nil, err
     }
@@ -3683,13 +3683,13 @@ func (p *procFuncMyServiceRPCSkippedCodegen) Read(iprot thrift.Protocol) (thrift
     return args, nil
 }
 
-func (p *procFuncMyServiceRPCSkippedCodegen) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncMyServiceRpcSkippedCodegen) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     if _, ok := result.(thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
-    if err2 = oprot.WriteMessageBegin("RPCSkippedCodegen", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("RpcSkippedCodegen", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3704,10 +3704,10 @@ func (p *procFuncMyServiceRPCSkippedCodegen) Write(seqId int32, result thrift.Wr
     return err
 }
 
-func (p *procFuncMyServiceRPCSkippedCodegen) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
-    result := newRespMyServiceRPCSkippedCodegen()
-    if err := p.handler.RPCSkippedCodegen(); err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing RPCSkippedCodegen: " + err.Error(), err)
+func (p *procFuncMyServiceRpcSkippedCodegen) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    result := newRespMyServiceRpcSkippedCodegen()
+    if err := p.handler.RpcSkippedCodegen(); err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing RpcSkippedCodegen: " + err.Error(), err)
         return x, x
     }
     return result, nil

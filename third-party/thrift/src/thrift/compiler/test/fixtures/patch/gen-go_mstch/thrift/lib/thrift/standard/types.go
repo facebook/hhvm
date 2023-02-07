@@ -23,7 +23,7 @@ type ByteString = []byte
 
 type ByteBuffer = []byte
 
-type URI = string
+type Uri = string
 
 type Void int32
 
@@ -89,8 +89,8 @@ const (
     StandardProtocol_Custom StandardProtocol = 0
     StandardProtocol_Binary StandardProtocol = 1
     StandardProtocol_Compact StandardProtocol = 2
-    StandardProtocol_JSON StandardProtocol = 3
-    StandardProtocol_SimpleJSON StandardProtocol = 4
+    StandardProtocol_Json StandardProtocol = 3
+    StandardProtocol_SimpleJson StandardProtocol = 4
 )
 
 // Enum value maps for StandardProtocol
@@ -99,16 +99,16 @@ var (
         StandardProtocol_Custom: "Custom",
         StandardProtocol_Binary: "Binary",
         StandardProtocol_Compact: "Compact",
-        StandardProtocol_JSON: "Json",
-        StandardProtocol_SimpleJSON: "SimpleJson",
+        StandardProtocol_Json: "Json",
+        StandardProtocol_SimpleJson: "SimpleJson",
     }
 
     StandardProtocol_value = map[string]StandardProtocol {
         "Custom": StandardProtocol_Custom,
         "Binary": StandardProtocol_Binary,
         "Compact": StandardProtocol_Compact,
-        "Json": StandardProtocol_JSON,
-        "SimpleJson": StandardProtocol_SimpleJSON,
+        "Json": StandardProtocol_Json,
+        "SimpleJson": StandardProtocol_SimpleJson,
     }
 
     // Deprecated: Use StandardProtocol_name instead.
@@ -161,44 +161,44 @@ func StandardProtocolPtr(v StandardProtocol) *StandardProtocol {
 }
 
 
-type TypeURI struct {
-    URI *URI `thrift:"uri,1" json:"uri" db:"uri"`
+type TypeUri struct {
+    Uri *Uri `thrift:"uri,1" json:"uri" db:"uri"`
     TypeHashPrefixSha2256 ByteString `thrift:"typeHashPrefixSha2_256,2" json:"typeHashPrefixSha2_256" db:"typeHashPrefixSha2_256"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &TypeURI{}
+var _ thrift.Struct = &TypeUri{}
 
-func NewTypeURI() *TypeURI {
-    return (&TypeURI{})
+func NewTypeUri() *TypeUri {
+    return (&TypeUri{})
 }
-func (x *TypeURI) GetURI() *URI {
-    return x.URI
+func (x *TypeUri) GetUri() *Uri {
+    return x.Uri
 }
 
-func (x *TypeURI) GetTypeHashPrefixSha2256() ByteString {
+func (x *TypeUri) GetTypeHashPrefixSha2256() ByteString {
     return x.TypeHashPrefixSha2256
 }
 
-func (x *TypeURI) SetURI(value URI) *TypeURI {
-    x.URI = &value
+func (x *TypeUri) SetUri(value Uri) *TypeUri {
+    x.Uri = &value
     return x
 }
 
-func (x *TypeURI) SetTypeHashPrefixSha2256(value ByteString) *TypeURI {
+func (x *TypeUri) SetTypeHashPrefixSha2256(value ByteString) *TypeUri {
     x.TypeHashPrefixSha2256 = value
     return x
 }
 
-func (x *TypeURI) IsSetURI() bool {
-    return x.URI != nil
+func (x *TypeUri) IsSetUri() bool {
+    return x.Uri != nil
 }
 
-func (x *TypeURI) IsSetTypeHashPrefixSha2256() bool {
+func (x *TypeUri) IsSetTypeHashPrefixSha2256() bool {
     return x.TypeHashPrefixSha2256 != nil
 }
 
-func (x *TypeURI) writeField1(p thrift.Protocol) error {  // URI
-    if !x.IsSetURI() {
+func (x *TypeUri) writeField1(p thrift.Protocol) error {  // Uri
+    if !x.IsSetUri() {
         return nil
     }
 
@@ -206,7 +206,7 @@ func (x *TypeURI) writeField1(p thrift.Protocol) error {  // URI
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetURI()
+    item := *x.GetUri()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -217,7 +217,7 @@ func (x *TypeURI) writeField1(p thrift.Protocol) error {  // URI
     return nil
 }
 
-func (x *TypeURI) writeField2(p thrift.Protocol) error {  // TypeHashPrefixSha2256
+func (x *TypeUri) writeField2(p thrift.Protocol) error {  // TypeHashPrefixSha2256
     if !x.IsSetTypeHashPrefixSha2256() {
         return nil
     }
@@ -237,17 +237,17 @@ func (x *TypeURI) writeField2(p thrift.Protocol) error {  // TypeHashPrefixSha22
     return nil
 }
 
-func (x *TypeURI) readField1(p thrift.Protocol) error {  // URI
+func (x *TypeUri) readField1(p thrift.Protocol) error {  // Uri
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetURI(result)
+    x.SetUri(result)
     return nil
 }
 
-func (x *TypeURI) readField2(p thrift.Protocol) error {  // TypeHashPrefixSha2256
+func (x *TypeUri) readField2(p thrift.Protocol) error {  // TypeHashPrefixSha2256
     result, err := p.ReadBinary()
 if err != nil {
     return err
@@ -259,7 +259,7 @@ if err != nil {
 
 
 
-func (x *TypeURI) Write(p thrift.Protocol) error {
+func (x *TypeUri) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("TypeUri"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -282,7 +282,7 @@ func (x *TypeURI) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *TypeURI) Read(p thrift.Protocol) error {
+func (x *TypeUri) Read(p thrift.Protocol) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -334,11 +334,11 @@ type TypeName struct {
     DoubleType *Void `thrift:"doubleType,7" json:"doubleType" db:"doubleType"`
     StringType *Void `thrift:"stringType,8" json:"stringType" db:"stringType"`
     BinaryType *Void `thrift:"binaryType,9" json:"binaryType" db:"binaryType"`
-    EnumType *TypeURI `thrift:"enumType,10" json:"enumType" db:"enumType"`
-    TypedefType *TypeURI `thrift:"typedefType,17" json:"typedefType" db:"typedefType"`
-    StructType *TypeURI `thrift:"structType,11" json:"structType" db:"structType"`
-    UnionType *TypeURI `thrift:"unionType,12" json:"unionType" db:"unionType"`
-    ExceptionType *TypeURI `thrift:"exceptionType,13" json:"exceptionType" db:"exceptionType"`
+    EnumType *TypeUri `thrift:"enumType,10" json:"enumType" db:"enumType"`
+    TypedefType *TypeUri `thrift:"typedefType,17" json:"typedefType" db:"typedefType"`
+    StructType *TypeUri `thrift:"structType,11" json:"structType" db:"structType"`
+    UnionType *TypeUri `thrift:"unionType,12" json:"unionType" db:"unionType"`
+    ExceptionType *TypeUri `thrift:"exceptionType,13" json:"exceptionType" db:"exceptionType"`
     ListType *Void `thrift:"listType,14" json:"listType" db:"listType"`
     SetType *Void `thrift:"setType,15" json:"setType" db:"setType"`
     MapType *Void `thrift:"mapType,16" json:"mapType" db:"mapType"`
@@ -385,23 +385,23 @@ func (x *TypeName) GetBinaryType() *Void {
     return x.BinaryType
 }
 
-func (x *TypeName) GetEnumType() *TypeURI {
+func (x *TypeName) GetEnumType() *TypeUri {
     return x.EnumType
 }
 
-func (x *TypeName) GetTypedefType() *TypeURI {
+func (x *TypeName) GetTypedefType() *TypeUri {
     return x.TypedefType
 }
 
-func (x *TypeName) GetStructType() *TypeURI {
+func (x *TypeName) GetStructType() *TypeUri {
     return x.StructType
 }
 
-func (x *TypeName) GetUnionType() *TypeURI {
+func (x *TypeName) GetUnionType() *TypeUri {
     return x.UnionType
 }
 
-func (x *TypeName) GetExceptionType() *TypeURI {
+func (x *TypeName) GetExceptionType() *TypeUri {
     return x.ExceptionType
 }
 
@@ -462,27 +462,27 @@ func (x *TypeName) SetBinaryType(value Void) *TypeName {
     return x
 }
 
-func (x *TypeName) SetEnumType(value TypeURI) *TypeName {
+func (x *TypeName) SetEnumType(value TypeUri) *TypeName {
     x.EnumType = &value
     return x
 }
 
-func (x *TypeName) SetTypedefType(value TypeURI) *TypeName {
+func (x *TypeName) SetTypedefType(value TypeUri) *TypeName {
     x.TypedefType = &value
     return x
 }
 
-func (x *TypeName) SetStructType(value TypeURI) *TypeName {
+func (x *TypeName) SetStructType(value TypeUri) *TypeName {
     x.StructType = &value
     return x
 }
 
-func (x *TypeName) SetUnionType(value TypeURI) *TypeName {
+func (x *TypeName) SetUnionType(value TypeUri) *TypeName {
     x.UnionType = &value
     return x
 }
 
-func (x *TypeName) SetExceptionType(value TypeURI) *TypeName {
+func (x *TypeName) SetExceptionType(value TypeUri) *TypeName {
     x.ExceptionType = &value
     return x
 }
@@ -1010,7 +1010,7 @@ result := Void(enumResult)
 }
 
 func (x *TypeName) readField10(p thrift.Protocol) error {  // EnumType
-    result := *NewTypeURI()
+    result := *NewTypeUri()
 err := result.Read(p)
 if err != nil {
     return err
@@ -1021,7 +1021,7 @@ if err != nil {
 }
 
 func (x *TypeName) readField17(p thrift.Protocol) error {  // TypedefType
-    result := *NewTypeURI()
+    result := *NewTypeUri()
 err := result.Read(p)
 if err != nil {
     return err
@@ -1032,7 +1032,7 @@ if err != nil {
 }
 
 func (x *TypeName) readField11(p thrift.Protocol) error {  // StructType
-    result := *NewTypeURI()
+    result := *NewTypeUri()
 err := result.Read(p)
 if err != nil {
     return err
@@ -1043,7 +1043,7 @@ if err != nil {
 }
 
 func (x *TypeName) readField12(p thrift.Protocol) error {  // UnionType
-    result := *NewTypeURI()
+    result := *NewTypeUri()
 err := result.Read(p)
 if err != nil {
     return err
@@ -1054,7 +1054,7 @@ if err != nil {
 }
 
 func (x *TypeName) readField13(p thrift.Protocol) error {  // ExceptionType
-    result := *NewTypeURI()
+    result := *NewTypeUri()
 err := result.Read(p)
 if err != nil {
     return err

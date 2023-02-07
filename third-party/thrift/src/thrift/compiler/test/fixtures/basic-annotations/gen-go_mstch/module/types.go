@@ -362,7 +362,7 @@ type MyStruct struct {
     MyEnum MyEnum `thrift:"my_enum,7" json:"my_enum" db:"my_enum"`
     CppTypeAnnotation []string `thrift:"cpp_type_annotation,8" json:"cpp_type_annotation" db:"cpp_type_annotation"`
     MyUnion *MyUnion `thrift:"my_union,9" json:"my_union" db:"my_union"`
-    MyId MyId `thrift:"my_id,10" json:"my_id" db:"my_id"`
+    MyID MyId `thrift:"my_id,10" json:"my_id" db:"my_id"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
@@ -406,8 +406,8 @@ func (x *MyStruct) GetMyUnion() *MyUnion {
     return x.MyUnion
 }
 
-func (x *MyStruct) GetMyId() MyId {
-    return x.MyId
+func (x *MyStruct) GetMyID() MyId {
+    return x.MyID
 }
 
 func (x *MyStruct) SetMajor(value int64) *MyStruct {
@@ -455,8 +455,8 @@ func (x *MyStruct) SetMyUnion(value MyUnion) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetMyId(value MyId) *MyStruct {
-    x.MyId = value
+func (x *MyStruct) SetMyID(value MyId) *MyStruct {
+    x.MyID = value
     return x
 }
 
@@ -639,12 +639,12 @@ func (x *MyStruct) writeField9(p thrift.Protocol) error {  // MyUnion
     return nil
 }
 
-func (x *MyStruct) writeField10(p thrift.Protocol) error {  // MyId
+func (x *MyStruct) writeField10(p thrift.Protocol) error {  // MyID
     if err := p.WriteFieldBegin("my_id", thrift.I16, 10); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyId()
+    item := x.GetMyID()
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -765,13 +765,13 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) readField10(p thrift.Protocol) error {  // MyId
+func (x *MyStruct) readField10(p thrift.Protocol) error {  // MyID
     result, err := p.ReadI16()
 if err != nil {
     return err
 }
 
-    x.SetMyId(result)
+    x.SetMyID(result)
     return nil
 }
 
@@ -832,8 +832,8 @@ func (x *MyStructBuilder) MyUnion(value *MyUnion) *MyStructBuilder {
     return x
 }
 
-func (x *MyStructBuilder) MyId(value MyId) *MyStructBuilder {
-    x.obj.MyId = value
+func (x *MyStructBuilder) MyID(value MyId) *MyStructBuilder {
+    x.obj.MyID = value
     return x
 }
 

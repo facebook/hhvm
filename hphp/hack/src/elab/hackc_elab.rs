@@ -45,6 +45,7 @@ pub struct FileOpts {
 }
 
 mod elab_files {
+    use std::io::Write;
     use std::path::Path;
 
     use anyhow::Result;
@@ -86,7 +87,9 @@ mod elab_files {
         let top_down = NoPass::default();
         let bottom_up = NoPass::default();
         let diff = elab::elab_one_file(path, &top_down, &bottom_up)?;
-        println!("diff ({path:#?}):\n{diff}");
+
+        print!("diff:\n{diff}");
+        std::io::stdout().flush().unwrap();
 
         Ok(())
     }

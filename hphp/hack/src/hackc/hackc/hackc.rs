@@ -9,6 +9,7 @@ mod cmp_unit;
 mod compile;
 mod crc;
 mod decls;
+mod elaborate;
 mod expr_trees;
 mod facts;
 mod infer;
@@ -115,6 +116,9 @@ enum Command {
 
     /// Compile one Hack source file or a list of files to HHAS
     Compile(compile::Opts),
+
+    /// Elaborate one Hack source file or a list of files.
+    Elaborate(elaborate::Opts),
 
     /// Compile Hack source files or directories and produce a single CRC per
     /// input file.
@@ -278,6 +282,7 @@ fn main() -> Result<()> {
         Some(Command::Parse(parse_opts)) => parse::run(parse_opts),
         Some(Command::ParseBench(bench_opts)) => parse::run_bench_command(bench_opts),
         Some(Command::Verify(opts)) => verify::run(opts),
+        Some(Command::Elaborate(opts)) => elaborate::run(opts),
 
         // Expr trees
         Some(Command::DesugarExprTrees(et_opts)) => expr_trees::desugar_expr_trees(&opts, et_opts),

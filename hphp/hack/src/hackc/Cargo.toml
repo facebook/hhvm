@@ -64,4 +64,5 @@ strum_macros = "0.21"
 tempdir = "0.3"
 textual = { path = "ir/conversions/textual/cargo/textual" }
 thiserror = "1.0.36"
+transform = { path = "../elab/transform/cargo/transform" }
 ty = { path = "../hackrs/ty/cargo/ty" }

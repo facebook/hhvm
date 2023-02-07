@@ -1,1 +1,327 @@
-diff:
+Program(
+    [
+        Stmt(
+            Stmt(
+                Pos(
+                    Tiny {
+                        file: RelativePath {
+                            prefix: Dummy,
+                            path: "tuple_hints.php",
+                        },
+                        span: PosSpanTiny { from 1:0 to 1:4 },
+                    },
+                ),
+                Markup(
+                    (
+                        Pos(
+                            Tiny {
+                                file: RelativePath {
+                                    prefix: Dummy,
+                                    path: "tuple_hints.php",
+                                },
+                                span: PosSpanTiny { from 1:0 to 1:4 },
+                            },
+                        ),
+                        "",
+                    ),
+                ),
+            ),
+        ),
+        Fun(
+            FunDef {
+                namespace: Env {
+                    ns_uses: {
+                        "Rx": "HH\\Rx",
+                    },
+                    class_uses: {
+                        "AnyArray": "HH\\AnyArray",
+                        "AsyncFunctionWaitHandle": "HH\\AsyncFunctionWaitHandle",
+                        "AsyncGenerator": "HH\\AsyncGenerator",
+                        "AsyncGeneratorWaitHandle": "HH\\AsyncGeneratorWaitHandle",
+                        "AsyncIterator": "HH\\AsyncIterator",
+                        "AsyncKeyedIterator": "HH\\AsyncKeyedIterator",
+                        "AwaitAllWaitHandle": "HH\\AwaitAllWaitHandle",
+                        "Awaitable": "HH\\Awaitable",
+                        "Collection": "HH\\Collection",
+                        "ConditionWaitHandle": "HH\\ConditionWaitHandle",
+                        "Container": "HH\\Container",
+                        "ExternalThreadEventWaitHandle": "HH\\ExternalThreadEventWaitHandle",
+                        "IMemoizeParam": "HH\\IMemoizeParam",
+                        "ImmMap": "HH\\ImmMap",
+                        "ImmSet": "HH\\ImmSet",
+                        "ImmVector": "HH\\ImmVector",
+                        "InvariantException": "HH\\InvariantException",
+                        "Iterable": "HH\\Iterable",
+                        "Iterator": "HH\\Iterator",
+                        "KeyedContainer": "HH\\KeyedContainer",
+                        "KeyedIterable": "HH\\KeyedIterable",
+                        "KeyedIterator": "HH\\KeyedIterator",
+                        "KeyedTraversable": "HH\\KeyedTraversable",
+                        "Map": "HH\\Map",
+                        "ObjprofObjectStats": "HH\\ObjprofObjectStats",
+                        "ObjprofPathsStats": "HH\\ObjprofPathsStats",
+                        "ObjprofStringStats": "HH\\ObjprofStringStats",
+                        "Pair": "HH\\Pair",
+                        "RescheduleWaitHandle": "HH\\RescheduleWaitHandle",
+                        "ResumableWaitHandle": "HH\\ResumableWaitHandle",
+                        "Set": "HH\\Set",
+                        "Shapes": "HH\\Shapes",
+                        "SleepWaitHandle": "HH\\SleepWaitHandle",
+                        "StaticWaitHandle": "HH\\StaticWaitHandle",
+                        "Traversable": "HH\\Traversable",
+                        "TypeStructure": "HH\\TypeStructure",
+                        "TypeStructureKind": "HH\\TypeStructureKind",
+                        "UNSAFESingletonMemoizeParam": "HH\\UNSAFESingletonMemoizeParam",
+                        "Vector": "HH\\Vector",
+                        "WaitableWaitHandle": "HH\\WaitableWaitHandle",
+                        "XenonSample": "HH\\XenonSample",
+                        "classname": "HH\\classname",
+                        "darray": "HH\\darray",
+                        "dict": "HH\\dict",
+                        "keyset": "HH\\keyset",
+                        "supportdyn": "HH\\supportdyn",
+                        "typename": "HH\\typename",
+                        "varray": "HH\\varray",
+                        "varray_or_darray": "HH\\varray_or_darray",
+                        "vec": "HH\\vec",
+                        "vec_or_dict": "HH\\vec_or_dict",
+                    },
+                    fun_uses: {
+                        "asio_get_current_context_idx": "HH\\asio_get_current_context_idx",
+                        "asio_get_running": "HH\\asio_get_running",
+                        "asio_get_running_in_context": "HH\\asio_get_running_in_context",
+                        "class_meth": "HH\\class_meth",
+                        "darray": "HH\\darray",
+                        "dict": "HH\\dict",
+                        "fun": "HH\\fun",
+                        "heapgraph_create": "HH\\heapgraph_create",
+                        "heapgraph_dfs_edges": "HH\\heapgraph_dfs_edges",
+                        "heapgraph_dfs_nodes": "HH\\heapgraph_dfs_nodes",
+                        "heapgraph_edge": "HH\\heapgraph_edge",
+                        "heapgraph_foreach_edge": "HH\\heapgraph_foreach_edge",
+                        "heapgraph_foreach_node": "HH\\heapgraph_foreach_node",
+                        "heapgraph_foreach_root": "HH\\heapgraph_foreach_root",
+                        "heapgraph_node": "HH\\heapgraph_node",
+                        "heapgraph_node_in_edges": "HH\\heapgraph_node_in_edges",
+                        "heapgraph_node_out_edges": "HH\\heapgraph_node_out_edges",
+                        "heapgraph_stats": "HH\\heapgraph_stats",
+                        "idx": "HH\\idx",
+                        "idx_readonly": "HH\\idx_readonly",
+                        "inst_meth": "HH\\inst_meth",
+                        "invariant": "HH\\invariant",
+                        "invariant_callback_register": "HH\\invariant_callback_register",
+                        "invariant_violation": "HH\\invariant_violation",
+                        "is_darray": "HH\\is_darray",
+                        "is_dict": "HH\\is_dict",
+                        "is_keyset": "HH\\is_keyset",
+                        "is_varray": "HH\\is_varray",
+                        "is_vec": "HH\\is_vec",
+                        "keyset": "HH\\keyset",
+                        "meth_caller": "HH\\meth_caller",
+                        "objprof_get_data": "HH\\objprof_get_data",
+                        "objprof_get_paths": "HH\\objprof_get_paths",
+                        "server_warmup_status": "HH\\server_warmup_status",
+                        "thread_mark_stack": "HH\\thread_mark_stack",
+                        "thread_memory_stats": "HH\\thread_memory_stats",
+                        "type_structure": "HH\\type_structure",
+                        "type_structure_for_alias": "HH\\type_structure_for_alias",
+                        "varray": "HH\\varray",
+                        "vec": "HH\\vec",
+                        "xenon_get_data": "HH\\xenon_get_data",
+                    },
+                    const_uses: {},
+                    name: None,
+                    auto_ns_map: [],
+                    is_codegen: false,
+                    disable_xhp_element_mangling: false,
+                },
+                file_attributes: [],
+                mode: Mstrict,
+                name: Id(
+                    Pos(
+                        Tiny {
+                            file: RelativePath {
+                                prefix: Dummy,
+                                path: "tuple_hints.php",
+                            },
+                            span: PosSpanTiny { from 12:9 to 12:12 },
+                        },
+                    ),
+                    "foo",
+                ),
+                fun: Fun_ {
+                    span: Pos(
+                        Tiny {
+                            file: RelativePath {
+                                prefix: Dummy,
+                                path: "tuple_hints.php",
+                            },
+                            span: PosSpanTiny { from 12:0 to 12:36 },
+                        },
+                    ),
+                    readonly_this: None,
+                    annotation: (),
+                    readonly_ret: None,
+                    ret: TypeHint(
+                        (),
+                        Some(
+                            Hint(
+                                Pos(
+                                    Tiny {
+                                        file: RelativePath {
+                                            prefix: Dummy,
+                                            path: "tuple_hints.php",
+                                        },
+                                        span: PosSpanTiny { from 12:29 to 12:33 },
+                                    },
+                                ),
+                                Happly(
+                                    Id(
+                                        Pos(
+                                            Tiny {
+                                                file: RelativePath {
+                                                    prefix: Dummy,
+                                                    path: "tuple_hints.php",
+                                                },
+                                                span: PosSpanTiny { from 12:29 to 12:33 },
+                                            },
+                                        ),
+                                        "void",
+                                    ),
+                                    [],
+                                ),
+                            ),
+                        ),
+                    ),
+                    tparams: [],
+                    where_constraints: [],
+                    params: [
+                        FunParam {
+                            annotation: (),
+                            type_hint: TypeHint(
+                                (),
+                                Some(
+                                    Hint(
+                                        Pos(
+                                            Tiny {
+                                                file: RelativePath {
+                                                    prefix: Dummy,
+                                                    path: "tuple_hints.php",
+                                                },
+                                                span: PosSpanTiny { from 12:13 to 12:23 },
+                                            },
+                                        ),
+                                        Happly(
+                                            Id(
+                                                Pos(
+                                                    Tiny {
+                                                        file: RelativePath {
+                                                            prefix: Dummy,
+                                                            path: "tuple_hints.php",
+                                                        },
+                                                        span: PosSpanTiny { from 12:13 to 12:18 },
+                                                    },
+                                                ),
+                                                "tuple",
+                                            ),
+                                            [
+                                                Hint(
+                                                    Pos(
+                                                        Tiny {
+                                                            file: RelativePath {
+                                                                prefix: Dummy,
+                                                                path: "tuple_hints.php",
+                                                            },
+                                                            span: PosSpanTiny { from 12:19 to 12:22 },
+                                                        },
+                                                    ),
+                                                    Happly(
+                                                        Id(
+                                                            Pos(
+                                                                Tiny {
+                                                                    file: RelativePath {
+                                                                        prefix: Dummy,
+                                                                        path: "tuple_hints.php",
+                                                                    },
+                                                                    span: PosSpanTiny { from 12:19 to 12:22 },
+                                                                },
+                                                            ),
+                                                            "int",
+                                                        ),
+                                                        [],
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            is_variadic: false,
+                            pos: Pos(
+                                Tiny {
+                                    file: RelativePath {
+                                        prefix: Dummy,
+                                        path: "tuple_hints.php",
+                                    },
+                                    span: PosSpanTiny { from 12:24 to 12:26 },
+                                },
+                            ),
+                            name: "$x",
+                            expr: None,
+                            readonly: None,
+                            callconv: Pnormal,
+                            user_attributes: [],
+                            visibility: None,
+                        },
+                    ],
+                    ctxs: None,
+                    unsafe_ctxs: None,
+                    body: FuncBody {
+                        fb_ast: [
+                            Stmt(
+                                Pos(
+                                    Tiny {
+                                        file: RelativePath {
+                                            prefix: Dummy,
+                                            path: "",
+                                        },
+                                        span: PosSpanTiny { from 0:18446744073709551615 to 0:18446744073709551615 },
+                                    },
+                                ),
+                                Noop,
+                            ),
+                        ],
+                    },
+                    fun_kind: FSync,
+                    user_attributes: [],
+                    external: false,
+                    doc_comment: Some(
+                        (
+                            Pos(
+                                Small {
+                                    file: RelativePath {
+                                        prefix: Dummy,
+                                        path: "tuple_hints.php",
+                                    },
+                                    start: FilePosSmall {
+                                        bol: 5,
+                                        line: 2,
+                                        column: 0,
+                                    },
+                                    end: FilePosSmall {
+                                        bol: 208,
+                                        line: 10,
+                                        column: 3,
+                                    },
+                                },
+                            ),
+                            "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */",
+                        ),
+                    ),
+                },
+                internal: false,
+                module: None,
+            },
+        ),
+    ],
+)

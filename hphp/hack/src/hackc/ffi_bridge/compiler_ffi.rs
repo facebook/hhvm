@@ -217,14 +217,15 @@ pub mod compile_ffi {
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////
 // Opaque to C++, so we don't need repr(C).
-
 pub struct DeclsHolder {
     _arena: bumpalo::Bump,
     parsed_file: ParsedFile<'static>,
 }
 
+// This is accessed in test_ffi.cpp; hence repr(C)
+#[derive(Debug)]
+#[repr(C)]
 pub struct UnitWrapper(Unit<'static>, bumpalo::Bump);
 
 ///////////////////////////////////////////////////////////////////////////////////

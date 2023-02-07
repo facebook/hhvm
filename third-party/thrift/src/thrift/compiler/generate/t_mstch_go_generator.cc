@@ -622,9 +622,9 @@ void t_mstch_go_generator::set_go_package_aliases() {
     auto package_base_name =
         go::get_go_package_base_name(include, data_.package_override);
     auto unique_package_name = go::make_unique_name(
-        data_.go_package_name_collisions, package_base_name);
+        data_.go_package_name_collisions, go::munge_arg(package_base_name));
 
-    data_.go_package_map.emplace(package, go::munge_arg(unique_package_name));
+    data_.go_package_map.emplace(package, unique_package_name);
   }
 }
 } // namespace

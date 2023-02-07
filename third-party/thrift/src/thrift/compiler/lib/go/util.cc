@@ -24,6 +24,49 @@ namespace thrift {
 namespace compiler {
 namespace go {
 
+// keywords
+// https://go.dev/ref/spec#Keywords
+static const std::set<std::string> go_keywords = {
+    "break",  "case",   "chan",        "const", "continue", "default", "defer",
+    "else",   "error",  "fallthrough", "for",   "func",     "go",      "goto",
+    "if",     "import", "interface",   "map",   "package",  "range",   "return",
+    "select", "struct", "switch",      "type",  "var",
+};
+// types
+// https://go.dev/ref/spec#Types
+static const std::set<std::string> go_types = {
+    "complex128",
+    "complex64",
+    "float32",
+    "float64",
+    "int",
+    "int16",
+    "int32",
+    "int64",
+    "int8",
+    "rune",
+    "uint",
+    "uint16",
+    "uint32",
+    "uint64",
+    "uintptr",
+    "uint8",
+};
+// predelcared identifiers
+// https://go.dev/ref/spec#Predeclared_identifiers
+static const std::set<std::string> go_predeclared = {
+    "any",   "append", "cap",     "close", "complex", "copy", "delete",
+    "false", "imag",   "iota",    "len",   "make",    "new",  "nil",
+    "panic", "print",  "println", "real",  "recover", "true",
+};
+static const std::set<std::string> go_reserved_words = []() {
+  std::set<std::string> set;
+  set.insert(go_keywords.cbegin(), go_keywords.cend());
+  set.insert(go_types.cbegin(), go_types.cend());
+  set.insert(go_predeclared.cbegin(), go_predeclared.cend());
+  return set;
+}();
+
 std::string get_go_package_name(
     const t_program* program, std::string name_override) {
   if (!name_override.empty()) {
@@ -142,65 +185,18 @@ std::string munge_ident(const std::string& ident, bool exported, bool compat) {
 }
 
 std::string munge_arg(const std::string& ident) {
-  // keywords
-  // https://go.dev/ref/spec#Keywords
-  static const std::set<std::string> go_keywords = {
-      "break",   "case",  "chan",   "const",       "continue",  "default",
-      "defer",   "else",  "error",  "fallthrough", "for",       "func",
-      "go",      "goto",  "if",     "import",      "interface", "map",
-      "package", "range", "return", "select",      "struct",    "switch",
-      "type",    "var",
-  };
-  // types
-  // https://go.dev/ref/spec#Types
-  static const std::set<std::string> go_types = {
-      "complex128",
-      "complex64",
-      "float32",
-      "float64",
-      "int",
-      "int16",
-      "int32",
-      "int64",
-      "int8",
-      "rune",
-      "uint",
-      "uint16",
-      "uint32",
-      "uint64",
-      "uintptr",
-      "uiny8",
-  };
-  // predelcared identifiers
-  // https://go.dev/ref/spec#Predeclared_identifiers
-  static const std::set<std::string> go_predeclared = {
-      "any",   "append", "cap",     "close", "complex", "copy", "delete",
-      "false", "imag",   "iota",    "len",   "make",    "new",  "nil",
-      "panic", "print",  "println", "real",  "recover", "true",
-  };
-  static const std::set<std::string> go_reserved_words = []() {
-    std::set<std::string> set;
-    set.insert(go_keywords.cbegin(), go_keywords.cend());
-    set.insert(go_types.cbegin(), go_types.cend());
-    set.insert(go_predeclared.cbegin(), go_predeclared.cend());
-    return set;
-  }();
-
   // we should never get an empty identifier
   assert(!ident.empty());
 
   // fast path / reserved name check if all lower
-  bool all_lower = true;
-  for (auto c : ident) {
-    if (!islower(c)) {
-      all_lower = false;
-    }
-  }
+  bool all_lower = std::all_of(ident.begin(), ident.end(), [](unsigned char c) {
+    return std::islower(c);
+  });
 
   if (all_lower) {
     // append an _ if identifier make conflict with a reserved go word
     // (keywords, types, predelcared identifiers)
-    if (go_reserved_words.count(ident) > 0) {
+    if (is_go_reserved_word(ident)) {
       return ident + "_";
     } else {
       return ident;
@@ -263,6 +259,10 @@ std::string make_unique_name(
   // i.e. package or program with the same name - an incrementing numeric
   // suffix is added.
   auto unique_name = name;
+  if (is_go_reserved_word(name)) {
+    // Emplaces only if not already in map.
+    name_collisions.try_emplace(name, 0);
+  }
   auto iter = name_collisions.find(name);
   if (iter == name_collisions.end()) {
     name_collisions.emplace(name, 0);
@@ -276,6 +276,10 @@ std::string make_unique_name(
 
 bool is_func_go_supported(const t_function* func) {
   return !func->returns_stream() && !func->returns_sink();
+}
+
+bool is_go_reserved_word(const std::string& value) {
+  return go_reserved_words.count(value) > 0;
 }
 
 } // namespace go

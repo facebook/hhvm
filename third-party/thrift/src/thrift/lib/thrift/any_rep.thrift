@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/api.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/type.thrift"
 include "thrift/lib/thrift/standard.thrift"

@@ -5,7 +5,7 @@
 use hash::HashSet;
 use oxidized::aast_defs::Tparam;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Context {
     tparams: HashSet<String>,
 }

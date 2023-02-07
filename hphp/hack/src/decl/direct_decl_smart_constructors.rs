@@ -2367,19 +2367,24 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         }
     }
 
-    fn ctx_generic_for_generic_taccess_inner(&self, ty: &Ty<'_>, cst: &str) -> std::string::String {
+    fn ctx_generic_for_generic_taccess_inner(ty: &Ty<'_>, cst: &str) -> std::string::String {
         let left = match ty {
             Ty(_, Ty_::Tgeneric((name, &[]))) => name.to_string(),
             Ty(_, Ty_::Taccess(&TaccessType(ty, cst))) => {
-                self.ctx_generic_for_generic_taccess_inner(ty, cst.1)
+                Self::ctx_generic_for_generic_taccess_inner(ty, cst.1)
             }
             _ => panic!("Unexpected element in Taccess"),
         };
         format!("{}::{}", left, cst)
     }
+
     fn ctx_generic_for_generic_taccess(&self, ty: &Ty<'_>, cst: &str) -> &'a str {
-        bumpalo::format!(in self.arena, "T/[{}]", self.ctx_generic_for_generic_taccess_inner(ty, cst))
-            .into_bump_str()
+        bumpalo::format!(
+            in self.arena,
+            "T/[{}]",
+            Self::ctx_generic_for_generic_taccess_inner(ty, cst)
+        )
+        .into_bump_str()
     }
 
     // For a polymorphic context with form `ctx $f` (represented here as

@@ -813,6 +813,11 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                    uint64_t offset,
                    MockQuicSocket::ByteEventCallback* cb)
                 -> folly::Expected<folly::Unit, LocalErrorCode> {
+              auto& connState = streams_[kConnectionStreamId];
+              ERROR_IF(connState.writeState == CLOSED,
+                       "registerByteEventCallback on CLOSED connection",
+                       return folly::makeUnexpected(
+                           quic::LocalErrorCode::INTERNAL_ERROR));
               checkNotReadOnlyStream(id);
               auto it = streams_.find(id);
               if (it == streams_.end()) {

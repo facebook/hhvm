@@ -1464,27 +1464,35 @@ class local_types =
 
 let compute_complete_local ctx tast =
   let (locals, id_at_cursor) = (new local_types)#get_types ctx tast in
-  let replace_pos =
-    replace_pos_of_id (Option.value id_at_cursor ~default:(Pos.none, ""))
+  let id_at_cursor = Option.value id_at_cursor ~default:(Pos.none, "") in
+  let replace_pos = replace_pos_of_id id_at_cursor in
+
+  let id_prefix =
+    if is_auto_complete (snd id_at_cursor) then
+      strip_suffix (snd id_at_cursor)
+    else
+      ""
   in
+
   Local_id.Map.iter
     (fun id (func_details, pos) ->
       let kind = SearchUtils.SI_LocalVariable in
       let name = Local_id.get_name id in
-      let complete =
-        {
-          res_pos = pos;
-          res_replace_pos = replace_pos;
-          res_base_class = None;
-          res_ty = kind_to_string kind;
-          res_name = name;
-          res_fullname = name;
-          res_kind = kind;
-          func_details;
-          res_documentation = None;
-        }
-      in
-      add_res complete)
+      if String.is_prefix name ~prefix:id_prefix then
+        let complete =
+          {
+            res_pos = pos;
+            res_replace_pos = replace_pos;
+            res_base_class = None;
+            res_ty = kind_to_string kind;
+            res_name = name;
+            res_fullname = name;
+            res_kind = kind;
+            func_details;
+            res_documentation = None;
+          }
+        in
+        add_res complete)
     locals
 
 let reset () =

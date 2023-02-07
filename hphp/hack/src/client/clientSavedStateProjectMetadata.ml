@@ -6,17 +6,41 @@
  *
  *)
 
-type env = {
-  root: Path.t;
-  ignore_hh_version: bool;
-  saved_state_ignore_hhconfig: bool;
-  config: (string * string) list;
-}
-
 exception GetProjectMetadataError of string
 
-let main (env : env) (config : ServerLocalConfig.t) : Exit_status.t Lwt.t =
-  let { root; ignore_hh_version; saved_state_ignore_hhconfig = _; config = _ } =
+let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
+    Exit_status.t Lwt.t =
+  let {
+    ClientEnv.root;
+    ignore_hh_version;
+    saved_state_ignore_hhconfig = _;
+    config = _;
+    autostart = _;
+    custom_hhi_path = _;
+    custom_telemetry_data = _;
+    error_format = _;
+    force_dormant_start = _;
+    from = _;
+    show_spinner = _;
+    gen_saved_ignore_type_errors = _;
+    paths = _;
+    log_inference_constraints = _;
+    max_errors = _;
+    mode = _;
+    no_load = _;
+    save_64bit = _;
+    save_human_readable_64bit_dep_map = _;
+    output_json = _;
+    prechecked = _;
+    mini_state = _;
+    remote = _;
+    sort_results = _;
+    stdin_name = _;
+    deadline = _;
+    watchman_debug_logging = _;
+    allow_non_opt_build = _;
+    desc = _;
+  } =
     env
   in
   let%lwt result =

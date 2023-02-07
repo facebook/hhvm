@@ -13,7 +13,7 @@ type command =
   | CStop of ClientStop.env
   | CRestart of ClientStart.env
   | CLsp of ClientLsp.args
-  | CSavedStateProjectMetadata of ClientSavedStateProjectMetadata.env
+  | CSavedStateProjectMetadata of ClientEnv.client_check_env
   | CDownloadSavedState of ClientDownloadSavedState.env
   | CRage of ClientRage.env
 
@@ -40,3 +40,14 @@ let get_custom_telemetry_data command =
   | CDownloadSavedState _
   | CRage _ ->
     []
+
+let command_name = function
+  | CKCheck -> "check"
+  | CKStart -> "start"
+  | CKStop -> "stop"
+  | CKRestart -> "restart"
+  | CKLsp -> "lsp"
+  | CKSavedStateProjectMetadata -> "saved-state-project-metadata"
+  | CKDownloadSavedState -> "download-saved-state"
+  | CKRage -> "rage"
+  | CKNone -> ""

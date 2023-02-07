@@ -153,7 +153,7 @@ let parse_check_args cmd =
   let version = ref false in
   let watchman_debug_logging = ref false in
   let allow_non_opt_build = ref false in
-  let desc = ref "check" in
+  let desc = ref (ClientCommand.command_name cmd) in
   (* custom behaviors *)
   let current_option = ref None in
   let set_from x () = from := x in
@@ -192,7 +192,17 @@ let parse_check_args cmd =
         ^^ "\tCOMMAND\t\tcheck\n"
         ^^ "\tWWW-ROOT\tCurrent directory\n\nCheck command options:\n")
         Sys.argv.(0)
-    | _ -> failwith "No other keywords should make it here"
+    | CKSavedStateProjectMetadata ->
+      Printf.sprintf
+        "Usage: %s saved-state-project-metadata [OPTION]... [WWW-ROOT]\nOutput the project metadata for the current saved state\n\nWWW-ROOT is assumed to be current directory if unspecified\n"
+        Sys.argv.(0)
+    | CKDownloadSavedState
+    | CKLsp
+    | CKRage
+    | CKRestart
+    | CKStart
+    | CKStop ->
+      failwith "No other keywords should make it here"
   in
   let options =
     [
@@ -778,7 +788,9 @@ let parse_check_args cmd =
     List.map options ~f:(fun (option, spec, text) ->
         (option, modify_spec ~option spec, text))
   in
-  let args = parse_without_command options usage "check" in
+  let args =
+    parse_without_command options usage (ClientCommand.command_name cmd)
+  in
   if !version then (
     if !output_json then
       ServerArgs.print_json_version ()
@@ -844,43 +856,42 @@ let parse_check_args cmd =
     if String.equal !from "emacs" then
       Printf.fprintf stdout "-*- mode: compilation -*-\n%!"
   in
-  CCheck
-    {
-      autostart = !autostart;
-      config = !config;
-      custom_hhi_path = !custom_hhi_path;
-      custom_telemetry_data = !custom_telemetry_data;
-      error_format = !error_format;
-      force_dormant_start = !force_dormant_start;
-      from = !from;
-      show_spinner = Option.value ~default:(String.equal !from "") !show_spinner;
-      gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
-      ignore_hh_version = !ignore_hh_version;
-      saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
-      paths;
-      log_inference_constraints = !log_inference_constraints;
-      max_errors = !max_errors;
-      mode;
-      no_load =
-        (!no_load
-        ||
-        match mode with
-        | MODE_REMOVE_DEAD_FIXMES _ -> true
-        | _ -> false);
-      save_64bit = !save_64bit;
-      save_human_readable_64bit_dep_map = !save_human_readable_64bit_dep_map;
-      output_json = !output_json;
-      prechecked = !prechecked;
-      mini_state = !mini_state;
-      remote = !remote;
-      root;
-      sort_results = !sort_results;
-      stdin_name = !stdin_name;
-      deadline = Option.map ~f:(fun t -> Unix.time () +. t) !timeout;
-      watchman_debug_logging = !watchman_debug_logging;
-      allow_non_opt_build = !allow_non_opt_build;
-      desc = !desc;
-    }
+  {
+    autostart = !autostart;
+    config = !config;
+    custom_hhi_path = !custom_hhi_path;
+    custom_telemetry_data = !custom_telemetry_data;
+    error_format = !error_format;
+    force_dormant_start = !force_dormant_start;
+    from = !from;
+    show_spinner = Option.value ~default:(String.equal !from "") !show_spinner;
+    gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
+    ignore_hh_version = !ignore_hh_version;
+    saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
+    paths;
+    log_inference_constraints = !log_inference_constraints;
+    max_errors = !max_errors;
+    mode;
+    no_load =
+      (!no_load
+      ||
+      match mode with
+      | MODE_REMOVE_DEAD_FIXMES _ -> true
+      | _ -> false);
+    save_64bit = !save_64bit;
+    save_human_readable_64bit_dep_map = !save_human_readable_64bit_dep_map;
+    output_json = !output_json;
+    prechecked = !prechecked;
+    mini_state = !mini_state;
+    remote = !remote;
+    root;
+    sort_results = !sort_results;
+    stdin_name = !stdin_name;
+    deadline = Option.map ~f:(fun t -> Unix.time () +. t) !timeout;
+    watchman_debug_logging = !watchman_debug_logging;
+    allow_non_opt_build = !allow_non_opt_build;
+    desc = !desc;
+  }
 
 let parse_start_env command =
   let usage =
@@ -966,43 +977,7 @@ let parse_start_env command =
   }
 
 let parse_saved_state_project_metadata_args () : command =
-  let command = "saved-state-project-metadata" in
-  let usage =
-    Printf.sprintf
-      "Usage: %s %s [OPTION]... [WWW-ROOT]\nOutput the project metadata for the current saved state\n\nWWW-ROOT is assumed to be current directory if unspecified\n"
-      command
-      Sys.argv.(0)
-  in
-  let ignore_hh_version = ref false in
-  let saved_state_ignore_hhconfig = ref false in
-  let config = ref [] in
-  let options =
-    [
-      (* Please keep these sorted in the alphabetical order *)
-      Common_argspecs.config config;
-      Common_argspecs.ignore_hh_version ignore_hh_version;
-      Common_argspecs.saved_state_ignore_hhconfig saved_state_ignore_hhconfig;
-      (* Please keep these sorted in the alphabetical order *)
-    ]
-  in
-  let args = parse_without_command options usage command in
-  let root =
-    match args with
-    | [] -> Wwwroot.get None
-    | [x] -> Wwwroot.get (Some x)
-    | _ ->
-      Printf.fprintf
-        stderr
-        "Error: please provide at most one www directory\n%!";
-      exit 1
-  in
-  CSavedStateProjectMetadata
-    {
-      ClientSavedStateProjectMetadata.config = !config;
-      ignore_hh_version = !ignore_hh_version;
-      saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
-      root;
-    }
+  CSavedStateProjectMetadata (parse_check_args CKSavedStateProjectMetadata)
 
 let parse_start_args () = CStart (parse_start_env "start")
 
@@ -1277,7 +1252,7 @@ invocations of `hh` faster.|}
 
 let parse_args () : command =
   match parse_command () with
-  | (CKNone | CKCheck) as cmd -> parse_check_args cmd
+  | (CKNone | CKCheck) as cmd -> CCheck (parse_check_args cmd)
   | CKStart -> parse_start_args ()
   | CKStop -> parse_stop_args ()
   | CKRestart -> parse_restart_args ()
@@ -1292,7 +1267,7 @@ let root = function
   | CRestart { ClientStart.root; _ }
   | CStop { ClientStop.root; _ }
   | CRage { ClientRage.root; _ }
-  | CSavedStateProjectMetadata { ClientSavedStateProjectMetadata.root; _ }
+  | CSavedStateProjectMetadata { ClientEnv.root; _ }
   | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
     Some root
   | CLsp _ -> None
@@ -1302,7 +1277,7 @@ let config = function
   | CStart { ClientStart.config; _ }
   | CRestart { ClientStart.config; _ }
   | CLsp { ClientLsp.config; _ }
-  | CSavedStateProjectMetadata { ClientSavedStateProjectMetadata.config; _ } ->
+  | CSavedStateProjectMetadata { ClientEnv.config; _ } ->
     Some config
   | CStop _
   | CDownloadSavedState _

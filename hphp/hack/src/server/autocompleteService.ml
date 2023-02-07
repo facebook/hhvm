@@ -20,6 +20,19 @@ module Cls = Decl_provider.Class
 module Syntax = Full_fidelity_positioned_syntax
 module Trivia = Full_fidelity_positioned_trivia
 
+(* When autocompletion is called, we insert an autocomplete token
+   "AUTO332" at the position of the cursor. For example, if the user
+   has this in their IDE, with | showing their cursor:
+
+       $x = new Fo|
+
+   We see the following TAST:
+
+       $x = new FoAUTO332
+
+   This allows us to walk the syntax tree and identify the position
+   of the cursor by looking for names containing "AUTO332". *)
+
 let autocomplete_results : complete_autocomplete_result list ref = ref []
 
 let autocomplete_is_complete : bool ref = ref true
@@ -36,23 +49,6 @@ let add_position_to_results
         | Some pos ->
           Some { name = r.si_fullname; pos; result_type = r.si_kind }
         | None -> None))
-
-(* When autocompletion is called, we insert an autocomplete token
-   "AUTO332" at the position of the cursor. When we walk the TAST, we
-   record the context that we saw a symbol containing this token.
-
-   For example, if the user has this in their IDE, with | showing their
-   cursor:
-
-       $x = new Fo|
-
-   We see the following TAST:
-
-       $x = new FoAUTO332
-
-   and we set argument_global_type to Acnew because we're completing in
-   a class instantiation. *)
-let (argument_global_type : autocomplete_type option ref) = ref None
 
 let max_results = 100
 
@@ -144,13 +140,8 @@ let autocomplete_result_to_json res =
 let add_res (res : complete_autocomplete_result) : unit =
   autocomplete_results := res :: !autocomplete_results
 
-let autocomplete_token ac_type x =
-  if is_auto_complete (snd x) then (
-    argument_global_type := Some ac_type;
-    auto_complete_for_global := snd x
-  )
-
-let autocomplete_id id = autocomplete_token Acid id
+let autocomplete_id (id : Aast.sid) : unit =
+  if is_auto_complete (snd id) then auto_complete_for_global := snd id
 
 let get_class_elt_types ~is_method env class_ cid elts =
   let is_visible (_, elt) =
@@ -213,9 +204,7 @@ let get_func_details_for env ty =
   | _ -> None
 
 let autocomplete_shape_key autocomplete_context env fields id =
-  if is_auto_complete (snd id) then (
-    argument_global_type := Some Acshape_key;
-
+  if is_auto_complete (snd id) then
     (* not the same as `prefix == ""` in namespaces *)
     let have_prefix =
       Pos.length (fst id) > AutocompleteTypes.autocomplete_token_length
@@ -270,7 +259,6 @@ let autocomplete_shape_key autocomplete_context env fields id =
     in
 
     List.iter (TShapeMap.keys fields) ~f:add
-  )
 
 let autocomplete_member ~is_static env class_ cid id =
   (* This is used for instance "$x->|" and static "Class1::|" members. *)
@@ -281,7 +269,7 @@ let autocomplete_member ~is_static env class_ cid id =
       | Some Aast.CIparent -> true
       | _ -> false
     in
-    argument_global_type := Some Acclass_get;
+
     let add kind (name, ty) =
       let res_ty = Tast_env.print_decl_ty env ty in
       let ty = Phase.decl ty in
@@ -372,8 +360,7 @@ let autocomplete_member ~is_static env class_ cid id =
 let autocomplete_xhp_attributes env class_ cid id attrs =
   (* This is used for "<nt:fb:text |" XHP attributes, in which case  *)
   (* class_ is ":nt:fb:text" and its attributes are in tc_props.     *)
-  if is_auto_complete (snd id) && Cls.is_xhp class_ then (
-    argument_global_type := Some Acprop;
+  if is_auto_complete (snd id) && Cls.is_xhp class_ then
     let existing_attr_names : SSet.t =
       attrs
       |> List.filter_map ~f:(fun attr ->
@@ -409,12 +396,9 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
             }
           in
           add_res complete)
-  )
 
 let autocomplete_xhp_bool_value attr_ty id_id env =
   if is_auto_complete (snd id_id) then begin
-    argument_global_type := Some Acprop;
-
     let is_bool_or_bool_option ty : bool =
       let is_bool = function
         | Tprim Tbool -> true
@@ -455,8 +439,6 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
 *)
 let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
   if is_auto_complete (snd id_id) then begin
-    argument_global_type := Some Acprop;
-
     let attr_origin =
       Cls.props cls
       |> List.find ~f:(fun (name, _) -> String.equal (":" ^ attr_name) name)
@@ -511,8 +493,6 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
 *)
 let autocomplete_xhp_enum_class_value attr_ty id_id env =
   if is_auto_complete (snd id_id) then begin
-    argument_global_type := Some Acprop;
-
     let get_class_name ty : string option =
       let get_name : type phase. phase Typing_defs.ty_ -> _ = function
         | Tnewtype (name, _, _) -> Some name
@@ -572,11 +552,6 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
                   add_res complete))
   end
 
-let autocomplete_lvar id =
-  (* This is used for "$|" and "$x = $|" local variables. *)
-  let text = Local_id.get_name (snd id) in
-  if is_auto_complete text then argument_global_type := Some Acprop
-
 let autocomplete_typed_member ~is_static env class_ty cid mid =
   Tast_env.get_class_ids env class_ty
   |> List.iter ~f:(fun cname ->
@@ -629,7 +604,6 @@ let unwrap_enum_memberof (ty : Typing_defs.decl_ty) : Typing_defs.decl_ty =
   | _ -> ty
 
 let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
-  argument_global_type := Some Acclass_get;
   let suggest_members cls =
     List.iter
       (compatible_enum_class_consts env cls expected_ty)
@@ -671,7 +645,6 @@ let rec zip_truncate (xs : 'a list) (ys : 'b list) : ('a * 'b) list =
  *)
 let autocomplete_enum_class_label_call env f args =
   let suggest_members_from_ty env ty pos_labelname expected_ty =
-    argument_global_type := Some Acclass_get;
     match get_node ty with
     | Tclass ((p, enum_name), _, _) when Tast_env.is_enum_class env enum_name ->
       autocomplete_enum_class_label
@@ -724,8 +697,6 @@ let autocomplete_shape_literal_in_call
     (ft : Typing_defs.locl_fun_type)
     (args : (Ast_defs.param_kind * Tast.expr) list) : unit =
   let add_shape_key_result pos key =
-    argument_global_type := Some Acshape_key;
-
     let ty = Tprim Aast_defs.Tstring in
     let reason = Typing_reason.Rwitness pos in
     let ty = mk (reason, ty) in
@@ -785,8 +756,6 @@ let autocomplete_shape_literal_in_call
     (zip_truncate args ft.ft_params)
 
 let add_builtin_attribute_result replace_pos ~doc ~name : unit =
-  argument_global_type := Some Acid;
-
   let complete =
     {
       res_pos = Pos.to_absolute Pos.none;
@@ -848,8 +817,6 @@ let enum_consts env name : string list option =
   | None -> None
 
 let add_enum_const_result env pos replace_pos prefix const_name =
-  argument_global_type := Some Acid;
-
   let ty = Tprim Aast_defs.Tstring in
   let reason = Typing_reason.Rwitness pos in
   let ty = mk (reason, ty) in
@@ -1240,7 +1207,13 @@ let compute_complete_local ctx tast =
         add_res complete)
     locals
 
-let visitor ctx autocomplete_context sienv =
+(* Walk the TAST and append autocomplete results for
+   any syntax that contains AUTO332 in its name. *)
+let visitor
+    (ctx : Provider_context.t)
+    (autocomplete_context : legacy_autocomplete_context)
+    (sienv : si_env)
+    (toplevel_tast : Tast.def list) =
   object (self)
     inherit Tast_visitor.iter as super
 
@@ -1290,8 +1263,9 @@ let visitor ctx autocomplete_context sienv =
       self#complete_global sid Actype;
       super#on_Happly env sid hl
 
-    method! on_Lvar env lid =
-      autocomplete_lvar lid;
+    method! on_Lvar env ((_, name) as lid) =
+      if is_auto_complete (Local_id.get_name name) then
+        compute_complete_local ctx toplevel_tast;
       super#on_Lvar env lid
 
     method! on_Class_get env cid mid prop_or_method =
@@ -1497,7 +1471,6 @@ let visitor ctx autocomplete_context sienv =
 
 let reset () =
   auto_complete_for_global := "";
-  argument_global_type := None;
   autocomplete_results := [];
   autocomplete_is_complete := true
 
@@ -1810,24 +1783,11 @@ let go_ctx
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  (visitor ctx autocomplete_context sienv)#go ctx tast;
+  (visitor ctx autocomplete_context sienv tast)#go ctx tast;
 
   Errors.ignore_ (fun () ->
       let start_time = Unix.gettimeofday () in
-      let completion_type = !argument_global_type in
-      let ( = ) = Option.equal equal_autocomplete_type in
-
-      if completion_type = Some Acprop then compute_complete_local ctx tast;
-
       let complete_autocomplete_results = !autocomplete_results in
-
-      let kind_filter =
-        match completion_type with
-        | Some Acnew -> Some SI_Class
-        | Some Actrait_only -> Some SI_Trait
-        | _ -> None
-      in
-
       let results =
         {
           With_complete_flag.is_complete = !autocomplete_is_complete;
@@ -1839,8 +1799,8 @@ let go_ctx
         ~start_time
         ~query_text:!auto_complete_for_global
         ~max_results
-        ~kind_filter
+        ~kind_filter:None
         ~results:(List.length results.With_complete_flag.value)
-        ~context:completion_type
+        ~context:None
         ~caller:"AutocompleteService.go";
       results)

@@ -8,6 +8,7 @@ edition = "2021"
 path = "../../pass.rs"
 
 [dependencies]
+file_info = { path = "../../../../deps/rust/file_info" }
 hash = { path = "../../../../utils/hash" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

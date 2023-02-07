@@ -5,9 +5,19 @@
 use hash::HashSet;
 use oxidized::aast_defs::Tparam;
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct Context {
     tparams: HashSet<String>,
+    mode: file_info::Mode,
+}
+
+impl Default for Context {
+    fn default() -> Self {
+        Context {
+            tparams: HashSet::default(),
+            mode: file_info::Mode::Mstrict,
+        }
+    }
 }
 
 impl Context {
@@ -25,5 +35,12 @@ impl Context {
     }
     pub fn tparams(&self) -> &HashSet<String> {
         &self.tparams
+    }
+
+    pub fn set_mode(&mut self, mode: file_info::Mode) {
+        self.mode = mode
+    }
+    pub fn mode(&self) -> &file_info::Mode {
+        &self.mode
     }
 }

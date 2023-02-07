@@ -6,7 +6,9 @@
  */
 
 #include "watchman/Client.h"
+#include "watchman/LogConfig.h"
 #include "watchman/Logging.h"
+#include "watchman/thirdparty/jansson/jansson.h"
 #include "watchman/watchman_cmd.h"
 
 using namespace watchman;
@@ -98,6 +100,18 @@ W_CMD_REG(
     cmd_global_log_level,
     CMD_DAEMON | CMD_ALLOW_ANY_USER,
     nullptr);
+
+// discover the log file path of the running watchman
+static UntypedResponse cmd_get_log(Client*, const json_ref& args) {
+  if (json_array_size(args) != 1) {
+    throw ErrorResponse("wrong number of arguments to 'get-log'");
+  }
+
+  UntypedResponse resp;
+  resp.set("log", w_string_to_json(w_string::build(logging::log_name)));
+  return resp;
+}
+W_CMD_REG("get-log", cmd_get_log, CMD_DAEMON | CMD_ALLOW_ANY_USER, NULL);
 
 /* vim:ts=2:sw=2:et:
  */

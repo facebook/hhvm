@@ -121,6 +121,7 @@ class TestCapabilities(WatchmanTestCase.WatchmanTestCase):
             "cmd-find",
             "cmd-flush-subscriptions",
             "cmd-get-config",
+            "cmd-get-log",
             "cmd-get-pid",
             "cmd-get-sockname",
             "cmd-global-log-level",

@@ -10,6 +10,7 @@ use oxidized::aast_defs::Tparam;
 pub struct Context {
     tparams: HashSet<String>,
     mode: file_info::Mode,
+    in_class: bool,
     flags: Flags,
 }
 
@@ -25,6 +26,7 @@ impl Default for Context {
         Context {
             tparams: HashSet::default(),
             mode: file_info::Mode::Mstrict,
+            in_class: false,
             flags: Flags::empty(),
         }
     }
@@ -59,6 +61,14 @@ impl Context {
     }
     pub fn mode(&self) -> &file_info::Mode {
         &self.mode
+    }
+
+    pub fn set_in_class(&mut self, in_class: bool) {
+        self.in_class = in_class;
+    }
+
+    pub fn in_class(&self) -> bool {
+        self.in_class
     }
 
     pub fn soft_as_like(&self) -> bool {

@@ -6,6 +6,7 @@
 
 pub mod context;
 pub mod elab_block;
+pub mod elab_class_id;
 pub mod elab_defs;
 pub mod elab_func_body;
 pub mod elab_happly_hint;

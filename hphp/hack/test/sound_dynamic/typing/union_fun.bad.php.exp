@@ -1,0 +1,30 @@
+File "union_fun.bad.php", line 6, characters 16-17:
+Invalid argument (Typing[4110])
+  File "collections/Set.hhi", line 197, characters 7-27:
+  Expected `dynamic`
+  File "union_fun.bad.php", line 5, characters 8-57:
+  But got `(function(mixed $_): Awaitable<int>)`
+File "union_fun.bad.php", line 6, characters 16-17:
+Invalid argument (Typing[4110])
+  File "collections/Vector.hhi", line 176, characters 29-49:
+  Expected `dynamic`
+  File "union_fun.bad.php", line 5, characters 8-57:
+  But got `(function(mixed $_): Awaitable<int>)`
+File "union_fun.bad.php", line 7, characters 16-66:
+Invalid argument (Typing[4110])
+  File "collections/Set.hhi", line 197, characters 7-27:
+  Expected `dynamic`
+  File "union_fun.bad.php", line 7, characters 16-66:
+  But got `(function(int $_): Awaitable<int>)`
+File "union_fun.bad.php", line 7, characters 16-66:
+Invalid argument (Typing[4110])
+  File "collections/Vector.hhi", line 176, characters 29-49:
+  Expected `dynamic`
+  File "union_fun.bad.php", line 7, characters 16-66:
+  But got `(function(int $_): Awaitable<int>)`
+File "union_fun.bad.php", line 7, characters 16-66:
+Typing error (Typing[4110])
+  File "union_fun.bad.php", line 7, characters 16-66:
+  Expected `dynamic`
+  File "union_fun.bad.php", line 7, characters 16-66:
+  Type `(function(int $_): Awaitable<int>)` is not a subtype of `dynamic` under dynamic-aware subtyping

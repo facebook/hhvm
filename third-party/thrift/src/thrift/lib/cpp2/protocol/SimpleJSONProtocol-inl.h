@@ -18,11 +18,7 @@
 #define THRIFT2_PROTOCOL_TSIMPLEJSONPROTOCOL_TCC_ 1
 
 #include <limits>
-#include <string>
 
-#include <folly/Conv.h>
-#include <folly/dynamic.h>
-#include <folly/json.h>
 #include <thrift/lib/cpp/protocol/TBase64Utils.h>
 
 namespace apache {

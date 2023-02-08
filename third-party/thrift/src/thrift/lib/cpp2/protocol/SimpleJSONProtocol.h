@@ -17,7 +17,7 @@
 #ifndef CPP2_PROTOCOL_TSIMPLEJSONPROTOCOL_H_
 #define CPP2_PROTOCOL_TSIMPLEJSONPROTOCOL_H_ 1
 
-#include <list>
+#include <string>
 
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>

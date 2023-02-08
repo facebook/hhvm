@@ -69,7 +69,7 @@
 
 open Core
 
-class ['s] monoid = ['s] VisitorsRuntime.monoid
+class virtual ['s] monoid = ['s] VisitorsRuntime.monoid
 
 class ['s] addition_monoid = ['s] VisitorsRuntime.addition_monoid
 

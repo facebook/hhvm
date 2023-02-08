@@ -116,6 +116,8 @@ val try_pred : fail:('a -> bool) -> (unit -> 'a) -> (unit -> 'a) -> 'a
 
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 
+val try_with_result : (unit -> 'a) -> ('a -> error -> 'a) -> 'a
+
 (** Return the list of errors caused by the function passed as parameter
     along with its result. *)
 val do_ : ?apply_fixmes:bool -> ?drop_fixmed:bool -> (unit -> 'a) -> t * 'a

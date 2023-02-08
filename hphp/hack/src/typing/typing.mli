@@ -92,4 +92,4 @@ val check_function_dynamically_callable :
   Nast.fun_ ->
   Typing_defs.decl_ty option list ->
   Typing_defs.locl_ty ->
-  unit
+  Tast.fun_param list * Tast.stmt list * Tast.ty

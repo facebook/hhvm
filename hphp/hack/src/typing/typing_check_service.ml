@@ -176,6 +176,7 @@ let process_file
           |> List.filter_map ~f:(type_fun ctx fn)
           |> List.unzip
         in
+        let fun_tasts = List.concat fun_tasts in
         let (class_tasts, class_global_tvenvs) =
           List.map classes ~f:FileInfo.id_name
           |> List.filter_map ~f:(type_class ctx fn)

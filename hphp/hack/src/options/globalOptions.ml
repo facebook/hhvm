@@ -176,6 +176,7 @@ type t = {
   po_disallow_static_constants_in_default_func_args: bool;
   tco_load_hack_64_distc_saved_state: bool;
   tco_ide_should_use_hack_64_distc: bool;
+  tco_tast_under_dynamic: bool;
 }
 [@@deriving eq, show]
 
@@ -315,6 +316,7 @@ let default =
     po_disallow_static_constants_in_default_func_args = false;
     tco_load_hack_64_distc_saved_state = false;
     tco_ide_should_use_hack_64_distc = false;
+    tco_tast_under_dynamic = false;
   }
 
 let make
@@ -485,6 +487,7 @@ let make
       default.tco_load_hack_64_distc_saved_state)
     ?(tco_ide_should_use_hack_64_distc =
       default.tco_ide_should_use_hack_64_distc)
+    ?(tco_tast_under_dynamic = default.tco_tast_under_dynamic)
     () =
   {
     tco_saved_state_loading;
@@ -621,6 +624,7 @@ let make
     po_disallow_static_constants_in_default_func_args;
     tco_load_hack_64_distc_saved_state;
     tco_ide_should_use_hack_64_distc;
+    tco_tast_under_dynamic;
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier

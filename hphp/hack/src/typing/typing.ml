@@ -5094,7 +5094,7 @@ and check_function_dynamically_callable
       params_decl_ty
       f.f_params
   in
-  let (env, _) = bind_params env f.f_ctxs param_tys f.f_params in
+  let (env, dynamic_params) = bind_params env f.f_ctxs param_tys f.f_params in
   let (pos, name) =
     match f_name with
     | Some n -> n
@@ -5107,13 +5107,18 @@ and check_function_dynamically_callable
       f.f_user_attributes
   in
 
-  Errors.try_
-    (fun () ->
-      let (_ : env * Tast.stmt list) =
-        fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind
-      in
-      ())
-    (fun error -> Errors.function_is_not_dynamically_callable name error)
+  let dynamic_body =
+    Errors.try_with_result
+      (fun () ->
+        let (_env, dynamic_body) : env * Tast.stmt list =
+          fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind
+        in
+        dynamic_body)
+      (fun dynamic_body error ->
+        Errors.function_is_not_dynamically_callable name error;
+        dynamic_body)
+  in
+  (dynamic_params, dynamic_body, dynamic_return_ty)
 
 and lambda ~is_anon ~closure_class_name ?expected p env f idl =
   (* This is the function type as declared on the lambda itself.
@@ -5818,14 +5823,19 @@ and closure_make
     Typing_env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
   in
   let (env, tparams) = List.map_env env f.f_tparams ~f:type_param in
-  if sdt_dynamic_check_required then
-    check_function_dynamically_callable
-      ~this_class
-      sound_dynamic_check_saved_env
-      None
-      f
-      params_decl_ty
-      hret.et_type;
+  let () =
+    if sdt_dynamic_check_required then
+      Fn.ignore
+      @@ check_function_dynamically_callable
+           ~this_class
+           sound_dynamic_check_saved_env
+           None
+           f
+           params_decl_ty
+           hret.et_type
+    else
+      ()
+  in
   let tfun_ =
     {
       Aast.f_annotation = Env.save local_tpenv env;

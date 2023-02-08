@@ -315,3 +315,5 @@ let load_hack_64_distc_saved_state t =
 
 let ide_should_use_hack_64_distc t =
   t.GlobalOptions.tco_ide_should_use_hack_64_distc
+
+let tast_under_dynamic t = t.GlobalOptions.tco_tast_under_dynamic

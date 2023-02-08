@@ -78,7 +78,9 @@ let method_dynamically_callable env cls m params_decl_ty return =
         params_decl_ty
         m.m_params
     in
-    let (env, _) = Typing.bind_params env m.m_ctxs param_tys m.m_params in
+    let (env, dynamic_params) =
+      Typing.bind_params env m.m_ctxs param_tys m.m_params
+    in
     let pos = fst m.m_name in
     let env = set_tyvars_variance_in_callable env dynamic_return_ty param_tys in
 
@@ -100,30 +102,37 @@ let method_dynamically_callable env cls m params_decl_ty return =
         m.m_user_attributes
     in
 
-    Errors.try_
-      (fun () ->
-        let (_ : env * Tast.stmt list) =
-          Typing.fun_
-            ~abstract:m.m_abstract
-            ~native:(Typing_native.is_native_meth ~env m)
-            ~disable
-            env
-            dynamic_return_info
+    let dynamic_body =
+      Errors.try_with_result
+        (fun () ->
+          let (_env, dynamic_body) : env * Tast.stmt list =
+            Typing.fun_
+              ~abstract:m.m_abstract
+              ~native:(Typing_native.is_native_meth ~env m)
+              ~disable
+              env
+              dynamic_return_info
+              pos
+              m.m_body
+              m.m_fun_kind
+          in
+          dynamic_body)
+        (fun dynamic_body error ->
+          Errors.method_is_not_dynamically_callable
             pos
-            m.m_body
-            m.m_fun_kind
-        in
-        ())
-      (fun error ->
-        Errors.method_is_not_dynamically_callable
-          pos
-          (snd m.m_name)
-          (Cls.name cls)
-          (Env.get_support_dynamic_type env)
-          None
-          (Some error))
+            (snd m.m_name)
+            (Cls.name cls)
+            (Env.get_support_dynamic_type env)
+            None
+            (Some error);
+          dynamic_body)
+    in
+    Some (dynamic_params, dynamic_body, dynamic_return_ty)
   in
-  if not interface_check then method_body_check ()
+  if not interface_check then
+    method_body_check ()
+  else
+    None
 
 let method_return ~supportdyn env cls m ret_decl_ty =
   let hint_pos =
@@ -313,13 +322,7 @@ let method_def ~is_disposable env cls m =
   let (env, e1) = Typing_solver.close_tyvars_and_solve env in
   let (env, e2) = Typing_solver.solve_all_unsolved_tyvars env in
 
-  if sdt_dynamic_check_required then
-    method_dynamically_callable
-      sound_dynamic_check_saved_env
-      cls
-      m
-      params_decl_ty
-      return;
+  let return_hint = hint_of_type_hint m.m_ret in
   let method_def =
     {
       Aast.m_annotation = Env.save local_tpenv env;
@@ -338,17 +341,48 @@ let method_def ~is_disposable env cls m =
       Aast.m_fun_kind = m.m_fun_kind;
       Aast.m_user_attributes = user_attributes;
       Aast.m_readonly_ret = m.m_readonly_ret;
-      Aast.m_ret = (ret_locl_ty, hint_of_type_hint m.m_ret);
+      Aast.m_ret = (ret_locl_ty, return_hint);
       Aast.m_body = { Aast.fb_ast = tb };
       Aast.m_external = m.m_external;
       Aast.m_doc_comment = m.m_doc_comment;
     }
   in
+  let method_defs =
+    let method_def_of_dynamic (dynamic_params, dynamic_body, dynamic_return_ty)
+        =
+      let open Aast in
+      {
+        method_def with
+        m_params = dynamic_params;
+        m_body = { Aast.fb_ast = dynamic_body };
+        m_ret = (dynamic_return_ty, return_hint);
+      }
+    in
+    method_def
+    ::
+    (if sdt_dynamic_check_required then
+      let dynamic_components =
+        method_dynamically_callable
+          sound_dynamic_check_saved_env
+          cls
+          m
+          params_decl_ty
+          return
+      in
+      if TypecheckerOptions.tast_under_dynamic tcopt then
+        dynamic_components
+        |> Option.value_map ~default:[] ~f:(fun dyn_comps ->
+               [method_def_of_dynamic dyn_comps])
+      else
+        []
+    else
+      [])
+  in
   let (env, global_inference_env) = Env.extract_global_inference_env env in
   let _env = Env.log_env_change "method_def" initial_env env in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  (method_def, (pos, global_inference_env))
+  (method_defs, (pos, global_inference_env))
 
 (** Checks that extending this parent is legal - e.g. it is not final and not const. *)
 let check_parent env class_def class_type =
@@ -1637,6 +1671,7 @@ let check_class_members env c tc =
   let (typed_methods, methods_global_inference_envs) =
     List.filter_map methods ~f:(method_def ~is_disposable env tc) |> List.unzip
   in
+  let typed_methods = List.concat typed_methods in
   let (env, typed_typeconsts) =
     List.map_env env c.c_typeconsts ~f:(typeconst_def c)
   in
@@ -1661,11 +1696,12 @@ let check_class_members env c tc =
     List.filter_map static_methods ~f:(method_def ~is_disposable env tc)
     |> List.unzip
   in
+  let typed_static_methods = List.concat typed_static_methods in
   let (typed_methods, constr_global_inference_env) =
     match typed_constructor with
     | None -> (typed_static_methods @ typed_methods, [])
-    | Some (m, global_inference_env) ->
-      ((m :: typed_static_methods) @ typed_methods, [global_inference_env])
+    | Some (ms, global_inference_env) ->
+      (ms @ typed_static_methods @ typed_methods, [global_inference_env])
   in
   let typed_members =
     ( typed_consts,

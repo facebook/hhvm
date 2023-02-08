@@ -47,7 +47,7 @@ let is_literal_with_trivially_inferable_type (_, _, e) =
   Option.is_some @@ Decl_utils.infer_const e
 
 let fun_def ctx fd :
-    (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
+    (Tast.fun_def list * Typing_inference_env.t_global_with_pos) option =
   let f = fd.fd_fun in
   let tcopt = Provider_context.get_tcopt ctx in
   Profile.measure_elapsed_time_and_report tcopt None fd.fd_name @@ fun () ->
@@ -188,21 +188,14 @@ let fun_def ctx fd :
   let (env, tparams) = List.map_env env f.f_tparams ~f:Typing.type_param in
   let (env, e1) = Typing_solver.close_tyvars_and_solve env in
   let (env, e2) = Typing_solver.solve_all_unsolved_tyvars env in
-  if sdt_dynamic_check_required then
-    Typing.check_function_dynamically_callable
-      ~this_class:None
-      sound_dynamic_check_saved_env
-      (Some fd.fd_name)
-      f
-      params_decl_ty
-      return_ty.et_type;
+  let ret_hint = hint_of_type_hint f.f_ret in
   let fun_ =
     {
       Aast.f_annotation = Env.save local_tpenv env;
       Aast.f_readonly_this = f.f_readonly_this;
       Aast.f_span = f.f_span;
       Aast.f_readonly_ret = f.f_readonly_ret;
-      Aast.f_ret = (return_ty.et_type, hint_of_type_hint f.f_ret);
+      Aast.f_ret = (return_ty.et_type, ret_hint);
       Aast.f_tparams = tparams;
       Aast.f_where_constraints = f.f_where_constraints;
       Aast.f_params = typed_params;
@@ -226,10 +219,43 @@ let fun_def ctx fd :
       Aast.fd_module = fd.fd_module;
     }
   in
+  let fundefs =
+    let fundef_of_dynamic (dynamic_params, dynamic_body, dynamic_return_ty) =
+      let open Aast in
+      {
+        fundef with
+        fd_fun =
+          {
+            fundef.fd_fun with
+            f_ret = (dynamic_return_ty, ret_hint);
+            f_params = dynamic_params;
+            f_body = { fb_ast = dynamic_body };
+          };
+      }
+    in
+    fundef
+    ::
+    (if sdt_dynamic_check_required then
+      let dynamic_components =
+        Typing.check_function_dynamically_callable
+          ~this_class:None
+          sound_dynamic_check_saved_env
+          (Some fd.fd_name)
+          f
+          params_decl_ty
+          return_ty.et_type
+      in
+      if TypecheckerOptions.tast_under_dynamic tcopt then
+        [fundef_of_dynamic dynamic_components]
+      else
+        []
+    else
+      [])
+  in
   let (_env, global_inference_env) = Env.extract_global_inference_env env in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  (fundef, (pos, global_inference_env))
+  (fundefs, (pos, global_inference_env))
 
 let class_def = Typing_class.class_def
 
@@ -323,14 +349,14 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
      *)
     | Fun f -> begin
       match fun_def ctx f with
-      | Some (f, env) -> Some (Aast.Fun f, [env])
+      | Some (fs, env) -> Some (List.map ~f:(fun f -> Aast.Fun f) fs, [env])
       | None -> None
     end
-    | Constant gc -> Some (Aast.Constant (gconst_def ctx gc), [])
-    | Typedef td -> Some (Aast.Typedef (Typing_typedef.typedef_def ctx td), [])
+    | Constant gc -> Some ([Aast.Constant (gconst_def ctx gc)], [])
+    | Typedef td -> Some ([Aast.Typedef (Typing_typedef.typedef_def ctx td)], [])
     | Class c -> begin
       match class_def ctx c with
-      | Some (c, envs) -> Some (Aast.Class c, envs)
+      | Some (c, envs) -> Some ([Aast.Class c], envs)
       | None -> None
     end
     (* We don't typecheck top level statements:
@@ -339,9 +365,9 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
      *)
     | Stmt s ->
       let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
-      Some (Aast.Stmt (snd (Typing.stmt env s)), [])
-    | Module md -> Some (Aast.Module (module_def ctx md), [])
-    | SetModule sm -> Some (Aast.SetModule sm, [])
+      Some ([Aast.Stmt (snd (Typing.stmt env s))], [])
+    | Module md -> Some ([Aast.Module (module_def ctx md)], [])
+    | SetModule sm -> Some ([Aast.SetModule sm], [])
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _
@@ -351,6 +377,7 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
   in
   if do_tast_checks then Nast_check.program ctx nast;
   let (tast, envs) = List.unzip @@ List.filter_map nast ~f:convert_def in
+  let tast = List.concat tast in
   let envs = List.concat envs in
   if do_tast_checks then Tast_check.program ctx tast;
   (tast, envs)

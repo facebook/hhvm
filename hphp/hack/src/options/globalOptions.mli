@@ -340,6 +340,9 @@ type t = {
   po_disallow_static_constants_in_default_func_args: bool;
   tco_load_hack_64_distc_saved_state: bool;
   tco_ide_should_use_hack_64_distc: bool;
+  (* Produce variations of methods and functions in TASTs that are cheked under
+     dynamic assumptions. *)
+  tco_tast_under_dynamic: bool;
 }
 [@@deriving eq, show]
 
@@ -477,6 +480,7 @@ val make :
   ?po_disallow_static_constants_in_default_func_args:bool ->
   ?tco_load_hack_64_distc_saved_state:bool ->
   ?tco_ide_should_use_hack_64_distc:bool ->
+  ?tco_tast_under_dynamic:bool ->
   unit ->
   t
 

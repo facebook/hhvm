@@ -928,7 +928,9 @@ end = struct
       Typing_deps.Dep.(
         match target with
         | Cmd.Function func ->
-          let (_ : (Tast.def * Typing_inference_env.t_global_with_pos) option) =
+          let (_
+                : (Tast.def list * Typing_inference_env.t_global_with_pos)
+                  option) =
             Typing_check_job.type_fun ctx filename func
           in
           add_implementation_dependencies ctx env;

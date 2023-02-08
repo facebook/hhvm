@@ -31,6 +31,7 @@ let type_file_with_global_tvenvs
         let (fs, f_global_tvenvs) =
           check ~f:Typing_check_job.type_fun funs |> List.unzip
         in
+        let fs = List.concat fs in
         let (cs, c_global_tvenvs) =
           check ~f:Typing_check_job.type_class classes |> List.unzip
         in

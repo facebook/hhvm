@@ -348,6 +348,7 @@ let parse_options () =
   let loop_iteration_upper_bound = ref None in
   let substitution_mutation = ref false in
   let allow_all_locations_for_type_constant_in_enum_class = ref true in
+  let tast_under_dynamic = ref false in
   let options =
     [
       ( "--no-print-position",
@@ -864,6 +865,10 @@ let parse_options () =
       ( "--count-imprecise-types",
         Arg.Unit (fun () -> set_mode CountImpreciseTypes ()),
         " Counts the number of mixed, dynamic, and nonnull types in a file" );
+      ( "--tast-under-dynamic",
+        Arg.Set tast_under_dynamic,
+        " Produce variations of definitions as they are checked under dynamic assumptions"
+      );
     ]
   in
 
@@ -1039,6 +1044,7 @@ let parse_options () =
       ~tco_substitution_mutation:!substitution_mutation
       ~tco_allow_all_locations_for_type_constant_in_enum_class:
         !allow_all_locations_for_type_constant_in_enum_class
+      ~tco_tast_under_dynamic:!tast_under_dynamic
       ()
   in
   Errors.allowed_fixme_codes_strict :=

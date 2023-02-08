@@ -13,6 +13,7 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
+use clap::Args;
 use clap::Parser;
 use compile::EnvFlags;
 use compile::NativeEnv;
@@ -51,27 +52,27 @@ use ty::reason::Reason;
 use crate::util::SyncWrite;
 use crate::FileOpts;
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 pub struct Opts {
     /// Output file. Creates it if necessary
     #[clap(short = 'o')]
     output_file: Option<PathBuf>,
 
-    #[clap(flatten)]
+    #[command(flatten)]
     files: FileOpts,
 
-    #[clap(flatten)]
+    #[command(flatten)]
     single_file_opts: SingleFileOpts,
 }
 
 #[derive(Parser, Clone, Debug)]
 pub(crate) struct SingleFileOpts {
-    #[clap(flatten)]
+    #[command(flatten)]
     pub(crate) env_flags: EnvFlags,
 
     /// The level of verbosity (can be set multiple times)
-    #[clap(long = "verbose", parse(from_occurrences))]
-    pub(crate) verbosity: isize,
+    #[clap(long = "verbose", action(clap::ArgAction::Count))]
+    pub(crate) verbosity: u8,
 }
 
 pub fn run(opts: &mut Opts) -> Result<()> {

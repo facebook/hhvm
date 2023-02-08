@@ -13,21 +13,21 @@ use ::assemble as _;
 use anyhow::anyhow;
 use anyhow::Result;
 use bumpalo::Bump;
-use clap::Parser;
+use clap::Args;
 use parking_lot::Mutex;
 use rayon::prelude::*;
 
 use crate::util::SyncWrite;
 use crate::FileOpts;
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 pub struct Opts {
     /// Output file. Creates it if necessary
     #[clap(short = 'o')]
     output_file: Option<PathBuf>,
 
     /// The input hhas file(s) to assemble back to ir::Unit
-    #[clap(flatten)]
+    #[command(flatten)]
     files: FileOpts,
 }
 

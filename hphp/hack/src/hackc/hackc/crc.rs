@@ -17,7 +17,7 @@ use std::time::Instant;
 
 use anyhow::bail;
 use anyhow::Result;
-use clap::Parser;
+use clap::Args;
 use multifile_rust as multifile;
 use parking_lot::Mutex;
 use rayon::prelude::*;
@@ -30,17 +30,17 @@ use crate::profile::StatusTicker;
 use crate::profile::Timing;
 use crate::util::SyncWrite;
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 pub struct Opts {
     #[allow(dead_code)]
-    #[clap(flatten)]
+    #[command(flatten)]
     single_file_opts: SingleFileOpts,
 
     /// Number of parallel worker threads. By default, or if set to 0, use num-cpu threads.
     #[clap(long, default_value = "0")]
     num_threads: usize,
 
-    #[clap(flatten)]
+    #[command(flatten)]
     files: crate::FileOpts,
 }
 

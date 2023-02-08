@@ -4,7 +4,7 @@
 use std::io::Write;
 
 use anyhow::Result;
-use clap::Parser;
+use clap::Args;
 use facts_rust::Facts;
 use facts_rust::{self as facts};
 use relative_path::Prefix;
@@ -13,9 +13,9 @@ use serde_json::json;
 use serde_json::Value;
 
 /// Facts subcommand options
-#[derive(Parser, Debug, Default)]
+#[derive(Args, Debug, Default)]
 pub(crate) struct Opts {
-    #[clap(flatten)]
+    #[command(flatten)]
     pub files: crate::FileOpts,
 
     /// Exclude sha1sum from JSON results.

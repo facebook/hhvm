@@ -27,6 +27,7 @@ use ::compile::EnvFlags;
 use ::compile::NativeEnv;
 use anyhow::Result;
 use byte_unit::Byte;
+use clap::Args;
 use clap::Parser;
 use hhvm_options::HhvmOptions;
 use log::info;
@@ -46,16 +47,16 @@ struct Opts {
     #[clap(long)]
     daemon: bool,
 
-    #[clap(flatten)]
+    #[command(flatten)]
     flag_commands: FlagCommands,
 
-    #[clap(flatten)]
+    #[command(flatten)]
     hhvm_options: HhvmOptions,
 
-    #[clap(flatten)]
+    #[command(flatten)]
     files: FileOpts,
 
-    #[clap(flatten)]
+    #[command(flatten)]
     pub(crate) env_flags: EnvFlags,
 
     /// Number of parallel worker threads for subcommands that support parallelism,
@@ -89,7 +90,7 @@ struct Opts {
 }
 
 /// Hack Compiler
-#[derive(Parser, Debug, Default)]
+#[derive(Args, Debug, Default)]
 struct FileOpts {
     /// Input file(s)
     filenames: Vec<PathBuf>,

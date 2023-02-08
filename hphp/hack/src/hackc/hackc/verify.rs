@@ -12,6 +12,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::ensure;
+use clap::Args;
 use clap::Parser;
 use decl_provider::SelfProvider;
 use hash::HashMap;
@@ -71,9 +72,9 @@ thread_local! {
     pub static PANIC_MSG: RefCell<Option<String>> = RefCell::new(None);
 }
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 struct CommonOpts {
-    #[clap(flatten)]
+    #[command(flatten)]
     files: crate::FileOpts,
 
     /// Print full error messages
@@ -81,7 +82,7 @@ struct CommonOpts {
     long_msg: bool,
 
     #[allow(dead_code)]
-    #[clap(flatten)]
+    #[command(flatten)]
     single_file_opts: SingleFileOpts,
 
     /// Number of parallel worker threads. By default, or if set to 0, use num-cpu threads.
@@ -97,9 +98,9 @@ struct CommonOpts {
     show_all: bool,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 struct AssembleOpts {
-    #[clap(flatten)]
+    #[command(flatten)]
     common: CommonOpts,
 }
 
@@ -152,9 +153,9 @@ impl AssembleOpts {
     }
 }
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 struct IrOpts {
-    #[clap(flatten)]
+    #[command(flatten)]
     common: CommonOpts,
 }
 
@@ -227,7 +228,7 @@ impl IrOpts {
     }
 }
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 struct InferOpts {
     #[clap(flatten)]
     common: CommonOpts,

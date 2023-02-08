@@ -9,7 +9,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use anyhow::Result;
-use clap::Parser;
+use clap::Args;
 use compile::Profile;
 use decl_provider::SelfProvider;
 use ocamlrep::rc::RcOc;
@@ -23,16 +23,16 @@ use crate::compile::SingleFileOpts;
 use crate::util::SyncWrite;
 use crate::FileOpts;
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 pub struct Opts {
     /// Output file. Creates it if necessary
     #[clap(short = 'o')]
     output_file: Option<PathBuf>,
 
-    #[clap(flatten)]
+    #[command(flatten)]
     files: FileOpts,
 
-    #[clap(flatten)]
+    #[command(flatten)]
     single_file_opts: SingleFileOpts,
 
     /// Skip emitting 'standard' builtins.

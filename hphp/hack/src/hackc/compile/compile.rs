@@ -66,7 +66,7 @@ impl Default for NativeEnv {
     }
 }
 
-#[derive(Debug, Default, Clone, clap::Parser, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, clap::Args, Serialize, Deserialize)]
 pub struct EnvFlags {
     /// Enable features only allowed in systemlib
     #[clap(long)]

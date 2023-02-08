@@ -2075,13 +2075,14 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyData>>(this->__fbthrift_field_structVal))) {
     constexpr int16_t kPrevFieldId = -10;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -11, kPrevFieldId>(*prot_, "structVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyData>::write(*prot_, this->__fbthrift_field_structVal);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::test::fixtures::patch::MyUnion>>(this->__fbthrift_field_unionVal))) {
     constexpr int16_t kPrevFieldId = -11;
@@ -2092,13 +2093,14 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStruct>>(this->__fbthrift_field_lateStructVal))) {
     constexpr int16_t kPrevFieldId = -12;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -13, kPrevFieldId>(*prot_, "lateStructVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStruct>::write(*prot_, this->__fbthrift_field_lateStructVal);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   if (this->__isset.get(0)) {
     constexpr int16_t kPrevFieldId = -13;
@@ -2262,21 +2264,23 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefault>>(this->__fbthrift_field_structWithCustomDefault))) {
     constexpr int16_t kPrevFieldId = -31;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -32, kPrevFieldId>(*prot_, "structWithCustomDefault", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefault>::write(*prot_, this->__fbthrift_field_structWithCustomDefault);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyData>>(this->__fbthrift_field_structWithFieldCustomDefault))) {
     constexpr int16_t kPrevFieldId = -32;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "structWithFieldCustomDefault", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyData>::write(*prot_, this->__fbthrift_field_structWithFieldCustomDefault);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -2603,11 +2607,10 @@ uint32_t Bar::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("Bar");
   bool previousFieldHasValue = true;
-  {
+  if (!(this->__fbthrift_field_loop && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>>(*this->__fbthrift_field_loop))) {
     constexpr int16_t kPrevFieldId = 0;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -1, kPrevFieldId>(*prot_, "loop", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     if (this->__fbthrift_field_loop) {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::Loop>::write(*prot_, *this->__fbthrift_field_loop);
     } else {
@@ -2615,7 +2618,9 @@ uint32_t Bar::write(Protocol_* prot_) const {
       xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
     }
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -2729,13 +2734,14 @@ uint32_t Loop::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("Loop");
   bool previousFieldHasValue = true;
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::Bar>>(this->__fbthrift_field_bar))) {
     constexpr int16_t kPrevFieldId = 0;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -1, kPrevFieldId>(*prot_, "bar", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::Bar>::write(*prot_, this->__fbthrift_field_bar);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -3059,21 +3065,23 @@ uint32_t MyDataFieldPatchStruct::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("MyDataFieldPatch");
   bool previousFieldHasValue = true;
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>(this->__fbthrift_field_data1))) {
     constexpr int16_t kPrevFieldId = 0;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "data1", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StringPatchAdapter::toThrift(this->__fbthrift_field_data1));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>(this->__fbthrift_field_data2))) {
     constexpr int16_t kPrevFieldId = 1;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 2, kPrevFieldId>(*prot_, "data2", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_data2));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -3349,29 +3357,32 @@ uint32_t MyDataPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataFieldPatchStruct>>>(this->__fbthrift_field_patchPrior))) {
     constexpr int16_t kPrevFieldId = 2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "patchPrior", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     constexpr int16_t kPrevFieldId = 5;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "patch", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patch));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -3695,21 +3706,23 @@ uint32_t MyDataWithCustomDefaultFieldPatchStruct::write(Protocol_* prot_) const 
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("MyDataWithCustomDefaultFieldPatch");
   bool previousFieldHasValue = true;
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>(this->__fbthrift_field_data1))) {
     constexpr int16_t kPrevFieldId = 0;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "data1", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StringPatchAdapter::toThrift(this->__fbthrift_field_data1));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>(this->__fbthrift_field_data2))) {
     constexpr int16_t kPrevFieldId = 1;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 2, kPrevFieldId>(*prot_, "data2", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_data2));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -3985,29 +3998,32 @@ uint32_t MyDataWithCustomDefaultPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>>>(this->__fbthrift_field_patchPrior))) {
     constexpr int16_t kPrevFieldId = 2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "patchPrior", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     constexpr int16_t kPrevFieldId = 5;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "patch", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patch));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -4131,13 +4147,14 @@ uint32_t InnerUnionFieldPatchStruct::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("InnerUnionFieldPatch");
   bool previousFieldHasValue = true;
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::BinaryPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BinaryPatchStruct>>>(this->__fbthrift_field_innerOption))) {
     constexpr int16_t kPrevFieldId = 0;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "innerOption", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::write(*prot_, ::apache::thrift::op::detail::BinaryPatchAdapter::toThrift(this->__fbthrift_field_innerOption));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -4413,13 +4430,14 @@ uint32_t InnerUnionPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::InnerUnionFieldPatchStruct>>>(this->__fbthrift_field_patchPrior))) {
     constexpr int16_t kPrevFieldId = 2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "patchPrior", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::test::fixtures::patch::InnerUnion>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
@@ -4430,13 +4448,14 @@ uint32_t InnerUnionPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::InnerUnionFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     constexpr int16_t kPrevFieldId = 4;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "patch", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patch));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -4642,29 +4661,32 @@ uint32_t MyUnionFieldPatchStruct::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("MyUnionFieldPatch");
   bool previousFieldHasValue = true;
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>(this->__fbthrift_field_option1))) {
     constexpr int16_t kPrevFieldId = 0;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "option1", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StringPatchAdapter::toThrift(this->__fbthrift_field_option1));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>(this->__fbthrift_field_option2))) {
     constexpr int16_t kPrevFieldId = 1;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 2, kPrevFieldId>(*prot_, "option2", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_option2));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::UnionPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::InnerUnionPatchStruct>>>(this->__fbthrift_field_option3))) {
     constexpr int16_t kPrevFieldId = 2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "option3", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionPatchStruct>::write(*prot_, ::apache::thrift::op::detail::UnionPatchAdapter::toThrift(this->__fbthrift_field_option3));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -4940,13 +4962,14 @@ uint32_t MyUnionPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyUnionFieldPatchStruct>>>(this->__fbthrift_field_patchPrior))) {
     constexpr int16_t kPrevFieldId = 2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "patchPrior", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::test::fixtures::patch::MyUnion>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
@@ -4957,13 +4980,14 @@ uint32_t MyUnionPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyUnionFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     constexpr int16_t kPrevFieldId = 4;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "patch", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patch));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -10466,269 +10490,302 @@ uint32_t MyStructFieldPatchStruct::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("MyStructFieldPatch");
   bool previousFieldHasValue = true;
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>>>(this->__fbthrift_field_structWithCustomDefault))) {
     constexpr int16_t kPrevFieldId = 0;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -32, kPrevFieldId>(*prot_, "structWithCustomDefault", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(this->__fbthrift_field_structWithCustomDefault));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>(this->__fbthrift_field_i32WithCustomDefault))) {
     constexpr int16_t kPrevFieldId = -32;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -31, kPrevFieldId>(*prot_, "i32WithCustomDefault", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_i32WithCustomDefault));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField30PatchStruct>>>(this->__fbthrift_field_mapMap))) {
     constexpr int16_t kPrevFieldId = -31;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -30, kPrevFieldId>(*prot_, "mapMap", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField30PatchStruct>::write(*prot_, ::apache::thrift::op::detail::MapPatchAdapter::toThrift(this->__fbthrift_field_mapMap));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField29PatchStruct>>>(this->__fbthrift_field_listMap))) {
     constexpr int16_t kPrevFieldId = -30;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -29, kPrevFieldId>(*prot_, "listMap", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField29PatchStruct>::write(*prot_, ::apache::thrift::op::detail::ListPatchAdapter::toThrift(this->__fbthrift_field_listMap));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField28PatchStruct>>>(this->__fbthrift_field_optMapVal))) {
     constexpr int16_t kPrevFieldId = -29;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -28, kPrevFieldId>(*prot_, "optMapVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField28PatchStruct>::write(*prot_, ::apache::thrift::op::detail::MapPatchAdapter::toThrift(this->__fbthrift_field_optMapVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField27PatchStruct>>>(this->__fbthrift_field_optSetVal))) {
     constexpr int16_t kPrevFieldId = -28;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -27, kPrevFieldId>(*prot_, "optSetVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField27PatchStruct>::write(*prot_, ::apache::thrift::op::detail::SetPatchAdapter::toThrift(this->__fbthrift_field_optSetVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField26PatchStruct>>>(this->__fbthrift_field_optListVal))) {
     constexpr int16_t kPrevFieldId = -27;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -26, kPrevFieldId>(*prot_, "optListVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField26PatchStruct>::write(*prot_, ::apache::thrift::op::detail::ListPatchAdapter::toThrift(this->__fbthrift_field_optListVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructPatchStruct>>>(this->__fbthrift_field_optLateStructVal))) {
     constexpr int16_t kPrevFieldId = -26;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -25, kPrevFieldId>(*prot_, "optLateStructVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(this->__fbthrift_field_optLateStructVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataPatchStruct>>>(this->__fbthrift_field_optStructVal))) {
     constexpr int16_t kPrevFieldId = -25;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -24, kPrevFieldId>(*prot_, "optStructVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(this->__fbthrift_field_optStructVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField23PatchStruct>>>(this->__fbthrift_field_optEnumVal))) {
     constexpr int16_t kPrevFieldId = -24;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -23, kPrevFieldId>(*prot_, "optEnumVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField23PatchStruct>::write(*prot_, ::apache::thrift::op::detail::AssignPatchAdapter::toThrift(this->__fbthrift_field_optEnumVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::BinaryPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BinaryPatchStruct>>>(this->__fbthrift_field_optBinaryVal))) {
     constexpr int16_t kPrevFieldId = -23;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -22, kPrevFieldId>(*prot_, "optBinaryVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::write(*prot_, ::apache::thrift::op::detail::BinaryPatchAdapter::toThrift(this->__fbthrift_field_optBinaryVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>(this->__fbthrift_field_optStringVal))) {
     constexpr int16_t kPrevFieldId = -22;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -21, kPrevFieldId>(*prot_, "optStringVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StringPatchAdapter::toThrift(this->__fbthrift_field_optStringVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::DoublePatchStruct>>>(this->__fbthrift_field_optDoubleVal))) {
     constexpr int16_t kPrevFieldId = -21;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -20, kPrevFieldId>(*prot_, "optDoubleVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::DoublePatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_optDoubleVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::FloatPatchStruct>>>(this->__fbthrift_field_optFloatVal))) {
     constexpr int16_t kPrevFieldId = -20;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -19, kPrevFieldId>(*prot_, "optFloatVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::FloatPatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_optFloatVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>(this->__fbthrift_field_optI64Val))) {
     constexpr int16_t kPrevFieldId = -19;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -18, kPrevFieldId>(*prot_, "optI64Val", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I64PatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_optI64Val));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>(this->__fbthrift_field_optI32Val))) {
     constexpr int16_t kPrevFieldId = -18;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -17, kPrevFieldId>(*prot_, "optI32Val", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_optI32Val));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I16PatchStruct>>>(this->__fbthrift_field_optI16Val))) {
     constexpr int16_t kPrevFieldId = -17;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -16, kPrevFieldId>(*prot_, "optI16Val", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I16PatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_optI16Val));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BytePatchStruct>>>(this->__fbthrift_field_optByteVal))) {
     constexpr int16_t kPrevFieldId = -16;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -15, kPrevFieldId>(*prot_, "optByteVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BytePatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_optByteVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>(this->__fbthrift_field_optBoolVal))) {
     constexpr int16_t kPrevFieldId = -15;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -14, kPrevFieldId>(*prot_, "optBoolVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BoolPatchStruct>::write(*prot_, ::apache::thrift::op::detail::BoolPatchAdapter::toThrift(this->__fbthrift_field_optBoolVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructPatchStruct>>>(this->__fbthrift_field_lateStructVal))) {
     constexpr int16_t kPrevFieldId = -14;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -13, kPrevFieldId>(*prot_, "lateStructVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(this->__fbthrift_field_lateStructVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::UnionPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyUnionPatchStruct>>>(this->__fbthrift_field_unionVal))) {
     constexpr int16_t kPrevFieldId = -13;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -12, kPrevFieldId>(*prot_, "unionVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionPatchStruct>::write(*prot_, ::apache::thrift::op::detail::UnionPatchAdapter::toThrift(this->__fbthrift_field_unionVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataPatchStruct>>>(this->__fbthrift_field_structVal))) {
     constexpr int16_t kPrevFieldId = -12;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -11, kPrevFieldId>(*prot_, "structVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(this->__fbthrift_field_structVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField10PatchStruct>>>(this->__fbthrift_field_enumVal))) {
     constexpr int16_t kPrevFieldId = -11;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -10, kPrevFieldId>(*prot_, "enumVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField10PatchStruct>::write(*prot_, ::apache::thrift::op::detail::AssignPatchAdapter::toThrift(this->__fbthrift_field_enumVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::BinaryPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BinaryPatchStruct>>>(this->__fbthrift_field_binaryVal))) {
     constexpr int16_t kPrevFieldId = -10;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -9, kPrevFieldId>(*prot_, "binaryVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::write(*prot_, ::apache::thrift::op::detail::BinaryPatchAdapter::toThrift(this->__fbthrift_field_binaryVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>(this->__fbthrift_field_stringVal))) {
     constexpr int16_t kPrevFieldId = -9;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -8, kPrevFieldId>(*prot_, "stringVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StringPatchAdapter::toThrift(this->__fbthrift_field_stringVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::DoublePatchStruct>>>(this->__fbthrift_field_doubleVal))) {
     constexpr int16_t kPrevFieldId = -8;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -7, kPrevFieldId>(*prot_, "doubleVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::DoublePatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_doubleVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::FloatPatchStruct>>>(this->__fbthrift_field_floatVal))) {
     constexpr int16_t kPrevFieldId = -7;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -6, kPrevFieldId>(*prot_, "floatVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::FloatPatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_floatVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>(this->__fbthrift_field_i64Val))) {
     constexpr int16_t kPrevFieldId = -6;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -5, kPrevFieldId>(*prot_, "i64Val", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I64PatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_i64Val));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>(this->__fbthrift_field_i32Val))) {
     constexpr int16_t kPrevFieldId = -5;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -4, kPrevFieldId>(*prot_, "i32Val", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_i32Val));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::I16PatchStruct>>>(this->__fbthrift_field_i16Val))) {
     constexpr int16_t kPrevFieldId = -4;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -3, kPrevFieldId>(*prot_, "i16Val", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I16PatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_i16Val));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BytePatchStruct>>>(this->__fbthrift_field_byteVal))) {
     constexpr int16_t kPrevFieldId = -3;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -2, kPrevFieldId>(*prot_, "byteVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BytePatchStruct>::write(*prot_, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(this->__fbthrift_field_byteVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>(this->__fbthrift_field_boolVal))) {
     constexpr int16_t kPrevFieldId = -2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -1, kPrevFieldId>(*prot_, "boolVal", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BoolPatchStruct>::write(*prot_, ::apache::thrift::op::detail::BoolPatchAdapter::toThrift(this->__fbthrift_field_boolVal));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataPatchStruct>>>(this->__fbthrift_field_structWithFieldCustomDefault))) {
     constexpr int16_t kPrevFieldId = -1;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "structWithFieldCustomDefault", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(this->__fbthrift_field_structWithFieldCustomDefault));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -11004,29 +11061,32 @@ uint32_t MyStructPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldPatchStruct>>>(this->__fbthrift_field_patchPrior))) {
     constexpr int16_t kPrevFieldId = 2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "patchPrior", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     constexpr int16_t kPrevFieldId = 5;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "patch", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patch));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -11460,29 +11520,32 @@ uint32_t LateDefStructPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructFieldPatchStruct>>>(this->__fbthrift_field_patchPrior))) {
     constexpr int16_t kPrevFieldId = 2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "patchPrior", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     constexpr int16_t kPrevFieldId = 5;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "patch", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patch));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -11890,13 +11953,14 @@ uint32_t RecursiveFieldPatchStruct::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("RecursiveFieldPatch");
   bool previousFieldHasValue = true;
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveField1PatchStruct>>>(this->__fbthrift_field_nodes))) {
     constexpr int16_t kPrevFieldId = 0;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -1, kPrevFieldId>(*prot_, "nodes", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveField1PatchStruct>::write(*prot_, ::apache::thrift::op::detail::AssignPatchAdapter::toThrift(this->__fbthrift_field_nodes));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -12172,29 +12236,32 @@ uint32_t RecursivePatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveFieldPatchStruct>>>(this->__fbthrift_field_patchPrior))) {
     constexpr int16_t kPrevFieldId = 2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "patchPrior", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     constexpr int16_t kPrevFieldId = 5;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "patch", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patch));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -12441,13 +12508,14 @@ uint32_t BarFieldPatchStruct::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("BarFieldPatch");
   bool previousFieldHasValue = true;
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LoopPatchStruct>>>(this->__fbthrift_field_loop))) {
     constexpr int16_t kPrevFieldId = 0;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -1, kPrevFieldId>(*prot_, "loop", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LoopPatchStruct>::write(*prot_, ::apache::thrift::op::detail::AssignPatchAdapter::toThrift(this->__fbthrift_field_loop));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -12723,29 +12791,32 @@ uint32_t BarPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarFieldPatchStruct>>>(this->__fbthrift_field_patchPrior))) {
     constexpr int16_t kPrevFieldId = 2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "patchPrior", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     constexpr int16_t kPrevFieldId = 5;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "patch", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarFieldPatchStruct>::write(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patch));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -12992,13 +13063,14 @@ uint32_t LoopFieldPatchStruct::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("LoopFieldPatch");
   bool previousFieldHasValue = true;
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarPatchStruct>>>(this->__fbthrift_field_bar))) {
     constexpr int16_t kPrevFieldId = 0;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -1, kPrevFieldId>(*prot_, "bar", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarPatchStruct>::write(*prot_, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(this->__fbthrift_field_bar));
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

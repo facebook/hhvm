@@ -2785,11 +2785,10 @@ uint32_t StructWithInternBox::write(Protocol_* prot_) const {
     }
     xfer += prot_->writeFieldEnd();
   }
-  {
+  if (!(this->__fbthrift_field_field3 && ::apache::thrift::empty(*this->__fbthrift_field_field3))) {
     constexpr int16_t kPrevFieldId = 2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "field3", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     if (this->__fbthrift_field_field3) {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, *this->__fbthrift_field_field3);
     } else {
@@ -2797,13 +2796,14 @@ uint32_t StructWithInternBox::write(Protocol_* prot_) const {
       xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
     }
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(this->__fbthrift_field_field4 && ::apache::thrift::empty(*this->__fbthrift_field_field4))) {
     constexpr int16_t kPrevFieldId = 3;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 4, kPrevFieldId>(*prot_, "field4", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     if (this->__fbthrift_field_field4) {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::write(*prot_, *this->__fbthrift_field_field4);
     } else {
@@ -2811,7 +2811,9 @@ uint32_t StructWithInternBox::write(Protocol_* prot_) const {
       xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
     }
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -3134,11 +3136,10 @@ uint32_t AdaptedStructWithInternBox::write(Protocol_* prot_) const {
     }
     xfer += prot_->writeFieldEnd();
   }
-  {
+  if (!(this->__fbthrift_field_field3 && (*this->__fbthrift_field_field3) == ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::cpp2::Empty, AdaptedStructWithInternBox>())) {
     constexpr int16_t kPrevFieldId = 2;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "field3", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     if (this->__fbthrift_field_field3) {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::write(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field3));
     } else {
@@ -3146,13 +3147,14 @@ uint32_t AdaptedStructWithInternBox::write(Protocol_* prot_) const {
       xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
     }
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
-  {
+  if (!(this->__fbthrift_field_field4 && (*this->__fbthrift_field_field4) == ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>())) {
     constexpr int16_t kPrevFieldId = 3;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 4, kPrevFieldId>(*prot_, "field4", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     if (this->__fbthrift_field_field4) {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::write(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field4));
     } else {
@@ -3160,7 +3162,9 @@ uint32_t AdaptedStructWithInternBox::write(Protocol_* prot_) const {
       xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
     }
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

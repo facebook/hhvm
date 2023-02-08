@@ -291,43 +291,43 @@ class DateTime implements DateTimeInterface {
   public function __construct(
     string $time = 'now',
     ?DateTimeZone $timezone = null,
-  )[leak_safe];
-  public function add(DateInterval $interval): HH\FIXME\MISSING_RETURN_TYPE;
-  public function modify(string $modify): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getOffset(): int;
+  )[read_globals];
+  public function add(DateInterval $interval)[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function modify(string $modify)[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function getOffset()[]: int;
   public function getTimestamp()[]: int;
-  public function getTimezone(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getTimezone()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function setDate(
     int $year,
     int $month,
     int $day,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  )[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
   public function setISODate(
     int $year,
     int $week,
     int $day = 1,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  )[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
   public function setTime(
     int $hour,
     int $minute,
     int $second = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setTimestamp(int $unixtimestamp): this;
+  )[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function setTimestamp(int $unixtimestamp)[read_globals, write_props]: this;
   public function setTimezone(
     DateTimeZone $timezone,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function sub(DateInterval $interval): HH\FIXME\MISSING_RETURN_TYPE;
+  )[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function sub(DateInterval $interval)[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
   public function diff(
     DateTimeInterface $datetime2,
     bool $absolute = false,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  )[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function format(string $format): HH\FIXME\MISSING_RETURN_TYPE;
   public static function createFromFormat(
     string $format,
     string $time,
     ?DateTimeZone $timezone = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public static function getLastErrors(): DateTimeErrors;
+  public static function getLastErrors()[read_globals]: DateTimeErrors;
 }
 
 class DateTimeImmutable implements DateTimeInterface {

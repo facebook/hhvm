@@ -62,6 +62,10 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     const folly::AsyncTransportCertificate*) {
   return std::vector<folly::IPAddress>();
 }
+
+THRIFT_PLUGGABLE_FUNC_REGISTER(bool, isLocalIP, const folly::IPAddress& ip) {
+  return ip.isLoopback();
+}
 } // namespace detail
 
 namespace {

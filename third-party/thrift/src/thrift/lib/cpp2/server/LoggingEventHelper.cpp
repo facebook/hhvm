@@ -47,10 +47,15 @@ void maybeLogTlsPeerCertEvent(
       !context.getPeerAddress()->isFamilyInet()) {
     return;
   }
-  if (std::find(
+  const auto& peerIP = context.getPeerAddress()->getIPAddress();
+  const auto peerLocal = detail::isLocalIP(peerIP);
+  if (std::any_of(
           allowedIPs.begin(),
           allowedIPs.end(),
-          context.getPeerAddress()->getIPAddress()) != allowedIPs.end()) {
+          [&peerIP, peerLocal](const folly::IPAddress& allowedIP) {
+            return peerIP == allowedIP ||
+                (peerLocal && detail::isLocalIP(allowedIP));
+          })) {
     THRIFT_CONNECTION_EVENT(tls.cert_ip_match).log(context);
   } else {
     THRIFT_CONNECTION_EVENT(tls.cert_ip_mismatch).log(context);

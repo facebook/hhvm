@@ -69,6 +69,6 @@ here we need to deduce Patch type based on PatchOp type. Steps:
     1. Assume we have exactly one field `X` in `EnsureUnion`, we can add `Clear` field to all fields in `patch2.PatchPrior` if the field is not `X`.
         1. This is because `EnsureUnion` will always clear other fields except `X`.
         2. After this change, the behavior of merged patch would be identical to `StructPatch`, in which case we can just use the same algorithm as `StructPatch`.
-8. Otherwise, treat it as a `StructPatch` since it doesn’t make any difference.
+8. Otherwise, we can not tell whether the patch is a `StructPatch` or `UnionPatch`. However, we can use the same merge algorithm that we used to merge `StructPatch`, and the result would be the correct regardless whether patch is a `StructPatch` or `UnionPatch`.
 
 If Schema is available, a strongly typed API can be provided to simplify the implementation and detect type mismatch on compile-time.

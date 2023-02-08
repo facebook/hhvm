@@ -56,6 +56,7 @@ class PersistentQuicPskCacheTest : public Test {
     quicPsk1_.transportParams.maxRecvPacketSize = 500;
     quicPsk1_.transportParams.initialMaxStreamsBidi = 234;
     quicPsk1_.transportParams.initialMaxStreamsUni = 123;
+    quicPsk1_.transportParams.knobFrameSupport = true;
     quicPsk1_.appParams = "QPACK param";
 
     auto& fizzPsk2 = quicPsk2_.cachedPsk;
@@ -81,8 +82,9 @@ class PersistentQuicPskCacheTest : public Test {
     quicPsk2_.transportParams.initialMaxData = 800;
     quicPsk2_.transportParams.idleTimeout = 90;
     quicPsk2_.transportParams.maxRecvPacketSize = 800;
-    quicPsk1_.transportParams.initialMaxStreamsBidi = 2345;
-    quicPsk1_.transportParams.initialMaxStreamsUni = 1233;
+    quicPsk2_.transportParams.initialMaxStreamsBidi = 2345;
+    quicPsk2_.transportParams.initialMaxStreamsUni = 1233;
+    quicPsk2_.transportParams.knobFrameSupport = false;
   }
 
   void TearDown() override {
@@ -139,6 +141,7 @@ static void expectMatch(const QuicCachedPsk& a, const QuicCachedPsk& b) {
   EXPECT_EQ(paramsA.maxRecvPacketSize, paramsB.maxRecvPacketSize);
   EXPECT_EQ(paramsA.initialMaxStreamsBidi, paramsB.initialMaxStreamsBidi);
   EXPECT_EQ(paramsA.initialMaxStreamsUni, paramsB.initialMaxStreamsUni);
+  EXPECT_EQ(paramsA.knobFrameSupport, paramsB.knobFrameSupport);
 
   EXPECT_EQ(a.appParams, b.appParams);
 }

@@ -65,6 +65,9 @@ folly::Optional<quic::QuicCachedPsk> PersistentQuicPskCache::getPsk(
                        cursor);
     fizz::detail::read(quicCachedPsk.transportParams.initialMaxStreamsUni,
                        cursor);
+    uint8_t knobFrameSupport;
+    fizz::detail::read(knobFrameSupport, cursor);
+    quicCachedPsk.transportParams.knobFrameSupport = knobFrameSupport > 0;
 
     std::unique_ptr<folly::IOBuf> appParams;
     fizz::detail::readBuf<uint16_t>(appParams, cursor);
@@ -105,6 +108,9 @@ void PersistentQuicPskCache::putPsk(const std::string& identity,
                       appender);
   fizz::detail::write(quicCachedPsk.transportParams.initialMaxStreamsUni,
                       appender);
+  uint8_t knobSupport = quicCachedPsk.transportParams.knobFrameSupport ? 1 : 0;
+  fizz::detail::write(knobSupport, appender);
+
   fizz::detail::writeBuf<uint16_t>(
       folly::IOBuf::wrapBuffer(folly::StringPiece(quicCachedPsk.appParams)),
       appender);

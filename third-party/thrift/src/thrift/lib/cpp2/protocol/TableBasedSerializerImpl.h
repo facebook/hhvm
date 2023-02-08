@@ -546,30 +546,6 @@ size_t writeField(
 }
 
 template <class Protocol_>
-size_t writeTerseField(
-    Protocol_* iprot, const FieldInfo& fieldInfo, const ThriftValue& value) {
-  // For a struct terse field, skip the empty check for the field, and rewind
-  // buffer if the struct field is emtpy.
-  if (fieldInfo.typeInfo->type == protocol::TType::T_STRUCT &&
-      !static_cast<const StructInfo*>(fieldInfo.typeInfo->typeExt)->unionExt) {
-    size_t xfer_before_field_begin = 0;
-    size_t written = iprot->writeFieldBegin(
-        fieldInfo.name, fieldInfo.typeInfo->type, fieldInfo.id);
-    size_t xfer_after_field_begin = written;
-    written += write(iprot, *fieldInfo.typeInfo, value);
-    rewindIfEmptyStructField(
-        *iprot, written, xfer_after_field_begin, xfer_before_field_begin);
-    return written;
-  }
-  // For all non-struct terse field, check whether the field is empty or not
-  // before serialization.
-  if (isTerseFieldSet(value, fieldInfo)) {
-    return writeField(iprot, fieldInfo, value);
-  }
-  return 0;
-}
-
-template <class Protocol_>
 void read(Protocol_* iprot, const StructInfo& structInfo, void* object) {
   DCHECK(object);
   ProtocolReaderStructReadState<Protocol_> readState;
@@ -694,11 +670,11 @@ size_t write(
       if (hasFieldValue(object, fieldInfo, structInfo)) {
         if (OptionalThriftValue value =
                 getValue(*fieldInfo.typeInfo, getMember(fieldInfo, object))) {
-          if (fieldInfo.qualifier == FieldQualifier::Terse) {
-            written += writeTerseField(iprot, fieldInfo, value.value());
-          } else {
-            written += writeField(iprot, fieldInfo, value.value());
+          if (fieldInfo.qualifier == FieldQualifier::Terse &&
+              !isTerseFieldSet(value.value(), fieldInfo)) {
+            continue;
           }
+          written += writeField(iprot, fieldInfo, value.value());
         }
       }
     }

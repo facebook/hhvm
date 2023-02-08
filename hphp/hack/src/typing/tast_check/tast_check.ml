@@ -24,7 +24,7 @@ let logger_handlers ctx =
   in
   let key_handler_pairs =
     [
-      ("tany", Bad_type_logger.handler);
+      ("tany", Tany_logger.handler);
       ("shape_analysis", Shape_analysis_logger.handler);
     ]
   in

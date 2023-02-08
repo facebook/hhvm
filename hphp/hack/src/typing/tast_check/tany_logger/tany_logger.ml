@@ -7,9 +7,9 @@
  *)
 
 open Hh_prelude
-open Bad_type_logger_types
-open Bad_type_logger_file
-open Bad_type_logger_scuba
+open Tany_logger_types
+open Tany_logger_file
+open Tany_logger_scuba
 
 (* A bad type is a Tany *)
 

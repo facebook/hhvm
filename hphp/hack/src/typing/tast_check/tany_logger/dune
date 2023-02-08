@@ -1,11 +1,11 @@
 (library
- (name bad_type_logger)
- (modules bad_type_logger bad_type_logger_file)
+ (name tany_logger)
+ (modules tany_logger tany_logger_file)
  (wrapped false)
  (libraries
   ast
-  bad_type_logger_common
-  bad_type_logger_scuba
+  tany_logger_common
+  tany_logger_scuba
   core_kernel
   tast_env
   utils_core)
@@ -13,9 +13,9 @@
   (pps ppx_deriving.std)))
 
 (library
- (name bad_type_logger_common)
+ (name tany_logger_common)
  (wrapped false)
- (modules bad_type_logger_types bad_type_logger_common)
+ (modules tany_logger_types tany_logger_common)
  (libraries ast core_kernel tast_env utils_core)
  (preprocess
   (pps ppx_deriving.std)))

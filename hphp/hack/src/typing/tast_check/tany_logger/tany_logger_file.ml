@@ -7,8 +7,8 @@
  *)
 
 open Hh_prelude
-open Bad_type_logger_types
-open Bad_type_logger_common
+open Tany_logger_types
+open Tany_logger_common
 
 (** Flattens the structure information about Tanys and writes it out to the logging channel. *)
 let log_info_to_file_internal level (info : info) : unit =

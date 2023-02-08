@@ -7,7 +7,7 @@
  *)
 
 open Hh_prelude
-open Bad_type_logger_types
+open Tany_logger_types
 
 let should_log log_level log_mask = log_level land log_mask_to_enum log_mask > 0
 

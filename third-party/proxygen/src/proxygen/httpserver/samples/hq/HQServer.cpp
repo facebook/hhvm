@@ -22,7 +22,6 @@
 
 using fizz::server::FizzServerContext;
 using quic::QuicServerTransport;
-using quic::QuicSocket;
 
 namespace {
 

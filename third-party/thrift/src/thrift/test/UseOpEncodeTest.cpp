@@ -64,6 +64,13 @@ void testUseOpEncode() {
   original.inplace_adapted_list_field()->value.push_back(adaptedFoo);
   original.nested_map_field().emplace()[adaptedFoo] = {
       {adaptedBar, adaptedInt}};
+  original.field20().emplace().push_back(
+      test::TemplatedTestAdapter::fromThrift(std::set<int32_t>{1}));
+  original.field21().emplace().push_back(
+      test::Wrapper<std::set<test::Wrapper<int32_t>>>{{{1}}});
+  original.field22().emplace().push_back(
+      test::Wrapper<std::set<test::Wrapper<std::set<test::Wrapper<int32_t>>>>>{
+          {{{{1}}}}});
 
   original.write(&writer);
 
@@ -79,6 +86,9 @@ void testUseOpEncode() {
       test::TemplatedTestAdapter::fromThrift(foo));
   result.inplace_adapted_list_field()->value.push_back(
       test::TemplatedTestAdapter::fromThrift(foo));
+  result.field20()->emplace_back();
+  result.field21()->emplace_back();
+  result.field22()->emplace_back();
 
   result.read(&reader);
   EXPECT_EQ(result, original);

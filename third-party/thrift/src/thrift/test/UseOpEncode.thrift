@@ -36,6 +36,15 @@ typedef Bar AdaptedBar
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef i32 AdaptedI32
 
+@cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+typedef set<i32> AdaptedSetOfI32
+
+@cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+typedef set<AdaptedI32> AdaptedSetOfAdaptedI32
+
+@cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+typedef set<AdaptedSetOfAdaptedI32> AdaptedSetOfAdaptedSetOfAdaptedI32
+
 enum Enum {
   first = 1,
   second = 2,
@@ -72,6 +81,10 @@ struct OpEncodeStruct {
 
   18: i64 (cpp.type = "Timestamp", cpp.indirection) timestamp;
   19: map<AdaptedFoo, map<AdaptedBar, AdaptedI32>> nested_map_field;
+
+  20: list<AdaptedSetOfI32> field20;
+  21: list<AdaptedSetOfAdaptedI32> field21;
+  22: list<AdaptedSetOfAdaptedSetOfAdaptedI32> field22;
 }
 
 struct Baz {

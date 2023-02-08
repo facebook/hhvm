@@ -5,16 +5,16 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use anyhow::Result;
-use clap::Parser;
+use clap::Args;
 use direct_decl_parser::ParsedFile;
 use hash::IndexMap;
 use relative_path::Prefix;
 use relative_path::RelativePath;
 
 /// Decls subcommand options
-#[derive(Parser, Debug, Default)]
+#[derive(Args, Debug, Default)]
 pub(crate) struct Opts {
-    #[clap(flatten)]
+    #[command(flatten)]
     pub files: crate::FileOpts,
 }
 

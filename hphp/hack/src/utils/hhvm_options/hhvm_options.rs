@@ -89,7 +89,7 @@ pub struct HphpOptions {
         long,
         short,
         default_value("binary"),
-        possible_values(&["binary", "hhas", "text"]),
+        value_parser = clap::builder::PossibleValuesParser::new(&["binary", "hhas", "text"]),
     )]
     pub format: String,
 

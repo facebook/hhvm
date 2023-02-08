@@ -12,7 +12,7 @@ use std::path::PathBuf;
 use aast_parser::AastParser;
 use anyhow::Context;
 use anyhow::Result;
-use clap::Parser;
+use clap::Args;
 use ocamlrep::rc::RcOc;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::parser_env::ParserEnv;
@@ -25,9 +25,9 @@ use strum_macros::Display;
 use strum_macros::EnumString;
 use strum_macros::EnumVariantNames;
 
-#[derive(Parser, Clone, Debug)]
+#[derive(Args, Clone, Debug)]
 pub struct BenchOpts {
-    #[clap(default_value_t, long, possible_values(ParserKind::VARIANTS))]
+    #[clap(default_value_t, long, value_parser = clap::builder::PossibleValuesParser::new(ParserKind::VARIANTS))]
     parser: ParserKind,
 }
 
@@ -92,9 +92,9 @@ pub fn run_bench_command(bench_opts: BenchOpts) -> Result<()> {
         })
 }
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 pub(crate) struct Opts {
-    #[clap(flatten)]
+    #[command(flatten)]
     pub files: crate::FileOpts,
 
     /// Print compact JSON instead of formatted & indented JSON.

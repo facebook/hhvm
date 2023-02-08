@@ -2,15 +2,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use anyhow::Result;
-use clap::Parser;
+use clap::Args;
 use relative_path::Prefix;
 use relative_path::RelativePath;
 
 use crate::FileOpts;
 
-#[derive(Parser, Debug, Default)]
+#[derive(Args, Debug, Default)]
 pub(crate) struct Opts {
-    #[clap(flatten)]
+    #[command(flatten)]
     pub files: FileOpts,
 }
 

@@ -3,7 +3,7 @@ use std::path::Path;
 use aast_parser::AastParser;
 use anyhow::anyhow;
 use anyhow::Result;
-use clap::Parser;
+use clap::Args;
 use log::info;
 use ocamlrep::rc::RcOc;
 use parser_core_types::indexed_source_text::IndexedSourceText;
@@ -16,9 +16,9 @@ use transform::Pass;
 
 use crate::FileOpts;
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 pub struct Opts {
-    #[clap(flatten)]
+    #[command(flatten)]
     files: FileOpts,
 }
 

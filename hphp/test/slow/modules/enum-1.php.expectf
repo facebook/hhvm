@@ -1,0 +1,24 @@
+Accessing internal enum Foo in module b from module a is not allowed
+
+Warning: Accessing soft internal enum SoftFoo in module b from module a is not allowed in %s on line 26
+string(3) "bar"
+Accessing internal enum class EC in module b from module a is not allowed
+
+Warning: Accessing soft internal enum class SoftEC in module b from module a is not allowed in %s on line 32
+object(C) (0) {
+}
+Dynamic>>
+
+Accessing internal enum Foo in module b from module a is not allowed
+Accessing internal enum Foo in module b from module a is not allowed
+
+Warning: Accessing soft internal enum SoftFoo in module b from module a is not allowed in %s on line 7
+string(3) "bar"
+Accessing internal enum Foo in module b from module a is not allowed
+Accessing internal enum class EC in module b from module a is not allowed
+Accessing internal enum class EC in module b from module a is not allowed
+
+Warning: Accessing soft internal enum class SoftEC in module b from module a is not allowed in %s on line 7
+object(C) (0) {
+}
+Accessing internal enum class EC in module b from module a is not allowed

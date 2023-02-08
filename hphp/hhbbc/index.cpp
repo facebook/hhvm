@@ -13279,7 +13279,8 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
       }
 
       // Fully resolved constant with a known value
-      return R{ from_cell(*cns.val), TriBool::Yes, false };
+      auto const mightThrow = bool(ci->cls->attrs & AttrInternal);
+      return R{ from_cell(*cns.val), TriBool::Yes, mightThrow };
     }();
     ITRACE(4, "-> {}\n", show(r));
     return r;

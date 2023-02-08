@@ -498,8 +498,10 @@ void raiseModuleBoundaryViolation(const Class* cls,
                                   const StringData* callerModule) {
   assertx(cls);
   assertx(cls->isInternal());
+  auto const symbolType =
+    isEnum(cls) ? "enum" : (isEnumClass(cls) ? "enum class" : "class");
   return moduleBoundaryViolationImpl(
-    folly::sformat("class {}", cls->name()),
+    folly::sformat("{} {}", symbolType, cls->name()),
     cls->moduleName(),
     callerModule,
     cls->attrs() & AttrInternalSoft

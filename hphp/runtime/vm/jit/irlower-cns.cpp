@@ -313,6 +313,9 @@ static TypedValue initClsCnsHelper(TypedValue* cache,
                                    const NamedType* ne,
                                    const StringData* cls,
                                    const StringData* cns) {
+  // We need anchor here since lookupClsCns might raise warning or throw an
+  // exception
+  VMRegAnchor _;
   auto const clsCns = g_context->lookupClsCns(ne, cls, cns);
   tvDup(clsCns, *cache);
   return clsCns;

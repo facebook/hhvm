@@ -1048,7 +1048,9 @@ TypedValue ExecutionContext::lookupClsCns(const NamedType* ne,
                                       const StringData* cns) {
   Class* class_ = nullptr;
   try {
-    class_ = Class::load(ne, cls);
+    // Use resolve() as opposed to load() since we want to make sure this
+    // class is accessible to us.
+    class_ = Class::resolve(ne, cls, vmfp()->func());
   } catch (Object& ex) {
     // For compatibility with php, throwing through a constant lookup has
     // different behavior inside a property initializer (86pinit/86sinit).

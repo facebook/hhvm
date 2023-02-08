@@ -26,7 +26,7 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         // a file log in the state dir or in a configured location. See
         // hh_decl_ffi.rs for another location we need to pass a better log
         // object.
-        let log = hh_slog::FileScubaLogger {
+        let log = file_scuba_logger::FileScubaLogger {
             file: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log")),
             scuba: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log_scuba")),
         };
@@ -40,7 +40,7 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         // a file log in the state dir or in a configured location. See
         // hh_decl_ffi.rs for another location we need to pass a better log
         // object.
-        let log = hh_slog::FileScubaLogger {
+        let log = file_scuba_logger::FileScubaLogger {
             file: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log")),
             scuba: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log_scuba")),
         };

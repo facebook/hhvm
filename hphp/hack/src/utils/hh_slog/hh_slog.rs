@@ -12,23 +12,6 @@ fn timestamp_format(io: &mut dyn std::io::Write) -> std::io::Result<()> {
     write!(io, "{}", chrono::Local::now().format(TIMESTAMP_FORMAT))
 }
 
-/// We want multiple components and even multiple *processes* to all be able to
-/// write to the same log destinations (scuba and/or file). This struct achieves
-/// two things:
-/// * It allows sharing between multiple processes. The initial creator writes config
-///   information to a config file, and subsequent processes can instantiate it from
-///   that config file.
-/// * It combines a scuba logger and a file logger.
-/// If multiple processes or multiple threads concurrently log to the file,
-/// items will be interleaved in the file.
-#[derive(Clone, Debug)]
-pub struct FileScubaLogger {
-    /// Logs to both scuba and file.
-    pub scuba: slog::Logger,
-    /// Only logs to the file.
-    pub file: slog::Logger,
-}
-
 /// Creates a logger that drains to the given path. Also returns its guard (read
 /// `init` for more details).
 /// The file logger uses unix flock to lock the log file when flushing its logs.
@@ -85,15 +68,6 @@ pub fn init_term_testing() -> slog::Logger {
         .fuse();
 
     slog::Logger::root(drain, o!())
-}
-
-/// Initializes a `FileScubaLogger` where each logger prints to stdout synchronously.
-/// Used for testing.
-pub fn init_testing() -> FileScubaLogger {
-    FileScubaLogger {
-        scuba: init_term_testing(),
-        file: init_term_testing(),
-    }
 }
 
 /// Essentially a /dev/null logger

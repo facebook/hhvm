@@ -9,9 +9,9 @@ use ocamlrep_custom::Custom;
 use unwrap_ocaml::UnwrapOcaml;
 
 #[derive(Clone)]
-pub struct FileScubaLoggerFfi(pub hh_slog::FileScubaLogger);
+pub struct FileScubaLoggerFfi(pub file_scuba_logger::FileScubaLogger);
 
-pub struct LoggerGuardFfi(file_scuba_config::LoggerGuard);
+pub struct LoggerGuardFfi(file_scuba_logger::LoggerGuard);
 
 impl ocamlrep_custom::CamlSerialize for FileScubaLoggerFfi {
     ocamlrep_custom::caml_serialize_default_impls!();
@@ -30,7 +30,7 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         // folly has initialized. Our binaries should all have initialized
         // fb/folly.
         let fb = unsafe { fbinit::assume_init() };
-        let (logger, guard) = file_scuba_config::from_config_file(fb, &config_file).unwrap_ocaml();
+        let (logger, guard) = file_scuba_logger::from_config_file(fb, &config_file).unwrap_ocaml();
         (
             Custom::from(FileScubaLoggerFfi(logger)),
             Custom::from(LoggerGuardFfi(guard))
@@ -38,7 +38,7 @@ ocamlrep_ocamlpool::ocaml_ffi! {
     }
 
     fn file_scuba_logger_ffi_make_env_term() -> (Custom<FileScubaLoggerFfi>, Custom<LoggerGuardFfi>) {
-        let (logger, guard) = file_scuba_config::env_term();
+        let (logger, guard) = file_scuba_logger::env_term();
         (
             Custom::from(FileScubaLoggerFfi(logger)),
             Custom::from(LoggerGuardFfi(guard))

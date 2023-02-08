@@ -1,6 +1,6 @@
 type t = unit
 
-let connect ~decl_state_dir:_ = failwith "not implemented"
+let connect _ ~decl_state_dir:_ = failwith "not implemented"
 
 let rpc_get_fun _ _ = failwith "not implemented"
 

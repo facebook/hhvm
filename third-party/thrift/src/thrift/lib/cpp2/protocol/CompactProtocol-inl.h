@@ -381,12 +381,6 @@ inline folly::io::Cursor CompactProtocolWriter::tail(size_t n) {
   return {cursor - n, n};
 }
 
-inline void CompactProtocolWriter::rewind(uint32_t n) {
-  out_.trimEnd(n);
-  // Clean up context.
-  state_.lastFieldId = state_.lastWrittenFieldId;
-}
-
 /**
  * Functions that return the serialized size
  */

@@ -109,13 +109,13 @@ inline uint32_t CompactProtocolWriter::writeStructBegin(
     const char* /* name */) {
   descend();
 
-  lastField_.push(state_);
-  state_ = {0, 0};
+  lastField_.push(lastFieldId_);
+  lastFieldId_ = 0;
   return 0;
 }
 
 inline uint32_t CompactProtocolWriter::writeStructEnd() {
-  state_ = lastField_.top();
+  lastFieldId_ = lastField_.top();
   lastField_.pop();
 
   ascend();
@@ -134,7 +134,7 @@ inline uint32_t CompactProtocolWriter::writeFieldBeginInternal(
     const int16_t fieldId,
     int8_t typeOverride,
     int16_t previousId) {
-  DCHECK_EQ(previousId, state_.lastFieldId);
+  DCHECK_EQ(previousId, lastFieldId_);
   uint32_t wsize = 0;
 
   // if there's a type override, use that.
@@ -153,7 +153,7 @@ inline uint32_t CompactProtocolWriter::writeFieldBeginInternal(
     wsize += writeByte(typeToWrite);
     wsize += writeI16(fieldId);
   }
-  state_ = {fieldId, state_.lastFieldId};
+  lastFieldId_ = fieldId;
   return wsize;
 }
 
@@ -253,7 +253,7 @@ inline uint32_t CompactProtocolWriter::writeBool(bool value) {
         booleanField_.fieldId,
         value ? apache::thrift::detail::compact::CT_BOOLEAN_TRUE
               : apache::thrift::detail::compact::CT_BOOLEAN_FALSE,
-        state_.lastFieldId);
+        lastFieldId_);
     booleanField_.name = nullptr;
   } else {
     // we're not part of a field, so just write the value

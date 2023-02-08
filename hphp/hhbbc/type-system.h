@@ -762,6 +762,8 @@ private:
   friend std::pair<Type, Type> split_string(Type);
   friend std::pair<Type, Type> split_lazycls(Type);
 
+  friend Type promote_classish(Type);
+
   friend std::string show(const Type&);
   friend std::pair<Type,bool> array_like_elem_impl(const Type&, const Type&);
   friend std::pair<Type,bool> array_like_set_impl(Type,
@@ -1213,6 +1215,13 @@ Type remove_keyset(Type);
  * data is removed.
  */
 Type remove_bits(Type, trep);
+
+/*
+ * If the type might contain TCls or TLazyCls, remove it, and add
+ * TSStr instead. Any lazy class/class specialization is preserved and
+ * translated into a string specialization.
+ */
+Type promote_classish(Type);
 
 /*
  * Returns the best known instantiation of a class type.

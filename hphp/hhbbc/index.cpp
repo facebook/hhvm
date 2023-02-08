@@ -4344,17 +4344,18 @@ Type context_sensitive_return_type(IndexData& data,
   returnType = return_with_context(std::move(returnType), adjustedCtx);
 
   auto const checkParam = [&] (int i) {
-    auto const constraint = finfo->func->params[i].typeConstraint;
+    auto const& constraint = finfo->func->params[i].typeConstraint;
     if (constraint.hasConstraint() &&
         !constraint.isTypeVar() &&
         !constraint.isTypeConstant()) {
-      auto ctx = Context {
+      auto const ctx = Context {
         data.units.at(finfo->func->unit),
         finfo->func,
         finfo->func->cls
       };
-      auto t = data.m_index->lookup_constraint(ctx, constraint);
-      return callCtx.args[i].strictlyMoreRefined(t);
+      return callCtx.args[i].strictlyMoreRefined(
+        data.m_index->lookup_constraint(ctx, constraint).upper
+      );
     }
     return callCtx.args[i].strictSubtypeOf(TInitCell);
   };
@@ -4565,7 +4566,9 @@ PropMergeResult<> prop_tc_effects(const Index& index,
   auto const check = [&] (const TypeConstraint& tc, const Type& t) {
     // If the type as is satisfies the constraint, we won't throw and
     // the type is unchanged.
-    if (index.satisfies_constraint(ctx, t, tc)) return R{ t, TriBool::No };
+      if (t.moreRefined(index.lookup_constraint(ctx, tc, t).lower)) {
+      return R{ t, TriBool:: No };
+    }
     // Otherwise adjust the type. If we get a Bottom we'll definitely
     // throw. We already know the type doesn't completely satisfy the
     // constraint, so we'll at least maybe throw.
@@ -11698,16 +11701,11 @@ void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
         // type-constraints are equivalent if all the possible values of one
         // satisfies the other, and vice-versa.
         if (!tc1.maybeInequivalentForProp(tc2)) return true;
+        auto const lookup1 = lookup_constraint(Context{}, tc1);
+        auto const lookup2 = lookup_constraint(Context{}, tc2);
         return
-          satisfies_constraint(
-            Context{},
-            lookup_constraint(Context{}, tc1),
-            tc2
-          ) && satisfies_constraint(
-            Context{},
-            lookup_constraint(Context{}, tc2),
-            tc1
-          );
+          lookup1.upper.moreRefined(lookup2.lower) &&
+          lookup2.upper.moreRefined(lookup1.lower);
       };
       auto const equiv = [&] {
         if (!equivOneTCPair(prop->typeConstraint, pprop->typeConstraint)) {
@@ -12187,18 +12185,18 @@ const php::TypeAlias* Index::lookup_type_alias(SString name) const {
   return it->second;
 }
 
-Index::ResolvedInfo<Optional<res::Class>>
-Index::resolve_type_name(SString inName) const {
-  Optional<hphp_fast_set<const void*>> seen;
-
+Index::ResolvedTypeName Index::resolve_type_name(SString name) const {
+  Optional<ISStringSet> seen;
   auto nullable = false;
-  auto name = inName;
 
-  for (unsigned i = 0; ; ++i) {
+  auto const get = [] (auto const& m, SString k) {
+    return folly::get_default(m, k, nullptr);
+  };
+
+  for (size_t rounds = 0;; ++rounds) {
     name = normalizeNS(name);
-    auto const cls_it = m_data->classInfo.find(name);
-    if (cls_it != end(m_data->classInfo)) {
-      auto const cinfo = cls_it->second;
+
+    if (auto const cinfo = get(m_data->classInfo, name)) {
       assertx(cinfo->cls->attrs & AttrUnique);
       if (!(cinfo->cls->attrs & AttrEnum)) {
         return {
@@ -12209,94 +12207,41 @@ Index::resolve_type_name(SString inName) const {
             : res::Class { cinfo }
         };
       }
+
       auto const& tc = cinfo->cls->enumBaseTy;
       assertx(!tc.isNullable());
       if (!tc.isUnresolved()) {
         auto const type = tc.isMixed() ? AnnotType::ArrayKey : tc.type();
         assertx(type != AnnotType::Object);
-        return { type, nullable, {} };
+        return { type, nullable, std::nullopt };
       }
       name = tc.typeName();
-    } else {
-      auto const ta_it = m_data->typeAliases.find(name);
-      if (ta_it == end(m_data->typeAliases)) break;
-      auto const ta = ta_it->second;
+    } else if (auto const ta = get(m_data->typeAliases, name)) {
       assertx(ta->attrs & AttrUnique);
-      nullable = nullable || ta->nullable;
+      nullable |= ta->nullable;
       if (ta->type != AnnotType::Unresolved) {
         assertx(ta->type != AnnotType::Object);
-        return { ta->type, nullable, {} };
+        return { ta->type, nullable, std::nullopt };
       }
       name = ta->value;
+    } else {
+      return { AnnotType::Unresolved, nullable, std::nullopt };
     }
 
-    // deal with cycles. Since we don't expect to
-    // encounter them, just use a counter until we hit a chain length
-    // of 10, then start tracking the names we resolve.
-    if (i == 10) {
+    // Deal with cycles. Since we don't expect to encounter them, just
+    // use a counter until we hit a chain length of 10, then start
+    // tracking the names we resolve.
+    if (rounds == 10) {
       seen.emplace();
       seen->insert(name);
-    } else if (i > 10) {
+    } else if (rounds > 10) {
       if (!seen->insert(name).second) {
-        return { AnnotType::Unresolved, false, {} };
+        return { AnnotType::Unresolved, false, std::nullopt };
       }
     }
   }
 
-  return { AnnotType::Object, nullable, res::Class { name } };
-}
-
-struct Index::ConstraintResolution {
-  /* implicit */ ConstraintResolution(Type type)
-    : type{std::move(type)}
-    , maybeMixed{false} {}
-  ConstraintResolution(Optional<Type> type, bool maybeMixed)
-    : type{std::move(type)}
-    , maybeMixed{maybeMixed} {}
-
-  Optional<Type> type;
-  bool maybeMixed;
-};
-
-Index::ConstraintResolution Index::resolve_named_type(
-  const Context& ctx, SString name, const Type& candidate) const {
-
-  auto const res = resolve_type_name(name);
-
-  if (res.nullable && candidate.subtypeOf(BInitNull)) return TInitNull;
-
-  if (res.type == AnnotType::Unresolved) return TInitCell;
-
-  if (res.type == AnnotType::Object) {
-    auto resolve = [&] (const res::Class& rcls) -> Optional<Type> {
-      if (!interface_supports_non_objects(rcls.name()) ||
-          candidate.subtypeOf(BOptObj)) {
-        return subObj(rcls);
-      }
-
-      if (candidate.subtypeOf(BOptVec)) {
-        if (interface_supports_arrlike(rcls.name())) return TVec;
-      } else if (candidate.subtypeOf(BOptDict)) {
-        if (interface_supports_arrlike(rcls.name())) return TDict;
-      } else if (candidate.subtypeOf(BOptKeyset)) {
-        if (interface_supports_arrlike(rcls.name())) return TKeyset;
-      } else if (candidate.subtypeOf(BOptStr)) {
-        if (interface_supports_string(rcls.name())) return TStr;
-      } else if (candidate.subtypeOf(BOptInt)) {
-        if (interface_supports_int(rcls.name())) return TInt;
-      } else if (candidate.subtypeOf(BOptDbl)) {
-        if (interface_supports_double(rcls.name())) return TDbl;
-      }
-      return std::nullopt;
-    };
-
-    auto ty = resolve(*res.value);
-    if (ty && res.nullable) *ty = opt(std::move(*ty));
-    return ConstraintResolution{ std::move(ty), false };
-  }
-
-  return get_type_for_annotated_type(ctx, res.type, res.nullable, nullptr,
-                                     candidate);
+  always_assert(false);
 }
 
 std::pair<res::Class, const php::Class*>
@@ -12850,180 +12795,177 @@ res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
   return resolve_func_helper((it != end(m_data->funcs)) ? it->second : nullptr, name);
 }
 
-/*
- * Gets a type for the constraint.
- *
- * If getSuperType is true, the type could be a super-type of the
- * actual type constraint (eg TCell). Otherwise its guaranteed that
- * for any t, t.subtypeOf(get_type_for_constraint<false>(ctx, tc, t)
- * implies t would pass the constraint.
- *
- * The candidate type is used to disambiguate; if we're applying a
- * Traversable constraint to a TObj, we should return
- * subObj(Traversable).  If we're applying it to an Array, we should
- * return Array.
- */
-template<bool getSuperType>
-Type Index::get_type_for_constraint(Context ctx,
-                                    const TypeConstraint& tc,
-                                    const Type& candidate) const {
-  assertx(IMPLIES(!tc.isCheckable(),
-                   tc.isMixed() ||
-                   (tc.isUpperBound() &&
-                    RuntimeOption::EvalEnforceGenericsUB == 0)));
+Index::ConstraintType<>
+Index::type_from_annot_type(const Context& ctx,
+                            AnnotType annot,
+                            SString name,
+                            const Type& candidate) const {
+  auto const resolve = [&] {
+    assertx(name);
+    auto const resolved = resolve_type_name(name);
 
-  if (getSuperType) {
-    /*
-     * Soft hints (@Foo) are not checked.
-     * Also upper-bound type hints are not checked when they do not error.
-     */
-    if (tc.isSoft() ||
-        (RuntimeOption::EvalEnforceGenericsUB < 2 && tc.isUpperBound())) {
-      return TCell;
+    auto ty = [&] {
+      if (resolved.type == AnnotType::Unresolved) {
+        // Resolution failed, so the type doesn't exist.
+        assertx(!resolved.cls);
+        return ConstraintType<>{ TBottom, TBottom };
+      }
+
+      if (resolved.type == AnnotType::Object) {
+        assertx(resolved.cls.has_value());
+        auto lower = subObj(*resolved.cls);
+        auto upper = lower;
+
+        // The "magic" interfaces cannot be represented with a single
+        // type. Obj=Foo|Str, for example, is not a valid type. It is
+        // safe to only provide a subset as the lower bound. We can
+        // use any provided candidate type to refine the lower bound
+        // and supply the subset which would allow us to optimize away
+        // the check.
+        if (interface_supports_arrlike(resolved.cls->name())) {
+          if (candidate.subtypeOf(BArrLike)) lower = TArrLike;
+          upper |= TArrLike;
+        }
+        if (interface_supports_int(resolved.cls->name())) {
+          if (candidate.subtypeOf(BInt)) lower = TInt;
+          upper |= TInt;
+        }
+        if (interface_supports_double(resolved.cls->name())) {
+          if (candidate.subtypeOf(BDbl)) lower = TDbl;
+          upper |= TDbl;
+        }
+
+        if (interface_supports_string(resolved.cls->name())) {
+          if (candidate.subtypeOf(BStr)) lower = TStr;
+          upper |= union_of(TStr, TCls, TLazyCls);
+          return ConstraintType<> {
+            std::move(lower),
+            std::move(upper),
+            TriBool::Yes
+          };
+        }
+
+        return ConstraintType<>{ std::move(lower), std::move(upper) };
+      }
+
+      // Not an object. It's some other type which must be recursively
+      // resolved.
+      assertx(!resolved.cls);
+      return type_from_annot_type(ctx, resolved.type, nullptr, candidate);
+    }();
+
+    if (resolved.nullable) {
+      ty.lower = opt(std::move(ty.lower));
+      ty.upper = opt(std::move(ty.upper));
     }
-  }
+    return ty;
+  };
 
-  auto const res = get_type_for_annotated_type(
-    ctx,
-    tc.type(),
-    tc.isNullable(),
-    tc.isObject() ? tc.clsName() : tc.typeName(),
-    candidate
-  );
-  if (res.type) return *res.type;
-  // If the type constraint might be mixed, then the value could be
-  // uninit. Any other type constraint implies TInitCell.
-  return getSuperType ? (res.maybeMixed ? TCell : TInitCell) : TBottom;
-}
+  auto const exact = [&] (const Type& t) {
+    return ConstraintType<>{ t, t };
+  };
 
-bool Index::prop_tc_maybe_unenforced(const php::Class& propCls,
-                                     const TypeConstraint& tc) const {
-  assertx(tc.validForProp());
-  if (RuntimeOption::EvalCheckPropTypeHints <= 2) return true;
-  if (!tc.isCheckable()) return true;
-  if (tc.isSoft()) return true;
-  if (tc.isUpperBound() && RuntimeOption::EvalEnforceGenericsUB < 2) {
-    return true;
-  }
-  auto const res = get_type_for_annotated_type(
-    Context { nullptr, nullptr, &propCls },
-    tc.type(),
-    tc.isNullable(),
-    tc.isObject() ? tc.clsName() : tc.typeName(),
-    TCell
-  );
-  return res.maybeMixed;
-}
-
-Index::ConstraintResolution Index::get_type_for_annotated_type(
-  Context ctx, AnnotType annot, bool nullable,
-  SString name, const Type& candidate) const {
-
-  if (candidate.subtypeOf(BInitNull) && nullable) {
-    return TInitNull;
-  }
-
-  auto mainType = [&]() -> ConstraintResolution {
-    switch (getAnnotMetaType(annot)) {
+  switch (getAnnotMetaType(annot)) {
     case AnnotMetaType::Precise: {
-      auto const dt = getAnnotDataType(annot);
-
-      switch (dt) {
-      case KindOfNull:         return TNull;
-      case KindOfBoolean:      return TBool;
-      case KindOfInt64:        return TInt;
-      case KindOfDouble:       return TDbl;
-      case KindOfPersistentString:
-      case KindOfString:       return TStr;
+      switch (getAnnotDataType(annot)) {
+      case KindOfNull:         return exact(TInitNull);
+      case KindOfBoolean:      return exact(TBool);
+      case KindOfInt64:        return exact(TInt);
+      case KindOfDouble:       return exact(TDbl);
       case KindOfPersistentVec:
-      case KindOfVec:          return TVec;
+      case KindOfVec:          return exact(TVec);
       case KindOfPersistentDict:
-      case KindOfDict:         return TDict;
+      case KindOfDict:         return exact(TDict);
       case KindOfPersistentKeyset:
-      case KindOfKeyset:       return TKeyset;
-      case KindOfResource:     return TRes;
-      case KindOfClsMeth:      return TClsMeth;
-      case KindOfObject:
-        return resolve_named_type(ctx, name, candidate);
+      case KindOfKeyset:       return exact(TKeyset);
+      case KindOfResource:     return exact(TRes);
+      case KindOfClsMeth:      return exact(TClsMeth);
+      case KindOfObject:       return resolve();
+      case KindOfPersistentString:
+      case KindOfString:
+        return ConstraintType<>{
+          TStr,
+          union_of(TStr, TCls, TLazyCls),
+          TriBool::Yes
+        };
       case KindOfUninit:
       case KindOfRFunc:
       case KindOfFunc:
       case KindOfRClsMeth:
       case KindOfClass:
-      case KindOfLazyClass:
-        always_assert_flog(false, "Unexpected DataType");
-        break;
+      case KindOfLazyClass:    break;
       }
-      break;
+      always_assert(false);
     }
     case AnnotMetaType::Mixed:
-      /*
-       * Here we handle "mixed", typevars, and some other ignored
-       * typehints (ex. "(function(..): ..)" typehints).
-       */
-      return { TCell, true };
+      return ConstraintType<>{ TInitCell, TInitCell, TriBool::No, true };
     case AnnotMetaType::Nothing:
-    case AnnotMetaType::NoReturn:
-      return TBottom;
-    case AnnotMetaType::Nonnull:
-      if (candidate.subtypeOf(BInitNull)) return TBottom;
-      if (!candidate.couldBe(BInitNull))  return candidate;
-      return unopt(candidate);
+    case AnnotMetaType::NoReturn:   return exact(TBottom);
+    case AnnotMetaType::Nonnull:    return exact(TNonNull);
+    case AnnotMetaType::Number:     return exact(TNum);
+    case AnnotMetaType::VecOrDict:  return exact(TKVish);
+    case AnnotMetaType::ArrayLike:  return exact(TArrLike);
+    case AnnotMetaType::Unresolved: return resolve();
     case AnnotMetaType::This:
-      if (auto s = selfCls(ctx)) return setctx(subObj(*s));
-      break;
+      if (auto const s = selfCls(ctx)) {
+        auto obj = subObj(*s);
+        if (!s->couldBeMocked()) return exact(setctx(obj));
+        return ConstraintType<>{ setctx(obj), obj };
+      }
+      return ConstraintType<>{ TBottom, TObj };
     case AnnotMetaType::Callable:
-      break;
-    case AnnotMetaType::Number:
-      return TNum;
+      return ConstraintType<>{
+        TBottom,
+        union_of(TStr, TVec, TDict, TFunc, TRFunc, TObj, TClsMeth, TRClsMeth)
+      };
     case AnnotMetaType::ArrayKey:
-      if (candidate.subtypeOf(BInt)) return TInt;
-      if (candidate.subtypeOf(BStr)) return TStr;
-      return TArrKey;
-    case AnnotMetaType::VecOrDict:
-      if (candidate.subtypeOf(BVec)) return TVec;
-      if (candidate.subtypeOf(BDict)) return TDict;
-      return union_of(TVec, TDict);
-    case AnnotMetaType::ArrayLike:
-      if (candidate.subtypeOf(BVec)) return TVec;
-      if (candidate.subtypeOf(BDict)) return TDict;
-      if (candidate.subtypeOf(BKeyset)) return TKeyset;
-      return TArrLike;
+      return ConstraintType<>{
+        TArrKey,
+        union_of(TArrKey, TCls, TLazyCls),
+        TriBool::Yes
+      };
     case AnnotMetaType::Classname:
-      if (candidate.subtypeOf(BStr)) return TStr;
-      if (!RuntimeOption::EvalClassnameNotices) {
-        if (candidate.subtypeOf(BCls)) return TCls;
-        if (candidate.subtypeOf(BLazyCls)) return TLazyCls;
-      }
-      break;
-    case AnnotMetaType::Unresolved:
-      return resolve_named_type(ctx, name, candidate);
-    }
-    return ConstraintResolution{ std::nullopt, false };
-  }();
-
-  if (mainType.type && nullable) {
-    if (mainType.type->subtypeOf(BBottom)) {
-      if (candidate.couldBe(BInitNull)) {
-        mainType.type = TInitNull;
-      }
-    } else if (!mainType.type->couldBe(BInitNull)) {
-      mainType.type = opt(*mainType.type);
-    }
+      return ConstraintType<>{
+        RO::EvalClassnameNotices ? TStr : union_of(TStr, TCls, TLazyCls),
+        union_of(TStr, TCls, TLazyCls)
+      };
   }
-  return mainType;
+
+  always_assert(false);
 }
 
-Type Index::lookup_constraint(Context ctx,
-                              const TypeConstraint& tc,
-                              const Type& t) const {
-  return get_type_for_constraint<true>(ctx, tc, t);
-}
+Index::ConstraintType<>
+Index::lookup_constraint(const Context& ctx,
+                         const TypeConstraint& tc,
+                         const Type& candidate) const {
+  assertx(IMPLIES(
+    !tc.isCheckable(),
+    tc.isMixed() || (tc.isUpperBound() && RO::EvalEnforceGenericsUB == 0)
+  ));
 
-bool Index::satisfies_constraint(Context ctx, const Type& t,
-                                 const TypeConstraint& tc) const {
-  auto const tcType = get_type_for_constraint<false>(ctx, tc, t);
-  return t.moreRefined(tcType);
+  auto ty = type_from_annot_type(
+    ctx,
+    tc.type(),
+    tc.isObject() ? tc.clsName() : tc.typeName(),
+    candidate
+  );
+
+  // Nullable constraint always includes TInitNull.
+  if (tc.isNullable()) {
+    ty.lower = opt(std::move(ty.lower));
+    ty.upper = opt(std::move(ty.upper));
+  }
+  // We cannot ever say an upper-bound check will succeed, so its
+  // lower-bound is always empty.
+  if (tc.isUpperBound()) ty.lower = TBottom;
+  // Soft type-constraints can potentially allow anything, so its
+  // upper-bound is maximal. We might still be able to optimize away
+  // the check if the lower bound is satisfied.
+  if (tc.isSoft() || (RO::EvalEnforceGenericsUB < 2 && tc.isUpperBound())) {
+    ty.upper = TInitCell;
+    ty.maybeMixed = true;
+  }
+  return ty;
 }
 
 bool Index::could_have_reified_type(Context ctx,
@@ -13043,40 +12985,47 @@ bool Index::could_have_reified_type(Context ctx,
   auto const resolved = resolve_type_name(name);
   if (resolved.type == AnnotType::Unresolved) return true;
   if (resolved.type != AnnotType::Object) return false;
-  return resolved.value->couldHaveReifiedGenerics();
+  return resolved.cls->couldHaveReifiedGenerics();
 }
 
-std::tuple<Type, bool> Index::verify_param_type(Context ctx, uint32_t paramId,
-                                                Type t) const {
+std::tuple<Type, bool> Index::verify_param_type(const Context& ctx,
+                                                uint32_t paramId,
+                                                const Type& t) const {
   // Builtins verify parameter types differently.
   if (ctx.func->isNative) return { t, true };
 
   auto const& pinfo = ctx.func->params[paramId];
-  bool effectFree = true;
+
   std::vector<const TypeConstraint*> tcs{&pinfo.typeConstraint};
   for (auto const& tc : pinfo.upperBounds) tcs.push_back(&tc);
 
+  auto refined = TInitCell;
+  auto effectFree = true;
   for (auto const tc : tcs) {
-    if (!tc->isCheckable()) continue;
-    if (satisfies_constraint(ctx, t, *tc)) continue;
+    auto const lookup = lookup_constraint(ctx, *tc, t);
+    if (t.moreRefined(lookup.lower)) {
+      refined = intersection_of(std::move(refined), t);
+      continue;
+    }
+
+    if (!t.couldBe(lookup.upper)) return { TBottom, false };
 
     effectFree = false;
 
-    if (tc->mayCoerce() && t.couldBe(BCls | BLazyCls)) {
-      // Add the result of possible coercion.
-      t = union_of(std::move(t), TStr);
+    auto result = intersection_of(t, lookup.upper);
+    if (lookup.coerceClassToString == TriBool::Yes) {
+      assertx(!lookup.lower.couldBe(BCls | BLazyCls));
+      assertx(lookup.upper.couldBe(BStr | BCls | BLazyCls));
+      result = promote_classish(std::move(result));
+    } else if (lookup.coerceClassToString == TriBool::Maybe) {
+      if (result.couldBe(BCls | BLazyCls)) result |= TSStr;
     }
 
-    auto tcTy = lookup_constraint(ctx, *tc);
-    if (tc->isThis()) {
-      auto const cls = selfCls(ctx);
-      if (cls && cls->couldBeMocked()) tcTy = unctx(std::move(tcTy));
-    }
-
-    t = intersection_of(std::move(t), std::move(tcTy));
+    refined = intersection_of(std::move(refined), std::move(result));
+    if (refined.is(BBottom)) return { TBottom, false };
   }
 
-  return { t, effectFree };
+  return { std::move(refined), effectFree };
 }
 
 TriBool
@@ -14417,35 +14366,37 @@ void Index::init_return_type(const php::Func* func) {
     return;
   }
 
-  auto make_type = [&] (const TypeConstraint& tc) {
-    if (tc.isSoft() ||
-        (RuntimeOption::EvalEnforceGenericsUB < 2 && tc.isUpperBound())) {
-      return TBottom;
-    }
+  auto const make_type = [&] (const TypeConstraint& tc) {
     auto const cls = func->cls && func->cls->closureContextCls
        ? m_data->classes.at(func->cls->closureContextCls)
        : func->cls;
     return lookup_constraint(
       Context { m_data->units.at(func->unit), func, cls },
       tc
-    );
+    ).upper;
   };
 
   auto const finfo = create_func_info(*m_data, func);
 
   auto tcT = make_type(func->retTypeConstraint);
-  if (tcT.is(BBottom)) return;
 
   if (func->hasInOutArgs) {
     std::vector<Type> types;
     types.emplace_back(intersection_of(TInitCell, std::move(tcT)));
-    for (auto& p : func->params) {
-      if (!p.inout) continue;
-      auto t = make_type(p.typeConstraint);
-      if (t.is(BBottom)) return;
-      types.emplace_back(intersection_of(TInitCell, std::move(t)));
+    if (!types.back().is(BBottom)) {
+      for (auto const& p : func->params) {
+        if (!p.inout) continue;
+        auto t = make_type(p.typeConstraint);
+        types.emplace_back(intersection_of(TInitCell, std::move(t)));
+        if (types.back().is(BBottom)) {
+          tcT = TBottom;
+          break;
+        }
+      }
+      if (!tcT.is(BBottom)) tcT = vec(std::move(types));
+    } else {
+      tcT = TBottom;
     }
-    tcT = vec(std::move(types));
   }
 
   tcT = loosen_all(to_cell(std::move(tcT)));

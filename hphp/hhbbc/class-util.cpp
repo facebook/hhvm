@@ -129,15 +129,19 @@ bool prop_might_have_bad_initial_value(const Index& index,
   if (initial.subtypeOf(BUninit)) return true;
 
   auto const ctx = Context{ index.lookup_class_unit(cls), nullptr, &cls };
-  if (!index.satisfies_constraint(ctx, initial, prop.typeConstraint)) {
+  if (!initial.moreRefined(
+        index.lookup_constraint(ctx, prop.typeConstraint, initial).lower
+      )) {
     return true;
   }
 
   return std::any_of(
-    prop.ubs.begin(), prop.ubs.end(),
+    begin(prop.ubs), end(prop.ubs),
     [&] (TypeConstraint ub) {
       applyFlagsToUB(ub, prop.typeConstraint);
-      return !index.satisfies_constraint(ctx, initial, ub);
+      return !initial.moreRefined(
+        index.lookup_constraint(ctx, ub, initial).lower
+      );
     }
   );
 }

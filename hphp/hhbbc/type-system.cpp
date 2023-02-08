@@ -5619,6 +5619,40 @@ Type assert_nonemptiness(Type t) {
 
 //////////////////////////////////////////////////////////////////////
 
+Type promote_classish(Type t) {
+  if (!t.couldBe(BCls | BLazyCls)) return t;
+  t.m_bits &= ~(BCls | BLazyCls);
+  t.m_bits |= BSStr;
+
+  if (t.m_dataTag == DataTag::LazyCls) {
+    auto const name = t.m_data.lazyclsval;
+    destroy(t.m_data.lazyclsval);
+    construct(t.m_data.sval, name);
+    t.m_dataTag = DataTag::Str;
+  } else if (t.m_dataTag == DataTag::Cls) {
+    // If there could be subclasses we don't know the exact name, so
+    // must drop the specialization.
+    if (!t.m_data.dcls.isExact()) {
+      destroy(t.m_data.dcls);
+      t.m_dataTag = DataTag::None;
+    } else {
+      auto const name = t.m_data.dcls.cls().name();
+      destroy(t.m_data.dcls);
+      construct(t.m_data.sval, name);
+      t.m_dataTag = DataTag::Str;
+    }
+  } else {
+    // Since t could be BCls or BLazyCls, it cannot have any
+    // specialization other than the above two.
+    assertx(t.m_dataTag == DataTag::None);
+  }
+
+  assertx(t.checkInvariants());
+  return t;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 IterTypes iter_types(const Type& iterable) {
   // Only array types and objects can be iterated. Everything else raises a
   // warning and jumps out of the loop.
@@ -7099,16 +7133,27 @@ Type adjust_type_for_prop(const Index& index,
                           const php::Class& propCls,
                           const TypeConstraint* tc,
                           const Type& ty) {
-  auto ret = loosen_likeness(ty);
-  // If the type-hint might not be enforced, we must be conservative.
-  if (!tc || index.prop_tc_maybe_unenforced(propCls, *tc)) return ret;
-  auto const ctx = Context { nullptr, nullptr, &propCls };
-  // Otherwise lookup what we know about the constraint.
-  auto const tcBase = index.lookup_constraint(ctx, *tc, ret);
-  auto const tcType = unctx(remove_uninit(tcBase));
-  // The adjusted type is the intersection of the constraint and the type
-  // (which might not exist).
-  return intersection_of(tcType, std::move(ret));
+  if (!tc) return ty;
+  assertx(tc->validForProp());
+  if (RO::EvalCheckPropTypeHints <= 2) return ty;
+  auto lookup = index.lookup_constraint(
+    Context { nullptr, nullptr, &propCls },
+    *tc,
+    ty
+  );
+  auto upper = unctx(lookup.upper);
+  // A property with a mixed type-hint can be unset and therefore by
+  // Uninit. Any other type-hint forbids unsetting.
+  if (lookup.maybeMixed) upper |= TUninit;
+  auto ret = intersection_of(std::move(upper), ty);
+  if (lookup.coerceClassToString == TriBool::Yes) {
+    assertx(!lookup.lower.couldBe(BCls | BLazyCls));
+    assertx(lookup.upper.couldBe(BStr | BCls | BLazyCls));
+    ret = promote_classish(std::move(ret));
+  } else if (lookup.coerceClassToString == TriBool::Maybe) {
+    if (ret.couldBe(BCls | BLazyCls)) ret |= TSStr;
+  }
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////

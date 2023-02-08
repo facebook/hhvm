@@ -1,0 +1,1 @@
+Catchable fatal error: Value returned from function f() must be of type D<C::A>, D<int> given in %s/non-null-verify-ret-ts.php on line 17

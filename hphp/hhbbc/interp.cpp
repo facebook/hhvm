@@ -2430,7 +2430,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       auto res = env.index.resolve_type_name(tc.typeName());
       if (res.type != AnnotType::Unresolved) {
         auto const typeName = res.type == AnnotType::Object
-          ? res.value->name() : nullptr;
+          ? res.cls->name() : nullptr;
         tc.resolveType(res.type, res.nullable, typeName);
       }
     }
@@ -5133,22 +5133,62 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
 }
 
 void verifyRetImpl(ISS& env, const TCVec& tcs,
-                   bool reduce_this, bool ts_flavor) {
-  // If it is the ts flavor, then second thing on the stack, otherwise first
+                   bool reduce_nullonly, bool ts_flavor) {
+  assertx(!tcs.empty());
+  // If it is the ts flavor, then second thing on the stack, otherwise
+  // first.
   auto stackT = topC(env, (int)ts_flavor);
-  auto const stackEquiv = topStkEquiv(env, (int)ts_flavor);
 
-  // If there is no return type constraint, or if the return type
-  // constraint is a typevar, or if the top of stack is the same or a
-  // subtype of the type constraint, then this is a no-op, unless
-  // reified types could be involved.
-  if (std::all_of(std::begin(tcs), std::end(tcs),
-                  [&](const TypeConstraint* tc) {
-                    return env.index.satisfies_constraint(env.ctx, stackT, *tc);
-                  })) {
+  auto refined = TInitCell;
+  auto remove = true;
+  auto nullonly =
+    reduce_nullonly &&
+    stackT.couldBe(BInitNull) &&
+    !stackT.subtypeOf(BInitNull);
+  for (auto const& tc : tcs) {
+    auto const type = env.index.lookup_constraint(env.ctx, *tc, stackT);
+    if (stackT.moreRefined(type.lower)) {
+      refined = intersection_of(std::move(refined), stackT);
+      continue;
+    }
+
+    if (!stackT.couldBe(type.upper)) {
+      if (ts_flavor) popC(env);
+      popC(env);
+      push(env, TBottom);
+      return unreachable(env);
+    }
+
+    remove = false;
+    if (nullonly) {
+      nullonly =
+        (!ts_flavor || tc->isThis()) &&
+        unopt(stackT).moreRefined(type.lower);
+    }
+
+    auto result = intersection_of(stackT, type.upper);
+    if (type.coerceClassToString == TriBool::Yes) {
+      assertx(!type.lower.couldBe(BCls | BLazyCls));
+      assertx(type.upper.couldBe(BStr | BCls | BLazyCls));
+      result = promote_classish(std::move(result));
+    } else if (type.coerceClassToString == TriBool::Maybe) {
+      if (result.couldBe(BCls | BLazyCls)) result |= TSStr;
+    }
+
+    refined = intersection_of(std::move(refined), result);
+    if (refined.is(BBottom)) {
+      if (ts_flavor) popC(env);
+      popC(env);
+      push(env, TBottom);
+      return unreachable(env);
+    }
+  }
+
+  if (remove) {
     if (ts_flavor) {
-      // we wouldn't get here if reified types were definitely not
+      // We wouldn't get here if reified types were definitely not
       // involved, so just bail.
+      auto const stackEquiv = topStkEquiv(env, 1);
       popC(env);
       popC(env);
       push(env, std::move(stackT), stackEquiv);
@@ -5157,75 +5197,17 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
     return reduce(env);
   }
 
-  std::vector<Type> constraintTypes;
-  auto dont_reduce = false;
-
-  for (auto const& constraint : tcs) {
-    // When the constraint is not soft.
-    // We can safely assume that either VerifyRetTypeC will
-    // throw or it will produce a value whose type is compatible with the
-    // return type constraint.
-    auto tcT = remove_uninit(env.index.lookup_constraint(env.ctx, *constraint));
-    constraintTypes.push_back(tcT);
-
-    // In some circumstances, verifyRetType can modify the type. If it
-    // does that we can't reduce even when we know it succeeds.
-    // VerifyRetType will convert a TCls to a TStr implicitly
-    // (and possibly warn)
-    if (tcT.couldBe(BStr) && stackT.couldBe(BCls | BLazyCls)) {
-      stackT |= TSStr;
-      dont_reduce = true;
-    }
-
-    // If the constraint is soft, then there are no optimizations we can safely
-    // do here, so just leave the top of stack as is.
-    if (constraint->isSoft() ||
-        (RuntimeOption::EvalEnforceGenericsUB < 2 &&
-         constraint->isUpperBound()))
-    {
-      if (ts_flavor) popC(env);
-      popC(env);
-      push(env, std::move(stackT), stackEquiv);
-      return;
-    }
-  }
-
-  // In cases where we have a `this` hint where stackT is an TOptObj known to
-  // be this, we can replace the check with a non null check.  These cases are
-  // likely from a BareThis that could return Null.  Since the runtime will
-  // split these translations, it will rarely in practice return null.
-  if (reduce_this &&
-      !dont_reduce &&
-      stackT.couldBe(BInitNull) &&
-      !stackT.subtypeOf(BInitNull) &&
-      std::all_of(std::begin(tcs), std::end(tcs),
-                  [&](const TypeConstraint* constraint) {
-                    return constraint->isThis() &&
-                           !constraint->isNullable() &&
-                           env.index.satisfies_constraint(
-                             env.ctx, unopt(stackT), *constraint);
-                    }
-                  )
-  ) {
-    if (ts_flavor) {
-      return reduce(env, bc::PopC {}, bc::VerifyRetNonNullC {});
-    }
+  // In cases where stackT includes InitNull, but would pass the
+  // type-constraint if it was not InitNull, we can lower to a
+  // non-null check.
+  if (nullonly) {
+    if (ts_flavor) return reduce(env, bc::PopC {}, bc::VerifyRetNonNullC {});
     return reduce(env, bc::VerifyRetNonNullC {});
   }
 
-  auto retT = std::move(stackT);
-  for (auto& tcT : constraintTypes) {
-    retT = intersection_of(std::move(tcT), std::move(retT));
-    if (retT.subtypeOf(BBottom)) {
-      unreachable(env);
-      if (ts_flavor) popC(env); // the type structure
-      return;
-    }
-  }
-
-  if (ts_flavor) popC(env); // the type structure
+  if (ts_flavor) popC(env);
   popC(env);
-  push(env, std::move(retT));
+  push(env, std::move(refined));
 }
 
 void in(ISS& env, const bc::VerifyOutType& op) {
@@ -5290,27 +5272,16 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
   verifyRetImpl(env, tcs, true, true);
 }
 
-void in(ISS& env, const bc::VerifyRetNonNullC& /*op*/) {
-  auto const constraint = env.ctx.func->retTypeConstraint;
-  if (constraint.isSoft()) {
-    return;
-  }
-
+void in(ISS& env, const bc::VerifyRetNonNullC&) {
   auto stackT = topC(env);
-
-  if (!stackT.couldBe(BInitNull)) {
-    reduce(env);
-    return;
+  if (!stackT.couldBe(BInitNull)) return reduce(env);
+  if (stackT.subtypeOf(BInitNull)) {
+    popC(env);
+    push(env, TBottom);
+    return unreachable(env);
   }
-
-  if (stackT.subtypeOf(BNull)) return unreachable(env);
-
-  auto const equiv = topStkEquiv(env);
-
-  stackT = unopt(std::move(stackT));
-
   popC(env);
-  push(env, stackT, equiv);
+  push(env, unopt(std::move(stackT)));
 }
 
 void in(ISS& env, const bc::SelfCls&) {
@@ -5596,12 +5567,17 @@ void in(ISS& env, const bc::InitProp& op) {
 
     ITRACE(1, "InitProp: {} = {}\n", op.str1, show(t));
 
-    if (env.index.satisfies_constraint(env.ctx, t, prop.typeConstraint) &&
-        std::all_of(prop.ubs.begin(), prop.ubs.end(),
-                    [&](TypeConstraint ub) {
-                      applyFlagsToUB(ub, prop.typeConstraint);
-                      return env.index.satisfies_constraint(env.ctx, t, ub);
-                    })) {
+    if (t.moreRefined(
+          env.index.lookup_constraint(env.ctx, prop.typeConstraint, t).lower
+        ) &&
+        std::all_of(
+          begin(prop.ubs), end(prop.ubs),
+          [&](TypeConstraint ub) {
+            applyFlagsToUB(ub, prop.typeConstraint);
+            return
+              t.moreRefined(env.index.lookup_constraint(env.ctx, ub, t).lower);
+          })
+       ) {
       prop.attrs |= AttrInitialSatisfiesTC;
     } else {
       badPropInitialValue(env);

@@ -7426,6 +7426,41 @@ TEST(Type, LoosenLikenessRecursively) {
   }
 }
 
+TEST(Type, PromoteClassish) {
+  auto const index = make_index();
+
+  auto const clsA = index.resolve_class(s_A.get());
+  if (!clsA || !clsA->resolved()) ADD_FAILURE();
+
+  std::vector<std::pair<Type, Type>> tests{
+    { TCls, TSStr },
+    { TLazyCls, TSStr },
+    { TOptCls, TOptSStr },
+    { TOptLazyCls, TOptSStr },
+    { TStr, TStr },
+    { TInt, TInt },
+    { TObj, TObj },
+    { TOptStr, TOptStr },
+    { TBottom, TBottom },
+    { union_of(TCls, TLazyCls), TSStr },
+    { union_of(TLazyCls, TStr), TStr },
+    { union_of(TCls, TSStr), TSStr },
+    { union_of(TInt, TLazyCls), union_of(TInt, TSStr) },
+    { make_specialized_int(BInt, 100), make_specialized_int(BInt, 100) },
+    { make_specialized_string(BStr, s_C.get()), make_specialized_string(BStr, s_C.get()) },
+    { make_specialized_lazycls(BLazyCls, s_C.get()), make_specialized_string(BSStr, s_C.get()) },
+    { make_specialized_lazycls(BLazyCls|BBool, s_C.get()), make_specialized_string(BSStr|BBool, s_C.get()) },
+    { make_specialized_exact_class(BCls, *clsA), make_specialized_string(BSStr, s_A.get()) },
+    { make_specialized_exact_class(BCls|BBool, *clsA), make_specialized_string(BSStr|BBool, s_A.get()) },
+    { make_specialized_sub_class(BCls, *clsA), TSStr },
+    { make_specialized_sub_class(BCls|BBool, *clsA), union_of(TSStr, TBool) }
+  };
+
+  for (auto const& p : tests) {
+    EXPECT_EQ(promote_classish(p.first), p.second);
+  }
+}
+
 TEST(Type, IterTypes) {
   auto const elem1 = map_elem(s_A, TObj);
   auto const elem2 = map_elem_nonstatic(s_B, TInt);

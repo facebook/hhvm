@@ -875,17 +875,18 @@ struct Index {
   Optional<res::Class> selfCls(const Context& ctx) const;
   Optional<res::Class> parentCls(const Context& ctx) const;
 
-  template <typename T>
-  struct ResolvedInfo {
-    AnnotType                               type;
-    bool                                    nullable;
-    T value;
-  };
-
   /*
-   * Try to resolve name, looking through TypeAliases and enums.
+   * Try to resolve a type-name, looking through type-aliases and
+   * enums. If returned type is AnnotType::Unresolved, the type does
+   * not exist.
    */
-  ResolvedInfo<Optional<res::Class>> resolve_type_name(SString name) const;
+  struct ResolvedTypeName {
+    AnnotType type;
+    bool nullable;
+    // If type == AnnotType::Object, the equivalent res::Class.
+    Optional<res::Class> cls;
+  };
+  ResolvedTypeName resolve_type_name(SString name) const;
 
   /*
    * Resolve a closure class.
@@ -942,40 +943,37 @@ struct Index {
   res::Class wait_handle_class() const;
 
   /*
-   * Give the Type in our type system that matches an hhvm
-   * TypeConstraint, subject to the information in this Index.
+   * Resolve a type-constraint into its equivalent set of HHBBC types.
    *
-   * This function returns a subtype of Cell, although TypeConstraints
-   * at runtime can match reference parameters.  The caller should
-   * make sure to handle that case.
+   * In general, a type-constraint cannot be represented exactly by a
+   * single HHBBC type, so a lower and upper bound is provided
+   * instead.
    *
-   * For soft constraints (@), this function returns Cell.
-   *
-   * For some non-soft constraints (such as "Stringish"), this
-   * function may return a Type that is a strict supertype of the
-   * constraint's type.
-   *
-   * If something is known about the type of the object against which
-   * the constraint will be checked, it can be passed in to help
-   * disambiguate certain constraints (useful because we don't support
-   * arbitrary unions, or intersection).
+   * A "candidate" type can be provided which will be applied to the
+   * type-constraint and can further constrain the output types. This
+   * is useful for the magic interfaces, whose lower-bound cannot be
+   * precisely represented by a single type.
    */
-  Type lookup_constraint(Context, const TypeConstraint&,
-                         const Type& t = TCell) const;
+  template <typename T = Type>
+  struct ConstraintType {
+    // Lower bound of constraint. Any type which is a subtype of this
+    // is guaranteed to pass a type-check without any side-effects.
+    T lower;
+    // Upper bound of constraint. Any type which does not intersect
+    // with this is guaranteed to always fail a type-check.
+    T upper;
+    // If this type-constraint might promote a "classish" type to a
+    // static string as a side-effect.
+    TriBool coerceClassToString{TriBool::No};
+    // Whether this type-constraint might map to a mixed
+    // type-hint. The mixed type-hint has special semantics when it
+    // comes to properties.
+    bool maybeMixed{false};
+  };
 
-  /*
-   * If this function returns true, it is safe to assume that Type t
-   * will always satisfy TypeConstraint tc at run time.
-   */
-  bool satisfies_constraint(Context, const Type& t,
-                            const TypeConstraint& tc) const;
-
-  /*
-   * Returns true if the given type-hint (declared on the given class) might not
-   * be enforced at runtime (IE, it might map to mixed or be soft).
-   */
-  bool prop_tc_maybe_unenforced(const php::Class& propCls,
-                                const TypeConstraint& tc) const;
+  ConstraintType<>
+  lookup_constraint(const Context&, const TypeConstraint&,
+                    const Type& candidate = TCell) const;
 
   /*
    * Returns true if the type constraint can contain a reified type
@@ -988,7 +986,7 @@ struct Index {
    * and a flag indicating whether the verification was effect free.
    */
   std::tuple<Type, bool>
-  verify_param_type(Context ctx, uint32_t paramId, Type t) const;
+  verify_param_type(const Context& ctx, uint32_t paramId, const Type& t) const;
 
   /*
    * Lookup metadata about the constant access `cls'::`name', in the
@@ -1432,22 +1430,8 @@ private:
   res::Func resolve_func_helper(const php::Func*, SString) const;
   res::Func do_resolve(const php::Func*) const;
 
-  template<bool getSuperType>
-  Type get_type_for_constraint(Context,
-                               const TypeConstraint&,
-                               const Type&) const;
-
-  struct ConstraintResolution;
-
-  /*
-   * Try to resolve name in the given context. Follows TypeAliases.
-   */
-  ConstraintResolution resolve_named_type(
-      const Context& ctx, SString name, const Type& candidate) const;
-
-  ConstraintResolution get_type_for_annotated_type(
-    Context ctx, AnnotType annot, bool nullable,
-    SString name, const Type& candidate) const;
+  ConstraintType<>
+  type_from_annot_type(const Context&, AnnotType, SString, const Type&) const;
 
   void init_return_type(const php::Func* func);
 

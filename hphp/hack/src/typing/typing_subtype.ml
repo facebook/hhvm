@@ -2343,10 +2343,11 @@ and simplify_subtype_i
         (* Match what's done in unify for non-strict code *)
         | (r_sub, Tclass (x_sub, exact_sub, tyl_sub)) ->
           let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
-          let exact_match =
+          let (exact_match, both_exact) =
             match (exact_sub, exact_super) with
-            | (Nonexact _, Exact) -> false
-            | (_, _) -> true
+            | (Nonexact _, Exact) -> (false, false)
+            | (Exact, Exact) -> (true, true)
+            | (_, _) -> (true, false)
           in
           if String.equal cid_super cid_sub then
             if List.is_empty tyl_sub && List.is_empty tyl_super && exact_match
@@ -2373,6 +2374,14 @@ and simplify_subtype_i
                 let variance_reifiedl =
                   if List.is_empty tyl_sub then
                     []
+                  else if both_exact then
+                    (* Subtyping exact class types following variance
+                     * annotations is unsound in general (see T142810099).
+                     * When the class is exact, we must treat all generic
+                     * parameters as invariant.
+                     *)
+                    List.map tyl_sub ~f:(fun _ ->
+                        (Ast_defs.Invariant, Aast.Erased))
                   else
                     match class_def_sub with
                     | None ->

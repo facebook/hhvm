@@ -1340,6 +1340,13 @@ module Primary = struct
           hint_pos: Pos.t;
         }
       | Tuple_syntax of Pos.t
+      | Invalid_refined_const_kind of {
+          pos: Pos.t;
+          class_id: string;
+          const_id: string;
+          correct_kind: string;
+          wrong_kind: string;
+        }
 
     let missing_return pos hint_pos is_async =
       let return_type =
@@ -1434,6 +1441,24 @@ module Primary = struct
         lazy [],
         [] )
 
+    let invalid_refined_const_kind ~correct_kind ~wrong_kind p class_id const_id
+        =
+      ( Error_code.InvalidRefinedConstKind,
+        lazy
+          ( p,
+            "`"
+            ^ const_id
+            ^ "`"
+            ^ " in `"
+            ^ class_id
+            ^ "` is not a `"
+            ^ wrong_kind
+            ^ "`, did you mean `"
+            ^ correct_kind
+            ^ "`?" ),
+        lazy [],
+        [] )
+
     let to_error : t -> error = function
       | Missing_return { pos; hint_pos; is_async } ->
         missing_return pos hint_pos is_async
@@ -1446,6 +1471,14 @@ module Primary = struct
       | Non_void_annotation_on_return_void_function { is_async; hint_pos } ->
         non_void_annotation_on_return_void_function is_async hint_pos
       | Tuple_syntax pos -> tuple_syntax pos
+      | Invalid_refined_const_kind
+          { pos; class_id; const_id; correct_kind; wrong_kind } ->
+        invalid_refined_const_kind
+          ~correct_kind
+          ~wrong_kind
+          pos
+          class_id
+          const_id
   end
 
   module Modules = struct

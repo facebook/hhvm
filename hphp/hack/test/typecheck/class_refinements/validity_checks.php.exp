@@ -14,3 +14,11 @@ Invalid class refinement (Typing[4470])
   Expected `string`
   File "validity_checks.php", line 18, characters 49-51:
   But got `int`
+File "validity_checks.php", line 19, characters 31-51:
+Invalid class refinement (Typing[4470])
+  File "validity_checks.php", line 8, characters 28-35:
+  Expected `arraykey`
+  File "validity_checks.php", line 19, characters 48-49:
+  But got `mixed`
+File "validity_checks.php", line 19, characters 44-44:
+`T` in `\D` is not a `ctx`, did you mean `type`? (Typing[4471])

@@ -58,11 +58,55 @@ let loclty_of_hint unchecked_tparams env h =
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (env, hint_pos, locl_ty)
 
+let check_refinement env cls_id rs =
+  let cls_decl = Env.get_class env cls_id in
+  rs
+  |> List.iter ~f:(fun r ->
+         let (sid, is_ctx) =
+           match r with
+           | Rctx (sid, _) -> (sid, true)
+           | Rtype (sid, _) -> (sid, false)
+         in
+         let const_id = snd sid in
+         Option.iter
+           ~f:Errors.add_typing_error
+           Option.Monad_infix.(
+             cls_decl >>= fun cls_decl ->
+             Env.get_typeconst env cls_decl const_id >>= fun ttc ->
+             if Bool.(ttc.ttc_is_ctx <> is_ctx) then
+               let kind_str is_ctx =
+                 if is_ctx then
+                   "ctx"
+                 else
+                   "type"
+               in
+               let correct_kind = kind_str ttc.ttc_is_ctx in
+               let wrong_kind = kind_str is_ctx in
+               Some
+                 Typing_error.(
+                   wellformedness
+                   @@ Primary.Wellformedness.Invalid_refined_const_kind
+                        {
+                          pos = fst sid;
+                          class_id = cls_id;
+                          const_id;
+                          correct_kind;
+                          wrong_kind;
+                        })
+             else
+               None))
+
 let check_hrefinement unchecked_tparams env h =
+  let r =
+    match snd h with
+    | Hrefinement (_, r) -> Some r
+    | _ -> None
+  in
   let (env, hint_pos, locl_ty) = loclty_of_hint unchecked_tparams env h in
   let (_, ty_err_opt) =
     match get_node locl_ty with
     | Tclass (cls, Nonexact cr, _) ->
+      Option.iter ~f:(check_refinement env (snd cls)) r;
       let both_err e1 e2 = Option.merge e1 e2 ~f:Typing_error.both in
       let on_error =
         Some (Typing_error.Reasons_callback.invalid_class_refinement hint_pos)
@@ -70,7 +114,7 @@ let check_hrefinement unchecked_tparams env h =
       Class_refinement.fold_refined_consts
         cr
         ~init:(env, None)
-        ~f:(fun type_id { rc_bound; _ } (env, ty_err_opt) ->
+        ~f:(fun const_id { rc_bound; _ } (env, ty_err_opt) ->
           let (lo_ty, up_ty) =
             match rc_bound with
             | TRexact ty -> (ty, ty)
@@ -87,7 +131,7 @@ let check_hrefinement unchecked_tparams env h =
               ~on_error
               ~this_ty:locl_ty
               (cls, nonexact)
-              (Pos_or_decl.none, type_id)
+              (Pos_or_decl.none, const_id)
           in
           match type_member with
           | Typing_type_member.Error ty_err_opt' ->

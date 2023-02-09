@@ -335,6 +335,13 @@ module Primary : sig
           hint_pos: Pos.t;
         }
       | Tuple_syntax of Pos.t
+      | Invalid_refined_const_kind of {
+          pos: Pos.t;
+          class_id: string;
+          const_id: string;
+          correct_kind: string;
+          wrong_kind: string;
+        }
   end
 
   module Modules : sig

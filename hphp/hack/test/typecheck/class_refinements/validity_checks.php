@@ -16,6 +16,7 @@ interface Bad {
   abstract const type BAD0 as C with { type T = int };
   abstract const type BAD1 as D with { type T = C };
   abstract const type BAD2 as E with { type T = int };
+  abstract const type BAD3 as D with { ctx T = [] };
 }
 
 interface Good {

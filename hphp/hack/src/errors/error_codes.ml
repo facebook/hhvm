@@ -750,6 +750,7 @@ module Typing = struct
     | InexactTConstAccess [@value 4468]
     | UnsupportedRefinement [@value 4469]
     | InvalidClassRefinement [@value 4470]
+    | InvalidRefinedConstKind [@value 4471]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

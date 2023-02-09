@@ -180,6 +180,16 @@ trait BaseException {
     );
   }
 
+  private static function getClassOfThrowable(\Throwable $ex)[]: string {
+    $cls = HH\FIXME\UNSAFE_CAST<mixed, string>(\get_class($ex));
+    if (\substr($cls, 0, \strlen("__SystemLib\\")) === "__SystemLib\\") {
+      $cls = HH\FIXME\UNSAFE_CAST<mixed, string>(
+        \substr($cls, \strlen("__SystemLib\\"))
+      );
+    }
+    return $cls;
+  }
+
   final protected static function toStringFromGetMessage(
     \Throwable $throwable,
     (function(\Throwable)[_]:string) $get_message,
@@ -200,15 +210,17 @@ trait BaseException {
       if (!$first) {
         $res .= "\n\nNext ";
       }
-      $cls = HH\FIXME\UNSAFE_CAST<mixed, string>(\get_class($ex));
-      if (\substr($cls, 0, \strlen("__SystemLib\\")) === "__SystemLib\\") {
-        $cls = HH\FIXME\UNSAFE_CAST<mixed, string>(
-          \substr($cls, \strlen("__SystemLib\\"))
-        );
+      $cls = self::getClassOfThrowable($ex);
+      try {
+        $message = $get_message($ex);
+      } catch (\Throwable $msg_ex) {
+        $msg_ex_cls = self::getClassOfThrowable($msg_ex);
+        $message = $msg_ex_cls . " thrown while getting the message";
       }
+
       $res .= $ex is \Error
-        ? $cls . ": " . $get_message($ex)
-        : "exception '" . $cls . "' with message '" . $get_message($ex) .  "'";
+        ? $cls . ": " . $message
+        : "exception '" . $cls . "' with message '" . $message .  "'";
       $res .=  " in " . $ex->getFile() . ":" .
         $ex->getLine() . "\nStack trace:\n" . $ex->getTraceAsString();
       $first = false;

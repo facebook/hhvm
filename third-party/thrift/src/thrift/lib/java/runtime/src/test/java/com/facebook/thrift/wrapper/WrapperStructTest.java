@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 import com.facebook.thrift.test.wrapper.MutableTerseWrappedTestStruct;
 import com.facebook.thrift.test.wrapper.TerseWrappedTestStruct;
 import com.facebook.thrift.test.wrapper.TestStruct;
+import com.facebook.thrift.test.wrapper.WrappedTestException;
 import com.facebook.thrift.test.wrapper.WrappedTestStruct;
 import com.facebook.thrift.util.IntrinsicDefaults;
 import com.facebook.thrift.util.SerializationProtocol;
@@ -30,10 +31,26 @@ import com.facebook.thrift.wrapper.test.PoliciedField;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+@RunWith(Parameterized.class)
 public class WrapperStructTest {
+
+  private final boolean exception;
+
+  public WrapperStructTest(boolean exception) {
+    this.exception = exception;
+  }
+
+  @Parameterized.Parameters
+  public static Collection<Boolean> data() {
+    return Arrays.asList(false, true);
+  }
 
   private byte[] serializeWrapped(WrappedTestStruct struct) {
     return SerializerUtil.toByteArray(struct, SerializationProtocol.TCompact);
@@ -43,7 +60,31 @@ public class WrapperStructTest {
     return SerializerUtil.toByteArray(struct, SerializationProtocol.TCompact);
   }
 
+  private WrappedTestStruct copy(WrappedTestException from) {
+    WrappedTestStruct.Builder to = new WrappedTestStruct.Builder();
+
+    for (Field f : from.getClass().getDeclaredFields()) {
+      try {
+        Field t = to.getClass().getDeclaredField(f.getName());
+        f.setAccessible(true);
+        t.setAccessible(true);
+        t.set(to, f.get(from));
+      } catch (Throwable t) {
+        // ignore
+      }
+    }
+
+    return to.build();
+  }
+
   private WrappedTestStruct deserializeWrapped(byte[] bytes) {
+    // test both Struct and Exception
+    if (exception) {
+      return copy(
+          SerializerUtil.fromByteArray(
+              WrappedTestException.asReader(), bytes, SerializationProtocol.TCompact));
+    }
+
     return SerializerUtil.fromByteArray(
         WrappedTestStruct.asReader(), bytes, SerializationProtocol.TCompact);
   }

@@ -178,3 +178,48 @@ struct MutableTerseWrappedTestStruct {
   }
   13: adaptedInt wrappedSingleAdaptedInt_field;
 } (java.swift.mutable = "true")
+
+safe permanent client exception WrappedTestException {
+  1001: i32 context;
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<Boolean>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<Boolean>",
+  }
+  3: optional bool wrappedBoolean_field;
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<Integer>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<Integer>",
+  }
+  4: i32 wrappedInt_field;
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<io.netty.buffer.ByteBuf>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<io.netty.buffer.ByteBuf>",
+  }
+  10: SlicedByteBuf wrappedByteBuf_field;
+
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.common.RetainedSlicedPooledByteBufTypeAdapter",
+    typeClassName = "io.netty.buffer.ByteBuf",
+  }
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<io.netty.buffer.ByteBuf>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<io.netty.buffer.ByteBuf>",
+  }
+  11: binary wrappedByteBuf_field2;
+
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
+    typeClassName = "java.lang.Long",
+  }
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<Long>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<Long>",
+  }
+  12: adaptedInt wrappedDoubleAdaptedInt_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<String>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<String>",
+  }
+  13: optional adaptedInt wrappedSingleAdaptedInt_field;
+}

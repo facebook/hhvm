@@ -45,7 +45,7 @@ public final class {{struct:javaCapitalName}} extends org.apache.thrift.TBaseExc
 
     private static final TStruct STRUCT_DESC = new TStruct("{{struct:name}}");
     {{#struct:fields}}
-    private final {{> FieldType}} {{field:javaName}};
+    private {{^struct:hasWrapper?}}final {{/struct:hasWrapper?}}{{> FieldType}} {{field:javaName}};
     public static final int _{{field:javaAllCapsName}} = {{field:key}};
     private static final TField {{field:javaTFieldName}} = new TField("{{field:javaName}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:key}});
     {{/struct:fields}}

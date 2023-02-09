@@ -3360,6 +3360,7 @@ name = "ocamlrep_ocamlpool"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "cc",
  "ocamlrep",
 ]
 

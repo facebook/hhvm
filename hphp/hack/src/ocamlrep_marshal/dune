@@ -4,7 +4,6 @@
  (name ocamlrep_marshal_ffi)
  (modules ocamlrep_marshal_ffi)
  (wrapped false)
- (libraries ocamlpool)
  (c_library_flags -lpthread)
  (foreign_archives ocamlrep_marshal_ffi_bindings))
 

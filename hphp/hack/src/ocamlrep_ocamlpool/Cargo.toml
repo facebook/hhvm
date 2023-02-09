@@ -3,10 +3,16 @@
 name = "ocamlrep_ocamlpool"
 version = "0.0.0"
 edition = "2021"
+build = "build.rs"
 
 [lib]
 path = "lib.rs"
+test = false
+doctest = false
 
 [dependencies]
 bumpalo = { version = "3.11.1", features = ["collections"] }
 ocamlrep = { path = "../ocamlrep" }
+
+[build-dependencies]
+cc = {}

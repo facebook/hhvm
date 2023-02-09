@@ -13,7 +13,7 @@
    (:include config/c_library_flags.sexp)))
  (preprocess
   (pps ppx_deriving.std visitors.ppx))
- (libraries ocamlpool shmffi utils_core))
+ (libraries shmffi utils_core))
 
 (library
  (name heap_ident)
@@ -29,7 +29,7 @@
  (modules sharedMemHash)
  (preprocess
   (pps ppx_deriving.std visitors.ppx))
- (libraries heap_libc ocamlpool shmffi))
+ (libraries heap_libc shmffi))
 
 (library
  (name heap_shared_mem)
@@ -41,7 +41,6 @@
   global_config
   heap_libc
   logging_common
-  ocamlpool
   shmffi
   utils_core
   worker_cancel))
@@ -52,7 +51,7 @@
  (modules workerCancel)
  (preprocess
   (pps ppx_deriving.std visitors.ppx))
- (libraries heap_libc ocamlpool shmffi utils_core))
+ (libraries heap_libc shmffi utils_core))
 
 (library
  (name heap_global_storage)
@@ -60,4 +59,4 @@
  (modules globalStorage)
  (preprocess
   (pps ppx_deriving.std visitors.ppx))
- (libraries heap_libc ocamlpool shmffi))
+ (libraries heap_libc shmffi))

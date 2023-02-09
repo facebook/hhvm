@@ -28,7 +28,6 @@
   hh_fanout_rust_ffi_externs
   hh_json
   logging
-  ocamlpool
   relative_path
   sqlite3
   sqlite_utils

@@ -15,7 +15,6 @@
  (name rust_parser_ffi)
  (modules)
  (wrapped false)
- (libraries ocamlpool)
  (c_library_flags -lpthread)
  (foreign_archives rust_parser_ffi))
 
@@ -34,7 +33,6 @@
  (name rust_parser_errors_ffi)
  (modules)
  (wrapped false)
- (libraries ocamlpool)
  (c_library_flags -lpthread)
  (foreign_archives rust_parser_errors_ffi))
 

@@ -13,6 +13,7 @@
 use std::path::PathBuf;
 
 use serde::Deserialize;
+use serde_bser::bytestring::ByteString;
 
 use crate::prelude::*;
 
@@ -85,6 +86,13 @@ define_field!(
     /// The field corresponding to the `name` of the file.
     NameField,
     PathBuf,
+    "name"
+);
+
+define_field!(
+    /// Like NameField but does not assume UTF-8.
+    BytesNameField,
+    ByteString,
     "name"
 );
 

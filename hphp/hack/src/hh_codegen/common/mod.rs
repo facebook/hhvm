@@ -49,7 +49,7 @@ pub fn insert_header(s: &str, command: &str) -> Result<String> {
     write!(
         &mut content,
         "
-// Copyright (c) Facebook, Inc. and its affiliates.
+// Copyright (c) Meta Platforms, Inc. and affiliates.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the \"hack\" directory of this source tree.

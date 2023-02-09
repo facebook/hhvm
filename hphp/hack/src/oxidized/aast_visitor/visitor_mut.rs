@@ -1,9 +1,9 @@
-// Copyright (c) Facebook, Inc. and its affiliates.
+// Copyright (c) Meta Platforms, Inc. and affiliates.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b61c23099c79653d33506adf580f0b52>>
+// @generated SignedSource<<64cc885ffa7ccf930fd9010a5b222a05>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh

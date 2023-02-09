@@ -1056,6 +1056,7 @@ struct RuntimeOption {
   F(bool,     DumpCoeffectFunParamProf,false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \
+  F(bool, DumpJitProfileStats,         false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \
   F(bool, NewTHPHotText,               false)                           \
   F(bool, FileBackedColdArena,         useFileBackedArenaDefault())     \

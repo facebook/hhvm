@@ -71,6 +71,7 @@
 #include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/struct-log.h"
 
 #include <folly/portability/Unistd.h>
 #include <folly/String.h>
@@ -2000,6 +2001,18 @@ std::string deserializeProfData(const std::string& filename,
     // the unit to be loaded the implementation might never get pulled
     // in (resulting in fatals when the wrapper tries to call it).
     merge_loaded_units(numWorkers);
+
+    if (RuntimeOption::EvalDumpJitProfileStats) {
+      StructuredLogEntry entry;
+      entry.force_init = true;
+      entry.setInt("signature", signature);
+      entry.setStr("repo_schema", schema);
+      entry.setStr("build_host", buildHost);
+      entry.setInt("build_time", buildTime);
+      entry.setInt("units_loaded_count", numLoadedUnits());
+      entry.setInt("profiling_func_count", pd->profilingFuncs());
+      StructuredLog::log("hhvm_jit_profile_stats", entry);
+    }
 
     if (isJitSerializing() && serializeOptProfEnabled()) {
       s_lastMappers = ser.getMappers();

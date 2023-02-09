@@ -43,6 +43,8 @@ end = struct
   let has_enough fuel = fuel >= 0
 end
 
+exception Out_of_fuel of Fuel.t * Doc.t list
+
 (** For sake of typing_print, either we wish to print a locl_ty in which case we need
 the env to look up the typing environment and constraints and the like, or a decl_ty
 in which case we don't need anything. [penv] stands for "printing env". *)
@@ -131,14 +133,30 @@ module Full = struct
       rd : Fuel.t * Doc.t =
     delimited_list ~fuel comma_sep ld printer items rd
 
-  let shape_map ~fuel fdm f_field =
+  let shape_map
+      ~fuel
+      (fdm : 'field TShapeMap.t)
+      (f_field : Fuel.t -> tshape_field_name * 'field -> Fuel.t * t) :
+      Fuel.t * t list =
     let compare (k1, _) (k2, _) =
       String.compare
         (Typing_defs.TShapeField.name k1)
         (Typing_defs.TShapeField.name k2)
     in
     let fields = List.sort ~compare (TShapeMap.bindings fdm) in
-    List.fold_map fields ~f:f_field ~init:fuel
+    let (fuel, fields) =
+      try
+        List.fold fields ~init:(fuel, []) ~f:(fun (fuel, acc) field ->
+            if Fuel.has_enough fuel then
+              let fuel = Fuel.deplete fuel in
+              let (fuel, field) = f_field fuel field in
+              (fuel, field :: acc)
+            else
+              raise (Out_of_fuel (fuel, text "[shape was truncated]" :: acc)))
+      with
+      | Out_of_fuel (fuel, docs) -> (fuel, docs)
+    in
+    (fuel, List.rev fields)
 
   let rec fun_type ~fuel ~ty to_doc st penv ft fun_implicit_params =
     let n = List.length ft.ft_params in
@@ -312,7 +330,7 @@ module Full = struct
 
   let ttuple ~fuel k tyl = list ~fuel "(" k tyl ")"
 
-  let tshape ~fuel k to_doc shape_kind fdm =
+  let tshape ~fuel k to_doc (shape_kind : shape_kind) (fdm : _ TShapeMap.t) =
     let (fuel, fields_doc) =
       let f_field fuel (shape_map_key, { sft_optional; sft_ty }) =
         let key_delim =

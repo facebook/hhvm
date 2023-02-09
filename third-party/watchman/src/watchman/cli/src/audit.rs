@@ -121,7 +121,7 @@ pub async fn audit_repo(
         out,
         "Sanity checking the filesystem at {} against watchman; this may take a couple of minutes.",
         repo.display(),
-    );
+    )?;
 
     let config = client.get_config(&resolved).await?;
     let mut ignore_dirs = config.ignore_dirs.unwrap_or_default().clone();
@@ -276,7 +276,7 @@ pub async fn audit_repo(
     let result = match result {
         Ok(result) => result,
         Err(err) => {
-            writeln!(out, "Error during Watchman query: {}", err);
+            writeln!(out, "Error during Watchman query: {}", err)?;
             // Use a different error code for Watchman query errors, including timeouts, so they can be differentiated by audit logging.
             std::process::exit(2);
         }
@@ -289,10 +289,10 @@ pub async fn audit_repo(
         result.is_fresh_instance,
         result.clock,
         result.version
-    );
+    )?;
     if let Some(debug) = result.debug {
         if let Some(cookie_files) = debug.cookie_files {
-            writeln!(out, "    cookie files: {:?}", cookie_files);
+            writeln!(out, "    cookie files: {:?}", cookie_files)?;
         }
     }
 
@@ -396,11 +396,11 @@ pub async fn audit_repo(
                 out,
                 "Conflicting information for {}:",
                 watchman_file.name.display()
-            );
+            )?;
             for diff in diffs {
-                writeln!(out, "  {}", diff);
+                writeln!(out, "  {}", diff)?;
             }
-            writeln!(out, "  oclock is {:?}", *watchman_file.oclock);
+            writeln!(out, "  oclock is {:?}", *watchman_file.oclock)?;
             any_differences = true;
         }
     }
@@ -422,9 +422,9 @@ pub async fn audit_repo(
             out,
             "There are {} items reported by watchman not on the filesystem:",
             phantoms.len()
-        );
+        )?;
         for phantom in &phantoms {
-            writeln!(out, "  {}", phantom.name.display());
+            writeln!(out, "  {}", phantom.name.display())?;
         }
         any_differences = true;
     }
@@ -434,9 +434,9 @@ pub async fn audit_repo(
             out,
             "There are {} items on the filesystem not reported by watchman:",
             missing.len()
-        );
+        )?;
         for (path, _) in &missing {
-            writeln!(out, "  {}", path.display());
+            writeln!(out, "  {}", path.display())?;
         }
         any_differences = true;
     }
@@ -447,7 +447,7 @@ pub async fn audit_repo(
         std::process::exit(1);
     }
 
-    writeln!(out, "Diffed in {:#?}", diff_start.elapsed());
+    writeln!(out, "Diffed in {:#?}", diff_start.elapsed())?;
 
     Ok(())
 }

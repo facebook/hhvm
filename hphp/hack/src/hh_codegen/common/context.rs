@@ -3,15 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::BTreeMap;
-use std::collections::BTreeSet;
-use std::collections::HashMap;
-use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::path::Path;
 
 use anyhow::anyhow;
 use anyhow::Result;
+use hash::IndexMap;
+use hash::IndexSet;
 use synstructure::Structure;
 
 use crate::common::syn_helpers;
@@ -20,8 +18,8 @@ use crate::common::syn_helpers;
 /// of the ASTs for `syn::Item` definitions provided in the constructor, except
 /// those whose types are not reachable from the given root type.
 pub struct Context {
-    defs: BTreeMap<String, syn::DeriveInput>,
-    mods: BTreeSet<String>,
+    defs: IndexMap<String, syn::DeriveInput>,
+    mods: IndexSet<String>,
 }
 
 impl Context {
@@ -46,8 +44,8 @@ impl Context {
         extern_files: &[(&Path, Vec<syn::Item>)],
         root: &str,
     ) -> Result<Self> {
-        let mut defs = HashMap::new();
-        let mut mods = BTreeSet::new();
+        let mut defs = IndexMap::default();
+        let mut mods = IndexSet::default();
         for (filename, items) in files {
             eprintln!("Processing {:?}", filename);
             for item in items.iter() {
@@ -112,9 +110,9 @@ impl Context {
         self.types().map(Structure::new)
     }
 
-    fn get_all_tys(defs: &HashMap<String, &syn::Item>, root: &str) -> Result<HashSet<String>> {
+    fn get_all_tys(defs: &IndexMap<String, &syn::Item>, root: &str) -> Result<IndexSet<String>> {
         let defined_types = defs.keys().map(|s| s.as_str()).collect();
-        let mut visited = HashSet::<String>::new();
+        let mut visited = IndexSet::<String>::default();
         let mut q = VecDeque::new();
         q.push_back(root.into());
         while let Some(ty) = q.pop_front() {

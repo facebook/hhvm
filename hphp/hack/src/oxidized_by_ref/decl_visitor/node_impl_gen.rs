@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3efe585f0e5470626a8b92444a3451ae>>
+// @generated SignedSource<<e5cc44912b5339542f216d96bbc6265a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -30,414 +30,6 @@ use crate::typing_reason::{self};
 use crate::xhp_attribute::*;
 use crate::xhp_attribute::{self};
 use crate::*;
-impl<'a> Node<'a> for AbstractTypeconst<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_abstract_typeconst(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            AbstractTypeconst {
-                as_constraint: ref __binding_0,
-                super_constraint: ref __binding_1,
-                default: ref __binding_2,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                { __binding_2.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for Abstraction {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_abstraction(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Abstraction::Concrete => {}
-            Abstraction::Abstract => {}
-        }
-    }
-}
-impl<'a> Node<'a> for ArgPosition {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_arg_position(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ArgPosition::Aonly => {}
-            ArgPosition::Afirst => {}
-            ArgPosition::Asecond => {}
-        }
-    }
-}
-impl<'a> Node<'a> for Blame<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_blame(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Blame::Blame(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for BlameSource {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_blame_source(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            BlameSource::BScall => {}
-            BlameSource::BSlambda => {}
-            BlameSource::BSassignment => {}
-            BlameSource::BSoutOfScope => {}
-        }
-    }
-}
-impl<'a> Node<'a> for Capability<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_capability(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Capability::CapDefaults(ref __binding_0) => __binding_0.accept(v),
-            Capability::CapTy(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for ClassConstFrom<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_class_const_from(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ClassConstFrom::Self_ => {}
-            ClassConstFrom::From(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for ClassConstKind {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_class_const_kind(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ClassConstKind::CCAbstract(ref __binding_0) => __binding_0.accept(v),
-            ClassConstKind::CCConcrete => {}
-        }
-    }
-}
-impl<'a> Node<'a> for ClassConstRef<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_class_const_ref(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ClassConstRef(ref __binding_0, ref __binding_1) => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for ClassRefinement<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_class_refinement(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ClassRefinement {
-                cr_consts: ref __binding_0,
-            } => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for ClassishKind {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_classish_kind(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ClassishKind::Cclass(ref __binding_0) => __binding_0.accept(v),
-            ClassishKind::Cinterface => {}
-            ClassishKind::Ctrait => {}
-            ClassishKind::Cenum => {}
-            ClassishKind::CenumClass(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for ConcreteTypeconst<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_concrete_typeconst(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ConcreteTypeconst {
-                tc_type: ref __binding_0,
-            } => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for ConstDecl<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_const_decl(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ConstDecl {
-                pos: ref __binding_0,
-                type_: ref __binding_1,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for ConstraintKind {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_constraint_kind(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ConstraintKind::ConstraintAs => {}
-            ConstraintKind::ConstraintEq => {}
-            ConstraintKind::ConstraintSuper => {}
-        }
-    }
-}
-impl<'a> Node<'a> for Decl<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_decl(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Decl::Class(ref __binding_0) => __binding_0.accept(v),
-            Decl::Fun(ref __binding_0) => __binding_0.accept(v),
-            Decl::Typedef(ref __binding_0) => __binding_0.accept(v),
-            Decl::Const(ref __binding_0) => __binding_0.accept(v),
-            Decl::Module(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for Decls<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_decls(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Decls(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for DependentType {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_dependent_type(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            DependentType::DTexpr(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for Enforcement {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_enforcement(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Enforcement::Unenforced => {}
-            Enforcement::Enforced => {}
-        }
-    }
-}
-impl<'a> Node<'a> for EnumType<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_enum_type(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            EnumType {
-                base: ref __binding_0,
-                constraint: ref __binding_1,
-                includes: ref __binding_2,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                { __binding_2.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for Exact<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_exact(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Exact::Exact => {}
-            Exact::Nonexact(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for ExprDepTypeReason<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_expr_dep_type_reason(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ExprDepTypeReason::ERexpr(ref __binding_0) => __binding_0.accept(v),
-            ExprDepTypeReason::ERstatic => {}
-            ExprDepTypeReason::ERclass(ref __binding_0) => __binding_0.accept(v),
-            ExprDepTypeReason::ERparent(ref __binding_0) => __binding_0.accept(v),
-            ExprDepTypeReason::ERself(ref __binding_0) => __binding_0.accept(v),
-            ExprDepTypeReason::ERpu(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for FunElt<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_fun_elt(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            FunElt {
-                deprecated: ref __binding_0,
-                module: ref __binding_1,
-                internal: ref __binding_2,
-                type_: ref __binding_3,
-                pos: ref __binding_4,
-                php_std_lib: ref __binding_5,
-                support_dynamic_type: ref __binding_6,
-                no_auto_dynamic: ref __binding_7,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                {
-                    __binding_2.accept(v)
-                }
-                {
-                    __binding_3.accept(v)
-                }
-                {
-                    __binding_4.accept(v)
-                }
-                {
-                    __binding_5.accept(v)
-                }
-                {
-                    __binding_6.accept(v)
-                }
-                { __binding_7.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for FunImplicitParams<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_fun_implicit_params(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            FunImplicitParams {
-                capability: ref __binding_0,
-            } => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for FunKind {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_fun_kind(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            FunKind::FSync => {}
-            FunKind::FAsync => {}
-            FunKind::FGenerator => {}
-            FunKind::FAsyncGenerator => {}
-        }
-    }
-}
-impl<'a> Node<'a> for FunParam<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_fun_param(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            FunParam {
-                pos: ref __binding_0,
-                name: ref __binding_1,
-                type_: ref __binding_2,
-                flags: ref __binding_3,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                {
-                    __binding_2.accept(v)
-                }
-                { __binding_3.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for FunType<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_fun_type(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            FunType {
-                tparams: ref __binding_0,
-                where_constraints: ref __binding_1,
-                params: ref __binding_2,
-                implicit_params: ref __binding_3,
-                ret: ref __binding_4,
-                flags: ref __binding_5,
-                ifc_decl: ref __binding_6,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                {
-                    __binding_2.accept(v)
-                }
-                {
-                    __binding_3.accept(v)
-                }
-                {
-                    __binding_4.accept(v)
-                }
-                {
-                    __binding_5.accept(v)
-                }
-                { __binding_6.accept(v) }
-            }
-        }
-    }
-}
 impl<'a> Node<'a> for Id<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_id(self)
@@ -453,27 +45,28 @@ impl<'a> Node<'a> for Id<'a> {
         }
     }
 }
-impl<'a> Node<'a> for IfcFunDecl<'a> {
+impl<'a> Node<'a> for XhpEnumValue<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_ifc_fun_decl(self)
+        v.visit_xhp_enum_value(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            IfcFunDecl::FDPolicied(ref __binding_0) => __binding_0.accept(v),
-            IfcFunDecl::FDInferFlows => {}
+            XhpEnumValue::XEVInt(ref __binding_0) => __binding_0.accept(v),
+            XhpEnumValue::XEVString(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
-impl<'a> Node<'a> for ModuleDefType<'a> {
+impl<'a> Node<'a> for ShallowClassConst<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_module_def_type(self)
+        v.visit_shallow_class_const(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ModuleDefType {
-                pos: ref __binding_0,
-                exports: ref __binding_1,
-                imports: ref __binding_2,
+            ShallowClassConst {
+                abstract_: ref __binding_0,
+                name: ref __binding_1,
+                type_: ref __binding_2,
+                refs: ref __binding_3,
             } => {
                 {
                     __binding_0.accept(v)
@@ -481,138 +74,105 @@ impl<'a> Node<'a> for ModuleDefType<'a> {
                 {
                     __binding_1.accept(v)
                 }
-                { __binding_2.accept(v) }
+                {
+                    __binding_2.accept(v)
+                }
+                { __binding_3.accept(v) }
             }
         }
     }
 }
-impl<'a> Node<'a> for ModuleReference<'a> {
+impl<'a> Node<'a> for ShallowTypeconst<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_module_reference(self)
+        v.visit_shallow_typeconst(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ModuleReference::MRGlobal => {}
-            ModuleReference::MRPrefix(ref __binding_0) => __binding_0.accept(v),
-            ModuleReference::MRExact(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for NegType<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_neg_type(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            NegType::NegPrim(ref __binding_0) => __binding_0.accept(v),
-            NegType::NegClass(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for PosByteString<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_pos_byte_string(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            PosByteString(ref __binding_0, ref __binding_1) => {
+            ShallowTypeconst {
+                name: ref __binding_0,
+                kind: ref __binding_1,
+                enforceable: ref __binding_2,
+                reifiable: ref __binding_3,
+                is_ctx: ref __binding_4,
+            } => {
                 {
                     __binding_0.accept(v)
                 }
-                { __binding_1.accept(v) }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                {
+                    __binding_3.accept(v)
+                }
+                { __binding_4.accept(v) }
             }
         }
     }
 }
-impl<'a> Node<'a> for PosString<'a> {
+impl<'a> Node<'a> for ShallowProp<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_pos_string(self)
+        v.visit_shallow_prop(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            PosString(ref __binding_0, ref __binding_1) => {
+            ShallowProp {
+                name: ref __binding_0,
+                xhp_attr: ref __binding_1,
+                type_: ref __binding_2,
+                visibility: ref __binding_3,
+                flags: ref __binding_4,
+            } => {
                 {
                     __binding_0.accept(v)
                 }
-                { __binding_1.accept(v) }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                {
+                    __binding_3.accept(v)
+                }
+                { __binding_4.accept(v) }
             }
         }
     }
 }
-impl<'a> Node<'a> for PossiblyEnforcedTy<'a> {
+impl<'a> Node<'a> for ShallowMethod<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_possibly_enforced_ty(self)
+        v.visit_shallow_method(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            PossiblyEnforcedTy {
-                enforced: ref __binding_0,
+            ShallowMethod {
+                name: ref __binding_0,
                 type_: ref __binding_1,
+                visibility: ref __binding_2,
+                deprecated: ref __binding_3,
+                flags: ref __binding_4,
+                attributes: ref __binding_5,
             } => {
                 {
                     __binding_0.accept(v)
                 }
-                { __binding_1.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for RefinedConst<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_refined_const(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            RefinedConst {
-                bound: ref __binding_0,
-                is_ctx: ref __binding_1,
-            } => {
                 {
-                    __binding_0.accept(v)
+                    __binding_1.accept(v)
                 }
-                { __binding_1.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for RefinedConstBound<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_refined_const_bound(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            RefinedConstBound::TRexact(ref __binding_0) => __binding_0.accept(v),
-            RefinedConstBound::TRloose(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for RefinedConstBounds<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_refined_const_bounds(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            RefinedConstBounds {
-                lower: ref __binding_0,
-                upper: ref __binding_1,
-            } => {
                 {
-                    __binding_0.accept(v)
+                    __binding_2.accept(v)
                 }
-                { __binding_1.accept(v) }
+                {
+                    __binding_3.accept(v)
+                }
+                {
+                    __binding_4.accept(v)
+                }
+                { __binding_5.accept(v) }
             }
-        }
-    }
-}
-impl<'a> Node<'a> for ReifyKind {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_reify_kind(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ReifyKind::Erased => {}
-            ReifyKind::SoftReified => {}
-            ReifyKind::Reified => {}
         }
     }
 }
@@ -746,45 +306,114 @@ impl<'a> Node<'a> for ShallowClass<'a> {
         }
     }
 }
-impl<'a> Node<'a> for ShallowClassConst<'a> {
+impl<'a> Node<'a> for Decl<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_shallow_class_const(self)
+        v.visit_decl(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ShallowClassConst {
-                abstract_: ref __binding_0,
-                name: ref __binding_1,
-                type_: ref __binding_2,
-                refs: ref __binding_3,
-            } => {
+            Decl::Class(ref __binding_0) => __binding_0.accept(v),
+            Decl::Fun(ref __binding_0) => __binding_0.accept(v),
+            Decl::Typedef(ref __binding_0) => __binding_0.accept(v),
+            Decl::Const(ref __binding_0) => __binding_0.accept(v),
+            Decl::Module(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for IfcFunDecl<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_ifc_fun_decl(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            IfcFunDecl::FDPolicied(ref __binding_0) => __binding_0.accept(v),
+            IfcFunDecl::FDInferFlows => {}
+        }
+    }
+}
+impl<'a> Node<'a> for PosString<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_pos_string(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            PosString(ref __binding_0, ref __binding_1) => {
                 {
                     __binding_0.accept(v)
                 }
-                {
-                    __binding_1.accept(v)
-                }
-                {
-                    __binding_2.accept(v)
-                }
-                { __binding_3.accept(v) }
+                { __binding_1.accept(v) }
             }
         }
     }
 }
-impl<'a> Node<'a> for ShallowMethod<'a> {
+impl<'a> Node<'a> for PosByteString<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_shallow_method(self)
+        v.visit_pos_byte_string(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ShallowMethod {
+            PosByteString(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for TshapeFieldName<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_tshape_field_name(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TshapeFieldName::TSFlitInt(ref __binding_0) => __binding_0.accept(v),
+            TshapeFieldName::TSFlitStr(ref __binding_0) => __binding_0.accept(v),
+            TshapeFieldName::TSFclassConst(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for DependentType {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_dependent_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            DependentType::DTexpr(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for UserAttribute<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_user_attribute(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            UserAttribute {
                 name: ref __binding_0,
-                type_: ref __binding_1,
-                visibility: ref __binding_2,
-                deprecated: ref __binding_3,
-                flags: ref __binding_4,
-                attributes: ref __binding_5,
+                classname_params: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for Tparam<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_tparam(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Tparam {
+                variance: ref __binding_0,
+                name: ref __binding_1,
+                tparams: ref __binding_2,
+                constraints: ref __binding_3,
+                reified: ref __binding_4,
+                user_attributes: ref __binding_5,
             } => {
                 {
                     __binding_0.accept(v)
@@ -806,63 +435,47 @@ impl<'a> Node<'a> for ShallowMethod<'a> {
         }
     }
 }
-impl<'a> Node<'a> for ShallowProp<'a> {
+impl<'a> Node<'a> for WhereConstraint<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_shallow_prop(self)
+        v.visit_where_constraint(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ShallowProp {
-                name: ref __binding_0,
-                xhp_attr: ref __binding_1,
-                type_: ref __binding_2,
-                visibility: ref __binding_3,
-                flags: ref __binding_4,
-            } => {
+            WhereConstraint(ref __binding_0, ref __binding_1, ref __binding_2) => {
                 {
                     __binding_0.accept(v)
                 }
                 {
                     __binding_1.accept(v)
                 }
-                {
-                    __binding_2.accept(v)
-                }
-                {
-                    __binding_3.accept(v)
-                }
-                { __binding_4.accept(v) }
+                { __binding_2.accept(v) }
             }
         }
     }
 }
-impl<'a> Node<'a> for ShallowTypeconst<'a> {
+impl<'a> Node<'a> for Ty<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_shallow_typeconst(self)
+        v.visit_ty(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ShallowTypeconst {
-                name: ref __binding_0,
-                kind: ref __binding_1,
-                enforceable: ref __binding_2,
-                reifiable: ref __binding_3,
-                is_ctx: ref __binding_4,
-            } => {
+            Ty(ref __binding_0, ref __binding_1) => {
                 {
                     __binding_0.accept(v)
                 }
-                {
-                    __binding_1.accept(v)
-                }
-                {
-                    __binding_2.accept(v)
-                }
-                {
-                    __binding_3.accept(v)
-                }
-                { __binding_4.accept(v) }
+                { __binding_1.accept(v) }
             }
+        }
+    }
+}
+impl<'a> Node<'a> for NegType<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_neg_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            NegType::NegPrim(ref __binding_0) => __binding_0.accept(v),
+            NegType::NegClass(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -884,24 +497,492 @@ impl<'a> Node<'a> for ShapeFieldType<'a> {
         }
     }
 }
-impl<'a> Node<'a> for ShapeKind {
+impl<'a> Node<'a> for Ty_<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_shape_kind(self)
+        v.visit_ty_(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ShapeKind::ClosedShape => {}
-            ShapeKind::OpenShape => {}
+            Ty_::Tthis => {}
+            Ty_::Tapply(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Trefinement(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tmixed => {}
+            Ty_::Tlike(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tany(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tnonnull => {}
+            Ty_::Tdynamic => {}
+            Ty_::Toption(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tprim(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tfun(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Ttuple(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tshape(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tvar(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tgeneric(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tunion(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tintersection(ref __binding_0) => __binding_0.accept(v),
+            Ty_::TvecOrDict(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Taccess(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tnewtype(ref __binding_0) => __binding_0.accept(v),
+            Ty_::TunappliedAlias(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tdependent(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tclass(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Tneg(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
-impl<'a> Node<'a> for TShapeField<'a> {
+impl<'a> Node<'a> for TaccessType<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_tshape_field(self)
+        v.visit_taccess_type(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            TShapeField(ref __binding_0) => __binding_0.accept(v),
+            TaccessType(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for Exact<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_exact(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Exact::Exact => {}
+            Exact::Nonexact(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for ClassRefinement<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_refinement(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassRefinement {
+                cr_consts: ref __binding_0,
+            } => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for RefinedConst<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_refined_const(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            RefinedConst {
+                bound: ref __binding_0,
+                is_ctx: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for RefinedConstBound<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_refined_const_bound(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            RefinedConstBound::TRexact(ref __binding_0) => __binding_0.accept(v),
+            RefinedConstBound::TRloose(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for RefinedConstBounds<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_refined_const_bounds(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            RefinedConstBounds {
+                lower: ref __binding_0,
+                upper: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for Capability<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_capability(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Capability::CapDefaults(ref __binding_0) => __binding_0.accept(v),
+            Capability::CapTy(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for FunImplicitParams<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_fun_implicit_params(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FunImplicitParams {
+                capability: ref __binding_0,
+            } => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for FunType<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_fun_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FunType {
+                tparams: ref __binding_0,
+                where_constraints: ref __binding_1,
+                params: ref __binding_2,
+                implicit_params: ref __binding_3,
+                ret: ref __binding_4,
+                flags: ref __binding_5,
+                ifc_decl: ref __binding_6,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                {
+                    __binding_3.accept(v)
+                }
+                {
+                    __binding_4.accept(v)
+                }
+                {
+                    __binding_5.accept(v)
+                }
+                { __binding_6.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for PossiblyEnforcedTy<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_possibly_enforced_ty(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            PossiblyEnforcedTy {
+                enforced: ref __binding_0,
+                type_: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for FunParam<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_fun_param(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FunParam {
+                pos: ref __binding_0,
+                name: ref __binding_1,
+                type_: ref __binding_2,
+                flags: ref __binding_3,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                { __binding_3.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for ClassConstFrom<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_const_from(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassConstFrom::Self_ => {}
+            ClassConstFrom::From(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for ClassConstRef<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_const_ref(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassConstRef(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for ConstDecl<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_const_decl(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ConstDecl {
+                pos: ref __binding_0,
+                type_: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for FunElt<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_fun_elt(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FunElt {
+                deprecated: ref __binding_0,
+                module: ref __binding_1,
+                internal: ref __binding_2,
+                type_: ref __binding_3,
+                pos: ref __binding_4,
+                php_std_lib: ref __binding_5,
+                support_dynamic_type: ref __binding_6,
+                no_auto_dynamic: ref __binding_7,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                {
+                    __binding_3.accept(v)
+                }
+                {
+                    __binding_4.accept(v)
+                }
+                {
+                    __binding_5.accept(v)
+                }
+                {
+                    __binding_6.accept(v)
+                }
+                { __binding_7.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for ModuleReference<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_module_reference(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ModuleReference::MRGlobal => {}
+            ModuleReference::MRPrefix(ref __binding_0) => __binding_0.accept(v),
+            ModuleReference::MRExact(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for ModuleDefType<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_module_def_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ModuleDefType {
+                pos: ref __binding_0,
+                exports: ref __binding_1,
+                imports: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for AbstractTypeconst<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_abstract_typeconst(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            AbstractTypeconst {
+                as_constraint: ref __binding_0,
+                super_constraint: ref __binding_1,
+                default: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for ConcreteTypeconst<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_concrete_typeconst(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ConcreteTypeconst {
+                tc_type: ref __binding_0,
+            } => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for Typeconst<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_typeconst(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Typeconst::TCAbstract(ref __binding_0) => __binding_0.accept(v),
+            Typeconst::TCConcrete(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for EnumType<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_enum_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            EnumType {
+                base: ref __binding_0,
+                constraint: ref __binding_1,
+                includes: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for TypedefType<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_typedef_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TypedefType {
+                module: ref __binding_0,
+                pos: ref __binding_1,
+                vis: ref __binding_2,
+                tparams: ref __binding_3,
+                as_constraint: ref __binding_4,
+                super_constraint: ref __binding_5,
+                type_: ref __binding_6,
+                is_ctx: ref __binding_7,
+                attributes: ref __binding_8,
+                internal: ref __binding_9,
+                docs_url: ref __binding_10,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                {
+                    __binding_3.accept(v)
+                }
+                {
+                    __binding_4.accept(v)
+                }
+                {
+                    __binding_5.accept(v)
+                }
+                {
+                    __binding_6.accept(v)
+                }
+                {
+                    __binding_7.accept(v)
+                }
+                {
+                    __binding_8.accept(v)
+                }
+                {
+                    __binding_9.accept(v)
+                }
+                { __binding_10.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for ExprDepTypeReason<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_expr_dep_type_reason(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ExprDepTypeReason::ERexpr(ref __binding_0) => __binding_0.accept(v),
+            ExprDepTypeReason::ERstatic => {}
+            ExprDepTypeReason::ERclass(ref __binding_0) => __binding_0.accept(v),
+            ExprDepTypeReason::ERparent(ref __binding_0) => __binding_0.accept(v),
+            ExprDepTypeReason::ERself(ref __binding_0) => __binding_0.accept(v),
+            ExprDepTypeReason::ERpu(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for Blame<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_blame(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Blame::Blame(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -1005,63 +1086,98 @@ impl<'a> Node<'a> for T_<'a> {
         }
     }
 }
-impl<'a> Node<'a> for TaccessType<'a> {
+impl<'a> Node<'a> for Decls<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_taccess_type(self)
+        v.visit_decls(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            TaccessType(ref __binding_0, ref __binding_1) => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
+            Decls(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
-impl<'a> Node<'a> for Tag {
+impl<'a> Node<'a> for TShapeField<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_tag(self)
+        v.visit_tshape_field(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            Tag::Required => {}
-            Tag::LateInit => {}
+            TShapeField(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
-impl<'a> Node<'a> for Tparam<'a> {
+impl<'a> Node<'a> for Variance {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_tparam(self)
+        v.visit_variance(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            Tparam {
-                variance: ref __binding_0,
-                name: ref __binding_1,
-                tparams: ref __binding_2,
-                constraints: ref __binding_3,
-                reified: ref __binding_4,
-                user_attributes: ref __binding_5,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                {
-                    __binding_2.accept(v)
-                }
-                {
-                    __binding_3.accept(v)
-                }
-                {
-                    __binding_4.accept(v)
-                }
-                { __binding_5.accept(v) }
-            }
+            Variance::Covariant => {}
+            Variance::Contravariant => {}
+            Variance::Invariant => {}
+        }
+    }
+}
+impl<'a> Node<'a> for ConstraintKind {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_constraint_kind(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ConstraintKind::ConstraintAs => {}
+            ConstraintKind::ConstraintEq => {}
+            ConstraintKind::ConstraintSuper => {}
+        }
+    }
+}
+impl<'a> Node<'a> for Abstraction {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_abstraction(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Abstraction::Concrete => {}
+            Abstraction::Abstract => {}
+        }
+    }
+}
+impl<'a> Node<'a> for ClassishKind {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_classish_kind(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassishKind::Cclass(ref __binding_0) => __binding_0.accept(v),
+            ClassishKind::Cinterface => {}
+            ClassishKind::Ctrait => {}
+            ClassishKind::Cenum => {}
+            ClassishKind::CenumClass(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for FunKind {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_fun_kind(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FunKind::FSync => {}
+            FunKind::FAsync => {}
+            FunKind::FGenerator => {}
+            FunKind::FAsyncGenerator => {}
+        }
+    }
+}
+impl<'a> Node<'a> for Visibility {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_visibility(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Visibility::Private => {}
+            Visibility::Public => {}
+            Visibility::Protected => {}
+            Visibility::Internal => {}
         }
     }
 }
@@ -1084,131 +1200,6 @@ impl<'a> Node<'a> for Tprim {
         }
     }
 }
-impl<'a> Node<'a> for TshapeFieldName<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_tshape_field_name(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            TshapeFieldName::TSFlitInt(ref __binding_0) => __binding_0.accept(v),
-            TshapeFieldName::TSFlitStr(ref __binding_0) => __binding_0.accept(v),
-            TshapeFieldName::TSFclassConst(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for Ty<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_ty(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Ty(ref __binding_0, ref __binding_1) => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for Ty_<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_ty_(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Ty_::Tthis => {}
-            Ty_::Tapply(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Trefinement(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tmixed => {}
-            Ty_::Tlike(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tany(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tnonnull => {}
-            Ty_::Tdynamic => {}
-            Ty_::Toption(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tprim(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tfun(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Ttuple(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tshape(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tvar(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tgeneric(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tunion(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tintersection(ref __binding_0) => __binding_0.accept(v),
-            Ty_::TvecOrDict(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Taccess(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tnewtype(ref __binding_0) => __binding_0.accept(v),
-            Ty_::TunappliedAlias(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tdependent(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tclass(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tneg(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for Typeconst<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_typeconst(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Typeconst::TCAbstract(ref __binding_0) => __binding_0.accept(v),
-            Typeconst::TCConcrete(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for TypedefType<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_typedef_type(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            TypedefType {
-                module: ref __binding_0,
-                pos: ref __binding_1,
-                vis: ref __binding_2,
-                tparams: ref __binding_3,
-                as_constraint: ref __binding_4,
-                super_constraint: ref __binding_5,
-                type_: ref __binding_6,
-                is_ctx: ref __binding_7,
-                attributes: ref __binding_8,
-                internal: ref __binding_9,
-                docs_url: ref __binding_10,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                {
-                    __binding_2.accept(v)
-                }
-                {
-                    __binding_3.accept(v)
-                }
-                {
-                    __binding_4.accept(v)
-                }
-                {
-                    __binding_5.accept(v)
-                }
-                {
-                    __binding_6.accept(v)
-                }
-                {
-                    __binding_7.accept(v)
-                }
-                {
-                    __binding_8.accept(v)
-                }
-                {
-                    __binding_9.accept(v)
-                }
-                { __binding_10.accept(v) }
-            }
-        }
-    }
-}
 impl<'a> Node<'a> for TypedefVisibility {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_typedef_visibility(self)
@@ -1221,64 +1212,84 @@ impl<'a> Node<'a> for TypedefVisibility {
         }
     }
 }
-impl<'a> Node<'a> for UserAttribute<'a> {
+impl<'a> Node<'a> for ReifyKind {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_user_attribute(self)
+        v.visit_reify_kind(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            UserAttribute {
-                name: ref __binding_0,
-                classname_params: ref __binding_1,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
+            ReifyKind::Erased => {}
+            ReifyKind::SoftReified => {}
+            ReifyKind::Reified => {}
         }
     }
 }
-impl<'a> Node<'a> for Variance {
+impl<'a> Node<'a> for ClassConstKind {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_variance(self)
+        v.visit_class_const_kind(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            Variance::Covariant => {}
-            Variance::Contravariant => {}
-            Variance::Invariant => {}
+            ClassConstKind::CCAbstract(ref __binding_0) => __binding_0.accept(v),
+            ClassConstKind::CCConcrete => {}
         }
     }
 }
-impl<'a> Node<'a> for Visibility {
+impl<'a> Node<'a> for ShapeKind {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_visibility(self)
+        v.visit_shape_kind(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            Visibility::Private => {}
-            Visibility::Public => {}
-            Visibility::Protected => {}
-            Visibility::Internal => {}
+            ShapeKind::ClosedShape => {}
+            ShapeKind::OpenShape => {}
         }
     }
 }
-impl<'a> Node<'a> for WhereConstraint<'a> {
+impl<'a> Node<'a> for Enforcement {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_where_constraint(self)
+        v.visit_enforcement(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            WhereConstraint(ref __binding_0, ref __binding_1, ref __binding_2) => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                { __binding_2.accept(v) }
-            }
+            Enforcement::Unenforced => {}
+            Enforcement::Enforced => {}
+        }
+    }
+}
+impl<'a> Node<'a> for ArgPosition {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_arg_position(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ArgPosition::Aonly => {}
+            ArgPosition::Afirst => {}
+            ArgPosition::Asecond => {}
+        }
+    }
+}
+impl<'a> Node<'a> for BlameSource {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_blame_source(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            BlameSource::BScall => {}
+            BlameSource::BSlambda => {}
+            BlameSource::BSassignment => {}
+            BlameSource::BSoutOfScope => {}
+        }
+    }
+}
+impl<'a> Node<'a> for Tag {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_tag(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Tag::Required => {}
+            Tag::LateInit => {}
         }
     }
 }
@@ -1297,17 +1308,6 @@ impl<'a> Node<'a> for XhpAttribute {
                 }
                 { __binding_1.accept(v) }
             }
-        }
-    }
-}
-impl<'a> Node<'a> for XhpEnumValue<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_xhp_enum_value(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            XhpEnumValue::XEVInt(ref __binding_0) => __binding_0.accept(v),
-            XhpEnumValue::XEVString(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

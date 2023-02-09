@@ -482,6 +482,12 @@ class HQSession
     versionUtilsReady_.then([this, stats] { qpackCodec_.setStats(stats); });
   }
 
+  void setHeaderIndexingStrategy(const HeaderIndexingStrategy* indexingStrat) {
+    versionUtilsReady_.then([this, indexingStrat] {
+      qpackCodec_.setHeaderIndexingStrategy(indexingStrat);
+    });
+  }
+
   void enableDoubleGoawayDrain() override {
   }
 

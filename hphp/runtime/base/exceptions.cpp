@@ -355,18 +355,34 @@ void throwable_mark_array(const ObjectData* throwable, Array& props) {
 }
 
 String throwable_to_string(ObjectData* throwable) {
-  if (throwable->instanceof(SystemLib::s_ThrowableClass)) {
+  auto const cls = throwable->getVMClass();
+  if (cls->classof(SystemLib::s_ThrowableClass)) {
     try {
       auto result = ObjectData::InvokeSimple(throwable, s___toString,
                                              RuntimeCoeffects::fixme());
       if (result.isString()) {
         return result.asCStrRef();
       }
-    } catch (const Object&) {
-      // Ignore PHP exceptions from Throwable::__toString
+      Logger::FError("{}::__toString() didn't return a string",
+                     cls->name()->slice());
+    } catch (const Object& ex) {
+      Logger::FError("encountered {} in {}::__toString()",
+                     ex->getVMClass()->name()->slice(),
+                     cls->name()->slice());
     }
+    auto message = throwable->getProp(MemberLookupContext{cls},
+                                      makeStaticString("message"));
+    if (!message) {
+      Logger::Error("Throwable object doesn't have the expected message field");
+      return String{StringData::Make(cls->name(), ": no message")};
+    }
+    return String{StringData::Make(cls->name()->slice(),
+                              folly::StringPiece{": "},
+                              message.val().pstr->slice())};
+  } else {
+    return s_throwableToStringFailed +
+      " on an object of class " + cls->name()->data();
   }
-  return s_throwableToStringFailed;
 }
 ///////////////////////////////////////////////////////////////////////////////
 }

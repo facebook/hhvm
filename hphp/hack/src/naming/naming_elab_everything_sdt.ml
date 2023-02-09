@@ -57,7 +57,7 @@ module Env = struct
   let implicit_sdt env = everything_sdt env && not (under_no_auto_dynamic env)
 end
 
-let under_no_auto_dyanmic ua =
+let no_auto_dynamic_attr ua =
   Naming_attributes.mem SN.UserAttributes.uaNoAutoDynamic ua
 
 let wrap_supportdyn p h = Aast.Happly ((p, SN.Classes.cSupportDyn), [(p, h)])
@@ -98,7 +98,7 @@ let on_fun_def_top_down fd ~ctx =
     Env.set_under_no_auto_dynamic
       ctx
       ~under_no_auto_dynamic:
-        (under_no_auto_dyanmic Aast.(fd.fd_fun.f_user_attributes))
+        (no_auto_dynamic_attr Aast.(fd.fd_fun.f_user_attributes))
   in
   (ctx, Ok fd)
 
@@ -107,7 +107,7 @@ let on_fun_def fd ~ctx =
     Env.set_under_no_auto_dynamic
       ctx
       ~under_no_auto_dynamic:
-        (under_no_auto_dyanmic Aast.(fd.fd_fun.f_user_attributes))
+        (no_auto_dynamic_attr Aast.(fd.fd_fun.f_user_attributes))
   in
   let fd_fun = fd.Aast.fd_fun in
   let fd_fun =
@@ -146,7 +146,7 @@ let on_typedef_top_down t ~ctx =
   let ctx =
     Env.set_under_no_auto_dynamic
       ctx
-      ~under_no_auto_dynamic:(under_no_auto_dyanmic t.Aast.t_user_attributes)
+      ~under_no_auto_dynamic:(no_auto_dynamic_attr t.Aast.t_user_attributes)
   in
   (ctx, Ok t)
 
@@ -154,7 +154,7 @@ let on_typedef t ~ctx =
   let ctx =
     Env.set_under_no_auto_dynamic
       ctx
-      ~under_no_auto_dynamic:(under_no_auto_dyanmic t.Aast.t_user_attributes)
+      ~under_no_auto_dynamic:(no_auto_dynamic_attr t.Aast.t_user_attributes)
   in
   Aast_defs.(
     let (pos, _) = t.Aast.t_name in
@@ -178,7 +178,7 @@ let on_class_top_down c ~ctx =
   let ctx =
     Env.set_under_no_auto_dynamic
       ctx
-      ~under_no_auto_dynamic:(under_no_auto_dyanmic c.Aast.c_user_attributes)
+      ~under_no_auto_dynamic:(no_auto_dynamic_attr c.Aast.c_user_attributes)
   in
   (ctx, Ok c)
 
@@ -186,7 +186,7 @@ let on_class_ c ~ctx =
   let ctx =
     Env.set_under_no_auto_dynamic
       ctx
-      ~under_no_auto_dynamic:(under_no_auto_dyanmic c.Aast.c_user_attributes)
+      ~under_no_auto_dynamic:(no_auto_dynamic_attr c.Aast.c_user_attributes)
   in
   let c =
     if Env.implicit_sdt ctx then
@@ -240,6 +240,16 @@ let on_enum_ e ~ctx =
   in
   (ctx, Ok e)
 
+let on_method_top_down m ~ctx =
+  let ctx =
+    Env.set_under_no_auto_dynamic
+      ctx
+      ~under_no_auto_dynamic:
+        (no_auto_dynamic_attr m.Aast.m_user_attributes
+        || Env.under_no_auto_dynamic ctx)
+  in
+  (ctx, Ok m)
+
 let top_down_pass =
   let id = Aast.Pass.identity () in
   Naming_phase_pass.(
@@ -249,6 +259,7 @@ let top_down_pass =
           id with
           on_ty_fun_def = Some on_fun_def_top_down;
           on_ty_class_ = Some on_class_top_down;
+          on_ty_method_ = Some on_method_top_down;
           on_ty_expr_ = Some on_expr_;
           on_ty_typedef = Some on_typedef_top_down;
         })

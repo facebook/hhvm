@@ -543,9 +543,3 @@ let pessimise_fun_type ~fun_kind ~this_class ctx p ty =
                     enf_ty_opt
                     (make_like_type ~return_from_async ret_ty))) )))
   | _ -> ty
-
-let maybe_pessimise_fun_type ~fun_kind ~this_class ctx p ty =
-  if Provider_context.implicit_sdt_for_class ctx this_class then
-    pessimise_fun_type ~fun_kind ~this_class ctx p ty
-  else
-    ty

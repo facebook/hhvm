@@ -112,16 +112,6 @@ val pessimise_fun_type :
   Typing_defs.decl_ty ->
   Typing_defs.decl_ty
 
-(** Pessimise the type if in implicit pessimisation mode, otherwise
-    return the type *)
-val maybe_pessimise_fun_type :
-  fun_kind:fun_kind ->
-  this_class:Shallow_decl_defs.shallow_class option ->
-  Provider_context.t ->
-  Pos_or_decl.t ->
-  Typing_defs.decl_ty ->
-  Typing_defs.decl_ty
-
 (** Add as supportdyn<mixed> constraints to the type parameters *)
 val add_supportdyn_constraints :
   Pos_or_decl.t ->

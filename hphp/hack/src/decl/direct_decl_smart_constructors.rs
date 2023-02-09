@@ -131,6 +131,7 @@ pub struct Impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
     type_parameters: Rc<Vec<SSet<'a>>>,
     retain_or_omit_user_attributes_for_facts: bool,
     under_no_auto_dynamic: bool,
+    inside_no_auto_dynamic_class: bool,
     source_text_allocator: S,
     module: Option<Id<'a>>,
 }
@@ -171,6 +172,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 source_text_allocator,
                 retain_or_omit_user_attributes_for_facts,
                 under_no_auto_dynamic: false,
+                inside_no_auto_dynamic_class: false,
                 module: None,
             }),
             token_factory: SimpleTokenFactoryImpl::new(),
@@ -1157,6 +1159,7 @@ struct Attributes<'a> {
 impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
     fn add_class(&mut self, name: &'a str, decl: &'a shallow_decl_defs::ShallowClass<'a>) {
         self.under_no_auto_dynamic = false;
+        self.inside_no_auto_dynamic_class = false;
         self.decls.add(name, Decl::Class(decl), self.arena);
     }
     fn add_fun(&mut self, name: &'a str, decl: &'a typing_defs::FunElt<'a>) {
@@ -2882,6 +2885,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             TokenKind::Arraykey => self.prim_ty(aast::Tprim::Tarraykey, token_pos(self)),
             TokenKind::Noreturn => self.prim_ty(aast::Tprim::Tnoreturn, token_pos(self)),
             TokenKind::Resource => self.prim_ty(aast::Tprim::Tresource, token_pos(self)),
+            TokenKind::Class => {
+                if self.under_no_auto_dynamic {
+                    let this = Rc::make_mut(&mut self.state);
+                    this.inside_no_auto_dynamic_class = true;
+                }
+                Node::Token(FixedWidthToken::new(kind, token.start_offset()))
+            }
             TokenKind::NullLiteral
             | TokenKind::Darray
             | TokenKind::Varray
@@ -2940,7 +2950,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             | TokenKind::Public
             | TokenKind::Reify
             | TokenKind::Static
-            | TokenKind::Class
             | TokenKind::Trait
             | TokenKind::Lateinit
             | TokenKind::RightBrace
@@ -4677,21 +4686,20 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             !is_constructor && attributes.support_dynamic_type,
         );
 
-        let mut user_attributes = bump::Vec::new_in(self.arena);
-        if self.retain_or_omit_user_attributes_for_facts {
-            for attribute in attrs.iter() {
-                match attribute {
-                    Node::Attribute(attr) => {
-                        user_attributes.push(self.user_attribute_to_decl(attr))
-                    }
-                    _ => {}
+        // Parse the user attributes
+        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
+        let user_attributes = self.slice(attrs.iter().rev().filter_map(|attribute| {
+            if let Node::Attribute(attr) = attribute {
+                if self.retain_or_omit_user_attributes_for_facts || attr.name.1 == "__NoAutoDynamic"
+                {
+                    Some(self.user_attribute_to_decl(attr))
+                } else {
+                    None
                 }
+            } else {
+                None
             }
-            // Match ordering of attributes produced by the OCaml decl parser (even
-            // though it's the reverse of the syntactic ordering).
-            user_attributes.reverse();
-        }
-        let user_attributes = user_attributes.into_bump_slice();
+        }));
 
         let method = self.alloc(ShallowMethod {
             name: id,
@@ -4701,6 +4709,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             flags,
             attributes: user_attributes,
         });
+        if !self.inside_no_auto_dynamic_class {
+            let this = Rc::make_mut(&mut self.state);
+            this.under_no_auto_dynamic = false;
+        }
         if is_constructor {
             Node::Constructor(self.alloc(ConstructorNode { method, properties }))
         } else {

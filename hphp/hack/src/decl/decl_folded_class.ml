@@ -665,6 +665,11 @@ let build_method_fun_elt
     (m : Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
   let (pos, id) = m.sm_name in
   let support_dynamic_type = sm_support_dynamic_type m in
+  let fe_no_auto_dynamic =
+    Typing_defs.Attributes.mem
+      Naming_special_names.UserAttributes.uaNoAutoDynamic
+      m.Shallow_decl_defs.sm_attributes
+  in
   let fe =
     {
       fe_module = None;
@@ -672,20 +677,26 @@ let build_method_fun_elt
       fe_internal = false;
       fe_deprecated = None;
       fe_type =
-        Decl_enforceability.(
-          maybe_pessimise_fun_type
-            ~fun_kind:
-              (if MethodFlags.get_abstract m.sm_flags then
-                Abstract_method
-              else
-                Concrete_method)
-            ~this_class
-            ctx
-            pos
-            m.sm_type);
+        (if
+         Provider_context.implicit_sdt_for_class ctx this_class
+         && not fe_no_auto_dynamic
+        then
+          Decl_enforceability.(
+            pessimise_fun_type
+              ~fun_kind:
+                (if MethodFlags.get_abstract m.sm_flags then
+                  Abstract_method
+                else
+                  Concrete_method)
+              ~this_class
+              ctx
+              pos
+              m.sm_type)
+        else
+          m.sm_type);
       fe_php_std_lib = false;
       fe_support_dynamic_type = support_dynamic_type;
-      fe_no_auto_dynamic = false;
+      fe_no_auto_dynamic;
     }
   in
   (if member_heaps_enabled ctx then

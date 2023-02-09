@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod args;
-pub mod by_ref_context;
 pub mod by_ref_node;
+pub mod context;
 
 use std::fmt::Write;
 use std::path::Path;

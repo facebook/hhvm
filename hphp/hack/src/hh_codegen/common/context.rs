@@ -16,13 +16,32 @@ use synstructure::Structure;
 
 use crate::common::syn_helpers;
 
+/// A simplified version of `crate::gen_visitor::context::Context`. Contains all
+/// of the ASTs for `syn::Item` definitions provided in the constructor, except
+/// those whose types are not reachable from the given root type.
 pub struct Context {
-    pub defs: BTreeMap<String, syn::DeriveInput>,
-    pub mods: BTreeSet<String>,
+    defs: BTreeMap<String, syn::DeriveInput>,
+    mods: BTreeSet<String>,
 }
 
 impl Context {
-    pub fn new(
+    /// Construct a `Context` containing the ASTs of all type definitions
+    /// reachable from the `root` type. Each type must have a unique name (even
+    /// if the types are declared in different modules).
+    #[allow(dead_code)]
+    pub fn new(files: &[(&Path, Vec<syn::Item>)], root: &str) -> Result<Self> {
+        Self::with_extern_files(files, &[], root)
+    }
+
+    /// Construct a `Context` containing the ASTs of all type definitions
+    /// reachable from the `root` type. Each type must have a unique name (even
+    /// if the types are declared in different modules).
+    ///
+    /// `extern_files` is used to provide the definitions of types which are
+    /// declared in `extern_files` and re-exported in `files` (e.g., when using
+    /// `oxidized_by_ref` for `files`, use `oxidized` for `extern_files`, since
+    /// `oxidized_by_ref` re-exports types defined in `oxidized`).
+    pub fn with_extern_files(
         files: &[(&Path, Vec<syn::Item>)],
         extern_files: &[(&Path, Vec<syn::Item>)],
         root: &str,
@@ -78,6 +97,9 @@ impl Context {
         Ok(Self { defs, mods })
     }
 
+    /// Return all the names of modules provided in the `files` argument to
+    /// `Self::new`. Assumes that each file has the same name as the module it
+    /// declares (i.e., no mod.rs files).
     pub fn modules(&self) -> impl Iterator<Item = &str> {
         self.mods.iter().map(|s| s.as_ref())
     }

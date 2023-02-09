@@ -176,7 +176,9 @@ fn extract_debugger_main(
         params,
         ctxs: None,        // TODO(T70095684)
         unsafe_ctxs: None, // TODO(T70095684)
-        body: FuncBody { fb_ast: body },
+        body: FuncBody {
+            fb_ast: ast::Block(body),
+        },
         fun_kind: FunKind::FSync,
         user_attributes: vec![UserAttribute {
             name: Id(Pos::make_none(), "__DebuggerMain".into()),

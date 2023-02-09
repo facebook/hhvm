@@ -277,20 +277,22 @@ Program(
                     ctxs: None,
                     unsafe_ctxs: None,
                     body: FuncBody {
-                        fb_ast: [
-                            Stmt(
-                                Pos(
-                                    Tiny {
-                                        file: RelativePath {
-                                            prefix: Dummy,
-                                            path: "",
+                        fb_ast: Block(
+                            [
+                                Stmt(
+                                    Pos(
+                                        Tiny {
+                                            file: RelativePath {
+                                                prefix: Dummy,
+                                                path: "",
+                                            },
+                                            span: PosSpanTiny { from 0:18446744073709551615 to 0:18446744073709551615 },
                                         },
-                                        span: PosSpanTiny { from 0:18446744073709551615 to 0:18446744073709551615 },
-                                    },
+                                    ),
+                                    Noop,
                                 ),
-                                Noop,
-                            ),
-                        ],
+                            ],
+                        ),
                     },
                     fun_kind: FSync,
                     user_attributes: [],

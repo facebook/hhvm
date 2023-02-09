@@ -97,6 +97,91 @@ impl<'a, Ex, En> Iterator for DefsIterator<'a, Ex, En> {
     }
 }
 
+impl<Ex, En> Block<Ex, En> {
+    #[inline]
+    pub fn as_slice(&self) -> &[Stmt<Ex, En>] {
+        self.0.as_slice()
+    }
+    #[inline]
+    pub fn as_mut_slice(&mut self) -> &mut [Stmt<Ex, En>] {
+        self.0.as_mut_slice()
+    }
+    #[inline]
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+    #[inline]
+    pub fn push(&mut self, stmt: Stmt<Ex, En>) {
+        self.0.push(stmt)
+    }
+    #[inline]
+    pub fn drain<R>(&mut self, range: R) -> std::vec::Drain<'_, Stmt<Ex, En>>
+    where
+        R: std::ops::RangeBounds<usize>,
+    {
+        self.0.drain(range)
+    }
+    #[inline]
+    pub fn clear(&mut self) {
+        self.0.clear()
+    }
+    #[inline]
+    pub fn iter(&self) -> std::slice::Iter<'_, Stmt<Ex, En>> {
+        self.0.iter()
+    }
+    #[inline]
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, Stmt<Ex, En>> {
+        self.0.iter_mut()
+    }
+}
+impl<Ex, En> IntoIterator for Block<Ex, En> {
+    type Item = Stmt<Ex, En>;
+    type IntoIter = std::vec::IntoIter<Stmt<Ex, En>>;
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+impl<'a, Ex, En> IntoIterator for &'a Block<Ex, En> {
+    type Item = &'a Stmt<Ex, En>;
+    type IntoIter = std::slice::Iter<'a, Stmt<Ex, En>>;
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl<'a, Ex, En> IntoIterator for &'a mut Block<Ex, En> {
+    type Item = &'a mut Stmt<Ex, En>;
+    type IntoIter = std::slice::IterMut<'a, Stmt<Ex, En>>;
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_mut()
+    }
+}
+impl<Ex, En> AsRef<[Stmt<Ex, En>]> for Block<Ex, En> {
+    #[inline]
+    fn as_ref(&self) -> &[Stmt<Ex, En>] {
+        self.as_slice()
+    }
+}
+impl<Ex, En> std::ops::Index<usize> for Block<Ex, En> {
+    type Output = Stmt<Ex, En>;
+    #[inline]
+    fn index(&self, index: usize) -> &Self::Output {
+        std::ops::Index::index(&self.0, index)
+    }
+}
+impl<Ex, En> std::ops::IndexMut<usize> for Block<Ex, En> {
+    #[inline]
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        std::ops::IndexMut::index_mut(&mut self.0, index)
+    }
+}
+
 impl<Ex, En> Stmt<Ex, En> {
     pub fn new(pos: Pos, s: Stmt_<Ex, En>) -> Self {
         Self(pos, s)

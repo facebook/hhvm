@@ -469,6 +469,8 @@ impl<'decl> Infer<'decl> {
                 let (splices, ctx) = self.infer_stmts(&et.splices, ctx, next_where);
                 let (function_pointers, ctx) =
                     self.infer_stmts(&et.function_pointers, ctx, next_where);
+                let splices = splices.0; // we want Vec<Stmt> rather than Block
+                let function_pointers = function_pointers.0; // we want Vec<Stmt> rather than Block
                 let et = ExpressionTree(Box::new(ast::ExpressionTree {
                     hint: et.hint.clone(),
                     splices,
@@ -695,17 +697,18 @@ impl<'decl> Infer<'decl> {
 
     fn infer_stmts(
         &mut self,
-        stmts: &[ast::Stmt],
+        stmts: impl AsRef<[ast::Stmt]>,
         mut ctx: Ctx,
         where_: Where<'_>,
-    ) -> (Vec<ast::Stmt>, Ctx) {
+    ) -> (ast::Block, Ctx) {
+        let stmts = stmts.as_ref();
         let mut out = Vec::with_capacity(stmts.len());
         for stmt in stmts.iter() {
             let (s, s_ctx) = self.infer_stmt(stmt, ctx, where_);
             out.push(s);
             ctx = s_ctx;
         }
-        (out, ctx)
+        (ast::Block(out), ctx)
     }
 
     fn infer_a_field(

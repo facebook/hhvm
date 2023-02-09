@@ -28,6 +28,7 @@ use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
 use oxidized::ast::Abstraction;
+use oxidized::ast::Block;
 use oxidized::ast::ClassGetExpr;
 use oxidized::ast::ClassHint;
 use oxidized::ast::ClassId;
@@ -784,7 +785,10 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         ctxs,
         unsafe_ctxs: None,
         body: FuncBody {
-            fb_ast: vec![Stmt(pos(), Stmt_::Return(Box::new(Some(invoke_method))))],
+            fb_ast: Block(vec![Stmt(
+                pos(),
+                Stmt_::Return(Box::new(Some(invoke_method))),
+            )]),
         },
         fun_kind: FunKind::FSync,
         user_attributes: attrs,
@@ -860,7 +864,8 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
         let cd = scope.as_class_summary().ok_or_else(|| {
             Error::unrecoverable("unexpected scope shape - method is not inside the class")
         })?;
-        let variables = Self::compute_variables_from_fun(&md.params, &md.body.fb_ast, None)?;
+        let variables =
+            Self::compute_variables_from_fun(&md.params, md.body.fb_ast.as_slice(), None)?;
         let coeffects = Coeffects::from_ast(
             self.alloc,
             md.ctxs.as_ref(),
@@ -915,8 +920,11 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
             // need to handle it ourselvses, because visit_fun_ is
             // called both for toplevel functions and lambdas
             Def::Fun(fd) => {
-                let variables =
-                    Self::compute_variables_from_fun(&fd.fun.params, &fd.fun.body.fb_ast, None)?;
+                let variables = Self::compute_variables_from_fun(
+                    &fd.fun.params,
+                    fd.fun.body.fb_ast.as_slice(),
+                    None,
+                )?;
                 let coeffects = Coeffects::from_ast(
                     self.alloc,
                     fd.fun.ctxs.as_ref(),
@@ -1343,8 +1351,11 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
                 .map(|Lid(_, (_, name))| name.to_string())
                 .collect()
         });
-        let variables =
-            Self::compute_variables_from_fun(&fd.params, &fd.body.fb_ast, explicit_capture)?;
+        let variables = Self::compute_variables_from_fun(
+            &fd.params,
+            fd.body.fb_ast.as_slice(),
+            explicit_capture,
+        )?;
         let coeffects =
             Coeffects::from_ast(self.alloc, fd.ctxs.as_ref(), &fd.params, &fd.tparams, &[]);
         let si = ScopeSummary::Lambda(LambdaSummary {
@@ -1560,10 +1571,10 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
             ctxs: None,
             unsafe_ctxs: None,
             body: FuncBody {
-                fb_ast: vec![
+                fb_ast: Block(vec![
                     Stmt(pos(), Stmt_::Expr(Box::new(assert_invariant))),
                     Stmt(pos(), Stmt_::Return(Box::new(Some(meth_caller_handle)))),
-                ],
+                ]),
             },
             fun_kind: FunKind::FSync,
             user_attributes: vec![UserAttribute {

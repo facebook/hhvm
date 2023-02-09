@@ -229,7 +229,7 @@ let tuple_aliases =
     ("typing_reason", "PosId");
   ]
 
-let newtypes = [("aast_defs", "Program")]
+let newtypes = [("aast_defs", "Block"); ("aast_defs", "Program")]
 
 (*
 A list of (<module>, <ty1>) where ty1 is enum and all non-empty variant fields should

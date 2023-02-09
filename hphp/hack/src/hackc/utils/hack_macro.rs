@@ -42,7 +42,7 @@ use syn::Token;
 /// A macro to build Hack Expr trees.
 ///
 /// Usage:
-///   hack_expr!(pos = p, "#foo + $bar")
+///     hack_expr!(pos = p, "#foo + $bar")
 ///
 /// Returns an ast::Expr representing the given code.
 ///
@@ -58,22 +58,22 @@ use syn::Token;
 ///     hack_expr!("$foo + #bar + $baz")
 ///
 /// The replacements have various forms:
-///   `#name` - Inject the Expr in local variable `name`.
-///   `#{args*}` - As a parameter to a call this inserts a Vec<Expr> as
-///                ParamKind::Pnormal parameters.
-///   `#{clone(name)}` - Clone the Expr `name` instead of consuming it.
-///   `#{cmd(name)}` - Convert name using 'cmd' (see below).
-///   `#{cmd(clone(name))}` - Clone `name` and then convert using 'cmd' (see below).
+///   - `#name` Inject the Expr in local variable `name`.
+///   - `#{args*}` As a parameter to a call this inserts a Vec<Expr> as
+///     ParamKind::Pnormal parameters.
+///   - `#{clone(name)}` Clone the Expr `name` instead of consuming it.
+///   - `#{cmd(name)}` Convert name using 'cmd' (see below).
+///   - `#{cmd(clone(name))}` Clone `name` and then convert using 'cmd' (see below).
 ///
 /// Conversion commands:
 ///
-///   `#{id(name)}` - builds an Expr_::Ident from a string.
-///   `#{lvar(name)}` - builds an Expr_::LVar from a LocalId.
-///   `#{str(name)}` - builds an Expr_::String from a &str.
+///   - `#{id(name)}` builds an Expr_::Ident from a string.
+///   - `#{lvar(name)}` builds an Expr_::LVar from a LocalId.
+///   - `#{str(name)}` builds an Expr_::String from a &str.
 ///
 /// All of the commands can also take an optional position override parameter:
-///   `#{str(name, pos)}`
-///   `#{str(clone(name), pos)}`
+///   - `#{str(name, pos)}`
+///   - `#{str(clone(name), pos)}`
 ///
 ///
 /// Technical note:
@@ -89,15 +89,15 @@ use syn::Token;
 ///
 /// transforms into something like this:
 ///
-///   Expr(
-///       (),
-///       p.clone(),
-///       Expr_::Binop(Box::new((
-///           Bop::Plus,
-///           foo,
-///           Expr((), p.clone(), Expr_::Lvar(Lid(p.clone(), (0, "$bar")))),
-///       )))
-///   )
+///     Expr(
+///         (),
+///         p.clone(),
+///         Expr_::Binop(Box::new((
+///             Bop::Plus,
+///             foo,
+///             Expr((), p.clone(), Expr_::Lvar(Lid(p.clone(), (0, "$bar")))),
+///         )))
+///     )
 ///
 #[proc_macro]
 pub fn hack_expr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -167,7 +167,7 @@ fn parse_stmts(src: &str, internal_offset: usize, span: Span) -> Result<Vec<ast:
     }
     let method = methods.pop().unwrap();
 
-    Ok(method.body.fb_ast)
+    Ok(method.body.fb_ast.0)
 }
 
 fn parse_stmt(src: &str, internal_offset: usize, span: Span) -> Result<ast::Stmt> {
@@ -1049,6 +1049,12 @@ mod emit {
     impl EmitTokens for ast::PropOrMethod {
         fn emit_tokens(&self, _e: &Emitter) -> Result<TokenStream> {
             self.emit_enum_from_debug("PropOrMethod")
+        }
+    }
+
+    impl EmitTokens for ast::Block {
+        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
+            emit_wrapper(quote!(Block), &self.0, e)
         }
     }
 

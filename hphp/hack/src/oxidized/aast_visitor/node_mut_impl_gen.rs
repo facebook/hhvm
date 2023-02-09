@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5f8172db1318e8ebfe1803b1a15b5b1f>>
+// @generated SignedSource<<6b5e7215e96421d2f2ad31de3cb4ffa6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -88,6 +88,22 @@ impl<P: Params> NodeMut<P> for AsExpr<P::Ex, P::En> {
                 a2.accept(c, v)
             }
         }
+    }
+}
+impl<P: Params> NodeMut<P> for Block<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_block(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for Bop {

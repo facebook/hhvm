@@ -126,7 +126,7 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
     // Make anonymous function of smart constructor calls
     let visitor_expr = wrap_return(rewritten_expr.desugar_expr, &et_literal_pos);
     let visitor_body = ast::FuncBody {
-        fb_ast: vec![visitor_expr],
+        fb_ast: ast::Block(vec![visitor_expr]),
     };
     let param = ast::FunParam {
         annotation: (),
@@ -151,7 +151,10 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
     // This enables us to report unbound variables correctly.
     let virtualized_expr = {
         let typing_fun_body = ast::FuncBody {
-            fb_ast: vec![wrap_return(rewritten_expr.virtual_expr, &et_literal_pos)],
+            fb_ast: ast::Block(vec![wrap_return(
+                rewritten_expr.virtual_expr,
+                &et_literal_pos,
+            )]),
         };
         let typing_fun_ = wrap_fun_(typing_fun_body, vec![], et_literal_pos.clone());
         let mut spliced_vars: Vec<ast::Lid> = (0..splice_count)
@@ -1286,7 +1289,7 @@ fn rewrite_expr(
                 param_names.push(string_literal(param.pos.clone(), &param.name));
             }
 
-            let body = std::mem::take(&mut fun_.body.fb_ast);
+            let body = std::mem::take(&mut fun_.body.fb_ast.0);
 
             let should_append_return = only_void_return(&body);
 
@@ -1318,7 +1321,7 @@ fn rewrite_expr(
                 ],
                 &pos,
             );
-            fun_.body.fb_ast = virtual_body_stmts;
+            fun_.body.fb_ast = ast::Block(virtual_body_stmts);
 
             let virtual_expr = _virtualize_lambda(
                 visitor_name,
@@ -1630,14 +1633,14 @@ fn rewrite_stmt(
             );
             let (virtual_then_stmts, desugar_then) = rewrite_stmts(
                 temps,
-                then_block,
+                then_block.0,
                 visitor_name,
                 errors,
                 should_virtualize_functions,
             );
             let (virtual_else_stmts, desugar_else) = rewrite_stmts(
                 temps,
-                else_block,
+                else_block.0,
                 visitor_name,
                 errors,
                 should_virtualize_functions,
@@ -1657,8 +1660,8 @@ fn rewrite_stmt(
                 pos,
                 If(Box::new((
                     boolify(rewritten_cond.virtual_expr),
-                    virtual_then_stmts,
-                    virtual_else_stmts,
+                    ast::Block(virtual_then_stmts),
+                    ast::Block(virtual_else_stmts),
                 ))),
             );
             (virtual_stmt, Some(desugar_expr))
@@ -1678,7 +1681,7 @@ fn rewrite_stmt(
             );
             let (virtual_body_stmts, desugar_body) = rewrite_stmts(
                 temps,
-                body,
+                body.0,
                 visitor_name,
                 errors,
                 should_virtualize_functions,
@@ -1697,7 +1700,7 @@ fn rewrite_stmt(
                 pos,
                 While(Box::new((
                     boolify(rewritten_cond.virtual_expr),
-                    virtual_body_stmts,
+                    ast::Block(virtual_body_stmts),
                 ))),
             );
             (virtual_stmt, Some(desugar_expr))
@@ -1743,7 +1746,7 @@ fn rewrite_stmt(
 
             let (virtual_body_stmts, desugar_body) = rewrite_stmts(
                 temps,
-                body,
+                body.0,
                 visitor_name,
                 errors,
                 should_virtualize_functions,
@@ -1766,7 +1769,7 @@ fn rewrite_stmt(
                     virtual_init_exprs,
                     virtual_cond_option,
                     virtual_incr_exprs,
-                    virtual_body_stmts,
+                    ast::Block(virtual_body_stmts),
                 ))),
             );
             (virtual_stmt, Some(desugar_expr))
@@ -1862,7 +1865,9 @@ fn immediately_invoked_lambda(
         .map(|e: Expr| -> (ParamKind, Expr) { (ParamKind::Pnormal, e) })
         .collect();
 
-    let func_body = ast::FuncBody { fb_ast: stmts };
+    let func_body = ast::FuncBody {
+        fb_ast: ast::Block(stmts),
+    };
     let fun_ = wrap_fun_(func_body, fun_params, pos.clone());
     let lambda_expr = Expr::new((), pos.clone(), Expr_::mk_lfun(fun_, vec![]));
 

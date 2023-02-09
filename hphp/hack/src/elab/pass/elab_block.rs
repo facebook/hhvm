@@ -72,38 +72,41 @@ mod tests {
         let top_down = ElabBlockPass;
         let bottom_up = Identity;
 
-        let mut elem: Block<(), ()> = vec![Stmt(
+        let mut elem: Block<(), ()> = Block(vec![Stmt(
             Pos::make_none(),
-            Stmt_::Block(vec![
+            Stmt_::Block(Block(vec![
                 Stmt(Pos::make_none(), Stmt_::Noop),
                 Stmt(
                     Pos::make_none(),
-                    Stmt_::Block(vec![
+                    Stmt_::Block(Block(vec![
                         Stmt(Pos::make_none(), Stmt_::Noop),
                         Stmt(
                             Pos::make_none(),
-                            Stmt_::Block(vec![
+                            Stmt_::Block(Block(vec![
                                 Stmt(Pos::make_none(), Stmt_::Noop),
                                 Stmt(
                                     Pos::make_none(),
-                                    Stmt_::Block(vec![
+                                    Stmt_::Block(Block(vec![
                                         Stmt(Pos::make_none(), Stmt_::Noop),
                                         Stmt(
                                             Pos::make_none(),
-                                            Stmt_::Block(vec![Stmt(Pos::make_none(), Stmt_::Noop)]),
+                                            Stmt_::Block(Block(vec![Stmt(
+                                                Pos::make_none(),
+                                                Stmt_::Noop,
+                                            )])),
                                         ),
                                         Stmt(Pos::make_none(), Stmt_::Noop),
-                                    ]),
+                                    ])),
                                 ),
                                 Stmt(Pos::make_none(), Stmt_::Noop),
-                            ]),
+                            ])),
                         ),
                         Stmt(Pos::make_none(), Stmt_::Noop),
-                    ]),
+                    ])),
                 ),
                 Stmt(Pos::make_none(), Stmt_::Noop),
-            ]),
-        )];
+            ])),
+        )]);
         transform::transform_ty_block(&mut elem, &mut ctx, &mut errs, &top_down, &bottom_up);
 
         assert_eq!(elem.len(), 9);

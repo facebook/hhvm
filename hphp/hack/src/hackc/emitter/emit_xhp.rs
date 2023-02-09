@@ -75,7 +75,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
         emit_xhp_attribute_array(emitter.alloc, xal)?,
     ));
 
-    let body = hack_stmts!(
+    let body = Block(hack_stmts!(
         r#"
             $r = self::$__xhpAttributeDeclarationCache;
             if ($r === null) {
@@ -84,7 +84,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
             }
             return $r;
     "#
-    );
+    ));
     from_xhp_attribute_declaration_method(
         emitter,
         class,
@@ -104,7 +104,10 @@ pub fn from_children_declaration<'a, 'arena, 'decl>(
     (pos, children): &(&ast_defs::Pos, Vec<&XhpChild>),
 ) -> Result<Method<'arena>> {
     let children_arr = mk_expr(emit_xhp_children_array(children)?);
-    let body = vec![Stmt((*pos).clone(), Stmt_::mk_return(Some(children_arr)))];
+    let body = Block(vec![Stmt(
+        (*pos).clone(),
+        Stmt_::mk_return(Some(children_arr)),
+    )]);
     from_xhp_attribute_declaration_method(
         emitter,
         ast_class,
@@ -124,7 +127,7 @@ pub fn from_category_declaration<'a, 'arena, 'decl>(
     (pos, categories): &(&ast_defs::Pos, Vec<&String>),
 ) -> Result<Method<'arena>> {
     let category_arr = mk_expr(get_category_array(categories));
-    let body = vec![mk_stmt(Stmt_::mk_return(Some(category_arr)))];
+    let body = Block(vec![mk_stmt(Stmt_::mk_return(Some(category_arr)))]);
     from_xhp_attribute_declaration_method(
         emitter,
         ast_class,

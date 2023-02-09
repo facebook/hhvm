@@ -495,7 +495,8 @@ fn traverse_ty_block<Ctx: Clone, Err, Ex, En>(
     top_down: &impl Pass<Ctx = Ctx, Err = Err>,
     bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
 ) {
-    elem.iter_mut()
+    elem.0
+        .iter_mut()
         .for_each(|elem| transform_ty_stmt(elem, &mut ctx.clone(), errs, top_down, bottom_up))
 }
 

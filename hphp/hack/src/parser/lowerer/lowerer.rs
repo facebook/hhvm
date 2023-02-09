@@ -2360,7 +2360,7 @@ fn p_awaitable_creation_expr<'a>(
         body: ast::FuncBody {
             fb_ast: if blk.is_empty() {
                 let pos = p_pos(&c.compound_statement, env);
-                vec![ast::Stmt::noop(pos)]
+                ast::Block(vec![ast::Stmt::noop(pos)])
             } else {
                 blk
             },
@@ -2675,7 +2675,7 @@ fn p_stmt_list_<'a>(
                                 is_block_scoped: false,
                                 has_await: !c.await_keyword.is_missing(),
                                 exprs: p_exprs_with_loc(&c.expression, e)?,
-                                block: body,
+                                block: ast::Block(body),
                             }),
                         ))
                     };
@@ -2703,7 +2703,7 @@ fn handle_loop_body<'a>(pos: Pos, node: S<'a>, env: &mut Env<'a>) -> Result<ast:
     } else {
         blk
     };
-    Ok(ast::Stmt::new(pos, ast::Stmt_::mk_block(body)))
+    Ok(ast::Stmt::new(pos, ast::Stmt_::mk_block(ast::Block(body))))
 }
 
 fn is_simple_assignment_await_expression<'a>(node: S<'a>) -> bool {
@@ -2822,7 +2822,7 @@ where
             };
             return Ok(ast::Stmt::new(
                 pos,
-                ast::Stmt_::mk_awaitall(awaits, vec![result]),
+                ast::Stmt_::mk_awaitall(awaits, ast::Block(vec![result])),
             ));
         }
     }
@@ -2961,7 +2961,7 @@ fn p_try_stmt<'a>(
             })?,
             match &c.finally_clause.children {
                 FinallyClause(c) => p_block(false, &c.body, env)?,
-                _ => vec![],
+                _ => ast::Block(vec![]),
             },
         ),
     ))
@@ -3037,11 +3037,14 @@ fn p_concurrent_stmt<'a>(
                 }
             }
             body_stmts.append(&mut assign_stmts);
-            new(stmt_pos, S_::mk_block(body_stmts))
+            new(stmt_pos, S_::mk_block(ast::Block(body_stmts)))
         }
         _ => missing_syntax("block in concurrent", &c.keyword, env)?,
     };
-    Ok(new(keyword_pos, S_::mk_awaitall(lifted_awaits, vec![stmt])))
+    Ok(new(
+        keyword_pos,
+        S_::mk_awaitall(lifted_awaits, ast::Block(vec![stmt])),
+    ))
 }
 
 fn p_unset_stmt<'a>(
@@ -3196,7 +3199,7 @@ fn p_using_statement_function_scoped_stmt<'a>(
                 is_block_scoped: false,
                 has_await: !&c.await_keyword.is_missing(),
                 exprs: p_exprs_with_loc(&c.expression, e)?,
-                block: vec![mk_noop(e)],
+                block: ast::Block(vec![mk_noop(e)]),
             }),
         ))
     };
@@ -3289,7 +3292,7 @@ fn p_if_stmt<'a>(
         let statement = p_block(true /* remove noop */, &c.statement, env)?;
         let else_ = match &c.else_clause.children {
             ElseClause(c) => p_block(true, &c.statement, env)?,
-            Missing => vec![mk_noop(env)],
+            Missing => ast::Block(vec![mk_noop(env)]),
             _ => missing_syntax("else clause", &c.else_clause, env)?,
         };
         Ok(new(pos, S_::mk_if(condition, statement, else_)))
@@ -3311,11 +3314,11 @@ fn p_switch_stmt_<'a>(
         match &n.children {
             CaseLabel(c) => Ok(aast::GenCase::Case(aast::Case(
                 p_expr(&c.expression, e)?,
-                vec![],
+                ast::Block(vec![]),
             ))),
             DefaultLabel(_) => Ok(aast::GenCase::Default(aast::DefaultCase(
                 p_pos(n, e),
-                vec![],
+                ast::Block(vec![]),
             ))),
             _ => missing_syntax("switch label", n, e),
         }
@@ -3329,8 +3332,8 @@ fn p_switch_stmt_<'a>(
                 }
                 let mut labels = could_map(&c.labels, e, p_label)?;
                 match labels.last_mut() {
-                    Some(aast::GenCase::Default(aast::DefaultCase(_, b))) => *b = blk,
-                    Some(aast::GenCase::Case(aast::Case(_, b))) => *b = blk,
+                    Some(aast::GenCase::Default(aast::DefaultCase(_, b))) => b.0 = blk,
+                    Some(aast::GenCase::Case(aast::Case(_, b))) => b.0 = blk,
                     _ => raise_parsing_error(n, e, "Malformed block result"),
                 }
                 Ok(labels)
@@ -4197,11 +4200,11 @@ fn p_block<'a>(remove_noop: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast:
     let ast::Stmt(p, stmt_) = p_stmt(node, env)?;
     if let ast::Stmt_::Block(blk) = stmt_ {
         if remove_noop && blk.len() == 1 && blk[0].1.is_noop() {
-            return Ok(vec![]);
+            return Ok(ast::Block(vec![]));
         }
         Ok(blk)
     } else {
-        Ok(vec![ast::Stmt(p, stmt_)])
+        Ok(ast::Block(vec![ast::Stmt(p, stmt_)]))
     }
 }
 
@@ -4210,10 +4213,10 @@ fn mk_noop(env: &Env<'_>) -> ast::Stmt {
 }
 
 fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
-    let mk_noop_result = |e: &Env<'_>| Ok(vec![mk_noop(e)]);
+    let mk_noop_result = |e: &Env<'_>| Ok(ast::Block(vec![mk_noop(e)]));
     let f = |e: &mut Env<'a>| -> Result<ast::Block> {
         match &node.children {
-            Missing => Ok(vec![]),
+            Missing => Ok(ast::Block(vec![])),
             CompoundStatement(c) => {
                 let compound_statements = &c.statements.children;
                 let compound_right_brace = &c.right_brace.children;
@@ -4244,9 +4247,9 @@ fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
                     ))
                 };
                 if is_simple_await_expression(node) {
-                    Ok(vec![f(e)?])
+                    Ok(ast::Block(vec![f(e)?]))
                 } else {
-                    Ok(vec![lift_awaits_in_statement(node, e, f)?])
+                    Ok(ast::Block(vec![lift_awaits_in_statement(node, e, f)?]))
                 }
             }
         }
@@ -5077,8 +5080,8 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
             if env.codegen() {
                 member_init.reverse();
             }
-            member_init.append(&mut body);
-            let body = member_init;
+            member_init.append(&mut body.0);
+            let body = ast::Block(member_init);
             *env.in_static_method() = false;
             let is_abstract = kinds.has(modifier::ABSTRACT);
             let is_external = !is_abstract && c.function_body.is_external();
@@ -5547,7 +5550,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             let hdr = p_fun_hdr(declaration_header, env)?;
             let is_external = body.is_external();
             let (block, yield_) = if is_external {
-                (vec![], false)
+                (ast::Block(vec![]), false)
             } else {
                 map_yielding(body, env, p_function_body)?
             };

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9f8f71ea5796d0cc8fc9ea2b51286555>>
+// @generated SignedSource<<4e41faff7d5c29260b9b35301388d423>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -400,8 +400,31 @@ pub enum AsExpr<'a, Ex, En> {
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for AsExpr<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(AsExpr<'arena, Ex, En>);
 
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
 #[rust_to_ocaml(and)]
-pub type Block<'a, Ex, En> = [&'a Stmt<'a, Ex, En>];
+#[repr(C)]
+pub struct Block<'a, Ex, En>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub  &'a [&'a Stmt<'a, Ex, En>],
+);
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Block<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(Block<'arena, Ex, En>);
 
 #[derive(
     Clone,

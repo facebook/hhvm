@@ -49,7 +49,7 @@ struct Opts {
 }
 
 fn main() -> Result<()> {
-    let opts = <Opts as clap::Parser>::from_args();
+    let opts = <Opts as clap::Parser>::parse();
 
     let config = Box::leak(Box::new(match opts.config {
         Some(path) => {

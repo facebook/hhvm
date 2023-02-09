@@ -14,7 +14,7 @@ struct Opts {
 }
 
 fn main() -> anyhow::Result<()> {
-    let opts = <Opts as clap::Parser>::from_args();
+    let opts = <Opts as clap::Parser>::parse();
     let mut stdout = std::io::BufWriter::new(std::io::stdout().lock());
     generate_hhi_lib::run(&mut stdout, &opts.filename)
 }

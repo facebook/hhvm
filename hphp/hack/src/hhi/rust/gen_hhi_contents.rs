@@ -11,19 +11,19 @@ use clap::Parser;
 #[derive(Debug, Parser)]
 struct Options {
     /// The directory containing HHI files.
-    #[clap(long, parse(from_os_str))]
+    #[clap(long)]
     hhi_dir: PathBuf,
 
     /// The directory containing this stamp is the directory to search for HHIs
     /// generated from the HSL. These will be placed in the final hhi directory
     /// under a subdirectory named "hsl_generated".
-    #[clap(long, parse(from_os_str))]
+    #[clap(long)]
     hsl_stamp: PathBuf,
 }
 
 fn main() {
     // This is the entrypoint when used from buck.
-    let opts = Options::from_args();
+    let opts = Options::parse();
     let out_dir = std::env::var("OUT").unwrap(); // $OUT implicitly provided by buck
     run(opts, &out_dir)
 }

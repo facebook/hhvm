@@ -418,6 +418,6 @@ fn decompress(in_path: &Path, out_path: &Path) -> std::io::Result<()> {
 }
 
 fn main() -> std::io::Result<()> {
-    let options = Options::from_args();
+    let options = Options::parse();
     decompress(&options.input, &options.output)
 }

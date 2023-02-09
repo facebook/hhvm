@@ -23,16 +23,29 @@ module Cls = Decl_provider.Class
 module Nast = Aast
 module ITySet = Internal_type_set
 
-(* Fuel ensures that types are curtailed while printing them. This avoids
+(** Fuel ensures that types are curtailed while printing them. This avoids
    performance regressions and increases readibility of errors overall. *)
 module Fuel : sig
   type t
 
   val init : int -> t
 
-  val deplete : t -> t
-
   val has_enough : t -> bool
+
+  (** [provide fuel f] consumes one unit of fuel to call f, plus fuel consumed by f itself,
+    provided there's enough fuel. If not, it returns the text doc "[truncated]". *)
+  val provide : t -> (fuel:t -> t * Doc.t) -> t * Doc.t
+
+  (** [provide_list fuel f inputs ~out_of_fuel_message] consumes fuel to call f
+    on each element of a list of inputs until we're out of fuel.
+    It consumes one unit of fuel per call to f plus the fuel consumed by f itself.
+    When out of fuel, it appends the text doc "[out_of_fuel_message]" to the results. *)
+  val provide_list :
+    t ->
+    ('input -> fuel:t -> t * Doc.t) ->
+    'input list ->
+    out_of_fuel_message:string ->
+    t * Doc.t list
 end = struct
   type t = int
 
@@ -41,9 +54,44 @@ end = struct
   let deplete fuel = fuel - 1
 
   let has_enough fuel = fuel >= 0
-end
 
-exception Out_of_fuel of Fuel.t * Doc.t list
+  let provide_ (fuel : t) (f : fuel:t -> t * Doc.t) : t * Doc.t option =
+    if has_enough fuel then
+      let fuel = deplete fuel in
+      let (fuel, doc) = f ~fuel in
+      (fuel, Some doc)
+    else
+      (fuel, None)
+
+  let provide_list
+      (fuel : t)
+      (f : 'input -> fuel:t -> t * Doc.t)
+      (inputs : 'input list)
+      ~(out_of_fuel_message : string) : t * Doc.t list =
+    let ((fuel, ran_out), docs) =
+      List.fold
+        inputs
+        ~init:((fuel, false), [])
+        ~f:(fun ((fuel, _), docs) input ->
+          let (fuel, doc) = provide_ fuel (f input) in
+          match doc with
+          | Some doc -> ((fuel, false), doc :: docs)
+          | None -> ((fuel, true), docs))
+    in
+    let docs =
+      if ran_out then
+        Doc.text (Printf.sprintf "[%s]" out_of_fuel_message) :: docs
+      else
+        docs
+    in
+    let docs = List.rev docs in
+    (fuel, docs)
+
+  let provide fuel f =
+    let (fuel, doc) = provide_ fuel f in
+    let doc = Option.value doc ~default:(Doc.text "[truncated]") in
+    (fuel, doc)
+end
 
 (** For sake of typing_print, either we wish to print a locl_ty in which case we need
 the env to look up the typing environment and constraints and the like, or a decl_ty
@@ -136,7 +184,7 @@ module Full = struct
   let shape_map
       ~fuel
       (fdm : 'field TShapeMap.t)
-      (f_field : Fuel.t -> tshape_field_name * 'field -> Fuel.t * t) :
+      (f_field : tshape_field_name * 'field -> fuel:Fuel.t -> Fuel.t * t) :
       Fuel.t * t list =
     let compare (k1, _) (k2, _) =
       String.compare
@@ -144,19 +192,11 @@ module Full = struct
         (Typing_defs.TShapeField.name k2)
     in
     let fields = List.sort ~compare (TShapeMap.bindings fdm) in
-    let (fuel, fields) =
-      try
-        List.fold fields ~init:(fuel, []) ~f:(fun (fuel, acc) field ->
-            if Fuel.has_enough fuel then
-              let fuel = Fuel.deplete fuel in
-              let (fuel, field) = f_field fuel field in
-              (fuel, field :: acc)
-            else
-              raise (Out_of_fuel (fuel, text "[shape was truncated]" :: acc)))
-      with
-      | Out_of_fuel (fuel, docs) -> (fuel, docs)
-    in
-    (fuel, List.rev fields)
+    Fuel.provide_list
+      fuel
+      f_field
+      fields
+      ~out_of_fuel_message:"shape was truncated"
 
   let rec fun_type ~fuel ~ty to_doc st penv ft fun_implicit_params =
     let n = List.length ft.ft_params in
@@ -332,7 +372,7 @@ module Full = struct
 
   let tshape ~fuel k to_doc (shape_kind : shape_kind) (fdm : _ TShapeMap.t) =
     let (fuel, fields_doc) =
-      let f_field fuel (shape_map_key, { sft_optional; sft_ty }) =
+      let f_field (shape_map_key, { sft_optional; sft_ty }) ~fuel =
         let key_delim =
           match shape_map_key with
           | Typing_defs.TSFlit_str _ -> text "'"
@@ -510,11 +550,7 @@ module Full = struct
      recursive call to print a type depletes the fuel by one. *)
   let rec decl_ty ~fuel : _ -> _ -> _ -> decl_ty -> Fuel.t * Doc.t =
    fun to_doc st penv x ->
-    if Fuel.has_enough fuel then
-      let fuel = Fuel.deplete fuel in
-      decl_ty_ ~fuel to_doc st penv (get_node x)
-    else
-      (fuel, text "[truncated]")
+    Fuel.provide fuel (decl_ty_ to_doc st penv (get_node x))
 
   and decl_ty_ ~fuel : _ -> _ -> _ -> decl_phase ty_ -> Fuel.t * Doc.t =
    fun to_doc st penv x ->
@@ -601,18 +637,16 @@ module Full = struct
      recursive call to print a type depletes the fuel by one. *)
   let rec locl_ty ~fuel : _ -> _ -> _ -> locl_ty -> Fuel.t * Doc.t =
    fun to_doc st penv ty ->
-    if Fuel.has_enough fuel then
-      let fuel = Fuel.deplete fuel in
-      let (r, x) = deref ty in
-      let (fuel, d) = locl_ty_ ~fuel to_doc st penv x in
-      let d =
-        match r with
-        | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
-        | _ -> d
-      in
-      (fuel, d)
-    else
-      (fuel, text "[truncated]")
+    Fuel.provide fuel (fun ~fuel ->
+        let (r, x) = deref ty in
+        let (fuel, d) = locl_ty_ ~fuel to_doc st penv x in
+        let d =
+          match r with
+          | Typing_reason.Rsolve_fail _ ->
+            Concat [text "{suggest:"; d; text "}"]
+          | _ -> d
+        in
+        (fuel, d))
 
   and locl_ty_ ~fuel : _ -> _ -> _ -> locl_phase ty_ -> Fuel.t * Doc.t =
    fun to_doc st penv x ->

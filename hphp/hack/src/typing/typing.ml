@@ -5290,10 +5290,11 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
              || is_dynamic expected_ty ->
         (* If the expected type of a lambda is mixed, nonnull or dynamic,
          * or supportdyn of these, we construct a function type where the
-         * undeclared parameters and the return type are set to
-         * mixed (when expected type of lambda is mixed or nonnull), or dynamic
-         * (when expected type of lambda is dynamic). Wrap mixed or nonnull
-         * in supportdyn if the expected type is supportdyn.
+         * undeclared parameters are set to mixed (when expected type of
+         * lambda is mixed or nonnull), or dynamic (when expected type of
+         * lambda is dynamic). Wrap mixed or nonnull in supportdyn if the
+         * expected type is supportdyn.
+         * We leave the return type alone, inferring it if necessary.
          *
          * For an expected mixed/nonnull type, one could argue that the lambda
          * doesn't even need to be checked as it can't be called (there is
@@ -5303,7 +5304,7 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
          * checked as though it could be called.
          *)
         let r = Reason.Rwitness p in
-        let param_and_ret_type =
+        let param_type =
           if is_dynamic expected_ty then
             MakeType.dynamic r
           else if supportdyn then
@@ -5317,7 +5318,7 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
           in
           if is_undeclared then
             let enforced_ty =
-              { et_enforced = Unenforced; et_type = param_and_ret_type }
+              { et_enforced = Unenforced; et_type = param_type }
             in
             { declared_ft_param with fp_type = enforced_ty }
           else
@@ -5329,11 +5330,7 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
           in
           { declared_ft with ft_params }
         in
-        check_body_under_known_params
-          ~supportdyn
-          env
-          ~ret_ty:param_and_ret_type
-          expected_ft
+        check_body_under_known_params ~supportdyn env expected_ft
       | _ ->
         Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
 

@@ -149,6 +149,7 @@ impl Pass for ElabClassIdPass {
 
 #[cfg(test)]
 mod tests {
+    use transform::Transform;
 
     use super::*;
 
@@ -186,13 +187,7 @@ mod tests {
             // transforming when outside a class
             // expect CI(Id(.., UNKNOWN))
             ctx.set_in_class(false);
-            transform::transform_ty_class_id(
-                &mut elem_outside,
-                &mut ctx,
-                &mut errs,
-                &top_down,
-                &bottom_up,
-            );
+            elem_outside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
             let ClassId(_, _, class_id_) = elem_outside;
             assert!(match class_id_ {
                 ClassId_::CI(Id(_, nm)) => nm == sn::classes::UNKNOWN,
@@ -202,13 +197,7 @@ mod tests {
             // transforming when inside a class
             // expect
             ctx.set_in_class(true);
-            transform::transform_ty_class_id(
-                &mut elem_inside,
-                &mut ctx,
-                &mut errs,
-                &top_down,
-                &bottom_up,
-            );
+            elem_inside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
             let ClassId(_, _, class_id_) = elem_inside;
             assert_eq!(class_id_, repr)
         }
@@ -238,13 +227,7 @@ mod tests {
         // transforming when outside a class
         // expect CI(Id(.., cname))
         ctx.set_in_class(false);
-        transform::transform_ty_class_id(
-            &mut elem_outside,
-            &mut ctx,
-            &mut errs,
-            &top_down,
-            &bottom_up,
-        );
+        elem_outside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
         let ClassId(_, _, class_id_) = elem_outside;
         assert!(match class_id_ {
             ClassId_::CI(Id(_, nm)) => nm == cname,
@@ -254,13 +237,7 @@ mod tests {
         // transforming when inside a class
         // expect CI(Id(.., cname))
         ctx.set_in_class(true);
-        transform::transform_ty_class_id(
-            &mut elem_inside,
-            &mut ctx,
-            &mut errs,
-            &top_down,
-            &bottom_up,
-        );
+        elem_inside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
         let ClassId(_, _, class_id_) = elem_inside;
         assert!(match class_id_ {
             ClassId_::CI(Id(_, nm)) => nm == cname,
@@ -293,13 +270,7 @@ mod tests {
         // transforming when outside a class
         // expect CIexpr(_,_,This)
         ctx.set_in_class(false);
-        transform::transform_ty_class_id(
-            &mut elem_outside,
-            &mut ctx,
-            &mut errs,
-            &top_down,
-            &bottom_up,
-        );
+        elem_outside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
         let ClassId(_, _, class_id_) = elem_outside;
         assert!(matches!(
             class_id_,
@@ -309,13 +280,7 @@ mod tests {
         // transforming when inside a class
         // expect
         ctx.set_in_class(true);
-        transform::transform_ty_class_id(
-            &mut elem_inside,
-            &mut ctx,
-            &mut errs,
-            &top_down,
-            &bottom_up,
-        );
+        elem_inside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
         let ClassId(_, _, class_id_) = elem_inside;
         assert!(matches!(
             class_id_,
@@ -352,13 +317,7 @@ mod tests {
             let mut elem_inside = elem_outside.clone();
 
             ctx.set_in_class(false);
-            transform::transform_ty_class_id(
-                &mut elem_outside,
-                &mut ctx,
-                &mut errs,
-                &top_down,
-                &bottom_up,
-            );
+            elem_outside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
             let ClassId(_, _, class_id_) = elem_outside;
             assert!(match class_id_ {
                 ClassId_::CIexpr(Expr(_, _, ci_expr_)) => ci_expr_ == expr_,
@@ -366,13 +325,7 @@ mod tests {
             });
 
             ctx.set_in_class(true);
-            transform::transform_ty_class_id(
-                &mut elem_inside,
-                &mut ctx,
-                &mut errs,
-                &top_down,
-                &bottom_up,
-            );
+            elem_inside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
             let ClassId(_, _, class_id_) = elem_inside;
             assert!(match class_id_ {
                 ClassId_::CIexpr(Expr(_, _, ci_expr_)) => ci_expr_ == expr_,

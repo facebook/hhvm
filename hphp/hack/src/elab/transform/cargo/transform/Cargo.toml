@@ -8,4 +8,7 @@ edition = "2021"
 path = "../../transform.rs"
 
 [dependencies]
+bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
+itertools = "0.10.3"
+ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }

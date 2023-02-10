@@ -26,7 +26,6 @@ impl Context {
     /// Construct a `Context` containing the ASTs of all type definitions
     /// reachable from the `root` type. Each type must have a unique name (even
     /// if the types are declared in different modules).
-    #[allow(dead_code)]
     pub fn new(files: &[(&Path, Vec<syn::Item>)], root: &str) -> Result<Self> {
         Self::with_extern_files(files, &[], root)
     }

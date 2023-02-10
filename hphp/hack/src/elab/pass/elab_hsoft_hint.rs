@@ -54,6 +54,7 @@ mod tests {
     use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
     use transform::Pass;
+    use transform::Transform;
 
     use super::*;
     use crate::context::Flags;
@@ -83,13 +84,13 @@ mod tests {
         // Transform elem1 without `soft_as_like` set
         // expect Hdynamic
         let mut ctx = Context::new(Flags::empty());
-        transform::transform_ty_hint(&mut elem1, &mut ctx, &mut errs, &top_down, &bottom_up);
+        elem1.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
         assert!(matches!(*elem1.1, Hint_::Hdynamic));
 
         // Transform elem2 with `soft_as_like` set
         // expect Hlike(_,Hdynamic)
         ctx = Context::new(Flags::SOFT_AS_LIKE);
-        transform::transform_ty_hint(&mut elem2, &mut ctx, &mut errs, &top_down, &bottom_up);
+        elem2.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
         assert!(matches!(&*elem2.1, Hint_::Hlike(_)));
         assert!(match &*elem2.1 {
             Hint_::Hlike(inner) => matches!(*inner.1, Hint_::Hdynamic),

@@ -5136,6 +5136,9 @@ dependencies = [
 name = "transform"
 version = "0.0.0"
 dependencies = [
+ "bstr 1.0.1",
+ "itertools 0.10.5",
+ "ocamlrep",
  "oxidized",
 ]
 

@@ -39,6 +39,7 @@ mod tests {
     use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
     use transform::Pass;
+    use transform::Transform;
 
     use super::*;
 
@@ -80,7 +81,7 @@ mod tests {
             Expr((), Pos::make_none(), Expr_::Int("43".to_string())),
         )));
 
-        transform::transform_ty_expr_(&mut elem, &mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
 
         assert!(match elem {
             Expr_::Binop(inner) => {

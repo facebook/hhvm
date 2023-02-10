@@ -74,6 +74,7 @@ mod tests {
     use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
     use transform::Pass;
+    use transform::Transform;
 
     use super::*;
 
@@ -117,7 +118,7 @@ mod tests {
         let top_down = ElabDefsPass;
         let bottom_up = Identity;
 
-        transform::transform_ty_program(&mut elem, &mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
 
         // Given our initial program:
         //

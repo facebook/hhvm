@@ -6,6 +6,7 @@
 
 mod common;
 mod gen_by_ref_decl_visitor;
+mod gen_elab_transform;
 mod gen_enum_helper;
 mod gen_visitor;
 mod quote_helper;
@@ -45,6 +46,8 @@ enum Subcommand {
     Visitor(gen_visitor::Args),
     /// Generate a Visitor trait for by-reference types.
     ByRefDeclVisitor(gen_by_ref_decl_visitor::Args),
+    /// Generate a transformer and Pass trait for AST elaboration.
+    ElabTransform(gen_elab_transform::Args),
 }
 
 fn main() -> Result<()> {
@@ -60,6 +63,7 @@ fn main() -> Result<()> {
         Subcommand::EnumHelpers(args) => gen_enum_helper::run(&args)?,
         Subcommand::Visitor(args) => gen_visitor::run(&args)?,
         Subcommand::ByRefDeclVisitor(args) => gen_by_ref_decl_visitor::run(&args)?,
+        Subcommand::ElabTransform(args) => gen_elab_transform::run(&args)?,
     };
 
     let output_files = files

@@ -103,6 +103,16 @@ summary "Write oxidized/aast_visitor/"
   --output "hphp/hack/src/oxidized/aast_visitor/"                             \
   --root "Program"                                                            \
 
+summary "Write elab/transform/"
+"${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
+  --regen-cmd "$REGEN_COMMAND"                                                \
+  --rustfmt "$RUSTFMT_PATH"                                                   \
+  elab-transform                                                              \
+  --input "hphp/hack/src/oxidized/gen/aast_defs.rs"                           \
+  --input "hphp/hack/src/oxidized/gen/ast_defs.rs"                            \
+  --output "hphp/hack/src/elab/transform/"                                    \
+  --root "Program"                                                            \
+
 summary "Write oxidized_by_ref/gen/"
 "${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize                                  \
   --out-dir hphp/hack/src/oxidized_by_ref/gen                                 \

@@ -11,8 +11,8 @@ use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use relative_path::Prefix;
 use relative_path::RelativePath;
-use transform::transform_ty_program;
 use transform::Pass;
+use transform::Transform;
 
 use crate::FileOpts;
 
@@ -64,13 +64,9 @@ pub fn process_one_file(path: &Path, _: &Opts) -> Result<()> {
             let bottom_up = NoPass::default();
             let mut ctx = Ctx::default();
             let mut errs = Vec::default();
-            transform_ty_program(
-                &mut parse_result.aast,
-                &mut ctx,
-                &mut errs,
-                &top_down,
-                &bottom_up,
-            );
+            parse_result
+                .aast
+                .transform(&mut ctx, &mut errs, &top_down, &bottom_up);
 
             // TODO: print elaboaration errors (`errs`).
             println!("{:#?}", &parse_result.aast);

@@ -93,6 +93,7 @@ mod tests {
     use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
     use transform::Pass;
+    use transform::Transform;
 
     use super::*;
 
@@ -116,12 +117,12 @@ mod tests {
         let bottom_up = Identity;
 
         // Transform when not in Mode::Mhhi should be unchanged
-        transform::transform_ty_func_body(&mut elem, &mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
         assert!(!elem.fb_ast.is_empty());
 
         // Transform when in Mode::Mhhi should result in [fb_ast] being cleared
         ctx.set_mode(file_info::Mode::Mhhi);
-        transform::transform_ty_func_body(&mut elem, &mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
         assert!(elem.fb_ast.is_empty());
     }
 }

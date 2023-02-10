@@ -27,22 +27,26 @@ and shape_field_name =
   | SFlit_int of pstring
   | SFlit_str of positioned_byte_string
   | SFclass_const of id * pstring
+[@@transform.opaque]
 
 and variance =
   | Covariant
   | Contravariant
   | Invariant
+[@@transform.opaque]
 
 and constraint_kind =
   | Constraint_as
   | Constraint_eq
   | Constraint_super
+[@@transform.opaque]
 
 and reified = bool
 
 and abstraction =
   | Concrete
   | Abstract
+[@@transform.opaque]
 
 and classish_kind =
   | Cclass of abstraction  (** Kind for `class` and `abstract class` *)
@@ -53,6 +57,7 @@ and classish_kind =
       (** Kind for `enum class` and `abstract enum class`.
       See https://docs.hhvm.com/hack/built-in-types/enum-class
   *)
+[@@transform.opaque]
 
 and param_kind =
   | Pinout of pos
@@ -63,22 +68,26 @@ and param_kind =
        *       ^^^^^^^^^^
        *)
   | Pnormal
+[@@transform.opaque]
 
-and readonly_kind = Readonly
+and readonly_kind = Readonly [@@transform.opaque]
 
 and og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe
+[@@transform.opaque]
 
 and prop_or_method =
   | Is_prop
   | Is_method
+[@@transform.opaque]
 
 and fun_kind =
   | FSync
   | FAsync
   | FGenerator
   | FAsyncGenerator
+[@@transform.opaque]
 
 and bop =
   | Plus  (** Addition: x + y *)
@@ -106,6 +115,7 @@ and bop =
   | Cmp  (** Spaceship operator: x <=> y *)
   | QuestionQuestion  (** Coalesce: x ?? y *)
   | Eq of bop option  (** =, +=, -=, ... *)
+[@@transform.opaque]
 
 and uop =
   | Utild  (** Bitwise negation: ~x *)
@@ -117,12 +127,14 @@ and uop =
   | Upincr  (** Unary postfix increment: i++ *)
   | Updecr  (** Unary postfix decrement: i-- *)
   | Usilence  (** Error control/Silence (ignore) expections: @e *)
+[@@transform.opaque]
 
 and visibility =
   | Private [@visitors.name "visibility_Private"]
   | Public [@visitors.name "visibility_Public"]
   | Protected [@visitors.name "visibility_Protected"]
   | Internal [@visitors.name "visibility_Internal"]
+[@@transform.opaque]
 
 (** Literal values that can occur in XHP enum properties.
  *
@@ -133,6 +145,7 @@ and visibility =
 and xhp_enum_value =
   | XEV_Int of int
   | XEV_String of string
+[@@transform.opaque]
 
 (** Hack's primitive types (as the typechecker understands them).
  *
@@ -150,16 +163,19 @@ and tprim =
   | Tnum
   | Tarraykey
   | Tnoreturn
+[@@transform.opaque]
 
 and typedef_visibility =
   | Transparent
   | Opaque
   | OpaqueModule
+[@@transform.opaque]
 
 and reify_kind =
   | Erased
   | SoftReified
   | Reified
+[@@transform.opaque]
 [@@deriving
   show { with_path = false },
     eq,

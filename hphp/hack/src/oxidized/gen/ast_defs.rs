@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4d735f4ad8ea0b88c8042c067c4af9a5>>
+// @generated SignedSource<<6bb648494ab4d92932a2c5463541b030>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -69,6 +69,7 @@ pub type PositionedByteString = (Pos, bstr::BString);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum ShapeFieldName {
     #[rust_to_ocaml(name = "SFlit_int")]
@@ -97,6 +98,7 @@ pub enum ShapeFieldName {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum Variance {
     Covariant,
@@ -124,6 +126,7 @@ arena_deserializer::impl_deserialize_in_arena!(Variance);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum ConstraintKind {
     #[rust_to_ocaml(name = "Constraint_as")]
@@ -157,6 +160,7 @@ pub type Reified = bool;
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum Abstraction {
     Concrete,
@@ -183,6 +187,7 @@ arena_deserializer::impl_deserialize_in_arena!(Abstraction);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum ClassishKind {
     /// Kind for `class` and `abstract class`
@@ -215,6 +220,7 @@ pub enum ClassishKind {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum ParamKind {
     /// Contains the position for an entire `inout` annotated expression, e.g.:
@@ -243,6 +249,7 @@ pub enum ParamKind {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum ReadonlyKind {
     Readonly,
@@ -268,6 +275,7 @@ arena_deserializer::impl_deserialize_in_arena!(ReadonlyKind);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum OgNullFlavor {
     #[rust_to_ocaml(name = "OG_nullthrows")]
@@ -296,6 +304,7 @@ arena_deserializer::impl_deserialize_in_arena!(OgNullFlavor);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum PropOrMethod {
     #[rust_to_ocaml(name = "Is_prop")]
@@ -324,6 +333,7 @@ arena_deserializer::impl_deserialize_in_arena!(PropOrMethod);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum FunKind {
     FSync,
@@ -350,6 +360,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunKind);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum Bop {
     /// Addition: x + y
@@ -422,6 +433,7 @@ pub enum Bop {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum Uop {
     /// Bitwise negation: ~x
@@ -464,6 +476,7 @@ arena_deserializer::impl_deserialize_in_arena!(Uop);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum Visibility {
     #[rust_to_ocaml(attr = r#"visitors.name "visibility_Private""#)]
@@ -499,6 +512,7 @@ arena_deserializer::impl_deserialize_in_arena!(Visibility);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum XhpEnumValue {
     #[rust_to_ocaml(name = "XEV_Int")]
@@ -529,6 +543,7 @@ pub enum XhpEnumValue {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum Tprim {
     Tnull,
@@ -563,6 +578,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tprim);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
 pub enum TypedefVisibility {
     Transparent,
@@ -590,6 +606,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord,
     (transform ~restart:(`Disallow `Encode_as_result)),
     (visitors

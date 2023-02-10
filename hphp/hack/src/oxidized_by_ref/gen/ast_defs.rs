@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<01a92154745f8d0bb2ec08f9e9bfd09c>>
+// @generated SignedSource<<ef09a5bce06710c70a67eb167b093422>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -74,6 +74,7 @@ pub type PositionedByteString<'a> = (&'a Pos<'a>, &'a bstr::BStr);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum ShapeFieldName<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -113,6 +114,7 @@ pub use oxidized::ast_defs::Variance;
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum ParamKind<'a> {
     /// Contains the position for an entire `inout` annotated expression, e.g.:
@@ -148,6 +150,7 @@ pub use oxidized::ast_defs::ReadonlyKind;
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum Bop<'a> {
     /// Addition: x + y
@@ -230,6 +233,7 @@ pub use oxidized::ast_defs::Visibility;
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum XhpEnumValue<'a> {
     #[rust_to_ocaml(name = "XEV_Int")]

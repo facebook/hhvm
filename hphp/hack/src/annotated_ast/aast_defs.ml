@@ -25,16 +25,17 @@ let pp_local_id_map _ fmt map =
        false);
   Format.fprintf fmt "}@]"
 
-type pos = Ast_defs.pos [@@deriving eq, show, ord]
+type pos = Ast_defs.pos [@@deriving eq, show, ord] [@@transform.opaque]
 
-type byte_string = Ast_defs.byte_string [@@deriving eq, show, ord]
+type byte_string = Ast_defs.byte_string
+[@@deriving eq, show, ord] [@@transform.opaque]
 
 type visibility = Ast_defs.visibility =
   | Private
   | Public
   | Protected
   | Internal
-[@@deriving eq, ord, show { with_path = false }]
+[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
 
 type tprim = Ast_defs.tprim =
   | Tnull
@@ -47,21 +48,21 @@ type tprim = Ast_defs.tprim =
   | Tnum
   | Tarraykey
   | Tnoreturn
-[@@deriving eq, ord, show { with_path = false }]
+[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
 
 type typedef_visibility = Ast_defs.typedef_visibility =
   | Transparent
   | Opaque
   | OpaqueModule
-[@@deriving eq, ord, show { with_path = false }]
+[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
 
 type reify_kind = Ast_defs.reify_kind =
   | Erased
   | SoftReified
   | Reified
-[@@deriving eq, ord, show { with_path = false }]
+[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
 
-type pstring = Ast_defs.pstring [@@deriving eq, ord, show]
+type pstring = Ast_defs.pstring [@@deriving eq, ord, show] [@@transform.opaque]
 
 type positioned_byte_string = Ast_defs.positioned_byte_string
 [@@deriving eq, ord, show]
@@ -69,14 +70,14 @@ type positioned_byte_string = Ast_defs.positioned_byte_string
 type og_null_flavor = Ast_defs.og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe
-[@@deriving eq, ord, show { with_path = false }]
+[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
 
 type prop_or_method = Ast_defs.prop_or_method =
   | Is_prop
   | Is_method
-[@@deriving eq, ord, show { with_path = false }]
+[@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
 
-type local_id = (Local_id.t[@visitors.opaque] [@transform.opaque])
+type local_id = (Local_id.t[@visitors.opaque]) [@@transform.opaque]
 
 and lid = pos * local_id [@@transform.opaque]
 

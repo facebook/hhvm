@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0c9b3a0dd5d8c31a3063e94bd3f35682>>
+// @generated SignedSource<<84101817d995b58574f7b2215ac7e181>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3602,582 +3602,53 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ShapeFieldName {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_shape_field_name(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_shape_field_name(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                ShapeFieldName::SFlitInt(ref mut __binding_0) => {
-                    __binding_0.transform(ctx, errs, top_down, bottom_up)
-                }
-                ShapeFieldName::SFlitStr(ref mut __binding_0) => {
-                    __binding_0.transform(ctx, errs, top_down, bottom_up)
-                }
-                ShapeFieldName::SFclassConst(ref mut __binding_0, ref mut __binding_1) => {
-                    {
-                        __binding_0.transform(ctx, errs, top_down, bottom_up)
-                    }
-                    { __binding_1.transform(ctx, errs, top_down, bottom_up) }
-                }
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ShapeFieldName {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Variance {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_variance(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_variance(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                Variance::Covariant => {}
-                Variance::Contravariant => {}
-                Variance::Invariant => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Variance {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ConstraintKind {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_constraint_kind(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_constraint_kind(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                ConstraintKind::ConstraintAs => {}
-                ConstraintKind::ConstraintEq => {}
-                ConstraintKind::ConstraintSuper => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ConstraintKind {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Abstraction {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_abstraction(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_abstraction(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                Abstraction::Concrete => {}
-                Abstraction::Abstract => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Abstraction {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ClassishKind {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_classish_kind(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_classish_kind(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                ClassishKind::Cclass(ref mut __binding_0) => {
-                    __binding_0.transform(ctx, errs, top_down, bottom_up)
-                }
-                ClassishKind::Cinterface => {}
-                ClassishKind::Ctrait => {}
-                ClassishKind::Cenum => {}
-                ClassishKind::CenumClass(ref mut __binding_0) => {
-                    __binding_0.transform(ctx, errs, top_down, bottom_up)
-                }
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ClassishKind {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ParamKind {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_param_kind(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_param_kind(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                ParamKind::Pinout(ref mut __binding_0) => {
-                    __binding_0.transform(ctx, errs, top_down, bottom_up)
-                }
-                ParamKind::Pnormal => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ParamKind {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ReadonlyKind {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_readonly_kind(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_readonly_kind(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                ReadonlyKind::Readonly => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ReadonlyKind {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for OgNullFlavor {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_og_null_flavor(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_og_null_flavor(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                OgNullFlavor::OGNullthrows => {}
-                OgNullFlavor::OGNullsafe => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for OgNullFlavor {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for PropOrMethod {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_prop_or_method(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_prop_or_method(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                PropOrMethod::IsProp => {}
-                PropOrMethod::IsMethod => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for PropOrMethod {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for FunKind {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_fun_kind(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_fun_kind(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                FunKind::FSync => {}
-                FunKind::FAsync => {}
-                FunKind::FGenerator => {}
-                FunKind::FAsyncGenerator => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for FunKind {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Bop {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_bop(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_bop(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                Bop::Plus => {}
-                Bop::Minus => {}
-                Bop::Star => {}
-                Bop::Slash => {}
-                Bop::Eqeq => {}
-                Bop::Eqeqeq => {}
-                Bop::Starstar => {}
-                Bop::Diff => {}
-                Bop::Diff2 => {}
-                Bop::Ampamp => {}
-                Bop::Barbar => {}
-                Bop::Lt => {}
-                Bop::Lte => {}
-                Bop::Gt => {}
-                Bop::Gte => {}
-                Bop::Dot => {}
-                Bop::Amp => {}
-                Bop::Bar => {}
-                Bop::Ltlt => {}
-                Bop::Gtgt => {}
-                Bop::Percent => {}
-                Bop::Xor => {}
-                Bop::Cmp => {}
-                Bop::QuestionQuestion => {}
-                Bop::Eq(ref mut __binding_0) => {
-                    __binding_0.transform(ctx, errs, top_down, bottom_up)
-                }
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Bop {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Uop {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_uop(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_uop(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                Uop::Utild => {}
-                Uop::Unot => {}
-                Uop::Uplus => {}
-                Uop::Uminus => {}
-                Uop::Uincr => {}
-                Uop::Udecr => {}
-                Uop::Upincr => {}
-                Uop::Updecr => {}
-                Uop::Usilence => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Uop {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Visibility {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_visibility(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_visibility(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                Visibility::Private => {}
-                Visibility::Public => {}
-                Visibility::Protected => {}
-                Visibility::Internal => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Visibility {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for XhpEnumValue {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_xhp_enum_value(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_xhp_enum_value(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                XhpEnumValue::XEVInt(ref mut __binding_0) => {
-                    __binding_0.transform(ctx, errs, top_down, bottom_up)
-                }
-                XhpEnumValue::XEVString(ref mut __binding_0) => {
-                    __binding_0.transform(ctx, errs, top_down, bottom_up)
-                }
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for XhpEnumValue {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Tprim {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_tprim(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_tprim(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                Tprim::Tnull => {}
-                Tprim::Tvoid => {}
-                Tprim::Tint => {}
-                Tprim::Tbool => {}
-                Tprim::Tfloat => {}
-                Tprim::Tstring => {}
-                Tprim::Tresource => {}
-                Tprim::Tnum => {}
-                Tprim::Tarraykey => {}
-                Tprim::Tnoreturn => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for Tprim {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for TypedefVisibility {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_typedef_visibility(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_typedef_visibility(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                TypedefVisibility::Transparent => {}
-                TypedefVisibility::Opaque => {}
-                TypedefVisibility::OpaqueModule => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for TypedefVisibility {}
 };
 const _: () = {
-    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ReifyKind {
-        fn transform(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            let mut in_ctx = ctx.clone();
-            if let Break(..) = top_down.on_ty_reify_kind(self, ctx, errs) {
-                return;
-            }
-            self.traverse(ctx, errs, top_down, bottom_up);
-            bottom_up.on_ty_reify_kind(self, &mut in_ctx, errs);
-        }
-        fn traverse(
-            &mut self,
-            ctx: &mut Ctx,
-            errs: &mut Vec<Err>,
-            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
-        ) {
-            match self {
-                ReifyKind::Erased => {}
-                ReifyKind::SoftReified => {}
-                ReifyKind::Reified => {}
-            }
-        }
-    }
+    impl<Ctx: Clone, Err> Transform<Ctx, Err> for ReifyKind {}
 };

@@ -209,7 +209,7 @@ std::unique_ptr<t_const_value> gen_type(
             gen_type(generator, program, defns_schema, *map.val_type()));
       }
       break;
-    case t_type::type::t_enum:
+    case t_type::type::t_enum: {
       if (defns_schema && program && generator) {
         auto foundType =
             dynamic_cast<const t_enum*>(program->scope()->find_def(type.uri()));
@@ -218,8 +218,12 @@ std::unique_ptr<t_const_value> gen_type(
           add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
         }
       }
-      type_name->add_map(val("enumType"), val(type.uri()));
+      auto enm = val();
+      enm->set_map();
+      enm->add_map(val("uri"), val(type.uri()));
+      type_name->add_map(val("enumType"), std::move(enm));
       break;
+    }
     case t_type::type::t_struct: {
       if (defns_schema && program && generator) {
         auto raw_type = program->scope()->find_def(type.uri());

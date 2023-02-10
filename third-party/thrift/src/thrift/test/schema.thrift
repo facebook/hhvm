@@ -71,6 +71,7 @@ exception NonSchematizedException {}
 struct NonSchematizedStruct {
   1: i32 none;
   2: i32 some = 42;
+  3: NonSchematizedEnum enm;
 }
 
 enum NonSchematizedEnum {

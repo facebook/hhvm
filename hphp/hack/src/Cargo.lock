@@ -544,7 +544,7 @@ version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d7ac49647ca72e4ecf4a1ca559dbc7fa43e2c5620dbd2cf198e6bf4671de6f2"
 dependencies = [
- "clap 3.2.17",
+ "clap 3.2.23",
  "heck 0.4.0",
  "indexmap",
  "log",
@@ -623,21 +623,21 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.17"
+version = "3.2.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29e724a68d9319343bb3328c9cc2dfde263f4b3142ee1059a9980580171c954b"
+checksum = "71655c45cb9845d3270c9d6df84ebe72b4dad3c2ba3f7023ad47c144e4e473a5"
 dependencies = [
  "atty",
  "bitflags",
- "clap_derive 3.2.17",
+ "clap_derive 3.2.18",
  "clap_lex 0.2.2",
  "indexmap",
  "once_cell",
  "regex",
  "strsim 0.10.0",
  "termcolor",
- "terminal_size 0.1.17",
- "textwrap 0.15.0",
+ "terminal_size 0.2.1",
+ "textwrap 0.16.0",
  "unicase",
 ]
 
@@ -661,9 +661,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "3.2.17"
+version = "3.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13547f7012c01ab4a0e8f8967730ada8f9fdf419e8b6c792788f39cf4e46eefa"
+checksum = "ea0c8bce528c4be4da13ea6fead8965e95b6073585a2f05204bd8f4119f82a65"
 dependencies = [
  "heck 0.4.0",
  "proc-macro-error",
@@ -1754,7 +1754,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "cbindgen",
- "clap 3.2.17",
+ "clap 3.2.23",
 ]
 
 [[package]]
@@ -2423,7 +2423,7 @@ dependencies = [
 name = "hhi"
 version = "0.0.0"
 dependencies = [
- "clap 3.2.17",
+ "clap 3.2.23",
  "gen_hhi_contents_lib",
  "generate_hhi_lib",
  "walkdir",
@@ -2868,7 +2868,7 @@ name = "lrgen"
 version = "0.0.0"
 dependencies = [
  "cfgrammar",
- "clap 3.2.17",
+ "clap 3.2.23",
  "lrlex",
 ]
 
@@ -5033,11 +5033,11 @@ dependencies = [
 
 [[package]]
 name = "textwrap"
-version = "0.15.0"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1141d4d61095b28419e22cb0bbf02755f5e54e0526f97f1e3d1d160e60885fb"
+checksum = "222a222a5bfe1bba4a77b45ec488a741b3cb8872e5e499451fd7d0129c9c7c3d"
 dependencies = [
- "terminal_size 0.1.17",
+ "terminal_size 0.2.1",
  "unicode-width",
 ]
 
@@ -5267,9 +5267,9 @@ checksum = "8895849a949e7845e06bd6dc1aa51731a103c42707010a5b591c0038fb73385b"
 
 [[package]]
 name = "unicode-width"
-version = "0.1.9"
+version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ed742d4ea2bd1176e236172c8429aaf54486e7ac098db29ffe6529e0ce50973"
+checksum = "c0edd1e5b14653f783770bce4a4dabb4a5108a5370a5f5d8cfe8710c361f6c8b"
 
 [[package]]
 name = "unicode-xid"

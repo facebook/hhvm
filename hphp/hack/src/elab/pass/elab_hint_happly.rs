@@ -276,12 +276,12 @@ fn canonical_happly(
                 let err = NamingPhaseError::Naming(NamingError::TooFewTypeArguments(id.0.clone()));
                 ControlFlow::Continue((Some(hint_), Some(err)))
             }
-            Some(hint1) => {
-                if let Some(hint2) = hints.pop() {
+            Some(hint2) => {
+                if let Some(hint1) = hints.pop() {
                     let hint_ = Hint_::HvecOrDict(Some(hint1), hint2);
                     ControlFlow::Continue((Some(hint_), None))
                 } else {
-                    let hint_ = Hint_::HvecOrDict(None, hint1);
+                    let hint_ = Hint_::HvecOrDict(None, hint2);
                     ControlFlow::Continue((Some(hint_), None))
                 }
             }
@@ -363,4 +363,100 @@ fn is_prim(str: &str) -> bool {
         || str == sn::typehints::NONNULL
         || str == sn::typehints::ARRAYKEY
         || str == sn::typehints::NOTHING
+}
+
+#[cfg(test)]
+mod tests {
+
+    use transform::Transform;
+
+    use super::*;
+
+    pub struct Identity;
+    impl Pass for Identity {
+        type Err = NamingPhaseError;
+        type Ctx = Context;
+    }
+
+    #[test]
+    fn test_vec_or_dict_two_tyargs() {
+        let mut ctx = Context::default();
+        let mut errs = Vec::default();
+        let top_down = ElabHintHapplyPass;
+        let bottom_up = Identity;
+
+        let mut elem = Hint(
+            Pos::make_none(),
+            Box::new(Hint_::Happly(
+                Id(Pos::make_none(), sn::typehints::VEC_OR_DICT.to_string()),
+                vec![
+                    Hint(Pos::make_none(), Box::new(Hint_::Hmixed)),
+                    Hint(Pos::make_none(), Box::new(Hint_::Hnothing)),
+                ],
+            )),
+        );
+
+        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        let Hint(_, hint_) = elem;
+        assert!(match &*hint_ {
+            Hint_::HvecOrDict(Some(h1), h2) => {
+                let Hint(_, h1_) = h1 as &Hint;
+                let Hint(_, h2_) = h2 as &Hint;
+                matches!(**h1_, Hint_::Hmixed) && matches!(**h2_, Hint_::Hnothing)
+            }
+            _ => false,
+        })
+    }
+
+    #[test]
+    fn test_vec_or_dict_one_tyargs() {
+        let mut ctx = Context::default();
+        let mut errs = Vec::default();
+        let top_down = ElabHintHapplyPass;
+        let bottom_up = Identity;
+
+        let mut elem = Hint(
+            Pos::make_none(),
+            Box::new(Hint_::Happly(
+                Id(Pos::make_none(), sn::typehints::VEC_OR_DICT.to_string()),
+                vec![Hint(Pos::make_none(), Box::new(Hint_::Hnothing))],
+            )),
+        );
+
+        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        let Hint(_, hint_) = elem;
+        assert!(match &*hint_ {
+            Hint_::HvecOrDict(None, h) => {
+                let Hint(_, h_) = h as &Hint;
+                matches!(**h_, Hint_::Hnothing)
+            }
+            _ => false,
+        })
+    }
+
+    #[test]
+    fn test_vec_or_dict_zero_tyargs() {
+        let mut ctx = Context::default();
+        let mut errs = Vec::default();
+        let top_down = ElabHintHapplyPass;
+        let bottom_up = Identity;
+
+        let mut elem = Hint(
+            Pos::make_none(),
+            Box::new(Hint_::Happly(
+                Id(Pos::make_none(), sn::typehints::VEC_OR_DICT.to_string()),
+                vec![],
+            )),
+        );
+
+        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        let Hint(_, hint_) = elem;
+        assert!(match &*hint_ {
+            Hint_::HvecOrDict(None, h) => {
+                let Hint(_, h_) = h as &Hint;
+                matches!(**h_, Hint_::Hany)
+            }
+            _ => false,
+        })
+    }
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d92e811a19e71ca6f6d787864ea0061f>>
+// @generated SignedSource<<0c9b3a0dd5d8c31a3063e94bd3f35682>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2987,6 +2987,42 @@ const _: () = {
                         __binding_0.transform(ctx, errs, top_down, bottom_up)
                     }
                     { __binding_1.transform(ctx, errs, top_down, bottom_up) }
+                }
+            }
+        }
+    }
+};
+const _: () = {
+    impl<Ctx: Clone, Err, Ex, En> Transform<Ctx, Err> for UserAttributes<Ex, En>
+    where
+        Ex: Default,
+        Ex: Transform<Ctx, Err>,
+        En: Transform<Ctx, Err>,
+    {
+        fn transform(
+            &mut self,
+            ctx: &mut Ctx,
+            errs: &mut Vec<Err>,
+            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
+            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
+        ) {
+            let mut in_ctx = ctx.clone();
+            if let Break(..) = top_down.on_ty_user_attributes(self, ctx, errs) {
+                return;
+            }
+            self.traverse(ctx, errs, top_down, bottom_up);
+            bottom_up.on_ty_user_attributes(self, &mut in_ctx, errs);
+        }
+        fn traverse(
+            &mut self,
+            ctx: &mut Ctx,
+            errs: &mut Vec<Err>,
+            top_down: &impl Pass<Ctx = Ctx, Err = Err>,
+            bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
+        ) {
+            match self {
+                UserAttributes(ref mut __binding_0) => {
+                    __binding_0.transform(ctx, errs, top_down, bottom_up)
                 }
             }
         }

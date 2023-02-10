@@ -63,6 +63,7 @@ use oxidized::ast::Targ;
 use oxidized::ast::Tparam;
 use oxidized::ast::TypeHint;
 use oxidized::ast::UserAttribute;
+use oxidized::ast::UserAttributes;
 use oxidized::ast::Visibility;
 use oxidized::ast_defs::ParamKind;
 use oxidized::ast_defs::PropOrMethod;
@@ -594,7 +595,7 @@ fn make_closure(
         type_: TypeHint((), None),
         id: Id(p.clone(), name.into()),
         expr: None,
-        user_attributes: vec![],
+        user_attributes: Default::default(),
         doc_comment: None,
         is_promoted_variadic: false,
         is_static: false,
@@ -609,7 +610,7 @@ fn make_closure(
         span: p.clone(),
         annotation: fd.annotation,
         mode,
-        user_attributes: vec![],
+        user_attributes: Default::default(),
         file_attributes: vec![],
         final_: false,
         is_xhp: false,
@@ -735,7 +736,7 @@ pub fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool)
             ParamKind::Pnormal
         },
         readonly: None, // TODO
-        user_attributes: vec![],
+        user_attributes: Default::default(),
         visibility: None,
     }
 }
@@ -754,12 +755,12 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         r#"#obj_lvar->#meth_lvar(...#{lvar(args_var)})"#
     );
     let attrs = if force {
-        vec![UserAttribute {
+        UserAttributes(vec![UserAttribute {
             name: Id(pos(), "__DynamicMethCallerForce".into()),
             params: vec![],
-        }]
+        }])
     } else {
-        vec![]
+        Default::default()
     };
     let ctxs = Some(Contexts(
         pos(),
@@ -835,7 +836,7 @@ fn add_reified_property(tparams: &[Tparam], vars: &mut Vec<ClassVar>) {
                 type_: TypeHint((), Some(hint)),
                 id: Id(p.clone(), string_utils::reified::PROP_NAME.into()),
                 expr: None,
-                user_attributes: vec![],
+                user_attributes: Default::default(),
                 is_static: false,
                 span: p,
             },
@@ -1570,10 +1571,10 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
                 ]),
             },
             fun_kind: FunKind::FSync,
-            user_attributes: vec![UserAttribute {
+            user_attributes: UserAttributes(vec![UserAttribute {
                 name: Id(pos(), "__MethCaller".into()),
                 params: vec![Expr((), pos(), Expr_::String(cname.into()))],
-            }],
+            }]),
             external: false,
             doc_comment: None,
         };

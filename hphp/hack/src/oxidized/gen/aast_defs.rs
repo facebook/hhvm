@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0f65fee94e8a4d7881372a904a17fbef>>
+// @generated SignedSource<<2bc1d01eacd82c2ed20830c58cbbe530>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2221,8 +2221,23 @@ pub struct Hint(pub Pos, pub Box<Hint_>);
 #[rust_to_ocaml(and)]
 pub type VariadicHint = Option<Hint>;
 
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 #[rust_to_ocaml(and)]
-pub type UserAttributes<Ex, En> = Vec<UserAttribute<Ex, En>>;
+#[repr(C)]
+pub struct UserAttributes<Ex, En>(pub Vec<UserAttribute<Ex, En>>);
 
 #[derive(
     Clone,

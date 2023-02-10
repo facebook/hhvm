@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4e41faff7d5c29260b9b35301388d423>>
+// @generated SignedSource<<f39becc0b39fcaa183d49097133a9103>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2663,8 +2663,31 @@ arena_deserializer::impl_deserialize_in_arena!(Hint<'arena>);
 #[rust_to_ocaml(and)]
 pub type VariadicHint<'a> = Option<&'a Hint<'a>>;
 
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
 #[rust_to_ocaml(and)]
-pub type UserAttributes<'a, Ex, En> = [&'a UserAttribute<'a, Ex, En>];
+#[repr(C)]
+pub struct UserAttributes<'a, Ex, En>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub  &'a [&'a UserAttribute<'a, Ex, En>],
+);
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for UserAttributes<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(UserAttributes<'arena, Ex, En>);
 
 #[derive(
     Clone,

@@ -169,6 +169,7 @@ macro_rules! vec_wrapper {
 
 vec_wrapper!(<Ex, En> Program<Ex, En>, Def<Ex, En>);
 vec_wrapper!(<Ex, En> Block<Ex, En>, Stmt<Ex, En>);
+vec_wrapper!(<Ex, En> UserAttributes<Ex, En>, UserAttribute<Ex, En>);
 
 impl<Ex, En> Program<Ex, En> {
     pub fn defs(&self) -> DefsIterator<'_, Ex, En> {

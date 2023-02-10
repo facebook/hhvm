@@ -1713,7 +1713,7 @@ fn p_lambda_expression<'a>(
                     expr: None,
                     callconv: ast::ParamKind::Pnormal,
                     readonly: None,
-                    user_attributes: vec![],
+                    user_attributes: Default::default(),
                     visibility: None,
                 }],
                 (None, None),
@@ -3617,7 +3617,7 @@ fn rewrite_fun_ctx<'a>(
                                 parameters: vec![],
                                 constraints: vec![],
                                 reified: ReifyKind::Erased,
-                                user_attributes: vec![],
+                                user_attributes: Default::default(),
                             });
                         } else {
                             invalid(pos);
@@ -3673,7 +3673,7 @@ fn rewrite_effect_polymorphism<'a>(
         parameters: vec![],
         constraints: v,
         reified: ReifyKind::Erased,
-        user_attributes: vec![],
+        user_attributes: Default::default(),
     };
 
     // For polymorphic context with form `$g::C`
@@ -3865,7 +3865,7 @@ fn param_template<'a>(node: S<'a>, env: &Env<'_>) -> ast::FunParam {
         expr: None,
         callconv: ast::ParamKind::Pnormal,
         readonly: None,
-        user_attributes: vec![],
+        user_attributes: Default::default(),
         visibility: None,
     }
 }
@@ -4417,7 +4417,7 @@ fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>, attr_name: &str) {
     }
 }
 
-fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserAttribute>> {
+fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::UserAttributes> {
     let p_attr = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::UserAttribute> {
         match &n.children {
             ConstructorCall(c) => {
@@ -4435,16 +4435,17 @@ fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserA
         }),
         _ => missing_syntax("attribute specification", node, env),
     }
+    .map(ast::UserAttributes)
 }
 
-fn p_user_attributes<'a>(node: S<'a>, env: &mut Env<'a>) -> Vec<ast::UserAttribute> {
+fn p_user_attributes<'a>(node: S<'a>, env: &mut Env<'a>) -> ast::UserAttributes {
     let attributes = could_map_emit_error(node, env, p_user_attribute);
     attributes.into_iter().flatten().collect()
 }
 
 /// Extract the URL in `<<__Docs("http://example.com")>>` if the __Docs attribute
 /// is present.
-fn p_docs_url<'a>(attrs: &[ast::UserAttribute], env: &mut Env<'a>) -> Option<String> {
+fn p_docs_url<'a>(attrs: &ast::UserAttributes, env: &mut Env<'a>) -> Option<String> {
     let mut url = None;
 
     for attr in attrs {
@@ -4753,7 +4754,7 @@ fn p_xhp_class_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Either<ast::Xh
                     type_: ast::TypeHint((), hint),
                     id: ast::Id(p, String::from(":") + &name),
                     expr: init_expr,
-                    user_attributes: vec![],
+                    user_attributes: Default::default(),
                     doc_comment: None,
                     is_promoted_variadic: false,
                     is_static: false,
@@ -4833,7 +4834,7 @@ fn p_type_constant<'a>(
             cls.typeconsts.push(ast::ClassTypeconstDef {
                 name,
                 kind,
-                user_attributes: user_attributes.to_vec(),
+                user_attributes,
                 span,
                 doc_comment: doc_comment_opt,
                 is_ctx: false,
@@ -4951,7 +4952,7 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
             class.typeconsts.push(ast::ClassTypeconstDef {
                 name,
                 kind,
-                user_attributes: vec![],
+                user_attributes: Default::default(),
                 span,
                 doc_comment: doc_comment_opt,
                 is_ctx: true,
@@ -5706,7 +5707,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 c.attribute_spec
                     .syntax_node_to_list_skip_separator()
                     .map(|attr| p_user_attribute(attr, env))
-                    .collect::<Result<Vec<Vec<_>>, _>>()?,
+                    .collect::<Result<Vec<ast::UserAttributes>, _>>()?,
             );
             let docs_url = p_docs_url(&user_attributes, env);
 
@@ -5792,7 +5793,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                     c.attribute_spec
                         .syntax_node_to_list_skip_separator()
                         .map(|attr| p_user_attribute(attr, env))
-                        .collect::<Result<Vec<Vec<_>>, _>>()?,
+                        .collect::<Result<Vec<ast::UserAttributes>, _>>()?,
                 ),
                 namespace: mk_empty_ns_env(env),
                 mode: env.file_mode(),
@@ -5813,7 +5814,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             let p_enumerator = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::ClassConst> {
                 match &n.children {
                     Enumerator(c) => Ok(ast::ClassConst {
-                        user_attributes: vec![],
+                        user_attributes: Default::default(),
                         type_: None,
                         id: pos_name(&c.name, e)?,
                         kind: ast::ClassConstKind::CCConcrete(p_expr(&c.value, e)?),
@@ -5982,7 +5983,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                             )?)
                         };
                         let class_const = ast::ClassConst {
-                            user_attributes: vec![],
+                            user_attributes: Default::default(),
                             type_: Some(full_type),
                             id: name,
                             kind,

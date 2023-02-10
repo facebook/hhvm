@@ -55,6 +55,7 @@ pub type Targ = aast::Targ<Ex>;
 pub type Tparam = aast::Tparam<Ex, En>;
 pub type Typedef = aast::Typedef<Ex, En>;
 pub type TypeHint = aast::TypeHint<Ex>;
+pub type UserAttributes = aast::UserAttributes<Ex, En>;
 pub type UserAttribute = aast::UserAttribute<Ex, En>;
 pub type UsingStmt = aast::UsingStmt<Ex, En>;
 pub type XhpAttr = aast::XhpAttr<Ex, En>;

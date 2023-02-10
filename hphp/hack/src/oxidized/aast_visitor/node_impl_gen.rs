@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cc60f2cbd0a044321c7b160289fb86cd>>
+// @generated SignedSource<<78bc090c052914810e5dedf5b1f3201b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2164,6 +2164,22 @@ impl<P: Params> Node<P> for UserAttribute<P::Ex, P::En> {
     ) -> Result<(), P::Error> {
         self.name.accept(c, v)?;
         self.params.accept(c, v)
+    }
+}
+impl<P: Params> Node<P> for UserAttributes<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_user_attributes(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for UsingStmt<P::Ex, P::En> {

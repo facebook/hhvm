@@ -137,7 +137,7 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
         expr: None,
         callconv: ParamKind::Pnormal,
         readonly: None,
-        user_attributes: vec![],
+        user_attributes: Default::default(),
         visibility: None,
     };
     let visitor_fun_ = wrap_fun_(visitor_body, vec![param], et_literal_pos.clone());
@@ -275,7 +275,7 @@ fn wrap_fun_(body: ast::FuncBody, params: Vec<ast::FunParam>, span: Pos) -> ast:
         fun_kind: ast::FunKind::FSync,
         ctxs: None,        // TODO(T70095684)
         unsafe_ctxs: None, // TODO(T70095684)
-        user_attributes: vec![],
+        user_attributes: Default::default(),
         external: false,
         doc_comment: None,
     }
@@ -1854,7 +1854,7 @@ fn immediately_invoked_lambda(
                 expr: None,
                 callconv: ParamKind::Pnormal,
                 readonly: None,
-                user_attributes: vec![],
+                user_attributes: Default::default(),
                 visibility: None,
             }
         })

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c28261219bcdfb1f63c48a4a33f17657>>
+// @generated SignedSource<<126a1abc4e271bc73aaed86d8fe5c0d4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -817,6 +817,18 @@ pub trait Pass {
         ctx: &mut Self::Ctx,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_user_attributes<Ex, En>(
+        &self,
+        elem: &mut UserAttributes<Ex, En>,
+        ctx: &mut Self::Ctx,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
         Continue(())
     }
     #[inline(always)]
@@ -2016,6 +2028,19 @@ where
     ) -> ControlFlow<(), ()> {
         self.fst.on_ty_hint(elem, ctx, errs)?;
         self.snd.on_ty_hint(elem, ctx, errs)
+    }
+    #[inline(always)]
+    fn on_ty_user_attributes<Ex, En>(
+        &self,
+        elem: &mut UserAttributes<Ex, En>,
+        ctx: &mut Self::Ctx,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_user_attributes(elem, ctx, errs)?;
+        self.snd.on_ty_user_attributes(elem, ctx, errs)
     }
     #[inline(always)]
     fn on_ty_contexts(

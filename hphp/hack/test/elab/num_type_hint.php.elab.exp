@@ -252,7 +252,9 @@ Program(
                             expr: None,
                             readonly: None,
                             callconv: Pnormal,
-                            user_attributes: [],
+                            user_attributes: UserAttributes(
+                                [],
+                            ),
                             visibility: None,
                         },
                         FunParam {
@@ -302,7 +304,9 @@ Program(
                             expr: None,
                             readonly: None,
                             callconv: Pnormal,
-                            user_attributes: [],
+                            user_attributes: UserAttributes(
+                                [],
+                            ),
                             visibility: None,
                         },
                     ],
@@ -405,7 +409,9 @@ Program(
                         ),
                     },
                     fun_kind: FSync,
-                    user_attributes: [],
+                    user_attributes: UserAttributes(
+                        [],
+                    ),
                     external: false,
                     doc_comment: Some(
                         (
@@ -660,7 +666,9 @@ Program(
                             expr: None,
                             readonly: None,
                             callconv: Pnormal,
-                            user_attributes: [],
+                            user_attributes: UserAttributes(
+                                [],
+                            ),
                             visibility: None,
                         },
                         FunParam {
@@ -710,7 +718,9 @@ Program(
                             expr: None,
                             readonly: None,
                             callconv: Pnormal,
-                            user_attributes: [],
+                            user_attributes: UserAttributes(
+                                [],
+                            ),
                             visibility: None,
                         },
                     ],
@@ -813,7 +823,9 @@ Program(
                         ),
                     },
                     fun_kind: FSync,
-                    user_attributes: [],
+                    user_attributes: UserAttributes(
+                        [],
+                    ),
                     external: false,
                     doc_comment: None,
                 },
@@ -1087,7 +1099,9 @@ Program(
                             expr: None,
                             readonly: None,
                             callconv: Pnormal,
-                            user_attributes: [],
+                            user_attributes: UserAttributes(
+                                [],
+                            ),
                             visibility: None,
                         },
                         FunParam {
@@ -1137,7 +1151,9 @@ Program(
                             expr: None,
                             readonly: None,
                             callconv: Pnormal,
-                            user_attributes: [],
+                            user_attributes: UserAttributes(
+                                [],
+                            ),
                             visibility: None,
                         },
                     ],
@@ -1323,7 +1339,9 @@ Program(
                         ),
                     },
                     fun_kind: FSync,
-                    user_attributes: [],
+                    user_attributes: UserAttributes(
+                        [],
+                    ),
                     external: false,
                     doc_comment: None,
                 },
@@ -1569,7 +1587,9 @@ Program(
                             expr: None,
                             readonly: None,
                             callconv: Pnormal,
-                            user_attributes: [],
+                            user_attributes: UserAttributes(
+                                [],
+                            ),
                             visibility: None,
                         },
                         FunParam {
@@ -1619,7 +1639,9 @@ Program(
                             expr: None,
                             readonly: None,
                             callconv: Pnormal,
-                            user_attributes: [],
+                            user_attributes: UserAttributes(
+                                [],
+                            ),
                             visibility: None,
                         },
                     ],
@@ -1890,7 +1912,9 @@ Program(
                         ),
                     },
                     fun_kind: FSync,
-                    user_attributes: [],
+                    user_attributes: UserAttributes(
+                        [],
+                    ),
                     external: false,
                     doc_comment: None,
                 },
@@ -2938,7 +2962,9 @@ Program(
                         ),
                     },
                     fun_kind: FSync,
-                    user_attributes: [],
+                    user_attributes: UserAttributes(
+                        [],
+                    ),
                     external: false,
                     doc_comment: None,
                 },
@@ -3171,7 +3197,9 @@ Program(
                             expr: None,
                             readonly: None,
                             callconv: Pnormal,
-                            user_attributes: [],
+                            user_attributes: UserAttributes(
+                                [],
+                            ),
                             visibility: None,
                         },
                         FunParam {
@@ -3221,7 +3249,9 @@ Program(
                             expr: None,
                             readonly: None,
                             callconv: Pnormal,
-                            user_attributes: [],
+                            user_attributes: UserAttributes(
+                                [],
+                            ),
                             visibility: None,
                         },
                     ],
@@ -4242,7 +4272,9 @@ Program(
                         ),
                     },
                     fun_kind: FSync,
-                    user_attributes: [],
+                    user_attributes: UserAttributes(
+                        [],
+                    ),
                     external: false,
                     doc_comment: None,
                 },

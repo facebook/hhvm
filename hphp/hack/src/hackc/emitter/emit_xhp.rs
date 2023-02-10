@@ -402,7 +402,7 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
         unsafe_ctxs: None,
         body: FuncBody { fb_ast },
         fun_kind: ast_defs::FunKind::FSync,
-        user_attributes: vec![],
+        user_attributes: Default::default(),
         readonly_ret: None, // TODO readonly emitter
         ret: TypeHint((), None),
         external: false,

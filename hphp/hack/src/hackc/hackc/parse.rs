@@ -12,6 +12,7 @@ use std::path::PathBuf;
 use aast_parser::AastParser;
 use anyhow::Context;
 use anyhow::Result;
+use clap::builder::TypedValueParser;
 use clap::Args;
 use ocamlrep::rc::RcOc;
 use parser_core_types::indexed_source_text::IndexedSourceText;
@@ -27,7 +28,7 @@ use strum_macros::EnumVariantNames;
 
 #[derive(Args, Clone, Debug)]
 pub struct BenchOpts {
-    #[clap(default_value_t, long, value_parser = clap::builder::PossibleValuesParser::new(ParserKind::VARIANTS))]
+    #[clap(default_value_t, long, value_parser = clap::builder::PossibleValuesParser::new(ParserKind::VARIANTS).map(|s| s.parse::<ParserKind>().unwrap()))]
     parser: ParserKind,
 }
 

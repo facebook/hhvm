@@ -952,13 +952,19 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
 
   if (dumpIREnabled(kind, kExtraExtraLevel)) printOpcodeStats(os, blocks);
 
-  // Print the block CFG above the actual code.
-
   auto const retreating_edges = findRetreatingEdges(unit);
+  // Find blocks in loops
+  auto const loop_blocks = findBlocksInLoops(unit, retreating_edges);
+  auto const isBlockInLoop = [&](Block* b) {
+    auto const it = loop_blocks.find(b->id());
+    return it != loop_blocks.end();
+  };
+
+  // Print the block CFG above the actual code.
   os << "digraph G {\n";
   for (auto block : blocks) {
     if (block->empty()) continue;
-    if (dotBodies) {
+    if (dotBodies || (RuntimeOption::EvalDumpHHIRInLoops && isBlockInLoop(block))) {
       if (block->hint() != Block::Hint::Unlikely &&
           block->hint() != Block::Hint::Unused) {
         // Include the IR in the body of the node

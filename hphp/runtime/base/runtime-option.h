@@ -1056,6 +1056,7 @@ struct RuntimeOption {
   F(uint32_t, DumpRegion,              0)                               \
   F(bool,     DumpCallTargets,         false)                           \
   F(bool,     DumpLayoutCFG,           false)                           \
+  F(bool,     DumpHHIRInLoops,         false)                           \
   F(bool,     DumpVBC,                 false)                           \
   F(bool,     DumpArrAccProf,          false)                           \
   F(bool,     DumpCoeffectFunParamProf,false)                           \

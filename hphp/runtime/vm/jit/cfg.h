@@ -101,6 +101,12 @@ bool cfgHasLoop(const IRUnit&);
 EdgeSet findRetreatingEdges(const IRUnit&);
 
 /*
+ * Return the set of blocks in a loop given a set of backedges
+ */
+jit::hash_set<RegionDesc::BlockId> findBlocksInLoops(const IRUnit&, const EdgeSet&);
+
+
+/*
  * Visit the instructions in this blocklist, in block order.
  */
 template <class BlockList, class Body>
@@ -111,4 +117,3 @@ void forEachInst(const BlockList& blocks, Body body);
 }
 
 #include "hphp/runtime/vm/jit/cfg-inl.h"
-

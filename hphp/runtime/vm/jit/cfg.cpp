@@ -293,6 +293,37 @@ bool cfgHasLoop(const IRUnit& unit) {
   return ret;
 }
 
+jit::hash_set<RegionDesc::BlockId> findBlocksInLoops(const IRUnit& unit, const EdgeSet& backEdges) {
+  jit::hash_set<RegionDesc::BlockId> blocks;
+  auto findBlocksInLoop = [&](Edge* backEdge) {
+    auto stack = BlockList{};
+    jit::hash_set<RegionDesc::BlockId> visited;
+    visited.reserve(unit.numBlocks());
+    stack.reserve(unit.numBlocks());
+    stack.push_back(backEdge->from());
+    auto loopHeaderId = backEdge->to()->id();
+    visited.insert(loopHeaderId);
+    blocks.insert(loopHeaderId);
+
+    // Find all blocks dominated by backEdge->to() that can reach
+    // backEdge->from()
+    while (!stack.empty()) {
+      auto* b = stack.back();
+      stack.pop_back();
+      if (visited.find(b->id()) != visited.end()) continue;
+      blocks.insert(b->id());
+      visited.insert(b->id());
+      b->forEachPred([&] (Block* pred) {
+        stack.push_back(pred);
+      });
+    }
+  };
+  for (auto edge : backEdges) {
+    findBlocksInLoop(edge);
+  }
+  return blocks;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

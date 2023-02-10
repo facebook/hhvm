@@ -16,7 +16,7 @@ pub struct GuardInvalidPass;
 impl Pass for GuardInvalidPass {
     type Ctx = Context;
     type Err = NamingPhaseError;
-    fn on_ty_expr_<Ex, En>(
+    fn on_ty_expr_<Ex: Default, En>(
         &self,
         elem: &mut Expr_<Ex, En>,
         _ctx: &mut Self::Ctx,
@@ -47,7 +47,7 @@ mod tests {
     impl Pass for RewriteZero {
         type Err = NamingPhaseError;
         type Ctx = Context;
-        fn on_ty_expr_<Ex, En>(
+        fn on_ty_expr_<Ex: Default, En>(
             &self,
             elem: &mut Expr_<Ex, En>,
             _ctx: &mut Self::Ctx,

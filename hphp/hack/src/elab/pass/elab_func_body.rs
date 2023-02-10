@@ -21,7 +21,7 @@ impl Pass for ElabFuncBodyPass {
     type Ctx = Context;
     type Err = NamingPhaseError;
 
-    fn on_ty_func_body<Ex, En>(
+    fn on_ty_func_body<Ex: Default, En>(
         &self,
         elem: &mut FuncBody<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -33,7 +33,7 @@ impl Pass for ElabFuncBodyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class_<Ex, En>(
+    fn on_ty_class_<Ex: Default, En>(
         &self,
         elem: &mut Class_<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -43,7 +43,7 @@ impl Pass for ElabFuncBodyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_typedef<Ex, En>(
+    fn on_ty_typedef<Ex: Default, En>(
         &self,
         elem: &mut Typedef<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -53,7 +53,7 @@ impl Pass for ElabFuncBodyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst<Ex, En>(
+    fn on_ty_gconst<Ex: Default, En>(
         &self,
         elem: &mut Gconst<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -63,7 +63,7 @@ impl Pass for ElabFuncBodyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def<Ex, En>(
+    fn on_ty_fun_def<Ex: Default, En>(
         &self,
         elem: &mut FunDef<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -73,7 +73,7 @@ impl Pass for ElabFuncBodyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def<Ex, En>(
+    fn on_ty_module_def<Ex: Default, En>(
         &self,
         elem: &mut ModuleDef<Ex, En>,
         ctx: &mut Self::Ctx,

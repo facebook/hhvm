@@ -42,7 +42,7 @@ impl Pass for ElabHKTPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_tparam<Ex, En>(
+    fn on_ty_tparam<Ex: Default, En>(
         &self,
         elem: &mut Tparam<Ex, En>,
         ctx: &mut Self::Ctx,

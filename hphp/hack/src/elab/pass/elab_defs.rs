@@ -21,7 +21,7 @@ impl Pass for ElabDefsPass {
     type Ctx = Context;
     type Err = NamingPhaseError;
 
-    fn on_ty_program<Ex, En>(
+    fn on_ty_program<Ex: Default, En>(
         &self,
         elem: &mut Program<Ex, En>,
         _ctx: &mut Self::Ctx,

@@ -20,7 +20,7 @@ impl Pass for ElabBlockPass {
     type Ctx = Context;
     type Err = NamingPhaseError;
 
-    fn on_ty_block<Ex, En>(
+    fn on_ty_block<Ex: Default, En>(
         &self,
         elem: &mut Block<Ex, En>,
         _ctx: &mut Self::Ctx,
@@ -36,7 +36,7 @@ impl Pass for ElabBlockPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_using_stmt<Ex, En>(
+    fn on_ty_using_stmt<Ex: Default, En>(
         &self,
         elem: &mut UsingStmt<Ex, En>,
         _ctx: &mut Self::Ctx,

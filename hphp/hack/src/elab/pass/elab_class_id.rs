@@ -46,7 +46,7 @@ impl Pass for ElabClassIdPass {
      TODO[mjt] Lowering gives us a very specific representation but we don't
      enforce this invariant at all here
     */
-    fn on_ty_class_id<Ex, En>(
+    fn on_ty_class_id<Ex: Default, En>(
         &self,
         elem: &mut ClassId<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -124,7 +124,7 @@ impl Pass for ElabClassIdPass {
         }
     }
 
-    fn on_ty_class_<Ex, En>(
+    fn on_ty_class_<Ex: Default, En>(
         &self,
         _elem: &mut oxidized::aast::Class_<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -136,7 +136,7 @@ impl Pass for ElabClassIdPass {
 
     /* The attributes applied to a class exist outside the current class so
     references to `self` are invalid */
-    fn on_fld_class__user_attributes<Ex, En>(
+    fn on_fld_class__user_attributes<Ex: Default, En>(
         &self,
         _elem: &mut oxidized::tast::UserAttributes<Ex, En>,
         ctx: &mut Self::Ctx,

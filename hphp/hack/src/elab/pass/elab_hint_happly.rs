@@ -41,7 +41,7 @@ impl Pass for ElabHintHapplyPass {
     type Ctx = Context;
     type Err = NamingPhaseError;
 
-    fn on_ty_typedef<Ex, En>(
+    fn on_ty_typedef<Ex: Default, En>(
         &self,
         elem: &mut Typedef<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -51,7 +51,7 @@ impl Pass for ElabHintHapplyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst<Ex, En>(
+    fn on_ty_gconst<Ex: Default, En>(
         &self,
         _elem: &mut Gconst<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -61,7 +61,7 @@ impl Pass for ElabHintHapplyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def<Ex, En>(
+    fn on_ty_fun_def<Ex: Default, En>(
         &self,
         elem: &mut FunDef<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -71,7 +71,7 @@ impl Pass for ElabHintHapplyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def<Ex, En>(
+    fn on_ty_module_def<Ex: Default, En>(
         &self,
         _elem: &mut ModuleDef<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -81,7 +81,7 @@ impl Pass for ElabHintHapplyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class_<Ex, En>(
+    fn on_ty_class_<Ex: Default, En>(
         &self,
         elem: &mut Class_<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -91,7 +91,7 @@ impl Pass for ElabHintHapplyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method_<Ex, En>(
+    fn on_ty_method_<Ex: Default, En>(
         &self,
         elem: &mut Method_<Ex, En>,
         ctx: &mut Self::Ctx,
@@ -101,7 +101,7 @@ impl Pass for ElabHintHapplyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_tparam<Ex, En>(
+    fn on_ty_tparam<Ex: Default, En>(
         &self,
         elem: &mut Tparam<Ex, En>,
         ctx: &mut Self::Ctx,

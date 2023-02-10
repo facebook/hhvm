@@ -798,9 +798,9 @@ fn print_block(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     env: &ExprEnv<'_, '_>,
-    block: &ast::Block,
+    block: &[ast::Stmt],
 ) -> Result<()> {
-    match block.as_slice() {
+    match block {
         [] | [ast::Stmt(_, ast::Stmt_::Noop)] => Ok(()),
         [ast::Stmt(_, ast::Stmt_::Block(b))] if b.len() == 1 => print_block_(ctx, w, env, b),
         [_, _, ..] => print_block_(ctx, w, env, block),
@@ -812,10 +812,10 @@ fn print_block_(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     env: &ExprEnv<'_, '_>,
-    block: &ast::Block,
+    block: &[ast::Stmt],
 ) -> Result<()> {
     write::wrap_by_(w, "{\n", "}\n", |w| {
-        write::concat(w, &block.0, |w, stmt| {
+        write::concat(w, block, |w, stmt| {
             if !matches!(stmt.1, ast::Stmt_::Noop) {
                 w.write_all(b"  ")?;
                 print_statement(ctx, w, env, stmt)?;
@@ -849,7 +849,7 @@ fn print_statement(
         S_::While(x) => {
             let (cond, block) = &**x;
             write::wrap_by_(w, "while (", ") ", |w| print_expr(ctx, w, env, cond))?;
-            print_block(ctx, w, env, block)
+            print_block(ctx, w, env, block.as_ref())
         }
         S_::If(x) => {
             let (cond, if_block, else_block) = &**x;

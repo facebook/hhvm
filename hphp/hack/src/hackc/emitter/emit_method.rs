@@ -268,7 +268,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
             emitter.alloc,
             emitter,
             namespace,
-            ast_body_block.as_slice(),
+            ast_body_block,
             instr::null(),
             scope,
             emit_body::Args {

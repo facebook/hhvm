@@ -134,7 +134,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
             alloc,
             e,
             RcOc::clone(&fd.namespace),
-            ast_body.as_slice(),
+            ast_body,
             instr::null(),
             scope,
             EmitBodyArgs {

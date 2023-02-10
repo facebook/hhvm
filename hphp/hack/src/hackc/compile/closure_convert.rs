@@ -864,8 +864,7 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
         let cd = scope.as_class_summary().ok_or_else(|| {
             Error::unrecoverable("unexpected scope shape - method is not inside the class")
         })?;
-        let variables =
-            Self::compute_variables_from_fun(&md.params, md.body.fb_ast.as_slice(), None)?;
+        let variables = Self::compute_variables_from_fun(&md.params, &md.body.fb_ast, None)?;
         let coeffects = Coeffects::from_ast(
             self.alloc,
             md.ctxs.as_ref(),
@@ -920,11 +919,8 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
             // need to handle it ourselvses, because visit_fun_ is
             // called both for toplevel functions and lambdas
             Def::Fun(fd) => {
-                let variables = Self::compute_variables_from_fun(
-                    &fd.fun.params,
-                    fd.fun.body.fb_ast.as_slice(),
-                    None,
-                )?;
+                let variables =
+                    Self::compute_variables_from_fun(&fd.fun.params, &fd.fun.body.fb_ast, None)?;
                 let coeffects = Coeffects::from_ast(
                     self.alloc,
                     fd.fun.ctxs.as_ref(),
@@ -1351,11 +1347,8 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
                 .map(|Lid(_, (_, name))| name.to_string())
                 .collect()
         });
-        let variables = Self::compute_variables_from_fun(
-            &fd.params,
-            fd.body.fb_ast.as_slice(),
-            explicit_capture,
-        )?;
+        let variables =
+            Self::compute_variables_from_fun(&fd.params, &fd.body.fb_ast, explicit_capture)?;
         let coeffects =
             Coeffects::from_ast(self.alloc, fd.ctxs.as_ref(), &fd.params, &fd.tparams, &[]);
         let si = ScopeSummary::Lambda(LambdaSummary {

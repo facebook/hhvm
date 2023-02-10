@@ -118,7 +118,7 @@ fn extract_debugger_main(
             stmts
         };
     let p = Pos::make_none;
-    let mut unsets: Vec<_> = vars
+    let mut unsets: ast::Block = vars
         .iter()
         .map(|name| {
             let name = local_id::make_unscoped(name);
@@ -176,9 +176,7 @@ fn extract_debugger_main(
         params,
         ctxs: None,        // TODO(T70095684)
         unsafe_ctxs: None, // TODO(T70095684)
-        body: FuncBody {
-            fb_ast: ast::Block(body),
-        },
+        body: FuncBody { fb_ast: body },
         fun_kind: FunKind::FSync,
         user_attributes: vec![UserAttribute {
             name: Id(Pos::make_none(), "__DebuggerMain".into()),

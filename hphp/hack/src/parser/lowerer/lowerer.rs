@@ -2694,16 +2694,16 @@ fn p_stmt_list_<'a>(
 
 fn handle_loop_body<'a>(pos: Pos, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     let list: Vec<_> = node.syntax_node_to_list_skip_separator().collect();
-    let blk: Vec<_> = p_stmt_list_(&pos, list.iter(), env)?
+    let blk: ast::Block = p_stmt_list_(&pos, list.iter(), env)?
         .into_iter()
         .filter(|stmt| !stmt.1.is_noop())
         .collect();
     let body = if blk.is_empty() {
-        vec![mk_noop(env)]
+        ast::Block(vec![mk_noop(env)])
     } else {
         blk
     };
-    Ok(ast::Stmt::new(pos, ast::Stmt_::mk_block(ast::Block(body))))
+    Ok(ast::Stmt::new(pos, ast::Stmt_::mk_block(body)))
 }
 
 fn is_simple_assignment_await_expression<'a>(node: S<'a>) -> bool {
@@ -2961,7 +2961,7 @@ fn p_try_stmt<'a>(
             })?,
             match &c.finally_clause.children {
                 FinallyClause(c) => p_block(false, &c.body, env)?,
-                _ => ast::Block(vec![]),
+                _ => Default::default(),
             },
         ),
     ))
@@ -3314,11 +3314,11 @@ fn p_switch_stmt_<'a>(
         match &n.children {
             CaseLabel(c) => Ok(aast::GenCase::Case(aast::Case(
                 p_expr(&c.expression, e)?,
-                ast::Block(vec![]),
+                Default::default(),
             ))),
             DefaultLabel(_) => Ok(aast::GenCase::Default(aast::DefaultCase(
                 p_pos(n, e),
-                ast::Block(vec![]),
+                Default::default(),
             ))),
             _ => missing_syntax("switch label", n, e),
         }
@@ -3326,14 +3326,14 @@ fn p_switch_stmt_<'a>(
     let p_section = |n: S<'a>, e: &mut Env<'a>| -> Result<Vec<ast::GenCase>> {
         match &n.children {
             SwitchSection(c) => {
-                let mut blk = could_map(&c.statements, e, p_stmt)?;
+                let mut blk = ast::Block(could_map(&c.statements, e, p_stmt)?);
                 if !c.fallthrough.is_missing() {
                     blk.push(new(e.mk_none_pos(), S_::Fallthrough));
                 }
                 let mut labels = could_map(&c.labels, e, p_label)?;
                 match labels.last_mut() {
-                    Some(aast::GenCase::Default(aast::DefaultCase(_, b))) => b.0 = blk,
-                    Some(aast::GenCase::Case(aast::Case(_, b))) => b.0 = blk,
+                    Some(aast::GenCase::Default(aast::DefaultCase(_, b))) => *b = blk,
+                    Some(aast::GenCase::Case(aast::Case(_, b))) => *b = blk,
                     _ => raise_parsing_error(n, e, "Malformed block result"),
                 }
                 Ok(labels)
@@ -4200,7 +4200,7 @@ fn p_block<'a>(remove_noop: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast:
     let ast::Stmt(p, stmt_) = p_stmt(node, env)?;
     if let ast::Stmt_::Block(blk) = stmt_ {
         if remove_noop && blk.len() == 1 && blk[0].1.is_noop() {
-            return Ok(ast::Block(vec![]));
+            return Ok(Default::default());
         }
         Ok(blk)
     } else {
@@ -4216,7 +4216,7 @@ fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
     let mk_noop_result = |e: &Env<'_>| Ok(ast::Block(vec![mk_noop(e)]));
     let f = |e: &mut Env<'a>| -> Result<ast::Block> {
         match &node.children {
-            Missing => Ok(ast::Block(vec![])),
+            Missing => Ok(Default::default()),
             CompoundStatement(c) => {
                 let compound_statements = &c.statements.children;
                 let compound_right_brace = &c.right_brace.children;
@@ -5550,7 +5550,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             let hdr = p_fun_hdr(declaration_header, env)?;
             let is_external = body.is_external();
             let (block, yield_) = if is_external {
-                (ast::Block(vec![]), false)
+                (Default::default(), false)
             } else {
                 map_yielding(body, env, p_function_body)?
             };

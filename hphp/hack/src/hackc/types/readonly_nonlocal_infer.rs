@@ -697,11 +697,10 @@ impl<'decl> Infer<'decl> {
 
     fn infer_stmts(
         &mut self,
-        stmts: impl AsRef<[ast::Stmt]>,
+        stmts: &[ast::Stmt],
         mut ctx: Ctx,
         where_: Where<'_>,
     ) -> (ast::Block, Ctx) {
-        let stmts = stmts.as_ref();
         let mut out = Vec::with_capacity(stmts.len());
         for stmt in stmts.iter() {
             let (s, s_ctx) = self.infer_stmt(stmt, ctx, where_);

@@ -115,19 +115,19 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
             _ => emit_expr::emit_ignored_expr(e, env, pos, e_),
         },
         a::Stmt_::Return(r_opt) => emit_return_(e, env, (**r_opt).as_ref(), pos),
-        a::Stmt_::Block(b) => emit_block(env, e, &b.0),
-        a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1.0, &f.2.0),
-        a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1.0),
+        a::Stmt_::Block(b) => emit_block(env, e, b),
+        a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
+        a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),
         a::Stmt_::Using(x) => emit_using(e, env, x),
         a::Stmt_::Break => Ok(emit_break(e, env, pos)),
         a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
-        a::Stmt_::Do(x) => emit_do(e, env, &x.0.0, &x.1),
-        a::Stmt_::For(x) => emit_for(e, env, &x.0, x.1.as_ref(), &x.2, &x.3.0),
+        a::Stmt_::Do(x) => emit_do(e, env, &x.0, &x.1),
+        a::Stmt_::For(x) => emit_for(e, env, &x.0, x.1.as_ref(), &x.2, &x.3),
         a::Stmt_::Throw(x) => emit_throw(e, env, x, pos),
         a::Stmt_::Try(x) => emit_try(e, env, x, pos),
         a::Stmt_::Switch(x) => emit_switch(e, env, pos, &x.0, &x.1, &x.2),
-        a::Stmt_::Foreach(x) => emit_foreach(e, env, pos, &x.0, &x.1, &x.2.0),
-        a::Stmt_::Awaitall(x) => emit_awaitall(e, env, pos, &x.0, &x.1.0),
+        a::Stmt_::Foreach(x) => emit_foreach(e, env, pos, &x.0, &x.1, &x.2),
+        a::Stmt_::Awaitall(x) => emit_awaitall(e, env, pos, &x.0, &x.1),
         a::Stmt_::Markup(x) => emit_markup(e, env, x, false),
         a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(instr::empty()),
         a::Stmt_::AssertEnv(_) => Ok(instr::empty()),
@@ -207,7 +207,6 @@ fn emit_try<'a, 'arena, 'decl>(
     pos: &Pos,
 ) -> Result<InstrSeq<'arena>> {
     let (try_block, catch_list, finally_block) = x;
-    let (try_block, finally_block) = (try_block.as_slice(), finally_block.as_slice());
     if catch_list.is_empty() {
         emit_try_finally(e, env, pos, try_block, finally_block)
     } else if finally_block.is_empty() {
@@ -298,7 +297,7 @@ fn emit_case<'c, 'a, 'arena, 'decl>(
     let ast::Case(case_expr, body) = case;
 
     let label = e.label_gen_mut().next_regular();
-    let mut res = vec![instr::label(label), emit_block(env, e, body.as_slice())?];
+    let mut res = vec![instr::label(label), emit_block(env, e, body)?];
     if addbreak {
         res.push(emit_break(e, env, &Pos::make_none()));
     }
@@ -314,10 +313,7 @@ fn emit_default_case<'a, 'arena, 'decl>(
 
     let label = e.label_gen_mut().next_regular();
     Ok((
-        InstrSeq::gather(vec![
-            instr::label(label),
-            emit_block(env, e, body.as_slice())?,
-        ]),
+        InstrSeq::gather(vec![instr::label(label), emit_block(env, e, body)?]),
         label,
     ))
 }
@@ -457,7 +453,7 @@ fn emit_using<'a, 'arena, 'decl>(
     using: &ast::UsingStmt,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let block_pos = block_pos(using.block.as_slice())?;
+    let block_pos = block_pos(&using.block)?;
     if using.exprs.1.len() > 1 {
         emit_stmts(
             e,
@@ -526,8 +522,7 @@ fn emit_using<'a, 'arena, 'decl>(
             };
             let finally_start = e.label_gen_mut().next_regular();
             let finally_end = e.label_gen_mut().next_regular();
-            let body =
-                env.do_in_using_body(e, finally_start, using.block.as_slice(), emit_block)?;
+            let body = env.do_in_using_body(e, finally_start, &using.block, emit_block)?;
             let jump_instrs = tfr::JumpInstructions::collect(&body, &mut env.jump_targets_gen);
             let jump_instrs_is_empty = jump_instrs.is_empty();
             let finally_epilogue =
@@ -590,7 +585,7 @@ fn emit_using<'a, 'arena, 'decl>(
                 ])
             };
             let exn_local = e.local_gen_mut().get_unnamed();
-            let middle = if is_empty_block(using.block.as_slice()) {
+            let middle = if is_empty_block(&using.block) {
                 instr::empty()
             } else {
                 let finally_instrs = emit_finally(e, local, using.has_await, using.is_block_scoped);
@@ -954,7 +949,7 @@ fn emit_catch<'a, 'arena, 'decl>(
         instr::jmp_z(next_catch),
         instr::set_l(e.named_local(local_id::get_name(catch_local_id).into())),
         instr::pop_c(),
-        emit_stmts(e, env, catch_block.as_slice())?,
+        emit_stmts(e, env, catch_block)?,
         emit_pos(pos),
         instr::jmp(end_label),
         instr::label(next_catch),
@@ -1509,7 +1504,7 @@ pub fn emit_final_stmt<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     match &stmt.1 {
         a::Stmt_::Throw(_) | a::Stmt_::Return(_) | a::Stmt_::YieldBreak => emit_stmt(e, env, stmt),
-        a::Stmt_::Block(stmts) => emit_final_stmts(env, e, stmts.as_slice()),
+        a::Stmt_::Block(stmts) => emit_final_stmts(env, e, stmts),
         _ => {
             let ret = emit_dropthrough_return(e, env)?;
             Ok(InstrSeq::gather(vec![emit_stmt(e, env, stmt)?, ret]))

@@ -982,10 +982,13 @@ struct Index {
   bool could_have_reified_type(Context ctx, const TypeConstraint& tc) const;
 
   /*
-   * Returns a tuple containing a type after the parameter type verification
-   * and a flag indicating whether the verification was effect free.
+   * Returns a tuple containing a type after the parameter type
+   * verification, a flag indicating whether the verification is a
+   * no-op (because it always passes without any conversion), and a
+   * flag indicating whether the verification is effect free (the
+   * verification could convert a type without causing a side-effect).
    */
-  std::tuple<Type, bool>
+  std::tuple<Type, bool, bool>
   verify_param_type(const Context& ctx, uint32_t paramId, const Type& t) const;
 
   /*

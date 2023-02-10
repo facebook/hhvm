@@ -101,7 +101,7 @@ State entry_state(const Index& index, CollectedInfo& collect,
           for (auto& p : pack) p = unctx(std::move(p));
           ret.locals[locId] = vec(std::move(pack));
         } else {
-          auto [ ty, effectFree ] =
+          auto [ty, _, effectFree] =
             index.verify_param_type(ctx, locId, unctx(knownArgs->args[locId]));
           ret.unreachable |= ty.subtypeOf(BBottom);
           ret.locals[locId] = std::move(ty);
@@ -121,7 +121,7 @@ State entry_state(const Index& index, CollectedInfo& collect,
     // Because we throw a non-recoverable error for having fewer than the
     // required number of args, all function parameters must be initialized.
 
-    auto [ty, effectFree] =
+    auto [ty, _, effectFree] =
       index.verify_param_type(ctx, locId, TInitCell);
     ret.unreachable |= ty.subtypeOf(BBottom);
     ret.locals[locId] = std::move(ty);

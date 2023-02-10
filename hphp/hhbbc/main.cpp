@@ -273,6 +273,7 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalClassPassesClassname;
   gd.ClassnameNotices =
     RuntimeOption::EvalClassnameNotices;
+  gd.ClassStringHintNotices = RO::EvalClassStringHintNotices;
   gd.ClassIsStringNotices = RuntimeOption::EvalClassIsStringNotices;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
   gd.TraitConstantInterfaceBehavior =

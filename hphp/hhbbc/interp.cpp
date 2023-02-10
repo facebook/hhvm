@@ -5073,11 +5073,16 @@ using TCVec = std::vector<const TypeConstraint*>;
 void in(ISS& env, const bc::VerifyParamType& op) {
   IgnoreUsedParams _{env};
 
-  auto [newTy, effectFree] =
+  auto [newTy, remove, effectFree] =
     env.index.verify_param_type(env.ctx, op.loc1, topC(env));
 
-  if (effectFree) return reduce(env);
+  if (remove) return reduce(env);
   if (newTy.subtypeOf(BBottom)) unreachable(env);
+
+  if (effectFree) {
+    effect_free(env);
+    constprop(env);
+  }
 
   popC(env);
   push(env, std::move(newTy));
@@ -5141,6 +5146,7 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
 
   auto refined = TInitCell;
   auto remove = true;
+  auto effectFree = true;
   auto nullonly =
     reduce_nullonly &&
     stackT.couldBe(BInitNull) &&
@@ -5170,9 +5176,21 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
     if (type.coerceClassToString == TriBool::Yes) {
       assertx(!type.lower.couldBe(BCls | BLazyCls));
       assertx(type.upper.couldBe(BStr | BCls | BLazyCls));
-      result = promote_classish(std::move(result));
+      if (result.couldBe(BCls | BLazyCls)) {
+        result = promote_classish(std::move(result));
+        if (effectFree && (ts_flavor ||
+                           RO::EvalClassStringHintNotices ||
+                           !promote_classish(stackT).moreRefined(type.lower))) {
+          effectFree = false;
+        }
+      } else {
+        effectFree = false;
+      }
     } else if (type.coerceClassToString == TriBool::Maybe) {
       if (result.couldBe(BCls | BLazyCls)) result |= TSStr;
+      effectFree = false;
+    } else {
+      effectFree = false;
     }
 
     refined = intersection_of(std::move(refined), result);
@@ -5203,6 +5221,11 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
   if (nullonly) {
     if (ts_flavor) return reduce(env, bc::PopC {}, bc::VerifyRetNonNullC {});
     return reduce(env, bc::VerifyRetNonNullC {});
+  }
+
+  if (effectFree) {
+    effect_free(env);
+    constprop(env);
   }
 
   if (ts_flavor) popC(env);
@@ -5567,17 +5590,34 @@ void in(ISS& env, const bc::InitProp& op) {
 
     ITRACE(1, "InitProp: {} = {}\n", op.str1, show(t));
 
-    if (t.moreRefined(
-          env.index.lookup_constraint(env.ctx, prop.typeConstraint, t).lower
-        ) &&
-        std::all_of(
-          begin(prop.ubs), end(prop.ubs),
-          [&](TypeConstraint ub) {
-            applyFlagsToUB(ub, prop.typeConstraint);
-            return
-              t.moreRefined(env.index.lookup_constraint(env.ctx, ub, t).lower);
-          })
-       ) {
+    auto const refine =
+      [&] (const TypeConstraint& tc) -> std::pair<Type, bool> {
+      assertx(tc.validForProp());
+      if (RO::EvalCheckPropTypeHints == 0) return { t, true };
+      auto const lookup = env.index.lookup_constraint(env.ctx, tc, t);
+      if (t.moreRefined(lookup.lower)) return { t, true };
+      if (RO::EvalClassStringHintNotices) return { t, false };
+      if (!t.couldBe(lookup.upper)) return { t, false };
+      if (lookup.coerceClassToString != TriBool::Yes) return { t, false };
+      auto promoted = promote_classish(t);
+      if (!promoted.moreRefined(lookup.lower)) return { t, false };
+      return { std::move(promoted), true };
+    };
+
+    auto const [refined, effectFree] = [&] () -> std::pair<Type, bool> {
+      auto [refined, effectFree] = refine(prop.typeConstraint);
+      for (auto ub : prop.ubs) {
+        if (!effectFree) break;
+        applyFlagsToUB(ub, prop.typeConstraint);
+        auto [refined2, effectFree2] = refine(ub);
+        refined &= refined2;
+        if (refined.is(BBottom)) effectFree = false;
+        effectFree &= effectFree2;
+      }
+      return { std::move(refined), effectFree };
+    }();
+
+    if (effectFree) {
       prop.attrs |= AttrInitialSatisfiesTC;
     } else {
       badPropInitialValue(env);
@@ -5585,8 +5625,8 @@ void in(ISS& env, const bc::InitProp& op) {
       continue;
     }
 
-    auto const v = tv(t);
-    if (v || !could_contain_objects(t)) {
+    auto const v = tv(refined);
+    if (v || !could_contain_objects(refined)) {
       prop.attrs = (Attr)(prop.attrs & ~AttrDeepInit);
       if (!v) break;
       prop.val = *v;

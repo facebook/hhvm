@@ -12988,11 +12988,11 @@ bool Index::could_have_reified_type(Context ctx,
   return resolved.cls->couldHaveReifiedGenerics();
 }
 
-std::tuple<Type, bool> Index::verify_param_type(const Context& ctx,
-                                                uint32_t paramId,
-                                                const Type& t) const {
+std::tuple<Type, bool, bool> Index::verify_param_type(const Context& ctx,
+                                                      uint32_t paramId,
+                                                      const Type& t) const {
   // Builtins verify parameter types differently.
-  if (ctx.func->isNative) return { t, true };
+  if (ctx.func->isNative) return { t, true, true };
 
   auto const& pinfo = ctx.func->params[paramId];
 
@@ -13000,6 +13000,7 @@ std::tuple<Type, bool> Index::verify_param_type(const Context& ctx,
   for (auto const& tc : pinfo.upperBounds) tcs.push_back(&tc);
 
   auto refined = TInitCell;
+  auto noop = true;
   auto effectFree = true;
   for (auto const tc : tcs) {
     auto const lookup = lookup_constraint(ctx, *tc, t);
@@ -13008,24 +13009,35 @@ std::tuple<Type, bool> Index::verify_param_type(const Context& ctx,
       continue;
     }
 
-    if (!t.couldBe(lookup.upper)) return { TBottom, false };
+    if (!t.couldBe(lookup.upper)) return { TBottom, false, false };
 
-    effectFree = false;
+    noop = false;
 
     auto result = intersection_of(t, lookup.upper);
     if (lookup.coerceClassToString == TriBool::Yes) {
       assertx(!lookup.lower.couldBe(BCls | BLazyCls));
       assertx(lookup.upper.couldBe(BStr | BCls | BLazyCls));
-      result = promote_classish(std::move(result));
+      if (result.couldBe(BCls | BLazyCls)) {
+        result = promote_classish(std::move(result));
+        if (effectFree && (RO::EvalClassStringHintNotices ||
+                           !promote_classish(t).moreRefined(lookup.lower))) {
+          effectFree = false;
+        }
+      } else {
+        effectFree = false;
+      }
     } else if (lookup.coerceClassToString == TriBool::Maybe) {
       if (result.couldBe(BCls | BLazyCls)) result |= TSStr;
+      effectFree = false;
+    } else {
+      effectFree = false;
     }
 
     refined = intersection_of(std::move(refined), std::move(result));
-    if (refined.is(BBottom)) return { TBottom, false };
+    if (refined.is(BBottom)) return { TBottom, false, false };
   }
 
-  return { std::move(refined), effectFree };
+  return { std::move(refined), noop, effectFree };
 }
 
 TriBool

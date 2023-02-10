@@ -268,9 +268,10 @@ pub(crate) fn happly_decl_has_reified_generics<'a, 'arena, 'decl>(
             }
             // Otherwise, we have a class or typedef name that we want to look up
             let provider = match emitter.decl_provider.as_ref() {
-                Some(p) => p,
-                None => {
-                    // Don't have a DeclProvider at all.
+                Some(p) if emitter.options().hhbc.optimize_reified_param_checks => p,
+                Some(_) | None => {
+                    // If we don't have a `DeclProvider` available, or this specific optimization
+                    // has been turned off, assume that this may be a refied generic class.
                     return true;
                 }
             };

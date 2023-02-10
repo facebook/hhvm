@@ -1,6 +1,6 @@
 <?hh
-// RUN: %hackc --test-compile-with-decls %s | FileCheck %s
-// RUN: %hackc --test-compile-with-decls --use-serialized-decls %s | FileCheck %s
+// RUN: %hackc -vHack.Lang.OptimizeReifiedParamChecks=true --test-compile-with-decls %s | FileCheck %s
+// RUN: %hackc -vHack.Lang.OptimizeReifiedParamChecks=true --test-compile-with-decls --use-serialized-decls %s | FileCheck %s
 
 class NoGenerics {}
 class WarnReifiedGenericsClass<T, Ta, <<__Warn>> reify Tb> {}

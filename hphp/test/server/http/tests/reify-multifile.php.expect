@@ -11,6 +11,235 @@ testa(Foo<Bool>) = ok
 testi(Foo<TAlias>) = ok
 testb(Foo<TAlias>) = ok
 testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Sandbox: 1 (sandbox1) Version: 0
+--------------------------------------------------------
+Foo<T> is not reified
+TAlias kind is 1
+testi(Foo<int>) = ok
+testb(Foo<int>) = ok
+testa(Foo<int>) = ok
+testi(Foo<Bool>) = ok
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ok
+testi(Foo<TAlias>) = ok
+testb(Foo<TAlias>) = ok
+testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Sandbox: 2 (sandbox2) Version: 3
+--------------------------------------------------------
+Foo<T> is not reified
+TAlias kind is 2
+testi(Foo<int>) = ok
+testb(Foo<int>) = ok
+testa(Foo<int>) = ok
+testi(Foo<Bool>) = ok
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ok
+testi(Foo<TAlias>) = ok
+testb(Foo<TAlias>) = ok
+testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 1
+--------------------------------------------------------
+Foo<T> is reified
+TAlias kind is 1
+testi(Foo<int>) = ok
+testb(Foo<int>) = ex
+testa(Foo<int>) = ok
+testi(Foo<Bool>) = ex
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ex
+testi(Foo<TAlias>) = ok
+testb(Foo<TAlias>) = ex
+testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Sandbox: 1 (sandbox1) Version: 0
+--------------------------------------------------------
+Foo<T> is not reified
+TAlias kind is 1
+testi(Foo<int>) = ok
+testb(Foo<int>) = ok
+testa(Foo<int>) = ok
+testi(Foo<Bool>) = ok
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ok
+testi(Foo<TAlias>) = ok
+testb(Foo<TAlias>) = ok
+testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Sandbox: 2 (sandbox2) Version: 3
+--------------------------------------------------------
+Foo<T> is not reified
+TAlias kind is 2
+testi(Foo<int>) = ok
+testb(Foo<int>) = ok
+testa(Foo<int>) = ok
+testi(Foo<Bool>) = ok
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ok
+testi(Foo<TAlias>) = ok
+testb(Foo<TAlias>) = ok
+testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 2
+--------------------------------------------------------
+Foo<T> is reified
+TAlias kind is 2
+testi(Foo<int>) = ok
+testb(Foo<int>) = ex
+testa(Foo<int>) = ex
+testi(Foo<Bool>) = ex
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ok
+testi(Foo<TAlias>) = ex
+testb(Foo<TAlias>) = ok
+testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Sandbox: 1 (sandbox1) Version: 0
+--------------------------------------------------------
+Foo<T> is not reified
+TAlias kind is 1
+testi(Foo<int>) = ok
+testb(Foo<int>) = ok
+testa(Foo<int>) = ok
+testi(Foo<Bool>) = ok
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ok
+testi(Foo<TAlias>) = ok
+testb(Foo<TAlias>) = ok
+testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Sandbox: 2 (sandbox2) Version: 3
+--------------------------------------------------------
+Foo<T> is not reified
+TAlias kind is 2
+testi(Foo<int>) = ok
+testb(Foo<int>) = ok
+testa(Foo<int>) = ok
+testi(Foo<Bool>) = ok
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ok
+testi(Foo<TAlias>) = ok
+testb(Foo<TAlias>) = ok
+testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 3
+--------------------------------------------------------
+Foo<T> is not reified
+TAlias kind is 2
+testi(Foo<int>) = ok
+testb(Foo<int>) = ok
+testa(Foo<int>) = ok
+testi(Foo<Bool>) = ok
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ok
+testi(Foo<TAlias>) = ok
+testb(Foo<TAlias>) = ok
+testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Sandbox: 1 (sandbox1) Version: 0
+--------------------------------------------------------
+Foo<T> is not reified
+TAlias kind is 1
+testi(Foo<int>) = ok
+testb(Foo<int>) = ok
+testa(Foo<int>) = ok
+testi(Foo<Bool>) = ok
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ok
+testi(Foo<TAlias>) = ok
+testb(Foo<TAlias>) = ok
+testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Sandbox: 2 (sandbox2) Version: 3
+--------------------------------------------------------
+Foo<T> is not reified
+TAlias kind is 2
+testi(Foo<int>) = ok
+testb(Foo<int>) = ok
+testa(Foo<int>) = ok
+testi(Foo<Bool>) = ok
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ok
+testi(Foo<TAlias>) = ok
+testb(Foo<TAlias>) = ok
+testa(Foo<TAlias>) = ok
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Verify BCs: VerifyParamTypeTS
+Deps: 
+--------------------------------------------------------
+
+Enabling OptimizeReifiedParamChecks...
+Sandbox: 0 (sandbox0) Version: 0
+--------------------------------------------------------
+Foo<T> is not reified
+TAlias kind is 1
+testi(Foo<int>) = ok
+testb(Foo<int>) = ok
+testa(Foo<int>) = ok
+testi(Foo<Bool>) = ok
+testb(Foo<Bool>) = ok
+testa(Foo<Bool>) = ok
+testi(Foo<TAlias>) = ok
+testb(Foo<TAlias>) = ok
+testa(Foo<TAlias>) = ok
 Verify BCs: 
 Verify BCs: 
 Verify BCs: 
@@ -454,4 +683,3 @@ Verify BCs:
 Verify BCs: 
 Deps: cls.php
 --------------------------------------------------------
-

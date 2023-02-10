@@ -60,6 +60,10 @@ pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
         .get_bool("Hack.Lang.ReadonlyNonlocalInference")?
         .unwrap_or(false);
 
+    flags.optimize_reified_param_checks = config
+        .get_bool("Hack.Lang.OptimizeReifiedParamChecks")?
+        .unwrap_or(false);
+
     // ini might use hhvm.array_provenance
     // hdf might use Eval.ArrayProvenance
     // But super unclear here

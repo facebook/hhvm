@@ -1,6 +1,6 @@
 <?hh
-// RUN: %hackc --test-compile-with-decls %s | FileCheck %s
-// RUN: %hackc --test-compile-with-decls --use-serialized-decls %s | FileCheck %s
+// RUN: %hackc -vHack.Lang.OptimizeReifiedParamChecks=true --test-compile-with-decls %s | FileCheck %s
+// RUN: %hackc -vHack.Lang.OptimizeReifiedParamChecks=true --test-compile-with-decls --use-serialized-decls %s | FileCheck %s
 
 // Should not look up T
 function foo<reify T>(T $_a): void {}

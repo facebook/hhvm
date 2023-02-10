@@ -87,6 +87,7 @@ pub struct HhbcFlags {
     pub array_provenance: bool,
     pub fold_lazy_class_keys: bool,
     pub readonly_nonlocal_infer: bool,
+    pub optimize_reified_param_checks: bool,
 }
 
 impl Default for HhbcFlags {
@@ -103,6 +104,7 @@ impl Default for HhbcFlags {
             array_provenance: false,
             fold_lazy_class_keys: true,
             readonly_nonlocal_infer: false,
+            optimize_reified_param_checks: false,
         }
     }
 }

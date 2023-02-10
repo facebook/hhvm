@@ -75,6 +75,7 @@ pub mod compile_ffi {
         emit_meth_caller_func_pointers: bool,
         fold_lazy_class_keys: bool,
         readonly_nonlocal_infer: bool,
+        optimize_reified_param_checks: bool,
     }
 
     struct ParserFlags {
@@ -283,6 +284,7 @@ impl compile_ffi::NativeEnv {
                 emit_meth_caller_func_pointers: self.hhbc_flags.emit_meth_caller_func_pointers,
                 fold_lazy_class_keys: self.hhbc_flags.fold_lazy_class_keys,
                 readonly_nonlocal_infer: self.hhbc_flags.readonly_nonlocal_infer,
+                optimize_reified_param_checks: self.hhbc_flags.optimize_reified_param_checks,
                 ..Default::default()
             },
             flags: EnvFlags {

@@ -113,6 +113,11 @@ struct RepoOptionsFlags {
    * nonlocal inference powered by decl directed bytecode             \
    */                                                                 \
   H(bool,           ReadonlyNonlocalInference,        false)          \
+  /* Emit specialized bytecodes when we an infer a typehint does not  \
+   * contain a reified generic bytecode, powered by decl directed     \
+   * bytecode                                                         \
+   */                                                                 \
+  H(bool,           OptimizeReifiedParamChecks,       false)
   /**/
 
   /**/

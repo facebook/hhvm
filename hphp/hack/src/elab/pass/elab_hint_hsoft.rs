@@ -12,9 +12,9 @@ use transform::Pass;
 
 use crate::context::Context;
 
-pub struct ElabHsoftHintPass;
+pub struct ElabHintHsoftPass;
 
-impl Pass for ElabHsoftHintPass {
+impl Pass for ElabHintHsoftPass {
     type Ctx = Context;
     type Err = NamingPhaseError;
 
@@ -68,7 +68,7 @@ mod tests {
     #[test]
     fn test() {
         let mut errs = Vec::default();
-        let top_down = ElabHsoftHintPass;
+        let top_down = ElabHintHsoftPass;
         let bottom_up = Identity;
 
         let mut elem1: Hint = Hint(

@@ -33,9 +33,9 @@ use crate::context::Context;
 //     fn tparams(&self) -> &HashSet<String>;
 // }
 
-pub struct ElabHapplyHintPass;
+pub struct ElabHintHapplyPass;
 
-impl Pass for ElabHapplyHintPass {
+impl Pass for ElabHintHapplyPass {
     // We can't write this - how can we make the contexts modular?
     // type Ctx = impl CanonicalHapplyCtx;
     type Ctx = Context;

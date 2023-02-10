@@ -1513,6 +1513,17 @@ and simplify_subtype_i
             match stripped_dynamic with
             | None -> finish env
             | Some ty ->
+              (* For generic parameters with lower bounds, try like-pushing wrt
+               * these lower bounds. For example, we want
+               * vec<~int> <: ~T if vec<int> <: T
+               *)
+              let ty =
+                match get_node ty with
+                | Tgeneric (name, targs) ->
+                  let bounds = Env.get_lower_bounds env name targs in
+                  MakeType.union (get_reason ty) (Typing_set.elements bounds)
+                | _ -> ty
+              in
               let (env, opt_ty) = Typing_dynamic.try_push_like env ty in
               (match opt_ty with
               | None -> finish env
@@ -1974,6 +1985,7 @@ and simplify_subtype_i
                   |> simplify_subtype
                        ~subtype_env
                        ~sub_supportdyn
+                       ~super_like
                        ~this_ty
                        ty_sub
                        ty

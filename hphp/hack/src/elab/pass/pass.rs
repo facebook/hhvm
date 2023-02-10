@@ -10,5 +10,6 @@ pub mod elab_class_id;
 pub mod elab_defs;
 pub mod elab_func_body;
 pub mod elab_happly_hint;
+pub mod elab_hkt;
 pub mod elab_hsoft_hint;
 pub mod guard_invalid;

@@ -18,6 +18,7 @@ bitflags! {
     #[derive(Default)]
     pub struct Flags: u8 {
         const SOFT_AS_LIKE= 1 << 0;
+        const HKT_ENABLED = 1 << 1;
     }
 }
 
@@ -73,5 +74,9 @@ impl Context {
 
     pub fn soft_as_like(&self) -> bool {
         self.flags.contains(Flags::SOFT_AS_LIKE)
+    }
+
+    pub fn hkt_enabled(&self) -> bool {
+        self.flags.contains(Flags::HKT_ENABLED)
     }
 }

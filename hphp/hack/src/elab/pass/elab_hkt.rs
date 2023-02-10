@@ -1,0 +1,148 @@
+// Copyright (c) Meta Platforms, Inc. and affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+use std::ops::ControlFlow;
+
+use oxidized::aast_defs::Hint;
+use oxidized::aast_defs::Hint_;
+use oxidized::aast_defs::Tparam;
+use oxidized::ast_defs::Id;
+use oxidized::naming_error::NamingError;
+use oxidized::naming_phase_error::NamingPhaseError;
+use transform::Pass;
+
+use crate::context::Context;
+
+pub struct ElabHKTPass;
+
+impl Pass for ElabHKTPass {
+    type Ctx = Context;
+    type Err = NamingPhaseError;
+
+    fn on_ty_hint(
+        &self,
+        elem: &mut Hint,
+        ctx: &mut Self::Ctx,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        if !ctx.hkt_enabled() {
+            let Hint(pos, hint_) = elem;
+            if let Hint_::Habstr(tp_name, tp_params) = &mut **hint_ {
+                if !tp_params.is_empty() {
+                    let err = NamingPhaseError::Naming(NamingError::TparamAppliedToType {
+                        pos: pos.clone(),
+                        tparam_name: tp_name.clone(),
+                    });
+                    errs.push(err);
+                    tp_params.clear()
+                }
+            }
+        }
+        ControlFlow::Continue(())
+    }
+
+    fn on_ty_tparam<Ex, En>(
+        &self,
+        elem: &mut Tparam<Ex, En>,
+        ctx: &mut Self::Ctx,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        if !ctx.hkt_enabled() {
+            if !elem.parameters.is_empty() {
+                let Id(pos, tp_name) = &elem.name;
+                let err = NamingPhaseError::Naming(NamingError::TparamWithTparam {
+                    pos: pos.clone(),
+                    tparam_name: tp_name.clone(),
+                });
+                errs.push(err);
+                elem.parameters.clear()
+            }
+        }
+        ControlFlow::Continue(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use oxidized::aast_defs::ReifyKind;
+    use oxidized::aast_defs::UserAttributes;
+    use oxidized::ast_defs::Variance;
+    use oxidized::tast::Pos;
+    use transform::Transform;
+
+    use super::*;
+    use crate::context::Flags;
+
+    pub struct Identity;
+    impl Pass for Identity {
+        type Err = NamingPhaseError;
+        type Ctx = Context;
+    }
+
+    #[test]
+    fn test_hint() {
+        let mut ctx_hkt_enabled = Context::new(Flags::HKT_ENABLED);
+        let mut ctx_hkt_disabled = Context::default();
+        let mut errs = Vec::default();
+        let top_down = ElabHKTPass;
+        let bottom_up = Identity;
+        let mut elem = Hint(
+            Pos::make_none(),
+            Box::new(Hint_::Habstr(
+                "T".to_string(),
+                vec![Hint(Pos::make_none(), Box::new(Hint_::Hmixed))],
+            )),
+        );
+
+        elem.transform(&mut ctx_hkt_enabled, &mut errs, &top_down, &bottom_up);
+        let Hint(_, hint_) = &elem;
+        assert!(match &**hint_ {
+            Hint_::Habstr(_, hints) => !hints.is_empty(),
+            _ => false,
+        });
+        assert_eq!(errs.len(), 0);
+
+        elem.transform(&mut ctx_hkt_disabled, &mut errs, &top_down, &bottom_up);
+        let Hint(_, hint_) = &elem;
+        assert!(match &**hint_ {
+            Hint_::Habstr(_, hints) => hints.is_empty(),
+            _ => false,
+        });
+        assert_eq!(errs.len(), 1);
+    }
+
+    #[test]
+    fn test_tparam() {
+        let mut ctx_hkt_enabled = Context::new(Flags::HKT_ENABLED);
+        let mut ctx_hkt_disabled = Context::default();
+        let mut errs = Vec::default();
+        let top_down = ElabHKTPass;
+        let bottom_up = Identity;
+
+        let mut elem: Tparam<(), ()> = Tparam {
+            variance: Variance::Invariant,
+            name: Id(Pos::make_none(), "T".to_string()),
+            parameters: vec![Tparam {
+                variance: Variance::Invariant,
+                name: Id(Pos::make_none(), "TInner".to_string()),
+                parameters: vec![],
+                constraints: vec![],
+                reified: ReifyKind::Erased,
+                user_attributes: UserAttributes::default(),
+            }],
+            constraints: vec![],
+            reified: ReifyKind::Erased,
+            user_attributes: UserAttributes::default(),
+        };
+
+        elem.transform(&mut ctx_hkt_enabled, &mut errs, &top_down, &bottom_up);
+        assert!(!elem.parameters.is_empty());
+        assert_eq!(errs.len(), 0);
+
+        elem.transform(&mut ctx_hkt_disabled, &mut errs, &top_down, &bottom_up);
+        assert!(elem.parameters.is_empty());
+        assert_eq!(errs.len(), 1);
+    }
+}

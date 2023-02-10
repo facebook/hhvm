@@ -642,10 +642,8 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
       RuntimeOption::PspCpuTimeoutSeconds
   );
 
-  // If the main request terminated with a C++ exception, we would not
-  // have cleared the implicit context since that logic is
-  // done in a PHP try-finally. Let's clear the implicit context here.
-  *ImplicitContext::activeCtx = nullptr;
+  // Implicit context should not have leaked
+  assertx(!(*ImplicitContext::activeCtx));
 
   // We mustn't destroy any callbacks until we're done with all
   // of them. So hold them in tmp.
@@ -1574,11 +1572,19 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     popVMState();
   };
 
+  // If the request terminated with a C++ exception, we would not
+  // have cleared the implicit context since that logic is
+  // done in a PHP try-finally. Let's clear the implicit context here.
+  auto const prev_ic = *ImplicitContext::activeCtx;
+  SCOPE_FAIL { *ImplicitContext::activeCtx = prev_ic; };
+
   enterVM(ar, [&] {
     exception_handler([&] {
       enterVMAtFunc(ar, numArgsInclUnpack);
     });
   });
+
+  assertx(prev_ic == *ImplicitContext::activeCtx);
 
   if (UNLIKELY(f->takesInOutParams())) {
     VecInit vec(f->numInOutParams() + 1);

@@ -11,6 +11,7 @@ server/http/tests/apache_proxygen_headers.php
 server/http/tests/basic-multifile.php
 server/http/tests/client_blocking_read_test.php
 server/http/tests/codeCoverageTest.php
+server/http/tests/error_page_clear_implicit_context.php
 server/http/tests/get_headers_secure_dv_array.php
 server/http/tests/globalDocumentTest.php
 server/http/tests/method.php

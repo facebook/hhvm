@@ -49,6 +49,11 @@ public final class RpcResources {
 
   private RpcResources() {}
 
+  // TODO: remove when rolled out
+  public static boolean enableOperatorFusion() {
+    return ResourceConfiguration.enableOperatorFusion;
+  }
+
   public static HashedWheelTimer getHashedWheelTimer() {
     return INSTANCE.doGet().getTimer();
   }

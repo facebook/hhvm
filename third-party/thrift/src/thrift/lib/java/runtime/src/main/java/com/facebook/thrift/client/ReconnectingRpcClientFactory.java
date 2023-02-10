@@ -16,18 +16,31 @@
 
 package com.facebook.thrift.client;
 
+import com.facebook.thrift.util.resources.RpcResources;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
 
 public class ReconnectingRpcClientFactory implements RpcClientFactory {
   private final RpcClientFactory delegate;
 
+  private final boolean forceFusion;
+
+  ReconnectingRpcClientFactory(RpcClientFactory delegate, boolean forceFusion) {
+    this.delegate = delegate;
+    this.forceFusion = forceFusion;
+  }
+
   public ReconnectingRpcClientFactory(RpcClientFactory delegate) {
     this.delegate = delegate;
+    this.forceFusion = false;
   }
 
   @Override
   public Mono<RpcClient> createRpcClient(SocketAddress socketAddress) {
-    return new ReconnectingRpcClientMono(delegate, socketAddress);
+    if (RpcResources.enableOperatorFusion() || forceFusion) {
+      return new FusableReconnectingRpcClientMono(delegate, socketAddress);
+    } else {
+      return new ReconnectingRpcClientMono(delegate, socketAddress);
+    }
   }
 }

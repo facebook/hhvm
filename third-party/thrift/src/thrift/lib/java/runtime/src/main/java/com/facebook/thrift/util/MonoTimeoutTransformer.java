@@ -42,10 +42,6 @@ import reactor.core.scheduler.Scheduler;
  * @param <T>
  */
 public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T>> {
-  // TODO: remove after enabled
-  static final boolean enableMonoTimeoutFusion =
-      System.getProperty("thrift.enable-mono-transformer-fusion", "false").equalsIgnoreCase("true");
-
   private final Scheduler scheduler;
   private final long delay;
   private final TimeUnit unit;
@@ -85,7 +81,7 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
 
     @Override
     public void subscribe(CoreSubscriber<? super T> actual) {
-      if (enableMonoTimeoutFusion) {
+      if (RpcResources.enableOperatorFusion()) {
         // If the source mono is a ScalarCallable, there might not be a need for a timeout. Get the
         // value from the call() method. If it returns a value just emit that directly without
         // applying a timeout

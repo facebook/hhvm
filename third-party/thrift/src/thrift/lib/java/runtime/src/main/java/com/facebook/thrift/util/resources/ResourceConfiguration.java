@@ -24,6 +24,9 @@ final class ResourceConfiguration {
   static final boolean enableForkJoinPool =
       System.getProperty("thrift.separate-forkjoin-scheduler", "false").equalsIgnoreCase("true");
 
+  static final boolean enableOperatorFusion =
+      System.getProperty("thrift.operator-fusion", "false").equalsIgnoreCase("true");
+
   static final boolean forceExecutionOffEventLoop =
       System.getProperty("thrift.force-execution-off-eventloop", "true").equalsIgnoreCase("true");
 

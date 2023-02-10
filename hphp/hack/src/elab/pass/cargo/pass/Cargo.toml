@@ -14,3 +14,6 @@ hash = { path = "../../../../utils/hash" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
 transform = { path = "../../../transform/cargo/transform" }
+
+[dev-dependencies]
+ocamlrep = { path = "../../../../ocamlrep" }

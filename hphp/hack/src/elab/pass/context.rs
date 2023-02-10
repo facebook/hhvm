@@ -19,6 +19,8 @@ bitflags! {
     pub struct Flags: u8 {
         const SOFT_AS_LIKE= 1 << 0;
         const HKT_ENABLED = 1 << 1;
+        const IS_HHI = 1 << 2;
+        const IS_SYSTEMLIB= 1 << 3;
     }
 }
 
@@ -78,5 +80,13 @@ impl Context {
 
     pub fn hkt_enabled(&self) -> bool {
         self.flags.contains(Flags::HKT_ENABLED)
+    }
+
+    pub fn is_hhi(&self) -> bool {
+        self.flags.contains(Flags::IS_HHI)
+    }
+
+    pub fn is_systemlib(&self) -> bool {
+        self.flags.contains(Flags::IS_SYSTEMLIB)
     }
 }

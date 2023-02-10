@@ -57,8 +57,6 @@ double rawbits_to_double(uint64_t bits) {
 }
 
 
-// Inlining disabled to avoid a Clang LTO bug (T144806450).
-__attribute__((__noinline__))
 int CountLeadingZeros(uint64_t value, int width) {
   assert((width == 32) || (width == 64));
   int count = 0;

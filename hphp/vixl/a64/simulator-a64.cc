@@ -1763,10 +1763,12 @@ static inline float FPRoundToFloat(int64_t sign, int64_t exponent,
 double Simulator::FixedToDouble(int64_t src, int fbits, FPRounding round) {
   if (src >= 0) {
     return UFixedToDouble(src, fbits, round);
-  } else {
-    // This works for all negative values, including INT64_MIN.
-    return -UFixedToDouble(-src, fbits, round);
   }
+  // NB: avoid negating int64 min, since it's undefined behavior
+  if (src == std::numeric_limits<int64_t>::min()) {
+    return -UFixedToDouble(src, fbits, round);
+  }
+  return -UFixedToDouble(-src, fbits, round);
 }
 
 
@@ -1789,10 +1791,12 @@ double Simulator::UFixedToDouble(uint64_t src, int fbits, FPRounding round) {
 float Simulator::FixedToFloat(int64_t src, int fbits, FPRounding round) {
   if (src >= 0) {
     return UFixedToFloat(src, fbits, round);
-  } else {
-    // This works for all negative values, including INT64_MIN.
-    return -UFixedToFloat(-src, fbits, round);
   }
+  // NB: avoid negating int64 min, since it's undefined behavior
+  if (src == std::numeric_limits<int64_t>::min()) {
+    return -UFixedToFloat(src, fbits, round);
+  }
+  return -UFixedToFloat(-src, fbits, round);
 }
 
 

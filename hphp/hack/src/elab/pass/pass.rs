@@ -10,6 +10,7 @@ pub mod elab_class_id;
 pub mod elab_defs;
 pub mod elab_expr_collection;
 pub mod elab_expr_import;
+pub mod elab_expr_lvar;
 pub mod elab_func_body;
 pub mod elab_hint_happly;
 pub mod elab_hint_hsoft;

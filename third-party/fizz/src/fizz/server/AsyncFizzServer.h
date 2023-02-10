@@ -13,8 +13,7 @@
 #include <fizz/server/FizzServer.h>
 #include <fizz/server/FizzServerContext.h>
 #include <fizz/server/ServerProtocol.h>
-#include <fizz/util/KeyLogWriter.h>
-#include <folly/tracing/StaticTracepoint.h>
+#include <fizz/util/Tracing.h>
 
 namespace fizz {
 namespace server {

@@ -218,6 +218,7 @@ set(FIZZ_SOURCES
   client/EarlyDataRejectionPolicy.cpp
   tool/FizzCommandCommon.cpp
   util/FizzUtil.cpp
+  util/Tracing.cpp
 )
 
 add_library(fizz

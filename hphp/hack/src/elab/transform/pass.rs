@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<126a1abc4e271bc73aaed86d8fe5c0d4>>
+// @generated SignedSource<<ecd9d005155439265d08c4daff739b6b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -17,15 +17,6 @@ use oxidized::ast_defs::*;
 pub trait Pass {
     type Ctx: Clone;
     type Err;
-    #[inline(always)]
-    fn on_ty_lid(
-        &self,
-        elem: &mut Lid,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
     #[inline(always)]
     fn on_ty_program<Ex, En>(
         &self,
@@ -60,15 +51,6 @@ pub trait Pass {
     where
         Ex: Default,
     {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_env_annot(
-        &self,
-        elem: &mut EnvAnnot,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
@@ -418,24 +400,6 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_require_kind(
-        &self,
-        elem: &mut RequireKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_emit_id(
-        &self,
-        elem: &mut EmitId,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
     fn on_ty_class_<Ex, En>(
         &self,
         elem: &mut Class_<Ex, En>,
@@ -547,15 +511,6 @@ pub trait Pass {
     where
         Ex: Default,
     {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_xhp_attr_tag(
-        &self,
-        elem: &mut XhpAttrTag,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
@@ -754,15 +709,6 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_md_name_kind(
-        &self,
-        elem: &mut MdNameKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
     fn on_ty_def<Ex, En>(
         &self,
         elem: &mut Def<Ex, En>,
@@ -775,36 +721,9 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_ns_kind(
-        &self,
-        elem: &mut NsKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_import_flavor(
-        &self,
-        elem: &mut ImportFlavor,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
     fn on_ty_xhp_child(
         &self,
         elem: &mut XhpChild,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_xhp_child_op(
-        &self,
-        elem: &mut XhpChildOp,
         ctx: &mut Self::Ctx,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
@@ -835,15 +754,6 @@ pub trait Pass {
     fn on_ty_contexts(
         &self,
         elem: &mut Contexts,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_hf_param_info(
-        &self,
-        elem: &mut HfParamInfo,
         ctx: &mut Self::Ctx,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
@@ -941,24 +851,6 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_kvc_kind(
-        &self,
-        elem: &mut KvcKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_vc_kind(
-        &self,
-        elem: &mut VcKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
     fn on_ty_enum_(
         &self,
         elem: &mut Enum_,
@@ -985,159 +877,6 @@ pub trait Pass {
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
-    #[inline(always)]
-    fn on_ty_shape_field_name(
-        &self,
-        elem: &mut ShapeFieldName,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_variance(
-        &self,
-        elem: &mut Variance,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_constraint_kind(
-        &self,
-        elem: &mut ConstraintKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_abstraction(
-        &self,
-        elem: &mut Abstraction,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_classish_kind(
-        &self,
-        elem: &mut ClassishKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_param_kind(
-        &self,
-        elem: &mut ParamKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_readonly_kind(
-        &self,
-        elem: &mut ReadonlyKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_og_null_flavor(
-        &self,
-        elem: &mut OgNullFlavor,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_prop_or_method(
-        &self,
-        elem: &mut PropOrMethod,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_fun_kind(
-        &self,
-        elem: &mut FunKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_bop(
-        &self,
-        elem: &mut Bop,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_uop(
-        &self,
-        elem: &mut Uop,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_visibility(
-        &self,
-        elem: &mut Visibility,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_xhp_enum_value(
-        &self,
-        elem: &mut XhpEnumValue,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_tprim(
-        &self,
-        elem: &mut Tprim,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_typedef_visibility(
-        &self,
-        elem: &mut TypedefVisibility,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_reify_kind(
-        &self,
-        elem: &mut ReifyKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        Continue(())
-    }
 }
 pub struct Passes<Ctx, Err, P, Q>
 where
@@ -1156,16 +895,6 @@ where
 {
     type Ctx = Ctx;
     type Err = Err;
-    #[inline(always)]
-    fn on_ty_lid(
-        &self,
-        elem: &mut Lid,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_lid(elem, ctx, errs)?;
-        self.snd.on_ty_lid(elem, ctx, errs)
-    }
     #[inline(always)]
     fn on_ty_program<Ex, En>(
         &self,
@@ -1204,16 +933,6 @@ where
     {
         self.fst.on_ty_stmt_(elem, ctx, errs)?;
         self.snd.on_ty_stmt_(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_env_annot(
-        &self,
-        elem: &mut EnvAnnot,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_env_annot(elem, ctx, errs)?;
-        self.snd.on_ty_env_annot(elem, ctx, errs)
     }
     #[inline(always)]
     fn on_ty_using_stmt<Ex, En>(
@@ -1591,26 +1310,6 @@ where
         self.snd.on_ty_tparam(elem, ctx, errs)
     }
     #[inline(always)]
-    fn on_ty_require_kind(
-        &self,
-        elem: &mut RequireKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_require_kind(elem, ctx, errs)?;
-        self.snd.on_ty_require_kind(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_emit_id(
-        &self,
-        elem: &mut EmitId,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_emit_id(elem, ctx, errs)?;
-        self.snd.on_ty_emit_id(elem, ctx, errs)
-    }
-    #[inline(always)]
     fn on_ty_class_<Ex, En>(
         &self,
         elem: &mut Class_<Ex, En>,
@@ -1733,16 +1432,6 @@ where
     {
         self.fst.on_fld_class__user_attributes(elem, ctx, errs)?;
         self.snd.on_fld_class__user_attributes(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_xhp_attr_tag(
-        &self,
-        elem: &mut XhpAttrTag,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_xhp_attr_tag(elem, ctx, errs)?;
-        self.snd.on_ty_xhp_attr_tag(elem, ctx, errs)
     }
     #[inline(always)]
     fn on_ty_xhp_attr<Ex, En>(
@@ -1957,16 +1646,6 @@ where
         self.snd.on_ty_module_def(elem, ctx, errs)
     }
     #[inline(always)]
-    fn on_ty_md_name_kind(
-        &self,
-        elem: &mut MdNameKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_md_name_kind(elem, ctx, errs)?;
-        self.snd.on_ty_md_name_kind(elem, ctx, errs)
-    }
-    #[inline(always)]
     fn on_ty_def<Ex, En>(
         &self,
         elem: &mut Def<Ex, En>,
@@ -1980,26 +1659,6 @@ where
         self.snd.on_ty_def(elem, ctx, errs)
     }
     #[inline(always)]
-    fn on_ty_ns_kind(
-        &self,
-        elem: &mut NsKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_ns_kind(elem, ctx, errs)?;
-        self.snd.on_ty_ns_kind(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_import_flavor(
-        &self,
-        elem: &mut ImportFlavor,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_import_flavor(elem, ctx, errs)?;
-        self.snd.on_ty_import_flavor(elem, ctx, errs)
-    }
-    #[inline(always)]
     fn on_ty_xhp_child(
         &self,
         elem: &mut XhpChild,
@@ -2008,16 +1667,6 @@ where
     ) -> ControlFlow<(), ()> {
         self.fst.on_ty_xhp_child(elem, ctx, errs)?;
         self.snd.on_ty_xhp_child(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_xhp_child_op(
-        &self,
-        elem: &mut XhpChildOp,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_xhp_child_op(elem, ctx, errs)?;
-        self.snd.on_ty_xhp_child_op(elem, ctx, errs)
     }
     #[inline(always)]
     fn on_ty_hint(
@@ -2051,16 +1700,6 @@ where
     ) -> ControlFlow<(), ()> {
         self.fst.on_ty_contexts(elem, ctx, errs)?;
         self.snd.on_ty_contexts(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_hf_param_info(
-        &self,
-        elem: &mut HfParamInfo,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_hf_param_info(elem, ctx, errs)?;
-        self.snd.on_ty_hf_param_info(elem, ctx, errs)
     }
     #[inline(always)]
     fn on_ty_hint_fun(
@@ -2164,26 +1803,6 @@ where
         self.snd.on_ty_nast_shape_info(elem, ctx, errs)
     }
     #[inline(always)]
-    fn on_ty_kvc_kind(
-        &self,
-        elem: &mut KvcKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_kvc_kind(elem, ctx, errs)?;
-        self.snd.on_ty_kvc_kind(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_vc_kind(
-        &self,
-        elem: &mut VcKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_vc_kind(elem, ctx, errs)?;
-        self.snd.on_ty_vc_kind(elem, ctx, errs)
-    }
-    #[inline(always)]
     fn on_ty_enum_(
         &self,
         elem: &mut Enum_,
@@ -2212,176 +1831,6 @@ where
     ) -> ControlFlow<(), ()> {
         self.fst.on_ty_id(elem, ctx, errs)?;
         self.snd.on_ty_id(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_shape_field_name(
-        &self,
-        elem: &mut ShapeFieldName,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_shape_field_name(elem, ctx, errs)?;
-        self.snd.on_ty_shape_field_name(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_variance(
-        &self,
-        elem: &mut Variance,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_variance(elem, ctx, errs)?;
-        self.snd.on_ty_variance(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_constraint_kind(
-        &self,
-        elem: &mut ConstraintKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_constraint_kind(elem, ctx, errs)?;
-        self.snd.on_ty_constraint_kind(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_abstraction(
-        &self,
-        elem: &mut Abstraction,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_abstraction(elem, ctx, errs)?;
-        self.snd.on_ty_abstraction(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_classish_kind(
-        &self,
-        elem: &mut ClassishKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_classish_kind(elem, ctx, errs)?;
-        self.snd.on_ty_classish_kind(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_param_kind(
-        &self,
-        elem: &mut ParamKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_param_kind(elem, ctx, errs)?;
-        self.snd.on_ty_param_kind(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_readonly_kind(
-        &self,
-        elem: &mut ReadonlyKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_readonly_kind(elem, ctx, errs)?;
-        self.snd.on_ty_readonly_kind(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_og_null_flavor(
-        &self,
-        elem: &mut OgNullFlavor,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_og_null_flavor(elem, ctx, errs)?;
-        self.snd.on_ty_og_null_flavor(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_prop_or_method(
-        &self,
-        elem: &mut PropOrMethod,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_prop_or_method(elem, ctx, errs)?;
-        self.snd.on_ty_prop_or_method(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_fun_kind(
-        &self,
-        elem: &mut FunKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_fun_kind(elem, ctx, errs)?;
-        self.snd.on_ty_fun_kind(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_bop(
-        &self,
-        elem: &mut Bop,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_bop(elem, ctx, errs)?;
-        self.snd.on_ty_bop(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_uop(
-        &self,
-        elem: &mut Uop,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_uop(elem, ctx, errs)?;
-        self.snd.on_ty_uop(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_visibility(
-        &self,
-        elem: &mut Visibility,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_visibility(elem, ctx, errs)?;
-        self.snd.on_ty_visibility(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_xhp_enum_value(
-        &self,
-        elem: &mut XhpEnumValue,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_xhp_enum_value(elem, ctx, errs)?;
-        self.snd.on_ty_xhp_enum_value(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_tprim(
-        &self,
-        elem: &mut Tprim,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_tprim(elem, ctx, errs)?;
-        self.snd.on_ty_tprim(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_typedef_visibility(
-        &self,
-        elem: &mut TypedefVisibility,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_typedef_visibility(elem, ctx, errs)?;
-        self.snd.on_ty_typedef_visibility(elem, ctx, errs)
-    }
-    #[inline(always)]
-    fn on_ty_reify_kind(
-        &self,
-        elem: &mut ReifyKind,
-        ctx: &mut Self::Ctx,
-        errs: &mut Vec<Self::Err>,
-    ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_reify_kind(elem, ctx, errs)?;
-        self.snd.on_ty_reify_kind(elem, ctx, errs)
     }
 }
 #[doc = r" Used to combine multiple types implementing `Pass` into nested `Passes` types"]

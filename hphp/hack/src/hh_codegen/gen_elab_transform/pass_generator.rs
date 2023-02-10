@@ -73,6 +73,10 @@ pub fn gen(ctx: &Context) -> TokenStream {
 }
 
 fn gen_pass_methods(s: synstructure::Structure<'_>, body_type: Body) -> TokenStream {
+    // If the type is marked opaque, generate no methods; they won't be called.
+    if contains_ocaml_attr(&s.ast().attrs, "transform.opaque") {
+        return quote!();
+    }
     let ty = &s.ast().ident;
     let name = super::gen_pass_method_name(ty.to_string());
     let (ty_params, ty_generics, _) = s.ast().generics.split_for_impl();

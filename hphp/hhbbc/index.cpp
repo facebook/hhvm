@@ -14382,36 +14382,36 @@ void Index::init_return_type(const php::Func* func) {
     auto const cls = func->cls && func->cls->closureContextCls
        ? m_data->classes.at(func->cls->closureContextCls)
        : func->cls;
-    return lookup_constraint(
+    auto lookup = lookup_constraint(
       Context { m_data->units.at(func->unit), func, cls },
       tc
-    ).upper;
+    );
+    if (lookup.coerceClassToString == TriBool::Yes) {
+      lookup.upper = promote_classish(std::move(lookup.upper));
+    } else if (lookup.coerceClassToString == TriBool::Maybe) {
+      lookup.upper |= TSStr;
+    }
+    return unctx(std::move(lookup.upper));
   };
 
   auto const finfo = create_func_info(*m_data, func);
 
-  auto tcT = make_type(func->retTypeConstraint);
+  auto tcT = [&] {
+    auto ret = make_type(func->retTypeConstraint);
+    if (!func->hasInOutArgs || ret.is(BBottom)) return ret;
 
-  if (func->hasInOutArgs) {
     std::vector<Type> types;
-    types.emplace_back(intersection_of(TInitCell, std::move(tcT)));
-    if (!types.back().is(BBottom)) {
-      for (auto const& p : func->params) {
-        if (!p.inout) continue;
-        auto t = make_type(p.typeConstraint);
-        types.emplace_back(intersection_of(TInitCell, std::move(t)));
-        if (types.back().is(BBottom)) {
-          tcT = TBottom;
-          break;
-        }
-      }
-      if (!tcT.is(BBottom)) tcT = vec(std::move(types));
-    } else {
-      tcT = TBottom;
+    types.reserve(func->params.size() + 1);
+    types.emplace_back(std::move(ret));
+    for (auto const& p : func->params) {
+      if (!p.inout) continue;
+      auto t = make_type(p.typeConstraint);
+      if (t.is(BBottom)) return TBottom;
+      types.emplace_back(std::move(t));
     }
-  }
-
-  tcT = loosen_all(to_cell(std::move(tcT)));
+    std::reverse(begin(types)+1, end(types));
+    return vec(std::move(types));
+  }();
 
   FTRACE(4, "Pre-fixup return type for {}{}{}: {}\n",
          func->cls ? func->cls->name->data() : "",

@@ -297,8 +297,12 @@ bool runServerDual(
   std::shared_ptr<apache::thrift::ThriftServer> thriftServer;
   try {
     // Create thread pool for both AsyncMcServer and ThriftServer
+    auto threadPrefix =
+        folly::to<std::string>("mcrpxy-", mcrouterOpts.router_name);
     ioThreadPool = std::make_shared<folly::IOThreadPoolExecutor>(
-        mcrouterOpts.num_proxies, mcrouterOpts.num_proxies);
+        mcrouterOpts.num_proxies,
+        mcrouterOpts.num_proxies,
+        std::make_shared<folly::NamedThreadFactory>(threadPrefix));
 
     // Run observer and extract event bases
     auto executorObserver = std::make_shared<ExecutorObserver>();

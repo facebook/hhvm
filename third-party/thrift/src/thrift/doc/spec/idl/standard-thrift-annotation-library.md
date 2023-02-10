@@ -443,7 +443,7 @@ struct Foo {
 Foo foo;
 foo.flags()->set(0); // set 0th bit
 ```
-More detail: [Adapters](/fb/features/adapters.md)
+More detail: [Adapters](/features/adapters.md)
 
 ## Annotations for C++ Allocator Awareness
 

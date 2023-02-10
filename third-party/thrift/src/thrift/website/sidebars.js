@@ -164,11 +164,11 @@ module.exports = {
           ]
         },
         'fb/features/interactions',
+        'features/adapters',
 
         // Beta features:
         {
           Beta: [
-            ...fbInternalOnly(['fb/features/adapters']),
             'features/any',
             'features/terse-write'
           ]

@@ -754,6 +754,6 @@ This completely replaces the underlying type of a thrift for a custom implementa
 
 <FbInternalOnly>
 
-See [Adapters](/fb/features/adapters.md) for more detail.
+See [Adapters](/features/adapters.md) for more detail.
 
 </FbInternalOnly>

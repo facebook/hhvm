@@ -195,6 +195,9 @@ impl HhConfig {
                 "union_intersection_type_hints" => {
                     go.tco_union_intersection_type_hints = parse_json(&value);
                 }
+                "typecheck_sample_rate" => {
+                    go.tco_typecheck_sample_rate = parse_json(&value);
+                }
                 "gc_minor_heap_size" => {
                     value.retain(|c| c != '_');
                     c.gc_minor_heap_size = parse_json(&value);

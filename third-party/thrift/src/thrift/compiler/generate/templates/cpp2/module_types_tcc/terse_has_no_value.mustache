@@ -15,29 +15,4 @@
   limitations under the License.
 %><%#field:cpp_ref?%><%!
     %><% > field/member%> && <%!
-%><%/field:cpp_ref?%><%!
-  // TODO(dokwon): Remove this after removing all deprecated_tag_incompatible thrift_cpp2_option.
-%><%^struct:thrift_uri%><%!
-  %><%#field:cpp_first_adapter%><%!
-    // Must use == operator, and check against the default constructor (ignoring any IDL-specified default).
-    %><% >  module_types_tcc/field_ref %> == <%field:cpp_type%>()<%!
-  %><%/field:cpp_first_adapter%><%!
-  %><%^field:cpp_first_adapter%><%!
-  %><%#type:resolves_to_container?%><%!
-    %><% > field/member%><%#field:cpp_ref?%>-><%/field:cpp_ref?%><%^field:cpp_ref?%>.<%/field:cpp_ref?%>empty()<%!
-  %><%/type:resolves_to_container?%><%!
-  %><%#type:struct?%><%!
-    %>::apache::thrift::empty(<% > module_types_tcc/pm_value%>)<%!
-  %><%/type:struct?%><%!
-  %><%#field:raw_string_or_binary?%><%!
-    %>apache::thrift::StringTraits<<% > types/indirected_string_type%>>::isEmpty(<% >  module_types_tcc/field_ref %>)<%!
-  %><%/field:raw_string_or_binary?%><%!
-  %><%^type:resolves_to_container?%><%^field:raw_string_or_binary?%><%^type:struct?%><%!
-    %><% >  module_types_tcc/field_ref %> == <% > field/intrinsic_default%><%!
-  %><%/type:struct?%><%/field:raw_string_or_binary?%><%/type:resolves_to_container?%><%!
-  %><%/field:cpp_first_adapter%><%!
-%><%/struct:thrift_uri%><%!
-%><%#struct:thrift_uri%><%!
-  %>::apache::thrift::op::isEmpty<<% > field/tag%>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>)<%!
-%><%/struct:thrift_uri%><%!
-%>
+%><%/field:cpp_ref?%>::apache::thrift::op::isEmpty<<% > field/tag%>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>)

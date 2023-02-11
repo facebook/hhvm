@@ -813,8 +813,15 @@ ObjectData* ObjectData::clone() {
   cloneProps->init(m_cls->numDeclProperties());
   for (auto slot = Slot{0}; slot < nProps; slot++) {
     auto index = m_cls->propSlotToIndex(slot);
-    tvDup(*props()->at(index), cloneProps->at(index));
-    assertx(assertTypeHint(cloneProps->at(index), slot));
+    auto const prop = props()->at(index);
+    if (!isLazyProp(prop)) {
+      tvDup(*prop, cloneProps->at(index));
+      assertx(assertTypeHint(cloneProps->at(index), slot));
+    } else {
+      auto const cloneProp = cloneProps->at(index);
+      type(cloneProp) = type(prop);
+      val(cloneProp).num = val(prop).num;
+    }
   }
 
   if (UNLIKELY(getAttribute(HasDynPropArr))) {

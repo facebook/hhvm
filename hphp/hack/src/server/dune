@@ -500,7 +500,6 @@
   direct_decl_utils
   server_api
   server_codemod_type_printer
-  recli_stubs
   server_code_actions_services
   server_coverage_metric_utils
   server_docblock_at

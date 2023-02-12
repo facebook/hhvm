@@ -572,8 +572,6 @@ type t = {
       (** The whether to use the hook that prefetches files on an Eden checkout *)
   recheck_capture: RecheckCapture.t;
       (** Settings controlling how and whether we capture the recheck environment *)
-  recli_version: string;
-      (** The version of the Remote Execution CLI tool to use *)
   remote_nonce: Int64.t;
       (** The unique identifier of a particular remote typechecking run *)
   remote_type_check: RemoteTypeCheck.t;
@@ -713,7 +711,6 @@ let default =
     defer_class_declaration_threshold = None;
     prefetch_deferred_files = false;
     recheck_capture = RecheckCapture.default;
-    recli_version = "STABLE";
     remote_nonce = Int64.zero;
     remote_type_check = RemoteTypeCheck.default;
     remote_worker_key = None;
@@ -1223,9 +1220,6 @@ let load_
   let watchman =
     Watchman.load ~current_version ~default:default.watchman config
   in
-  let recli_version =
-    string_ "recli_version" ~default:default.recli_version config
-  in
   let remote_worker_key = string_opt "remote_worker_key" config in
   let remote_check_id = string_opt "remote_check_id" config in
   let remote_version_specifier_required =
@@ -1582,7 +1576,6 @@ let load_
     defer_class_declaration_threshold;
     prefetch_deferred_files;
     recheck_capture;
-    recli_version;
     remote_nonce;
     remote_type_check;
     remote_worker_key;

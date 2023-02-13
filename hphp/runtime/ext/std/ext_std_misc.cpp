@@ -281,7 +281,7 @@ int64_t HHVM_FUNCTION(ignore_user_abort, bool /*setting*/ /* = false */) {
 
 Variant HHVM_FUNCTION(pack, const String& format, const Array& argv) {
   // pack() returns false if there was an error, String otherwise
-  return ZendPack().pack(format, argv);
+  return ZendPack::getInstance()->pack(format, argv);
 }
 
 int64_t HHVM_FUNCTION(sleep, int64_t seconds) {
@@ -427,7 +427,7 @@ String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
 }
 
 Variant HHVM_FUNCTION(unpack, const String& format, const String& data) {
-  return ZendPack().unpack(format, data);
+  return ZendPack::getInstance()->unpack(format, data);
 }
 
 Array HHVM_FUNCTION(sys_getloadavg) {

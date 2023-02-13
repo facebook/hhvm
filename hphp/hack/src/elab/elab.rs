@@ -18,6 +18,7 @@ macro_rules! passes {
 }
 
 mod config;
+mod elab_utils;
 mod pass;
 mod passes;
 mod transform;
@@ -105,7 +106,7 @@ fn elaborate<T: Transform>(node: &mut T) -> Vec<NamingPhaseError> {
         // passes::elab_haccess_hint::ElabHaccessHintPass::default(),
 
         // Replace empty `Tuple`s with invalid expression marker
-        // passes::elab_tuple::ElabTuplePass::default(),
+        passes::elab_expr_tuple::ElabExprTuplePass::default(),
 
         // Validate / replace invalid uses of dynamic classes in `New` and `Class_get`
         // expressions

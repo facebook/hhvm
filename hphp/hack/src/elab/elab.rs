@@ -31,10 +31,7 @@ pub fn elaborate_program(program: &mut ast::Program) -> Vec<NamingPhaseError> {
     elaborate(program)
 }
 
-fn elaborate<T>(node: &mut T) -> Vec<NamingPhaseError>
-where
-    T: Transform<config::Config, NamingPhaseError>,
-{
+fn elaborate<T: Transform>(node: &mut T) -> Vec<NamingPhaseError> {
     #[rustfmt::skip]
     let mut passes = passes![
         // Stop on `Invalid` expressions

@@ -18,15 +18,12 @@ use crate::Pass;
 pub struct ElabExprLvarPass;
 
 impl Pass for ElabExprLvarPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     #[allow(non_snake_case)]
     fn on_ty_expr__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut oxidized::aast::Expr_<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         match elem {
             Expr_::Lvar(lid) => {

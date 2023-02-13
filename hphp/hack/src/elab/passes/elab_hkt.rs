@@ -18,14 +18,11 @@ use crate::Pass;
 pub struct ElabHktPass;
 
 impl Pass for ElabHktPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     fn on_ty_hint_top_down(
         &mut self,
         elem: &mut Hint,
-        cfg: &Self::Cfg,
-        errs: &mut Vec<Self::Err>,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         if !cfg.hkt_enabled() {
             let Hint(pos, hint_) = elem;
@@ -46,8 +43,8 @@ impl Pass for ElabHktPass {
     fn on_ty_tparam_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Tparam<Ex, En>,
-        cfg: &Self::Cfg,
-        errs: &mut Vec<Self::Err>,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         if !cfg.hkt_enabled() {
             if !elem.parameters.is_empty() {

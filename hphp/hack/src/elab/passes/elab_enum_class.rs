@@ -22,15 +22,12 @@ use crate::Pass;
 pub struct ElabEnumClassPass;
 
 impl Pass for ElabEnumClassPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     #[allow(non_snake_case)]
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         if let Some(enum_) = &elem.enum_ {
             let Id(pos, _) = &elem.name;
@@ -67,8 +64,8 @@ impl Pass for ElabEnumClassPass {
     fn on_ty_hint__top_down(
         &mut self,
         elem: &mut oxidized::tast::Hint_,
-        cfg: &Self::Cfg,
-        errs: &mut Vec<Self::Err>,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         if !(cfg.is_hhi() || cfg.is_systemlib()) {
             match elem {

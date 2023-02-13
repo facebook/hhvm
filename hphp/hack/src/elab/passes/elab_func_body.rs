@@ -29,14 +29,11 @@ impl Default for ElabFuncBodyPass {
 }
 
 impl Pass for ElabFuncBodyPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     fn on_ty_func_body_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut FuncBody<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         if matches!(self.mode, file_info::Mode::Mhhi) {
             elem.fb_ast.clear()
@@ -48,8 +45,8 @@ impl Pass for ElabFuncBodyPass {
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -58,8 +55,8 @@ impl Pass for ElabFuncBodyPass {
     fn on_ty_typedef_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Typedef<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -68,8 +65,8 @@ impl Pass for ElabFuncBodyPass {
     fn on_ty_gconst_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Gconst<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -78,8 +75,8 @@ impl Pass for ElabFuncBodyPass {
     fn on_ty_fun_def_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut FunDef<Ex, En>,
-        _cf: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cf: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -88,8 +85,8 @@ impl Pass for ElabFuncBodyPass {
     fn on_ty_module_def_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut ModuleDef<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())

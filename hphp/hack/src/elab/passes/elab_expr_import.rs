@@ -17,17 +17,14 @@ use crate::Pass;
 pub struct ElabExprImportPass;
 
 impl Pass for ElabExprImportPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     // Wrap all occurrence of `Import` in an `Invalid` marker
     // TODO[mjt] Oddly there is no error reporting about the occurrence of these
     // expressions and no invariant is assumed. I would expect one of these
     fn on_ty_expr_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Expr<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         let Expr(_, _, expr_) = elem;
         match expr_ {

@@ -15,15 +15,12 @@ use crate::Pass;
 pub struct GuardInvalidPass;
 
 impl Pass for GuardInvalidPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     #[allow(non_snake_case)]
     fn on_ty_expr__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         if matches!(elem, Expr_::Invalid(..)) {
             ControlFlow::Break(())
@@ -49,14 +46,12 @@ mod tests {
     #[derive(Clone)]
     pub struct RewriteZero;
     impl Pass for RewriteZero {
-        type Err = NamingPhaseError;
-        type Cfg = Config;
         #[allow(non_snake_case)]
         fn on_ty_expr__bottom_up<Ex: Default, En>(
             &mut self,
             elem: &mut Expr_<Ex, En>,
-            _cfg: &Self::Cfg,
-            _errs: &mut Vec<Self::Err>,
+            _cfg: &Config,
+            _errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> {
             match elem {
                 Expr_::Int(..) => *elem = Expr_::Int("0".to_string()),

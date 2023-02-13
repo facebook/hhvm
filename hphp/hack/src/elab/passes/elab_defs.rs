@@ -19,14 +19,11 @@ use crate::Pass;
 pub struct ElabDefsPass;
 
 impl Pass for ElabDefsPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     fn on_ty_program_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Program<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         let Program(defs) = elem;
         let mut q: VecDeque<_> = defs.drain(0..).collect();

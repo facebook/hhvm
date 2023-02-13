@@ -18,14 +18,11 @@ use crate::Pass;
 pub struct ElabUserAttributesPass;
 
 impl Pass for ElabUserAttributesPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     fn on_ty_user_attributes_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut UserAttributes<Ex, En>,
-        _cfg: &Self::Cfg,
-        errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         let mut seen: HashMap<String, Pos> = HashMap::default();
         let UserAttributes(uas) = elem;

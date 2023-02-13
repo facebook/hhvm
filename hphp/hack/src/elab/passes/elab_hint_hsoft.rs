@@ -16,14 +16,11 @@ use crate::Pass;
 pub struct ElabHintHsoftPass;
 
 impl Pass for ElabHintHsoftPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     fn on_ty_hint_top_down(
         &mut self,
         elem: &mut Hint,
-        cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> std::ops::ControlFlow<(), ()> {
         let Hint(_, hint_) = elem;
         if let Hint_::Hsoft(inner) = hint_ as &mut Hint_ {

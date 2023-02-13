@@ -18,14 +18,11 @@ use crate::Pass;
 pub struct ElabBlockPass;
 
 impl Pass for ElabBlockPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     fn on_ty_block_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Block<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         let mut q: VecDeque<_> = elem.drain(0..).collect();
         while let Some(Stmt(pos, stmt_)) = q.pop_front() {
@@ -40,8 +37,8 @@ impl Pass for ElabBlockPass {
     fn on_ty_using_stmt_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut UsingStmt<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         elem.is_block_scoped = false;
         ControlFlow::Continue(())

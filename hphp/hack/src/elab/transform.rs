@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eb9b180e9ddc6d63f4faa2e7075cde95>>
+// @generated SignedSource<<02c2f812511701595129b1332b1bd52c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,72 +13,74 @@ use std::ops::ControlFlow::Break;
 
 use oxidized::aast_defs::*;
 use oxidized::ast_defs::*;
+use oxidized::naming_phase_error::NamingPhaseError;
 
+use crate::config::Config;
 use crate::Pass;
-pub trait Transform<Cfg, Err> {
+pub trait Transform {
     #[inline(always)]
     fn transform(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         self.traverse(cfg, errs, pass);
     }
     #[inline(always)]
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
     }
 }
-impl<Cfg, Err> Transform<Cfg, Err> for () {}
-impl<Cfg, Err> Transform<Cfg, Err> for bool {}
-impl<Cfg, Err> Transform<Cfg, Err> for isize {}
-impl<Cfg, Err> Transform<Cfg, Err> for String {}
-impl<Cfg, Err> Transform<Cfg, Err> for bstr::BString {}
-impl<Cfg, Err> Transform<Cfg, Err> for oxidized::pos::Pos {}
-impl<Cfg, Err> Transform<Cfg, Err> for oxidized::file_info::Mode {}
-impl<Cfg, Err> Transform<Cfg, Err> for oxidized::namespace_env::Env {}
-impl<Cfg, Err, Ex> Transform<Cfg, Err> for oxidized::LocalIdMap<(Pos, Ex)> {}
-impl<Cfg, Err, T> Transform<Cfg, Err> for &mut T
+impl Transform for () {}
+impl Transform for bool {}
+impl Transform for isize {}
+impl Transform for String {}
+impl Transform for bstr::BString {}
+impl Transform for oxidized::pos::Pos {}
+impl Transform for oxidized::file_info::Mode {}
+impl Transform for oxidized::namespace_env::Env {}
+impl<Ex> Transform for oxidized::LocalIdMap<(Pos, Ex)> {}
+impl<T> Transform for &mut T
 where
-    T: Transform<Cfg, Err>,
+    T: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
-    ) {
-        (**self).transform(cfg, errs, &mut pass.clone())
-    }
-}
-impl<Cfg, Err, T> Transform<Cfg, Err> for Box<T>
-where
-    T: Transform<Cfg, Err>,
-{
-    fn traverse(
-        &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         (**self).transform(cfg, errs, &mut pass.clone())
     }
 }
-impl<Cfg, Err, L, R> Transform<Cfg, Err> for itertools::Either<L, R>
+impl<T> Transform for Box<T>
 where
-    L: Transform<Cfg, Err>,
-    R: Transform<Cfg, Err>,
+    T: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
+    ) {
+        (**self).transform(cfg, errs, &mut pass.clone())
+    }
+}
+impl<L, R> Transform for itertools::Either<L, R>
+where
+    L: Transform,
+    R: Transform,
+{
+    fn traverse(
+        &mut self,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         match self {
             Self::Left(x) => x.transform(cfg, errs, &mut pass.clone()),
@@ -86,30 +88,30 @@ where
         }
     }
 }
-impl<Cfg, Err, T> Transform<Cfg, Err> for Vec<T>
+impl<T> Transform for Vec<T>
 where
-    T: Transform<Cfg, Err>,
+    T: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         for x in self.iter_mut() {
             x.transform(cfg, errs, &mut pass.clone());
         }
     }
 }
-impl<Cfg, Err, T> Transform<Cfg, Err> for Option<T>
+impl<T> Transform for Option<T>
 where
-    T: Transform<Cfg, Err>,
+    T: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         match self {
             Some(x) => x.transform(cfg, errs, &mut pass.clone()),
@@ -117,109 +119,109 @@ where
         }
     }
 }
-impl<Cfg, Err, T> Transform<Cfg, Err> for oxidized::lazy::Lazy<T>
+impl<T> Transform for oxidized::lazy::Lazy<T>
 where
-    T: Transform<Cfg, Err>,
+    T: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         self.0.transform(cfg, errs, &mut pass.clone())
     }
 }
-impl<Cfg, Err, K, V> Transform<Cfg, Err> for std::collections::BTreeMap<K, V>
+impl<K, V> Transform for std::collections::BTreeMap<K, V>
 where
-    K: Transform<Cfg, Err>,
-    V: Transform<Cfg, Err>,
+    K: Transform,
+    V: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         for x in self.values_mut() {
             x.transform(cfg, errs, &mut pass.clone());
         }
     }
 }
-impl<Cfg, Err, T> Transform<Cfg, Err> for ocamlrep::rc::RcOc<T>
+impl<T> Transform for ocamlrep::rc::RcOc<T>
 where
-    T: Transform<Cfg, Err>,
+    T: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         if let Some(x) = ocamlrep::rc::RcOc::get_mut(self) {
             x.transform(cfg, errs, &mut pass.clone());
         }
     }
 }
-impl<Cfg, Err, T> Transform<Cfg, Err> for std::rc::Rc<T>
+impl<T> Transform for std::rc::Rc<T>
 where
-    T: Transform<Cfg, Err>,
+    T: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         if let Some(x) = std::rc::Rc::get_mut(self) {
             x.transform(cfg, errs, &mut pass.clone());
         }
     }
 }
-impl<Cfg, Err, T1, T2> Transform<Cfg, Err> for (T1, T2)
+impl<T1, T2> Transform for (T1, T2)
 where
-    T1: Transform<Cfg, Err>,
-    T2: Transform<Cfg, Err>,
+    T1: Transform,
+    T2: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         self.0.transform(cfg, errs, &mut pass.clone());
         self.1.transform(cfg, errs, &mut pass.clone());
     }
 }
-impl<Cfg, Err, T1, T2, T3> Transform<Cfg, Err> for (T1, T2, T3)
+impl<T1, T2, T3> Transform for (T1, T2, T3)
 where
-    T1: Transform<Cfg, Err>,
-    T2: Transform<Cfg, Err>,
-    T3: Transform<Cfg, Err>,
+    T1: Transform,
+    T2: Transform,
+    T3: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         self.0.transform(cfg, errs, &mut pass.clone());
         self.1.transform(cfg, errs, &mut pass.clone());
         self.2.transform(cfg, errs, &mut pass.clone());
     }
 }
-impl<Cfg, Err, T1, T2, T3, T4> Transform<Cfg, Err> for (T1, T2, T3, T4)
+impl<T1, T2, T3, T4> Transform for (T1, T2, T3, T4)
 where
-    T1: Transform<Cfg, Err>,
-    T2: Transform<Cfg, Err>,
-    T3: Transform<Cfg, Err>,
-    T4: Transform<Cfg, Err>,
+    T1: Transform,
+    T2: Transform,
+    T3: Transform,
+    T4: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         self.0.transform(cfg, errs, &mut pass.clone());
         self.1.transform(cfg, errs, &mut pass.clone());
@@ -227,19 +229,19 @@ where
         self.3.transform(cfg, errs, &mut pass.clone());
     }
 }
-impl<Cfg, Err, T1, T2, T3, T4, T5> Transform<Cfg, Err> for (T1, T2, T3, T4, T5)
+impl<T1, T2, T3, T4, T5> Transform for (T1, T2, T3, T4, T5)
 where
-    T1: Transform<Cfg, Err>,
-    T2: Transform<Cfg, Err>,
-    T3: Transform<Cfg, Err>,
-    T4: Transform<Cfg, Err>,
-    T5: Transform<Cfg, Err>,
+    T1: Transform,
+    T2: Transform,
+    T3: Transform,
+    T4: Transform,
+    T5: Transform,
 {
     fn traverse(
         &mut self,
-        cfg: &Cfg,
-        errs: &mut Vec<Err>,
-        pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+        pass: &mut (impl Pass + Clone),
     ) {
         self.0.transform(cfg, errs, &mut pass.clone());
         self.1.transform(cfg, errs, &mut pass.clone());
@@ -249,20 +251,20 @@ where
     }
 }
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Lid {}
+    impl Transform for Lid {}
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Program<Ex, En>
+    impl<Ex, En> Transform for Program<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_program_top_down(self, cfg, errs) {
@@ -273,9 +275,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Program(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
@@ -284,17 +286,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Stmt<Ex, En>
+    impl<Ex, En> Transform for Stmt<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_stmt_top_down(self, cfg, errs) {
@@ -305,9 +307,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Stmt(ref mut __binding_0, ref mut __binding_1) => {
@@ -321,17 +323,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Stmt_<Ex, En>
+    impl<Ex, En> Transform for Stmt_<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_stmt__top_down(self, cfg, errs) {
@@ -342,9 +344,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Stmt_::Fallthrough => {}
@@ -371,20 +373,20 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for EnvAnnot {}
+    impl Transform for EnvAnnot {}
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for UsingStmt<Ex, En>
+    impl<Ex, En> Transform for UsingStmt<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_using_stmt_top_down(self, cfg, errs) {
@@ -395,9 +397,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 UsingStmt {
@@ -422,17 +424,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for AsExpr<Ex, En>
+    impl<Ex, En> Transform for AsExpr<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_as_expr_top_down(self, cfg, errs) {
@@ -443,9 +445,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 AsExpr::AsV(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
@@ -479,17 +481,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Block<Ex, En>
+    impl<Ex, En> Transform for Block<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_block_top_down(self, cfg, errs) {
@@ -500,9 +502,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Block(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
@@ -511,17 +513,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for ClassId<Ex, En>
+    impl<Ex, En> Transform for ClassId<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_class_id_top_down(self, cfg, errs) {
@@ -532,9 +534,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ClassId(ref mut __binding_0, ref mut __binding_1, ref mut __binding_2) => {
@@ -551,17 +553,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for ClassId_<Ex, En>
+    impl<Ex, En> Transform for ClassId_<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_class_id__top_down(self, cfg, errs) {
@@ -572,9 +574,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ClassId_::CIparent => {}
@@ -587,17 +589,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Expr<Ex, En>
+    impl<Ex, En> Transform for Expr<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_expr_top_down(self, cfg, errs) {
@@ -608,9 +610,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Expr(ref mut __binding_0, ref mut __binding_1, ref mut __binding_2) => {
@@ -627,16 +629,16 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex> Transform<Cfg, Err> for CollectionTarg<Ex>
+    impl<Ex> Transform for CollectionTarg<Ex>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
+        Ex: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_collection_targ_top_down(self, cfg, errs) {
@@ -647,9 +649,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 CollectionTarg::CollectionTV(ref mut __binding_0) => {
@@ -666,17 +668,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for FunctionPtrId<Ex, En>
+    impl<Ex, En> Transform for FunctionPtrId<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_function_ptr_id_top_down(self, cfg, errs) {
@@ -687,9 +689,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 FunctionPtrId::FPId(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
@@ -704,17 +706,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for ExpressionTree<Ex, En>
+    impl<Ex, En> Transform for ExpressionTree<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_expression_tree_top_down(self, cfg, errs) {
@@ -725,9 +727,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ExpressionTree {
@@ -757,17 +759,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Expr_<Ex, En>
+    impl<Ex, En> Transform for Expr_<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_expr__top_down(self, cfg, errs) {
@@ -778,9 +780,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Expr_::Darray(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
@@ -852,12 +854,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for HoleSource {
+    impl Transform for HoleSource {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_hole_source_top_down(self, cfg, errs) {
@@ -868,9 +870,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 HoleSource::Typing => {}
@@ -886,17 +888,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for ClassGetExpr<Ex, En>
+    impl<Ex, En> Transform for ClassGetExpr<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_class_get_expr_top_down(self, cfg, errs) {
@@ -907,9 +909,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ClassGetExpr::CGstring(ref mut __binding_0) => {
@@ -921,17 +923,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Case<Ex, En>
+    impl<Ex, En> Transform for Case<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_case_top_down(self, cfg, errs) {
@@ -942,9 +944,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Case(ref mut __binding_0, ref mut __binding_1) => {
@@ -958,17 +960,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for DefaultCase<Ex, En>
+    impl<Ex, En> Transform for DefaultCase<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_default_case_top_down(self, cfg, errs) {
@@ -979,9 +981,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 DefaultCase(ref mut __binding_0, ref mut __binding_1) => {
@@ -995,17 +997,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Catch<Ex, En>
+    impl<Ex, En> Transform for Catch<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_catch_top_down(self, cfg, errs) {
@@ -1016,9 +1018,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Catch(ref mut __binding_0, ref mut __binding_1, ref mut __binding_2) => {
@@ -1035,17 +1037,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Field<Ex, En>
+    impl<Ex, En> Transform for Field<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_field_top_down(self, cfg, errs) {
@@ -1056,9 +1058,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Field(ref mut __binding_0, ref mut __binding_1) => {
@@ -1072,17 +1074,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Afield<Ex, En>
+    impl<Ex, En> Transform for Afield<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_afield_top_down(self, cfg, errs) {
@@ -1093,9 +1095,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Afield::AFvalue(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
@@ -1110,17 +1112,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for XhpSimple<Ex, En>
+    impl<Ex, En> Transform for XhpSimple<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_xhp_simple_top_down(self, cfg, errs) {
@@ -1131,9 +1133,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 XhpSimple {
@@ -1151,17 +1153,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for XhpAttribute<Ex, En>
+    impl<Ex, En> Transform for XhpAttribute<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_xhp_attribute_top_down(self, cfg, errs) {
@@ -1172,9 +1174,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 XhpAttribute::XhpSimple(ref mut __binding_0) => {
@@ -1188,17 +1190,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for FunParam<Ex, En>
+    impl<Ex, En> Transform for FunParam<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_fun_param_top_down(self, cfg, errs) {
@@ -1209,9 +1211,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 FunParam {
@@ -1245,17 +1247,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Fun_<Ex, En>
+    impl<Ex, En> Transform for Fun_<Ex, En>
     where
         Ex: Default,
-        En: Transform<Cfg, Err>,
-        Ex: Transform<Cfg, Err>,
+        En: Transform,
+        Ex: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_fun__top_down(self, cfg, errs) {
@@ -1266,9 +1268,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Fun_ {
@@ -1327,17 +1329,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Efun<Ex, En>
+    impl<Ex, En> Transform for Efun<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_efun_top_down(self, cfg, errs) {
@@ -1348,9 +1350,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Efun {
@@ -1371,17 +1373,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for FuncBody<Ex, En>
+    impl<Ex, En> Transform for FuncBody<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_func_body_top_down(self, cfg, errs) {
@@ -1392,9 +1394,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 FuncBody {
@@ -1405,16 +1407,16 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex> Transform<Cfg, Err> for TypeHint<Ex>
+    impl<Ex> Transform for TypeHint<Ex>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
+        Ex: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_type_hint_top_down(self, cfg, errs) {
@@ -1425,9 +1427,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 TypeHint(ref mut __binding_0, ref mut __binding_1) => {
@@ -1441,16 +1443,16 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex> Transform<Cfg, Err> for Targ<Ex>
+    impl<Ex> Transform for Targ<Ex>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
+        Ex: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_targ_top_down(self, cfg, errs) {
@@ -1461,9 +1463,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Targ(ref mut __binding_0, ref mut __binding_1) => {
@@ -1477,17 +1479,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for UserAttribute<Ex, En>
+    impl<Ex, En> Transform for UserAttribute<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_user_attribute_top_down(self, cfg, errs) {
@@ -1498,9 +1500,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 UserAttribute {
@@ -1517,17 +1519,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for FileAttribute<Ex, En>
+    impl<Ex, En> Transform for FileAttribute<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_file_attribute_top_down(self, cfg, errs) {
@@ -1538,9 +1540,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 FileAttribute {
@@ -1557,17 +1559,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Tparam<Ex, En>
+    impl<Ex, En> Transform for Tparam<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_tparam_top_down(self, cfg, errs) {
@@ -1578,9 +1580,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Tparam {
@@ -1606,23 +1608,23 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for RequireKind {}
+    impl Transform for RequireKind {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for EmitId {}
+    impl Transform for EmitId {}
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Class_<Ex, En>
+    impl<Ex, En> Transform for Class_<Ex, En>
     where
         Ex: Default,
-        En: Transform<Cfg, Err>,
-        Ex: Transform<Cfg, Err>,
+        En: Transform,
+        Ex: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_class__top_down(self, cfg, errs) {
@@ -1633,9 +1635,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Class_ {
@@ -1814,20 +1816,20 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for XhpAttrTag {}
+    impl Transform for XhpAttrTag {}
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for XhpAttr<Ex, En>
+    impl<Ex, En> Transform for XhpAttr<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_xhp_attr_top_down(self, cfg, errs) {
@@ -1838,9 +1840,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 XhpAttr(
@@ -1865,17 +1867,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for ClassConstKind<Ex, En>
+    impl<Ex, En> Transform for ClassConstKind<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_class_const_kind_top_down(self, cfg, errs) {
@@ -1886,9 +1888,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ClassConstKind::CCAbstract(ref mut __binding_0) => {
@@ -1902,17 +1904,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for ClassConst<Ex, En>
+    impl<Ex, En> Transform for ClassConst<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_class_const_top_down(self, cfg, errs) {
@@ -1923,9 +1925,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ClassConst {
@@ -1955,12 +1957,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for ClassAbstractTypeconst {
+    impl Transform for ClassAbstractTypeconst {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_class_abstract_typeconst_top_down(self, cfg, errs) {
@@ -1971,9 +1973,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ClassAbstractTypeconst {
@@ -1994,12 +1996,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for ClassConcreteTypeconst {
+    impl Transform for ClassConcreteTypeconst {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_class_concrete_typeconst_top_down(self, cfg, errs) {
@@ -2010,9 +2012,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ClassConcreteTypeconst {
@@ -2023,12 +2025,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for ClassTypeconst {
+    impl Transform for ClassTypeconst {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_class_typeconst_top_down(self, cfg, errs) {
@@ -2039,9 +2041,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ClassTypeconst::TCAbstract(ref mut __binding_0) => {
@@ -2055,17 +2057,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for ClassTypeconstDef<Ex, En>
+    impl<Ex, En> Transform for ClassTypeconstDef<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_class_typeconst_def_top_down(self, cfg, errs) {
@@ -2076,9 +2078,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ClassTypeconstDef {
@@ -2108,12 +2110,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for XhpAttrInfo {
+    impl Transform for XhpAttrInfo {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_xhp_attr_info_top_down(self, cfg, errs) {
@@ -2124,9 +2126,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 XhpAttrInfo {
@@ -2138,17 +2140,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for ClassVar<Ex, En>
+    impl<Ex, En> Transform for ClassVar<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_class_var_top_down(self, cfg, errs) {
@@ -2159,9 +2161,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ClassVar {
@@ -2222,17 +2224,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Method_<Ex, En>
+    impl<Ex, En> Transform for Method_<Ex, En>
     where
         Ex: Default,
-        En: Transform<Cfg, Err>,
-        Ex: Transform<Cfg, Err>,
+        En: Transform,
+        Ex: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_method__top_down(self, cfg, errs) {
@@ -2243,9 +2245,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Method_ {
@@ -2325,17 +2327,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Typedef<Ex, En>
+    impl<Ex, En> Transform for Typedef<Ex, En>
     where
         Ex: Default,
-        En: Transform<Cfg, Err>,
-        Ex: Transform<Cfg, Err>,
+        En: Transform,
+        Ex: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_typedef_top_down(self, cfg, errs) {
@@ -2346,9 +2348,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Typedef {
@@ -2414,17 +2416,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Gconst<Ex, En>
+    impl<Ex, En> Transform for Gconst<Ex, En>
     where
         Ex: Default,
-        En: Transform<Cfg, Err>,
-        Ex: Transform<Cfg, Err>,
+        En: Transform,
+        Ex: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_gconst_top_down(self, cfg, errs) {
@@ -2435,9 +2437,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Gconst {
@@ -2477,17 +2479,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for FunDef<Ex, En>
+    impl<Ex, En> Transform for FunDef<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_fun_def_top_down(self, cfg, errs) {
@@ -2498,9 +2500,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 FunDef {
@@ -2534,17 +2536,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for ModuleDef<Ex, En>
+    impl<Ex, En> Transform for ModuleDef<Ex, En>
     where
         Ex: Default,
-        En: Transform<Cfg, Err>,
-        Ex: Transform<Cfg, Err>,
+        En: Transform,
+        Ex: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_module_def_top_down(self, cfg, errs) {
@@ -2555,9 +2557,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ModuleDef {
@@ -2587,20 +2589,20 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for MdNameKind {}
+    impl Transform for MdNameKind {}
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for Def<Ex, En>
+    impl<Ex, En> Transform for Def<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_def_top_down(self, cfg, errs) {
@@ -2611,9 +2613,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Def::Fun(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
@@ -2632,18 +2634,18 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for NsKind {}
+    impl Transform for NsKind {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for ImportFlavor {}
+    impl Transform for ImportFlavor {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for XhpChild {
+    impl Transform for XhpChild {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_xhp_child_top_down(self, cfg, errs) {
@@ -2654,9 +2656,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 XhpChild::ChildName(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
@@ -2678,15 +2680,15 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for XhpChildOp {}
+    impl Transform for XhpChildOp {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Hint {
+    impl Transform for Hint {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_hint_top_down(self, cfg, errs) {
@@ -2697,9 +2699,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Hint(ref mut __binding_0, ref mut __binding_1) => {
@@ -2713,17 +2715,17 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err, Ex, En> Transform<Cfg, Err> for UserAttributes<Ex, En>
+    impl<Ex, En> Transform for UserAttributes<Ex, En>
     where
         Ex: Default,
-        Ex: Transform<Cfg, Err>,
-        En: Transform<Cfg, Err>,
+        Ex: Transform,
+        En: Transform,
     {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_user_attributes_top_down(self, cfg, errs) {
@@ -2734,9 +2736,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 UserAttributes(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
@@ -2745,12 +2747,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Contexts {
+    impl Transform for Contexts {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_contexts_top_down(self, cfg, errs) {
@@ -2761,9 +2763,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Contexts(ref mut __binding_0, ref mut __binding_1) => {
@@ -2777,15 +2779,15 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for HfParamInfo {}
+    impl Transform for HfParamInfo {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for HintFun {
+    impl Transform for HintFun {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_hint_fun_top_down(self, cfg, errs) {
@@ -2796,9 +2798,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 HintFun {
@@ -2837,12 +2839,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Hint_ {
+    impl Transform for Hint_ {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_hint__top_down(self, cfg, errs) {
@@ -2853,9 +2855,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Hint_::Hoption(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
@@ -2911,12 +2913,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Refinement {
+    impl Transform for Refinement {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_refinement_top_down(self, cfg, errs) {
@@ -2927,9 +2929,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Refinement::Rctx(ref mut __binding_0, ref mut __binding_1) => {
@@ -2949,12 +2951,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for TypeRefinement {
+    impl Transform for TypeRefinement {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_type_refinement_top_down(self, cfg, errs) {
@@ -2965,9 +2967,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 TypeRefinement::TRexact(ref mut __binding_0) => {
@@ -2981,12 +2983,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for TypeRefinementBounds {
+    impl Transform for TypeRefinementBounds {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_type_refinement_bounds_top_down(self, cfg, errs) {
@@ -2997,9 +2999,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 TypeRefinementBounds {
@@ -3016,12 +3018,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for CtxRefinement {
+    impl Transform for CtxRefinement {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_ctx_refinement_top_down(self, cfg, errs) {
@@ -3032,9 +3034,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 CtxRefinement::CRexact(ref mut __binding_0) => {
@@ -3048,12 +3050,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for CtxRefinementBounds {
+    impl Transform for CtxRefinementBounds {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_ctx_refinement_bounds_top_down(self, cfg, errs) {
@@ -3064,9 +3066,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 CtxRefinementBounds {
@@ -3083,12 +3085,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for ShapeFieldInfo {
+    impl Transform for ShapeFieldInfo {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_shape_field_info_top_down(self, cfg, errs) {
@@ -3099,9 +3101,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 ShapeFieldInfo {
@@ -3119,12 +3121,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for NastShapeInfo {
+    impl Transform for NastShapeInfo {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_nast_shape_info_top_down(self, cfg, errs) {
@@ -3135,9 +3137,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 NastShapeInfo {
@@ -3154,18 +3156,18 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for KvcKind {}
+    impl Transform for KvcKind {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for VcKind {}
+    impl Transform for VcKind {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Enum_ {
+    impl Transform for Enum_ {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_enum__top_down(self, cfg, errs) {
@@ -3176,9 +3178,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Enum_ {
@@ -3199,12 +3201,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for WhereConstraintHint {
+    impl Transform for WhereConstraintHint {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_where_constraint_hint_top_down(self, cfg, errs) {
@@ -3215,9 +3217,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 WhereConstraintHint(
@@ -3238,12 +3240,12 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Id {
+    impl Transform for Id {
         fn transform(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             let mut in_pass = pass.clone();
             if let Break(..) = pass.on_ty_id_top_down(self, cfg, errs) {
@@ -3254,9 +3256,9 @@ const _: () = {
         }
         fn traverse(
             &mut self,
-            cfg: &Cfg,
-            errs: &mut Vec<Err>,
-            pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
         ) {
             match self {
                 Id(ref mut __binding_0, ref mut __binding_1) => {
@@ -3270,53 +3272,53 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for ShapeFieldName {}
+    impl Transform for ShapeFieldName {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Variance {}
+    impl Transform for Variance {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for ConstraintKind {}
+    impl Transform for ConstraintKind {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Abstraction {}
+    impl Transform for Abstraction {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for ClassishKind {}
+    impl Transform for ClassishKind {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for ParamKind {}
+    impl Transform for ParamKind {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for ReadonlyKind {}
+    impl Transform for ReadonlyKind {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for OgNullFlavor {}
+    impl Transform for OgNullFlavor {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for PropOrMethod {}
+    impl Transform for PropOrMethod {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for FunKind {}
+    impl Transform for FunKind {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Bop {}
+    impl Transform for Bop {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Uop {}
+    impl Transform for Uop {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Visibility {}
+    impl Transform for Visibility {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for XhpEnumValue {}
+    impl Transform for XhpEnumValue {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for Tprim {}
+    impl Transform for Tprim {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for TypedefVisibility {}
+    impl Transform for TypedefVisibility {}
 };
 const _: () = {
-    impl<Cfg, Err> Transform<Cfg, Err> for ReifyKind {}
+    impl Transform for ReifyKind {}
 };

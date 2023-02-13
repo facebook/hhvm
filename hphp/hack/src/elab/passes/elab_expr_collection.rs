@@ -29,9 +29,6 @@ use crate::Pass;
 pub struct ElabExprCollectionPass;
 
 impl Pass for ElabExprCollectionPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     /// Translate `Collection1 expressions received from lowering into
     /// the canonical representation of either:
     ///   - `ValCollection` for `Keyset`, `Vec`, (`Imm`)`Vector`, (`Imm`)`Set`
@@ -48,8 +45,8 @@ impl Pass for ElabExprCollectionPass {
     fn on_ty_expr_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Expr<Ex, En>,
-        _ctx: &Self::Cfg,
-        errs: &mut Vec<Self::Err>,
+        _ctx: &Config,
+        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         let Expr(_annot, _pos, expr_) = elem;
 

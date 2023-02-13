@@ -50,14 +50,12 @@ impl ElabHintHapplyPass {
 impl Pass for ElabHintHapplyPass {
     // We can't write this - how can we make the contexts modular?
     // type Ctx = impl CanonicalHapplyCtx;
-    type Cfg = Config;
-    type Err = NamingPhaseError;
 
     fn on_ty_typedef_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Typedef<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
@@ -66,8 +64,8 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_gconst_top_down<Ex: Default, En>(
         &mut self,
         _elem: &mut Gconst<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.reset_tparams();
         ControlFlow::Continue(())
@@ -76,8 +74,8 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_fun_def_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut FunDef<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.set_tparams(&elem.fun.tparams);
         ControlFlow::Continue(())
@@ -86,8 +84,8 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_module_def_top_down<Ex: Default, En>(
         &mut self,
         _elem: &mut ModuleDef<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.reset_tparams();
         ControlFlow::Continue(())
@@ -97,8 +95,8 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
@@ -108,8 +106,8 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_method__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.extend_tparams(&elem.tparams);
         ControlFlow::Continue(())
@@ -118,8 +116,8 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_tparam_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Tparam<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.extend_tparams(&elem.parameters);
         ControlFlow::Continue(())
@@ -128,8 +126,8 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_hint_top_down(
         &mut self,
         elem: &mut Hint,
-        _ctx: &Self::Cfg,
-        errs: &mut Vec<Self::Err>,
+        _ctx: &Config,
+        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         match &mut *elem.1 {
             Hint_::Happly(id, hints) => match canonical_happly(id, hints, self.tparams()) {

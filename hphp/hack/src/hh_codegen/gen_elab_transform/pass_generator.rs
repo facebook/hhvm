@@ -28,41 +28,38 @@ pub fn gen(ctx: &Context) -> TokenStream {
 
         use oxidized::ast_defs::*;
         use oxidized::aast_defs::*;
+        use oxidized::naming_phase_error::NamingPhaseError;
+
+        use crate::config::Config;
 
         pub trait Pass {
-            type Cfg;
-            type Err;
-
             #(#pass_methods)*
         }
 
-        pub struct Passes<Cfg, Err, P, Q>
+        pub struct Passes<P, Q>
         where
-            P: Pass<Cfg = Cfg, Err = Err>,
-            Q: Pass<Cfg = Cfg, Err = Err>,
+            P: Pass,
+            Q: Pass,
         {
             pub fst: P,
             pub snd: Q,
         }
 
-        impl<Cfg, Err, P, Q> Clone for Passes<Cfg, Err, P, Q>
+        impl<P, Q> Clone for Passes<P, Q>
         where
-           P: Pass<Cfg = Cfg, Err = Err> + Clone,
-           Q: Pass<Cfg = Cfg, Err = Err> + Clone,
+           P: Pass + Clone,
+           Q: Pass + Clone,
         {
             fn clone(&self) -> Self {
                 Passes { fst: self.fst.clone(), snd: self.snd.clone() }
             }
         }
 
-        impl<Cfg, Err, P, Q> Pass for Passes<Cfg, Err, P, Q>
+        impl<P, Q> Pass for Passes<P, Q>
         where
-            P: Pass<Cfg = Cfg, Err = Err>,
-            Q: Pass<Cfg = Cfg, Err = Err>,
+            P: Pass,
+            Q: Pass,
         {
-            type Cfg = Cfg;
-            type Err = Err;
-
             #(#passes_methods)*
         }
     }
@@ -86,8 +83,8 @@ fn gen_pass_methods(s: synstructure::Structure<'_>, body_type: Body) -> TokenStr
         fn #name_td #ty_params(
             &mut self,
             elem: &mut #ty #ty_generics,
-            cfg: &Self::Cfg,
-            errs: &mut Vec<Self::Err>,
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_td
         }
@@ -96,8 +93,8 @@ fn gen_pass_methods(s: synstructure::Structure<'_>, body_type: Body) -> TokenStr
         fn #name_bu #ty_params(
             &mut self,
             elem: &mut #ty #ty_generics,
-            cfg: &Self::Cfg,
-            errs: &mut Vec<Self::Err>,
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_bu
         }
@@ -168,8 +165,8 @@ fn gen_fld_method(
         fn #name_td <#(#ty_params,)*>(
             &mut self,
             elem: &mut #field_ty,
-            cfg: &Self::Cfg,
-            errs: &mut Vec<Self::Err>,
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_td
         }
@@ -178,8 +175,8 @@ fn gen_fld_method(
         fn #name_bu <#(#ty_params,)*>(
             &mut self,
             elem: &mut #field_ty,
-            cfg: &Self::Cfg,
-            errs: &mut Vec<Self::Err>,
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_bu
         }
@@ -209,8 +206,8 @@ fn gen_ctor_method(
         fn #name_td <#(#ty_params,)*>(
             &mut self,
             elem: &mut #variant_ty,
-            cfg: &Self::Cfg,
-            errs: &mut Vec<Self::Err>,
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_td
         }
@@ -219,8 +216,8 @@ fn gen_ctor_method(
         fn #name_bu <#(#ty_params,)*>(
             &mut self,
             elem: &mut #variant_ty,
-            cfg: &Self::Cfg,
-            errs: &mut Vec<Self::Err>,
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_bu
         }

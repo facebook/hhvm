@@ -27,37 +27,39 @@ pub fn gen(ctx: &Context) -> TokenStream {
 
         use oxidized::ast_defs::*;
         use oxidized::aast_defs::*;
+        use oxidized::naming_phase_error::NamingPhaseError;
 
+        use crate::config::Config;
         use crate::Pass;
 
-        pub trait Transform<Cfg, Err> {
+        pub trait Transform {
             #[inline(always)]
             fn transform(
                 &mut self,
-                cfg: &Cfg,
-                errs: &mut Vec<Err>,
-                pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+                cfg: &Config,
+                errs: &mut Vec<NamingPhaseError>,
+                pass: &mut (impl Pass + Clone),
             ) {
                 self.traverse(cfg, errs, pass);
             }
             #[inline(always)]
             fn traverse(
                 &mut self,
-                cfg: &Cfg,
-                errs: &mut Vec<Err>,
-                pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+                cfg: &Config,
+                errs: &mut Vec<NamingPhaseError>,
+                pass: &mut (impl Pass + Clone),
             ) {}
         }
 
-        impl<Cfg, Err> Transform<Cfg, Err> for () {}
-        impl<Cfg, Err> Transform<Cfg, Err> for bool {}
-        impl<Cfg, Err> Transform<Cfg, Err> for isize {}
-        impl<Cfg, Err> Transform<Cfg, Err> for String {}
-        impl<Cfg, Err> Transform<Cfg, Err> for bstr::BString {}
-        impl<Cfg, Err> Transform<Cfg, Err> for oxidized::pos::Pos {}
-        impl<Cfg, Err> Transform<Cfg, Err> for oxidized::file_info::Mode {}
-        impl<Cfg, Err> Transform<Cfg, Err> for oxidized::namespace_env::Env {}
-        impl<Cfg, Err, Ex> Transform<Cfg, Err> for oxidized::LocalIdMap<(Pos, Ex)> {}
+        impl Transform for () {}
+        impl Transform for bool {}
+        impl Transform for isize {}
+        impl Transform for String {}
+        impl Transform for bstr::BString {}
+        impl Transform for oxidized::pos::Pos {}
+        impl Transform for oxidized::file_info::Mode {}
+        impl Transform for oxidized::namespace_env::Env {}
+        impl<Ex> Transform for oxidized::LocalIdMap<(Pos, Ex)> {}
 
         #(#manual_impls)*
 
@@ -85,7 +87,7 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
     // If the type is marked opaque, generate a no-op Transform impl.
     if contains_ocaml_attr(&s.ast().attrs, "transform.opaque") {
         return s.gen_impl(quote! {
-            gen impl<Cfg, Err> Transform<Cfg, Err> for @Self {}
+            gen impl Transform for @Self {}
         });
     }
 
@@ -108,23 +110,23 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
     };
 
     s.gen_impl(quote! {
-        gen impl<Cfg, Err> Transform<Cfg, Err> for @Self
+        gen impl Transform for @Self
             #ex_bound
         {
             fn transform(
                 &mut self,
-                cfg: &Cfg,
-                errs: &mut Vec<Err>,
-                pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+                cfg: &Config,
+                errs: &mut Vec<NamingPhaseError>,
+                pass: &mut (impl Pass + Clone),
             ) {
                 #transform_body
             }
 
             fn traverse(
                 &mut self,
-                cfg: &Cfg,
-                errs: &mut Vec<Err>,
-                pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+                cfg: &Config,
+                errs: &mut Vec<NamingPhaseError>,
+                pass: &mut (impl Pass + Clone),
             ) {
                 match self { #traverse_body }
             }
@@ -286,15 +288,15 @@ fn gen_manual_impl(
         .map(|tp| quote::format_ident!("{}", tp))
         .collect();
     quote! {
-        impl<Cfg, Err, #(#typarams,)*> Transform<Cfg, Err> for #ty
+        impl<#(#typarams,)*> Transform for #ty
         where
-            #(#typarams: Transform<Cfg, Err>,)*
+            #(#typarams: Transform,)*
         {
             fn traverse(
                 &mut self,
-                cfg: &Cfg,
-                errs: &mut Vec<Err>,
-                pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
+                cfg: &Config,
+                errs: &mut Vec<NamingPhaseError>,
+                pass: &mut (impl Pass + Clone),
             ) {
                 #traverse_body
             }

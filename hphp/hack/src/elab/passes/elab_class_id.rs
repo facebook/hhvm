@@ -27,9 +27,6 @@ pub struct ElabClassIdPass {
 }
 
 impl Pass for ElabClassIdPass {
-    type Cfg = Config;
-    type Err = NamingPhaseError;
-
     /*
       The lowerer will give us CIexpr (Id  _ | Lvar _ ); here we:
       - convert CIexpr(_,_,Id _) to CIparent, CIself, CIstatic and CI.
@@ -52,8 +49,8 @@ impl Pass for ElabClassIdPass {
     fn on_ty_class_id_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut ClassId<Ex, En>,
-        _cfg: &Self::Cfg,
-        errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         let ClassId(_annot, pos, class_id_) = elem;
         if let ClassId_::CIexpr(Expr(_, expr_pos, expr_)) = class_id_ as &mut ClassId_<_, _> {
@@ -130,8 +127,8 @@ impl Pass for ElabClassIdPass {
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         _elem: &mut oxidized::aast::Class_<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.in_class = true;
         ControlFlow::Continue(())
@@ -142,8 +139,8 @@ impl Pass for ElabClassIdPass {
     fn on_fld_class__user_attributes_top_down<Ex: Default, En>(
         &mut self,
         _elem: &mut oxidized::tast::UserAttributes<Ex, En>,
-        _cfg: &Self::Cfg,
-        _errs: &mut Vec<Self::Err>,
+        _cfg: &Config,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.in_class = true;
         ControlFlow::Continue(())

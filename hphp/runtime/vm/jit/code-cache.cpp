@@ -65,10 +65,8 @@ void enhugen(void* base, unsigned numMB) {
   if (CodeCache::MapTCHuge) {
     assertx((uintptr_t(base) & (kRoundUp - 1)) == 0);
     assertx(numMB < (1 << 12));
-#ifdef __linux__
     remap_interleaved_2m_pages(base, /* number of 2M pages */ numMB / 2);
     madvise(base, numMB << 20, MADV_DONTFORK);
-#endif
   }
 }
 

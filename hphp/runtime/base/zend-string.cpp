@@ -28,9 +28,7 @@
 #include <algorithm>
 #include <cmath>
 
-#ifndef _MSC_VER
 #include <monetary.h>
-#endif
 
 #include "hphp/util/bstring.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -1366,44 +1364,20 @@ String string_escape_shell_arg(const char *str) {
   String ret(safe_address(l, 4, 3), ReserveString); /* worst case */
   cmd = ret.mutableData();
 
-#ifdef _MSC_VER
-  cmd[y++] = '"';
-#else
   cmd[y++] = '\'';
-#endif
 
   for (x = 0; x < l; x++) {
     switch (str[x]) {
-#ifdef _MSC_VER
-    case '"':
-    case '%':
-    case '!':
-      cmd[y++] = ' ';
-      break;
-#else
     case '\'':
       cmd[y++] = '\'';
       cmd[y++] = '\\';
       cmd[y++] = '\'';
-#endif
       /* fall-through */
     default:
       cmd[y++] = str[x];
     }
   }
-#ifdef _MSC_VER
-  if (y > 0 && '\\' == cmd[y - 1]) {
-    int k = 0, n = y - 1;
-    for (; n >= 0 && '\\' == cmd[n]; n--, k++);
-    if (k % 2) {
-      cmd[y++] = '\\';
-    }
-  }
-
-  cmd[y++] = '"';
-#else
   cmd[y++] = '\'';
-#endif
   ret.setSize(y);
   return ret;
 }
@@ -1419,7 +1393,6 @@ String string_escape_shell_cmd(const char *str) {
 
   for (x = 0, y = 0; x < l; x++) {
     switch (str[x]) {
-#ifndef _MSC_VER
     case '"':
     case '\'':
       if (!p && (p = (char *)memchr(str + x + 1, str[x], l - x - 1))) {
@@ -1431,16 +1404,6 @@ String string_escape_shell_cmd(const char *str) {
       }
       cmd[y++] = str[x];
       break;
-#else
-    /* % is Windows specific for environmental variables, ^%PATH% will
-    output PATH while ^%PATH^% will not. escapeshellcmd->val will
-    escape all % and !.
-    */
-    case '%':
-    case '!':
-    case '"':
-    case '\'':
-#endif
     case '#': /* This is character-set independent */
     case '&':
     case ';':
@@ -1462,11 +1425,7 @@ String string_escape_shell_cmd(const char *str) {
     case '\\':
     case '\x0A': /* excluding these two */
     case '\xFF':
-#ifdef _MSC_VER
-      cmd[y++] = '^';
-#else
       cmd[y++] = '\\';
-#endif
       /* fall-through */
     default:
       cmd[y++] = str[x];

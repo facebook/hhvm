@@ -37,9 +37,7 @@
 
 #include "hphp/zend/zend-strtod.h"
 
-#ifndef _MSC_VER
 #include <glob.h>
-#endif
 
 #define __STDC_LIMIT_MACROS
 #include <cstdint>

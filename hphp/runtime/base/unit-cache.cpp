@@ -65,11 +65,6 @@
 
 #include <sys/xattr.h>
 
-#ifdef __APPLE__
-#define st_mtim st_mtimespec
-#define st_ctim st_ctimespec
-#endif
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -245,12 +240,8 @@ struct CachedFile {
     : cu(src)
     , repoOptionsHash(options.flags().cacheKeySha1())
   {
-#ifdef _MSC_VER
-    mtime      = statInfo.st_mtime;
-#else
     mtime      = statInfo.st_mtim;
     ctime      = statInfo.st_ctim;
-#endif
     ino        = statInfo.st_ino;
     devId      = statInfo.st_dev;
     if (cu.unit) cu.unit->acquireCacheRefCount();
@@ -262,12 +253,8 @@ struct CachedFile {
     : cu{o.cu}
     , repoOptionsHash(o.repoOptionsHash)
   {
-#ifdef _MSC_VER
-    mtime      = statInfo.st_mtime;
-#else
     mtime      = statInfo.st_mtim;
     ctime      = statInfo.st_ctim;
-#endif
     ino        = statInfo.st_ino;
     devId      = statInfo.st_dev;
     if (cu.unit) {
@@ -292,12 +279,8 @@ struct CachedFile {
 
   CachedUnit cu;
 
-#ifdef _MSC_VER
-  mutable time_t mtime;
-#else
   mutable struct timespec mtime;
   mutable struct timespec ctime;
-#endif
   mutable ino_t ino;
   mutable dev_t devId;
 
@@ -392,9 +375,6 @@ HashCache& getHashCache(const std::string& repo) {
 Optional<std::string> getHashFromEden(const char* path,
                                       Stream::Wrapper* wrapper) {
   assertx(RO::EvalUseEdenFS);
-#if !defined(__linux__)
-  return std::nullopt;
-#else
   assertx(path);
   if (wrapper) {
     // We only allow normal file streams, which cannot re-enter
@@ -407,7 +387,6 @@ Optional<std::string> getHashFromEden(const char* path,
   auto const ret = getxattr(path, "user.sha1", xattr_buf, sizeof(xattr_buf));
   if (ret != sizeof(xattr_buf)) return std::nullopt;
   return std::string{xattr_buf, sizeof(xattr_buf)};
-#endif
 }
 
 Optional<String> loadFileContents(const char* path,

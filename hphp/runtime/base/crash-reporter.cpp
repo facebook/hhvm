@@ -39,7 +39,7 @@
 #include "hphp/util/stack-trace.h"
 
 #include <signal.h>
-#if defined(__x86_64__) && defined(__linux__)
+#ifdef __x86_64__
 #include <ucontext.h>
 #endif
 
@@ -129,7 +129,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
   static int sig = sigin;
   static Optional<StackTraceNoHeap> st;
   static void* sig_addr = info ? info->si_addr : nullptr;
-#if defined(__x86_64__) && defined(__linux__)
+#ifdef __x86_64__
   static uintptr_t sig_rip = ((ucontext_t*) args)->uc_mcontext.gregs[REG_RIP];
 #endif
 
@@ -258,7 +258,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
           auto const frame = BTFrame::regular(ar, kInvalidOffset);
           auto const addr = [&] () -> jit::CTCA {
             if (sig != SIGILL && sig != SIGSEGV) return (jit::CTCA) sig_addr;
-#if defined(__x86_64__) && defined(__linux__)
+#if defined(__x86_64__)
             return (jit::CTCA) sig_rip;
 #else
             return (jit::CTCA) 0;

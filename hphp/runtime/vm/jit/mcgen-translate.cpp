@@ -352,12 +352,10 @@ void scheduleSerializeOptProf() {
   }
 }
 
-#ifdef __linux__
-  // GCC GCOV API
-  extern "C" void __gcov_reset() __attribute__((__weak__));
-  // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
-  extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
-#endif
+// GCC GCOV API
+extern "C" void __gcov_reset() __attribute__((__weak__));
+// LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
+extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
 
 /*
  * This is the main driver for the profile-guided retranslation of all the
@@ -504,7 +502,6 @@ void retranslateAll(bool skipSerialize) {
     scheduleSerializeOptProf();
   }
 
-#ifdef __linux__
   if (__gcov_reset) {
     if (serverMode) {
       Logger::Info("Calling __gcov_reset (retranslateAll finished)");
@@ -518,7 +515,6 @@ void retranslateAll(bool skipSerialize) {
     }
     __llvm_profile_reset_counters();
   }
-#endif
 
 }
 

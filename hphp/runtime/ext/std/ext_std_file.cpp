@@ -57,18 +57,12 @@
 
 #include <sys/types.h>
 
-#ifndef _MSC_VER
 #include <glob.h>
-#if defined(__FreeBSD__) || defined(__APPLE__)
-# include <sys/mount.h>
-#else
-# include <sys/vfs.h>
-#endif
+#include <sys/vfs.h>
 #include <utime.h>
 #include <grp.h>
 #include <pwd.h>
 #include <fnmatch.h>
-#endif
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -278,10 +272,8 @@ Array stat_impl(struct stat *stat_sb) {
   ret.append((int64_t)stat_sb->st_atime);
   ret.append((int64_t)stat_sb->st_mtime);
   ret.append((int64_t)stat_sb->st_ctime);
-#ifndef _MSC_VER
   ret.append((int64_t)stat_sb->st_blksize);
   ret.append((int64_t)stat_sb->st_blocks);
-#endif
   ret.set(s_dev,     (int64_t)stat_sb->st_dev);
   ret.set(s_ino,     (int64_t)stat_sb->st_ino);
   ret.set(s_mode,    (int64_t)stat_sb->st_mode);
@@ -293,10 +285,8 @@ Array stat_impl(struct stat *stat_sb) {
   ret.set(s_atime,   (int64_t)stat_sb->st_atime);
   ret.set(s_mtime,   (int64_t)stat_sb->st_mtime);
   ret.set(s_ctime,   (int64_t)stat_sb->st_ctime);
-#ifndef _MSC_VER
   ret.set(s_blksize, (int64_t)stat_sb->st_blksize);
   ret.set(s_blocks,  (int64_t)stat_sb->st_blocks);
-#endif
   return ret.toArray();
 }
 
@@ -1581,10 +1571,6 @@ bool HHVM_FUNCTION(touch,
     fclose(f);
   }
 
-#ifdef _MSC_VER
-  CHECK_FS_ASSIGN(fs::last_write_time, translated, mtime);
-  // Windows doesn't have an access time to set.
-#else
   if (mtime == 0 && atime == 0) {
     // It is important to pass nullptr so that the OS sets mtime and atime
     // to the current time with maximum precision (more precise then seconds)
@@ -1595,7 +1581,6 @@ bool HHVM_FUNCTION(touch,
     newtime.modtime = mtime;
     CHECK_SYSTEM(utime(translated.data(), &newtime));
   }
-#endif
 
   return true;
 }

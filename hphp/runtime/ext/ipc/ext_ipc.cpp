@@ -35,18 +35,7 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 
-#if defined(__APPLE__)
-/* OS X defines msgbuf, but it is defined with extra fields and some weird
- * types. It turns out that the actual msgsnd() and msgrcv() calls work fine
- * with the same structure that other OSes use. This is weird, but this is also
- * what PHP does, so *shrug*. */
-typedef struct {
-    long mtype;
-    char mtext[1];
-} hhvm_msgbuf;
-#else
 typedef msgbuf hhvm_msgbuf;
-#endif
 
 using HPHP::ScopedMem;
 
@@ -258,9 +247,7 @@ bool HHVM_FUNCTION(msg_receive,
 
   int64_t realflags = 0;
   if (flags != 0) {
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
     if (flags & k_MSG_EXCEPT) realflags |= MSG_EXCEPT;
-#endif
     if (flags & k_MSG_NOERROR) realflags |= MSG_NOERROR;
     if (flags & k_MSG_IPC_NOWAIT) realflags |= IPC_NOWAIT;
   }

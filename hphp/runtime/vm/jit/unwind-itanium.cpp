@@ -49,10 +49,8 @@
 #include <memory>
 #include <typeinfo>
 
-#ifndef _MSC_VER
 #include <cxxabi.h>
 #include <unwind.h>
-#endif
 
 TRACE_SET_MOD(unwind);
 

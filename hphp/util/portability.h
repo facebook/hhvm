@@ -58,21 +58,6 @@
 #define ATTRIBUTE_PRINTF_STRING
 #endif
 
-#ifdef _MSC_VER
-#define ATTRIBUTE_PRINTF(a1, a2)
-#ifndef __thread
-# define __thread __declspec(thread)
-#endif
-#define ATTRIBUTE_UNUSED
-#define ATTRIBUTE_USED
-
-#define ALWAYS_INLINE __forceinline
-#define EXTERNALLY_VISIBLE
-#define FLATTEN
-#define NEVER_INLINE __declspec(noinline)
-#define UNUSED
-
-#else
 #define ATTRIBUTE_PRINTF(a1, a2) \
   __attribute__((__format__ (__printf__, a1, a2)))
 #define ATTRIBUTE_UNUSED   __attribute__((__unused__))
@@ -88,8 +73,6 @@
 #endif
 #define NEVER_INLINE       __attribute__((__noinline__))
 #define UNUSED             __attribute__((__unused__))
-
-#endif
 
 #ifdef __clang__
 #define NO_OPT [[clang::optnone]]
@@ -144,23 +127,8 @@
  * Note: this may not work properly with LTO. We'll revisit when/if we
  * move to it.
  */
-#ifndef __APPLE__
 # define KEEP_SECTION \
     __attribute__((__section__(".text.keep")))
-#else
-# define KEEP_SECTION \
-    __attribute__((__section__(".text,.text.keep")))
-#endif
-
-#if defined(__APPLE__)
-// OS X has a macro "isset" defined in this header. Force the include so we can
-// make sure the macro gets undef'd. (I think this also applies to BSD, but we
-// can cross that road when we come to it.)
-# include <sys/param.h>
-# ifdef isset
-#  undef isset
-# endif
-#endif
 
 //////////////////////////////////////////////////////////////////////
 // DECLARE_FRAME_POINTER
@@ -197,11 +165,7 @@
 //////////////////////////////////////////////////////////////////////
 // CALLEE_SAVED_BARRIER
 
-#ifdef _MSC_VER
-  // Unfortunately, we have no way to tell MSVC to do this, so we'll
-  // probably have to use a pair of assembly stubs to manage this.
-  #define CALLEE_SAVED_BARRIER() always_assert(false);
-#elif defined (__AARCH64EL__)
+#ifdef __AARCH64EL__
   #define CALLEE_SAVED_BARRIER()\
     asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25",\
                  "x26", "x27", "x28", \
@@ -236,28 +200,4 @@
 
 //////////////////////////////////////////////////////////////////////
 
-#ifdef _MSC_VER
-# include "hphp/util/portability/fnmatch.h"
-# include "hphp/util/portability/glob.h"
-# include "hphp/util/portability/rand_r.h"
-# include "hphp/util/portability/strfmon.h"
-#endif
-
-#if defined(_MSC_VER) && _MSC_FULL_VER <= 190023506 // 2015 Update 1 or below
-// MSVC2015 has an issue with getting function pointers to templated functions
-// if the expected result type isn't auto. Unfortunately, when I made the
-// initial bug report, I oversimplified the use-case, and, while the case I
-// reported was indeed fixed in Update 1 RC, none of our actual uses of it were
-// fixed.
-// This is being tracked at MS as #163251.
-# define MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD 1
-// 2015 RTM doesn't like it when you try to add via a double duration.
-// Bug Report: https://connect.microsoft.com/VisualStudio/feedback/details/1839243
-# define MSVC_NO_STD_CHRONO_DURATION_DOUBLE_ADD 1
-#endif
-
-#ifdef __APPLE__
-#define ASM_LOCAL_LABEL(x) "L" x
-#else
 #define ASM_LOCAL_LABEL(x) ".L" x
-#endif

@@ -22,14 +22,6 @@
 #include "hphp/util/rds-local.h"
 
 #include <dlfcn.h>
-#ifdef __APPLE__
-#include <xlocale.h>
-#endif
-
-#ifdef __APPLE__
-// On MacOS we have and use localeconv_l, but we emulate it on other platforms
-#include <locale.h>
-#endif
 
 /*
  * This class reimplements the setlocale() and localeconv() functions
@@ -108,27 +100,6 @@ const char* ThreadSafeLocaleHandler::actuallySetLocale(
   return m_locale->querylocale(LocaleCategory, category);
 }
 
-#ifdef _MSC_VER
-struct lconv* ThreadSafeLocaleHandler::localeconv() {
-  // We've setup locales to be thread local, so this is no
-  // problem at all.
-  struct lconv *ptr = g_thread_safe_localeconv_data.get();
-  struct lconv *l = ::localeconv();
-  memcpy(ptr, l, sizeof(struct lconv));
-  return ptr;
-}
-#elif defined(__APPLE__)
-struct lconv* ThreadSafeLocaleHandler::localeconv() {
-  // BSD/OS X has localeconv_l, which actually returns data held onto by the
-  // locale itself -- and since that's thread-local (since this object instance
-  // is) we can just use that.
-  // TODO is the memcpy even necessary?
-  struct lconv *ptr = g_thread_safe_localeconv_data.get();
-  struct lconv *l = localeconv_l(m_locale->get());
-  memcpy(ptr, l, sizeof(struct lconv));
-  return ptr;
-}
-#else
 struct lconv* ThreadSafeLocaleHandler::localeconv() {
   // glibc does not have localeconv_l, and so we need to do some shenanigans.
   struct lconv *ptr = g_thread_safe_localeconv_data.get();
@@ -170,7 +141,6 @@ struct lconv* ThreadSafeLocaleHandler::localeconv() {
 
   return ptr;
 }
-#endif
 
 void ThreadSafeLocaleHandler::generate_LC_ALL_String() {
   auto names = m_locale->getAllCategoryLocaleNames();
@@ -221,7 +191,6 @@ void ThreadSafeLocaleHandler::setRequestLocale(std::shared_ptr<Locale> loc) {
 
 }
 
-#ifndef _MSC_VER
 extern "C" char* setlocale(int category, const char* locale) {
   /* The returned char* is exactly what was passed in. */
   return const_cast<char*>
@@ -231,4 +200,3 @@ extern "C" char* setlocale(int category, const char* locale) {
 extern "C" struct lconv* localeconv() {
   return HPHP::g_thread_safe_locale_handler->localeconv();
 }
-#endif

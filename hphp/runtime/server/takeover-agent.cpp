@@ -19,9 +19,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include <folly/String.h>
-#ifndef _MSC_VER
 #include <afdt.h>
-#endif
 
 /*
  * TakeoverAgent provides the ability to transfer the accept socket
@@ -56,7 +54,6 @@
 
 namespace HPHP {
 
-#ifndef _MSC_VER
 static void
 fd_transfer_error_handler(const struct afdt_error_t* err, void* /*userdata*/) {
   Logger::Error("AFDT ERROR: phase=%s operation=%s "
@@ -81,7 +78,6 @@ static int fd_transfer_request_handler(const uint8_t* request,
   *response_length = resp.size();
   return fd;
 }
-#endif
 
 TakeoverAgent::TakeoverAgent(const std::string &fname)
   : m_delete_handle(nullptr),
@@ -97,9 +93,6 @@ const StaticString
   s_ver_C_TERM_OK(P_VERSION C_TERM_OK);
 
 int TakeoverAgent::afdtRequest(String request, String* response) {
-#ifdef _MSC_VER
-  return -1;
-#else
   Logger::Info("takeover: received request");
   if (request == s_ver_C_FD_REQ) {
     Logger::Info("takeover: request is a listen socket request");
@@ -137,14 +130,10 @@ int TakeoverAgent::afdtRequest(String request, String* response) {
     *response = P_VERSION C_UNKNOWN;
     return -1;
   }
-#endif
 }
 
 int TakeoverAgent::setupFdServer(event_base *eventBase, int sock,
                                  Callback *callback) {
-#ifdef _MSC_VER
-  return -1;
-#else
   int ret;
   m_sock = sock;
   m_callback = callback;
@@ -169,13 +158,9 @@ int TakeoverAgent::setupFdServer(event_base *eventBase, int sock,
     Logger::Info("takeover: fd server set up successfully");
   }
   return ret;
-#endif
 }
 
 int TakeoverAgent::takeover(std::chrono::seconds timeoutSec) {
-#ifdef _MSC_VER
-  return -1;
-#else
   int ret;
 
   Logger::Info("takeover: beginning listen socket acquisition");
@@ -209,11 +194,9 @@ int TakeoverAgent::takeover(std::chrono::seconds timeoutSec) {
   m_took_over = true;
 
   return m_sock;
-#endif
 }
 
 void TakeoverAgent::requestShutdown() {
-#ifndef _MSC_VER
   if (m_took_over) {
     Logger::Info("takeover: requesting shutdown of satellites");
     // Use AFDT to synchronously shut down the old server's satellites
@@ -250,11 +233,9 @@ void TakeoverAgent::requestShutdown() {
       Logger::Info("takeover: old satellites have shut down");
     }
   }
-#endif
 }
 
 void TakeoverAgent::stop() {
-#ifndef _MSC_VER
   if (m_delete_handle != nullptr) {
     afdt_close_server(m_delete_handle);
   }
@@ -270,7 +251,6 @@ void TakeoverAgent::stop() {
   if (m_takeover_state != TakeoverState::NotStarted) {
     m_callback->takeoverAborted();
   }
-#endif
 }
 
 TakeoverListener::~TakeoverListener() {

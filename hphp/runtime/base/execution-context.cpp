@@ -136,10 +136,7 @@ ExecutionContext::ExecutionContext()
 }
 
 namespace rds::local {
-// See header for why this is required.
-#ifndef _MSC_VER
 template<>
-#endif
 void GContextType::Base::destroy() {
   if (!isNull()) {
     getNoCheck()->sweep();

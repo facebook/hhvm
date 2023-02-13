@@ -34,13 +34,7 @@ int execute_program(int argc, char **argv);
 
 static int get_tempfile_if_not_exists(int ini_fd, char ini_path[]) {
   if (ini_fd == -1) {
-#ifdef _MSC_VER
-    // MSVC doesn't require the characters to be the last
-    // 6 in the string.
-    ini_fd = open(mktemp(ini_path), O_RDWR | O_EXCL);
-#else
     ini_fd = mkstemps(ini_path, 4); // keep the .ini suffix
-#endif
     if (ini_fd == -1) {
       fprintf(stderr, "Error: unable to open temporary file");
       exit(EXIT_FAILURE);

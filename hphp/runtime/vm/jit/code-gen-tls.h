@@ -45,14 +45,6 @@ struct TLSDatum {
   };
 };
 
-#if !(defined(__x86_64__) && defined(__APPLE__))
-/*
- * Wrapper helper for TLSDatum.
- */
-template<typename T>
-TLSDatum<T> tls_datum(const T& var) { return TLSDatum<T>(var); }
-
-#else
 /*
  * See code-gen-tls-x64.h for an explanation of this assembly.
  */
@@ -62,8 +54,6 @@ TLSDatum<T> tls_datum(const T& var) { return TLSDatum<T>(var); }
           "=r"(ret) : "m"(var));            \
   return TLSDatum<decltype(var)>(ret);      \
 }())
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -96,4 +86,3 @@ void emitTLSLoad(Vout& v, TLSDatum<ThreadLocalNoCheck<T>> datum, Vreg d);
 
 // This has to follow all the arch-specific includes.
 #include "hphp/runtime/vm/jit/code-gen-tls-inl.h"
-

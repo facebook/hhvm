@@ -55,7 +55,6 @@
 #include <signal.h>
 #include <fstream>
 
-#ifdef __linux__
 void DisableFork() __attribute__((__weak__));
 void EnableForkLogging() __attribute__((__weak__));
 // GCC GCOV API
@@ -63,7 +62,6 @@ extern "C" void __gcov_flush() __attribute__((__weak__));
 // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
 extern "C" void __llvm_profile_write_file() __attribute__((__weak__));
 extern "C" void __llvm_profile_set_filename(const char* filename) __attribute__((__weak__));
-#endif
 
 namespace HPHP {
 
@@ -430,7 +428,6 @@ void HttpServer::runOrExitProcess() {
     BootStats::mark("servers started");
     Logger::Info("all servers started");
     if (!RuntimeOption::ServerForkEnabled) {
-#ifdef __linux__
       if (DisableFork) {
         // We should not fork from the server process.  Use light process
         // instead.  This will intercept subsequent fork() calls and make them
@@ -441,10 +438,6 @@ void HttpServer::runOrExitProcess() {
         // some tests, don't intercept fork().
         Logger::Warning("ignored runtime option Server.Forking.Enabled=false");
       }
-#else
-      Logger::Warning("ignored Server.Forking.Enabled=false "
-                      "as it only works on Linux");
-#endif
     } else {
 #if FOLLY_HAVE_PTHREAD_ATFORK
       pthread_atfork(nullptr, nullptr,
@@ -454,7 +447,6 @@ void HttpServer::runOrExitProcess() {
 #endif
     }
     if (RuntimeOption::ServerForkLogging) {
-#ifdef __linux__
       if (EnableForkLogging) {
         EnableForkLogging();
       } else {
@@ -462,10 +454,6 @@ void HttpServer::runOrExitProcess() {
         // some tests, don't intercept fork().
         Logger::Warning("ignored runtime option Server.Forking.Log=true");
       }
-#else
-      Logger::Warning("ignored Server.Forking.Log=true "
-                      "as it only works on Linux");
-#endif
     }
     if (RuntimeOption::EvalServerOOMAdj < 0) {
       // Avoid HHVM getting killed when a forked process uses too much memory.
@@ -526,7 +514,6 @@ void HttpServer::waitForServers() {
 }
 
 void HttpServer::ProfileFlush() {
-  #ifdef __linux__
   if (__gcov_flush) {
     Logger::Info("Flushing profile");
     __gcov_flush();
@@ -536,7 +523,6 @@ void HttpServer::ProfileFlush() {
     __llvm_profile_write_file();
     __llvm_profile_set_filename("/dev/null");
   }
-  #endif
 }
 
 void HttpServer::stop(const char* stopReason) {
@@ -568,12 +554,9 @@ void HttpServer::stop(const char* stopReason) {
       // the main thread returns before that, the killer thread will
       // exit.  So don't do join() on this thread.
       auto killer = std::thread([totalWait] {
-#ifdef __linux__
           sched_param param{};
           param.sched_priority = 5;
           pthread_setschedparam(pthread_self(), SCHED_RR, &param);
-          // It is OK if we fail to increase thread priority.
-#endif
           /* sleep override */
           std::this_thread::sleep_for(std::chrono::seconds{totalWait});
           _Exit(1);

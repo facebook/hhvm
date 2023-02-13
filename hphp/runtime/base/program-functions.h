@@ -28,15 +28,10 @@ namespace HPHP {
 struct Transport;
 struct Unit;
 
-#if defined(__APPLE__) || defined(_MSC_VER)
-extern const void* __hot_start;
-extern const void* __hot_end;
-#else
 extern "C" {
 void __attribute__((__weak__)) __hot_start();
 void __attribute__((__weak__)) __hot_end();
 }
-#endif
 
 /**
  * Main entry point of the entire program.

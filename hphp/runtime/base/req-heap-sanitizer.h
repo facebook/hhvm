@@ -20,7 +20,7 @@
 #include "hphp/util/assertions.h"
 
 #include <signal.h>
-#if defined(__x86_64__) && defined(__linux__)
+#ifdef __x86_64__
 #include <ucontext.h>
 #endif
 

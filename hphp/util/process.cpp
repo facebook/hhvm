@@ -268,19 +268,12 @@ std::string Process::GetCurrentUser() {
     return name;
   }
 
-#ifdef _MSC_VER
-  char username[UNLEN + 1];
-  DWORD username_len = UNLEN + 1;
-  if (GetUserName(username, &username_len))
-    return std::string(username, username_len);
-#else
   auto buf = PasswdBuffer{};
   passwd *pwd;
   if (!getpwuid_r(geteuid(), &buf.ent, buf.data.get(), buf.size, &pwd) &&
       pwd && pwd->pw_name) {
     return pwd->pw_name;
   }
-#endif
   return "";
 }
 
@@ -289,7 +282,6 @@ std::string Process::GetCurrentDirectory() {
   memset(buf, 0, sizeof(buf));
   if (char* cwd = getcwd(buf, PATH_MAX)) return cwd;
 
-#if defined(__linux__)
   if (errno != ENOENT) {
     return "";
   }
@@ -304,10 +296,6 @@ std::string Process::GetCurrentDirectory() {
     buf[r - kDeletedLen] = 0;
   }
   return &(buf[0]);
-#else
-  // /proc/self/cwd is not available.
-  return "";
-#endif
 }
 
 std::string Process::GetHomeDirectory() {
@@ -317,20 +305,10 @@ std::string Process::GetHomeDirectory() {
   if (home && *home) {
     ret = home;
   } else {
-#ifdef _MSC_VER
-    PWSTR path;
-    if (SHGetKnownFolderPath(FOLDERID_UsersFiles, 0, nullptr, &path) == S_OK) {
-      char hPath[PATH_MAX];
-      size_t len = wcstombs(hPath, path, MAX_PATH);
-      CoTaskMemFree(path);
-      ret = std::string(hPath, len);
-    }
-#else
     passwd *pwd = getpwent();
     if (pwd && pwd->pw_dir) {
       ret = pwd->pw_dir;
     }
-#endif
   }
 
   if (ret.empty() || ret[ret.size() - 1] != '/') {
@@ -340,7 +318,6 @@ std::string Process::GetHomeDirectory() {
 }
 
 void Process::SetCoreDumpHugePages() {
-#if defined(__linux__)
   /*
    * From documentation athttp://man7.org/linux/man-pages/man5/core.5.html
    *
@@ -368,7 +345,6 @@ void Process::SetCoreDumpHugePages() {
     }
     fclose(f);
   }
-#endif
 }
 
 void ProcStatus::update() {
@@ -424,7 +400,6 @@ void ProcStatus::update() {
 }
 
 bool Process::OOMScoreAdj(int adj) {
-#ifdef __linux__
   if (adj >= -1000 && adj < 1000) {
     if (auto f = fopen("/proc/self/oom_score_adj", "r+")) {
       fprintf(f, "%d", adj);
@@ -432,7 +407,6 @@ bool Process::OOMScoreAdj(int adj) {
       return true;
     }
   }
-#endif
   return false;
 }
 
@@ -491,12 +465,7 @@ std::map<int, int> Process::RemapFDsPreExec(const std::map<int, int>& fds) {
   // This includes the STDIO FDs as it's possible that:
   // - the FILE* were previously closed (so the fclose above were no-ops)
   // - the FDs were then re-used
-#ifdef __APPLE__
-  const char* fd_dir = "/dev/fd";
-#endif
-#ifdef __linux__
   const char* fd_dir = "/proc/self/fd";
-#endif
   // If you close FDs while in this loop, they get removed from /proc/self/fd
   // and the iterator gets sad ("Bad file descriptor: /proc/self/fd")
   std::set<int> fds_to_close;
@@ -615,23 +584,7 @@ pid_t Process::ForkAndExecve(
     SCOPE_EXIT { free(argv_arr); free(envp_arr); };
 
     if (flags & Process::FORK_AND_EXECVE_FLAG_EXECVPE) {
-#if defined(__APPLE__)
-      // execvpe() is a glibcism
-      //
-      // We could either:
-      // - use `execve()` and implement our own $PATH behavior
-      // - use `execvp()` and implement our own envp behavior
-      // The latter seems less likely to lead to accidental problems, so let's
-      // do that.
-      char**& environ = *_NSGetEnviron();
-      // We could also use this implementation on Linux (using the standard
-      // `extern char** environ` instead of the Apple-specific call above)...
-      environ = envp_arr;
-      execvp(path.c_str(), argv_arr);
-#else
-      // ... but it feels nasty enough that I'll use the glibcism
       execvpe(path.c_str(), argv_arr, envp_arr);
-#endif
     } else {
       execve(path.c_str(), argv_arr, envp_arr);
     }

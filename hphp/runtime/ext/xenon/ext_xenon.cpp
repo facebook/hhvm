@@ -149,10 +149,9 @@ Xenon& Xenon::getInstance() noexcept {
   return instance;
 }
 
-Xenon::Xenon() noexcept : m_lastSurpriseTime(0), m_stopping(false), m_missedSampleCount(0) {
-#if !defined(__APPLE__) && !defined(_MSC_VER)
+Xenon::Xenon() noexcept
+  : m_lastSurpriseTime(0), m_stopping(false), m_missedSampleCount(0) {
   m_timerid = 0;
-#endif
 }
 
 void Xenon::incrementMissedSampleCount(ssize_t val) {
@@ -174,7 +173,6 @@ static void onXenonTimer(int signo) {
 // The number of milliseconds has to be greater than zero.
 // If all of those happen, then we need a timer attached to a signal handler.
 void Xenon::start(uint64_t msec) {
-#if !defined(__APPLE__) && !defined(_MSC_VER)
   TRACE(1, "XenonForceAlwaysOn %d\n", RuntimeOption::XenonForceAlwaysOn);
   if (!RuntimeOption::XenonForceAlwaysOn && !m_timerid && msec > 0) {
     time_t sec = msec / 1000;
@@ -203,18 +201,15 @@ void Xenon::start(uint64_t msec) {
     ts.it_interval.tv_nsec = nsec;
     timer_settime(m_timerid, 0, &ts, nullptr);
   }
-#endif
 }
 
 // If Xenon owns a pthread, tell it to stop, also clean up anything from start.
 void Xenon::stop() {
-#if !defined(__APPLE__) && !defined(_MSC_VER)
   if (m_timerid) {
     m_stopping = true;
     TRACE(1, "Xenon::stop has stopped the waiting thread\n");
     timer_delete(m_timerid);
   }
-#endif
 }
 
 // Xenon data is gathered for logging per request, "if we should"

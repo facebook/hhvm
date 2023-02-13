@@ -18,9 +18,6 @@
 
 #include <fstream>
 
-#ifndef _MSC_VER
-#include <dlfcn.h>
-#endif
 #include <memory>
 #include <set>
 #include <vector>

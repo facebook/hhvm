@@ -177,7 +177,6 @@ int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {
 
 Optional<std::string> FileStreamWrapper::getxattr(const char* path,
                                                   const char* xattr) {
-#if defined(__linux__)
   std::string buf;
   buf.resize(64);
 
@@ -193,7 +192,6 @@ Optional<std::string> FileStreamWrapper::getxattr(const char* path,
     if (actualSize < 0) break;
     buf.resize(std::max<size_t>(actualSize, buf.size()));
   }
-#endif
   return std::nullopt;
 }
 

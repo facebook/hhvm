@@ -47,10 +47,8 @@ static std::string statToString(const struct stat* buf) {
   os <<   "gid="                << buf->st_gid                 << ", ";
   os <<   "rdev="               << buf->st_rdev                << ", ";
   os <<   "size="               << buf->st_size                << ", ";
-#ifndef _MSC_VER
   os <<   "blksize="            << buf->st_blksize             << ", ";
   os <<   "blocks="             << buf->st_blocks              << ", ";
-#endif
   os <<   "atime="              << buf->st_atime               << ", ";
   os <<   "mtime="              << buf->st_mtime               << ", ";
   os <<   "ctime="              << buf->st_ctime;

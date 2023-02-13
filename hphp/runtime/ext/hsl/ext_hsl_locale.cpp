@@ -203,9 +203,6 @@ struct LocaleExtension final : Extension {
     LC_(MONETARY);
     LC_(NUMERIC);
     LC_(TIME);
-#if defined(__APPLE__) || defined(__GLIBC__)
-    LC_(MESSAGES);
-#endif
 #ifdef __GLIBC__
     LC_(PAPER);
     LC_(NAME);

@@ -18,9 +18,7 @@
 
 #include <filesystem>
 
-#ifndef _MSC_VER
 #include <pwd.h>
-#endif
 
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/SysStat.h>
@@ -83,7 +81,6 @@ static FILE *new_log_file(const char *fileTemplate, const char *linkname,
     return nullptr;
   }
 
-#ifndef _MSC_VER
   if (linkname) {
     struct stat stat_buf;
     struct stat stat_buf2;
@@ -107,7 +104,6 @@ static FILE *new_log_file(const char *fileTemplate, const char *linkname,
       create_link(filename.c_str(), linkname, linktype, prevlinkname);
     }
   }
-#endif
   return fdopen(log_fd, "a");
 }
 
@@ -145,11 +141,7 @@ FILE *Cronolog::getOutputFile() {
     if (m_file == nullptr) {
       const char *linkname = m_linkName.empty() ? nullptr : m_linkName.c_str();
       m_file = new_log_file(m_template.c_str(),
-#ifdef _MSC_VER
-                            "", 0,
-#else
                             linkname, S_IFLNK,
-#endif
                             m_prevLinkName, m_periodicity, m_periodMultiple,
                             m_periodDelay, m_fileName, sizeof(m_fileName),
                             time_now, &m_nextPeriod);
@@ -159,9 +151,6 @@ FILE *Cronolog::getOutputFile() {
 }
 
 void Cronolog::changeOwner(const string &username, const string &symlink) {
-#ifdef _MSC_VER
-  return;
-#else
   if (username.empty() || symlink.empty()) {
     return;
   }
@@ -193,7 +182,6 @@ void Cronolog::changeOwner(const string &username, const string &symlink) {
   if (success < 0) {
     fprintf(stderr, "Unable to chown %s\n", symlink.c_str());
   }
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

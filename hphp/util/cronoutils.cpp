@@ -215,7 +215,6 @@ create_link(const char *pfilename,
 	    const char *linkname, mode_t linktype,
 	    const char *prevlinkname)
 {
-#ifndef _MSC_VER
     struct stat		stat_buf;
 
     if (prevlinkname && lstat(prevlinkname, &stat_buf) == 0)
@@ -245,10 +244,6 @@ create_link(const char *pfilename,
                   pfilename, linkname);
         }
     }
-#else
-    fprintf(stderr, "Creating link from %s to %s not supported",
-            pfilename, linkname);
-#endif
 }
 
 /* Examine the log file name specifier for strftime conversion

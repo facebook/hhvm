@@ -25,7 +25,7 @@
 #  include "hphp/util/hphp-config.h"
 #endif
 
-#if defined(__x86_64__) && !defined(_MSC_VER)
+#if defined(__x86_64__)
 #  include <nmmintrin.h>
 #  if (!defined USE_HWCRC)
 #    define USE_HWCRC
@@ -328,7 +328,7 @@ size_t consistent_hash(int64_t key, size_t buckets, int64_t salt = 0);
 
 }
 
-#if defined(USE_HWCRC) && !defined(__SSE4_2__) && !defined(_MSC_VER)
+#if defined(USE_HWCRC) && !defined(__SSE4_2__)
 // The following functions are implemented in ASM directly for x86_64 and ARM
 extern "C" {
   HPHP::strhash_t hash_string_cs_crc(const char*, uint32_t);

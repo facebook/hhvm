@@ -584,10 +584,8 @@ void ProcessExtension::moduleInit() {
   HHVM_RC_INT(SIGCLD, SIGCHLD);
   HHVM_RC_INT(SIGPOLL, SIGIO);
 
-#ifdef __linux__
   HHVM_RC_INT_SAME(SIGPWR);
   HHVM_RC_INT_SAME(SIGSTKFLT);
-#endif
 
   loadSystemlib("process");
 }

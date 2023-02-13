@@ -744,12 +744,7 @@ void check_cli_server_access(ucred& cred) {
     if (!s_allowedGroups.empty()) {
       FTRACE(2, "check_cli_server_access: starting slow check...\n");
 
-      // The signature for getgrouplist differs for Apple
-#ifdef __APPLE__
-      std::vector<int> groups;
-#else
       std::vector<gid_t> groups;
-#endif
       int ngroups = 0;
       UserInfo user(cred.uid);
       if (getgrouplist(user.pw->pw_name, cred.gid, nullptr, &ngroups) != -1) {
@@ -1601,9 +1596,6 @@ Optional<int> cli_process_command_loop(int fd) {
       std::string xattr;
       cli_read(fd, path, xattr);
 
-#if !defined(__linux__)
-      cli_write(fd, false, std::string{});
-#else
       std::string buf;
       buf.resize(64);
 
@@ -1625,7 +1617,6 @@ Optional<int> cli_process_command_loop(int fd) {
         }
         cli_write(fd, false, std::string{});
       }();
-#endif
       continue;
     }
 

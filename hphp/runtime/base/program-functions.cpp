@@ -96,9 +96,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/kernel-version.h"
-#ifndef _MSC_VER
 #include "hphp/util/light-process.h"
-#endif
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/perf-event.h"
@@ -157,11 +155,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-#ifdef _MSC_VER
-#include <windows.h>
-#include <winuser.h>
-#endif
 
 using namespace boost::program_options;
 using std::cout;
@@ -801,13 +794,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   hphp_session_exit();
 }
 
-#if defined(__APPLE__) || defined(_MSC_VER)
-const void* __hot_start = nullptr;
-const void* __hot_end = nullptr;
-#define AT_END_OF_TEXT
-#else
 #define AT_END_OF_TEXT    __attribute__((__section__(".stub")))
-#endif
 
 #define ALIGN_HUGE_PAGE   __attribute__((__aligned__(2 * 1024 * 1024)))
 
@@ -942,7 +929,6 @@ static void pagein_self(void) {
     }
   }
 
-#ifdef __linux__
   if (RO::ServerSchedPolicy >= 0 && RO::ServerSchedPolicy <= SCHED_BATCH) {
     sched_param param{};
     if (RO::ServerSchedPolicy == SCHED_RR) {
@@ -965,10 +951,8 @@ static void pagein_self(void) {
                      folly::errnoStr(errno));
     }
   }
-#endif
 
   auto mapped_huge = false;
-#ifdef __linux__
   auto const try_map_huge =
     hugePagesSupported() &&
     RuntimeOption::EvalMaxHotTextHugePages > 0 &&
@@ -980,11 +964,6 @@ static void pagein_self(void) {
       Logger::Warning("Failed to hugify the .text section");
     }
   };
-#else
-  // MacOS doesn't have transparent huge pages.  It uses mmap() with
-  // VM_FLAGS_SUPERPAGE_SIZE_2MB, which we don't do here, so don't bother.
-  auto constexpr try_map_huge = false;
-#endif
 
   char mapname[PATH_MAX];
   // pad due to the spaces between the inode number and the mapname
@@ -1886,7 +1865,6 @@ static int execute_program_impl(int argc, char** argv) {
     }
   }
 
-#ifndef _MSC_VER
   // Defer the initialization of light processes until the log file handle is
   // created, so that light processes can log to the right place. If we ever
   // lose a light process, stop the server instead of proceeding in an
@@ -1904,7 +1882,7 @@ static int execute_program_impl(int argc, char** argv) {
                              RuntimeOption::EvalRecordSubprocessTimes,
                              inherited_fds);
   }
-#endif
+
 #if USE_JEMALLOC_EXTENT_HOOKS
   if (RuntimeOption::ServerExecutionMode()) {
     purge_all();
@@ -2278,7 +2256,6 @@ std::string get_systemlib(const std::string &section /*= "systemlib" */,
 ///////////////////////////////////////////////////////////////////////////////
 // C++ ffi
 
-#ifndef _MSC_VER
 namespace {
 
 void on_timeout(int sig, siginfo_t* info, void* /*context*/) {
@@ -2291,7 +2268,6 @@ void on_timeout(int sig, siginfo_t* info, void* /*context*/) {
 }
 
 }
-#endif
 
 /*
  * Update constants to their real values and sync some runtime options
@@ -2389,7 +2365,7 @@ void cli_client_init() {
 void init_current_pthread_stack_limits() {
   pthread_attr_t attr;
 // Linux+GNU extension
-#if defined(_GNU_SOURCE) && defined(__linux__)
+#if defined(_GNU_SOURCE)
   if (pthread_getattr_np(pthread_self(), &attr) != 0 ) {
     Logger::Error("pthread_getattr_np failed before checking stack limits");
     _exit(1);
@@ -2424,12 +2400,11 @@ void hphp_process_init(bool skipModules) {
 
   hphp_thread_init();
 
-#ifndef _MSC_VER
   struct sigaction action = {};
   action.sa_sigaction = on_timeout;
   action.sa_flags = SA_SIGINFO | SA_NODEFER | SA_RESTART;
   sigaction(SIGVTALRM, &action, nullptr);
-#endif
+
   // start takes milliseconds, Period is a double in seconds
   Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
   BootStats::mark("xenon");
@@ -2994,9 +2969,7 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(shutdownUnitReaper());
   LOG_AND_IGNORE(Strobelight::shutdown())
   LOG_AND_IGNORE(ExtensionRegistry::moduleShutdown())
-#ifndef _MSC_VER
   LOG_AND_IGNORE(LightProcess::Close())
-#endif
   LOG_AND_IGNORE(InitFiniNode::ProcessFini())
   LOG_AND_IGNORE(folly::SingletonVault::singleton()->destroyInstances())
   LOG_AND_IGNORE(embedded_data_cleanup())
@@ -3068,7 +3041,7 @@ static struct SetThreadInitFini {
   SetThreadInitFini() {
     AsyncFuncImpl::SetThreadInitFunc(
       [] (void*) {
-#if defined(_GNU_SOURCE) && defined(__linux__)
+#if defined(_GNU_SOURCE)
         if (RuntimeOption::EvalPerfDataMap) {
           pthread_t threadId = pthread_self();
           pthread_attr_t attr;

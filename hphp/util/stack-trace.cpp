@@ -20,10 +20,7 @@
 #include <set>
 #include <string>
 
-#ifndef _MSC_VER
 #include <execinfo.h>
-#endif
-
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>

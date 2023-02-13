@@ -42,17 +42,6 @@ void hash_keccak::hash_init(void *context) {
 namespace keccak {
 ///////////////////////////////////////////////////////////////////////////////
 
-#if (defined(__APPLE__) || defined(__APPLE_CC__)) && \
-    (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
-# if defined(__LITTLE_ENDIAN__)
-#  undef WORDS_BIGENDIAN
-# else
-#  if defined(__BIG_ENDIAN__)
-#   define WORDS_BIGENDIAN
-#  endif
-# endif
-#endif
-
 inline uint64_t rol64(uint64_t v, uint8_t b) {
   return (v << b) | (v >> (64 - b));
 }
@@ -60,35 +49,9 @@ inline uint8_t idx(uint8_t x, uint8_t y) {
   return x + (5 * y);
 }
 
-#ifdef WORDS_BIGENDIAN
-inline uint64_t load64(const uint8_t* x) {
-  uint64_t ret = 0;
-  for (uint8_t i = 7; i >= 0; --i) {
-    ret <<= 8;
-    ret |= x[i];
-  }
-  return ret;
-}
-inline void store64(const uint8_t* x, uint64_t val) {
-  for (uint8_t i = 0; i < 8; ++i) {
-    x[i] = val & 0xFF;
-    val >>= 8;
-  }
-}
-inline void xor64(const uint8_t* x, uint64_t val) {
-  for (uint8_t i = 0; i < 8; ++i) {
-    x[i] ^= val & 0xFF;
-    val >>= 8;
-  }
-}
-# define readLane(x, y)     load64(ctx->state+sizeof(uint64_t)*idx(x, y))
-# define writeLane(x, y, v) store64(ctx->state+sizeof(uint64_t)*idx(x, y), v)
-# define XORLane(x, y, v)   xor64(ctx->state+sizeof(uint64_t)*idx(x, y), v)
-#else
-# define readLane(x, y)     (((uint64_t*)ctx->state)[idx(x,y)])
-# define writeLane(x, y, v) (((uint64_t*)ctx->state)[idx(x,y)] = v)
-# define XORLane(x, y, v)   (((uint64_t*)ctx->state)[idx(x,y)] ^= v)
-#endif
+#define readLane(x, y)     (((uint64_t*)ctx->state)[idx(x,y)])
+#define writeLane(x, y, v) (((uint64_t*)ctx->state)[idx(x,y)] = v)
+#define XORLane(x, y, v)   (((uint64_t*)ctx->state)[idx(x,y)] ^= v)
 
 inline bool LFSR86540(uint8_t& LFSR)
 {

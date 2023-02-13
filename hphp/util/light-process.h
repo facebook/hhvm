@@ -16,10 +16,6 @@
 
 #pragma once
 
-#ifdef _MSC_VER
-# error LightProcess is not supported under MSVC!
-#endif
-
 #include <string>
 #include <vector>
 #include <cstdio>

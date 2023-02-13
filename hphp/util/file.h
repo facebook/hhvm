@@ -28,22 +28,14 @@ namespace HPHP::FileUtil {
  * platform.
  */
 inline bool isDirSeparator(char c) {
-#ifdef _MSC_VER
-  return c == '/' || c == '\\';
-#else
   return c == '/';
-#endif
 }
 
 /*
  * Get the preferred directory separator for the current platform.
  */
 inline char getDirSeparator() {
-#ifdef _MSC_VER
-  return '\\';
-#else
   return '/';
-#endif
 }
 
 /*
@@ -51,22 +43,8 @@ inline char getDirSeparator() {
  * the path is canonicalized.
  */
 inline bool isAbsolutePath(folly::StringPiece path) {
-#ifdef _MSC_VER
-  auto const len = path.size();
-  if (len < 2) {
-    return false;
-  }
-  // NOTE: Boost actually checks if the last character of the first path element
-  // is a colon, rather than if the first character is an alpha followed by a
-  // colon.  This is fine for now, as I don't know of any other forms of paths
-  // that would allow.
-  return (isDirSeparator(path[0]) && isDirSeparator(path[1])) ||
-    (isalpha(path[0]) && path[1] == ':');
-#else
   return path.size() > 0 && path[0] == '/';
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 }
-

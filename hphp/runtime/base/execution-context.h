@@ -649,12 +649,8 @@ using GContextType = rds::local::AliasedRDSLocal<ExecutionContext,
       rds::local::Initialize::Explicitly,
       &rds::local::detail::HotRDSLocals::g_context>;
 
-// MSVC doesn't instantiate this, causing an undefined symbol at link time
-// if the template<> is present, but other compilers require it.
 namespace rds::local {
-#ifndef _MSC_VER
 template<>
-#endif
 void GContextType::Base::destroy();
 }
 

@@ -2226,10 +2226,6 @@ Array HHVM_FUNCTION(localeconv) {
 }
 
 Variant HHVM_FUNCTION(nl_langinfo, int64_t item) {
-#ifdef _MSC_VER
-  raise_warning("nl_langinfo is not yet implemented on Windows!");
-  return empty_string();
-#else
   switch(item) {
 #ifdef ABDAY_1
     case ABDAY_1:
@@ -2400,7 +2396,6 @@ Variant HHVM_FUNCTION(nl_langinfo, int64_t item) {
     return false;
   }
   return String(ret);
-#endif
 }
 
 String HHVM_FUNCTION(convert_cyr_string,

@@ -5615,9 +5615,6 @@ JitResumeAddr dispatchImpl() {
   }
 #endif
 
-  // Unfortunately, MSVC doesn't support computed
-  // gotos, so use a switch instead.
-#ifndef _MSC_VER
   static const void* const optabDirect[] = {
 #define O(name, imm, push, pop, flags) \
     &&Label##name,
@@ -5643,17 +5640,12 @@ JitResumeAddr dispatchImpl() {
     optab = optabCover;
   }
   DEBUGGER_ATTACHED_ONLY(optab = optabDbg);
-#endif
 
   bool isCtlFlow = false;
   auto retAddr = JitResumeAddr::none();
   Op op;
 
-#ifdef _MSC_VER
-# define DISPATCH_ACTUAL() goto DispatchSwitch
-#else
-# define DISPATCH_ACTUAL() goto *optab[size_t(op)]
-#endif
+#define DISPATCH_ACTUAL() goto *optab[size_t(op)]
 
 #define DISPATCH() do {                                                 \
     if (breakOnCtlFlow && isCtlFlow) {                                  \
@@ -5723,16 +5715,6 @@ name##Done:                                                   \
     DISPATCH();                                                 \
   }
 
-#ifdef _MSC_VER
-DispatchSwitch:
-  switch (uint8_t(op)) {
-#define O(name, imm, push, pop, flags)                        \
-    case Op::name: {                                          \
-      DEBUGGER_ATTACHED_ONLY(OPCODE_DBG_BODY(name, imm, push, pop, flags)); \
-      OPCODE_COVER_BODY(name, imm, push, pop, flags)          \
-      OPCODE_MAIN_BODY(name, imm, push, pop, flags)           \
-    }
-#else
 #define O(name, imm, push, pop, flags)                        \
   LabelDbg##name:                                             \
     OPCODE_DBG_BODY(name, imm, push, pop, flags);             \
@@ -5740,13 +5722,9 @@ DispatchSwitch:
     OPCODE_COVER_BODY(name, imm, push, pop, flags)            \
   Label##name:                                                \
     OPCODE_MAIN_BODY(name, imm, push, pop, flags)
-#endif
 
   OPCODES
 
-#ifdef _MSC_VER
-    }
-#endif
 #undef O
 #undef DISPATCH
 #undef DISPATCH_ACTUAL

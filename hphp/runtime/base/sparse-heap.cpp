@@ -65,14 +65,12 @@ void SparseHeap::reset() {
   auto const UNUSED isShuttingDown = s_shutdown.load(std::memory_order_acquire);
   for (auto& slab : m_pooled_slabs) {
     m_bigs.erase(slab.ptr);
-#ifdef __linux__
     if (isShuttingDown) {
       // Free the slab by remapping to overwrite it. This may still fail (e.g.,
       // when the slab comes from weird things such as a 1G page and the kernel
       // doesn't handle it properly); so check the result.
       if (SlabManager::UnmapSlab(slab.ptr)) continue;
     }
-#endif
     if (!pooledSlabTail) pooledSlabTail = slab.ptr;
     pooledSlabs.push_front<true>(slab.ptr, slab.version);
   }

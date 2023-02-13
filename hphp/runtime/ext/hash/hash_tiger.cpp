@@ -18,16 +18,6 @@
 #include "hphp/runtime/ext/hash/hash_tiger.h"
 #include "hphp/runtime/ext/hash/php_hash_tiger_tables.h"
 
-#if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
-# if defined(__LITTLE_ENDIAN__)
-#  undef WORDS_BIGENDIAN
-# else
-#  if defined(__BIG_ENDIAN__)
-#   define WORDS_BIGENDIAN
-#  endif
-# endif
-#endif
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -114,20 +104,8 @@ hash_tiger::hash_tiger(bool tiger3, int digest, bool invert /*= false */)
 #define split_ex(str)                               \
   x0=str[0]; x1=str[1]; x2=str[2]; x3=str[3];       \
   x4=str[4]; x5=str[5]; x6=str[6]; x7=str[7];
-#ifdef WORDS_BIGENDIAN
-# define split(str)                       \
-  {                                             \
-    int i;                                      \
-    uint64_t tmp[8];                       \
-                                                \
-    for (i = 0; i < 64; ++i) {                                          \
-      ((unsigned char *) tmp)[i^7] = ((unsigned char *) str)[i];        \
-    }                                                                   \
-    split_ex(tmp);                                                      \
-  }
-#else
-# define split split_ex
-#endif
+
+#define split split_ex
 
 #define tiger_compress(passes, str, state)                              \
   {                                                                     \
@@ -165,18 +143,7 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context) {
     memset(&context->buffer[context->length], 0, 56 - context->length);
   }
 
-#ifndef WORDS_BIGENDIAN
   memcpy(&context->buffer[56], &context->passed, sizeof(uint64_t));
-#else
-  context->buffer[56] = (unsigned char) (context->passed & 0xff);
-  context->buffer[57] = (unsigned char) ((context->passed >> 8) & 0xff);
-  context->buffer[58] = (unsigned char) ((context->passed >> 16) & 0xff);
-  context->buffer[59] = (unsigned char) ((context->passed >> 24) & 0xff);
-  context->buffer[60] = (unsigned char) ((context->passed >> 32) & 0xff);
-  context->buffer[61] = (unsigned char) ((context->passed >> 40) & 0xff);
-  context->buffer[62] = (unsigned char) ((context->passed >> 48) & 0xff);
-  context->buffer[63] = (unsigned char) ((context->passed >> 56) & 0xff);
-#endif
   tiger_compress(context->passes, context->buffer_u64, context->state);
 }
 

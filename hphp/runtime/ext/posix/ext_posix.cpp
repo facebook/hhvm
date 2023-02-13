@@ -24,16 +24,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <folly/portability/SysResource.h>
-#ifdef __FreeBSD__
-#include <sys/param.h>
-#endif
-#ifdef __linux__
 #include <sys/sysmacros.h>
-#endif
-#include <folly/portability/Unistd.h>
 #include <pwd.h>
 
 #include <folly/container/Array.h>
+#include <folly/portability/Unistd.h>
 #include <folly/system/Pid.h>
 #include <folly/String.h>
 
@@ -182,11 +177,7 @@ Variant HHVM_FUNCTION(posix_getgroups) {
 }
 
 Variant HHVM_FUNCTION(posix_getlogin) {
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
   char buf[L_cuserid];
-#else
-  char buf[MAXLOGNAME];
-#endif
   if (!getlogin_r(buf, sizeof(buf) - 1)) {
     return String(buf, CopyString);
   }
@@ -502,7 +493,7 @@ Variant HHVM_FUNCTION(posix_uname) {
     , s_release,    String(u.release,    CopyString)
     , s_version,    String(u.version,    CopyString)
     , s_machine,    String(u.machine,    CopyString)
-#if defined(_GNU_SOURCE) && defined(__linux__)
+#if defined(_GNU_SOURCE)
     , s_domainname, String(u.domainname, CopyString)
 #endif
   );

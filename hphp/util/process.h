@@ -26,11 +26,7 @@
 #include <folly/portability/SysResource.h>
 #include <folly/portability/Unistd.h>
 
-#ifdef _MSC_VER
-# include <windows.h>
-#else
-# include <sys/syscall.h>
-#endif
+#include <sys/syscall.h>
 
 #include <pthread.h>
 #include <signal.h>
@@ -186,34 +182,14 @@ inline pthread_t GetThreadId() {
  * Current thread's identifier.
  */
 inline uint64_t GetThreadIdForTrace() {
-  // For tracing purposes this just needs to be unique, pthread_t is not
-  // portable but even if it's a pointer to a struct like on OSX this will
-  // produce a unique value. If we support platforms where this isn't the
-  // case we will need to revisit this.
-#ifdef __linux__
-  return pthread_self();
-#else
   return (uint64_t)pthread_self();
-#endif
 }
 
 /*
  * Thread's process identifier.
  */
 inline pid_t GetThreadPid() {
-#ifdef __FreeBSD__
-# if __FreeBSD__version > 900030
-  return pthread_getthreadid_np();
-# else
-  long tid;
-  syscall(SYS_thr_self, &tid);
-  return (pid_t) tid;
-# endif
-#elif defined(_MSC_VER)
-  return GetCurrentThreadId();
-#else
   return syscall(SYS_gettid);
-#endif
 }
 
 /**

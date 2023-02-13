@@ -36,14 +36,7 @@
 #include <memory>
 #include <vector>
 
-#ifdef __APPLE__
-#include <mach-o/getsect.h>
-#elif defined(_MSC_VER)
-#include <windows.h>
-#include <winuser.h>
-#else
 #include <folly/experimental/symbolizer/Elf.h>
-#endif
 
 namespace HPHP {
 
@@ -80,30 +73,6 @@ bool get_embedded_data(const char* section, embedded_data* desc,
                        const std::string& filename /*= "" */) {
   auto const fname = filename.empty() ? current_executable_path() : filename;
 
-#ifdef _MSC_VER
-  HMODULE moduleHandle = GetModuleHandleA(fname.data());
-  HGLOBAL loadedResource;
-  HRSRC   resourceInfo;
-  DWORD   resourceSize;
-
-  resourceInfo = FindResource(moduleHandle, section, RT_RCDATA);
-  if (!resourceInfo) {
-    return false;
-  }
-
-  loadedResource = LoadResource(moduleHandle, resourceInfo);
-  if (!loadedResource) {
-    return false;
-  }
-
-  resourceSize = SizeofResource(moduleHandle, resourceInfo);
-
-  desc->m_filename = fname;
-  desc->m_handle = loadedResource;
-  desc->m_len = resourceSize;
-
-  return true;
-#elif !defined(__APPLE__) // LINUX/ELF
   folly::symbolizer::ElfFile file;
   if (file.openNoThrow(fname.c_str()) != 0) return false;
 
@@ -114,28 +83,7 @@ bool get_embedded_data(const char* section, embedded_data* desc,
   desc->m_start = shdr->sh_offset;
   desc->m_len = shdr->sh_size;
   return true;
-#else // __APPLE__
-  const struct section_64 *sect = getsectbyname("__text", section);
-  if (sect) {
-    desc->m_filename = fname;
-    desc->m_start = sect->offset;
-    desc->m_len = sect->size;
-    return !desc->m_filename.empty();
-  }
-#endif // __APPLE__
-  return false;
 }
-
-#ifdef _MSC_VER
-
-std::string read_embedded_data(const embedded_data& desc) {
-  return std::string((const char*)LockResource(desc.m_handle), desc.m_len);
-}
-void* dlopen_embedded_data(const embedded_data&, char*) {
-  return nullptr;
-}
-
-#else
 
 std::string read_embedded_data(const embedded_data& desc) {
   std::ifstream ifs(desc.m_filename);
@@ -264,8 +212,6 @@ void* dlopen_embedded_data(const embedded_data& desc,
   }
   return handle;
 }
-
-#endif
 
 void embedded_data_cleanup() {
   std::lock_guard<std::mutex> l(s_tmp_files_lock);

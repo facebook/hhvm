@@ -23,13 +23,8 @@
 #include <mutex>
 #include <string>
 
-#ifdef _MSC_VER
-# include <windows.h>
-# include <dbghelp.h>
-#else
-# include <cxxabi.h>
-# include <execinfo.h>
-#endif
+#include <cxxabi.h>
+#include <execinfo.h>
 
 #include <folly/Demangle.h>
 #include <folly/Format.h>

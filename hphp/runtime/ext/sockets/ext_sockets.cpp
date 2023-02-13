@@ -248,9 +248,6 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
   switch (sock->getType()) {
   case AF_UNIX:
     {
-#ifdef _MSC_VER
-      return false;
-#else
       struct sockaddr_un *sa = (struct sockaddr_un *)sock_type;
       sa->sun_family = AF_UNIX;
       if (addr.length() > sizeof(sa->sun_path)) {
@@ -264,7 +261,6 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
       memcpy(sa->sun_path, addr.data(), addr.length());
       sa_ptr = (struct sockaddr *)sa;
       sa_size = offsetof(struct sockaddr_un, sun_path) + addr.length();
-#ifdef __linux__
       if (addr.length() == 0) {
         // Linux supports 3 kinds of unix sockets; behavior of this struct
         // is in `man 7 unix`; relevant parts:
@@ -280,9 +276,6 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
         // distinguish between unnamed and abstract.
         sa_size = offsetof(struct sockaddr_un, sun_path);
       }
-#endif
-
-#endif // ifdef _MSC_VER
     }
     break;
   case AF_INET:
@@ -314,19 +307,6 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
                     "AF_UNIX, AF_INET, or AF_INET6", sock->getType());
     return false;
   }
-#ifdef __APPLE__
-  // This field is not in the relevant standards, not defined on Linux, but is
-  // technically required on MacOS (and other BSDs) according to the man pages:
-  // - `man 4 netintro` covers the base sa_len
-  // - `man 4 unix` and `man 4 inet6` cover AF_UNIX sun_len and AF_INET6
-  //    sin6_len
-  // - ... At least MacOS Catalina includes the wrong `man 4 inet`. Look at the
-  //   (Net|Free|Open)BSD `man 4 inet` instead.
-  //   The MacOS man page says it starts with `sin_family`, which would conflict
-  //   with the base sockaddr definition. `sin_len` is actually the first field
-  //   in the header file, matching `sa_len`.
-  sa_ptr->sa_len = sa_size;
-#endif
   return true;
 }
 

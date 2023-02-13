@@ -20,11 +20,7 @@
 #include <exception>
 #include <typeinfo>
 
-#ifndef _MSC_VER
 #include <unwind.h>
-#else
-#include "hphp/util/unwind-itanium-msvc.h"
-#endif
 
 namespace HPHP {
 
@@ -55,11 +51,7 @@ inline bool is_dependent_exception(uint64_t c) {
  */
 inline void*
 exceptionFromUE(_Unwind_Exception* eo) {
-#ifdef __APPLE__
-  constexpr size_t sizeOfDependentException = 120;
-#else
   constexpr size_t sizeOfDependentException = 112;
-#endif
 
   if (detail::is_dependent_exception(eo->exception_class)) {
     return *reinterpret_cast<std::exception**>(
@@ -84,4 +76,3 @@ typeinfoFromUE(_Unwind_Exception* eo) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

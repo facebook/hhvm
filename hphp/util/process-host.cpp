@@ -16,18 +16,8 @@
 
 #include "hphp/util/process-host.h"
 
-#ifdef _MSC_VER
-#include <lmcons.h>
-#include <Windows.h>
-#include <ShlObj.h>
-#else
 #include <sys/wait.h>
 #include <unistd.h>
-#endif
-
-#ifdef __APPLE__
-#include <crt_externs.h>
-#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

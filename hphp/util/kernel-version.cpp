@@ -20,12 +20,8 @@
 #include <stdio.h>
 #include <iostream>
 
-#ifdef _MSC_VER
-#include <Windows.h>
-#else
 #include <unistd.h>
 #include <sys/utsname.h>
-#endif
 
 namespace HPHP {
 
@@ -51,20 +47,10 @@ void KernelVersion::parse(const char* s) {
 }
 
 KernelVersion::KernelVersion() {
-#ifdef _MSC_VER
-  OSVERSIONINFO verInf;
-  verInf.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-  GetVersionEx(&verInf);
-  m_major = verInf.dwMajorVersion;
-  m_minor = verInf.dwMinorVersion;
-  m_build = verInf.dwBuildNumber;
-  m_release = verInf.dwPlatformId;
-#else
   struct utsname uts;
   DEBUG_ONLY int err = uname(&uts);
   assert(err == 0);
   parse(uts.release);
-#endif
 }
 
 KernelVersion::KernelVersion(const char* s) {

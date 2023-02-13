@@ -38,11 +38,6 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/network.h"
 
-#if defined(__APPLE__)
-# include <arpa/nameser_compat.h>
-#include <vector>
-#endif
-
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

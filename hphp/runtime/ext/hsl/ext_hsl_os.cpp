@@ -115,15 +115,8 @@ Object hsl_sockaddr_from_native(const sockaddr_storage& addr, socklen_t len) {
           "sockaddr_un must fit in allocated space"
         );
         const sockaddr_un* const detail = reinterpret_cast<const sockaddr_un*>(&addr);
-#ifdef __linux__
         // Documented way to check for "unnamed" sockets: 0-byte-length sun_path
         const bool is_unnamed = len == sizeof(sa_family_t);
-#else
-        // This works on __APPLE__, generally makes sense, but means an 'abstract' socket
-        // on Linux
-        const bool is_unnamed = len <= offsetof(struct sockaddr_un, sun_path)
-          || detail->sun_path[0] == 0;
-#endif
         if (is_unnamed) {
           return create_object(s_HSL_sockaddr_un_unnamed, Array::CreateVec());
         }
@@ -192,11 +185,6 @@ void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, so
   }
   bzero(&native, sizeof(native));
   address_len = offsetof(struct sockaddr_storage, ss_family) + sizeof(native.ss_family);
-#ifdef __APPLE__
-  SCOPE_EXIT {
-    native.ss_len = address_len;
-  };
-#endif
   native.ss_family = object->propRvalAtOffset(s_sa_family_idx).val().num;
 #define CHECK_SOCKADDR_TYPE(sa, af) \
   static_assert( \
@@ -222,16 +210,8 @@ void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, so
         auto detail = reinterpret_cast<sockaddr_un*>(&native);
         const auto offset = offsetof(struct sockaddr_un, sun_path);
         if (object.instanceof(s_HSL_sockaddr_un_unnamed)) {
-#if defined(__linux__)
           address_len = sizeof(sa_family_t);
           return;
-#elif defined(__APPLE__)
-          // Match what MacOS gives us for socketpair()- 16 nulls
-          address_len = 16;
-          return;
-#else
-          static_assert(false, "Unsupported platform");
-#endif
         }
         assertx(object.instanceof(s_HSL_sockaddr_un_pathname));
 
@@ -658,22 +638,11 @@ Object HHVM_FUNCTION(HSL_os_socket, int64_t domain, int64_t type, int64_t protoc
   return HSLFileDescriptor::newInstance(fd);
 }
 
-#ifdef __APPLE__
-#define EINVAL_ON_BAD_SOCKADDR_LEN(ss, sslen) { \
-  if (sslen > sizeof(sockaddr_storage) || sslen < 0) { \
-    return { CLIError {}, EINVAL }; \
-  } \
-  if (sslen != ss.ss_len) { \
-    return { CLIError {}, EINVAL }; \
-  } \
-}
-#else // ifdef __APPLE__
 #define EINVAL_ON_BAD_SOCKADDR_LEN(ss, sslen) { \
   if (sslen > sizeof(sockaddr_storage) || sslen < 0) { \
     return { CLIError {}, EINVAL }; \
   } \
 }
-#endif // ifdef __APPLE__
 
 #define IMPL(fun) \
 CLISrvResult<int, int> CLI_CLIENT_HANDLER(HSL_os_## fun, \

@@ -89,14 +89,9 @@
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
 
-#if defined (__linux__) && defined (__aarch64__)
+#ifdef __aarch64__
 #include <sys/auxv.h>
 #include <asm/hwcap.h>
-#endif
-
-#ifdef __APPLE__
-#define st_mtim st_mtimespec
-#define st_ctim st_ctimespec
 #endif
 
 namespace HPHP {
@@ -1036,7 +1031,7 @@ static inline bool alignMacroFusionPairs() {
 }
 
 static inline bool armLseDefault() {
-#if defined (__linux__) && defined (__aarch64__) && defined (HWCAP_ATOMICS)
+#if defined (__aarch64__) && defined (HWCAP_ATOMICS)
   return (getauxval(AT_HWCAP) & HWCAP_ATOMICS) != 0;
 #else
   return false;
@@ -1044,11 +1039,7 @@ static inline bool armLseDefault() {
 }
 
 static inline bool evalJitDefault() {
-#ifdef _MSC_VER
-  return false;
-#else
   return true;
-#endif
 }
 
 static inline bool reuseTCDefault() {

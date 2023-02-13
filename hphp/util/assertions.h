@@ -33,20 +33,11 @@
 
 #define IMPLIES(a, b) (!(a) || (b))
 
-#if defined(__INTEL_COMPILER)
-#define not_reached()                                                \
-  do {                                                               \
-    assertx(false);                                                  \
-  } while (true)
-#elif defined(_MSC_VER)
-#define not_reached() __assume(0)
-#else
 #define not_reached() /* gcc-4.5 supports __builtin_unreachable() */  \
   do {                                                                \
     assertx(false);                                                   \
     __builtin_unreachable();                                          \
   } while (true)
-#endif
 
 #define not_implemented() do {                   \
   fprintf(stderr, "not implemented: %s:%d %s\n", \
@@ -201,4 +192,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

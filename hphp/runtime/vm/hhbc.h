@@ -353,8 +353,6 @@ enum class Op : std::conditional<Op_count <= 256, uint8_t, uint16_t>::type {
   OPCODES
 #undef O
 
-// These are comparable by default under MSVC.
-#ifndef _MSC_VER
 inline constexpr bool operator<(Op a, Op b) { return size_t(a) < size_t(b); }
 inline constexpr bool operator>(Op a, Op b) { return size_t(a) > size_t(b); }
 inline constexpr bool operator<=(Op a, Op b) {
@@ -363,7 +361,6 @@ inline constexpr bool operator<=(Op a, Op b) {
 inline constexpr bool operator>=(Op a, Op b) {
   return size_t(a) >= size_t(b);
 }
-#endif
 
 constexpr bool isValidOpcode(Op op) {
   return size_t(op) < Op_count;

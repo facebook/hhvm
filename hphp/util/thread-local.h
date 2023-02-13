@@ -31,10 +31,6 @@ namespace HPHP {
 // return the location of the current thread's tdata section
 std::pair<void*,size_t> getCppTdata();
 
-#ifdef _MSC_VER
-extern "C" int _tls_index;
-#endif
-
 inline uintptr_t tlsBase() {
   uintptr_t retval;
 #if defined(__x86_64__)
@@ -52,41 +48,7 @@ inline uintptr_t tlsBase() {
   return retval;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// gcc >= 4.3.0 supports the '__thread' keyword for thread locals
-//
-// Clang seems to have added this feature, or at the very least it is ignoring
-// __thread keyword and compiling anyway
-//
-// On OSX, gcc does emulate TLS but in a manner that invalidates assumptions
-// we have made about __thread and makes accessing thread-local variables in a
-// JIT-friendly fashion difficult (as the compiler is doing a lot of magic that
-// is not contractual or documented that we would need to duplicate in emitted
-// code) so for now we're not going to use it. One possibility if we really
-// want to do this is to generate functions that access variables of interest
-// in ThreadLocal* (all of them are NoCheck right now) and use the bytes of
-// gcc's compiled functions to find the values we would need to pass to
-// __emutls_get_address.
-//
-// icc 13.0.0 appears to support it as well but we end up with
-// assembler warnings of unknown importance about incorrect section
-// types
-//
-// __thread on cygwin and mingw uses pthreads emulation not native tls so
-// the emulation for thread local must be used as well
-//
-// So we use __thread on gcc, icc and clang, and OSX, falling back to
-// emulation on unsupported platforms. Use the THREAD_LOCAL() macro to
-// hide the decl details.
-//
-// See thread-local-emulate.h for the emulated versions; they're in a
-// separate header to avoid confusion; this is a long header file and it's
-// easy to lose track of which version you're looking at.
-
-#if !defined(NO_TLS) &&                                       \
-   ((__llvm__ && __clang__) ||                                \
-   __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) ||   \
-   __INTEL_COMPILER || defined(_MSC_VER))
+#if !defined(NO_TLS)
 #define USE_GCC_FAST_TLS
 #endif
 
@@ -113,10 +75,6 @@ inline void ThreadLocalSetValue(pthread_key_t key, const void* value) {
   ThreadLocalCheckReturn(ret, "pthread_setspecific");
 }
 
-#ifdef __APPLE__
-typedef struct __darwin_pthread_handler_rec darwin_pthread_handler;
-#endif
-
 } // namespace HPHP
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,7 +97,6 @@ typedef struct __darwin_pthread_handler_rec darwin_pthread_handler;
  */
 
 ///////////////////////////////////////////////////////////////////////////////
-#if defined(USE_GCC_FAST_TLS)
 
 namespace HPHP {
 /**
@@ -175,20 +132,12 @@ private:
   static void PushTop(void* node, uint32_t size, type_scan::Index);
   struct ThreadLocalList {
     void* head{nullptr};
-#ifdef __APPLE__
-    ThreadLocalList();
-    darwin_pthread_handler handler;
-#endif
   };
   static ThreadLocalList* getList(void* p) {
     return static_cast<ThreadLocalList*>(p);
   }
   ThreadLocalManager() : m_key(0) {
-#ifdef __APPLE__
-    ThreadLocalCreateKey(&m_key, nullptr);
-#else
     ThreadLocalCreateKey(&m_key, ThreadLocalManager::OnThreadExit);
-#endif
   };
   static void OnThreadExit(void *p);
   pthread_key_t m_key;
@@ -346,9 +295,5 @@ struct ThreadLocalFlat {
 #define THREAD_LOCAL_FLAT(T, f) __thread HPHP::ThreadLocalFlat<T> f
 
 } // namespace HPHP
-
-#else /* USE_GCC_FAST_TLS */
-#include "hphp/util/thread-local-emulate.h"
-#endif /* USE_GCC_FAST_TLS */
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-// We can't do this on MSVC, it's all debug or all release.
-#ifndef _MSC_VER
 /*
  * Forcibly define USE_TRACE, so we get the debug trace.h interface included
  * here. This allows mixed compilation, where some units were compiled
@@ -24,7 +22,7 @@
 #ifndef USE_TRACE
 #  define USE_TRACE 1
 #endif
-#endif
+
 #include "hphp/util/trace.h"
 
 #include <iostream>

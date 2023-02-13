@@ -89,14 +89,10 @@ class MultiplexAsyncProcessorFactory final : public AsyncProcessorFactory {
       std::size_t index;
       std::shared_ptr<const WildcardMethodMetadata> metadata;
     };
-    // createMethodMetadata() is not implemented
-    struct WildcardNoMetadata {
-      std::size_t index;
-    };
+
     // The first occurrence of a wildcard-like AsyncProcessorFactory swallows up
     // all requests left unhandled by all previous factories.
-    std::variant<std::monostate, Wildcard, WildcardNoMetadata>
-        firstWildcardLike;
+    std::variant<std::monostate, Wildcard> firstWildcardLike;
 
     // The return value of createMethodMetadata()
     CreateMethodMetadataResult cachedMethodMetadataResult;

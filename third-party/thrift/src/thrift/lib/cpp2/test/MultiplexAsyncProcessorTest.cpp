@@ -358,16 +358,6 @@ class WildcardThrowsInternalError : public TProcessorFactory {
   std::unique_ptr<AsyncProcessor> getProcessor() override {
     class Processor : public AsyncProcessor {
      public:
-      void processSerializedRequest(
-          ResponseChannelRequest::UniquePtr,
-          SerializedRequest&&,
-          protocol::PROTOCOL_TYPES,
-          Cpp2RequestContext*,
-          folly::EventBase*,
-          concurrency::ThreadManager*) override {
-        ADD_FAILURE() << "Should never be called";
-      }
-
       void processSerializedCompressedRequestWithMetadata(
           ResponseChannelRequest::UniquePtr req,
           SerializedCompressedRequest&& serializedRequest,
@@ -608,38 +598,6 @@ TEST_F(MultiplexAsyncProcessorServerTest, Interaction) {
 
   class TerminateInteractionTrackingProcessor : public AsyncProcessor {
    public:
-    void processSerializedRequest(
-        ResponseChannelRequest::UniquePtr req,
-        SerializedRequest&& serializedRequest,
-        protocol::PROTOCOL_TYPES protocolType,
-        Cpp2RequestContext* context,
-        folly::EventBase* eb,
-        concurrency::ThreadManager* tm) override {
-      delegate_->processSerializedRequest(
-          std::move(req),
-          std::move(serializedRequest),
-          protocolType,
-          context,
-          eb,
-          tm);
-    }
-
-    void processSerializedCompressedRequest(
-        ResponseChannelRequest::UniquePtr req,
-        SerializedCompressedRequest&& serializedRequest,
-        protocol::PROTOCOL_TYPES protocolType,
-        Cpp2RequestContext* context,
-        folly::EventBase* eb,
-        concurrency::ThreadManager* tm) override {
-      delegate_->processSerializedCompressedRequest(
-          std::move(req),
-          std::move(serializedRequest),
-          protocolType,
-          context,
-          eb,
-          tm);
-    }
-
     void processSerializedCompressedRequestWithMetadata(
         ResponseChannelRequest::UniquePtr req,
         SerializedCompressedRequest&& serializedRequest,

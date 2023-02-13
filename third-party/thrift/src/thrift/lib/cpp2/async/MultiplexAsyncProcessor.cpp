@@ -142,17 +142,6 @@ MultiplexAsyncProcessorFactory::CompositionMetadata computeCompositionMetadata(
 
 class MultiplexAsyncProcessor final : public AsyncProcessor {
  public:
-  void processSerializedRequest(
-      ResponseChannelRequest::UniquePtr,
-      SerializedRequest&&,
-      protocol::PROTOCOL_TYPES,
-      Cpp2RequestContext*,
-      folly::EventBase*,
-      concurrency::ThreadManager*) override {
-    LOG(FATAL)
-        << "This method should never be called since we implement createMethodMetadata()";
-  }
-
   void processSerializedCompressedRequestWithMetadata(
       ResponseChannelRequest::UniquePtr req,
       SerializedCompressedRequest&& serializedRequest,
@@ -217,19 +206,6 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
               std::move(req),
               std::move(serializedRequest),
               wildcardMethodMetadata,
-              protocolType,
-              context,
-              eb,
-              tm);
-        },
-        [&](const MultiplexAsyncProcessorFactory::CompositionMetadata::
-                WildcardNoMetadata& wildcard) {
-          DCHECK(wildcard.index < processors_.size());
-          auto& processor = *processors_[wildcard.index];
-          maybeTrackInteraction(processor);
-          processor.processSerializedCompressedRequest(
-              std::move(req),
-              std::move(serializedRequest),
               protocolType,
               context,
               eb,

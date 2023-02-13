@@ -332,45 +332,6 @@ class AsyncProcessor : public TProcessorBase {
   using WildcardMethodMetadata = AsyncProcessorFactory::WildcardMethodMetadata;
 
   /**
-   * DEPRECATED! This will be removed.
-   *
-   * Legacy overload for processing requests. This is pure virtual purely for
-   * backwards compatibility. Prefer implementing
-   * processSerializedCompressedRequestWithMetadata (or
-   * processSerializedCompressedRequest) instead.
-   *
-   * If either of those overloads are implemented, this function will NOT be
-   * called.
-   */
-  virtual void processSerializedRequest(
-      ResponseChannelRequest::UniquePtr,
-      SerializedRequest&&,
-      protocol::PROTOCOL_TYPES,
-      Cpp2RequestContext*,
-      folly::EventBase*,
-      concurrency::ThreadManager*) {
-    LOG(FATAL) << "AsyncProcessor::processSerializedRequest is not implemented";
-  }
-
-  /**
-   * DEPRECATED! This will be removed.
-   *
-   * Legacy overload for processing requests. By default, this calls
-   * processSerializedRequest for backward compatibility reasons. Prefer
-   * implementing processSerializedCompressedRequestWithMetadata instead.
-   *
-   * This overload is only called if
-   * AsyncProcessorFactory::createMethodMetadata() is not implemented.
-   */
-  virtual void processSerializedCompressedRequest(
-      ResponseChannelRequest::UniquePtr req,
-      SerializedCompressedRequest&& serializedRequest,
-      protocol::PROTOCOL_TYPES prot_type,
-      Cpp2RequestContext* context,
-      folly::EventBase* eb,
-      concurrency::ThreadManager* tm);
-
-  /**
    * Processes one incoming request / method.
    *
    * @param methodMetadata See AsyncProcessorFactory::createMethodMetadata()
@@ -649,32 +610,6 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
   template <typename InteractionConstructor>
   using InteractionConstructorMap =
       folly::F14ValueMap<std::string, InteractionConstructor>;
-
-  void processSerializedRequest(
-      ResponseChannelRequest::UniquePtr req,
-      SerializedRequest&& serializedRequest,
-      protocol::PROTOCOL_TYPES prot_type,
-      Cpp2RequestContext* context,
-      folly::EventBase* eb,
-      concurrency::ThreadManager* tm) final {
-    processSerializedCompressedRequest(
-        std::move(req),
-        SerializedCompressedRequest(std::move(serializedRequest)),
-        prot_type,
-        context,
-        eb,
-        tm);
-  }
-
-  // TODO(praihan): This function will be removed once we enforce that
-  // createMethodMetadata is always implemented correctly.
-  void processSerializedCompressedRequest(
-      ResponseChannelRequest::UniquePtr req,
-      SerializedCompressedRequest&& serializedRequest,
-      protocol::PROTOCOL_TYPES prot_type,
-      Cpp2RequestContext* context,
-      folly::EventBase* eb,
-      concurrency::ThreadManager* tm) override = 0;
 
   // Sends an error response if validation fails.
   static bool validateRpcKind(

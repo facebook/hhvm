@@ -299,26 +299,6 @@ class PythonAsyncProcessor : public AsyncProcessor {
         true /* fromExecuteRequest  */);
   }
 
-  // Create a task and add it to thread manager's queue. Essentially the same
-  // as GeneratedAsyncProcessorBase's processInThread method.
-  void processSerializedRequest(
-      ResponseChannelRequest::UniquePtr req,
-      apache::thrift::SerializedRequest&& serializedRequest,
-      apache::thrift::protocol::PROTOCOL_TYPES protType,
-      Cpp2RequestContext* context,
-      folly::EventBase* eb,
-      apache::thrift::concurrency::ThreadManager* tm) override {
-    processSerializedCompressedRequestWithMetadata(
-        std::move(req),
-        apache::thrift::SerializedCompressedRequest(
-            std::move(serializedRequest)),
-        apache::thrift::AsyncProcessorFactory::MethodMetadata(),
-        protType,
-        context,
-        eb,
-        tm);
-  }
-
   /**
    * Get the priority of the request
    * Check the headers directly in C++ since noone seems to override that logic

@@ -122,16 +122,6 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
       folly::Promise<folly::Unit> promise,
       apache::thrift::SerializedRequest serializedRequest);
 
-  void processSerializedRequest(
-      apache::thrift::ResponseChannelRequest::UniquePtr /* req */,
-      apache::thrift::SerializedRequest&& /* serializedRequest */,
-      apache::thrift::protocol::PROTOCOL_TYPES /* protType */,
-      apache::thrift::Cpp2RequestContext* /* context */,
-      folly::EventBase* /* eb */,
-      apache::thrift::concurrency::ThreadManager* /* tm */) override {
-    LOG(FATAL) << "shouldn't be called";
-  }
-
   void processSerializedCompressedRequestWithMetadata(
       apache::thrift::ResponseChannelRequest::UniquePtr req,
       apache::thrift::SerializedCompressedRequest&& serializedRequest,

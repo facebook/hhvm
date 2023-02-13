@@ -455,15 +455,6 @@ TEST_P(
       // method error.
       class Processor : public AsyncProcessor {
        public:
-        void processSerializedRequest(
-            ResponseChannelRequest::UniquePtr,
-            SerializedRequest&&,
-            protocol::PROTOCOL_TYPES,
-            Cpp2RequestContext*,
-            folly::EventBase*,
-            concurrency::ThreadManager*) override {
-          ADD_FAILURE() << "This overload should never be called";
-        }
         void processSerializedCompressedRequestWithMetadata(
             ResponseChannelRequest::UniquePtr req,
             SerializedCompressedRequest&& serializedRequest,

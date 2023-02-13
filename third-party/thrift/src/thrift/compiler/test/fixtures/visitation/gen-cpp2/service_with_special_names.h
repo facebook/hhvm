@@ -379,10 +379,6 @@ class service_with_special_namesAsyncProcessor : public ::apache::thrift::Genera
  protected:
   ::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>* iface_;
  public:
-  // This is implemented in case the corresponding AsyncProcessorFactory did not implement createMethodMetadata.
-  // This can happen if the service is using a custom AsyncProcessorFactory but re-using the same AsyncProcessor.
-  void processSerializedCompressedRequest(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
-  // By default, this overload will be called for generated services
   void processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
   void executeRequest(apache::thrift::ServerRequest&& serverRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata) override;
  public:

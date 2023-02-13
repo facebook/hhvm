@@ -161,6 +161,7 @@ module Naming = struct
     | DynamicMethodAccess [@value 2121]
     | TypeConstantInEnumClassOutsideAllowedLocations [@value 2122]
     | InvalidBuiltinType [@value 2123]
+    | InvalidMemoizeLabel [@value 2124]
   (* Add new Naming codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

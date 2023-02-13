@@ -1031,6 +1031,17 @@ pub fn memoize_too_many_arguments(attr: &String) -> Error {
     Cow::Owned(format!("The attribute {} takes at most one argument", attr))
 }
 
+pub fn memoize_invalid_label(attr: &str) -> Error {
+    Cow::Owned(format!("Invalid label for `{}`.", attr))
+}
+
+pub fn memoize_requires_label(attr: &str) -> Error {
+    Cow::Owned(format!(
+        "The first argument to `{}` must be a label, e.g. `#KeyedByIC`.",
+        attr
+    ))
+}
+
 pub fn lambda_effect_polymorphic(kind: &str) -> Error {
     Cow::Owned(format!("{} cannot have a polymorphic context", kind))
 }

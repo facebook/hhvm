@@ -1105,6 +1105,8 @@ module FB = struct
 end
 
 module HH = struct
+  let memoizeOption = "\\HH\\MemoizeOption"
+
   let contains = "\\HH\\Lib\\C\\contains"
 
   let contains_key = "\\HH\\Lib\\C\\contains_key"

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9decb30dcf5180196654fb51c53851a5>>
+// @generated SignedSource<<c65360b72404970bb60551845a0461d7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -191,6 +191,8 @@ pub enum NamingError {
         attr_name: String,
         prev_pos: pos::Pos,
     },
+    #[rust_to_ocaml(name = "Invalid_memoize_label")]
+    InvalidMemoizeLabel { pos: pos::Pos, attr_name: String },
     #[rust_to_ocaml(name = "Unbound_attribute_name")]
     UnboundAttributeName {
         pos: pos::Pos,

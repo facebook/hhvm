@@ -109,7 +109,7 @@ let passes =
     Naming_elab_hkt.pass on_error;
     (* Elaborate `Collection` to `ValCollection` or `KeyValCollection` *)
     Naming_elab_collection.pass on_error;
-    (* Deduplicate user attributes *)
+    (* Check that user attributes are well-formed *)
     Naming_elab_user_attributes.pass on_error;
     (* Replace import expressions with invalid expression marker *)
     Naming_elab_import.pass;

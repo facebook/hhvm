@@ -94,6 +94,10 @@ type t =
       attr_name: string;
       prev_pos: Pos.t;
     }
+  | Invalid_memoize_label of {
+      pos: Pos.t;
+      attr_name: string;
+    }
   | Unbound_attribute_name of {
       pos: Pos.t;
       attr_name: string;

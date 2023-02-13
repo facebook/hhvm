@@ -10,6 +10,8 @@ use hhbc::Attribute;
 use hhbc::TypedValue;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
+use oxidized::aast::Expr;
+use oxidized::aast::Expr_;
 use oxidized::ast as a;
 
 use crate::emit_expression;
@@ -25,11 +27,25 @@ pub fn from_ast<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     attr: &a::UserAttribute,
 ) -> Result<Attribute<'arena>> {
-    let arguments = constant_folder::literals_from_exprs(
-        &mut attr.params.clone(),
-        e,
-    )
-    .map_err(|err| {
+    let mut arguments: Vec<Expr<_, _>> = attr
+        .params
+        .iter()
+        .map(|param| {
+            // Treat enum class label syntax Foo#Bar as "Bar" in attribute arguments.
+            if let Expr_::EnumClassLabel(ecl) = &param.2 {
+                let label = &ecl.1;
+                Expr(
+                    param.0,
+                    param.1.clone(),
+                    Expr_::String(label.clone().into()),
+                )
+            } else {
+                param.clone()
+            }
+        })
+        .collect();
+
+    let arguments = constant_folder::literals_from_exprs(&mut arguments, e).map_err(|err| {
         assert_eq!(
             err,
             constant_folder::Error::UserDefinedConstant,

@@ -4280,23 +4280,6 @@ fn mk_fun_kind(suspension_kind: SuspensionKind, yield_: bool) -> ast::FunKind {
     }
 }
 
-fn memoized_attribute_arg_to_string<'a>(
-    node: S<'a>,
-    env: &mut Env<'a>,
-) -> Result<Option<ast::Expr>> {
-    match &node.children {
-        EnumClassLabelExpression(c) => {
-            let ast::Id(p, id) = pos_name(&c.expression, env)?;
-            if sn::memoize_option::is_valid(&id) {
-                Ok(Some(ast::Expr((), p, ast::Expr_::String(id.into()))))
-            } else {
-                Ok(None)
-            }
-        }
-        _ => Ok(None),
-    }
-}
-
 fn process_attribute_constructor_call<'a>(
     node: S<'a>,
     constructor_call_argument_list: S<'a>,
@@ -4318,6 +4301,17 @@ fn process_attribute_constructor_call<'a>(
         let list: Vec<_> = constructor_call_argument_list
             .syntax_node_to_list_skip_separator()
             .collect();
+
+        if let Some(first_arg) = list.first() {
+            if !matches!(first_arg.children, EnumClassLabelExpression(_)) {
+                raise_parsing_error(
+                    first_arg,
+                    env,
+                    &syntax_error::memoize_requires_label(&name.1),
+                );
+            }
+        }
+
         if list.len() > 1 {
             let ast::Id(_, first) = pos_name(list[0], env)?;
             let ast::Id(_, second) = pos_name(list[1], env)?;
@@ -4337,15 +4331,7 @@ fn process_attribute_constructor_call<'a>(
     }
     let params = could_map(constructor_call_argument_list, env, |n, e| {
         is_valid_attribute_arg(n, e, &name.1);
-        if sn::user_attributes::is_memoized(&name.1) {
-            if let Ok(Some(str)) = memoized_attribute_arg_to_string(n, e) {
-                Ok(str)
-            } else {
-                p_expr(n, e)
-            }
-        } else {
-            p_expr(n, e)
-        }
+        p_expr(n, e)
     })?;
     Ok(ast::UserAttribute { name, params })
 }
@@ -4364,10 +4350,14 @@ fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>, attr_name: &str) {
         ParenthesizedExpression(c) => is_valid_attribute_arg(&c.expression, env, attr_name),
         // Normal literals (string, int, etc)
         LiteralExpression(_) => {}
-        // Special tokens for memoization
-        EnumClassLabelExpression(_)
-            if sn::user_attributes::is_memoized(attr_name)
-                && memoized_attribute_arg_to_string(node, env) != Ok(None) => {}
+        // Only allow enum class label syntax on __Memoize and __MemizeLSB.
+        EnumClassLabelExpression(ecl) if sn::user_attributes::is_memoized(attr_name) => {
+            if let Ok(ast::Id(_, label_name)) = pos_name(&ecl.expression, env) {
+                if !sn::memoize_option::is_valid(&label_name) {
+                    raise_parsing_error(node, env, &syntax_error::memoize_invalid_label(attr_name));
+                }
+            }
+        }
         // ::class strings
         ScopeResolutionExpression(c) => {
             if let Some(TK::Class) = token_kind(&c.name) {
@@ -5309,10 +5299,9 @@ fn p_namespace_use_clause<'a>(
 fn is_memoize_attribute_with_flavor(u: &aast::UserAttribute<(), ()>, flavor: Option<&str>) -> bool {
     sn::user_attributes::is_memoized(&u.name.1)
         && (match flavor {
-            Some(flavor) => u
-                .params
-                .iter()
-                .any(|p| matches!(p, Expr(_, _, ast::Expr_::String(s)) if s == flavor)),
+            Some(flavor) => u.params.iter().any(
+                |p| matches!(p, Expr(_, _, ast::Expr_::EnumClassLabel(ecl)) if ecl.1 == flavor),
+            ),
             None => u.params.is_empty(),
         })
 }

@@ -6,8 +6,10 @@
  *
  *)
 open Hh_prelude
+open Aast
 
 let on_user_attributes on_error us ~ctx =
+  (* Complain on duplicates, e.g. <<Foo, Bar, Foo>>. *)
   let seen = Caml.Hashtbl.create 0 in
   let dedup (attrs, err_acc) (Aast.{ ua_name = (pos, attr_name); _ } as attr) =
     match Caml.Hashtbl.find_opt seen attr_name with
@@ -25,6 +27,50 @@ let on_user_attributes on_error us ~ctx =
     Tuple2.map_fst ~f:List.rev @@ List.fold_left us ~init:([], []) ~f:dedup
   in
   List.iter ~f:on_error errs;
+
+  (* Fully qualify arguments to __Memoize with enum class syntax.
+     E.g. <<__Memoize(#KeyedByIC)>> becomes <<__Memoize(\HH\MemoizeOption#KeyedByIC)>> *)
+  let us =
+    List.map
+      ~f:(fun ({ ua_name = (_, attr_name); ua_params } as attr) ->
+        if
+          String.equal attr_name Naming_special_names.UserAttributes.uaMemoize
+          || String.equal
+               attr_name
+               Naming_special_names.UserAttributes.uaMemoizeLSB
+        then
+          let ua_params =
+            List.map ua_params ~f:(fun e ->
+                let (ex, pos, e_) = e in
+                let e_ =
+                  match e_ with
+                  | EnumClassLabel (None, label) ->
+                    EnumClassLabel
+                      ( Some (Pos.none, Naming_special_names.HH.memoizeOption),
+                        label )
+                  | EnumClassLabel (Some cid, label) ->
+                    let (class_pos, class_name) = cid in
+                    if
+                      not
+                        (String.equal
+                           class_name
+                           Naming_special_names.HH.memoizeOption)
+                    then
+                      on_error
+                        (Naming_phase_error.naming
+                        @@ Naming_error.Invalid_memoize_label
+                             { pos = class_pos; attr_name });
+                    EnumClassLabel (Some cid, label)
+                  | _ -> e_
+                in
+                (ex, pos, e_))
+          in
+          { attr with ua_params }
+        else
+          attr)
+      us
+  in
+
   (ctx, Ok us)
 
 let pass on_error =

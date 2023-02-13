@@ -104,6 +104,10 @@ type t =
       attr_name: string;
       prev_pos: Pos.t;
     }
+  | Invalid_memoize_label of {
+      pos: Pos.t;
+      attr_name: string;
+    }
   | Unbound_attribute_name of {
       pos: Pos.t;
       attr_name: string;
@@ -636,6 +640,15 @@ let duplicate_user_attribute attr_name prev_pos pos =
       ( Pos_or_decl.of_raw_pos prev_pos,
         Markdown_lite.md_codify attr_name ^ " was already used here" );
     ]
+
+let invalid_memoize_label attr_name pos =
+  User_error.make
+    Error_code.(to_enum InvalidMemoizeLabel)
+    ( pos,
+      Format.sprintf
+        "%s can only be used with items from MemoizeOption."
+        (Markdown_lite.md_codify attr_name) )
+    []
 
 let unbound_name pos name kind =
   let kind_str =
@@ -1182,6 +1195,8 @@ let to_user_error = function
   | Invalid_type_access_root { pos; id } -> invalid_type_access_root pos id
   | Duplicate_user_attribute { attr_name; prev_pos; pos } ->
     duplicate_user_attribute attr_name prev_pos pos
+  | Invalid_memoize_label { attr_name; pos } ->
+    invalid_memoize_label attr_name pos
   | Unbound_name { pos; name; kind } -> unbound_name pos name kind
   | Unbound_attribute_name { pos; attr_name; closest_attr_name } ->
     unbound_attribute_name pos attr_name closest_attr_name

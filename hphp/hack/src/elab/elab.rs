@@ -28,13 +28,143 @@ use pass::Pass;
 use transform::Transform;
 
 pub fn elaborate_program(program: &mut ast::Program) -> Vec<NamingPhaseError> {
-    #[derive(Clone, Default)]
-    struct NoPass;
-    impl Pass for NoPass {
-        type Cfg = config::Config;
-        type Err = NamingPhaseError;
-    }
+    elaborate(program)
+}
+
+fn elaborate<T>(node: &mut T) -> Vec<NamingPhaseError>
+where
+    T: Transform<config::Config, NamingPhaseError>,
+{
+    #[rustfmt::skip]
+    let mut passes = passes![
+        // Stop on `Invalid` expressions
+        passes::guard_invalid::GuardInvalidPass::default(),
+
+        // -- Canonicalization passes -----------------------------------------
+
+        // Remove top-level file attributes, noop and markup statements
+        passes::elab_defs::ElabDefsPass::default(),
+
+        // Remove function bodies when in hhi mode
+        passes::elab_func_body::ElabFuncBodyPass::default(),
+
+        // Flatten `Block` statements
+        passes::elab_block::ElabBlockPass::default(),
+
+        // Strip `Hsoft` hints or replace with `Hlike`
+        passes::elab_hint_hsoft::ElabHintHsoftPass::default(),
+
+        // Elaborate `Happly` to canonical representation, if any
+        passes::elab_hint_happly::ElabHintHapplyPass::default(),
+
+        // Elaborate class identifier expressions (`CIexpr`) to canonical
+        // representation: `CIparent`, `CIself`, `CIstatic`, `CI` _or_
+        // `CIexpr (_,_, Lvar _ | This )`
+        passes::elab_class_id::ElabClassIdPass::default(),
+
+        // Strip type parameters from type parameters when HKTs are not enabled
+        passes::elab_hkt::ElabHktPass::default(),
+
+        // Elaborate `Collection` to `ValCollection` or `KeyValCollection`
+        passes::elab_expr_collection::ElabExprCollectionPass::default(),
+
+        // Deduplicate user attributes
+        passes::elab_user_attributes::ElabUserAttributesPass::default(),
+
+        // Replace import expressions with invalid expression marker
+        passes::elab_expr_import::ElabExprImportPass::default(),
+
+        // Elaborate local variables to canonical representation
+        passes::elab_expr_lvar::ElabExprLvarPass::default(),
+
+        // Warn of explicit use of builtin enum classes; make subtyping of
+        // enum classes explicit
+        passes::elab_enum_class::ElabEnumClassPass::default(),
+
+        // Elaborate class members & xhp attributes
+        // passes::elab_class_members::ElabClassMembersPass::default(),
+
+        // Elaborate special function calls to canonical representation, if any
+        // passes::elab_call::ElabCallPass::default(),
+
+        // Elaborate invariant calls to canonical representation
+        // passes::elab_invariant::ElabInvariantPass::default(),
+
+        // -- Mark invalid hints and expressions & miscellaneous validation ---
+
+        // Replace invalid uses of `void` and `noreturn` with `Herr`
+        // passes::elab_retonly_hint::ElabRetonlyHintPass::default(),
+
+        // Replace invalid uses of wildcard hints with `Herr`
+        // passes::elab_wildcard_hint::ElabWildcardHintPass::default(),
+
+        // Replace uses to `self` in shape field names with referenced class
+        // passes::elab_shape_field_name::ElabShapeFieldNamePass::default(),
+
+        // Replace invalid uses of `this` hints with `Herr`
+        // passes::elab_this_hint::ElabThisHintPass::default(),
+
+        // Replace invalid `Haccess` root hints with `Herr`
+        // passes::elab_haccess_hint::ElabHaccessHintPass::default(),
+
+        // Replace empty `Tuple`s with invalid expression marker
+        // passes::elab_tuple::ElabTuplePass::default(),
+
+        // Validate / replace invalid uses of dynamic classes in `New` and `Class_get`
+        // expressions
+        // passes::elab_dynamic_class_name::ElabDynamicClassNamePass::default(),
+
+        // Replace non-constant class or global constant with invalid expression marker
+        // passes::elab_const_expr::ElabConstExprPass::default(),
+
+        // Replace malformed key / value bindings in as expressions with invalid
+        // local var markers
+        // passes::elab_as_expr::ElabAsExprPass::default(),
+
+        // Validate hints used in `Cast` expressions
+        // passes::validate_cast_expr::ValidateCastExprPass::default(),
+
+        // Check for duplicate function parameter names
+        // passes::validate_fun_params::ValidateFunParamsPass::default(),
+
+        // Validate use of `require implements`, `require extends` and
+        // `require class` declarations for traits, interfaces and classes
+        // passes::validate_class_req::ValidateClassReqPass::default(),
+
+        // Validation dealing with common xhp naming errors
+        // passes::validate_xhp_name::ValidateXhpNamePass::default(),
+
+        // -- Elaboration & validation under typechecker options --------------
+
+        // Add `supportdyn` and `Like` wrappers everywhere - under `everything-sdt`
+        // typechecker option
+        // passes::elab_everything_sdt::ElabEverythingSdtPass::default(),
+
+        // Validate use of `Hlike` hints - depends on `enable-like-type-hints`
+        // and `everything_sdt` typechecker options
+        // passes::validate_like_hint::ValidateLikeHintPass::default(),
+
+        // Validate constructors under
+        // `consistent-explicit_consistent_constructors` typechecker option
+        // passes::validate_consistent_construct::ValidateConsistentConstructPass::default(),
+
+        // Validate  use of `SupportDyn` class - depends on `enable-supportdyn`
+        // and `everything_sdt` typechecker options
+        // passes::validate_supportdyn::ValidateSupportdynPass::default(),
+
+        // Validate uses of enum class type constants - depends on:
+        // - `allow_all_locations_for_type_constant_in_enum_class`
+        // - `allowed_locations_for_type_constant_in_enum_class`
+        // typecheck options
+        // passes::validate_enum_class_typeconst::ValidateEnumClassTypeconstPass::default(),
+
+        // Validate use of module definitions - depends on:
+        // - `allow_all_files_for_module_declarations`
+        // - `allowed_files_for_module_declarations`
+        // typechecker options
+        // passes::validate_module::ValidateModulePass::default(),
+    ];
     let mut errs = Vec::default();
-    program.transform(&Default::default(), &mut errs, &mut passes![NoPass, NoPass]);
+    node.transform(&Default::default(), &mut errs, &mut passes);
     errs
 }

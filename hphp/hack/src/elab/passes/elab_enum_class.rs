@@ -19,9 +19,9 @@ use crate::config::Config;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
-pub struct ElabClassIdPass;
+pub struct ElabEnumClassPass;
 
-impl Pass for ElabClassIdPass {
+impl Pass for ElabEnumClassPass {
     type Cfg = Config;
     type Err = NamingPhaseError;
 
@@ -151,7 +151,7 @@ mod tests {
     fn test_enum_class_concrete() {
         let cfg = Config::default();
         let mut errs = Vec::default();
-        let mut pass = ElabClassIdPass;
+        let mut pass = ElabEnumClassPass;
 
         let mut elem: Class_<(), ()> = make_enum_class_(
             ClassishKind::CenumClass(Abstraction::Concrete),
@@ -189,7 +189,7 @@ mod tests {
     fn test_enum_class_abstract() {
         let cfg = Config::default();
         let mut errs = Vec::default();
-        let mut pass = ElabClassIdPass;
+        let mut pass = ElabEnumClassPass;
 
         let mut elem: Class_<(), ()> = make_enum_class_(
             ClassishKind::CenumClass(Abstraction::Abstract),
@@ -215,7 +215,7 @@ mod tests {
     fn test_enum() {
         let cfg = Config::default();
         let mut errs = Vec::default();
-        let mut pass = ElabClassIdPass;
+        let mut pass = ElabEnumClassPass;
 
         let mut elem: Class_<(), ()> = make_enum_class_(
             ClassishKind::Cenum,

@@ -15,9 +15,9 @@ use crate::config::Config;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
-pub struct ElabHKTPass;
+pub struct ElabHktPass;
 
-impl Pass for ElabHKTPass {
+impl Pass for ElabHktPass {
     type Cfg = Config;
     type Err = NamingPhaseError;
 
@@ -80,7 +80,7 @@ mod tests {
         let cfg_hkt_enabled = Config::HKT_ENABLED;
         let cfg_hkt_disabled = Config::default();
         let mut errs = Vec::default();
-        let mut pass = ElabHKTPass;
+        let mut pass = ElabHktPass;
         let mut elem = Hint(
             Pos::make_none(),
             Box::new(Hint_::Habstr(
@@ -111,7 +111,7 @@ mod tests {
         let cfg_hkt_enabled = Config::HKT_ENABLED;
         let cfg_hkt_disabled = Config::default();
         let mut errs = Vec::default();
-        let mut pass = ElabHKTPass;
+        let mut pass = ElabHktPass;
 
         let mut elem: Tparam<(), ()> = Tparam {
             variance: Variance::Invariant,

@@ -1,32 +1,5 @@
 Program(
     [
-        Stmt(
-            Stmt(
-                Pos(
-                    Tiny {
-                        file: RelativePath {
-                            prefix: Dummy,
-                            path: "num_type_hint.php",
-                        },
-                        span: PosSpanTiny { from 1:0 to 1:4 },
-                    },
-                ),
-                Markup(
-                    (
-                        Pos(
-                            Tiny {
-                                file: RelativePath {
-                                    prefix: Dummy,
-                                    path: "num_type_hint.php",
-                                },
-                                span: PosSpanTiny { from 1:0 to 1:4 },
-                            },
-                        ),
-                        "",
-                    ),
-                ),
-            ),
-        ),
         Fun(
             FunDef {
                 namespace: Env {
@@ -184,20 +157,8 @@ Program(
                                         span: PosSpanTiny { from 12:30 to 12:33 },
                                     },
                                 ),
-                                Happly(
-                                    Id(
-                                        Pos(
-                                            Tiny {
-                                                file: RelativePath {
-                                                    prefix: Dummy,
-                                                    path: "num_type_hint.php",
-                                                },
-                                                span: PosSpanTiny { from 12:30 to 12:33 },
-                                            },
-                                        ),
-                                        "num",
-                                    ),
-                                    [],
+                                Hprim(
+                                    Tnum,
                                 ),
                             ),
                         ),
@@ -220,20 +181,8 @@ Program(
                                                 span: PosSpanTiny { from 12:11 to 12:14 },
                                             },
                                         ),
-                                        Happly(
-                                            Id(
-                                                Pos(
-                                                    Tiny {
-                                                        file: RelativePath {
-                                                            prefix: Dummy,
-                                                            path: "num_type_hint.php",
-                                                        },
-                                                        span: PosSpanTiny { from 12:11 to 12:14 },
-                                                    },
-                                                ),
-                                                "num",
-                                            ),
-                                            [],
+                                        Hprim(
+                                            Tnum,
                                         ),
                                     ),
                                 ),
@@ -272,20 +221,8 @@ Program(
                                                 span: PosSpanTiny { from 12:20 to 12:23 },
                                             },
                                         ),
-                                        Happly(
-                                            Id(
-                                                Pos(
-                                                    Tiny {
-                                                        file: RelativePath {
-                                                            prefix: Dummy,
-                                                            path: "num_type_hint.php",
-                                                        },
-                                                        span: PosSpanTiny { from 12:20 to 12:23 },
-                                                    },
-                                                ),
-                                                "num",
-                                            ),
-                                            [],
+                                        Hprim(
+                                            Tnum,
                                         ),
                                     ),
                                 ),
@@ -598,20 +535,8 @@ Program(
                                         span: PosSpanTiny { from 16:32 to 16:35 },
                                     },
                                 ),
-                                Happly(
-                                    Id(
-                                        Pos(
-                                            Tiny {
-                                                file: RelativePath {
-                                                    prefix: Dummy,
-                                                    path: "num_type_hint.php",
-                                                },
-                                                span: PosSpanTiny { from 16:32 to 16:35 },
-                                            },
-                                        ),
-                                        "num",
-                                    ),
-                                    [],
+                                Hprim(
+                                    Tnum,
                                 ),
                             ),
                         ),
@@ -634,20 +559,8 @@ Program(
                                                 span: PosSpanTiny { from 16:13 to 16:16 },
                                             },
                                         ),
-                                        Happly(
-                                            Id(
-                                                Pos(
-                                                    Tiny {
-                                                        file: RelativePath {
-                                                            prefix: Dummy,
-                                                            path: "num_type_hint.php",
-                                                        },
-                                                        span: PosSpanTiny { from 16:13 to 16:16 },
-                                                    },
-                                                ),
-                                                "int",
-                                            ),
-                                            [],
+                                        Hprim(
+                                            Tint,
                                         ),
                                     ),
                                 ),
@@ -686,20 +599,8 @@ Program(
                                                 span: PosSpanTiny { from 16:22 to 16:25 },
                                             },
                                         ),
-                                        Happly(
-                                            Id(
-                                                Pos(
-                                                    Tiny {
-                                                        file: RelativePath {
-                                                            prefix: Dummy,
-                                                            path: "num_type_hint.php",
-                                                        },
-                                                        span: PosSpanTiny { from 16:22 to 16:25 },
-                                                    },
-                                                ),
-                                                "int",
-                                            ),
-                                            [],
+                                        Hprim(
+                                            Tint,
                                         ),
                                     ),
                                 ),
@@ -1002,20 +903,8 @@ Program(
                                                     span: PosSpanTiny { from 20:34 to 20:39 },
                                                 },
                                             ),
-                                            Happly(
-                                                Id(
-                                                    Pos(
-                                                        Tiny {
-                                                            file: RelativePath {
-                                                                prefix: Dummy,
-                                                                path: "num_type_hint.php",
-                                                            },
-                                                            span: PosSpanTiny { from 20:34 to 20:39 },
-                                                        },
-                                                    ),
-                                                    "float",
-                                                ),
-                                                [],
+                                            Hprim(
+                                                Tfloat,
                                             ),
                                         ),
                                         Hint(
@@ -1028,20 +917,8 @@ Program(
                                                     span: PosSpanTiny { from 20:41 to 20:44 },
                                                 },
                                             ),
-                                            Happly(
-                                                Id(
-                                                    Pos(
-                                                        Tiny {
-                                                            file: RelativePath {
-                                                                prefix: Dummy,
-                                                                path: "num_type_hint.php",
-                                                            },
-                                                            span: PosSpanTiny { from 20:41 to 20:44 },
-                                                        },
-                                                    ),
-                                                    "int",
-                                                ),
-                                                [],
+                                            Hprim(
+                                                Tint,
                                             ),
                                         ),
                                     ],
@@ -1067,20 +944,8 @@ Program(
                                                 span: PosSpanTiny { from 20:14 to 20:17 },
                                             },
                                         ),
-                                        Happly(
-                                            Id(
-                                                Pos(
-                                                    Tiny {
-                                                        file: RelativePath {
-                                                            prefix: Dummy,
-                                                            path: "num_type_hint.php",
-                                                        },
-                                                        span: PosSpanTiny { from 20:14 to 20:17 },
-                                                    },
-                                                ),
-                                                "num",
-                                            ),
-                                            [],
+                                        Hprim(
+                                            Tnum,
                                         ),
                                     ),
                                 ),
@@ -1119,20 +984,8 @@ Program(
                                                 span: PosSpanTiny { from 20:23 to 20:26 },
                                             },
                                         ),
-                                        Happly(
-                                            Id(
-                                                Pos(
-                                                    Tiny {
-                                                        file: RelativePath {
-                                                            prefix: Dummy,
-                                                            path: "num_type_hint.php",
-                                                        },
-                                                        span: PosSpanTiny { from 20:23 to 20:26 },
-                                                    },
-                                                ),
-                                                "num",
-                                            ),
-                                            [],
+                                        Hprim(
+                                            Tnum,
                                         ),
                                     ),
                                 ),
@@ -1210,20 +1063,8 @@ Program(
                                                                                 span: PosSpanTiny { from 21:16 to 21:21 },
                                                                             },
                                                                         ),
-                                                                        Happly(
-                                                                            Id(
-                                                                                Pos(
-                                                                                    Tiny {
-                                                                                        file: RelativePath {
-                                                                                            prefix: Dummy,
-                                                                                            path: "num_type_hint.php",
-                                                                                        },
-                                                                                        span: PosSpanTiny { from 21:16 to 21:21 },
-                                                                                    },
-                                                                                ),
-                                                                                "float",
-                                                                            ),
-                                                                            [],
+                                                                        Hprim(
+                                                                            Tfloat,
                                                                         ),
                                                                     ),
                                                                     Expr(
@@ -1281,20 +1122,8 @@ Program(
                                                                                 span: PosSpanTiny { from 21:29 to 21:32 },
                                                                             },
                                                                         ),
-                                                                        Happly(
-                                                                            Id(
-                                                                                Pos(
-                                                                                    Tiny {
-                                                                                        file: RelativePath {
-                                                                                            prefix: Dummy,
-                                                                                            path: "num_type_hint.php",
-                                                                                        },
-                                                                                        span: PosSpanTiny { from 21:29 to 21:32 },
-                                                                                    },
-                                                                                ),
-                                                                                "int",
-                                                                            ),
-                                                                            [],
+                                                                        Hprim(
+                                                                            Tint,
                                                                         ),
                                                                     ),
                                                                     Expr(
@@ -1506,20 +1335,8 @@ Program(
                                         span: PosSpanTiny { from 36:35 to 36:38 },
                                     },
                                 ),
-                                Happly(
-                                    Id(
-                                        Pos(
-                                            Tiny {
-                                                file: RelativePath {
-                                                    prefix: Dummy,
-                                                    path: "num_type_hint.php",
-                                                },
-                                                span: PosSpanTiny { from 36:35 to 36:38 },
-                                            },
-                                        ),
-                                        "num",
-                                    ),
-                                    [],
+                                Hprim(
+                                    Tnum,
                                 ),
                             ),
                         ),
@@ -1553,20 +1370,8 @@ Program(
                                                         span: PosSpanTiny { from 36:16 to 36:19 },
                                                     },
                                                 ),
-                                                Happly(
-                                                    Id(
-                                                        Pos(
-                                                            Tiny {
-                                                                file: RelativePath {
-                                                                    prefix: Dummy,
-                                                                    path: "num_type_hint.php",
-                                                                },
-                                                                span: PosSpanTiny { from 36:16 to 36:19 },
-                                                            },
-                                                        ),
-                                                        "num",
-                                                    ),
-                                                    [],
+                                                Hprim(
+                                                    Tnum,
                                                 ),
                                             ),
                                         ),
@@ -1607,20 +1412,8 @@ Program(
                                                 span: PosSpanTiny { from 36:25 to 36:28 },
                                             },
                                         ),
-                                        Happly(
-                                            Id(
-                                                Pos(
-                                                    Tiny {
-                                                        file: RelativePath {
-                                                            prefix: Dummy,
-                                                            path: "num_type_hint.php",
-                                                        },
-                                                        span: PosSpanTiny { from 36:25 to 36:28 },
-                                                    },
-                                                ),
-                                                "num",
-                                            ),
-                                            [],
+                                        Hprim(
+                                            Tnum,
                                         ),
                                     ),
                                 ),
@@ -2079,20 +1872,8 @@ Program(
                                         span: PosSpanTiny { from 43:17 to 43:21 },
                                     },
                                 ),
-                                Happly(
-                                    Id(
-                                        Pos(
-                                            Tiny {
-                                                file: RelativePath {
-                                                    prefix: Dummy,
-                                                    path: "num_type_hint.php",
-                                                },
-                                                span: PosSpanTiny { from 43:17 to 43:21 },
-                                            },
-                                        ),
-                                        "void",
-                                    ),
-                                    [],
+                                Hprim(
+                                    Tvoid,
                                 ),
                             ),
                         ),
@@ -3129,20 +2910,8 @@ Program(
                                         span: PosSpanTiny { from 56:38 to 56:42 },
                                     },
                                 ),
-                                Happly(
-                                    Id(
-                                        Pos(
-                                            Tiny {
-                                                file: RelativePath {
-                                                    prefix: Dummy,
-                                                    path: "num_type_hint.php",
-                                                },
-                                                span: PosSpanTiny { from 56:38 to 56:42 },
-                                            },
-                                        ),
-                                        "bool",
-                                    ),
-                                    [],
+                                Hprim(
+                                    Tbool,
                                 ),
                             ),
                         ),
@@ -3165,20 +2934,8 @@ Program(
                                                 span: PosSpanTiny { from 56:21 to 56:24 },
                                             },
                                         ),
-                                        Happly(
-                                            Id(
-                                                Pos(
-                                                    Tiny {
-                                                        file: RelativePath {
-                                                            prefix: Dummy,
-                                                            path: "num_type_hint.php",
-                                                        },
-                                                        span: PosSpanTiny { from 56:21 to 56:24 },
-                                                    },
-                                                ),
-                                                "int",
-                                            ),
-                                            [],
+                                        Hprim(
+                                            Tint,
                                         ),
                                     ),
                                 ),
@@ -3217,20 +2974,8 @@ Program(
                                                 span: PosSpanTiny { from 56:29 to 56:32 },
                                             },
                                         ),
-                                        Happly(
-                                            Id(
-                                                Pos(
-                                                    Tiny {
-                                                        file: RelativePath {
-                                                            prefix: Dummy,
-                                                            path: "num_type_hint.php",
-                                                        },
-                                                        span: PosSpanTiny { from 56:29 to 56:32 },
-                                                    },
-                                                ),
-                                                "int",
-                                            ),
-                                            [],
+                                        Hprim(
+                                            Tint,
                                         ),
                                     ),
                                 ),

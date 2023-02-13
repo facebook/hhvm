@@ -1,32 +1,5 @@
 Program(
     [
-        Stmt(
-            Stmt(
-                Pos(
-                    Tiny {
-                        file: RelativePath {
-                            prefix: Dummy,
-                            path: "tuple_hints.php",
-                        },
-                        span: PosSpanTiny { from 1:0 to 1:4 },
-                    },
-                ),
-                Markup(
-                    (
-                        Pos(
-                            Tiny {
-                                file: RelativePath {
-                                    prefix: Dummy,
-                                    path: "tuple_hints.php",
-                                },
-                                span: PosSpanTiny { from 1:0 to 1:4 },
-                            },
-                        ),
-                        "",
-                    ),
-                ),
-            ),
-        ),
         Fun(
             FunDef {
                 namespace: Env {
@@ -175,20 +148,8 @@ Program(
                                         span: PosSpanTiny { from 12:29 to 12:33 },
                                     },
                                 ),
-                                Happly(
-                                    Id(
-                                        Pos(
-                                            Tiny {
-                                                file: RelativePath {
-                                                    prefix: Dummy,
-                                                    path: "tuple_hints.php",
-                                                },
-                                                span: PosSpanTiny { from 12:29 to 12:33 },
-                                            },
-                                        ),
-                                        "void",
-                                    ),
-                                    [],
+                                Hprim(
+                                    Tvoid,
                                 ),
                             ),
                         ),
@@ -235,20 +196,8 @@ Program(
                                                             span: PosSpanTiny { from 12:19 to 12:22 },
                                                         },
                                                     ),
-                                                    Happly(
-                                                        Id(
-                                                            Pos(
-                                                                Tiny {
-                                                                    file: RelativePath {
-                                                                        prefix: Dummy,
-                                                                        path: "tuple_hints.php",
-                                                                    },
-                                                                    span: PosSpanTiny { from 12:19 to 12:22 },
-                                                                },
-                                                            ),
-                                                            "int",
-                                                        ),
-                                                        [],
+                                                    Hprim(
+                                                        Tint,
                                                     ),
                                                 ),
                                             ],

@@ -23,12 +23,13 @@ use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Pos;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
+#[derive(Clone, Copy, Default)]
 pub struct ElabExprCollectionPass;
 
 impl Pass for ElabExprCollectionPass {
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
 
     /// Translate `Collection1 expressions received from lowering into
@@ -44,10 +45,10 @@ impl Pass for ElabExprCollectionPass {
     /// errors in the explicit type arguments and the expressions
     /// within the collection literal.
 
-    fn on_ty_expr<Ex: Default, En>(
-        &self,
+    fn on_ty_expr_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Expr<Ex, En>,
-        _ctx: &mut Self::Ctx,
+        _ctx: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         let Expr(_annot, _pos, expr_) = elem;
@@ -318,20 +319,14 @@ mod tests {
 
     use super::*;
 
-    pub struct Identity;
-    impl Pass for Identity {
-        type Err = NamingPhaseError;
-        type Ctx = Context;
-    }
-
     // -- ValCollection --------------------------------------------------------
 
     #[test]
     fn test_val_collection_empty() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -342,7 +337,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert_eq!(errs.len(), 0);
@@ -351,10 +346,10 @@ mod tests {
 
     #[test]
     fn test_val_collection_afvalue() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -369,7 +364,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert_eq!(errs.len(), 0);
@@ -378,10 +373,10 @@ mod tests {
 
     #[test]
     fn test_val_collection_afkvalue() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -395,7 +390,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert!(matches!(
@@ -409,10 +404,10 @@ mod tests {
 
     #[test]
     fn test_val_collection_val_arg() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -426,7 +421,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert_eq!(errs.len(), 0);
@@ -435,10 +430,10 @@ mod tests {
 
     #[test]
     fn test_val_collection_key_val_arg() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -452,7 +447,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert!(matches!(
@@ -472,10 +467,10 @@ mod tests {
 
     #[test]
     fn test_key_val_collection_empty() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -486,7 +481,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert_eq!(errs.len(), 0);
@@ -495,10 +490,10 @@ mod tests {
 
     #[test]
     fn test_key_val_collection_afvalue() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -513,7 +508,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert!(matches!(
@@ -525,10 +520,10 @@ mod tests {
 
     #[test]
     fn test_key_val_collection_afkvalue() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -542,7 +537,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert_eq!(errs.len(), 0);
@@ -551,10 +546,10 @@ mod tests {
 
     #[test]
     fn test_key_val_collection_val_arg() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -568,7 +563,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert!(matches!(
@@ -586,10 +581,10 @@ mod tests {
 
     #[test]
     fn test_key_val_collection_key_val_arg() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -603,7 +598,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert_eq!(errs.len(), 0);
@@ -612,10 +607,10 @@ mod tests {
     // -- Pair -----------------------------------------------------------------
     #[test]
     fn test_pair() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -629,7 +624,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert_eq!(errs.len(), 0);
@@ -638,10 +633,10 @@ mod tests {
 
     #[test]
     fn test_pair_too_few_exprs() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -656,7 +651,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert!(matches!(
@@ -668,10 +663,10 @@ mod tests {
 
     #[test]
     fn test_pair_too_many_exprs() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -686,7 +681,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert!(matches!(
@@ -698,10 +693,10 @@ mod tests {
 
     #[test]
     fn test_pair_val_arg() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -718,7 +713,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert!(matches!(
@@ -736,10 +731,10 @@ mod tests {
 
     #[test]
     fn test_pair_key_val_arg() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -755,7 +750,7 @@ mod tests {
                 ],
             ))),
         );
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         let Expr(_, _, expr_) = elem;
         assert_eq!(errs.len(), 0);
         assert!(matches!(expr_, Expr_::Pair(_)));
@@ -765,10 +760,10 @@ mod tests {
 
     #[test]
     fn test_not_a_collection() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprCollectionPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprCollectionPass;
+
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::make_none(),
@@ -778,7 +773,7 @@ mod tests {
                 vec![],
             ))),
         );
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         let Expr(_, _, expr_) = elem;
         assert!(matches!(
             errs.pop(),

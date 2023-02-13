@@ -19,12 +19,15 @@ use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Pos;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
-pub struct ElabClassIdPass;
+#[derive(Clone, Copy, Default)]
+pub struct ElabClassIdPass {
+    in_class: bool,
+}
 
 impl Pass for ElabClassIdPass {
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
 
     /*
@@ -46,15 +49,14 @@ impl Pass for ElabClassIdPass {
      TODO[mjt] Lowering gives us a very specific representation but we don't
      enforce this invariant at all here
     */
-    fn on_ty_class_id<Ex: Default, En>(
-        &self,
+    fn on_ty_class_id_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut ClassId<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         let ClassId(_annot, pos, class_id_) = elem;
         if let ClassId_::CIexpr(Expr(_, expr_pos, expr_)) = class_id_ as &mut ClassId_<_, _> {
-            let in_class = ctx.in_class();
             // [mjt] For some reason the legacy code modifies the position of
             // the surrounding [ClassId]. This seems wrong and causes a clone
             *pos = expr_pos.clone();
@@ -64,7 +66,7 @@ impl Pass for ElabClassIdPass {
                     // valid if we are in a class
                     let Id(id_pos, cname) = sid as &mut Sid;
                     if cname == sn::classes::PARENT {
-                        if !in_class {
+                        if !self.in_class {
                             let err_pos = std::mem::replace(id_pos, Pos::make_none());
                             let err =
                                 NamingPhaseError::Naming(NamingError::ParentOutsideClass(err_pos));
@@ -75,7 +77,7 @@ impl Pass for ElabClassIdPass {
                             *class_id_ = ClassId_::CIparent
                         }
                     } else if cname == sn::classes::SELF {
-                        if !in_class {
+                        if !self.in_class {
                             let err_pos = std::mem::replace(id_pos, Pos::make_none());
                             let err =
                                 NamingPhaseError::Naming(NamingError::SelfOutsideClass(err_pos));
@@ -86,7 +88,7 @@ impl Pass for ElabClassIdPass {
                             *class_id_ = ClassId_::CIself
                         }
                     } else if cname == sn::classes::STATIC {
-                        if !in_class {
+                        if !self.in_class {
                             let err_pos = std::mem::replace(id_pos, Pos::make_none());
                             let err =
                                 NamingPhaseError::Naming(NamingError::StaticOutsideClass(err_pos));
@@ -124,25 +126,26 @@ impl Pass for ElabClassIdPass {
         }
     }
 
-    fn on_ty_class_<Ex: Default, En>(
-        &self,
+    #[allow(non_snake_case)]
+    fn on_ty_class__top_down<Ex: Default, En>(
+        &mut self,
         _elem: &mut oxidized::aast::Class_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.set_in_class(true);
+        self.in_class = true;
         ControlFlow::Continue(())
     }
 
     /* The attributes applied to a class exist outside the current class so
     references to `self` are invalid */
-    fn on_fld_class__user_attributes<Ex: Default, En>(
-        &self,
+    fn on_fld_class__user_attributes_top_down<Ex: Default, En>(
+        &mut self,
         _elem: &mut oxidized::tast::UserAttributes<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.set_in_class(true);
+        self.in_class = true;
         ControlFlow::Continue(())
     }
 }
@@ -152,20 +155,12 @@ mod tests {
     use transform::Transform;
 
     use super::*;
-
-    pub struct Identity;
-    impl Pass for Identity {
-        type Err = NamingPhaseError;
-        type Ctx = Context;
-    }
-
     // Elaboration of CIexpr(..,..,Id(..,..)) when the id refers to a class
     #[test]
     fn test_ciexpr_id_class_ref() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabClassIdPass;
-        let bottom_up = Identity;
+        let mut pass = ElabClassIdPass::default();
 
         let cases: Vec<(&str, ClassId_<(), ()>)> = vec![
             (sn::classes::SELF, ClassId_::CIself),
@@ -186,8 +181,8 @@ mod tests {
 
             // transforming when outside a class
             // expect CI(Id(.., UNKNOWN))
-            ctx.set_in_class(false);
-            elem_outside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+            pass.in_class = false;
+            elem_outside.transform(&cfg, &mut errs, &mut pass);
             let ClassId(_, _, class_id_) = elem_outside;
             assert!(match class_id_ {
                 ClassId_::CI(Id(_, nm)) => nm == sn::classes::UNKNOWN,
@@ -196,8 +191,8 @@ mod tests {
 
             // transforming when inside a class
             // expect
-            ctx.set_in_class(true);
-            elem_inside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+            pass.in_class = true;
+            elem_inside.transform(&cfg, &mut errs, &mut pass);
             let ClassId(_, _, class_id_) = elem_inside;
             assert_eq!(class_id_, repr)
         }
@@ -207,10 +202,9 @@ mod tests {
     // to a class
     #[test]
     fn test_ciexpr_id_non_class_ref() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabClassIdPass;
-        let bottom_up = Identity;
+        let mut pass = ElabClassIdPass::default();
         let cname = "Classy";
 
         let mut elem_outside: ClassId<(), ()> = ClassId(
@@ -226,8 +220,8 @@ mod tests {
 
         // transforming when outside a class
         // expect CI(Id(.., cname))
-        ctx.set_in_class(false);
-        elem_outside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        pass.in_class = false;
+        elem_outside.transform(&cfg, &mut errs, &mut pass);
         let ClassId(_, _, class_id_) = elem_outside;
         assert!(match class_id_ {
             ClassId_::CI(Id(_, nm)) => nm == cname,
@@ -236,8 +230,8 @@ mod tests {
 
         // transforming when inside a class
         // expect CI(Id(.., cname))
-        ctx.set_in_class(true);
-        elem_inside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        pass.in_class = true;
+        elem_inside.transform(&cfg, &mut errs, &mut pass);
         let ClassId(_, _, class_id_) = elem_inside;
         assert!(match class_id_ {
             ClassId_::CI(Id(_, nm)) => nm == cname,
@@ -248,10 +242,9 @@ mod tests {
     // Elaboration of CIexpr(..,..,Lvar(..,this)) => CIexpr(..,..,This)
     #[test]
     fn test_ciexpr_lvar_this() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabClassIdPass;
-        let bottom_up = Identity;
+        let mut pass = ElabClassIdPass::default();
 
         let mut elem_outside: ClassId<(), ()> = ClassId(
             (),
@@ -269,8 +262,8 @@ mod tests {
 
         // transforming when outside a class
         // expect CIexpr(_,_,This)
-        ctx.set_in_class(false);
-        elem_outside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        pass.in_class = false;
+        elem_outside.transform(&cfg, &mut errs, &mut pass);
         let ClassId(_, _, class_id_) = elem_outside;
         assert!(matches!(
             class_id_,
@@ -279,8 +272,8 @@ mod tests {
 
         // transforming when inside a class
         // expect
-        ctx.set_in_class(true);
-        elem_inside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        pass.in_class = true;
+        elem_inside.transform(&cfg, &mut errs, &mut pass);
         let ClassId(_, _, class_id_) = elem_inside;
         assert!(matches!(
             class_id_,
@@ -295,10 +288,9 @@ mod tests {
     // in this position
     #[test]
     fn test_ciexpr_fallthrough() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabClassIdPass;
-        let bottom_up = Identity;
+        let mut pass = ElabClassIdPass::default();
 
         let exprs_ = vec![
             Expr_::Lvar(Box::new(Lid(
@@ -316,16 +308,16 @@ mod tests {
             );
             let mut elem_inside = elem_outside.clone();
 
-            ctx.set_in_class(false);
-            elem_outside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+            pass.in_class = false;
+            elem_outside.transform(&cfg, &mut errs, &mut pass);
             let ClassId(_, _, class_id_) = elem_outside;
             assert!(match class_id_ {
                 ClassId_::CIexpr(Expr(_, _, ci_expr_)) => ci_expr_ == expr_,
                 _ => false,
             });
 
-            ctx.set_in_class(true);
-            elem_inside.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+            pass.in_class = true;
+            elem_inside.transform(&cfg, &mut errs, &mut pass);
             let ClassId(_, _, class_id_) = elem_inside;
             assert!(match class_id_ {
                 ClassId_::CIexpr(Expr(_, _, ci_expr_)) => ci_expr_ == expr_,

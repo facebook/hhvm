@@ -8,6 +8,7 @@ use quote::quote;
 
 use super::contains_ocaml_attr;
 use super::Context;
+use super::Direction;
 
 pub fn gen(ctx: &Context) -> TokenStream {
     let pass_methods: Vec<_> = ctx
@@ -20,7 +21,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
         .collect();
 
     quote! {
-        #![allow(unused_variables)]
+        #![allow(unused_variables, non_snake_case)]
 
         use std::ops::ControlFlow;
         use std::ops::ControlFlow::Continue;
@@ -29,29 +30,37 @@ pub fn gen(ctx: &Context) -> TokenStream {
         use oxidized::aast_defs::*;
 
         pub trait Pass {
-            type Ctx: Clone;
+            type Cfg;
             type Err;
 
             #(#pass_methods)*
         }
 
-        pub struct Passes<Ctx, Err, P, Q>
+        pub struct Passes<Cfg, Err, P, Q>
         where
-            Ctx: Clone,
-            P: Pass<Ctx = Ctx, Err = Err>,
-            Q: Pass<Ctx = Ctx, Err = Err>,
+            P: Pass<Cfg = Cfg, Err = Err>,
+            Q: Pass<Cfg = Cfg, Err = Err>,
         {
-            fst: P,
-            snd: Q,
+            pub fst: P,
+            pub snd: Q,
         }
 
-        impl<Ctx, Err, P, Q> Pass for Passes<Ctx, Err, P, Q>
+        impl<Cfg, Err, P, Q> Clone for Passes<Cfg, Err, P, Q>
         where
-            Ctx: Clone,
-            P: Pass<Ctx = Ctx, Err = Err>,
-            Q: Pass<Ctx = Ctx, Err = Err>,
+           P: Pass<Cfg = Cfg, Err = Err> + Clone,
+           Q: Pass<Cfg = Cfg, Err = Err> + Clone,
         {
-            type Ctx = Ctx;
+            fn clone(&self) -> Self {
+                Passes { fst: self.fst.clone(), snd: self.snd.clone() }
+            }
+        }
+
+        impl<Cfg, Err, P, Q> Pass for Passes<Cfg, Err, P, Q>
+        where
+            P: Pass<Cfg = Cfg, Err = Err>,
+            Q: Pass<Cfg = Cfg, Err = Err>,
+        {
+            type Cfg = Cfg;
             type Err = Err;
 
             #(#passes_methods)*
@@ -63,7 +72,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
         #[macro_export]
         macro_rules! passes {
             ( $p:expr $(,$ps:expr)+ $(,)? ) => {
-                $crate::transform::Passes($p, $crate::passes!($($ps),*))
+                $crate::Passes { fst:$p, snd:$crate::passes!($($ps),*) }
             };
             ( $p:expr $(,)? ) => {
                 $p
@@ -78,20 +87,32 @@ fn gen_pass_methods(s: synstructure::Structure<'_>, body_type: Body) -> TokenStr
         return quote!();
     }
     let ty = &s.ast().ident;
-    let name = super::gen_pass_method_name(ty.to_string());
+    let name_td = super::gen_pass_method_name(ty.to_string(), Direction::TopDown);
+    let name_bu = super::gen_pass_method_name(ty.to_string(), Direction::BottomUp);
     let (ty_params, ty_generics, _) = s.ast().generics.split_for_impl();
     let fld_methods = gen_fld_methods(&s, body_type);
-    let body = body_type.gen(&name);
+    let body_td = body_type.gen(&name_td);
+    let body_bu = body_type.gen(&name_bu);
     let where_clause = ex_where_clause(&s.referenced_ty_params());
     quote! {
         #[inline(always)]
-        fn #name #ty_params(
-            &self,
+        fn #name_td #ty_params(
+            &mut self,
             elem: &mut #ty #ty_generics,
-            ctx: &mut Self::Ctx,
+            cfg: &Self::Cfg,
             errs: &mut Vec<Self::Err>,
         ) -> ControlFlow<(), ()> #where_clause {
-            #body
+            #body_td
+        }
+
+        #[inline(always)]
+        fn #name_bu #ty_params(
+            &mut self,
+            elem: &mut #ty #ty_generics,
+            cfg: &Self::Cfg,
+            errs: &mut Vec<Self::Err>,
+        ) -> ControlFlow<(), ()> #where_clause {
+            #body_bu
         }
 
         #(#fld_methods)*
@@ -109,8 +130,8 @@ impl Body {
         match self {
             Body::Default => quote!(Continue(())),
             Body::Passes => quote! {
-                self.fst.#name(elem, ctx, errs)?;
-                self.snd.#name(elem, ctx, errs)
+                self.fst.#name(elem, cfg, errs)?;
+                self.snd.#name(elem, cfg, errs)
             },
         }
     }
@@ -140,21 +161,40 @@ fn gen_fld_method(
     body_type: Body,
 ) -> TokenStream {
     let ast = binding_info.ast();
-    let name = super::gen_pass_fld_method_name(ty_name, ast.ident.as_ref().unwrap().to_string());
+    let name_td = super::gen_pass_fld_method_name(
+        ty_name,
+        ast.ident.as_ref().unwrap().to_string(),
+        Direction::TopDown,
+    );
+    let name_bu = super::gen_pass_fld_method_name(
+        ty_name,
+        ast.ident.as_ref().unwrap().to_string(),
+        Direction::BottomUp,
+    );
     let ty_params = binding_info.referenced_ty_params();
     let field_ty = &ast.ty;
-    let body = body_type.gen(&name);
+    let body_td = body_type.gen(&name_td);
+    let body_bu = body_type.gen(&name_bu);
     let where_clause = ex_where_clause(&ty_params);
     quote! {
-        #[allow(non_snake_case)]
         #[inline(always)]
-        fn #name <#(#ty_params,)*>(
-            &self,
+        fn #name_td <#(#ty_params,)*>(
+            &mut self,
             elem: &mut #field_ty,
-            ctx: &mut Self::Ctx,
+            cfg: &Self::Cfg,
             errs: &mut Vec<Self::Err>,
         ) -> ControlFlow<(), ()> #where_clause {
-            #body
+            #body_td
+        }
+
+        #[inline(always)]
+        fn #name_bu <#(#ty_params,)*>(
+            &mut self,
+            elem: &mut #field_ty,
+            cfg: &Self::Cfg,
+            errs: &mut Vec<Self::Err>,
+        ) -> ControlFlow<(), ()> #where_clause {
+            #body_bu
         }
     }
 }
@@ -169,20 +209,33 @@ fn gen_ctor_method(
         syn::Fields::Unnamed(fields) if fields.unnamed.len() == 1 => &fields.unnamed[0].ty,
         _ => panic!("transform.explicit only supports tuple-like variants with 1 field"),
     };
-    let name = super::gen_pass_ctor_method_name(ty_name, ast.ident.to_string());
+    let name_td =
+        super::gen_pass_ctor_method_name(ty_name, ast.ident.to_string(), Direction::TopDown);
+    let name_bu =
+        super::gen_pass_ctor_method_name(ty_name, ast.ident.to_string(), Direction::BottomUp);
     let ty_params = variant_info.referenced_ty_params();
-    let body = body_type.gen(&name);
+    let body_td = body_type.gen(&name_td);
+    let body_bu = body_type.gen(&name_bu);
     let where_clause = ex_where_clause(&ty_params);
     quote! {
-        #[allow(non_snake_case)]
         #[inline(always)]
-        fn #name <#(#ty_params,)*>(
-            &self,
+        fn #name_td <#(#ty_params,)*>(
+            &mut self,
             elem: &mut #variant_ty,
-            ctx: &mut Self::Ctx,
+            cfg: &Self::Cfg,
             errs: &mut Vec<Self::Err>,
         ) -> ControlFlow<(), ()> #where_clause {
-            #body
+            #body_td
+        }
+
+        #[inline(always)]
+        fn #name_bu <#(#ty_params,)*>(
+            &mut self,
+            elem: &mut #variant_ty,
+            cfg: &Self::Cfg,
+            errs: &mut Vec<Self::Err>,
+        ) -> ControlFlow<(), ()> #where_clause {
+            #body_bu
         }
     }
 }

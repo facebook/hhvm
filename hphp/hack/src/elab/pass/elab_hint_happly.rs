@@ -22,103 +22,117 @@ use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Tprim;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
-// How can we use a trait here? If we could, we would have fully modular passes
-// since we can define a type implementing all required for the combined pass
-// pub trait CanonicalHapplyCtx: Clone {
-//     fn extend_tparams<Ex, En>(&mut self, tps: &Vec<Tparam<Ex, En>>);
-//     fn set_tparams<Ex, En>(&mut self, tps: &Vec<Tparam<Ex, En>>);
-//     fn reset_tparams(&mut self);
-//     fn tparams(&self) -> &HashSet<String>;
-// }
+#[derive(Clone, Default)]
+pub struct ElabHintHapplyPass {
+    tparams: HashSet<String>,
+}
 
-pub struct ElabHintHapplyPass;
+impl ElabHintHapplyPass {
+    pub fn extend_tparams<Ex, En>(&mut self, tps: &[Tparam<Ex, En>]) {
+        tps.iter().for_each(|tparam| {
+            self.tparams.insert(tparam.name.1.clone());
+        })
+    }
+    pub fn reset_tparams(&mut self) {
+        self.tparams.clear()
+    }
+    pub fn set_tparams<Ex, En>(&mut self, tps: &[Tparam<Ex, En>]) {
+        self.reset_tparams();
+        self.extend_tparams(tps);
+    }
+    pub fn tparams(&self) -> &HashSet<String> {
+        &self.tparams
+    }
+}
 
 impl Pass for ElabHintHapplyPass {
     // We can't write this - how can we make the contexts modular?
     // type Ctx = impl CanonicalHapplyCtx;
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
 
-    fn on_ty_typedef<Ex: Default, En>(
-        &self,
+    fn on_ty_typedef_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Typedef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.set_tparams(&elem.tparams);
+        self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst<Ex: Default, En>(
-        &self,
+    fn on_ty_gconst_top_down<Ex: Default, En>(
+        &mut self,
         _elem: &mut Gconst<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.reset_tparams();
+        self.reset_tparams();
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def<Ex: Default, En>(
-        &self,
+    fn on_ty_fun_def_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut FunDef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.set_tparams(&elem.fun.tparams);
+        self.set_tparams(&elem.fun.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def<Ex: Default, En>(
-        &self,
+    fn on_ty_module_def_top_down<Ex: Default, En>(
+        &mut self,
         _elem: &mut ModuleDef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.reset_tparams();
+        self.reset_tparams();
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class_<Ex: Default, En>(
-        &self,
+    #[allow(non_snake_case)]
+    fn on_ty_class__top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Class_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.set_tparams(&elem.tparams);
+        self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method_<Ex: Default, En>(
-        &self,
+    #[allow(non_snake_case)]
+    fn on_ty_method__top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Method_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.extend_tparams(&elem.tparams);
+        self.extend_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_tparam<Ex: Default, En>(
-        &self,
+    fn on_ty_tparam_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Tparam<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.extend_tparams(&elem.parameters);
+        self.extend_tparams(&elem.parameters);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint(
-        &self,
+    fn on_ty_hint_top_down(
+        &mut self,
         elem: &mut Hint,
-        ctx: &mut Self::Ctx,
+        _ctx: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         match &mut *elem.1 {
-            Hint_::Happly(id, hints) => match canonical_happly(id, hints, ctx.tparams()) {
+            Hint_::Happly(id, hints) => match canonical_happly(id, hints, self.tparams()) {
                 ControlFlow::Continue((hint_opt, err_opt)) => {
                     if let Some(hint_) = hint_opt {
                         *elem.1 = hint_
@@ -372,18 +386,11 @@ mod tests {
 
     use super::*;
 
-    pub struct Identity;
-    impl Pass for Identity {
-        type Err = NamingPhaseError;
-        type Ctx = Context;
-    }
-
     #[test]
     fn test_vec_or_dict_two_tyargs() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabHintHapplyPass;
-        let bottom_up = Identity;
+        let mut pass = ElabHintHapplyPass::default();
 
         let mut elem = Hint(
             Pos::make_none(),
@@ -396,7 +403,7 @@ mod tests {
             )),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         let Hint(_, hint_) = elem;
         assert!(match &*hint_ {
             Hint_::HvecOrDict(Some(h1), h2) => {
@@ -410,10 +417,9 @@ mod tests {
 
     #[test]
     fn test_vec_or_dict_one_tyargs() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabHintHapplyPass;
-        let bottom_up = Identity;
+        let mut pass = ElabHintHapplyPass::default();
 
         let mut elem = Hint(
             Pos::make_none(),
@@ -423,7 +429,7 @@ mod tests {
             )),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         let Hint(_, hint_) = elem;
         assert!(match &*hint_ {
             Hint_::HvecOrDict(None, h) => {
@@ -436,10 +442,9 @@ mod tests {
 
     #[test]
     fn test_vec_or_dict_zero_tyargs() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabHintHapplyPass;
-        let bottom_up = Identity;
+        let mut pass = ElabHintHapplyPass::default();
 
         let mut elem = Hint(
             Pos::make_none(),
@@ -449,7 +454,7 @@ mod tests {
             )),
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         let Hint(_, hint_) = elem;
         assert!(match &*hint_ {
             Hint_::HvecOrDict(None, h) => {

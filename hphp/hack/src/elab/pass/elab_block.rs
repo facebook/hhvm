@@ -12,18 +12,19 @@ use oxidized::aast_defs::UsingStmt;
 use oxidized::naming_phase_error::NamingPhaseError;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
+#[derive(Clone, Copy, Default)]
 pub struct ElabBlockPass;
 
 impl Pass for ElabBlockPass {
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
 
-    fn on_ty_block<Ex: Default, En>(
-        &self,
+    fn on_ty_block_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Block<Ex, En>,
-        _ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         let mut q: VecDeque<_> = elem.drain(0..).collect();
@@ -36,10 +37,10 @@ impl Pass for ElabBlockPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_using_stmt<Ex: Default, En>(
-        &self,
+    fn on_ty_using_stmt_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut UsingStmt<Ex, En>,
-        _ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         elem.is_block_scoped = false;
@@ -53,25 +54,16 @@ mod tests {
     use oxidized::aast_defs::Block;
     use oxidized::aast_defs::Stmt;
     use oxidized::aast_defs::Stmt_;
-    use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
-    use transform::Pass;
     use transform::Transform;
 
     use super::*;
 
-    pub struct Identity;
-    impl Pass for Identity {
-        type Err = NamingPhaseError;
-        type Ctx = Context;
-    }
-
     #[test]
     fn test() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabBlockPass;
-        let bottom_up = Identity;
+        let mut pass = ElabBlockPass;
 
         let mut elem: Block<(), ()> = Block(vec![Stmt(
             Pos::make_none(),
@@ -108,7 +100,7 @@ mod tests {
                 Stmt(Pos::make_none(), Stmt_::Noop),
             ])),
         )]);
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         assert_eq!(elem.len(), 9);
         assert!(elem.into_iter().all(|s| matches!(s.1, Stmt_::Noop)));

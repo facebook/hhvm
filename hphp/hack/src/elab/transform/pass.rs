@@ -3,25 +3,25 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ecd9d005155439265d08c4daff739b6b>>
+// @generated SignedSource<<41e0ef26ddebbabbb024f4f04cd3c35f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
-#![allow(unused_variables)]
+#![allow(unused_variables, non_snake_case)]
 use std::ops::ControlFlow;
 use std::ops::ControlFlow::Continue;
 
 use oxidized::aast_defs::*;
 use oxidized::ast_defs::*;
 pub trait Pass {
-    type Ctx: Clone;
+    type Cfg;
     type Err;
     #[inline(always)]
-    fn on_ty_program<Ex, En>(
-        &self,
+    fn on_ty_program_top_down<Ex, En>(
+        &mut self,
         elem: &mut Program<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -30,10 +30,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_stmt<Ex, En>(
-        &self,
+    fn on_ty_program_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Program<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_stmt_top_down<Ex, En>(
+        &mut self,
         elem: &mut Stmt<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -42,10 +54,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_stmt_<Ex, En>(
-        &self,
+    fn on_ty_stmt_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Stmt<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_stmt__top_down<Ex, En>(
+        &mut self,
         elem: &mut Stmt_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -54,10 +78,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_using_stmt<Ex, En>(
-        &self,
+    fn on_ty_stmt__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Stmt_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_using_stmt_top_down<Ex, En>(
+        &mut self,
         elem: &mut UsingStmt<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -66,10 +102,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_as_expr<Ex, En>(
-        &self,
+    fn on_ty_using_stmt_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut UsingStmt<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_as_expr_top_down<Ex, En>(
+        &mut self,
         elem: &mut AsExpr<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -78,10 +126,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_block<Ex, En>(
-        &self,
+    fn on_ty_as_expr_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut AsExpr<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_block_top_down<Ex, En>(
+        &mut self,
         elem: &mut Block<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -90,10 +150,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_class_id<Ex, En>(
-        &self,
+    fn on_ty_block_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Block<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_id_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassId<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -102,10 +174,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_class_id_<Ex, En>(
-        &self,
+    fn on_ty_class_id_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassId<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_id__top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassId_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -114,10 +198,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_expr<Ex, En>(
-        &self,
+    fn on_ty_class_id__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassId_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_expr_top_down<Ex, En>(
+        &mut self,
         elem: &mut Expr<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -126,10 +222,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_collection_targ<Ex>(
-        &self,
+    fn on_ty_expr_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Expr<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_collection_targ_top_down<Ex>(
+        &mut self,
         elem: &mut CollectionTarg<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -138,10 +246,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_function_ptr_id<Ex, En>(
-        &self,
+    fn on_ty_collection_targ_bottom_up<Ex>(
+        &mut self,
+        elem: &mut CollectionTarg<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_function_ptr_id_top_down<Ex, En>(
+        &mut self,
         elem: &mut FunctionPtrId<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -150,10 +270,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_expression_tree<Ex, En>(
-        &self,
+    fn on_ty_function_ptr_id_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FunctionPtrId<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_expression_tree_top_down<Ex, En>(
+        &mut self,
         elem: &mut ExpressionTree<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -162,10 +294,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_expr_<Ex, En>(
-        &self,
+    fn on_ty_expression_tree_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ExpressionTree<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_expr__top_down<Ex, En>(
+        &mut self,
         elem: &mut Expr_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -174,19 +318,40 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_hole_source(
-        &self,
+    fn on_ty_expr__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Expr_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_hole_source_top_down(
+        &mut self,
         elem: &mut HoleSource,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_class_get_expr<Ex, En>(
-        &self,
+    fn on_ty_hole_source_bottom_up(
+        &mut self,
+        elem: &mut HoleSource,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_get_expr_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassGetExpr<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -195,10 +360,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_case<Ex, En>(
-        &self,
+    fn on_ty_class_get_expr_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassGetExpr<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_case_top_down<Ex, En>(
+        &mut self,
         elem: &mut Case<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -207,10 +384,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_default_case<Ex, En>(
-        &self,
+    fn on_ty_case_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Case<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_default_case_top_down<Ex, En>(
+        &mut self,
         elem: &mut DefaultCase<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -219,10 +408,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_catch<Ex, En>(
-        &self,
+    fn on_ty_default_case_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut DefaultCase<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_catch_top_down<Ex, En>(
+        &mut self,
         elem: &mut Catch<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -231,10 +432,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_field<Ex, En>(
-        &self,
+    fn on_ty_catch_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Catch<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_field_top_down<Ex, En>(
+        &mut self,
         elem: &mut Field<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -243,10 +456,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_afield<Ex, En>(
-        &self,
+    fn on_ty_field_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Field<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_afield_top_down<Ex, En>(
+        &mut self,
         elem: &mut Afield<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -255,10 +480,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_xhp_simple<Ex, En>(
-        &self,
+    fn on_ty_afield_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Afield<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_xhp_simple_top_down<Ex, En>(
+        &mut self,
         elem: &mut XhpSimple<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -267,10 +504,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_xhp_attribute<Ex, En>(
-        &self,
+    fn on_ty_xhp_simple_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut XhpSimple<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_xhp_attribute_top_down<Ex, En>(
+        &mut self,
         elem: &mut XhpAttribute<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -279,10 +528,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_fun_param<Ex, En>(
-        &self,
+    fn on_ty_xhp_attribute_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut XhpAttribute<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_fun_param_top_down<Ex, En>(
+        &mut self,
         elem: &mut FunParam<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -291,10 +552,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_fun_<Ex, En>(
-        &self,
+    fn on_ty_fun_param_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FunParam<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_fun__top_down<Ex, En>(
+        &mut self,
         elem: &mut Fun_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -302,12 +575,23 @@ pub trait Pass {
     {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_fun__ret<Ex>(
-        &self,
+    fn on_ty_fun__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Fun_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_fun__ret_top_down<Ex>(
+        &mut self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -316,10 +600,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_efun<Ex, En>(
-        &self,
+    fn on_fld_fun__ret_bottom_up<Ex>(
+        &mut self,
+        elem: &mut TypeHint<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_efun_top_down<Ex, En>(
+        &mut self,
         elem: &mut Efun<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -328,10 +624,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_func_body<Ex, En>(
-        &self,
+    fn on_ty_efun_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Efun<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_func_body_top_down<Ex, En>(
+        &mut self,
         elem: &mut FuncBody<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -340,10 +648,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_type_hint<Ex>(
-        &self,
+    fn on_ty_func_body_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FuncBody<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_type_hint_top_down<Ex>(
+        &mut self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -352,10 +672,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_targ<Ex>(
-        &self,
+    fn on_ty_type_hint_bottom_up<Ex>(
+        &mut self,
+        elem: &mut TypeHint<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_targ_top_down<Ex>(
+        &mut self,
         elem: &mut Targ<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -364,10 +696,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_user_attribute<Ex, En>(
-        &self,
+    fn on_ty_targ_bottom_up<Ex>(
+        &mut self,
+        elem: &mut Targ<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_user_attribute_top_down<Ex, En>(
+        &mut self,
         elem: &mut UserAttribute<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -376,10 +720,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_file_attribute<Ex, En>(
-        &self,
+    fn on_ty_user_attribute_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut UserAttribute<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_file_attribute_top_down<Ex, En>(
+        &mut self,
         elem: &mut FileAttribute<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -388,10 +744,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_tparam<Ex, En>(
-        &self,
+    fn on_ty_file_attribute_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FileAttribute<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tparam_top_down<Ex, En>(
+        &mut self,
         elem: &mut Tparam<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -400,10 +768,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_class_<Ex, En>(
-        &self,
+    fn on_ty_tparam_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Tparam<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class__top_down<Ex, En>(
+        &mut self,
         elem: &mut Class_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -411,12 +791,23 @@ pub trait Pass {
     {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__tparams<Ex, En>(
-        &self,
+    fn on_ty_class__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Class_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_class__tparams_top_down<Ex, En>(
+        &mut self,
         elem: &mut Vec<Tparam<Ex, En>>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -424,62 +815,113 @@ pub trait Pass {
     {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__extends(
-        &self,
+    fn on_fld_class__tparams_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Vec<Tparam<Ex, En>>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_class__extends_top_down(
+        &mut self,
         elem: &mut Vec<ClassHint>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__uses(
-        &self,
+    fn on_fld_class__extends_bottom_up(
+        &mut self,
+        elem: &mut Vec<ClassHint>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_class__uses_top_down(
+        &mut self,
         elem: &mut Vec<TraitHint>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__xhp_attr_uses(
-        &self,
+    fn on_fld_class__uses_bottom_up(
+        &mut self,
+        elem: &mut Vec<TraitHint>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_class__xhp_attr_uses_top_down(
+        &mut self,
         elem: &mut Vec<XhpAttrHint>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__reqs(
-        &self,
+    fn on_fld_class__xhp_attr_uses_bottom_up(
+        &mut self,
+        elem: &mut Vec<XhpAttrHint>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_class__reqs_top_down(
+        &mut self,
         elem: &mut Vec<(ClassHint, RequireKind)>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__implements(
-        &self,
+    fn on_fld_class__reqs_bottom_up(
+        &mut self,
+        elem: &mut Vec<(ClassHint, RequireKind)>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_class__implements_top_down(
+        &mut self,
         elem: &mut Vec<ClassHint>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__consts<Ex, En>(
-        &self,
+    fn on_fld_class__implements_bottom_up(
+        &mut self,
+        elem: &mut Vec<ClassHint>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_class__consts_top_down<Ex, En>(
+        &mut self,
         elem: &mut Vec<ClassConst<Ex, En>>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -487,12 +929,23 @@ pub trait Pass {
     {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__xhp_attrs<Ex, En>(
-        &self,
+    fn on_fld_class__consts_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Vec<ClassConst<Ex, En>>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_class__xhp_attrs_top_down<Ex, En>(
+        &mut self,
         elem: &mut Vec<XhpAttr<Ex, En>>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -500,12 +953,23 @@ pub trait Pass {
     {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__user_attributes<Ex, En>(
-        &self,
+    fn on_fld_class__xhp_attrs_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Vec<XhpAttr<Ex, En>>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_class__user_attributes_top_down<Ex, En>(
+        &mut self,
         elem: &mut UserAttributes<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -514,10 +978,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_xhp_attr<Ex, En>(
-        &self,
+    fn on_fld_class__user_attributes_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut UserAttributes<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_xhp_attr_top_down<Ex, En>(
+        &mut self,
         elem: &mut XhpAttr<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -526,10 +1002,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_class_const_kind<Ex, En>(
-        &self,
+    fn on_ty_xhp_attr_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut XhpAttr<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_const_kind_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassConstKind<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -538,10 +1026,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_class_const<Ex, En>(
-        &self,
+    fn on_ty_class_const_kind_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassConstKind<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_const_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassConst<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -550,37 +1050,76 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_class_abstract_typeconst(
-        &self,
+    fn on_ty_class_const_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassConst<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_abstract_typeconst_top_down(
+        &mut self,
         elem: &mut ClassAbstractTypeconst,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_class_concrete_typeconst(
-        &self,
+    fn on_ty_class_abstract_typeconst_bottom_up(
+        &mut self,
+        elem: &mut ClassAbstractTypeconst,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_concrete_typeconst_top_down(
+        &mut self,
         elem: &mut ClassConcreteTypeconst,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_class_typeconst(
-        &self,
+    fn on_ty_class_concrete_typeconst_bottom_up(
+        &mut self,
+        elem: &mut ClassConcreteTypeconst,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_typeconst_top_down(
+        &mut self,
         elem: &mut ClassTypeconst,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_class_typeconst_def<Ex, En>(
-        &self,
+    fn on_ty_class_typeconst_bottom_up(
+        &mut self,
+        elem: &mut ClassTypeconst,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_typeconst_def_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassTypeconstDef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -589,19 +1128,40 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_xhp_attr_info(
-        &self,
+    fn on_ty_class_typeconst_def_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassTypeconstDef<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_xhp_attr_info_top_down(
+        &mut self,
         elem: &mut XhpAttrInfo,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_class_var<Ex, En>(
-        &self,
+    fn on_ty_xhp_attr_info_bottom_up(
+        &mut self,
+        elem: &mut XhpAttrInfo,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_var_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassVar<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -609,12 +1169,23 @@ pub trait Pass {
     {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class_var_type_<Ex>(
-        &self,
+    fn on_ty_class_var_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassVar<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_class_var_type__top_down<Ex>(
+        &mut self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -623,10 +1194,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_method_<Ex, En>(
-        &self,
+    fn on_fld_class_var_type__bottom_up<Ex>(
+        &mut self,
+        elem: &mut TypeHint<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_method__top_down<Ex, En>(
+        &mut self,
         elem: &mut Method_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -634,12 +1217,23 @@ pub trait Pass {
     {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_method__ret<Ex>(
-        &self,
+    fn on_ty_method__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Method_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_method__ret_top_down<Ex>(
+        &mut self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -648,10 +1242,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_typedef<Ex, En>(
-        &self,
+    fn on_fld_method__ret_bottom_up<Ex>(
+        &mut self,
+        elem: &mut TypeHint<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_typedef_top_down<Ex, En>(
+        &mut self,
         elem: &mut Typedef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -660,10 +1266,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_gconst<Ex, En>(
-        &self,
+    fn on_ty_typedef_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Typedef<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_gconst_top_down<Ex, En>(
+        &mut self,
         elem: &mut Gconst<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -671,12 +1289,23 @@ pub trait Pass {
     {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_gconst_value<Ex, En>(
-        &self,
+    fn on_ty_gconst_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Gconst<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_gconst_value_top_down<Ex, En>(
+        &mut self,
         elem: &mut Expr<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -685,10 +1314,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_fun_def<Ex, En>(
-        &self,
+    fn on_fld_gconst_value_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Expr<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_fun_def_top_down<Ex, En>(
+        &mut self,
         elem: &mut FunDef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -697,10 +1338,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_module_def<Ex, En>(
-        &self,
+    fn on_ty_fun_def_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FunDef<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_module_def_top_down<Ex, En>(
+        &mut self,
         elem: &mut ModuleDef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -709,10 +1362,22 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_def<Ex, En>(
-        &self,
+    fn on_ty_module_def_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ModuleDef<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_def_top_down<Ex, En>(
+        &mut self,
         elem: &mut Def<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -721,28 +1386,58 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_xhp_child(
-        &self,
+    fn on_ty_def_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Def<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_xhp_child_top_down(
+        &mut self,
         elem: &mut XhpChild,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_hint(
-        &self,
+    fn on_ty_xhp_child_bottom_up(
+        &mut self,
+        elem: &mut XhpChild,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_hint_top_down(
+        &mut self,
         elem: &mut Hint,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_user_attributes<Ex, En>(
-        &self,
+    fn on_ty_hint_bottom_up(
+        &mut self,
+        elem: &mut Hint,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_user_attributes_top_down<Ex, En>(
+        &mut self,
         elem: &mut UserAttributes<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
@@ -751,1090 +1446,2183 @@ pub trait Pass {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_contexts(
-        &self,
+    fn on_ty_user_attributes_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut UserAttributes<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_contexts_top_down(
+        &mut self,
         elem: &mut Contexts,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_hint_fun(
-        &self,
+    fn on_ty_contexts_bottom_up(
+        &mut self,
+        elem: &mut Contexts,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_hint_fun_top_down(
+        &mut self,
         elem: &mut HintFun,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_hint_fun_return_ty(
-        &self,
+    fn on_ty_hint_fun_bottom_up(
+        &mut self,
+        elem: &mut HintFun,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_hint_fun_return_ty_top_down(
+        &mut self,
         elem: &mut Hint,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_hint_(
-        &self,
+    fn on_fld_hint_fun_return_ty_bottom_up(
+        &mut self,
+        elem: &mut Hint,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_hint__top_down(
+        &mut self,
         elem: &mut Hint_,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_refinement(
-        &self,
+    fn on_ty_hint__bottom_up(
+        &mut self,
+        elem: &mut Hint_,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_refinement_top_down(
+        &mut self,
         elem: &mut Refinement,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_type_refinement(
-        &self,
+    fn on_ty_refinement_bottom_up(
+        &mut self,
+        elem: &mut Refinement,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_type_refinement_top_down(
+        &mut self,
         elem: &mut TypeRefinement,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_type_refinement_bounds(
-        &self,
+    fn on_ty_type_refinement_bottom_up(
+        &mut self,
+        elem: &mut TypeRefinement,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_type_refinement_bounds_top_down(
+        &mut self,
         elem: &mut TypeRefinementBounds,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_ctx_refinement(
-        &self,
+    fn on_ty_type_refinement_bounds_bottom_up(
+        &mut self,
+        elem: &mut TypeRefinementBounds,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_ctx_refinement_top_down(
+        &mut self,
         elem: &mut CtxRefinement,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_ctx_refinement_bounds(
-        &self,
+    fn on_ty_ctx_refinement_bottom_up(
+        &mut self,
+        elem: &mut CtxRefinement,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_ctx_refinement_bounds_top_down(
+        &mut self,
         elem: &mut CtxRefinementBounds,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_shape_field_info(
-        &self,
+    fn on_ty_ctx_refinement_bounds_bottom_up(
+        &mut self,
+        elem: &mut CtxRefinementBounds,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_shape_field_info_top_down(
+        &mut self,
         elem: &mut ShapeFieldInfo,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_nast_shape_info(
-        &self,
+    fn on_ty_shape_field_info_bottom_up(
+        &mut self,
+        elem: &mut ShapeFieldInfo,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_nast_shape_info_top_down(
+        &mut self,
         elem: &mut NastShapeInfo,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_enum_(
-        &self,
+    fn on_ty_nast_shape_info_bottom_up(
+        &mut self,
+        elem: &mut NastShapeInfo,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_enum__top_down(
+        &mut self,
         elem: &mut Enum_,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_where_constraint_hint(
-        &self,
+    fn on_ty_enum__bottom_up(
+        &mut self,
+        elem: &mut Enum_,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_where_constraint_hint_top_down(
+        &mut self,
         elem: &mut WhereConstraintHint,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
-    fn on_ty_id(
-        &self,
+    fn on_ty_where_constraint_hint_bottom_up(
+        &mut self,
+        elem: &mut WhereConstraintHint,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_id_top_down(
+        &mut self,
         elem: &mut Id,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_id_bottom_up(
+        &mut self,
+        elem: &mut Id,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         Continue(())
     }
 }
-pub struct Passes<Ctx, Err, P, Q>
+pub struct Passes<Cfg, Err, P, Q>
 where
-    Ctx: Clone,
-    P: Pass<Ctx = Ctx, Err = Err>,
-    Q: Pass<Ctx = Ctx, Err = Err>,
+    P: Pass<Cfg = Cfg, Err = Err>,
+    Q: Pass<Cfg = Cfg, Err = Err>,
 {
-    fst: P,
-    snd: Q,
+    pub fst: P,
+    pub snd: Q,
 }
-impl<Ctx, Err, P, Q> Pass for Passes<Ctx, Err, P, Q>
+impl<Cfg, Err, P, Q> Clone for Passes<Cfg, Err, P, Q>
 where
-    Ctx: Clone,
-    P: Pass<Ctx = Ctx, Err = Err>,
-    Q: Pass<Ctx = Ctx, Err = Err>,
+    P: Pass<Cfg = Cfg, Err = Err> + Clone,
+    Q: Pass<Cfg = Cfg, Err = Err> + Clone,
 {
-    type Ctx = Ctx;
+    fn clone(&self) -> Self {
+        Passes {
+            fst: self.fst.clone(),
+            snd: self.snd.clone(),
+        }
+    }
+}
+impl<Cfg, Err, P, Q> Pass for Passes<Cfg, Err, P, Q>
+where
+    P: Pass<Cfg = Cfg, Err = Err>,
+    Q: Pass<Cfg = Cfg, Err = Err>,
+{
+    type Cfg = Cfg;
     type Err = Err;
     #[inline(always)]
-    fn on_ty_program<Ex, En>(
-        &self,
+    fn on_ty_program_top_down<Ex, En>(
+        &mut self,
         elem: &mut Program<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_program(elem, ctx, errs)?;
-        self.snd.on_ty_program(elem, ctx, errs)
+        self.fst.on_ty_program_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_program_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_stmt<Ex, En>(
-        &self,
+    fn on_ty_program_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Program<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_program_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_program_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_stmt_top_down<Ex, En>(
+        &mut self,
         elem: &mut Stmt<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_stmt(elem, ctx, errs)?;
-        self.snd.on_ty_stmt(elem, ctx, errs)
+        self.fst.on_ty_stmt_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_stmt_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_stmt_<Ex, En>(
-        &self,
+    fn on_ty_stmt_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Stmt<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_stmt_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_stmt_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_stmt__top_down<Ex, En>(
+        &mut self,
         elem: &mut Stmt_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_stmt_(elem, ctx, errs)?;
-        self.snd.on_ty_stmt_(elem, ctx, errs)
+        self.fst.on_ty_stmt__top_down(elem, cfg, errs)?;
+        self.snd.on_ty_stmt__top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_using_stmt<Ex, En>(
-        &self,
+    fn on_ty_stmt__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Stmt_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_stmt__bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_stmt__bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_using_stmt_top_down<Ex, En>(
+        &mut self,
         elem: &mut UsingStmt<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_using_stmt(elem, ctx, errs)?;
-        self.snd.on_ty_using_stmt(elem, ctx, errs)
+        self.fst.on_ty_using_stmt_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_using_stmt_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_as_expr<Ex, En>(
-        &self,
+    fn on_ty_using_stmt_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut UsingStmt<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_using_stmt_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_using_stmt_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_as_expr_top_down<Ex, En>(
+        &mut self,
         elem: &mut AsExpr<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_as_expr(elem, ctx, errs)?;
-        self.snd.on_ty_as_expr(elem, ctx, errs)
+        self.fst.on_ty_as_expr_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_as_expr_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_block<Ex, En>(
-        &self,
+    fn on_ty_as_expr_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut AsExpr<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_as_expr_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_as_expr_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_block_top_down<Ex, En>(
+        &mut self,
         elem: &mut Block<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_block(elem, ctx, errs)?;
-        self.snd.on_ty_block(elem, ctx, errs)
+        self.fst.on_ty_block_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_block_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_class_id<Ex, En>(
-        &self,
+    fn on_ty_block_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Block<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_block_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_block_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_id_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassId<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_class_id(elem, ctx, errs)?;
-        self.snd.on_ty_class_id(elem, ctx, errs)
+        self.fst.on_ty_class_id_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_class_id_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_class_id_<Ex, En>(
-        &self,
+    fn on_ty_class_id_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassId<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_class_id_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_class_id_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_id__top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassId_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_class_id_(elem, ctx, errs)?;
-        self.snd.on_ty_class_id_(elem, ctx, errs)
+        self.fst.on_ty_class_id__top_down(elem, cfg, errs)?;
+        self.snd.on_ty_class_id__top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_expr<Ex, En>(
-        &self,
+    fn on_ty_class_id__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassId_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_class_id__bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_class_id__bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_expr_top_down<Ex, En>(
+        &mut self,
         elem: &mut Expr<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_expr(elem, ctx, errs)?;
-        self.snd.on_ty_expr(elem, ctx, errs)
+        self.fst.on_ty_expr_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_expr_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_collection_targ<Ex>(
-        &self,
+    fn on_ty_expr_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Expr<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_expr_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_expr_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_collection_targ_top_down<Ex>(
+        &mut self,
         elem: &mut CollectionTarg<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_collection_targ(elem, ctx, errs)?;
-        self.snd.on_ty_collection_targ(elem, ctx, errs)
+        self.fst.on_ty_collection_targ_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_collection_targ_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_function_ptr_id<Ex, En>(
-        &self,
+    fn on_ty_collection_targ_bottom_up<Ex>(
+        &mut self,
+        elem: &mut CollectionTarg<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_collection_targ_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_collection_targ_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_function_ptr_id_top_down<Ex, En>(
+        &mut self,
         elem: &mut FunctionPtrId<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_function_ptr_id(elem, ctx, errs)?;
-        self.snd.on_ty_function_ptr_id(elem, ctx, errs)
+        self.fst.on_ty_function_ptr_id_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_function_ptr_id_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_expression_tree<Ex, En>(
-        &self,
+    fn on_ty_function_ptr_id_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FunctionPtrId<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_function_ptr_id_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_function_ptr_id_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_expression_tree_top_down<Ex, En>(
+        &mut self,
         elem: &mut ExpressionTree<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_expression_tree(elem, ctx, errs)?;
-        self.snd.on_ty_expression_tree(elem, ctx, errs)
+        self.fst.on_ty_expression_tree_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_expression_tree_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_expr_<Ex, En>(
-        &self,
+    fn on_ty_expression_tree_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ExpressionTree<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_expression_tree_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_expression_tree_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_expr__top_down<Ex, En>(
+        &mut self,
         elem: &mut Expr_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_expr_(elem, ctx, errs)?;
-        self.snd.on_ty_expr_(elem, ctx, errs)
+        self.fst.on_ty_expr__top_down(elem, cfg, errs)?;
+        self.snd.on_ty_expr__top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_hole_source(
-        &self,
+    fn on_ty_expr__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Expr_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_expr__bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_expr__bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_hole_source_top_down(
+        &mut self,
         elem: &mut HoleSource,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_hole_source(elem, ctx, errs)?;
-        self.snd.on_ty_hole_source(elem, ctx, errs)
+        self.fst.on_ty_hole_source_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_hole_source_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_class_get_expr<Ex, En>(
-        &self,
+    fn on_ty_hole_source_bottom_up(
+        &mut self,
+        elem: &mut HoleSource,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_hole_source_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_hole_source_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_get_expr_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassGetExpr<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_class_get_expr(elem, ctx, errs)?;
-        self.snd.on_ty_class_get_expr(elem, ctx, errs)
+        self.fst.on_ty_class_get_expr_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_class_get_expr_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_case<Ex, En>(
-        &self,
+    fn on_ty_class_get_expr_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassGetExpr<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_class_get_expr_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_class_get_expr_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_case_top_down<Ex, En>(
+        &mut self,
         elem: &mut Case<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_case(elem, ctx, errs)?;
-        self.snd.on_ty_case(elem, ctx, errs)
+        self.fst.on_ty_case_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_case_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_default_case<Ex, En>(
-        &self,
+    fn on_ty_case_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Case<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_case_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_case_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_default_case_top_down<Ex, En>(
+        &mut self,
         elem: &mut DefaultCase<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_default_case(elem, ctx, errs)?;
-        self.snd.on_ty_default_case(elem, ctx, errs)
+        self.fst.on_ty_default_case_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_default_case_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_catch<Ex, En>(
-        &self,
+    fn on_ty_default_case_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut DefaultCase<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_default_case_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_default_case_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_catch_top_down<Ex, En>(
+        &mut self,
         elem: &mut Catch<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_catch(elem, ctx, errs)?;
-        self.snd.on_ty_catch(elem, ctx, errs)
+        self.fst.on_ty_catch_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_catch_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_field<Ex, En>(
-        &self,
+    fn on_ty_catch_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Catch<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_catch_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_catch_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_field_top_down<Ex, En>(
+        &mut self,
         elem: &mut Field<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_field(elem, ctx, errs)?;
-        self.snd.on_ty_field(elem, ctx, errs)
+        self.fst.on_ty_field_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_field_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_afield<Ex, En>(
-        &self,
+    fn on_ty_field_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Field<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_field_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_field_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_afield_top_down<Ex, En>(
+        &mut self,
         elem: &mut Afield<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_afield(elem, ctx, errs)?;
-        self.snd.on_ty_afield(elem, ctx, errs)
+        self.fst.on_ty_afield_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_afield_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_xhp_simple<Ex, En>(
-        &self,
+    fn on_ty_afield_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Afield<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_afield_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_afield_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_xhp_simple_top_down<Ex, En>(
+        &mut self,
         elem: &mut XhpSimple<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_xhp_simple(elem, ctx, errs)?;
-        self.snd.on_ty_xhp_simple(elem, ctx, errs)
+        self.fst.on_ty_xhp_simple_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_xhp_simple_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_xhp_attribute<Ex, En>(
-        &self,
+    fn on_ty_xhp_simple_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut XhpSimple<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_xhp_simple_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_xhp_simple_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_xhp_attribute_top_down<Ex, En>(
+        &mut self,
         elem: &mut XhpAttribute<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_xhp_attribute(elem, ctx, errs)?;
-        self.snd.on_ty_xhp_attribute(elem, ctx, errs)
+        self.fst.on_ty_xhp_attribute_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_xhp_attribute_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_fun_param<Ex, En>(
-        &self,
+    fn on_ty_xhp_attribute_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut XhpAttribute<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_xhp_attribute_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_xhp_attribute_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_fun_param_top_down<Ex, En>(
+        &mut self,
         elem: &mut FunParam<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_fun_param(elem, ctx, errs)?;
-        self.snd.on_ty_fun_param(elem, ctx, errs)
+        self.fst.on_ty_fun_param_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_fun_param_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_fun_<Ex, En>(
-        &self,
+    fn on_ty_fun_param_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FunParam<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_fun_param_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_fun_param_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_fun__top_down<Ex, En>(
+        &mut self,
         elem: &mut Fun_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_fun_(elem, ctx, errs)?;
-        self.snd.on_ty_fun_(elem, ctx, errs)
+        self.fst.on_ty_fun__top_down(elem, cfg, errs)?;
+        self.snd.on_ty_fun__top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_fun__ret<Ex>(
-        &self,
+    fn on_ty_fun__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Fun_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_fun__bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_fun__bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_fun__ret_top_down<Ex>(
+        &mut self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_fld_fun__ret(elem, ctx, errs)?;
-        self.snd.on_fld_fun__ret(elem, ctx, errs)
+        self.fst.on_fld_fun__ret_top_down(elem, cfg, errs)?;
+        self.snd.on_fld_fun__ret_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_efun<Ex, En>(
-        &self,
+    fn on_fld_fun__ret_bottom_up<Ex>(
+        &mut self,
+        elem: &mut TypeHint<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_fld_fun__ret_bottom_up(elem, cfg, errs)?;
+        self.snd.on_fld_fun__ret_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_efun_top_down<Ex, En>(
+        &mut self,
         elem: &mut Efun<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_efun(elem, ctx, errs)?;
-        self.snd.on_ty_efun(elem, ctx, errs)
+        self.fst.on_ty_efun_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_efun_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_func_body<Ex, En>(
-        &self,
+    fn on_ty_efun_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Efun<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_efun_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_efun_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_func_body_top_down<Ex, En>(
+        &mut self,
         elem: &mut FuncBody<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_func_body(elem, ctx, errs)?;
-        self.snd.on_ty_func_body(elem, ctx, errs)
+        self.fst.on_ty_func_body_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_func_body_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_type_hint<Ex>(
-        &self,
+    fn on_ty_func_body_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FuncBody<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_func_body_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_func_body_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_type_hint_top_down<Ex>(
+        &mut self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_type_hint(elem, ctx, errs)?;
-        self.snd.on_ty_type_hint(elem, ctx, errs)
+        self.fst.on_ty_type_hint_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_type_hint_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_targ<Ex>(
-        &self,
+    fn on_ty_type_hint_bottom_up<Ex>(
+        &mut self,
+        elem: &mut TypeHint<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_type_hint_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_type_hint_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_targ_top_down<Ex>(
+        &mut self,
         elem: &mut Targ<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_targ(elem, ctx, errs)?;
-        self.snd.on_ty_targ(elem, ctx, errs)
+        self.fst.on_ty_targ_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_targ_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_user_attribute<Ex, En>(
-        &self,
+    fn on_ty_targ_bottom_up<Ex>(
+        &mut self,
+        elem: &mut Targ<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_targ_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_targ_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_user_attribute_top_down<Ex, En>(
+        &mut self,
         elem: &mut UserAttribute<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_user_attribute(elem, ctx, errs)?;
-        self.snd.on_ty_user_attribute(elem, ctx, errs)
+        self.fst.on_ty_user_attribute_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_user_attribute_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_file_attribute<Ex, En>(
-        &self,
+    fn on_ty_user_attribute_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut UserAttribute<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_user_attribute_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_user_attribute_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_file_attribute_top_down<Ex, En>(
+        &mut self,
         elem: &mut FileAttribute<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_file_attribute(elem, ctx, errs)?;
-        self.snd.on_ty_file_attribute(elem, ctx, errs)
+        self.fst.on_ty_file_attribute_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_file_attribute_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_tparam<Ex, En>(
-        &self,
+    fn on_ty_file_attribute_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FileAttribute<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_file_attribute_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_file_attribute_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_tparam_top_down<Ex, En>(
+        &mut self,
         elem: &mut Tparam<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_tparam(elem, ctx, errs)?;
-        self.snd.on_ty_tparam(elem, ctx, errs)
+        self.fst.on_ty_tparam_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_tparam_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_class_<Ex, En>(
-        &self,
+    fn on_ty_tparam_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Tparam<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_tparam_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_tparam_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class__top_down<Ex, En>(
+        &mut self,
         elem: &mut Class_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_class_(elem, ctx, errs)?;
-        self.snd.on_ty_class_(elem, ctx, errs)
+        self.fst.on_ty_class__top_down(elem, cfg, errs)?;
+        self.snd.on_ty_class__top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__tparams<Ex, En>(
-        &self,
+    fn on_ty_class__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Class_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_class__bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_class__bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_class__tparams_top_down<Ex, En>(
+        &mut self,
         elem: &mut Vec<Tparam<Ex, En>>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_fld_class__tparams(elem, ctx, errs)?;
-        self.snd.on_fld_class__tparams(elem, ctx, errs)
+        self.fst.on_fld_class__tparams_top_down(elem, cfg, errs)?;
+        self.snd.on_fld_class__tparams_top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__extends(
-        &self,
+    fn on_fld_class__tparams_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Vec<Tparam<Ex, En>>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_fld_class__tparams_bottom_up(elem, cfg, errs)?;
+        self.snd.on_fld_class__tparams_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_class__extends_top_down(
+        &mut self,
         elem: &mut Vec<ClassHint>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__extends(elem, ctx, errs)?;
-        self.snd.on_fld_class__extends(elem, ctx, errs)
+        self.fst.on_fld_class__extends_top_down(elem, cfg, errs)?;
+        self.snd.on_fld_class__extends_top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__uses(
-        &self,
+    fn on_fld_class__extends_bottom_up(
+        &mut self,
+        elem: &mut Vec<ClassHint>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_fld_class__extends_bottom_up(elem, cfg, errs)?;
+        self.snd.on_fld_class__extends_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_class__uses_top_down(
+        &mut self,
         elem: &mut Vec<TraitHint>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__uses(elem, ctx, errs)?;
-        self.snd.on_fld_class__uses(elem, ctx, errs)
+        self.fst.on_fld_class__uses_top_down(elem, cfg, errs)?;
+        self.snd.on_fld_class__uses_top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__xhp_attr_uses(
-        &self,
+    fn on_fld_class__uses_bottom_up(
+        &mut self,
+        elem: &mut Vec<TraitHint>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_fld_class__uses_bottom_up(elem, cfg, errs)?;
+        self.snd.on_fld_class__uses_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_class__xhp_attr_uses_top_down(
+        &mut self,
         elem: &mut Vec<XhpAttrHint>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__xhp_attr_uses(elem, ctx, errs)?;
-        self.snd.on_fld_class__xhp_attr_uses(elem, ctx, errs)
+        self.fst
+            .on_fld_class__xhp_attr_uses_top_down(elem, cfg, errs)?;
+        self.snd
+            .on_fld_class__xhp_attr_uses_top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__reqs(
-        &self,
+    fn on_fld_class__xhp_attr_uses_bottom_up(
+        &mut self,
+        elem: &mut Vec<XhpAttrHint>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst
+            .on_fld_class__xhp_attr_uses_bottom_up(elem, cfg, errs)?;
+        self.snd
+            .on_fld_class__xhp_attr_uses_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_class__reqs_top_down(
+        &mut self,
         elem: &mut Vec<(ClassHint, RequireKind)>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__reqs(elem, ctx, errs)?;
-        self.snd.on_fld_class__reqs(elem, ctx, errs)
+        self.fst.on_fld_class__reqs_top_down(elem, cfg, errs)?;
+        self.snd.on_fld_class__reqs_top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__implements(
-        &self,
+    fn on_fld_class__reqs_bottom_up(
+        &mut self,
+        elem: &mut Vec<(ClassHint, RequireKind)>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_fld_class__reqs_bottom_up(elem, cfg, errs)?;
+        self.snd.on_fld_class__reqs_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_class__implements_top_down(
+        &mut self,
         elem: &mut Vec<ClassHint>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_class__implements(elem, ctx, errs)?;
-        self.snd.on_fld_class__implements(elem, ctx, errs)
+        self.fst
+            .on_fld_class__implements_top_down(elem, cfg, errs)?;
+        self.snd.on_fld_class__implements_top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__consts<Ex, En>(
-        &self,
+    fn on_fld_class__implements_bottom_up(
+        &mut self,
+        elem: &mut Vec<ClassHint>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst
+            .on_fld_class__implements_bottom_up(elem, cfg, errs)?;
+        self.snd.on_fld_class__implements_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_class__consts_top_down<Ex, En>(
+        &mut self,
         elem: &mut Vec<ClassConst<Ex, En>>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_fld_class__consts(elem, ctx, errs)?;
-        self.snd.on_fld_class__consts(elem, ctx, errs)
+        self.fst.on_fld_class__consts_top_down(elem, cfg, errs)?;
+        self.snd.on_fld_class__consts_top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__xhp_attrs<Ex, En>(
-        &self,
+    fn on_fld_class__consts_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Vec<ClassConst<Ex, En>>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_fld_class__consts_bottom_up(elem, cfg, errs)?;
+        self.snd.on_fld_class__consts_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_class__xhp_attrs_top_down<Ex, En>(
+        &mut self,
         elem: &mut Vec<XhpAttr<Ex, En>>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_fld_class__xhp_attrs(elem, ctx, errs)?;
-        self.snd.on_fld_class__xhp_attrs(elem, ctx, errs)
+        self.fst.on_fld_class__xhp_attrs_top_down(elem, cfg, errs)?;
+        self.snd.on_fld_class__xhp_attrs_top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class__user_attributes<Ex, En>(
-        &self,
+    fn on_fld_class__xhp_attrs_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Vec<XhpAttr<Ex, En>>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst
+            .on_fld_class__xhp_attrs_bottom_up(elem, cfg, errs)?;
+        self.snd.on_fld_class__xhp_attrs_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_class__user_attributes_top_down<Ex, En>(
+        &mut self,
         elem: &mut UserAttributes<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_fld_class__user_attributes(elem, ctx, errs)?;
-        self.snd.on_fld_class__user_attributes(elem, ctx, errs)
+        self.fst
+            .on_fld_class__user_attributes_top_down(elem, cfg, errs)?;
+        self.snd
+            .on_fld_class__user_attributes_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_xhp_attr<Ex, En>(
-        &self,
+    fn on_fld_class__user_attributes_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut UserAttributes<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst
+            .on_fld_class__user_attributes_bottom_up(elem, cfg, errs)?;
+        self.snd
+            .on_fld_class__user_attributes_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_xhp_attr_top_down<Ex, En>(
+        &mut self,
         elem: &mut XhpAttr<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_xhp_attr(elem, ctx, errs)?;
-        self.snd.on_ty_xhp_attr(elem, ctx, errs)
+        self.fst.on_ty_xhp_attr_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_xhp_attr_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_class_const_kind<Ex, En>(
-        &self,
+    fn on_ty_xhp_attr_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut XhpAttr<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_xhp_attr_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_xhp_attr_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_const_kind_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassConstKind<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_class_const_kind(elem, ctx, errs)?;
-        self.snd.on_ty_class_const_kind(elem, ctx, errs)
+        self.fst.on_ty_class_const_kind_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_class_const_kind_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_class_const<Ex, En>(
-        &self,
+    fn on_ty_class_const_kind_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassConstKind<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_class_const_kind_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_class_const_kind_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_const_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassConst<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_class_const(elem, ctx, errs)?;
-        self.snd.on_ty_class_const(elem, ctx, errs)
+        self.fst.on_ty_class_const_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_class_const_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_class_abstract_typeconst(
-        &self,
+    fn on_ty_class_const_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassConst<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_class_const_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_class_const_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_abstract_typeconst_top_down(
+        &mut self,
         elem: &mut ClassAbstractTypeconst,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_abstract_typeconst(elem, ctx, errs)?;
-        self.snd.on_ty_class_abstract_typeconst(elem, ctx, errs)
+        self.fst
+            .on_ty_class_abstract_typeconst_top_down(elem, cfg, errs)?;
+        self.snd
+            .on_ty_class_abstract_typeconst_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_class_concrete_typeconst(
-        &self,
+    fn on_ty_class_abstract_typeconst_bottom_up(
+        &mut self,
+        elem: &mut ClassAbstractTypeconst,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst
+            .on_ty_class_abstract_typeconst_bottom_up(elem, cfg, errs)?;
+        self.snd
+            .on_ty_class_abstract_typeconst_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_concrete_typeconst_top_down(
+        &mut self,
         elem: &mut ClassConcreteTypeconst,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_concrete_typeconst(elem, ctx, errs)?;
-        self.snd.on_ty_class_concrete_typeconst(elem, ctx, errs)
+        self.fst
+            .on_ty_class_concrete_typeconst_top_down(elem, cfg, errs)?;
+        self.snd
+            .on_ty_class_concrete_typeconst_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_class_typeconst(
-        &self,
+    fn on_ty_class_concrete_typeconst_bottom_up(
+        &mut self,
+        elem: &mut ClassConcreteTypeconst,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst
+            .on_ty_class_concrete_typeconst_bottom_up(elem, cfg, errs)?;
+        self.snd
+            .on_ty_class_concrete_typeconst_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_typeconst_top_down(
+        &mut self,
         elem: &mut ClassTypeconst,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_class_typeconst(elem, ctx, errs)?;
-        self.snd.on_ty_class_typeconst(elem, ctx, errs)
+        self.fst.on_ty_class_typeconst_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_class_typeconst_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_class_typeconst_def<Ex, En>(
-        &self,
+    fn on_ty_class_typeconst_bottom_up(
+        &mut self,
+        elem: &mut ClassTypeconst,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_class_typeconst_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_class_typeconst_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_typeconst_def_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassTypeconstDef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_class_typeconst_def(elem, ctx, errs)?;
-        self.snd.on_ty_class_typeconst_def(elem, ctx, errs)
+        self.fst
+            .on_ty_class_typeconst_def_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_class_typeconst_def_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_xhp_attr_info(
-        &self,
+    fn on_ty_class_typeconst_def_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassTypeconstDef<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst
+            .on_ty_class_typeconst_def_bottom_up(elem, cfg, errs)?;
+        self.snd
+            .on_ty_class_typeconst_def_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_xhp_attr_info_top_down(
+        &mut self,
         elem: &mut XhpAttrInfo,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_xhp_attr_info(elem, ctx, errs)?;
-        self.snd.on_ty_xhp_attr_info(elem, ctx, errs)
+        self.fst.on_ty_xhp_attr_info_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_xhp_attr_info_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_class_var<Ex, En>(
-        &self,
+    fn on_ty_xhp_attr_info_bottom_up(
+        &mut self,
+        elem: &mut XhpAttrInfo,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_xhp_attr_info_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_xhp_attr_info_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_var_top_down<Ex, En>(
+        &mut self,
         elem: &mut ClassVar<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_class_var(elem, ctx, errs)?;
-        self.snd.on_ty_class_var(elem, ctx, errs)
+        self.fst.on_ty_class_var_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_class_var_top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_class_var_type_<Ex>(
-        &self,
+    fn on_ty_class_var_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ClassVar<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_class_var_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_class_var_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_class_var_type__top_down<Ex>(
+        &mut self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_fld_class_var_type_(elem, ctx, errs)?;
-        self.snd.on_fld_class_var_type_(elem, ctx, errs)
+        self.fst.on_fld_class_var_type__top_down(elem, cfg, errs)?;
+        self.snd.on_fld_class_var_type__top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_method_<Ex, En>(
-        &self,
+    fn on_fld_class_var_type__bottom_up<Ex>(
+        &mut self,
+        elem: &mut TypeHint<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_fld_class_var_type__bottom_up(elem, cfg, errs)?;
+        self.snd.on_fld_class_var_type__bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_method__top_down<Ex, En>(
+        &mut self,
         elem: &mut Method_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_method_(elem, ctx, errs)?;
-        self.snd.on_ty_method_(elem, ctx, errs)
+        self.fst.on_ty_method__top_down(elem, cfg, errs)?;
+        self.snd.on_ty_method__top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_method__ret<Ex>(
-        &self,
+    fn on_ty_method__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Method_<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_method__bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_method__bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_method__ret_top_down<Ex>(
+        &mut self,
         elem: &mut TypeHint<Ex>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_fld_method__ret(elem, ctx, errs)?;
-        self.snd.on_fld_method__ret(elem, ctx, errs)
+        self.fst.on_fld_method__ret_top_down(elem, cfg, errs)?;
+        self.snd.on_fld_method__ret_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_typedef<Ex, En>(
-        &self,
+    fn on_fld_method__ret_bottom_up<Ex>(
+        &mut self,
+        elem: &mut TypeHint<Ex>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_fld_method__ret_bottom_up(elem, cfg, errs)?;
+        self.snd.on_fld_method__ret_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_typedef_top_down<Ex, En>(
+        &mut self,
         elem: &mut Typedef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_typedef(elem, ctx, errs)?;
-        self.snd.on_ty_typedef(elem, ctx, errs)
+        self.fst.on_ty_typedef_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_typedef_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_gconst<Ex, En>(
-        &self,
+    fn on_ty_typedef_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Typedef<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_typedef_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_typedef_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_gconst_top_down<Ex, En>(
+        &mut self,
         elem: &mut Gconst<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_gconst(elem, ctx, errs)?;
-        self.snd.on_ty_gconst(elem, ctx, errs)
+        self.fst.on_ty_gconst_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_gconst_top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_gconst_value<Ex, En>(
-        &self,
+    fn on_ty_gconst_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Gconst<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_gconst_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_gconst_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_gconst_value_top_down<Ex, En>(
+        &mut self,
         elem: &mut Expr<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_fld_gconst_value(elem, ctx, errs)?;
-        self.snd.on_fld_gconst_value(elem, ctx, errs)
+        self.fst.on_fld_gconst_value_top_down(elem, cfg, errs)?;
+        self.snd.on_fld_gconst_value_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_fun_def<Ex, En>(
-        &self,
+    fn on_fld_gconst_value_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Expr<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_fld_gconst_value_bottom_up(elem, cfg, errs)?;
+        self.snd.on_fld_gconst_value_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_fun_def_top_down<Ex, En>(
+        &mut self,
         elem: &mut FunDef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_fun_def(elem, ctx, errs)?;
-        self.snd.on_ty_fun_def(elem, ctx, errs)
+        self.fst.on_ty_fun_def_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_fun_def_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_module_def<Ex, En>(
-        &self,
+    fn on_ty_fun_def_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FunDef<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_fun_def_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_fun_def_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_module_def_top_down<Ex, En>(
+        &mut self,
         elem: &mut ModuleDef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_module_def(elem, ctx, errs)?;
-        self.snd.on_ty_module_def(elem, ctx, errs)
+        self.fst.on_ty_module_def_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_module_def_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_def<Ex, En>(
-        &self,
+    fn on_ty_module_def_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut ModuleDef<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_module_def_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_module_def_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_def_top_down<Ex, En>(
+        &mut self,
         elem: &mut Def<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_def(elem, ctx, errs)?;
-        self.snd.on_ty_def(elem, ctx, errs)
+        self.fst.on_ty_def_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_def_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_xhp_child(
-        &self,
+    fn on_ty_def_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Def<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_def_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_def_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_xhp_child_top_down(
+        &mut self,
         elem: &mut XhpChild,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_xhp_child(elem, ctx, errs)?;
-        self.snd.on_ty_xhp_child(elem, ctx, errs)
+        self.fst.on_ty_xhp_child_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_xhp_child_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_hint(
-        &self,
+    fn on_ty_xhp_child_bottom_up(
+        &mut self,
+        elem: &mut XhpChild,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_xhp_child_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_xhp_child_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_hint_top_down(
+        &mut self,
         elem: &mut Hint,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_hint(elem, ctx, errs)?;
-        self.snd.on_ty_hint(elem, ctx, errs)
+        self.fst.on_ty_hint_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_hint_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_user_attributes<Ex, En>(
-        &self,
+    fn on_ty_hint_bottom_up(
+        &mut self,
+        elem: &mut Hint,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_hint_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_hint_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_user_attributes_top_down<Ex, En>(
+        &mut self,
         elem: &mut UserAttributes<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        self.fst.on_ty_user_attributes(elem, ctx, errs)?;
-        self.snd.on_ty_user_attributes(elem, ctx, errs)
+        self.fst.on_ty_user_attributes_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_user_attributes_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_contexts(
-        &self,
+    fn on_ty_user_attributes_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut UserAttributes<Ex, En>,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_user_attributes_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_user_attributes_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_contexts_top_down(
+        &mut self,
         elem: &mut Contexts,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_contexts(elem, ctx, errs)?;
-        self.snd.on_ty_contexts(elem, ctx, errs)
+        self.fst.on_ty_contexts_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_contexts_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_hint_fun(
-        &self,
+    fn on_ty_contexts_bottom_up(
+        &mut self,
+        elem: &mut Contexts,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_contexts_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_contexts_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_hint_fun_top_down(
+        &mut self,
         elem: &mut HintFun,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_hint_fun(elem, ctx, errs)?;
-        self.snd.on_ty_hint_fun(elem, ctx, errs)
+        self.fst.on_ty_hint_fun_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_hint_fun_top_down(elem, cfg, errs)
     }
-    #[allow(non_snake_case)]
     #[inline(always)]
-    fn on_fld_hint_fun_return_ty(
-        &self,
+    fn on_ty_hint_fun_bottom_up(
+        &mut self,
+        elem: &mut HintFun,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_hint_fun_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_hint_fun_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_fld_hint_fun_return_ty_top_down(
+        &mut self,
         elem: &mut Hint,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_fld_hint_fun_return_ty(elem, ctx, errs)?;
-        self.snd.on_fld_hint_fun_return_ty(elem, ctx, errs)
+        self.fst
+            .on_fld_hint_fun_return_ty_top_down(elem, cfg, errs)?;
+        self.snd.on_fld_hint_fun_return_ty_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_hint_(
-        &self,
+    fn on_fld_hint_fun_return_ty_bottom_up(
+        &mut self,
+        elem: &mut Hint,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst
+            .on_fld_hint_fun_return_ty_bottom_up(elem, cfg, errs)?;
+        self.snd
+            .on_fld_hint_fun_return_ty_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_hint__top_down(
+        &mut self,
         elem: &mut Hint_,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_hint_(elem, ctx, errs)?;
-        self.snd.on_ty_hint_(elem, ctx, errs)
+        self.fst.on_ty_hint__top_down(elem, cfg, errs)?;
+        self.snd.on_ty_hint__top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_refinement(
-        &self,
+    fn on_ty_hint__bottom_up(
+        &mut self,
+        elem: &mut Hint_,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_hint__bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_hint__bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_refinement_top_down(
+        &mut self,
         elem: &mut Refinement,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_refinement(elem, ctx, errs)?;
-        self.snd.on_ty_refinement(elem, ctx, errs)
+        self.fst.on_ty_refinement_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_refinement_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_type_refinement(
-        &self,
+    fn on_ty_refinement_bottom_up(
+        &mut self,
+        elem: &mut Refinement,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_refinement_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_refinement_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_type_refinement_top_down(
+        &mut self,
         elem: &mut TypeRefinement,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_type_refinement(elem, ctx, errs)?;
-        self.snd.on_ty_type_refinement(elem, ctx, errs)
+        self.fst.on_ty_type_refinement_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_type_refinement_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_type_refinement_bounds(
-        &self,
+    fn on_ty_type_refinement_bottom_up(
+        &mut self,
+        elem: &mut TypeRefinement,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_type_refinement_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_type_refinement_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_type_refinement_bounds_top_down(
+        &mut self,
         elem: &mut TypeRefinementBounds,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_type_refinement_bounds(elem, ctx, errs)?;
-        self.snd.on_ty_type_refinement_bounds(elem, ctx, errs)
+        self.fst
+            .on_ty_type_refinement_bounds_top_down(elem, cfg, errs)?;
+        self.snd
+            .on_ty_type_refinement_bounds_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_ctx_refinement(
-        &self,
+    fn on_ty_type_refinement_bounds_bottom_up(
+        &mut self,
+        elem: &mut TypeRefinementBounds,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst
+            .on_ty_type_refinement_bounds_bottom_up(elem, cfg, errs)?;
+        self.snd
+            .on_ty_type_refinement_bounds_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_ctx_refinement_top_down(
+        &mut self,
         elem: &mut CtxRefinement,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_ctx_refinement(elem, ctx, errs)?;
-        self.snd.on_ty_ctx_refinement(elem, ctx, errs)
+        self.fst.on_ty_ctx_refinement_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_ctx_refinement_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_ctx_refinement_bounds(
-        &self,
+    fn on_ty_ctx_refinement_bottom_up(
+        &mut self,
+        elem: &mut CtxRefinement,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_ctx_refinement_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_ctx_refinement_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_ctx_refinement_bounds_top_down(
+        &mut self,
         elem: &mut CtxRefinementBounds,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_ctx_refinement_bounds(elem, ctx, errs)?;
-        self.snd.on_ty_ctx_refinement_bounds(elem, ctx, errs)
+        self.fst
+            .on_ty_ctx_refinement_bounds_top_down(elem, cfg, errs)?;
+        self.snd
+            .on_ty_ctx_refinement_bounds_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_shape_field_info(
-        &self,
+    fn on_ty_ctx_refinement_bounds_bottom_up(
+        &mut self,
+        elem: &mut CtxRefinementBounds,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst
+            .on_ty_ctx_refinement_bounds_bottom_up(elem, cfg, errs)?;
+        self.snd
+            .on_ty_ctx_refinement_bounds_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_shape_field_info_top_down(
+        &mut self,
         elem: &mut ShapeFieldInfo,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_shape_field_info(elem, ctx, errs)?;
-        self.snd.on_ty_shape_field_info(elem, ctx, errs)
+        self.fst.on_ty_shape_field_info_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_shape_field_info_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_nast_shape_info(
-        &self,
+    fn on_ty_shape_field_info_bottom_up(
+        &mut self,
+        elem: &mut ShapeFieldInfo,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_shape_field_info_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_shape_field_info_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_nast_shape_info_top_down(
+        &mut self,
         elem: &mut NastShapeInfo,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_nast_shape_info(elem, ctx, errs)?;
-        self.snd.on_ty_nast_shape_info(elem, ctx, errs)
+        self.fst.on_ty_nast_shape_info_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_nast_shape_info_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_enum_(
-        &self,
+    fn on_ty_nast_shape_info_bottom_up(
+        &mut self,
+        elem: &mut NastShapeInfo,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_nast_shape_info_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_nast_shape_info_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_enum__top_down(
+        &mut self,
         elem: &mut Enum_,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_enum_(elem, ctx, errs)?;
-        self.snd.on_ty_enum_(elem, ctx, errs)
+        self.fst.on_ty_enum__top_down(elem, cfg, errs)?;
+        self.snd.on_ty_enum__top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_where_constraint_hint(
-        &self,
+    fn on_ty_enum__bottom_up(
+        &mut self,
+        elem: &mut Enum_,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_enum__bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_enum__bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_where_constraint_hint_top_down(
+        &mut self,
         elem: &mut WhereConstraintHint,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_where_constraint_hint(elem, ctx, errs)?;
-        self.snd.on_ty_where_constraint_hint(elem, ctx, errs)
+        self.fst
+            .on_ty_where_constraint_hint_top_down(elem, cfg, errs)?;
+        self.snd
+            .on_ty_where_constraint_hint_top_down(elem, cfg, errs)
     }
     #[inline(always)]
-    fn on_ty_id(
-        &self,
-        elem: &mut Id,
-        ctx: &mut Self::Ctx,
+    fn on_ty_where_constraint_hint_bottom_up(
+        &mut self,
+        elem: &mut WhereConstraintHint,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        self.fst.on_ty_id(elem, ctx, errs)?;
-        self.snd.on_ty_id(elem, ctx, errs)
+        self.fst
+            .on_ty_where_constraint_hint_bottom_up(elem, cfg, errs)?;
+        self.snd
+            .on_ty_where_constraint_hint_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_id_top_down(
+        &mut self,
+        elem: &mut Id,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_id_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_id_top_down(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_id_bottom_up(
+        &mut self,
+        elem: &mut Id,
+        cfg: &Self::Cfg,
+        errs: &mut Vec<Self::Err>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_id_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_id_bottom_up(elem, cfg, errs)
     }
 }
 #[doc = r" Used to combine multiple types implementing `Pass` into nested `Passes` types"]
 #[doc = r" without requiring them to hand write it so :"]
 #[doc = r" `passes![p1, p2, p3]` => `Passes(p1, Passes(p2, p3))`"]
 #[macro_export]
-macro_rules ! passes { ($ p : expr $ (, $ ps : expr) + $ (,) ?) => { $ crate :: transform :: Passes ($ p , $ crate :: passes ! ($ ($ ps) , *)) } ; ($ p : expr $ (,) ?) => { $ p } ; }
+macro_rules ! passes { ($ p : expr $ (, $ ps : expr) + $ (,) ?) => { $ crate :: Passes { fst : $ p , snd : $ crate :: passes ! ($ ($ ps) , *) } } ; ($ p : expr $ (,) ?) => { $ p } ; }

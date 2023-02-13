@@ -16,18 +16,20 @@ use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::NamingPhaseError;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
+#[derive(Clone, Copy, Default)]
 pub struct ElabClassIdPass;
 
 impl Pass for ElabClassIdPass {
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
 
-    fn on_ty_class_<Ex: Default, En>(
-        &self,
+    #[allow(non_snake_case)]
+    fn on_ty_class__top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Class_<Ex, En>,
-        _ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         if let Some(enum_) = &elem.enum_ {
@@ -61,13 +63,14 @@ impl Pass for ElabClassIdPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint_(
-        &self,
+    #[allow(non_snake_case)]
+    fn on_ty_hint__top_down(
+        &mut self,
         elem: &mut oxidized::tast::Hint_,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        if !(ctx.is_hhi() || ctx.is_systemlib()) {
+        if !(cfg.is_hhi() || cfg.is_systemlib()) {
             match elem {
                 Hint_::Happly(Id(pos, ty_name), _)
                     if ty_name == sn::classes::HH_BUILTIN_ENUM
@@ -98,12 +101,6 @@ mod tests {
     use transform::Transform;
 
     use super::*;
-
-    pub struct Identity;
-    impl Pass for Identity {
-        type Err = NamingPhaseError;
-        type Ctx = Context;
-    }
 
     fn make_enum_class_(kind: ClassishKind, enum_: Enum_) -> Class_<(), ()> {
         Class_ {
@@ -152,10 +149,9 @@ mod tests {
 
     #[test]
     fn test_enum_class_concrete() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabClassIdPass;
-        let bottom_up = Identity;
+        let mut pass = ElabClassIdPass;
 
         let mut elem: Class_<(), ()> = make_enum_class_(
             ClassishKind::CenumClass(Abstraction::Concrete),
@@ -166,7 +162,7 @@ mod tests {
             },
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         let Hint(_, hint_) = &mut elem.extends.pop().unwrap();
 
         assert!(match &mut **hint_ {
@@ -191,10 +187,9 @@ mod tests {
 
     #[test]
     fn test_enum_class_abstract() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabClassIdPass;
-        let bottom_up = Identity;
+        let mut pass = ElabClassIdPass;
 
         let mut elem: Class_<(), ()> = make_enum_class_(
             ClassishKind::CenumClass(Abstraction::Abstract),
@@ -205,7 +200,7 @@ mod tests {
             },
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         let Hint(_, hint_) = &mut elem.extends.pop().unwrap();
 
         assert!(match &mut **hint_ {
@@ -218,10 +213,9 @@ mod tests {
 
     #[test]
     fn test_enum() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabClassIdPass;
-        let bottom_up = Identity;
+        let mut pass = ElabClassIdPass;
 
         let mut elem: Class_<(), ()> = make_enum_class_(
             ClassishKind::Cenum,
@@ -232,7 +226,7 @@ mod tests {
             },
         );
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         let Hint(_, hint_) = &mut elem.extends.pop().unwrap();
 
         assert!(match &mut **hint_ {

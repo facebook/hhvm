@@ -12,18 +12,19 @@ use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::NamingPhaseError;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
+#[derive(Clone, Copy, Default)]
 pub struct ElabUserAttributesPass;
 
 impl Pass for ElabUserAttributesPass {
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
 
-    fn on_ty_user_attributes<Ex: Default, En>(
-        &self,
+    fn on_ty_user_attributes_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut UserAttributes<Ex, En>,
-        _ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         let mut seen: HashMap<String, Pos> = HashMap::default();
@@ -55,19 +56,12 @@ mod tests {
 
     use super::*;
 
-    pub struct Identity;
-    impl Pass for Identity {
-        type Err = NamingPhaseError;
-        type Ctx = Context;
-    }
-
     // Elaboration of CIexpr(..,..,Id(..,..)) when the id refers to a class
     #[test]
     fn test_ciexpr_id_class_ref() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabUserAttributesPass;
-        let bottom_up = Identity;
+        let mut pass = ElabUserAttributesPass;
         let mut elem: UserAttributes<(), ()> = UserAttributes(vec![
             UserAttribute {
                 name: Id(Pos::make_none(), "One".to_string()),
@@ -95,7 +89,7 @@ mod tests {
             },
         ]);
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         assert_eq!(elem.len(), 2);
         assert_eq!(errs.len(), 4);
     }

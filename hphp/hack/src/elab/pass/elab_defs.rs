@@ -13,18 +13,19 @@ use oxidized::aast_defs::Stmt_;
 use oxidized::naming_phase_error::NamingPhaseError;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
+#[derive(Clone, Copy, Default)]
 pub struct ElabDefsPass;
 
 impl Pass for ElabDefsPass {
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
 
-    fn on_ty_program<Ex: Default, En>(
-        &self,
+    fn on_ty_program_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Program<Ex, En>,
-        _ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         let Program(defs) = elem;
@@ -71,22 +72,14 @@ mod tests {
     use oxidized::aast_defs::Stmt;
     use oxidized::aast_defs::Stmt_;
     use oxidized::ast_defs::Id;
-    use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
-    use transform::Pass;
     use transform::Transform;
 
     use super::*;
 
-    pub struct Identity;
-    impl Pass for Identity {
-        type Err = NamingPhaseError;
-        type Ctx = Context;
-    }
-
     #[test]
     fn test() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
 
         let mut elem: Program<(), ()> = Program(vec![
             Def::Stmt(Box::new(Stmt(Pos::make_none(), Stmt_::Break))),
@@ -115,10 +108,9 @@ mod tests {
 
         let mut errs = Vec::default();
 
-        let top_down = ElabDefsPass;
-        let bottom_up = Identity;
+        let mut pass = ElabDefsPass;
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         // Given our initial program:
         //

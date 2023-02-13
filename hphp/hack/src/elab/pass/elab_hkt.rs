@@ -12,21 +12,22 @@ use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::NamingPhaseError;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
+#[derive(Clone, Copy, Default)]
 pub struct ElabHKTPass;
 
 impl Pass for ElabHKTPass {
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
 
-    fn on_ty_hint(
-        &self,
+    fn on_ty_hint_top_down(
+        &mut self,
         elem: &mut Hint,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        if !ctx.hkt_enabled() {
+        if !cfg.hkt_enabled() {
             let Hint(pos, hint_) = elem;
             if let Hint_::Habstr(tp_name, tp_params) = &mut **hint_ {
                 if !tp_params.is_empty() {
@@ -42,13 +43,13 @@ impl Pass for ElabHKTPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_tparam<Ex: Default, En>(
-        &self,
+    fn on_ty_tparam_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Tparam<Ex, En>,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        if !ctx.hkt_enabled() {
+        if !cfg.hkt_enabled() {
             if !elem.parameters.is_empty() {
                 let Id(pos, tp_name) = &elem.name;
                 let err = NamingPhaseError::Naming(NamingError::TparamWithTparam {
@@ -73,21 +74,13 @@ mod tests {
     use transform::Transform;
 
     use super::*;
-    use crate::context::Flags;
-
-    pub struct Identity;
-    impl Pass for Identity {
-        type Err = NamingPhaseError;
-        type Ctx = Context;
-    }
 
     #[test]
     fn test_hint() {
-        let mut ctx_hkt_enabled = Context::new(Flags::HKT_ENABLED);
-        let mut ctx_hkt_disabled = Context::default();
+        let cfg_hkt_enabled = Config::HKT_ENABLED;
+        let cfg_hkt_disabled = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabHKTPass;
-        let bottom_up = Identity;
+        let mut pass = ElabHKTPass;
         let mut elem = Hint(
             Pos::make_none(),
             Box::new(Hint_::Habstr(
@@ -96,7 +89,7 @@ mod tests {
             )),
         );
 
-        elem.transform(&mut ctx_hkt_enabled, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg_hkt_enabled, &mut errs, &mut pass);
         let Hint(_, hint_) = &elem;
         assert!(match &**hint_ {
             Hint_::Habstr(_, hints) => !hints.is_empty(),
@@ -104,7 +97,7 @@ mod tests {
         });
         assert_eq!(errs.len(), 0);
 
-        elem.transform(&mut ctx_hkt_disabled, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg_hkt_disabled, &mut errs, &mut pass);
         let Hint(_, hint_) = &elem;
         assert!(match &**hint_ {
             Hint_::Habstr(_, hints) => hints.is_empty(),
@@ -115,11 +108,10 @@ mod tests {
 
     #[test]
     fn test_tparam() {
-        let mut ctx_hkt_enabled = Context::new(Flags::HKT_ENABLED);
-        let mut ctx_hkt_disabled = Context::default();
+        let cfg_hkt_enabled = Config::HKT_ENABLED;
+        let cfg_hkt_disabled = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabHKTPass;
-        let bottom_up = Identity;
+        let mut pass = ElabHKTPass;
 
         let mut elem: Tparam<(), ()> = Tparam {
             variance: Variance::Invariant,
@@ -137,11 +129,11 @@ mod tests {
             user_attributes: UserAttributes::default(),
         };
 
-        elem.transform(&mut ctx_hkt_enabled, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg_hkt_enabled, &mut errs, &mut pass);
         assert!(!elem.parameters.is_empty());
         assert_eq!(errs.len(), 0);
 
-        elem.transform(&mut ctx_hkt_disabled, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg_hkt_disabled, &mut errs, &mut pass);
         assert!(elem.parameters.is_empty());
         assert_eq!(errs.len(), 1);
     }

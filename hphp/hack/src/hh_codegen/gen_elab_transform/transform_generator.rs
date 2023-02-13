@@ -10,6 +10,7 @@ use quote::quote;
 
 use super::contains_ocaml_attr;
 use super::Context;
+use super::Direction;
 use crate::common::to_snake;
 
 pub fn gen(ctx: &Context) -> TokenStream {
@@ -29,37 +30,36 @@ pub fn gen(ctx: &Context) -> TokenStream {
 
         mod pass;
         pub use pass::Pass;
+        pub use pass::Passes;
 
-        pub trait Transform<Ctx: Clone, Err> {
+        pub trait Transform<Cfg, Err> {
             #[inline(always)]
             fn transform(
                 &mut self,
-                ctx: &mut Ctx,
+                cfg: &Cfg,
                 errs: &mut Vec<Err>,
-                top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-                bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
+                pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
             ) {
-                self.traverse(ctx, errs, top_down, bottom_up);
+                self.traverse(cfg, errs, pass);
             }
             #[inline(always)]
             fn traverse(
                 &mut self,
-                ctx: &mut Ctx,
+                cfg: &Cfg,
                 errs: &mut Vec<Err>,
-                top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-                bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
+                pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
             ) {}
         }
 
-        impl<Ctx: Clone, Err> Transform<Ctx, Err> for () {}
-        impl<Ctx: Clone, Err> Transform<Ctx, Err> for bool {}
-        impl<Ctx: Clone, Err> Transform<Ctx, Err> for isize {}
-        impl<Ctx: Clone, Err> Transform<Ctx, Err> for String {}
-        impl<Ctx: Clone, Err> Transform<Ctx, Err> for bstr::BString {}
-        impl<Ctx: Clone, Err> Transform<Ctx, Err> for oxidized::pos::Pos {}
-        impl<Ctx: Clone, Err> Transform<Ctx, Err> for oxidized::file_info::Mode {}
-        impl<Ctx: Clone, Err> Transform<Ctx, Err> for oxidized::namespace_env::Env {}
-        impl<Ctx: Clone, Err, Ex> Transform<Ctx, Err> for oxidized::LocalIdMap<(Pos, Ex)> {}
+        impl<Cfg, Err> Transform<Cfg, Err> for () {}
+        impl<Cfg, Err> Transform<Cfg, Err> for bool {}
+        impl<Cfg, Err> Transform<Cfg, Err> for isize {}
+        impl<Cfg, Err> Transform<Cfg, Err> for String {}
+        impl<Cfg, Err> Transform<Cfg, Err> for bstr::BString {}
+        impl<Cfg, Err> Transform<Cfg, Err> for oxidized::pos::Pos {}
+        impl<Cfg, Err> Transform<Cfg, Err> for oxidized::file_info::Mode {}
+        impl<Cfg, Err> Transform<Cfg, Err> for oxidized::namespace_env::Env {}
+        impl<Cfg, Err, Ex> Transform<Cfg, Err> for oxidized::LocalIdMap<(Pos, Ex)> {}
 
         #(#manual_impls)*
 
@@ -87,7 +87,7 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
     // If the type is marked opaque, generate a no-op Transform impl.
     if contains_ocaml_attr(&s.ast().attrs, "transform.opaque") {
         return s.gen_impl(quote! {
-            gen impl<Ctx: Clone, Err> Transform<Ctx, Err> for @Self {}
+            gen impl<Cfg, Err> Transform<Cfg, Err> for @Self {}
         });
     }
 
@@ -97,9 +97,10 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
 
     let ty_name = s.ast().ident.to_string();
     let transform_body = gen_transform_body(
-        &super::gen_pass_method_name(&ty_name),
+        &super::gen_pass_method_name(&ty_name, Direction::TopDown),
+        &super::gen_pass_method_name(&ty_name, Direction::BottomUp),
         quote!(self),
-        quote!(self.traverse(ctx, errs, top_down, bottom_up)),
+        quote!(self.traverse(cfg, errs, pass)),
     );
     let traverse_body = gen_traverse_body(&ty_name, &s);
     let ex_bound = if s.referenced_ty_params().iter().any(|tp| *tp == "Ex") {
@@ -109,25 +110,23 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
     };
 
     s.gen_impl(quote! {
-        gen impl<Ctx: Clone, Err> Transform<Ctx, Err> for @Self
+        gen impl<Cfg, Err> Transform<Cfg, Err> for @Self
             #ex_bound
         {
             fn transform(
                 &mut self,
-                ctx: &mut Ctx,
+                cfg: &Cfg,
                 errs: &mut Vec<Err>,
-                top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-                bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
+                pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
             ) {
                 #transform_body
             }
 
             fn traverse(
                 &mut self,
-                ctx: &mut Ctx,
+                cfg: &Cfg,
                 errs: &mut Vec<Err>,
-                top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-                bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
+                pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
             ) {
                 match self { #traverse_body }
             }
@@ -151,53 +150,66 @@ fn gen_variant_traverse(ty_name: &str, v: &synstructure::VariantInfo<'_>) -> Tok
     if !contains_ocaml_attr(v.ast().attrs, "transform.explicit") {
         return v.each(|bi| gen_fld_traverse(ty_name, bi));
     }
-    let pass_method = super::gen_pass_ctor_method_name(ty_name, v.ast().ident.to_string());
+    let pass_method_td =
+        super::gen_pass_ctor_method_name(ty_name, v.ast().ident.to_string(), Direction::TopDown);
+    let pass_method_bu =
+        super::gen_pass_ctor_method_name(ty_name, v.ast().ident.to_string(), Direction::BottomUp);
     if v.ast().fields.len() != 1 {
         panic!("transform.explicit only supports variants with 1 field")
     }
     v.each(|bi| {
         gen_transform_body(
-            &pass_method,
+            &pass_method_td,
+            &pass_method_bu,
             quote!(#bi),
-            quote! { #bi.transform(ctx, errs, top_down, bottom_up) },
+            quote! { #bi.transform(cfg, errs, pass) },
         )
     })
 }
 
 fn gen_fld_traverse(ty_name: &str, bi: &synstructure::BindingInfo<'_>) -> TokenStream {
-    let transform_bi = quote! { #bi.transform(ctx, errs, top_down, bottom_up) };
+    let transform_bi = quote! { #bi.transform(cfg, errs, pass) };
     if !contains_ocaml_attr(&bi.ast().attrs, "transform.explicit") {
         return transform_bi;
     }
     // Since Transform is a trait, we can't have special implementations
     // of Transform::transform for fields. Instead, we inline the
     // transform_fld function here (in the Transform::traverse body).
-    let pass_method = super::gen_pass_fld_method_name(
+    let pass_method_td = super::gen_pass_fld_method_name(
         ty_name,
         (bi.ast().ident.as_ref())
             .map(|i| i.to_string())
             .unwrap_or_default(),
+        Direction::TopDown,
     );
-    gen_transform_body(&pass_method, quote!(#bi), transform_bi)
+    let pass_method_bu = super::gen_pass_fld_method_name(
+        ty_name,
+        (bi.ast().ident.as_ref())
+            .map(|i| i.to_string())
+            .unwrap_or_default(),
+        Direction::BottomUp,
+    );
+    gen_transform_body(&pass_method_td, &pass_method_bu, quote!(#bi), transform_bi)
 }
 
 fn gen_transform_body(
-    pass_method: &syn::Ident,
+    pass_method_td: &syn::Ident,
+    pass_method_bu: &syn::Ident,
     elem: TokenStream,
     recurse: TokenStream,
 ) -> TokenStream {
     quote! {
-        let mut in_ctx = ctx.clone();
-        if let Break(..) = top_down.#pass_method(#elem, ctx, errs) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.#pass_method_td(#elem, cfg, errs) {
             return;
         }
         #recurse;
-        bottom_up.#pass_method(#elem, &mut in_ctx, errs);
+        in_pass.#pass_method_bu(#elem, cfg, errs);
     }
 }
 
 fn gen_manual_impls() -> Vec<TokenStream> {
-    let transform = quote!(transform(&mut ctx.clone(), errs, top_down, bottom_up));
+    let transform = quote!(transform(cfg, errs, &mut pass.clone()));
 
     #[rustfmt::skip]
     let manual_impls = vec![
@@ -276,17 +288,15 @@ fn gen_manual_impl(
         .map(|tp| quote::format_ident!("{}", tp))
         .collect();
     quote! {
-        impl<Ctx, Err, #(#typarams,)*> Transform<Ctx, Err> for #ty
+        impl<Cfg, Err, #(#typarams,)*> Transform<Cfg, Err> for #ty
         where
-            Ctx: Clone,
-            #(#typarams: Transform<Ctx, Err>,)*
+            #(#typarams: Transform<Cfg, Err>,)*
         {
             fn traverse(
                 &mut self,
-                ctx: &mut Ctx,
+                cfg: &Cfg,
                 errs: &mut Vec<Err>,
-                top_down: &impl Pass<Ctx = Ctx, Err = Err>,
-                bottom_up: &impl Pass<Ctx = Ctx, Err = Err>,
+                pass: &mut (impl Pass<Cfg = Cfg, Err = Err> + Clone),
             ) {
                 #traverse_body
             }

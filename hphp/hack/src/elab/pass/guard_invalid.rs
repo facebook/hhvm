@@ -9,17 +9,20 @@ use oxidized::aast_defs::Expr_;
 use oxidized::naming_phase_error::NamingPhaseError;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
+#[derive(Clone, Copy, Default)]
 pub struct GuardInvalidPass;
 
 impl Pass for GuardInvalidPass {
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
-    fn on_ty_expr_<Ex: Default, En>(
-        &self,
+
+    #[allow(non_snake_case)]
+    fn on_ty_expr__top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Expr_<Ex, En>,
-        _ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         if matches!(elem, Expr_::Invalid(..)) {
@@ -38,19 +41,22 @@ mod tests {
     use oxidized::ast_defs::Bop;
     use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
+    use transform::passes;
     use transform::Pass;
     use transform::Transform;
 
     use super::*;
 
+    #[derive(Clone)]
     pub struct RewriteZero;
     impl Pass for RewriteZero {
         type Err = NamingPhaseError;
-        type Ctx = Context;
-        fn on_ty_expr_<Ex: Default, En>(
-            &self,
+        type Cfg = Config;
+        #[allow(non_snake_case)]
+        fn on_ty_expr__bottom_up<Ex: Default, En>(
+            &mut self,
             elem: &mut Expr_<Ex, En>,
-            _ctx: &mut Self::Ctx,
+            _cfg: &Self::Cfg,
             _errs: &mut Vec<Self::Err>,
         ) -> ControlFlow<(), ()> {
             match elem {
@@ -63,10 +69,10 @@ mod tests {
 
     #[test]
     fn test() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = GuardInvalidPass;
-        let bottom_up = RewriteZero;
+        let mut pass = passes![GuardInvalidPass, RewriteZero];
+
         let mut elem: Expr_<(), ()> = Expr_::Binop(Box::new((
             Bop::Lt,
             Expr(
@@ -81,7 +87,7 @@ mod tests {
             Expr((), Pos::make_none(), Expr_::Int("43".to_string())),
         )));
 
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
 
         assert!(match elem {
             Expr_::Binop(inner) => {

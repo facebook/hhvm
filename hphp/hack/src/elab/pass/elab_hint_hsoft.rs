@@ -10,23 +10,24 @@ use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Pos;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
+#[derive(Clone, Copy, Default)]
 pub struct ElabHintHsoftPass;
 
 impl Pass for ElabHintHsoftPass {
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
 
-    fn on_ty_hint(
-        &self,
+    fn on_ty_hint_top_down(
+        &mut self,
         elem: &mut Hint,
-        ctx: &mut Self::Ctx,
+        cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> std::ops::ControlFlow<(), ()> {
         let Hint(_, hint_) = elem;
         if let Hint_::Hsoft(inner) = hint_ as &mut Hint_ {
-            if ctx.soft_as_like() {
+            if cfg.soft_as_like() {
                 // Replace `Hsoft` with `Hlike` retaining the original position
                 // (pos, Hsoft(hint)) ==> (pos, Hlike(hint))
                 let herr = Hint(Pos::make_none(), Box::new(Hint_::Herr));
@@ -51,25 +52,15 @@ mod tests {
 
     use oxidized::aast_defs::Hint;
     use oxidized::aast_defs::Hint_;
-    use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
-    use transform::Pass;
     use transform::Transform;
 
     use super::*;
-    use crate::context::Flags;
-
-    pub struct Identity;
-    impl Pass for Identity {
-        type Err = NamingPhaseError;
-        type Ctx = Context;
-    }
 
     #[test]
     fn test() {
         let mut errs = Vec::default();
-        let top_down = ElabHintHsoftPass;
-        let bottom_up = Identity;
+        let mut pass = ElabHintHsoftPass;
 
         let mut elem1: Hint = Hint(
             Pos::make_none(),
@@ -83,14 +74,14 @@ mod tests {
 
         // Transform elem1 without `soft_as_like` set
         // expect Hdynamic
-        let mut ctx = Context::new(Flags::empty());
-        elem1.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        let mut cfg = Config::default();
+        elem1.transform(&cfg, &mut errs, &mut pass);
         assert!(matches!(*elem1.1, Hint_::Hdynamic));
 
         // Transform elem2 with `soft_as_like` set
         // expect Hlike(_,Hdynamic)
-        ctx = Context::new(Flags::SOFT_AS_LIKE);
-        elem2.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        cfg = Config::SOFT_AS_LIKE;
+        elem2.transform(&cfg, &mut errs, &mut pass);
         assert!(matches!(&*elem2.1, Hint_::Hlike(_)));
         assert!(match &*elem2.1 {
             Hint_::Hlike(inner) => matches!(*inner.1, Hint_::Hdynamic),

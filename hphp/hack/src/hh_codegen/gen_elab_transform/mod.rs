@@ -10,6 +10,19 @@ pub use crate::common::args::Args;
 use crate::common::context::Context;
 use crate::common::to_snake;
 
+pub enum Direction {
+    TopDown,
+    BottomUp,
+}
+impl Direction {
+    pub fn to_string(&self) -> &str {
+        match self {
+            Direction::TopDown => "top_down",
+            Direction::BottomUp => "bottom_up",
+        }
+    }
+}
+
 pub fn run(args: &Args) -> anyhow::Result<Vec<(std::path::PathBuf, String)>> {
     let files = crate::common::parse_all(&args.input)?;
 
@@ -25,23 +38,33 @@ pub fn run(args: &Args) -> anyhow::Result<Vec<(std::path::PathBuf, String)>> {
         .collect())
 }
 
-fn gen_pass_method_name(ty: impl AsRef<str>) -> syn::Ident {
-    quote::format_ident!("on_ty_{}", to_snake(ty.as_ref()))
+fn gen_pass_method_name(ty: impl AsRef<str>, dir: Direction) -> syn::Ident {
+    quote::format_ident!("on_ty_{}_{}", to_snake(ty.as_ref()), dir.to_string())
 }
 
-fn gen_pass_fld_method_name(ty: impl AsRef<str>, field: impl AsRef<str>) -> syn::Ident {
+fn gen_pass_fld_method_name(
+    ty: impl AsRef<str>,
+    field: impl AsRef<str>,
+    dir: Direction,
+) -> syn::Ident {
     quote::format_ident!(
-        "on_fld_{}_{}",
+        "on_fld_{}_{}_{}",
         to_snake(ty.as_ref()),
-        to_snake(field.as_ref())
+        to_snake(field.as_ref()),
+        dir.to_string(),
     )
 }
 
-fn gen_pass_ctor_method_name(ty: impl AsRef<str>, field: impl AsRef<str>) -> syn::Ident {
+fn gen_pass_ctor_method_name(
+    ty: impl AsRef<str>,
+    field: impl AsRef<str>,
+    dir: Direction,
+) -> syn::Ident {
     quote::format_ident!(
-        "on_ctor_{}_{}",
+        "on_ctor_{}_{}_{}",
         to_snake(ty.as_ref()),
-        to_snake(field.as_ref())
+        to_snake(field.as_ref()),
+        dir.to_string()
     )
 }
 

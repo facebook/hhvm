@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![feature(is_some_and)]
 
-pub mod context;
+pub mod config;
 pub mod elab_block;
 pub mod elab_class_id;
 pub mod elab_defs;

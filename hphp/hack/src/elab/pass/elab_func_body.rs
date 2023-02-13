@@ -13,73 +13,85 @@ use oxidized::aast_defs::Typedef;
 use oxidized::naming_phase_error::NamingPhaseError;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
-pub struct ElabFuncBodyPass;
+#[derive(Clone, Copy)]
+pub struct ElabFuncBodyPass {
+    mode: file_info::Mode,
+}
+
+impl Default for ElabFuncBodyPass {
+    fn default() -> Self {
+        ElabFuncBodyPass {
+            mode: file_info::Mode::Mstrict,
+        }
+    }
+}
 
 impl Pass for ElabFuncBodyPass {
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
 
-    fn on_ty_func_body<Ex: Default, En>(
-        &self,
+    fn on_ty_func_body_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut FuncBody<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        if matches!(ctx.mode(), file_info::Mode::Mhhi) {
+        if matches!(self.mode, file_info::Mode::Mhhi) {
             elem.fb_ast.clear()
         }
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class_<Ex: Default, En>(
-        &self,
+    #[allow(non_snake_case)]
+    fn on_ty_class__top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Class_<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.set_mode(elem.mode);
+        self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_typedef<Ex: Default, En>(
-        &self,
+    fn on_ty_typedef_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Typedef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.set_mode(elem.mode);
+        self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst<Ex: Default, En>(
-        &self,
+    fn on_ty_gconst_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut Gconst<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.set_mode(elem.mode);
+        self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def<Ex: Default, En>(
-        &self,
+    fn on_ty_fun_def_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut FunDef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cf: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.set_mode(elem.mode);
+        self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def<Ex: Default, En>(
-        &self,
+    fn on_ty_module_def_top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut ModuleDef<Ex, En>,
-        ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
-        ctx.set_mode(elem.mode);
+        self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 }
@@ -90,22 +102,14 @@ mod tests {
     use oxidized::aast_defs::FuncBody;
     use oxidized::aast_defs::Stmt;
     use oxidized::aast_defs::Stmt_;
-    use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
-    use transform::Pass;
     use transform::Transform;
 
     use super::*;
 
-    pub struct Identity;
-    impl Pass for Identity {
-        type Err = NamingPhaseError;
-        type Ctx = Context;
-    }
-
     #[test]
     fn test_add() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
 
         let mut elem: FuncBody<(), ()> = FuncBody {
             fb_ast: oxidized::ast::Block(vec![Stmt(Pos::make_none(), Stmt_::Noop)]),
@@ -113,16 +117,15 @@ mod tests {
 
         let mut errs = Vec::default();
 
-        let top_down = ElabFuncBodyPass;
-        let bottom_up = Identity;
+        let mut pass = ElabFuncBodyPass::default();
 
         // Transform when not in Mode::Mhhi should be unchanged
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         assert!(!elem.fb_ast.is_empty());
 
         // Transform when in Mode::Mhhi should result in [fb_ast] being cleared
-        ctx.set_mode(file_info::Mode::Mhhi);
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        pass.mode = file_info::Mode::Mhhi;
+        elem.transform(&cfg, &mut errs, &mut pass);
         assert!(elem.fb_ast.is_empty());
     }
 }

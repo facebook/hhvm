@@ -22,14 +22,14 @@ pub struct Opts {
     files: FileOpts,
 }
 
-#[derive(Clone, Default)]
-struct Ctx {}
+#[derive(Default)]
+struct Cfg {}
 struct Err {}
 
-#[derive(Default)]
-struct NoPass {}
+#[derive(Clone, Default)]
+struct NoPass;
 impl Pass for NoPass {
-    type Ctx = Ctx;
+    type Cfg = Cfg;
     type Err = Err;
 }
 
@@ -60,13 +60,10 @@ pub fn process_one_file(path: &Path, _: &Opts) -> Result<()> {
             // TODO: print errors in parse result?
 
             info!("invoking 'tranform_ty_program' on {filename:#?}");
-            let top_down = NoPass::default();
-            let bottom_up = NoPass::default();
-            let mut ctx = Ctx::default();
+            let mut pass = NoPass::default();
+            let cfg = Cfg::default();
             let mut errs = Vec::default();
-            parse_result
-                .aast
-                .transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+            parse_result.aast.transform(&cfg, &mut errs, &mut pass);
 
             // TODO: print elaboaration errors (`errs`).
             println!("{:#?}", &parse_result.aast);

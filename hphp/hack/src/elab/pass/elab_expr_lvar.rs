@@ -12,18 +12,20 @@ use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Pos;
 use transform::Pass;
 
-use crate::context::Context;
+use crate::config::Config;
 
+#[derive(Clone, Copy, Default)]
 pub struct ElabExprLvarPass;
 
 impl Pass for ElabExprLvarPass {
-    type Ctx = Context;
+    type Cfg = Config;
     type Err = NamingPhaseError;
 
-    fn on_ty_expr_<Ex: Default, En>(
-        &self,
+    #[allow(non_snake_case)]
+    fn on_ty_expr__top_down<Ex: Default, En>(
+        &mut self,
         elem: &mut oxidized::aast::Expr_<Ex, En>,
-        _ctx: &mut Self::Ctx,
+        _cfg: &Self::Cfg,
         _errs: &mut Vec<Self::Err>,
     ) -> ControlFlow<(), ()> {
         match elem {
@@ -61,51 +63,45 @@ mod tests {
 
     use super::*;
 
-    pub struct Identity;
-    impl Pass for Identity {
-        type Err = NamingPhaseError;
-        type Ctx = Context;
-    }
-
     #[test]
     fn test_lvar_this() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprLvarPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprLvarPass;
+
         let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
             Pos::make_none(),
             local_id::make_unscoped(sn::special_idents::THIS),
         )));
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         assert!(matches!(elem, Expr_::This))
     }
 
     #[test]
     fn test_lvar_placeholder() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprLvarPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprLvarPass;
+
         let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
             Pos::make_none(),
             local_id::make_unscoped(sn::special_idents::PLACEHOLDER),
         )));
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         assert!(matches!(elem, Expr_::Lplaceholder(_)))
     }
 
     #[test]
     fn test_lvar_dollar_dollar() {
-        let mut ctx = Context::default();
+        let cfg = Config::default();
         let mut errs = Vec::default();
-        let top_down = ElabExprLvarPass;
-        let bottom_up = Identity;
+        let mut pass = ElabExprLvarPass;
+
         let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
             Pos::make_none(),
             local_id::make_unscoped(sn::special_idents::DOLLAR_DOLLAR),
         )));
-        elem.transform(&mut ctx, &mut errs, &top_down, &bottom_up);
+        elem.transform(&cfg, &mut errs, &mut pass);
         assert!(matches!(elem, Expr_::Dollardollar(_)))
     }
 }

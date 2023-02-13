@@ -100,10 +100,16 @@ bool cfgHasLoop(const IRUnit&);
  */
 EdgeSet findRetreatingEdges(const IRUnit&);
 
+struct LoopInfo {
+  jit::hash_set<RegionDesc::BlockId> blocks;
+  jit::hash_map<RegionDesc::BlockId, BlockList> loopPreheaders;
+};
+
 /*
- * Return the set of blocks in a loop given a set of backedges
+ * Return loop information containing the set of blocks in a loop and the
+ * set of loop preheaders for each loop
  */
-jit::hash_set<RegionDesc::BlockId> findBlocksInLoops(const IRUnit&, const EdgeSet&);
+LoopInfo findBlocksInLoops(const IRUnit&, const EdgeSet&);
 
 
 /*

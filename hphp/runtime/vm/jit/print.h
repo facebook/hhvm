@@ -30,6 +30,7 @@ struct AsmInfo;
 struct Block;
 struct GuardConstraints;
 struct IRInstruction;
+struct LoopInfo;
 struct SSATmp;
 
 // IRInstruction
@@ -54,7 +55,8 @@ void print(std::ostream& os, const Block* block,
            TransKind kind,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr,
-           BCMarker* curMarker = nullptr);
+           BCMarker* curMarker = nullptr,
+           const LoopInfo* loopInfo = nullptr);
 void print(const Block* block);
 
 // Unit

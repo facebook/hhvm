@@ -293,7 +293,9 @@ bool cfgHasLoop(const IRUnit& unit) {
   return ret;
 }
 
-jit::hash_set<RegionDesc::BlockId> findBlocksInLoops(const IRUnit& unit, const EdgeSet& backEdges) {
+
+LoopInfo findBlocksInLoops(const IRUnit& unit, const EdgeSet& backEdges) {
+  jit::hash_map<RegionDesc::BlockId, BlockList> loopEntryBlocks;
   jit::hash_set<RegionDesc::BlockId> blocks;
   auto findBlocksInLoop = [&](Edge* backEdge) {
     auto stack = BlockList{};
@@ -301,7 +303,8 @@ jit::hash_set<RegionDesc::BlockId> findBlocksInLoops(const IRUnit& unit, const E
     visited.reserve(unit.numBlocks());
     stack.reserve(unit.numBlocks());
     stack.push_back(backEdge->from());
-    auto loopHeaderId = backEdge->to()->id();
+    auto loopHeader = backEdge->to();
+    auto loopHeaderId = loopHeader->id();
     visited.insert(loopHeaderId);
     blocks.insert(loopHeaderId);
 
@@ -317,11 +320,18 @@ jit::hash_set<RegionDesc::BlockId> findBlocksInLoops(const IRUnit& unit, const E
         stack.push_back(pred);
       });
     }
+
+    BlockList entries{};
+    loopHeader->forEachPred([&] (Block* pred) {
+      if (visited.find(pred->id()) != visited.end()) return;
+      entries.push_back(pred);
+    });
+    loopEntryBlocks[loopHeaderId] = std::move(entries);
   };
   for (auto edge : backEdges) {
     findBlocksInLoop(edge);
   }
-  return blocks;
+  return {blocks, loopEntryBlocks};
 }
 
 //////////////////////////////////////////////////////////////////////

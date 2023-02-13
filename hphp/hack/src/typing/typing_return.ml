@@ -177,6 +177,16 @@ let make_return_type
         in
         let ((env, ty_err_opt), ty) = Typing_phase.localize ~ety_env env dty in
         Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        (* If type doesn't already support dynamic then wrap it if supportdyn=true *)
+        let (env, ty) =
+          if supportdyn then
+            TUtils.make_supportdyn
+              (Reason.Rsupport_dynamic_type (get_pos ty))
+              env
+              ty
+          else
+            (env, ty)
+        in
         let et_type =
           match get_node ty with
           | Tprim Aast.Tvoid when not wrap -> ty

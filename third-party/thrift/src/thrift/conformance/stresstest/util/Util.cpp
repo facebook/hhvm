@@ -39,8 +39,8 @@ void resetMemoryStats() {
 }
 
 size_t getThreadMemoryUsage() {
-  static size_t* allocatedp = getStatsPtr("thread.allocatedp");
-  static size_t* deallocatedp = getStatsPtr("thread.deallocatedp");
+  size_t* allocatedp = getStatsPtr("thread.allocatedp");
+  size_t* deallocatedp = getStatsPtr("thread.deallocatedp");
   return allocatedp && deallocatedp ? (*allocatedp - *deallocatedp) : 0;
 }
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<41e0ef26ddebbabbb024f4f04cd3c35f>>
+// @generated SignedSource<<7f4c93fa3c25b3d90894cab696e6cb62>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3621,8 +3621,3 @@ where
         self.snd.on_ty_id_bottom_up(elem, cfg, errs)
     }
 }
-#[doc = r" Used to combine multiple types implementing `Pass` into nested `Passes` types"]
-#[doc = r" without requiring them to hand write it so :"]
-#[doc = r" `passes![p1, p2, p3]` => `Passes(p1, Passes(p2, p3))`"]
-#[macro_export]
-macro_rules ! passes { ($ p : expr $ (, $ ps : expr) + $ (,) ?) => { $ crate :: Passes { fst : $ p , snd : $ crate :: passes ! ($ ($ ps) , *) } } ; ($ p : expr $ (,) ?) => { $ p } ; }

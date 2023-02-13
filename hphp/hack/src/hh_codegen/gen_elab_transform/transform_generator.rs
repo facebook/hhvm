@@ -28,9 +28,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
         use oxidized::ast_defs::*;
         use oxidized::aast_defs::*;
 
-        mod pass;
-        pub use pass::Pass;
-        pub use pass::Passes;
+        use crate::Pass;
 
         pub trait Transform<Cfg, Err> {
             #[inline(always)]

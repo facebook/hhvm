@@ -17,9 +17,9 @@ use oxidized::local_id;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Pos;
-use transform::Pass;
 
 use crate::config::Config;
+use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabClassIdPass {
@@ -152,9 +152,8 @@ impl Pass for ElabClassIdPass {
 
 #[cfg(test)]
 mod tests {
-    use transform::Transform;
-
     use super::*;
+    use crate::Transform;
     // Elaboration of CIexpr(..,..,Id(..,..)) when the id refers to a class
     #[test]
     fn test_ciexpr_id_class_ref() {

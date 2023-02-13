@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1cda5c84d9366594b6edb3f39ddff006>>
+// @generated SignedSource<<eb9b180e9ddc6d63f4faa2e7075cde95>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,9 +13,8 @@ use std::ops::ControlFlow::Break;
 
 use oxidized::aast_defs::*;
 use oxidized::ast_defs::*;
-mod pass;
-pub use pass::Pass;
-pub use pass::Passes;
+
+use crate::Pass;
 pub trait Transform<Cfg, Err> {
     #[inline(always)]
     fn transform(

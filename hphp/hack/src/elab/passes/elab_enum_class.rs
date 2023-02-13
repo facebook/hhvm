@@ -14,9 +14,9 @@ use oxidized::ast_defs::ClassishKind;
 use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::NamingPhaseError;
-use transform::Pass;
 
 use crate::config::Config;
+use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabClassIdPass;
@@ -98,9 +98,9 @@ mod tests {
     use oxidized::namespace_env::Env;
     use oxidized::s_map::SMap;
     use oxidized::tast::Pos;
-    use transform::Transform;
 
     use super::*;
+    use crate::Transform;
 
     fn make_enum_class_(kind: ClassishKind, enum_: Enum_) -> Class_<(), ()> {
         Class_ {

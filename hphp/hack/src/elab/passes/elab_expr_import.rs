@@ -9,9 +9,9 @@ use oxidized::aast_defs::Expr;
 use oxidized::aast_defs::Expr_;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Pos;
-use transform::Pass;
 
 use crate::config::Config;
+use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabExprImportPass;
@@ -49,9 +49,9 @@ impl Pass for ElabExprImportPass {
 #[cfg(test)]
 mod tests {
     use oxidized::aast_defs::ImportFlavor;
-    use transform::Transform;
 
     use super::*;
+    use crate::Transform;
 
     // -- ValCollection --------------------------------------------------------
 

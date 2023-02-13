@@ -8,9 +8,9 @@ use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::Hint_;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Pos;
-use transform::Pass;
 
 use crate::config::Config;
+use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabHintHsoftPass;
@@ -53,9 +53,9 @@ mod tests {
     use oxidized::aast_defs::Hint;
     use oxidized::aast_defs::Hint_;
     use oxidized::tast::Pos;
-    use transform::Transform;
 
     use super::*;
+    use crate::Transform;
 
     #[test]
     fn test() {

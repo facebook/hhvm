@@ -10,9 +10,9 @@ use oxidized::ast_defs::Id;
 use oxidized::ast_defs::Pos;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::NamingPhaseError;
-use transform::Pass;
 
 use crate::config::Config;
+use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabUserAttributesPass;
@@ -52,9 +52,9 @@ impl Pass for ElabUserAttributesPass {
 #[cfg(test)]
 mod tests {
     use oxidized::aast_defs::UserAttribute;
-    use transform::Transform;
 
     use super::*;
+    use crate::Transform;
 
     // Elaboration of CIexpr(..,..,Id(..,..)) when the id refers to a class
     #[test]

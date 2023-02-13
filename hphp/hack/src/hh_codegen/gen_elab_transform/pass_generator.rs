@@ -65,19 +65,6 @@ pub fn gen(ctx: &Context) -> TokenStream {
 
             #(#passes_methods)*
         }
-
-        /// Used to combine multiple types implementing `Pass` into nested `Passes` types
-        /// without requiring them to hand write it so :
-        /// `passes![p1, p2, p3]` => `Passes(p1, Passes(p2, p3))`
-        #[macro_export]
-        macro_rules! passes {
-            ( $p:expr $(,$ps:expr)+ $(,)? ) => {
-                $crate::Passes { fst:$p, snd:$crate::passes!($($ps),*) }
-            };
-            ( $p:expr $(,)? ) => {
-                $p
-            };
-        }
     }
 }
 

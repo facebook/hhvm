@@ -21,6 +21,7 @@ compile = { path = "compile/cargo/compile" }
 decl_parser = { path = "../hackrs/decl_parser/cargo/decl_parser" }
 decl_provider = { path = "decl_provider" }
 direct_decl_parser = { path = "../parser/api/cargo/direct_decl_parser" }
+elab = { path = "../elab" }
 env_logger = "0.7"
 facts_rust = { path = "../facts/cargo/facts_rust" }
 ffi = { path = "../utils/ffi" }
@@ -64,5 +65,4 @@ strum_macros = "0.21"
 tempdir = "0.3"
 textual = { path = "ir/conversions/textual/cargo/textual" }
 thiserror = "1.0.36"
-transform = { path = "../elab/transform/cargo/transform" }
 ty = { path = "../hackrs/ty/cargo/ty" }

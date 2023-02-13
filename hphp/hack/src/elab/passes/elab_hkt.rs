@@ -10,9 +10,9 @@ use oxidized::aast_defs::Tparam;
 use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::NamingPhaseError;
-use transform::Pass;
 
 use crate::config::Config;
+use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabHKTPass;
@@ -71,9 +71,9 @@ mod tests {
     use oxidized::aast_defs::UserAttributes;
     use oxidized::ast_defs::Variance;
     use oxidized::tast::Pos;
-    use transform::Transform;
 
     use super::*;
+    use crate::Transform;
 
     #[test]
     fn test_hint() {

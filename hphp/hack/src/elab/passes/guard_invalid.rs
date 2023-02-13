@@ -7,9 +7,9 @@ use std::ops::ControlFlow;
 
 use oxidized::aast_defs::Expr_;
 use oxidized::naming_phase_error::NamingPhaseError;
-use transform::Pass;
 
 use crate::config::Config;
+use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
 pub struct GuardInvalidPass;
@@ -41,11 +41,10 @@ mod tests {
     use oxidized::ast_defs::Bop;
     use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
-    use transform::passes;
-    use transform::Pass;
-    use transform::Transform;
 
     use super::*;
+    use crate::Pass;
+    use crate::Transform;
 
     #[derive(Clone)]
     pub struct RewriteZero;

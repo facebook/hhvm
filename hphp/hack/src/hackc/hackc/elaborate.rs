@@ -11,8 +11,6 @@ use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use relative_path::Prefix;
 use relative_path::RelativePath;
-use transform::Pass;
-use transform::Transform;
 
 use crate::FileOpts;
 
@@ -20,17 +18,6 @@ use crate::FileOpts;
 pub struct Opts {
     #[command(flatten)]
     files: FileOpts,
-}
-
-#[derive(Default)]
-struct Cfg {}
-struct Err {}
-
-#[derive(Clone, Default)]
-struct NoPass;
-impl Pass for NoPass {
-    type Cfg = Cfg;
-    type Err = Err;
 }
 
 pub fn run(opts: Opts) -> Result<()> {
@@ -59,11 +46,8 @@ pub fn process_one_file(path: &Path, _: &Opts) -> Result<()> {
         Ok(mut parse_result) => {
             // TODO: print errors in parse result?
 
-            info!("invoking 'tranform_ty_program' on {filename:#?}");
-            let mut pass = NoPass::default();
-            let cfg = Cfg::default();
-            let mut errs = Vec::default();
-            parse_result.aast.transform(&cfg, &mut errs, &mut pass);
+            info!("invoking 'elaborate_program' on {filename:#?}");
+            let _errs = elab::elaborate_program(&mut parse_result.aast);
 
             // TODO: print elaboaration errors (`errs`).
             println!("{:#?}", &parse_result.aast);

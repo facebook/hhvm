@@ -20,9 +20,9 @@ use oxidized::ast_defs::Pos;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Tprim;
-use transform::Pass;
 
 use crate::config::Config;
+use crate::Pass;
 
 #[derive(Clone, Default)]
 pub struct ElabHintHapplyPass {
@@ -382,9 +382,8 @@ fn is_prim(str: &str) -> bool {
 #[cfg(test)]
 mod tests {
 
-    use transform::Transform;
-
     use super::*;
+    use crate::Transform;
 
     #[test]
     fn test_vec_or_dict_two_tyargs() {

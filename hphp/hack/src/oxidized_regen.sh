@@ -110,7 +110,7 @@ summary "Write elab/transform/"
   elab-transform                                                              \
   --input "hphp/hack/src/oxidized/gen/aast_defs.rs"                           \
   --input "hphp/hack/src/oxidized/gen/ast_defs.rs"                            \
-  --output "hphp/hack/src/elab/transform/"                                    \
+  --output "hphp/hack/src/elab/"                                              \
   --root "Program"                                                            \
 
 summary "Write oxidized_by_ref/gen/"

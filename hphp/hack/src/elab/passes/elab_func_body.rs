@@ -11,9 +11,9 @@ use oxidized::aast_defs::Gconst;
 use oxidized::aast_defs::ModuleDef;
 use oxidized::aast_defs::Typedef;
 use oxidized::naming_phase_error::NamingPhaseError;
-use transform::Pass;
 
 use crate::config::Config;
+use crate::Pass;
 
 #[derive(Clone, Copy)]
 pub struct ElabFuncBodyPass {
@@ -103,9 +103,9 @@ mod tests {
     use oxidized::aast_defs::Stmt;
     use oxidized::aast_defs::Stmt_;
     use oxidized::tast::Pos;
-    use transform::Transform;
 
     use super::*;
+    use crate::Transform;
 
     #[test]
     fn test_add() {

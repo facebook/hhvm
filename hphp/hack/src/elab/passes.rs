@@ -2,9 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![feature(is_some_and)]
 
-pub mod config;
 pub mod elab_block;
 pub mod elab_class_id;
 pub mod elab_defs;

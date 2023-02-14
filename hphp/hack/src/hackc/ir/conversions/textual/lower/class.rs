@@ -11,12 +11,6 @@ pub(crate) fn lower_class<'a>(class: Class<'a>, _strings: Arc<StringInterner>) -
         }
     }
 
-    if !class.type_constants.is_empty() {
-        textual_todo! {
-            trace!("TODO: class.type_constants");
-        }
-    }
-
     if !class.upper_bounds.is_empty() {
         textual_todo! {
             trace!("TODO: class.upper_bounds");

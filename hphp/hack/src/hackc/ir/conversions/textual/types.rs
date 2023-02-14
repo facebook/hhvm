@@ -23,9 +23,16 @@ pub(crate) fn convert_ty(ty: &ir::EnforceableType, strings: &StringInterner) -> 
     // All textual boxed types are nullable.
     modifiers -= TypeConstraintFlags::Nullable;
 
+    if modifiers.contains(TypeConstraintFlags::TypeConstant) {
+        // A type constant is treated as a raw mixed.
+        return textual::Ty::mixed();
+    }
+
     if modifiers != TypeConstraintFlags::NoFlags {
-        log::trace!("MODIFIERS: {modifiers:?}");
         textual_todo! {
+            message = ("MODIFIERS: {modifiers:?}\n{}",
+                       ir::print::FmtEnforceableType(ty, strings)
+            ),
             base = textual::Ty::Type("TODO_NoFlags".to_string());
         }
     }
@@ -67,6 +74,6 @@ fn convert_base(ty: &ir::BaseType, strings: &StringInterner) -> textual::Ty {
         | BaseType::None
         | BaseType::Nonnull
         | BaseType::This
-        | BaseType::Typename => textual::Ty::SpecialPtr(textual::SpecialTy::Mixed),
+        | BaseType::Typename => textual::Ty::mixed(),
     }
 }

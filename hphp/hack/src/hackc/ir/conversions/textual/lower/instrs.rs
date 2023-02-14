@@ -75,6 +75,8 @@ impl LowerInstrs<'_> {
     fn handle_hhbc_with_builtin(&self, hhbc: &Hhbc) -> Option<hack::Hhbc> {
         let builtin = match hhbc {
             Hhbc::Add(..) => hack::Hhbc::Add,
+            Hhbc::AddElemC(..) => hack::Hhbc::AddElemC,
+            Hhbc::AddNewElemC(..) => hack::Hhbc::AddNewElemC,
             Hhbc::CastVec(..) => hack::Hhbc::CastVec,
             Hhbc::ClassGetC(..) => hack::Hhbc::ClassGetC,
             Hhbc::ClassHasReifiedGenerics(..) => hack::Hhbc::ClassHasReifiedGenerics,
@@ -93,6 +95,7 @@ impl LowerInstrs<'_> {
             Hhbc::Div(..) => hack::Hhbc::Div,
             Hhbc::GetClsRGProp(..) => hack::Hhbc::GetClsRGProp,
             Hhbc::HasReifiedParent(..) => hack::Hhbc::HasReifiedParent,
+            Hhbc::IsLateBoundCls(..) => hack::Hhbc::IsLateBoundCls,
             Hhbc::IsTypeC(_, IsTypeOp::ArrLike, _) => hack::Hhbc::IsTypeArrLike,
             Hhbc::IsTypeC(_, IsTypeOp::Bool, _) => hack::Hhbc::IsTypeBool,
             Hhbc::IsTypeC(_, IsTypeOp::Class, _) => hack::Hhbc::IsTypeClass,
@@ -112,6 +115,7 @@ impl LowerInstrs<'_> {
             Hhbc::Modulo(..) => hack::Hhbc::Modulo,
             Hhbc::Mul(..) => hack::Hhbc::Mul,
             Hhbc::NewDictArray(..) => hack::Hhbc::NewDictArray,
+            Hhbc::NewKeysetArray(..) => hack::Hhbc::NewKeysetArray,
             Hhbc::NewVec(..) => hack::Hhbc::NewVec,
             Hhbc::Not(..) => hack::Hhbc::Not,
             Hhbc::Print(..) => hack::Hhbc::Print,
@@ -366,6 +370,11 @@ impl TransformInstr for LowerInstrs<'_> {
                     }
                 }
             }
+            Instr::Hhbc(Hhbc::LazyClass(clsid, _)) => {
+                // Treat a lazy class as a simple string.
+                let c = builder.emit_constant(Constant::String(clsid.id));
+                Instr::copy(c)
+            }
             Instr::Hhbc(Hhbc::LockObj(obj, loc)) => {
                 builder.emit_hhbc_builtin(hack::Hhbc::LockObj, &[obj], loc);
                 Instr::copy(obj)
@@ -432,6 +441,10 @@ impl TransformInstr for LowerInstrs<'_> {
             }
             Instr::Hhbc(Hhbc::VerifyRetTypeTS([obj, ts], loc)) => {
                 self.verify_ret_type_ts(builder, obj, ts, loc)
+            }
+            Instr::Hhbc(Hhbc::VerifyImplicitContextState(_)) => {
+                // no-op
+                Instr::tombstone()
             }
             Instr::Hhbc(Hhbc::IterFree(id, loc)) => {
                 let lid = iter_var_name(id, &builder.strings);

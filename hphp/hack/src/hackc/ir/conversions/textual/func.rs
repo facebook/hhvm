@@ -300,9 +300,12 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             state.fb.call_static(&cons, obj.into(), operands)?;
             state.set_iid(iid, obj);
         }
-        Instr::Hhbc(Hhbc::CGetL(lid, _) | Hhbc::CUGetL(lid, _) | Hhbc::ConsumeL(lid, _)) => {
-            write_load_var(state, iid, lid)?
-        }
+        Instr::Hhbc(
+            Hhbc::CGetL(lid, _)
+            | Hhbc::CGetQuietL(lid, _)
+            | Hhbc::CUGetL(lid, _)
+            | Hhbc::ConsumeL(lid, _),
+        ) => write_load_var(state, iid, lid)?,
         Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(state, iid, lid, op)?,
         Instr::Hhbc(Hhbc::ResolveClass(cid, _)) => {
             let vid = state.load_static_class(cid)?;
@@ -378,8 +381,8 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             // This should only handle instructions that can't be rewritten into
             // a simpler form (like control flow and generic calls). Everything
             // else should be handled in lower().
-            trace!("TODO: {hhbc:?}");
             textual_todo! {
+                message = ("Non-lowered hhbc instr: {hhbc:?}"),
                 use ir::instr::HasOperands;
                 let name = format!("TODO_hhbc_{}", hhbc);
                 let operands = instr

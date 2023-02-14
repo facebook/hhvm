@@ -38,6 +38,10 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 pub(crate) enum Hhbc {
     #[decl(fn hhbc_add(*HackMixed, *HackMixed) -> *HackMixed)]
     Add,
+    #[decl(fn hhbc_add_elem_c(*HackMixed, *HackMixed, *HackMixed) -> *HackMixed)]
+    AddElemC,
+    #[decl(fn hhbc_add_elem_c(*HackMixed, *HackMixed) -> *HackMixed)]
+    AddNewElemC,
     #[decl(fn hhbc_cast_vec(*HackMixed) -> void)]
     CastVec,
     #[decl(fn hhbc_class_get_c(*HackMixed) -> void)]
@@ -82,6 +86,8 @@ pub(crate) enum Hhbc {
     GetClsRGProp,
     #[decl(fn hhbc_has_reified_parent(*HackMixed) -> *HackMixed)]
     HasReifiedParent,
+    #[decl(fn hhbc_is_late_bound_cls(*HackMixed) -> *HackMixed)]
+    IsLateBoundCls,
     #[decl(fn hhbc_is_type_arr_like(*HackMixed) -> *HackMixed)]
     IsTypeArrLike,
     #[decl(fn hhbc_is_type_bool(*HackMixed) -> *HackMixed)]

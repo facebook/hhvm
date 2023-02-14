@@ -14,6 +14,10 @@
 
 pub static KEEP_GOING: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
+pub fn keep_going_mode() -> bool {
+    KEEP_GOING.load(std::sync::atomic::Ordering::Acquire)
+}
+
 // If KEEP_GOING is false then execute a 'todo!' otherwise call the function.
 //
 // Used like:
@@ -21,14 +25,14 @@ pub static KEEP_GOING: std::sync::atomic::AtomicBool = std::sync::atomic::Atomic
 #[allow(unused)]
 macro_rules! textual_todo {
     ( message = ($($msg:expr),+), $($rest:tt)+ ) => {
-        (if $crate::KEEP_GOING.load(std::sync::atomic::Ordering::Acquire) {
+        (if $crate::keep_going_mode() {
             $($rest)+
         } else {
             todo!($($msg),+)
         })
     };
     ( $($rest:tt)+ ) => {
-        (if $crate::KEEP_GOING.load(std::sync::atomic::Ordering::Acquire) {
+        (if $crate::keep_going_mode() {
             $($rest)+
         } else {
             todo!()

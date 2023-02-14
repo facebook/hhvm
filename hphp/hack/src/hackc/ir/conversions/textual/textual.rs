@@ -7,6 +7,7 @@
 //! basically no business logic and just provides a type-safe way to write
 //! Textual.
 
+use std::borrow::Cow;
 use std::fmt;
 use std::sync::Arc;
 
@@ -189,13 +190,37 @@ impl<'a> TextualFile<'a> {
         let mut sep = "\n";
 
         for f in fields {
+            for comment in &f.comments {
+                writeln!(self.w, "{sep}{INDENT}// {comment}")?;
+                sep = "";
+            }
             write!(
                 self.w,
-                "{sep}{INDENT}{name}: {vis} {ty}",
+                "{sep}{INDENT}{name}: {vis} ",
                 name = f.name,
-                ty = FmtTy(f.ty),
                 vis = f.visibility.decl()
             )?;
+
+            for attr in &f.attributes {
+                write!(self.w, ".{name} ", name = attr.name())?;
+                match attr {
+                    FieldAttribute::Unparameterized { .. } => {}
+                    FieldAttribute::Parameterized {
+                        name: _,
+                        parameters,
+                    } => {
+                        let mut i = parameters.iter();
+                        let param = i.next().unwrap();
+                        write!(self.w, "= \"{param}\"")?;
+                        for param in i {
+                            write!(self.w, ", \"{param}\"")?;
+                        }
+                        write!(self.w, " ")?;
+                    }
+                }
+            }
+
+            write!(self.w, "{ty}", ty = FmtTy(&f.ty))?;
             sep = ";\n";
         }
 
@@ -205,9 +230,9 @@ impl<'a> TextualFile<'a> {
         Ok(())
     }
 
-    pub(crate) fn set_attribute(&mut self, attr: Attribute) -> Result {
+    pub(crate) fn set_attribute(&mut self, attr: FileAttribute) -> Result {
         match attr {
-            Attribute::SourceLanguage(lang) => {
+            FileAttribute::SourceLanguage(lang) => {
                 writeln!(self.w, ".source_language = \"{lang}\"")?;
             }
         }
@@ -725,7 +750,7 @@ where
     }
 }
 
-pub(crate) enum Attribute {
+pub(crate) enum FileAttribute {
     SourceLanguage(String),
 }
 
@@ -978,8 +1003,29 @@ impl Visibility {
     }
 }
 
+pub(crate) enum FieldAttribute {
+    Unparameterized {
+        name: String,
+    },
+    #[allow(dead_code)]
+    Parameterized {
+        name: String,
+        parameters: Vec<String>,
+    },
+}
+
+impl FieldAttribute {
+    fn name(&self) -> &str {
+        match self {
+            Self::Unparameterized { name } | Self::Parameterized { name, .. } => name,
+        }
+    }
+}
+
 pub(crate) struct Field<'a> {
-    pub name: &'a str,
-    pub ty: &'a Ty,
+    pub name: Cow<'a, str>,
+    pub ty: Cow<'a, Ty>,
     pub visibility: Visibility,
+    pub attributes: Vec<FieldAttribute>,
+    pub comments: Vec<String>,
 }

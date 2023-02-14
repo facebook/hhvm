@@ -3,7 +3,7 @@
 // TEST-CHECK-BAL: type C$static
 // CHECK: type C$static = .kind="class" .static {
 // CHECK:   prop3: .public *HackFloat;
-// CHECK:   prop4: .public *HackMixed
+// CHECK:   prop4: .public .SomeAttribute *HackMixed
 // CHECK: }
 
 // TEST-CHECK-BAL: "type C "
@@ -27,6 +27,7 @@ class C {
   public int $prop1 = 42;
   public string $prop2 = "hello";
   public static float $prop3 = 3.14;
+  <<SomeAttribute>>
   public static mixed $prop4 = null;
 
   const int MY_CONSTANT = 7;

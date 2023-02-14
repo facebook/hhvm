@@ -31,7 +31,7 @@ pub fn textual_writer(
     let escaped_path = escaper::escape(path.display().to_string());
     txf.write_comment(&format!("{UNIT_START_MARKER} {escaped_path}"))?;
 
-    txf.set_attribute(textual::Attribute::SourceLanguage("hack".to_string()))?;
+    txf.set_attribute(textual::FileAttribute::SourceLanguage("hack".to_string()))?;
     txf.debug_separator()?;
 
     let mut state = UnitState::new(Arc::clone(&unit.strings));

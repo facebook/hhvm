@@ -28,6 +28,7 @@ use crate::mangle::Mangle;
 use crate::mangle::MangleClass as _;
 use crate::mangle::MangleWithClass;
 use crate::state::UnitState;
+use crate::textual::FieldAttribute;
 use crate::textual::TextualFile;
 use crate::typed_value;
 use crate::types::convert_ty;
@@ -143,7 +144,7 @@ impl ClassState<'_, '_, '_> {
             metadata.insert("final", self.class.flags.is_final().into());
         }
 
-        let mut fields: Vec<(String, textual::Ty, textual::Visibility)> = Vec::new();
+        let mut fields: Vec<textual::Field<'_>> = Vec::new();
         let properties = std::mem::take(&mut self.class.properties);
         for prop in &properties {
             if prop.flags.is_static() == is_static.as_bool() {
@@ -165,18 +166,12 @@ impl ClassState<'_, '_, '_> {
             .map(|id| id.mangle_class(is_static, self.strings()))
             .collect_vec();
 
-        let fields = fields.iter().map(|(name, ty, visibility)| textual::Field {
-            name: name.as_str(),
-            ty,
-            visibility: *visibility,
-        });
-
         let cname = self.class.name.mangle_class(is_static, self.strings());
         self.txf.define_type(
             &cname,
             &self.class.src_loc,
             extends.iter().map(String::as_str),
-            fields,
+            fields.into_iter(),
             metadata.iter().map(|(k, v)| (*k, v)),
         )?;
 
@@ -185,14 +180,14 @@ impl ClassState<'_, '_, '_> {
 
     fn write_property(
         &mut self,
-        fields: &mut Vec<(String, textual::Ty, textual::Visibility)>,
+        fields: &mut Vec<textual::Field<'_>>,
         prop: &ir::Property<'_>,
     ) -> Result {
         let ir::Property {
             name,
             mut flags,
             ref attributes,
-            visibility,
+            visibility: ir_visibility,
             ref initial_value,
             ref type_info,
             doc_comment: _,
@@ -202,7 +197,7 @@ impl ClassState<'_, '_, '_> {
 
         let name = name.mangle(&self.unit_state.strings);
 
-        let vis = if flags.is_private() {
+        let visibility = if flags.is_private() {
             textual::Visibility::Private
         } else if flags.is_protected() {
             textual::Visibility::Protected
@@ -214,14 +209,35 @@ impl ClassState<'_, '_, '_> {
         flags.clear(ir::Attr::AttrPublic);
         flags.clear(ir::Attr::AttrSystemInitialValue);
 
+        let mut tx_attributes = Vec::new();
+        let comments = Vec::new();
+
         if !flags.is_empty() {
             trace!("CLASS FLAGS: {:?}", flags);
             textual_todo! { self.txf.write_comment(&format!("TODO: class flags: {flags:?}"))? };
         }
-        if !attributes.is_empty() {
-            textual_todo! { self.txf.write_comment(&format!("TODO: class attributes: {attributes:?}"))? };
+
+        for attribute in attributes {
+            // We don't do anything with class attributes. They don't affect
+            // normal program flow - but can be seen by reflection so it's
+            // questionable if we need them for analysis.
+            let name = attribute
+                .name
+                .mangle_class(IsStatic::NonStatic, &self.unit_state.strings);
+            if attribute.arguments.is_empty() {
+                tx_attributes.push(FieldAttribute::Unparameterized { name });
+            } else {
+                let mut parameters = Vec::new();
+                for arg in &attribute.arguments {
+                    textual_todo! {
+                        parameters.push(format!("TODO: {arg:?}"));
+                    }
+                }
+                tx_attributes.push(FieldAttribute::Parameterized { name, parameters });
+            }
         }
-        if visibility == ir::Visibility::Private {
+
+        if ir_visibility == ir::Visibility::Private {
             self.txf.write_comment(&format!("TODO: private {name}"))?;
         }
         if let Some(initial_value) = initial_value {
@@ -231,7 +247,13 @@ impl ClassState<'_, '_, '_> {
 
         let ty = convert_ty(&type_info.enforced, &self.unit_state.strings);
 
-        fields.push((name, ty, vis));
+        fields.push(textual::Field {
+            name: name.into(),
+            ty: ty.into(),
+            visibility,
+            attributes: tx_attributes,
+            comments,
+        });
         Ok(())
     }
 

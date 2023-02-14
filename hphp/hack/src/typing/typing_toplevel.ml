@@ -220,13 +220,15 @@ let fun_def ctx fd :
     }
   in
   let fundefs =
-    let fundef_of_dynamic (dynamic_params, dynamic_body, dynamic_return_ty) =
+    let fundef_of_dynamic
+        (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
       let open Aast in
       {
         fundef with
         fd_fun =
           {
             fundef.fd_fun with
+            f_annotation = Env.save local_tpenv dynamic_env;
             f_ret = (dynamic_return_ty, ret_hint);
             f_params = dynamic_params;
             f_body = { fb_ast = dynamic_body };

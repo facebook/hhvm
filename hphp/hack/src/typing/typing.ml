@@ -5107,18 +5107,15 @@ and check_function_dynamically_callable
       f.f_user_attributes
   in
 
-  let dynamic_body =
+  let (env, dynamic_body) =
     Errors.try_with_result
       (fun () ->
-        let (_env, dynamic_body) : env * Tast.stmt list =
-          fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind
-        in
-        dynamic_body)
-      (fun dynamic_body error ->
+        fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind)
+      (fun env_and_dynamic_body error ->
         Errors.function_is_not_dynamically_callable name error;
-        dynamic_body)
+        env_and_dynamic_body)
   in
-  (dynamic_params, dynamic_body, dynamic_return_ty)
+  (env, dynamic_params, dynamic_body, dynamic_return_ty)
 
 and lambda ~is_anon ~closure_class_name ?expected p env f idl =
   (* This is the function type as declared on the lambda itself.

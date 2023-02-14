@@ -102,22 +102,19 @@ let method_dynamically_callable env cls m params_decl_ty return =
         m.m_user_attributes
     in
 
-    let dynamic_body =
+    let (env, dynamic_body) =
       Errors.try_with_result
         (fun () ->
-          let (_env, dynamic_body) : env * Tast.stmt list =
-            Typing.fun_
-              ~abstract:m.m_abstract
-              ~native:(Typing_native.is_native_meth ~env m)
-              ~disable
-              env
-              dynamic_return_info
-              pos
-              m.m_body
-              m.m_fun_kind
-          in
-          dynamic_body)
-        (fun dynamic_body error ->
+          Typing.fun_
+            ~abstract:m.m_abstract
+            ~native:(Typing_native.is_native_meth ~env m)
+            ~disable
+            env
+            dynamic_return_info
+            pos
+            m.m_body
+            m.m_fun_kind)
+        (fun env_and_dynamic_body error ->
           Errors.method_is_not_dynamically_callable
             pos
             (snd m.m_name)
@@ -125,9 +122,9 @@ let method_dynamically_callable env cls m params_decl_ty return =
             (Env.get_support_dynamic_type env)
             None
             (Some error);
-          dynamic_body)
+          env_and_dynamic_body)
     in
-    Some (dynamic_params, dynamic_body, dynamic_return_ty)
+    Some (env, dynamic_params, dynamic_body, dynamic_return_ty)
   in
   if not interface_check then
     method_body_check ()
@@ -348,11 +345,12 @@ let method_def ~is_disposable env cls m =
     }
   in
   let method_defs =
-    let method_def_of_dynamic (dynamic_params, dynamic_body, dynamic_return_ty)
-        =
+    let method_def_of_dynamic
+        (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
       let open Aast in
       {
         method_def with
+        m_annotation = Env.save local_tpenv dynamic_env;
         m_params = dynamic_params;
         m_body = { Aast.fb_ast = dynamic_body };
         m_ret = (dynamic_return_ty, return_hint);

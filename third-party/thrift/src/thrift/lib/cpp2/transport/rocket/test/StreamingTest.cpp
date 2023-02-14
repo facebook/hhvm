@@ -968,6 +968,9 @@ TEST_F(StreamingTest, ServerCompletesFirstResponseAfterClientTimeout) {
   EXPECT_THROW(
       client.sync_leakCheckWithSleep(rpcOptions, 0, 0, 200),
       TTransportException);
+  // Wait for server to finish processing, so next call won't trigger queue
+  // timeout.
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   // Wait for the server to finish processing the first response, then check
   // that no streams are leaked.
   waitNoLeak(&client);

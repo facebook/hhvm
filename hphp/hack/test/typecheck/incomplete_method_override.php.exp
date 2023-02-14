@@ -1,0 +1,4 @@
+File "incomplete_method_override.php", line 9, characters 27-27:
+A left parenthesis `(` is expected here. (Parsing[1002])
+File "incomplete_method_override.php", line 10, characters 1-1:
+Encountered unexpected text `}`, was expecting a type hint. (Parsing[1002])

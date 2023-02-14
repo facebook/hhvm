@@ -763,6 +763,11 @@ module Primary : sig
         trait_name: string;
         meth_pos: Pos_or_decl.t;
       }
+    | Should_not_be_override of {
+        pos: Pos.t;
+        class_id: string;
+        id: string;
+      }
     | Generic_at_runtime of {
         pos: Pos.t;
         prefix: string;
@@ -1650,11 +1655,6 @@ module Secondary : sig
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
         kind: [ `constant | `method_ | `property | `typeconst ];
-      }
-    | Should_not_be_override of {
-        pos: Pos_or_decl.t;
-        class_id: string;
-        id: string;
       }
     | Override_no_default_typeconst of {
         pos: Pos_or_decl.t;

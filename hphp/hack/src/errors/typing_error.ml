@@ -2035,6 +2035,11 @@ module Primary = struct
         trait_name: string;
         meth_pos: Pos_or_decl.t;
       }
+    | Should_not_be_override of {
+        pos: Pos.t;
+        class_id: string;
+        id: string;
+      }
     | Generic_at_runtime of {
         pos: Pos.t;
         prefix: string;
@@ -3798,6 +3803,17 @@ module Primary = struct
             "Declaration of " ^ Markdown_lite.md_codify meth_name ^ " is here"
           );
         ],
+      [] )
+
+  let should_not_be_override pos class_id id =
+    ( Error_code.ShouldNotBeOverride,
+      lazy
+        ( pos,
+          Printf.sprintf
+            "%s has no parent class with a method %s to override"
+            (Render.strip_ns class_id |> Markdown_lite.md_codify)
+            (Markdown_lite.md_codify id) ),
+      lazy [],
       [] )
 
   let generic_at_runtime p prefix =
@@ -5795,6 +5811,8 @@ module Primary = struct
       invalid_newable_type_param_constraints (pos, tp_name) constraints
     | Override_per_trait { pos; class_name; meth_name; trait_name; meth_pos } ->
       override_per_trait (pos, class_name) meth_name trait_name meth_pos
+    | Should_not_be_override { pos; class_id; id } ->
+      should_not_be_override pos class_id id
     | Generic_at_runtime { pos; prefix } -> generic_at_runtime pos prefix
     | Generics_not_allowed pos -> generics_not_allowed pos
     | Trivial_strict_eq { pos; result; left; right; left_trail; right_trail } ->
@@ -6637,11 +6655,6 @@ and Secondary : sig
         parent_pos: Pos_or_decl.t;
         kind: [ `constant | `method_ | `property | `typeconst ];
       }
-    | Should_not_be_override of {
-        pos: Pos_or_decl.t;
-        class_id: string;
-        id: string;
-      }
     | Override_no_default_typeconst of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
@@ -6919,11 +6932,6 @@ end = struct
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
         kind: [ `constant | `method_ | `property | `typeconst ];
-      }
-    | Should_not_be_override of {
-        pos: Pos_or_decl.t;
-        class_id: string;
-        id: string;
       }
     | Override_no_default_typeconst of {
         pos: Pos_or_decl.t;
@@ -7619,18 +7627,6 @@ end = struct
     in
     (Error_code.AbstractConcreteOverride, reasons, [])
 
-  let should_not_be_override pos class_id id =
-    ( Error_code.ShouldNotBeOverride,
-      lazy
-        [
-          ( pos,
-            Printf.sprintf
-              "%s has no parent class with a method %s to override"
-              (Render.strip_ns class_id |> Markdown_lite.md_codify)
-              (Markdown_lite.md_codify id) );
-        ],
-      [] )
-
   let override_no_default_typeconst pos parent_pos =
     ( Error_code.OverrideNoDefaultTypeconst,
       lazy
@@ -7851,8 +7847,6 @@ end = struct
       Eval_result.single (typeconst_concrete_concrete_override pos parent_pos)
     | Abstract_concrete_override { pos; parent_pos; kind } ->
       Eval_result.single (abstract_concrete_override pos parent_pos kind)
-    | Should_not_be_override { pos; class_id; id } ->
-      Eval_result.single (should_not_be_override pos class_id id)
     | Override_no_default_typeconst { pos; parent_pos } ->
       Eval_result.single (override_no_default_typeconst pos parent_pos)
     | Unsupported_refinement pos ->

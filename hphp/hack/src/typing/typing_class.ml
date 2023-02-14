@@ -1355,61 +1355,71 @@ let check_SupportDynamicType env c tc =
           end
           | None -> ())
 
-(** Check proper usage of the __Override attribute. *)
-let check_override_keyword env c tc =
-  if not Ast_defs.(is_c_trait c.c_kind) then (
-    let check_override ~is_static (id, ce) =
-      if get_ce_superfluous_override ce then
-        if String.equal ce.ce_origin (snd c.c_name) then
-          Errors.add_typing_error
-            Typing_error.(
-              assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
-              @@ Secondary.Should_not_be_override
-                   {
-                     pos =
-                       c.c_methods
-                       |> List.find_map
-                            ~f:(fun { m_name = (p_name, name); _ } ->
-                              Option.some_if (String.equal id name) p_name)
-                       |> Option.value ~default:Pos.none
-                       |> Pos_or_decl.of_raw_pos;
-                     class_id = snd c.c_name;
-                     id;
-                   })
-        else
-          match Env.get_class env ce.ce_origin with
-          | None -> ()
-          | Some parent_class ->
-            (* If it's not defined here, then either it's inherited
-             * (so we have emitted an error already when checking the origin class)
-             * or it's in a trait, and so we need to emit the error now *)
-            if Ast_defs.(is_c_trait (Cls.kind parent_class)) then
-              let (class_pos, class_name) = c.c_name in
-              Errors.add_typing_error
-                Typing_error.(
-                  primary
-                  @@ Primary.Override_per_trait
-                       {
-                         pos = class_pos;
-                         class_name;
-                         meth_name = id;
-                         trait_name = ce.ce_origin;
-                         meth_pos =
-                           (let get_meth =
-                              if is_static then
-                                Decl_store.((get ()).get_static_method)
-                              else
-                                Decl_store.((get ()).get_method)
-                            in
-                            match get_meth (ce.ce_origin, id) with
-                            | Some { fe_pos; _ } -> fe_pos
-                            | None -> Pos_or_decl.none);
-                       })
-    in
+(** Check methods with <<__Override>> have a corresponding overridden method. *)
+let check_override_has_parent (c : ('a, 'b) class_) (tc : Cls.t) : unit =
+  if not Ast_defs.(is_c_trait c.c_kind) then
+    (* We don't want to check __Override on traits. __Override on
+       traits asserts that the *using* class has an inherited method
+       that we're overriding. *)
+    List.iter c.c_methods ~f:(fun m ->
+        let id = snd m.m_name in
+        match Cls.get_any_method ~is_static:m.m_static tc id with
+        | Some ce -> begin
+          if get_ce_superfluous_override ce then
+            Errors.add_typing_error
+              Typing_error.(
+                primary
+                @@ Primary.Should_not_be_override
+                     { pos = fst m.m_name; class_id = snd c.c_name; id })
+        end
+        | None -> ())
 
+(** Check __Override on class methods included from traits. *)
+let check_used_methods_with_override env c (tc : Cls.t) : unit =
+  let (class_pos, class_name) = c.c_name in
+
+  let check_override ~is_static (meth_name, ce) =
+    if
+      get_ce_superfluous_override ce
+      && not (String.equal ce.ce_origin class_name)
+    then
+      match Env.get_class env ce.ce_origin with
+      | Some parent_class when Ast_defs.(is_c_trait (Cls.kind parent_class)) ->
+        (* If we've included a method from a trait that has
+           __Override, but there's no inherited method on this class
+           that we're overridding, that's an error. *)
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Override_per_trait
+                 {
+                   pos = class_pos;
+                   class_name;
+                   meth_name;
+                   trait_name = ce.ce_origin;
+                   meth_pos =
+                     (let get_meth =
+                        if is_static then
+                          Decl_store.((get ()).get_static_method)
+                        else
+                          Decl_store.((get ()).get_method)
+                      in
+                      match get_meth (ce.ce_origin, meth_name) with
+                      | Some { fe_pos; _ } -> fe_pos
+                      | None -> Pos_or_decl.none);
+                 })
+      | _ -> ()
+  in
+
+  if not Ast_defs.(is_c_trait c.c_kind) then (
     List.iter (Cls.methods tc) ~f:(check_override ~is_static:false);
     List.iter (Cls.smethods tc) ~f:(check_override ~is_static:true)
   )
+
+(** Check proper usage of the __Override attribute. *)
+let check_override_keyword env c tc =
+  check_override_has_parent c tc;
+  check_used_methods_with_override env c tc
 
 let check_sealed env c =
   let hard_error =

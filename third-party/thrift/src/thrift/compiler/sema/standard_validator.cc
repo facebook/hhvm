@@ -160,7 +160,8 @@ class adapter_or_wrapper_checker {
   void check(
       const t_named& node,
       const char* structured_adapter_annotation,
-      const char* structured_adapter_annotation_error_name) {
+      const char* structured_adapter_annotation_error_name,
+      const char* name) {
     const t_const* adapter_annotation =
         node.find_structured_annotation_or_null(structured_adapter_annotation);
     if (!adapter_annotation) {
@@ -168,7 +169,7 @@ class adapter_or_wrapper_checker {
     }
 
     try {
-      adapter_annotation->get_value_from_structured_annotation("name");
+      adapter_annotation->get_value_from_structured_annotation(name);
     } catch (const std::exception& e) {
       ctx_.error("{}", e.what());
       return;
@@ -672,23 +673,44 @@ void validate_ref_annotation(diagnostic_context& ctx, const t_field& node) {
 
 void validate_cpp_adapter_annotation(
     diagnostic_context& ctx, const t_named& node) {
-  adapter_or_wrapper_checker(ctx).check(node, kCppAdapterUri, "@cpp.Adapter");
+  adapter_or_wrapper_checker(ctx).check(
+      node, kCppAdapterUri, "@cpp.Adapter", "name");
 }
 
 void validate_hack_adapter_annotation(
     diagnostic_context& ctx, const t_named& node) {
-  adapter_or_wrapper_checker(ctx).check(node, kHackAdapterUri, "@hack.Adapter");
+  adapter_or_wrapper_checker(ctx).check(
+      node, kHackAdapterUri, "@hack.Adapter", "name");
 }
 
 void validate_hack_wrapper_annotation(
     diagnostic_context& ctx, const t_named& node) {
-  adapter_or_wrapper_checker(ctx).check(node, kHackWrapperUri, "@hack.Wrapper");
+  adapter_or_wrapper_checker(ctx).check(
+      node, kHackWrapperUri, "@hack.Wrapper", "name");
 }
 // Do not adapt a wrapped type
 void validate_hack_wrapper_and_adapter_annotation(
     diagnostic_context& ctx, const t_named& node) {
   adapter_or_wrapper_checker(ctx).check(
       node, kHackAdapterUri, kHackWrapperUri, "@hack.Adapter", "@hack.Wrapper");
+}
+
+void validate_java_adapter_annotation(
+    diagnostic_context& ctx, const t_named& node) {
+  adapter_or_wrapper_checker(ctx).check(
+      node, kJavaAdapterUri, "@java.Adapter", "adapterClassName");
+}
+
+void validate_java_wrapper_annotation(
+    diagnostic_context& ctx, const t_named& node) {
+  adapter_or_wrapper_checker(ctx).check(
+      node, kJavaWrapperUri, "@java.Wrapper", "wrapperClassName");
+}
+
+void validate_java_wrapper_and_adapter_annotation(
+    diagnostic_context& ctx, const t_named& node) {
+  adapter_or_wrapper_checker(ctx).check(
+      node, kJavaAdapterUri, kJavaWrapperUri, "@java.Adapter", "@java.Wrapper");
 }
 
 void validate_box_annotation(
@@ -907,6 +929,16 @@ void validate_hack_field_adapter_annotation(
       true /* disallow_structured_annotations_on_both_field_and_typedef */);
 }
 
+void validate_java_field_adapter_annotation(
+    diagnostic_context& ctx, const t_field& field) {
+  adapter_or_wrapper_checker(ctx).check(
+      field,
+      kJavaAdapterUri,
+      kJavaAdapterUri,
+      "@java.Adapter",
+      false /* disallow_structured_annotations_on_both_field_and_typedef */);
+}
+
 class reserved_ids_checker {
  public:
   explicit reserved_ids_checker(diagnostic_context& ctx) : ctx_(ctx) {}
@@ -1079,6 +1111,7 @@ ast_validator standard_validator() {
   validator.add_field_visitor(&validate_ref_unique_and_box_annotation);
   validator.add_field_visitor(&validate_cpp_field_adapter_annotation);
   validator.add_field_visitor(&validate_hack_field_adapter_annotation);
+  validator.add_field_visitor(&validate_java_field_adapter_annotation);
   validator.add_field_visitor(&validate_cpp_field_interceptor_annotation);
   validator.add_field_visitor(&validate_required_field);
 
@@ -1094,6 +1127,10 @@ ast_validator standard_validator() {
   validator.add_definition_visitor(&validate_hack_wrapper_annotation);
   validator.add_definition_visitor(
       &validate_hack_wrapper_and_adapter_annotation);
+  validator.add_definition_visitor(&validate_java_adapter_annotation);
+  validator.add_definition_visitor(&validate_java_wrapper_annotation);
+  validator.add_definition_visitor(
+      &validate_java_wrapper_and_adapter_annotation);
   validator.add_definition_visitor(&validate_custom_cpp_type_annotations);
   validator.add_enum_visitor(&validate_cpp_enum_type);
 

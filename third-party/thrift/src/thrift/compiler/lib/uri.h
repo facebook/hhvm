@@ -87,6 +87,7 @@ constexpr auto kCppUseOpEncodeUri =
 
 // java
 constexpr auto kJavaAdapterUri = "facebook.com/thrift/annotation/java/Adapter";
+constexpr auto kJavaWrapperUri = "facebook.com/thrift/annotation/java/Wrapper";
 
 // python
 constexpr auto kPythonAdapterUri =

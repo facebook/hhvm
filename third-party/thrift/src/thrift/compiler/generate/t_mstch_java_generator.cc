@@ -38,8 +38,6 @@ namespace compiler {
 
 namespace {
 
-constexpr auto kJavaWrapperUri = "facebook.com/thrift/annotation/java/Wrapper";
-
 /**
  * Gets the java namespace, throws a runtime error if not found.
  */

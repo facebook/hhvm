@@ -108,9 +108,9 @@ impl PosSpanTiny {
         let end_bol = end.beg_of_line() as u64;
         let end_line = end.line() as u64;
         let end_offset = end.offset() as u64;
-        let bol_increment = end_bol.checked_sub(start_bol)? as u64;
-        let line_increment = end_line.checked_sub(start_line)? as u64;
-        let width = end_offset.checked_sub(start_offset)? as u64;
+        let bol_increment = end_bol.checked_sub(start_bol)?;
+        let line_increment = end_line.checked_sub(start_line)?;
+        let width = end_offset.checked_sub(start_offset)?;
         if start_bol > MAX_START_BEGINNING_OF_LINE
             || start_line > MAX_START_LINE_NUMBER
             || start_col > MAX_START_COLUMN_NUMBER

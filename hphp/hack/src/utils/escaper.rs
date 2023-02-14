@@ -353,14 +353,14 @@ fn unescape_literal_bytes(
                         output.push(c);
                     } else {
                         let c = parse_numeric_escape(false, hex, 16)?;
-                        output.push(c as u8);
+                        output.push(c);
                     }
                 }
                 c if is_oct(c) => {
                     s.back();
                     let oct = s.take_if(is_oct, 3);
                     let c = parse_numeric_escape(true, oct, 8)?;
-                    output.push(c as u8);
+                    output.push(c);
                 }
                 c => {
                     output.push(b'\\');

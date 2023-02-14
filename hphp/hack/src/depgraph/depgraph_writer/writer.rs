@@ -96,14 +96,14 @@ pub fn write_dep_graph(output: &Path, g: MemDepGraph) -> std::io::Result<()> {
 
     // Write the header and the size field at the start of the indexer.
     info!("Writing header");
-    let indexer_offset = header_size as u64;
-    let lookup_offset = indexer_offset + indexer_size as u64;
+    let indexer_offset = header_size;
+    let lookup_offset = indexer_offset + indexer_size;
     out.write_all(&(indexer_offset as u32).to_ne_bytes())?;
     out.write_all(&(lookup_offset as u32).to_ne_bytes())?;
 
     // Write indexer.
     info!("Writing indexer");
-    out.write_all(&(num_deps as u64).to_ne_bytes())?;
+    out.write_all(&num_deps.to_ne_bytes())?;
     out.write_all(bytemuck::cast_slice(&g.hashes))?;
 
     // Write hash list file offsets.

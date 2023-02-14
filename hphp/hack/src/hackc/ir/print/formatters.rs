@@ -220,7 +220,7 @@ impl Display for FmtFloat {
             FpCategory::Zero if value.is_sign_negative() => "-0.0",
             FpCategory::Zero => "0.0",
             FpCategory::Subnormal | FpCategory::Normal => {
-                let mut s = format!("{:.}", value);
+                let mut s = format!("{}", value);
                 if !s.contains('.') {
                     s.push_str(".0");
                 }

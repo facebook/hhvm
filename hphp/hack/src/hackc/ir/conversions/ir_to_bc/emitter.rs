@@ -578,7 +578,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             }
             Hhbc::Modulo(..) => Opcode::Mod,
             Hhbc::Mul(..) => Opcode::Mul,
-            Hhbc::NewDictArray(hint, _) => Opcode::NewDictArray(hint as u32),
+            Hhbc::NewDictArray(hint, _) => Opcode::NewDictArray(hint),
             Hhbc::NewKeysetArray(ref operands, _) => Opcode::NewKeysetArray(operands.len() as u32),
             Hhbc::NewObj(_, _) => Opcode::NewObj,
             Hhbc::NewObjD(clsid, _) => {

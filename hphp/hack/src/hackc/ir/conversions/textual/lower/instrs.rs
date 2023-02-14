@@ -590,6 +590,6 @@ fn rewrite_nullsafe_call(
 }
 
 fn iter_var_name(id: ir::IterId, strings: &ir::StringInterner) -> LocalId {
-    let name = strings.intern_str(&format!("iter{}", id.idx));
+    let name = strings.intern_str(format!("iter{}", id.idx));
     LocalId::Named(name)
 }

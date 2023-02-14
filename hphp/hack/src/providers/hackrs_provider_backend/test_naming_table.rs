@@ -70,7 +70,7 @@ fn type_test() -> Result<()> {
     // Retrieve a typename
     let (pos, kindof) = naming_table.get_type_pos(a_type).unwrap().unwrap();
 
-    let rp: RelativePath = pos.path().into();
+    let rp: RelativePath = pos.path();
     assert_eq!(rp, a_relative_path);
     assert_eq!(kindof, naming_types::KindOfType::TClass);
 
@@ -91,7 +91,7 @@ fn type_test() -> Result<()> {
     )?;
 
     let (pos, kindof) = naming_table.get_type_pos(a_type).unwrap().unwrap();
-    let rp: RelativePath = pos.path().into();
+    let rp: RelativePath = pos.path();
     assert_eq!(rp, a_relative_path);
     assert_eq!(kindof, naming_types::KindOfType::TClass);
 
@@ -119,7 +119,7 @@ fn fun_test() -> Result<()> {
 
     // Retrieve a fun
     let pos = naming_table.get_fun_pos(a_fun).unwrap().unwrap();
-    let rp: RelativePath = pos.path().into();
+    let rp: RelativePath = pos.path();
     assert_eq!(rp, a_relative_path);
 
     // Remove a fun
@@ -136,7 +136,7 @@ fn fun_test() -> Result<()> {
     )?;
 
     let pos = naming_table.get_fun_pos(a_fun).unwrap().unwrap();
-    let rp: RelativePath = pos.path().into();
+    let rp: RelativePath = pos.path();
     assert_eq!(rp, a_relative_path);
 
     // Get canon name from its lowercase version
@@ -163,7 +163,7 @@ fn const_test() -> Result<()> {
 
     // Retrieve a const
     let pos = naming_table.get_const_pos(a_const).unwrap().unwrap();
-    let rp: RelativePath = pos.path().into();
+    let rp: RelativePath = pos.path();
     assert_eq!(rp, a_relative_path);
 
     // Remove a const
@@ -180,7 +180,7 @@ fn const_test() -> Result<()> {
     )?;
 
     let pos = naming_table.get_const_pos(a_const).unwrap().unwrap();
-    let rp: RelativePath = pos.path().into();
+    let rp: RelativePath = pos.path();
     assert_eq!(rp, a_relative_path);
 
     Ok(())

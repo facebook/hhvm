@@ -131,7 +131,7 @@ fn load_global_dep_graph(mode: RawTypingDepsMode) -> Result<Option<&'static DepG
                     new_edges_dir: _,
                     human_readable_dep_map_dir: _,
                 } => {
-                    let depgraph = DepGraph::from_path(&depgraph_fn)
+                    let depgraph = DepGraph::from_path(depgraph_fn)
                         .map_err(|err| format!("could not open dep graph file: {:?}", err))?;
                     Ok(Some(depgraph))
                 }

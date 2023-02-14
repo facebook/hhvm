@@ -127,10 +127,10 @@ mod tests {
         std::os::unix::fs::symlink(&root, &link_root)?;
         std::fs::write(root.join(".hhconfig"), "")?;
         std::fs::write(root.join("a.php"), "<?hh")?;
-        std::fs::create_dir(&root.join("d"))?;
+        std::fs::create_dir(root.join("d"))?;
         std::fs::write(root.join("d").join("b.php"), "<?hh")?;
-        std::os::unix::fs::symlink(&tmp, &tmp.join("t"))?;
-        std::fs::create_dir(&root.join("hhi"))?;
+        std::os::unix::fs::symlink(&tmp, tmp.join("t"))?;
+        std::fs::create_dir(root.join("hhi"))?;
 
         // a helper - given specified "base/suffix", extracts the root-relative path as a string
         let relpath = |base: &Path, suffix: &str| -> anyhow::Result<String> {
@@ -170,7 +170,7 @@ mod tests {
         assert_eq!(&relpath(&empty, "./d/b.php")?, "d/b.php");
         assert_eq!(&relpath(&empty, "./ax.php")?, "ax.php");
         assert_eq!(&relpath(&empty, "./d/bx.php")?, "d/bx.php");
-        std::env::set_current_dir(&root.join("d"))?;
+        std::env::set_current_dir(root.join("d"))?;
         assert_eq!(&relpath(&empty, "b.php")?, "d/b.php");
         assert_eq!(&relpath(&empty, "bx.php")?, "d/bx.php");
         assert_eq!(&relpath(&empty, "./b.php")?, "d/b.php");
@@ -189,7 +189,7 @@ mod tests {
         assert_eq!(&relpath(&empty, "./d/b.php")?, "d/b.php");
         assert_eq!(&relpath(&empty, "./ax.php")?, "ax.php");
         assert_eq!(&relpath(&empty, "./d/bx.php")?, "d/bx.php");
-        std::env::set_current_dir(&link_root.join("d"))?;
+        std::env::set_current_dir(link_root.join("d"))?;
         assert_eq!(&relpath(&empty, "b.php")?, "d/b.php");
         assert_eq!(&relpath(&empty, "bx.php")?, "d/bx.php");
         assert_eq!(&relpath(&empty, "./b.php")?, "d/b.php");

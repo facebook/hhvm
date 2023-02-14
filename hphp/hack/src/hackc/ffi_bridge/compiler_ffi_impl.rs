@@ -143,8 +143,8 @@ impl From<facts::Facts> for compile_ffi::Facts {
             constants: facts.constants,
             modules: facts
                 .modules
-                .into_iter()
-                .map(|(name, _)| compile_ffi::ModuleFactsByName { name })
+                .into_keys()
+                .map(|name| compile_ffi::ModuleFactsByName { name })
                 .collect(),
             file_attributes: map_to_vec(facts.file_attributes),
         }

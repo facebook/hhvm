@@ -185,7 +185,7 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
                         self.stack.pop();
                     }
                     // Read a value and set v to this value
-                    code = self.read8u() as u8;
+                    code = self.read8u();
                     if code >= PREFIX_SMALL_INT {
                         if code >= PREFIX_SMALL_BLOCK {
                             // Small block
@@ -205,27 +205,19 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
                         } else {
                             match code {
                                 CODE_INT8 => {
-                                    v = Value::from_bits(
-                                        (((self.read8s() as usize) << 1) as usize + 1) as usize,
-                                    );
+                                    v = Value::from_bits(((self.read8s() as usize) << 1) + 1);
                                     current_block = NOTHING_TO_DO_LABEL;
                                 }
                                 CODE_INT16 => {
-                                    v = Value::from_bits(
-                                        (((self.read16s() as usize) << 1) as usize + 1) as usize,
-                                    );
+                                    v = Value::from_bits(((self.read16s() as usize) << 1) + 1);
                                     current_block = NOTHING_TO_DO_LABEL;
                                 }
                                 CODE_INT32 => {
-                                    v = Value::from_bits(
-                                        (((self.read32s() as usize) << 1) as usize + 1) as usize,
-                                    );
+                                    v = Value::from_bits(((self.read32s() as usize) << 1) + 1);
                                     current_block = NOTHING_TO_DO_LABEL;
                                 }
                                 CODE_INT64 => {
-                                    v = Value::from_bits(
-                                        (((self.read64u() as usize) << 1) as usize + 1) as usize,
-                                    );
+                                    v = Value::from_bits(((self.read64u() as usize) << 1) + 1);
                                     current_block = NOTHING_TO_DO_LABEL;
                                 }
                                 CODE_SHARED8 => {
@@ -247,13 +239,13 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
                                 CODE_BLOCK32 => {
                                     header = self.read32u() as usize;
                                     tag = (header & 0xff) as u8;
-                                    size = header as usize >> 10;
+                                    size = header >> 10;
                                     current_block = READ_BLOCK_LABEL;
                                 }
                                 CODE_BLOCK64 => {
                                     header = self.read64u() as usize;
                                     tag = (header & 0xff) as u8;
-                                    size = header as usize >> 10;
+                                    size = header >> 10;
                                     current_block = READ_BLOCK_LABEL;
                                 }
                                 CODE_STRING8 => {
@@ -307,12 +299,12 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
                                 _ => {
                                     match current_block {
                                         READ_SHARED_LABEL => {
-                                            v = self.intern_obj_table[(self.obj_counter - ofs) as usize];
+                                            v = self.intern_obj_table[(self.obj_counter - ofs)];
                                         }
                                         _ /* READ_DOUBLE_ARRAY_LABEL */ => {
                                             size = len * ocamlrep::DOUBLE_WOSIZE;
                                             let mut builder = self.alloc.block_with_size_and_tag(
-                                                size as usize,
+                                                size,
                                                 ocamlrep::DOUBLE_ARRAY_TAG,
                                             );
                                             self.readfloats(
@@ -345,8 +337,7 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
                             if size == 0 {
                                 panic!("input_value: atoms are not supported");
                             } else {
-                                let mut builder =
-                                    self.alloc.block_with_size_and_tag(size as usize, tag);
+                                let mut builder = self.alloc.block_with_size_and_tag(size, tag);
                                 if tag == ocamlrep::OBJECT_TAG {
                                     panic!("input_value: objects not supported");
                                 } else {
@@ -403,7 +394,7 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
             whsize: 0,
         };
         self.parse_header(&mut h);
-        if h.header_len as usize + h.data_len as usize > str.len() {
+        if h.header_len as usize + h.data_len > str.len() {
             panic!("input_value: bad length");
         }
         self.intern_src = &str[(h.header_len as usize)..];

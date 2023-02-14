@@ -250,7 +250,7 @@ ocaml_ffi! {
         let f = std::fs::OpenOptions::new()
             .create(true)
             .append(true)
-            .open(&dest).unwrap();
+            .open(dest).unwrap();
         let hashes_added = dep_graph_delta_with(move |s| {
             let mut w = std::io::BufWriter::new(f);
             let hashes_added = s.write_to(&mut w).unwrap();
@@ -267,7 +267,7 @@ ocaml_ffi! {
     }
 
     fn hh_custom_dep_graph_load_delta(mode: RawTypingDepsMode, source: OsString) -> usize {
-        let f = File::open(&source).unwrap();
+        let f = File::open(source).unwrap();
         let mut r = std::io::BufReader::new(f);
 
         // Safety: we don't call into OCaml again, so mode will remain valid.
@@ -297,7 +297,7 @@ ocaml_ffi! {
     // Moves the source file to the destination directory.
     fn hh_save_custom_dep_graph_save_delta(source: OsString, dest_dir: OsString) -> usize {
         let dest_file = Path::new(&dest_dir)
-            .join(&source.to_str().unwrap().replace('/', "-"));
+            .join(source.to_str().unwrap().replace('/', "-"));
         std::fs::rename(&source, dest_file).unwrap();
 
         // Technically we loaded 0 deps into the hh_server dep graph

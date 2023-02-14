@@ -29,7 +29,7 @@ impl DiskProvider {
 
     pub fn read(&self, file: RelativePath) -> std::io::Result<BString> {
         let absolute_path = file.to_absolute(&self.relative_path_ctx);
-        Ok(std::fs::read(&absolute_path)?.into())
+        Ok(std::fs::read(absolute_path)?.into())
     }
 }
 

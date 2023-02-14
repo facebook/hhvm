@@ -223,7 +223,7 @@ impl Input {
                     if target.is_some() {
                         return Err(Error::new(
                             left.span(),
-                            &format!("{} cannot be set twice", left.to_token_stream()),
+                            format!("{} cannot be set twice", left.to_token_stream()),
                         ));
                     }
                     *target = Some(assign.right);
@@ -491,18 +491,15 @@ fn parse_repl_var(input: &str, span: Span, default_pos: &TokenStream) -> Result<
         "id" => VarOp::Id,
         "lvar" => VarOp::Lvar,
         "str" => VarOp::Str,
-        _ => return Err(Error::new(span, &format!("Unknown command '{}'", cmd))),
+        _ => return Err(Error::new(span, format!("Unknown command '{}'", cmd))),
     };
 
     let pos = match args.len() {
-        0 => return Err(Error::new(span, &format!("Too few arguments to '{}'", cmd))),
+        0 => return Err(Error::new(span, format!("Too few arguments to '{}'", cmd))),
         1 => default_pos.clone(),
         2 if op != VarOp::None => Ident::new(args[1], span).to_token_stream(),
         _ => {
-            return Err(Error::new(
-                span,
-                &format!("Too many arguments to '{}'", cmd),
-            ));
+            return Err(Error::new(span, format!("Too many arguments to '{}'", cmd)));
         }
     };
 
@@ -611,13 +608,13 @@ fn convert_aast_error(err: AastError, src: &str, internal_offset: usize, span: S
         AastError::ParserFatal(syn, _) => convert_syntax_error(&syn, src, internal_offset, span)
             .err()
             .unwrap(),
-        AastError::Other(msg) => Error::new(Span::call_site(), &msg),
+        AastError::Other(msg) => Error::new(Span::call_site(), msg),
     }
 }
 
 fn convert_error(err: &errors::Error, src: &str, internal_offset: usize, span: Span) -> Result<()> {
     let err_span = span_for_pos(src, internal_offset, span, &err.claim.0);
-    Err(Error::new(err_span, &err.claim.1.to_string()))
+    Err(Error::new(err_span, err.claim.1.to_string()))
 }
 
 fn convert_syntax_error(
@@ -629,7 +626,7 @@ fn convert_syntax_error(
     let err_span = span_for_range(src, internal_offset, span, err.start_offset..err.end_offset);
     Err(Error::new(
         err_span,
-        &format!("[{}] {}", err.start_offset, err.message),
+        format!("[{}] {}", err.start_offset, err.message),
     ))
 }
 
@@ -640,7 +637,7 @@ fn convert_lowerer_parsing_error(
     span: Span,
 ) -> Result<()> {
     let err_span = span_for_pos(src, internal_offset, span, &err.0);
-    Err(Error::new(err_span, &err.1.to_string()))
+    Err(Error::new(err_span, err.1.to_string()))
 }
 
 mod emit {

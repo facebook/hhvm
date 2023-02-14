@@ -221,7 +221,7 @@ fn convert_call<'a, 'b>(ctx: &mut Context<'a, 'b>, call: &Opcode<'a>) {
 
     let context = ctx.intern_ffi_str(fcall_args.context);
 
-    let mut num_args = fcall_args.num_args as u32;
+    let mut num_args = fcall_args.num_args;
     // These first two stack entries correspond to an HHVM ActRec (in
     // TypedValue-sized chunks - see kNumActRecCells).  The first entry fits
     // into the ActRec::m_thisUnsafe or ActRec::m_clsUnsafe values (they're a
@@ -343,7 +343,7 @@ fn convert_call<'a, 'b>(ctx: &mut Context<'a, 'b>, call: &Opcode<'a>) {
         flags: fcall_args.flags,
         inouts,
         loc: ctx.loc,
-        num_rets: fcall_args.num_rets as u32,
+        num_rets: fcall_args.num_rets,
         operands: operands.into(),
         readonly,
     };

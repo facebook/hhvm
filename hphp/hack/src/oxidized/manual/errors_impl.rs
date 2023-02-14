@@ -77,7 +77,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for UserError<PP, P> {
         self_pos
             .cmp_file(other_pos)
             // If the files are the same, sort by phase.
-            .then(((*self_code / 1000) as isize).cmp(&((*other_code / 1000) as isize)))
+            .then((*self_code / 1000).cmp(&{ *other_code / 1000 }))
             // If the phases are the same, sort by position.
             .then(self_pos.cmp(other_pos))
             // If the positions are the same, sort by claim message text.

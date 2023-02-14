@@ -2881,7 +2881,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
         }
         _ => Ok(
             match (args, istype_op(lower_fq_name), is_isexp_op(lower_fq_name)) {
-                (&[ref arg_expr], _, Some(ref h)) => {
+                ([arg_expr], _, Some(ref h)) => {
                     let is_expr = emit_is(e, env, pos, h)?;
                     Some(InstrSeq::gather(vec![
                         emit_expr(e, env, error::expect_normal_paramkind(arg_expr)?)?,
@@ -4295,10 +4295,10 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                     if no_final {
                         instr::empty()
                     } else if null_coalesce_assignment {
-                        querym_n_unpopped = Some(total_stack_size as u32);
+                        querym_n_unpopped = Some(total_stack_size);
                         instr::query_m(0, query_op, memberkey)
                     } else {
-                        instr::query_m(total_stack_size as u32, query_op, memberkey)
+                        instr::query_m(total_stack_size, query_op, memberkey)
                     }
                 };
             let instr = match (base_result, local_temp_kind) {
@@ -4313,7 +4313,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                         emit_pos(outer_pos),
                         base.setup_instrs,
                         make_final(
-                            base.base_stack_size + base.cls_stack_size + elem_stack_size as u32,
+                            base.base_stack_size + base.cls_stack_size + elem_stack_size,
                             memberkey,
                         ),
                     ]))
@@ -5414,8 +5414,8 @@ fn emit_base<'a, 'arena, 'decl>(
             i.base_instrs,
             i.cls_instrs,
             i.setup_instrs,
-            i.base_stack_size as u32,
-            i.cls_stack_size as u32,
+            i.base_stack_size,
+            i.cls_stack_size,
         )),
         ArrayGetBase::Inout { .. } => Err(Error::unrecoverable("unexpected input")),
     }
@@ -6327,7 +6327,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                     )?;
                     let total_stack_size = elem_stack_size + base_stack_size + cls_stack_size;
                     let final_instr =
-                        emit_pos_then(pos, emit_final_member_op(total_stack_size as u32, op, mk));
+                        emit_pos_then(pos, emit_final_member_op(total_stack_size, op, mk));
                     (
                         // Don't emit instructions for elems as these were not popped from
                         // the stack by the final member op during the lookup of a null
@@ -6408,7 +6408,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                 )?;
                 let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size;
                 let final_instr =
-                    emit_pos_then(pos, emit_final_member_op(total_stack_size as u32, op, mk));
+                    emit_pos_then(pos, emit_final_member_op(total_stack_size, op, mk));
                 (
                     // Don't emit instructions for props as these were not popped from
                     // the stack by the final member op during the lookup of a null

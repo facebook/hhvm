@@ -173,7 +173,7 @@ fn parse_opcode_pat<'a, 'b>(
     if opcode_class != "Opcode" {
         return Err(Error::new(
             span,
-            &format!("Expected 'Opcode', not '{}'", opcode_class),
+            format!("Expected 'Opcode', not '{}'", opcode_class),
         ));
     }
     let data = if let Some(data) = opcodes.get(&opcode_variant) {
@@ -181,7 +181,7 @@ fn parse_opcode_pat<'a, 'b>(
     } else {
         return Err(Error::new(
             span,
-            &format!("Opcode '{}' not found", opcode_variant),
+            format!("Opcode '{}' not found", opcode_variant),
         ));
     };
 
@@ -258,7 +258,7 @@ fn parse_convert_simple(
         | Inputs::SMany => {
             return Err(Error::new(
                 span,
-                &format!("Unhandled conversion: {:?}", data.inputs),
+                format!("Unhandled conversion: {:?}", data.inputs),
             ));
         }
     };
@@ -365,7 +365,7 @@ fn parse_convert_simple(
             outputs => {
                 return Err(Error::new(
                     span,
-                    &format!("Unhandled outputs: {:?}", outputs),
+                    format!("Unhandled outputs: {:?}", outputs),
                 ));
             }
         }

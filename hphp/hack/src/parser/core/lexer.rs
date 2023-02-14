@@ -1041,9 +1041,9 @@ where
             let ch0 = self.peek_char(len);
             let ch1 = self.peek_char(len + 1);
             if ((Self::is_newline(ch0)) || ch0 == ';' && (Self::is_newline(ch1)))
-                && self.peek_string(len as usize) == name
+                && self.peek_string(len) == name
             {
-                self.advance(len as usize);
+                self.advance(len);
                 break;
             } else {
                 self.skip_to_end_of_line();
@@ -1219,10 +1219,10 @@ where
             let ch2 = self.peek_char(offset + 2);
             match (ch0, ch1, ch2) {
                 (INVALID, _, _) => {
-                    self.advance(offset as usize);
+                    self.advance(offset);
                     return self.with_error(Errors::error0014);
                 }
-                ('-', '-', '>') => return self.advance((offset + 3) as usize),
+                ('-', '-', '>') => return self.advance(offset + 3),
                 _ => offset += 1,
             }
         }

@@ -291,7 +291,7 @@ impl<'a> SerializedValue<'a> {
                 uncompressed_size, ..
             } => HeapValueHeaderFields {
                 buffer_size: slice.len(),
-                uncompressed_size: *uncompressed_size as usize,
+                uncompressed_size: *uncompressed_size,
                 is_serialized: true,
                 is_evictable,
             },

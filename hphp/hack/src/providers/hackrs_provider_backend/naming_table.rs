@@ -253,16 +253,16 @@ impl NamingProvider for NamingTable {
     ) -> Result<Option<(RelativePath, KindOfType)>> {
         Ok(self
             .get_type_pos(name)?
-            .map(|(pos, kind)| (pos.path().into(), kind)))
+            .map(|(pos, kind)| (pos.path(), kind)))
     }
     fn get_fun_path(&self, name: pos::FunName) -> Result<Option<RelativePath>> {
-        Ok(self.get_fun_pos(name)?.map(|pos| pos.path().into()))
+        Ok(self.get_fun_pos(name)?.map(|pos| pos.path()))
     }
     fn get_const_path(&self, name: pos::ConstName) -> Result<Option<RelativePath>> {
-        Ok(self.get_const_pos(name)?.map(|pos| pos.path().into()))
+        Ok(self.get_const_pos(name)?.map(|pos| pos.path()))
     }
     fn get_module_path(&self, name: pos::ModuleName) -> Result<Option<RelativePath>> {
-        Ok(self.get_module_pos(name)?.map(|pos| pos.path().into()))
+        Ok(self.get_module_pos(name)?.map(|pos| pos.path()))
     }
     fn get_canon_type_name(&self, name: TypeName) -> Result<Option<TypeName>> {
         self.get_canon_type_name(name)

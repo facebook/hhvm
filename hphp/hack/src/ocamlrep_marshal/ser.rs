@@ -643,7 +643,7 @@ pub fn output_value<W: Read + Write + Seek>(
     let mut header_len = 0;
     // At this point we don't know the size of the header.
     // Guess that it is small, and fix up later if not.
-    w.seek(std::io::SeekFrom::Start(0))?;
+    w.rewind()?;
     w.write_all(&[0; 20])?;
     let mut s = State::new(&mut *w);
     s.extern_value(v, flags, &mut header, &mut header_len)?;
@@ -657,7 +657,7 @@ pub fn output_value<W: Read + Write + Seek>(
         w.seek(std::io::SeekFrom::Start(header_len as u64))?;
         w.write_all(&output)?;
     }
-    w.seek(std::io::SeekFrom::Start(0))?;
+    w.rewind()?;
     w.write_all(&header[0..header_len])?;
     w.flush()
 }

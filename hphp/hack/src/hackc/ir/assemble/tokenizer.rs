@@ -69,7 +69,7 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn cur_line(&self) -> LineNum {
-        LineNum(self.cur_line as u32)
+        LineNum(self.cur_line)
     }
 
     fn consume_any_byte(&mut self) {

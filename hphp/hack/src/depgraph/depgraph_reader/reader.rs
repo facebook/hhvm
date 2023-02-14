@@ -638,10 +638,10 @@ impl<'bytes> OldHashList<'bytes> {
         let len: usize = len as usize;
 
         let indices = byteutils::subslice(data, 1.., "hash list.data")?;
-        if indices.len() < len as usize {
+        if indices.len() < len {
             return Err("hash list: not enough indices".to_string());
         }
-        let indices = &indices[..len as usize];
+        let indices = &indices[..len];
         Ok(OldHashList { indices })
     }
 

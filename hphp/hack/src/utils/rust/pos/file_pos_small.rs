@@ -74,7 +74,7 @@ impl FilePosSmall {
         if self.is_dummy() {
             0
         } else {
-            mask_by(BOL_BITS, self.0 >> (LINE_BITS + COLUMN_BITS)) as usize
+            mask_by(BOL_BITS, self.0 >> (LINE_BITS + COLUMN_BITS))
         }
     }
 
@@ -83,7 +83,7 @@ impl FilePosSmall {
         if self.is_dummy() {
             0
         } else {
-            mask_by(LINE_BITS, self.0 >> COLUMN_BITS) as usize
+            mask_by(LINE_BITS, self.0 >> COLUMN_BITS)
         }
     }
 
@@ -92,7 +92,7 @@ impl FilePosSmall {
         if self.is_dummy() {
             DUMMY as usize
         } else {
-            mask_by(COLUMN_BITS, self.0) as usize
+            mask_by(COLUMN_BITS, self.0)
         }
     }
 

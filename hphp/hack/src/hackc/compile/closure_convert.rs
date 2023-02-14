@@ -1761,10 +1761,7 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
     let mut state = visitor.state.take().unwrap();
     state.record_function_state(get_unique_id_for_main(), Coeffects::default());
     hoist_toplevel_functions(defs);
-    let named_fun_defs = state
-        .named_hoisted_functions
-        .into_iter()
-        .map(|(_, fd)| Def::mk_fun(fd));
+    let named_fun_defs = state.named_hoisted_functions.into_values().map(Def::mk_fun);
     defs.splice(0..0, named_fun_defs);
     for class in state.closures.into_iter() {
         defs.push(Def::mk_class(class));

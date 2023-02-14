@@ -81,7 +81,7 @@ fn parse_array_key(tokenizer: &mut Tokenizer<'_>) -> Result<ArrayKey> {
             ArrayKey::Int(i)
         }
         Token::QuotedString(_, s, _) => {
-            let id = tokenizer.strings.intern_bytes(&unescape(&s)?);
+            let id = tokenizer.strings.intern_bytes(unescape(&s)?);
             ArrayKey::String(id)
         }
         _ => return Err(t.bail(format!("Expected string or int but got {t}"))),
@@ -642,10 +642,10 @@ pub(crate) fn parse_src_loc(tokenizer: &mut Tokenizer<'_>, cur: Option<&SrcLoc>)
 
     Ok(SrcLoc {
         filename,
-        line_begin: line_begin as i32,
-        col_begin: col_begin as i32,
-        line_end: line_end as i32,
-        col_end: col_end as i32,
+        line_begin,
+        col_begin,
+        line_end,
+        col_end,
     })
 }
 
@@ -682,7 +682,7 @@ pub(crate) fn parse_silence_op(tokenizer: &mut Tokenizer<'_>) -> Result<SilenceO
 pub(crate) fn parse_string_id(tokenizer: &mut Tokenizer<'_>) -> Result<UnitBytesId> {
     let name = tokenizer.expect_any_string()?;
     let name = name.unescaped_string()?;
-    Ok(tokenizer.strings.intern_bytes(&name))
+    Ok(tokenizer.strings.intern_bytes(name))
 }
 
 pub(crate) fn parse_type_info(tokenizer: &mut Tokenizer<'_>) -> Result<TypeInfo> {
@@ -696,7 +696,7 @@ pub(crate) fn parse_type_info(tokenizer: &mut Tokenizer<'_>) -> Result<TypeInfo>
         Some(
             tokenizer
                 .strings
-                .intern_bytes(&user_type.unescaped_string()?),
+                .intern_bytes(user_type.unescaped_string()?),
         )
     };
 
@@ -782,7 +782,7 @@ pub(crate) fn parse_typed_value(tokenizer: &mut Tokenizer<'_>) -> Result<TypedVa
             Num::Float(f) => TypedValue::Float(FloatBits(f)),
         },
         Token::QuotedString(_, s, _) => {
-            let id = tokenizer.strings.intern_bytes(&unescape(&s)?);
+            let id = tokenizer.strings.intern_bytes(unescape(&s)?);
             TypedValue::String(id)
         }
         _ => return Err(t.bail("Invalid TypedValue, got '{t}'")),

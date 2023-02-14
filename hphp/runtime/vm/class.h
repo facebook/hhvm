@@ -193,8 +193,10 @@ struct Class : AtomicCountable {
     UpperBoundVec  ubs;
 
     LowStringPtr name;
-    LowStringPtr mangledName;
+   private:
+    mutable LowStringPtr m_mangledName = nullptr;
 
+   public:
     /* Most derived class that declared this property. */
     LowPtr<Class> cls;
 
@@ -214,6 +216,14 @@ struct Class : AtomicCountable {
 
     const StringData* moduleName() const {
       return cls.get()->moduleName();
+    }
+
+    const StringData* mangledName() const {
+      if (m_mangledName == nullptr) {
+        m_mangledName = PreClass::manglePropName(baseCls->name(), name, attrs);
+      }
+      assertx(m_mangledName);
+      return m_mangledName;
     }
   };
 

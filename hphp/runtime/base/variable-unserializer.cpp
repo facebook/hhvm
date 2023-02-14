@@ -1065,7 +1065,7 @@ void VariableUnserializer::unserializeVariant(
               auto index = objCls->propSlotToIndex(slot);
               auto const& prop = declProps[slot];
               if (prop.name == s_86reified_prop.get()) continue;
-              if (!matchString(prop.mangledName->slice())) {
+              if (!matchString(prop.mangledName()->slice())) {
                 mismatch = true;
                 break;
               }

@@ -344,7 +344,7 @@ void throwable_mark_array(const ObjectData* throwable, Array& props) {
   assertx(throwable_has_expected_props());
 
   auto const prop = throwable->getVMClass()->declProperties()[s_traceSlot];
-  auto const name = StrNR(prop.mangledName).asString();
+  auto const name = StrNR(prop.mangledName()).asString();
   auto const base = props.lookup(name);
   if (!tvIsArrayLike(base)) return;
 

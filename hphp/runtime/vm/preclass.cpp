@@ -177,7 +177,6 @@ PreClass::Prop::Prop(PreClass* preClass,
                      RepoAuthType repoAuthType,
                      UserAttributeMap userAttributes)
   : m_name(name)
-  , m_mangledName(manglePropName(preClass->name(), name, attrs))
   , m_attrs(attrs)
   , m_userType{userType}
   , m_docComment(docComment)

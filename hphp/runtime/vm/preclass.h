@@ -93,7 +93,6 @@ struct PreClass : AtomicCountable {
     void prettyPrint(std::ostream&, const PreClass*) const;
 
     const StringData* name()           const { return m_name; }
-    const StringData* mangledName()    const { return m_mangledName; }
     Attr              attrs()          const { return m_attrs; }
     const StringData* userType()       const { return m_userType; }
     const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
@@ -106,7 +105,6 @@ struct PreClass : AtomicCountable {
 
   private:
     LowStringPtr m_name;
-    LowStringPtr m_mangledName;
     Attr m_attrs;
     LowStringPtr m_userType;
     LowStringPtr m_docComment;

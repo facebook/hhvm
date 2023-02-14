@@ -2914,7 +2914,6 @@ void Class::setProperties() {
       prop.preProp             = parentProp.preProp;
       prop.cls                 = parentProp.cls;
       prop.baseCls             = parentProp.baseCls;
-      prop.mangledName         = parentProp.mangledName;
       prop.attrs               = parentProp.attrs | AttrNoBadRedeclare;
       prop.typeConstraint      = parentProp.typeConstraint;
       prop.ubs                 = parentProp.ubs;
@@ -3058,7 +3057,6 @@ void Class::setProperties() {
           assertx((prop.attrs & VisibilityAttrs) == AttrProtected);
           assertx((preProp->attrs() & VisibilityAttrs) == AttrPublic);
           // Weaken protected property to public.
-          prop.mangledName = preProp->mangledName();
           prop.attrs = Attr(prop.attrs ^ (AttrProtected|AttrPublic));
         }
 
@@ -3343,12 +3341,6 @@ void Class::importTraitInstanceProp(Prop& traitProp,
     // New prop, go ahead and add it
     auto prop = traitProp;
     prop.baseCls = this;
-    // private props' mangled names contain the class name, so regenerate them
-    if (prop.attrs & AttrPrivate) {
-      prop.mangledName = PreClass::manglePropName(m_preClass->name(),
-                                                  prop.name,
-                                                  prop.attrs);
-    }
     if (prop.attrs & AttrDeepInit) {
       m_allFlags.m_hasDeepInitProps = true;
     }
@@ -3527,8 +3519,7 @@ void Class::initProp(XProp& prop, const PreClass::Prop* preProp) {
 
 void Class::initProp(Prop& prop, const PreClass::Prop* preProp) {
   initProp<Prop>(prop, preProp);
-  prop.mangledName = preProp->mangledName();
-  prop.baseCls     = this;
+  prop.baseCls = this;
 }
 
 void Class::initProp(SProp& prop, const PreClass::Prop* preProp) {

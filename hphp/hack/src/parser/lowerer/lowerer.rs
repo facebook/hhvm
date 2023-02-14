@@ -4315,16 +4315,24 @@ fn process_attribute_constructor_call<'a>(
         if list.len() > 1 {
             let ast::Id(_, first) = pos_name(list[0], env)?;
             let ast::Id(_, second) = pos_name(list[1], env)?;
-            // Only allow of the form (#SoftMakeICInaccessible, 4)
-            if !(list.len() == 2
-                && first == "#SoftMakeICInaccessible"
-                && second.parse::<u32>().is_ok())
-            {
-                //TODO: Improve error message for the sample rate
+
+            if first == "#SoftMakeICInaccessible" {
+                if list.len() > 2 {
+                    raise_parsing_error(
+                        list[2],
+                        env,
+                        &syntax_error::memoize_invalid_arity(&name.1, 2, &first),
+                    );
+                }
+
+                if second.parse::<u32>().is_err() {
+                    raise_parsing_error(list[1], env, &syntax_error::memoize_invalid_sample_rate);
+                }
+            } else {
                 raise_parsing_error(
-                    node,
+                    list[1],
                     env,
-                    &syntax_error::memoize_too_many_arguments(&name.1),
+                    &syntax_error::memoize_invalid_arity(&name.1, 1, &first),
                 );
             }
         }

@@ -1,0 +1,2 @@
+File "memoized_invalid_syntax_int.php", line 3, characters 13-15:
+The first argument to `__Memoize` must be a label, e.g. `#KeyedByIC`. (Parsing[1002])

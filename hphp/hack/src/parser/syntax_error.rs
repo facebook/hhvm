@@ -1027,9 +1027,18 @@ pub fn memoize_category_without_implicit_policy_capability(kind: &str) -> Error 
     ))
 }
 
-pub fn memoize_too_many_arguments(attr: &String) -> Error {
-    Cow::Owned(format!("The attribute {} takes at most one argument", attr))
+pub fn memoize_invalid_arity(attr: &str, num_args: usize, label: &str) -> Error {
+    Cow::Owned(format!(
+        "`{}` takes {} argument{} when using `{}`.",
+        attr,
+        num_args,
+        if num_args == 1 { "" } else { "s" },
+        label
+    ))
 }
+
+pub const memoize_invalid_sample_rate: Error =
+    Cow::Borrowed("Expected a valid 32-bit integer as a sample rate.");
 
 pub fn memoize_invalid_label(attr: &str) -> Error {
     Cow::Owned(format!("Invalid label for `{}`.", attr))

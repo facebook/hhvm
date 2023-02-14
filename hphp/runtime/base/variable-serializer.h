@@ -245,8 +245,12 @@ private:
 
   private:
     struct TvHash {
+      using folly_is_avalanching = std::true_type;
+      using folly_assume_32bit_hash = std::true_type;
+
       std::size_t operator()(const TypedValue& tv) const {
-        return pointer_hash<void>()(tv.m_data.parr);
+        auto hash = pointer_hash<void>()(tv.m_data.parr);
+        return std::uint32_t(hash) | (std::size_t(hash) << 32);
       }
     };
 

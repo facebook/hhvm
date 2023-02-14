@@ -89,6 +89,7 @@ impl LowerInstrs<'_> {
             Hhbc::CmpOp(_, CmpOp::Same, _) => hack::Hhbc::CmpSame,
             Hhbc::CombineAndResolveTypeStruct(..) => hack::Hhbc::CombineAndResolveTypeStruct,
             Hhbc::Concat(..) => hack::Hhbc::Concat,
+            Hhbc::ConcatN(..) => hack::Hhbc::ConcatN,
             Hhbc::Div(..) => hack::Hhbc::Div,
             Hhbc::GetClsRGProp(..) => hack::Hhbc::GetClsRGProp,
             Hhbc::HasReifiedParent(..) => hack::Hhbc::HasReifiedParent,
@@ -448,6 +449,36 @@ impl TransformInstr for LowerInstrs<'_> {
                 let builtin = hack::Hhbc::NewVec;
                 let vec = builder.emit_hhbc_builtin(builtin, &ops, loc);
                 Instr::ret(vec, loc)
+            }
+            Instr::Terminator(Terminator::SSwitch {
+                cond,
+                cases,
+                targets,
+                loc,
+            }) => {
+                // if (StrEq(cond, case_0)) jmp targets[0];
+                // else if (StrEq(cond, case_1)) jmp targets[1];
+                // ...
+                // else jmp targets.last();
+
+                // Last case MUST be 'default'.
+                let iter = cases.iter().take(cases.len() - 1).zip(targets.iter());
+
+                for (case, target) in iter {
+                    let string = builder.emit_constant(Constant::String(*case));
+                    let pred = builder.emit_hhbc_builtin(hack::Hhbc::CmpSame, &[string, cond], loc);
+                    let false_bid = builder.alloc_bid();
+                    builder.emit(Instr::jmp_op(
+                        pred,
+                        Predicate::NonZero,
+                        *target,
+                        false_bid,
+                        loc,
+                    ));
+                    builder.start_block(false_bid);
+                }
+
+                Instr::jmp(*targets.last().unwrap(), loc)
             }
             instr => {
                 return instr;

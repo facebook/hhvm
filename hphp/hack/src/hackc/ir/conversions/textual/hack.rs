@@ -70,6 +70,8 @@ pub(crate) enum Hhbc {
     CombineAndResolveTypeStruct,
     #[decl(fn hhbc_concat(*HackMixed, *HackMixed) -> *HackMixed)]
     Concat,
+    #[decl(fn hhbc_concat(...) -> *HackMixed)]
+    ConcatN,
     #[decl(fn hhbc_div(*HackMixed, *HackMixed) -> *HackMixed)]
     Div,
     #[decl(fn hhbc_exit(*HackMixed) -> noreturn)]

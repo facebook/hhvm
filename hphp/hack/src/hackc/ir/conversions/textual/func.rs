@@ -458,9 +458,6 @@ fn write_terminator(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
 
     state.update_loc(terminator.loc_id())?;
 
-    // In general don't write directly to `w` here - isolate the formatting to
-    // the `textual` crate.
-
     match *terminator {
         Terminator::Enter(bid, _) | Terminator::Jmp(bid, _) => {
             state.fb.jmp(&[bid], ())?;

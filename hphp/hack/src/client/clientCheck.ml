@@ -581,7 +581,17 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let%lwt (ty, telemetry) =
         rpc args @@ Rpc.TAST_HOLES (filename, hole_src_opt)
       in
-      ClientTastHoles.go ty args.output_json;
+      ClientTastHoles.go ty ~print_file:false args.output_json;
+      Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_TAST_HOLES_BATCH (file : string) ->
+      let files =
+        Sys_utils.read_file file
+        |> Bytes.to_string
+        |> String.strip
+        |> String.split ~on:'\n'
+      in
+      let%lwt (holes, telemetry) = rpc args @@ Rpc.TAST_HOLES_BATCH files in
+      ClientTastHoles.go holes ~print_file:true args.output_json;
       Lwt.return (Exit_status.No_error, telemetry)
     | MODE_FUN_DEPS_AT_POS_BATCH positions ->
       let positions = parse_positions positions in

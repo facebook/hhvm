@@ -9,6 +9,7 @@ let debug_describe_t : type a. a t -> string = function
   | INFER_TYPE_ERROR _ -> "INFER_TYPE_ERROR"
   | IS_SUBTYPE _ -> "IS_SUBTYPE"
   | TAST_HOLES _ -> "TAST_HOLES"
+  | TAST_HOLES_BATCH _ -> "TAST_HOLES_BATCH"
   | IDE_HOVER _ -> "IDE_HOVER"
   | DOCBLOCK_AT _ -> "DOCBLOCK_AT"
   | DOCBLOCK_FOR_SYMBOL _ -> "DOCBLOCK_FOR_SYMBOL"

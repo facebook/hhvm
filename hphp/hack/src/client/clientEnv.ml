@@ -73,6 +73,7 @@ type client_mode =
   | MODE_TYPE_ERROR_AT_POS of string
   | MODE_IS_SUBTYPE
   | MODE_TAST_HOLES of string
+  | MODE_TAST_HOLES_BATCH of string
   | MODE_FUN_DEPS_AT_POS_BATCH of string list
   | MODE_FILE_LEVEL_DEPENDENCIES
   | MODE_GLOBAL_INFERENCE of ServerGlobalInferenceTypes.mode * string list

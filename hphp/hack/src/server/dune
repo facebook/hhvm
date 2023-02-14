@@ -457,6 +457,7 @@
   serverGenShallowDeclsToDir
   serverIdle
   serverInferTypeBatch
+  serverTastHolesBatch
   serverInvalidateUnits
   serverIsSubtype
   serverLint

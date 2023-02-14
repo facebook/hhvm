@@ -103,6 +103,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ServerCollectTastHoles.go_ctx ~ctx ~entry ~hole_filter)
     in
     (env, result)
+  | TAST_HOLES_BATCH files ->
+    (env, ServerTastHolesBatch.go genv.workers files env)
   | INFER_TYPE_ERROR (file_input, line, column) ->
     let path =
       match file_input with

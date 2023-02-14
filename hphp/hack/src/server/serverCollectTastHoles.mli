@@ -6,6 +6,12 @@
  *
  *)
 
+val tast_holes :
+  Provider_context.t ->
+  Tast.program ->
+  ServerCommandTypes.Tast_hole.filter ->
+  TastHolesService.result
+
 val go_ctx :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->

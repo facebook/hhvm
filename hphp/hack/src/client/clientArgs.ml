@@ -746,6 +746,10 @@ let parse_check_args cmd =
       ( "--tast-holes",
         Arg.String (fun x -> set_mode (MODE_TAST_HOLES x)),
         " (mode) return all TAST Holes in a given file" );
+      ( "--tast-holes-batch",
+        Arg.String (fun x -> set_mode (MODE_TAST_HOLES_BATCH x)),
+        " (mode) return all TAST Holes for a set of files. Argument is a file containing a newline-separated list of files"
+      );
       ( "--verbose-on",
         Arg.Unit (fun () -> set_mode (MODE_VERBOSE true)),
         " (mode) turn on verbose server log" );

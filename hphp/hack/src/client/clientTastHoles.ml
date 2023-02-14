@@ -26,13 +26,19 @@ let print_json result =
     @@ tast_holes_response_to_json
     @@ List.map ~f:tast_holes_result_to_tuple result)
 
-let print_string result =
+let print_string ~print_file result =
+  let printer pos =
+    if print_file then
+      Pos.to_absolute pos |> Pos.string
+    else
+      Pos.string_no_file pos
+  in
   let print_elem
       TastHolesService.{ pos; actual_ty_string; expected_ty_string; _ } =
     print_endline
     @@ Format.sprintf
          {|%s actual type: %s, expected type: %s|}
-         Pos.(string_no_file pos)
+         (printer pos)
          actual_ty_string
          expected_ty_string
   in
@@ -40,8 +46,8 @@ let print_string result =
   | [] -> print_endline "No TAST Holes"
   | _ -> List.iter ~f:print_elem result
 
-let go result output_json =
+let go result ~print_file output_json =
   if output_json then
     print_json result
   else
-    print_string result
+    print_string ~print_file result

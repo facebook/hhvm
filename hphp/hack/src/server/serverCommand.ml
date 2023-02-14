@@ -58,6 +58,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | INFER_TYPE_ERROR _ -> false
   | IS_SUBTYPE _ -> false
   | TAST_HOLES _ -> false
+  | TAST_HOLES_BATCH _ -> false
   | IDE_HOVER _ -> false
   | DOCBLOCK_AT _ -> false
   | DOCBLOCK_FOR_SYMBOL _ -> false

@@ -5,4 +5,4 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-val go : TastHolesService.result -> bool -> unit
+val go : TastHolesService.result -> print_file:bool -> bool -> unit

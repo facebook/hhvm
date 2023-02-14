@@ -543,6 +543,7 @@
     hhMonitorInformant_sig
     hhServerMonitor
     hhServerMonitorConfig
+    packageConfig
     serverCommand
     serverCommandLwt
     serverEagerInit
@@ -555,6 +556,7 @@
     serverRemoteInit
     serverRpc)
   (libraries
+    ast
     ast_and_decl_service
     build
     ci_util

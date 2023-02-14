@@ -63,6 +63,10 @@ let init
       |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ()))
   in
 
+  (* Load and parse __PACKAGES__.php if it exists.
+     TODO(milliechen): restart the server if __PACKAGES__.php changes. *)
+  PackageConfig.load_and_parse env;
+
   (* We don't support a saved state for eager init. *)
   let (get_next, t) =
     ServerInitCommon.indexing ~telemetry_label:"eager.init.indexing" genv

@@ -1268,6 +1268,11 @@ let post_saved_state_initialization
       old_errors
       [Errors.Decl; Errors.Typing]
   in
+
+  (* Load and parse __PACKAGES__.php if it exists.
+     TODO(milliechen): restart the server if __PACKAGES__.php changes. *)
+  PackageConfig.load_and_parse env;
+
   (* Parse and name all dirty files uniformly *)
   let dirty_files =
     List.fold

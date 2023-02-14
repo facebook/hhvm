@@ -159,6 +159,15 @@ class BaseSampleHandler : public proxygen::HTTPTransactionHandler {
     return params_.httpVersion;
   }
 
+  proxygen::HTTPMessage createHttpResponse(uint16_t status,
+                                           std::string_view message) {
+    proxygen::HTTPMessage resp;
+    resp.setVersionString(getHttpVersion());
+    resp.setStatusCode(status);
+    resp.setStatusMessage(message);
+    return resp;
+  }
+
   proxygen::HTTPTransaction* txn_{nullptr};
   const HandlerParams& params_;
 };
@@ -799,11 +808,7 @@ class StaticFileHandler : public BaseSampleHandler {
       sendError(errorMsg);
       return;
     }
-    proxygen::HTTPMessage resp;
-    VLOG(10) << "Setting http-version to " << getHttpVersion();
-    resp.setVersionString(getHttpVersion());
-    resp.setStatusCode(200);
-    resp.setStatusMessage("Ok");
+    proxygen::HTTPMessage resp = createHttpResponse(200, "Ok");
     maybeAddAltSvcHeader(resp);
     txn_->sendHeaders(resp);
     // use a CPU executor since read(2) of a file can block
@@ -870,9 +875,7 @@ class StaticFileHandler : public BaseSampleHandler {
   }
 
   void sendError(const std::string& errorMsg) {
-    proxygen::HTTPMessage resp;
-    resp.setStatusCode(400);
-    resp.setStatusMessage("Bad Request");
+    proxygen::HTTPMessage resp = createHttpResponse(400, "Bad Request");
     resp.setWantsKeepalive(true);
     maybeAddAltSvcHeader(resp);
     txn_->sendHeaders(resp);

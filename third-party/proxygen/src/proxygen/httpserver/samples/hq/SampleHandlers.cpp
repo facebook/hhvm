@@ -230,10 +230,7 @@ void ServerPushHandler::sendPushResponse(proxygen::HTTPTransaction* pushTxn,
                                          const std::string& pushedResourceBody,
                                          bool eom) {
   VLOG(10) << "ServerPushHandler::" << __func__;
-  proxygen::HTTPMessage resp;
-  resp.setVersionString(getHttpVersion());
-  resp.setStatusCode(200);
-  resp.setStatusMessage("OK");
+  proxygen::HTTPMessage resp = createHttpResponse(200, "OK");
   resp.setWantsKeepalive(true);
   resp.setIsChunked(true);
   pushTxn->sendHeaders(resp);
@@ -258,10 +255,7 @@ void ServerPushHandler::sendPushResponse(proxygen::HTTPTransaction* pushTxn,
 }
 
 void ServerPushHandler::sendErrorResponse(const std::string& body) {
-  proxygen::HTTPMessage resp;
-  resp.setVersionString(getHttpVersion());
-  resp.setStatusCode(400);
-  resp.setStatusMessage("ERROR");
+  proxygen::HTTPMessage resp = createHttpResponse(400, "ERROR");
   resp.setWantsKeepalive(false);
   txn_->sendHeaders(resp);
   txn_->sendBody(folly::IOBuf::copyBuffer(body));
@@ -271,10 +265,7 @@ void ServerPushHandler::sendErrorResponse(const std::string& body) {
 void ServerPushHandler::sendOkResponse(const std::string& body, bool eom) {
   VLOG(10) << "ServerPushHandler::" << __func__ << ": sending " << body.length()
            << " bytes";
-  proxygen::HTTPMessage resp;
-  resp.setVersionString(getHttpVersion());
-  resp.setStatusCode(200);
-  resp.setStatusMessage("OK");
+  proxygen::HTTPMessage resp = createHttpResponse(200, "OK");
   resp.setWantsKeepalive(true);
   resp.setIsChunked(true);
   txn_->sendHeaders(resp);

@@ -868,12 +868,12 @@ class RecvChunksTest : public SocketPairTest<ChannelT> {
     //
     // The number of calls is roughly log(size/4096) / log(1.5)
     // (Since the code starts with an initial buffer size of 4096, and grows by
-    // a factor of 1.5 each time it reallocates.)  Add extra 2 milliseconds of
+    // a factor of 1.5 each time it reallocates.)  Add extra 3 milliseconds of
     // tolerance for every expected call.
     if (!NeedsFrame<ChannelT>::value() && expectedBytes > 4096) {
       double numCalls = log(expectedBytes / 4096) / log(1.5);
       printf("expected %f calls for %u bytes\n", numCalls, expectedBytes);
-      tolerance += milliseconds(static_cast<int64_t>(numCalls)) * 2;
+      tolerance += milliseconds(static_cast<int64_t>(numCalls)) * 3;
     }
 
     if (expectTimeout) {

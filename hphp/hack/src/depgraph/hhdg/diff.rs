@@ -79,9 +79,12 @@ pub(crate) fn run(opts: Opts) -> Result<usize> {
 
     if !opts.depmaps.is_empty() {
         // Only list unknown nodes if depmaps were provided
-        (opts.depmaps.par_iter())
+        let lists_of_collisions = (opts.depmaps.par_iter())
             .map(|path| dep_map.load(path))
-            .collect::<Result<_>>()?;
+            .collect::<Result<Vec<Vec<_>>>>()?;
+        for collision in lists_of_collisions.into_iter().flatten() {
+            println!("{collision}");
+        }
 
         // list unknown nodes in dg1
         for h in dg1.all_hashes() {

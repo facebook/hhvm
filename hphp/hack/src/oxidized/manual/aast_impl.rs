@@ -210,6 +210,7 @@ impl<'a, Ex, En> Iterator for DefsIterator<'a, Ex, En> {
                 Def::Stmt(_)
                 | Def::Module(_)
                 | Def::SetModule(_)
+                | Def::Package(_)
                 | Def::NamespaceUse(_)
                 | Def::SetNamespaceEnv(_)
                 | Def::FileAttributes(_) => {}

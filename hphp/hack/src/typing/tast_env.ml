@@ -308,7 +308,9 @@ let def_env ctx d =
   | SetModule _
   | FileAttributes _
   (* TODO(T108206307) *)
-  | Module _ ->
+  | Module _
+  (* TODO(milliechen) *)
+  | Package _ ->
     empty ctx
 
 let typing_env_as_tast_env env = env

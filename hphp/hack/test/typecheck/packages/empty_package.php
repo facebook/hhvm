@@ -1,0 +1,3 @@
+<?hh
+
+package foo {}

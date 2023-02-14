@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<78bc090c052914810e5dedf5b1f3201b>>
+// @generated SignedSource<<8eb86f8b1a7a161b91541be28f90dfc1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -580,6 +580,7 @@ impl<P: Params> Node<P> for Def<P::Ex, P::En> {
             Def::SetNamespaceEnv(a0) => a0.accept(c, v),
             Def::FileAttributes(a0) => a0.accept(c, v),
             Def::Module(a0) => a0.accept(c, v),
+            Def::Package(a0) => a0.accept(c, v),
             Def::SetModule(a0) => a0.accept(c, v),
         }
     }
@@ -1627,6 +1628,25 @@ impl<P: Params> Node<P> for OgNullFlavor {
             OgNullFlavor::OGNullthrows => Ok(()),
             OgNullFlavor::OGNullsafe => Ok(()),
         }
+    }
+}
+impl<P: Params> Node<P> for PackageDef<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_package_def(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.name.accept(c, v)?;
+        self.user_attributes.accept(c, v)?;
+        self.uses.accept(c, v)?;
+        self.includes.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for ParamKind {

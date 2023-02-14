@@ -1096,6 +1096,13 @@ and ('ex, 'en) module_def = {
   md_imports: md_name_kind list option;
 }
 
+and ('ex, 'en) package_def = {
+  pkg_name: Ast_defs.id;
+  pkg_user_attributes: ('ex, 'en) user_attributes;
+  pkg_uses: md_name_kind list option;
+  pkg_includes: Ast_defs.id list option;
+}
+
 and md_name_kind =
   | MDNameGlobal of pos
   | MDNamePrefix of sid
@@ -1113,6 +1120,7 @@ and ('ex, 'en) def =
   | SetNamespaceEnv of nsenv
   | FileAttributes of ('ex, 'en) file_attribute
   | Module of ('ex, 'en) module_def
+  | Package of ('ex, 'en) package_def
   | SetModule of sid
 
 and ns_kind =

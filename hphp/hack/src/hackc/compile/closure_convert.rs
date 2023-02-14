@@ -1710,7 +1710,8 @@ fn prepare_defs(defs: &mut [Def]) -> usize {
             | Def::SetModule(_)
             | Def::NamespaceUse(_)
             | Def::SetNamespaceEnv(_)
-            | Def::Stmt(_) => {}
+            | Def::Stmt(_)
+            | Def::Package(_) => {}
         }
     }
 
@@ -1754,7 +1755,8 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
             | Def::Namespace(_)
             | Def::NamespaceUse(_)
             | Def::Stmt(_)
-            | Def::Typedef(_) => {}
+            | Def::Typedef(_)
+            | Def::Package(_) => {}
         }
     }
 

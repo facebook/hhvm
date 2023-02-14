@@ -373,7 +373,9 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _
-    | FileAttributes _ ->
+    | FileAttributes _
+    (* TODO(milliechen) *)
+    | Package _ ->
       failwith
         "Invalid nodes in NAST. These nodes should be removed during naming."
   in

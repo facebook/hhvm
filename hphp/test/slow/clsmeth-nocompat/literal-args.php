@@ -4,16 +4,16 @@ class A {
   static function test() {
     var_dump(__METHOD__);
     class_meth(__CLASS__, __FUNCTION__);
-    class_meth(__CLASS__, 'test');
+    A::test<>;
     class_meth('A', __FUNCTION__);
-    class_meth(self::class, 'test');
-    class_meth(static::class, 'test');
+    self::test<>;
+    static::test<>;
   }
 }
 class B extends A {
   static function test() {
     var_dump(__METHOD__);
-    class_meth(parent::class, 'test')();
+    (parent::test<>)();
   }
 }
 
@@ -31,14 +31,14 @@ class D extends C {}
 
 <<__EntryPoint>>
 function main() {
-  class_meth('A', 'test');
-  class_meth(A::class, 'test');
+  A::test<>;
+  A::test<>;
 
   $inv = ($x, $n) ==> { while ($n-- > 0) $x = $x(); echo "---\n"; };
-  $inv(class_meth(B::class, 'test'), 1);
-  $inv(class_meth(T::class, 'test'), 2);
-  $inv(class_meth(D::class, 'test'), 3);
-  $inv(class_meth(C::class, 'test'), 10);
+  $inv(B::test<>, 1);
+  $inv(T::test<>, 2);
+  $inv(D::test<>, 3);
+  $inv(C::test<>, 10);
 
   echo "Done\n";
 }

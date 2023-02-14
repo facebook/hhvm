@@ -12,7 +12,7 @@ class Foo { static function bar() {} }
 function LV($x) { return __hhvm_intrinsics\launder_value($x); }
 
 function array_get_static() {
-  $m = class_meth(Foo::class, 'bar');
+  $m = Foo::bar<>;
 
   var_dump($m[0], $m[1]);
   var_dump($m[LV(0)], $m[LV(1)]);
@@ -31,7 +31,7 @@ function array_get_static() {
 }
 
 function array_get_dynamic() {
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
 
   var_dump($m[0], $m[1]);
   var_dump($m[LV(0)], $m[LV(1)]);
@@ -50,29 +50,29 @@ function array_get_dynamic() {
 }
 
 function array_set_static() {
-  $m = class_meth(Foo::class, 'bar');
+  $m = Foo::bar<>;
   $m[0] = 'Alpha';
   var_dump($m);
 
-  $m = class_meth(Foo::class, 'bar');
+  $m = Foo::bar<>;
   $m[0][1] = 'x';
   var_dump($m);
 
-  $m = class_meth(Foo::class, 'bar');
+  $m = Foo::bar<>;
   $m[1] .= '-xyz';
   var_dump($m);
 }
 
 function array_set_dynamic() {
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
   $m[0] = 'Alpha';
   var_dump($m);
 
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
   $m[0][1] = 'x';
   var_dump($m);
 
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
   $m[1] .= '-xyz';
   var_dump($m);
 }

@@ -13,7 +13,7 @@ function run($fn) {
 
 // Display $x in a way that distinguishes arrays, varrays, and darrays.
 function display($x) {
-  if ($x === class_meth(ClsMethTest::class, 'fn')) return 'clsmeth';
+  if ($x === ClsMethTest::fn<>) return 'clsmeth';
   $result = __hhvm_intrinsics\serialize_keep_dvarrays($x)[0];
   $lookup = dict[
     'a'=>'array',
@@ -60,7 +60,7 @@ function test_builtin_error_messages() {
 // Test that builtins enforce dvarray-ness of inputs.
 function test_builtin_enforcement() {
   print("\n=====================================\nBuiltins:\n");
-  $clsmeth = class_meth(ClsMethTest::class, 'fn');
+  $clsmeth = ClsMethTest::fn<>;
   foreach (vec[varray[], darray[], $clsmeth] as $input) {
     print('Passing '.display($input).' to varray: ');
     run(() ==> __hhvm_intrinsics\dummy_varray_builtin($input));
@@ -141,7 +141,7 @@ class D extends C {
 // Test that regular Hack function typehints are enforced.
 function test_typehint_enforcement(int $count) {
   if (!$count) print("\n=====================================\nTypehints:\n");
-  $clsmeth = class_meth(ClsMethTest::class, 'fn');
+  $clsmeth = ClsMethTest::fn<>;
   foreach (vec[varray[], darray[], $clsmeth] as $input) {
     if (!($count--)) run(() ==> takes_varray($input));
     if (!($count--)) run(() ==> takes_darray($input));

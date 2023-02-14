@@ -14,7 +14,7 @@ class P { function __construct(public mixed $m)[] {} }
 function LV(mixed $m): mixed { return __hhvm_intrinsics\launder_value($m); }
 
 function set_static1(): void {
-  $cm = class_meth(Foo::class, 'bar');
+  $cm = Foo::bar<>;
   $am = varray[$cm];
   $dm = darray[0 => $cm];
   $om = new P($cm);
@@ -32,7 +32,7 @@ function set_static1(): void {
 }
 
 function set_static2(): void {
-  $cm = class_meth(Foo::class, 'bar');
+  $cm = Foo::bar<>;
   $am = varray[$cm];
   $dm = darray[0 => $cm];
   $om = new P($cm);
@@ -46,7 +46,7 @@ function set_static2(): void {
 }
 
 function set_static3(): void {
-  $cm = class_meth(Foo::class, 'bar');
+  $cm = Foo::bar<>;
   $am = varray[$cm];
   $dm = darray[0 => $cm];
   $om = new P($cm);
@@ -64,7 +64,7 @@ function set_static3(): void {
 }
 
 function set_static4(): void {
-  $cm = class_meth(Foo::class, 'bar');
+  $cm = Foo::bar<>;
   $am = varray[$cm];
   $dm = darray[0 => $cm];
   $om = new P($cm);
@@ -82,7 +82,7 @@ function set_static4(): void {
 }
 
 function set_dynamic1(): void {
-  $cm = LV(class_meth(Foo::class, 'bar'));
+  $cm = LV(Foo::bar<>);
   $am = LV(varray[$cm]);
   $dm = LV(darray[0 => $cm]);
   $om = LV(new P($cm));
@@ -100,7 +100,7 @@ function set_dynamic1(): void {
 }
 
 function set_dynamic2(): void {
-  $cm = LV(class_meth(Foo::class, 'bar'));
+  $cm = LV(Foo::bar<>);
   $am = LV(varray[$cm]);
   $dm = LV(darray[0 => $cm]);
   $om = LV(new P($cm));
@@ -114,7 +114,7 @@ function set_dynamic2(): void {
 }
 
 function set_dynamic3(): void {
-  $cm = LV(class_meth(Foo::class, 'bar'));
+  $cm = LV(Foo::bar<>);
   $am = LV(varray[$cm]);
   $dm = LV(darray[0 => $cm]);
   $om = LV(new P($cm));
@@ -132,7 +132,7 @@ function set_dynamic3(): void {
 }
 
 function set_dynamic4(): void {
-  $cm = LV(class_meth(Foo::class, 'bar'));
+  $cm = LV(Foo::bar<>);
   $am = LV(varray[$cm]);
   $dm = LV(darray[0 => $cm]);
   $om = LV(new P($cm));

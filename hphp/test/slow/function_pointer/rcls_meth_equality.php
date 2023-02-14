@@ -65,7 +65,7 @@ function main(): void {
 
   comp(TestBase::foo<int>, 'TestBase::foo', "String");
 
-  comp(TestBase::foo<int>, class_meth(TestBase::class, 'foo'), "Regular class_meth");
+  comp(TestBase::foo<int>, TestBase::foo<>, "Regular class_meth");
 
   comp(TestBase::foo<int>, true, "Boolean");
 

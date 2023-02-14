@@ -6,7 +6,7 @@ class C {
 }
 
 class D extends C {
-  function bar() { return class_meth('D', 'foo'); }
+  function bar() { return D::foo<>; }
 }
 
 <<__EntryPoint>>

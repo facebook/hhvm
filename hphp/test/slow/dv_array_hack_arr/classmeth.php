@@ -7,7 +7,7 @@ class Derp {
 
 <<__EntryPoint>>
 function dvarr_classmeth(): void {
-  class_meth(Derp::class, 'foo');
+  Derp::foo<>;
   inst_meth(new Derp(), 'bar');
   echo "success";
 }

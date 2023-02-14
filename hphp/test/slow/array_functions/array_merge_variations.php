@@ -18,7 +18,7 @@ class C {
     'ImmMap' => ImmMap{12 => 12, '12' => '12', 13 => 13},
     'ImmSet' => ImmSet{14, '14', 15},
     'Pair' => Pair{16, 17},
-    'class_meth' => class_meth(C::class, 'f'),
+    'class_meth' => C::f<>,
     'false' => false, // any value not resembling a Container
   ];
 

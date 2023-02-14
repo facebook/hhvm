@@ -74,7 +74,7 @@ class Props {
   private        ?varray      $priv_prop_opt_varray_dynamic  = null;
 
   public static function assign_priv_sprop_static() {
-    $val = class_meth(Foo::class, 'bar');
+    $val = Foo::bar<>;
     try { Props::$priv_sprop_foo_static     = $val; } catch (Exception $_) {}
     try { Props::$priv_sprop_trav_static        = $val; } catch (Exception $_) {}
     try { Props::$priv_sprop_varray_static      = $val; } catch (Exception $_) {}
@@ -84,7 +84,7 @@ class Props {
   }
 
   public static function assign_priv_sprop_dynamic1() {
-    $val = LV(class_meth(Foo::class, 'bar'));
+    $val = LV(Foo::bar<>);
     try { Props::$priv_sprop_foo_dynamic     = $val; } catch (Exception $_) {}
     try { Props::$priv_sprop_trav_dynamic        = $val; } catch (Exception $_) {}
     try { Props::$priv_sprop_varray_dynamic      = $val; } catch (Exception $_) {}
@@ -94,7 +94,7 @@ class Props {
   }
 
   public static function assign_priv_sprop_dynamic2() {
-    $val = LV(class_meth(Foo::class, 'bar'));
+    $val = LV(Foo::bar<>);
     $base = LV('Props');
     try { Props::$priv_sprop_foo_dynamic     = $val; } catch (Exception $_) {}
     try { $base::$priv_sprop_trav_dynamic        = $val; } catch (Exception $_) {}
@@ -123,7 +123,7 @@ class Props {
   }
 
   public function assign_priv_prop_static() {
-    $m = class_meth(Foo::class, 'bar');
+    $m = Foo::bar<>;
 
     try { $this->priv_prop_foo_static     = $m; } catch (Exception $_) {}
     try { $this->priv_prop_trav_static        = $m; } catch (Exception $_) {}
@@ -134,7 +134,7 @@ class Props {
   }
 
   public function assign_priv_prop_dynamic1() {
-    $m = LV(class_meth(Foo::class, 'bar'));
+    $m = LV(Foo::bar<>);
 
     try { $this->priv_prop_foo_dynamic     = $m; } catch (Exception $_) {}
     try { $this->priv_prop_trav_dynamic        = $m; } catch (Exception $_) {}
@@ -146,7 +146,7 @@ class Props {
   }
 
   public function assign_priv_prop_dynamic2() {
-    $m = LV(class_meth(Foo::class, 'bar'));
+    $m = LV(Foo::bar<>);
 
     try { LV($this)->priv_prop_foo_dynamic     = $m; } catch (Exception $_) {}
     try { LV($this)->priv_prop_trav_dynamic        = $m; } catch (Exception $_) {}
@@ -173,7 +173,7 @@ class Props {
 }
 
 function assign_pub_sprop_static() {
-  $val = class_meth(Foo::class, 'bar');
+  $val = Foo::bar<>;
 
   try { Props::$pub_sprop_foo_static     = $val; } catch (Exception $_) {}
   try { Props::$pub_sprop_trav_static        = $val; } catch (Exception $_) {}
@@ -184,7 +184,7 @@ function assign_pub_sprop_static() {
 }
 
 function assign_pub_sprop_dynamic1() {
-  $val = LV(class_meth(Foo::class, 'bar'));
+  $val = LV(Foo::bar<>);
 
   try { Props::$pub_sprop_foo_dynamic     = $val; } catch (Exception $_) {}
   try { Props::$pub_sprop_trav_dynamic        = $val; } catch (Exception $_) {}
@@ -195,7 +195,7 @@ function assign_pub_sprop_dynamic1() {
 }
 
 function assign_pub_sprop_dynamic2() {
-  $val = LV(class_meth(Foo::class, 'bar'));
+  $val = LV(Foo::bar<>);
   $base = LV('Props');
 
   try { Props::$pub_sprop_foo_dynamic     = $val; } catch (Exception $_) {}
@@ -225,7 +225,7 @@ function dump_pub_sprops() {
 }
 
 function assign_pub_prop_static(Props $p) {
-  $m = class_meth(Foo::class, 'bar');
+  $m = Foo::bar<>;
 
   try { $p->pub_prop_foo_static     = $m; } catch (Exception $_) {}
   try { $p->pub_prop_trav_static        = $m; } catch (Exception $_) {}
@@ -236,7 +236,7 @@ function assign_pub_prop_static(Props $p) {
 }
 
 function assign_pub_prop_dynamic1(Props $p) {
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
 
   try { $p->pub_prop_foo_dynamic     = $m; } catch (Exception $_) {}
   try { $p->pub_prop_trav_dynamic        = $m; } catch (Exception $_) {}
@@ -248,7 +248,7 @@ function assign_pub_prop_dynamic1(Props $p) {
 }
 
 function assign_pub_prop_dynamic2(mixed $p) {
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
 
   try { LV($p)->pub_prop_foo_dynamic     = $m; } catch (Exception $_) {}
   try { LV($p)->pub_prop_trav_dynamic        = $m; } catch (Exception $_) {}

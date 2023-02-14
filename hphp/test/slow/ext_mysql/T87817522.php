@@ -7,7 +7,7 @@ function test_mysql_ssl_connect() {
 <<__EntryPoint>>
 function main(): void {
   $tests = vec[
-    fun('test_mysql_ssl_connect'),
+    test_mysql_ssl_connect<>,
   ];
   foreach ($tests as $t) {
     try {

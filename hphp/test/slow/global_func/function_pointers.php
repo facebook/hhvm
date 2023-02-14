@@ -63,7 +63,7 @@ function main_entry(): void {
 
   $s = Vector {'1', '2', '3'};
   $data = $s->map(intval<>);
-  var_dump($data->filter(class_meth('C', 'isOdd')));
+  var_dump($data->filter(C::isOdd<>));
   var_dump((new C)->filter($data));
 
   $caller = meth_caller(C::class, 'id');

@@ -28,7 +28,7 @@ function baz(): string {
 }
 
 function buz() {
-  return fun('buz');
+  return buz<>;
 }
 
 function io(inout string $a, inout $b): string {

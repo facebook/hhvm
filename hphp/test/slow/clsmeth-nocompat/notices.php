@@ -13,7 +13,7 @@ function C(bool $b) {
 }
 
 function is_functions_static() {
-  $m = class_meth(Foo::class, 'bar');
+  $m = Foo::bar<>;
 
   echo 'is_array($m):'        ;C(is_array($m));
   echo 'HH\is_any_array($m):' ;C(HH\is_any_array($m));
@@ -39,7 +39,7 @@ function is_functions_static() {
 }
 
 function is_functions_dynamic() {
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
 
   echo 'is_array($m):'        ;C(is_array($m));
   echo 'HH\is_any_array($m):' ;C(HH\is_any_array($m));
@@ -65,7 +65,7 @@ function is_functions_dynamic() {
 }
 
 function is_functions_builtins() {
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
 
   echo 'is_array($m):'       ;C(LV('is_array')($m));
   echo 'HH\is_any_array($m):';C(LV('HH\is_any_array')($m));

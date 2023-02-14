@@ -44,11 +44,11 @@ class R<reify Tarr, reify Tvar, reify Ttrav, reify Tcont> {
     if ($cont[0] !== Foo::class || $cont[1] !== 'bar') echo "Fail!\n";
   }
 
-  function ret_varr(): Tvar { return class_meth(Foo::class, 'bar'); }
-  function ret_arr():  Tarr { return class_meth(Foo::class, 'bar'); }
+  function ret_varr(): Tvar { return Foo::bar<>; }
+  function ret_arr():  Tarr { return Foo::bar<>; }
 
-  function ret_varr_dyn(): Tvar {return LV(class_meth(Foo::class, 'bar')); }
-  function ret_arr_dyn():  Tarr {return LV(class_meth(Foo::class, 'bar')); }
+  function ret_varr_dyn(): Tvar {return LV(Foo::bar<>); }
+  function ret_arr_dyn():  Tarr {return LV(Foo::bar<>); }
 
   function inout_args(
     inout Tarr $arr,
@@ -74,20 +74,20 @@ function test_static() {
 
   try {
     $R->args(
-      class_meth(Foo::class, 'bar'),
-      class_meth(Foo::class, 'bar'),
-      class_meth(Foo::class, 'bar'),
-      class_meth(Foo::class, 'bar'),
+      Foo::bar<>,
+      Foo::bar<>,
+      Foo::bar<>,
+      Foo::bar<>,
     );
   } catch (Exception $_) {}
 
   try { var_dump($R->ret_varr()); } catch (Exception $_) {}
   try { var_dump($R->ret_arr()); } catch (Exception $_) {}
 
-  $io1 = class_meth(Foo::class, 'bar');
-  $io2 = class_meth(Foo::class, 'bar');
-  $io3 = class_meth(Foo::class, 'bar');
-  $io4 = class_meth(Foo::class, 'bar');
+  $io1 = Foo::bar<>;
+  $io2 = Foo::bar<>;
+  $io3 = Foo::bar<>;
+  $io4 = Foo::bar<>;
 
   try {
     $R->inout_args(
@@ -99,7 +99,7 @@ function test_static() {
   } catch (Exception $_) {}
   var_dump($io1, $io2, $io3, $io4);
 
-  $foo = class_meth(Foo::class, 'bar');
+  $foo = Foo::bar<>;
   try { var_dump(varray($foo)); } catch (Exception $_) {}
 
   try {
@@ -112,20 +112,20 @@ function test_dynamic() {
 
   try {
     $R->args(
-      LV(class_meth(Foo::class, 'bar')),
-      LV(class_meth(Foo::class, 'bar')),
-      LV(class_meth(Foo::class, 'bar')),
-      LV(class_meth(Foo::class, 'bar')),
+      LV(Foo::bar<>),
+      LV(Foo::bar<>),
+      LV(Foo::bar<>),
+      LV(Foo::bar<>),
     );
   } catch (Exception $_) {}
 
   try { var_dump($R->ret_varr_dyn()); } catch (Exception $_) {}
   try { var_dump($R->ret_arr_dyn()); } catch (Exception $_) {}
 
-  $io1 = LV(class_meth(Foo::class, 'bar'));
-  $io2 = LV(class_meth(Foo::class, 'bar'));
-  $io3 = LV(class_meth(Foo::class, 'bar'));
-  $io4 = LV(class_meth(Foo::class, 'bar'));
+  $io1 = LV(Foo::bar<>);
+  $io2 = LV(Foo::bar<>);
+  $io3 = LV(Foo::bar<>);
+  $io4 = LV(Foo::bar<>);
 
   try {
     $R->inout_args(
@@ -137,7 +137,7 @@ function test_dynamic() {
   } catch (Exception $_) {}
   var_dump($io1, $io2, $io3, $io4);
 
-  $foo = LV(class_meth(Foo::class, 'bar'));
+  $foo = LV(Foo::bar<>);
   try { var_dump(varray($foo)); } catch (Exception $_) {}
 
   try {

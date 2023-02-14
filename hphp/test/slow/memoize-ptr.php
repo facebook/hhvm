@@ -29,11 +29,11 @@ function main() {
   memo_fptr('foo', 1);
   memo_fptr(__hhvm_intrinsics\launder_value('foo'), 2);
 
-  memo_cptr(class_meth(A::class, 'b'), 3);
-  memo_cptr(__hhvm_intrinsics\launder_value(class_meth(A::class, 'b')), 4);
+  memo_cptr(A::b<>, 3);
+  memo_cptr(__hhvm_intrinsics\launder_value(A::b<>), 4);
 
-  memo_cptr(class_meth(A::class, 'b'), 3);
-  memo_cptr(__hhvm_intrinsics\launder_value(class_meth(A::class, 'b')), 4);
+  memo_cptr(A::b<>, 3);
+  memo_cptr(__hhvm_intrinsics\launder_value(A::b<>), 4);
 
   memo_cptr(varray[A::class, 'b'], 3);
   memo_cptr(__hhvm_intrinsics\launder_value(varray[A::class, 'b']), 4);

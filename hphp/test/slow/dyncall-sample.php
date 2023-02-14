@@ -40,12 +40,12 @@ function main() {
   echo "Raw class method call\n";
   Klass::funktion();
 
-  $cm = class_meth(Klass::class, 'funktion');
+  $cm = Klass::funktion<>;
 
   echo "Class method pointer call\n";
   $cm();
 
-  $cm2 = __hhvm_intrinsics\launder_value(class_meth(Klass::class, 'funktion'));
+  $cm2 = __hhvm_intrinsics\launder_value(Klass::funktion<>);
 
   echo "Class method pointer call (laundered)\n";
   $cm2();

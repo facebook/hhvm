@@ -98,22 +98,22 @@ function test16() {
 <<__EntryPoint>>
 function main() {
   $tests = vec[
-    fun('test1'),
-    fun('test2'),
-    fun('test3'),
-    fun('test4'),
-    fun('test5'),
-    fun('test6'),
-    fun('test7'),
-    fun('test8'),
-    fun('test9'),
-    fun('test10'),
-    fun('test11'),
-    fun('test12'),
-    fun('test13'),
-    fun('test14'),
-    fun('test15'),
-    fun('test16')
+    test1<>,
+    test2<>,
+    test3<>,
+    test4<>,
+    test5<>,
+    test6<>,
+    test7<>,
+    test8<>,
+    test9<>,
+    test10<>,
+    test11<>,
+    test12<>,
+    test13<>,
+    test14<>,
+    test15<>,
+    test16<>
   ];
 
   foreach ($tests as $t) {

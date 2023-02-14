@@ -25,8 +25,6 @@ object(HH\Vector) (2) {
 string(12) "Hello World!"
 int(1337)
 string(85) "C::ref() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
-string(9) "inst_meth"
-string(4) "meth"
 function(foo)fun('foo')function(foo)
 string(5) ""foo""
 string(10) "s:3:"foo";"

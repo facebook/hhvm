@@ -101,6 +101,10 @@ impl Instr {
         matches!(self, Instr::Terminator(_))
     }
 
+    pub fn is_tombstone(&self) -> bool {
+        matches!(self, Instr::Special(Special::Tombstone))
+    }
+
     pub fn is_select(&self) -> bool {
         matches!(self, Instr::Special(Special::Select(..)))
     }

@@ -42,9 +42,12 @@ pub trait FuncBuilderEx {
         &mut self,
         pred: ValueId,
         loc: LocId,
-        f_true: impl FnOnce(&mut Self) -> ValueId,
-        f_false: impl FnOnce(&mut Self) -> ValueId,
+        f_true: impl FnOnce(&mut Self) -> Instr,
+        f_false: impl FnOnce(&mut Self) -> Instr,
     ) -> ValueId;
+
+    /// Emit a constant string.
+    fn emit_string(&mut self, s: &str) -> ValueId;
 
     /// Build an `is` check.
     fn is(&mut self, vid: ValueId, ty: &EnforceableType, loc: LocId) -> Instr;
@@ -81,8 +84,8 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
         &mut self,
         pred: ValueId,
         loc: LocId,
-        f_true: impl FnOnce(&mut Self) -> ValueId,
-        f_false: impl FnOnce(&mut Self) -> ValueId,
+        f_true: impl FnOnce(&mut Self) -> Instr,
+        f_false: impl FnOnce(&mut Self) -> Instr,
     ) -> ValueId {
         // b_true:
         //   arg = f_true()
@@ -92,7 +95,7 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
         //   jmp b_join(arg)
         // b_join(arg):
 
-        let join_bid = self.alloc_bid();
+        let mut join_bid = None;
         let true_bid = self.alloc_bid();
         let false_bid = self.alloc_bid();
         self.emit(Instr::jmp_op(
@@ -104,19 +107,38 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
         ));
 
         self.start_block(true_bid);
-        let arg = f_true(self);
-        if !self.func.is_terminated(self.cur_bid()) {
-            self.emit(Instr::jmp_args(join_bid, &[arg], loc));
+        let instr = f_true(self);
+        if !instr.is_tombstone() {
+            let terminated = matches!(instr, Instr::Terminator(_));
+            let arg = self.emit(instr);
+            if !terminated {
+                let target = self.alloc_bid();
+                join_bid = Some(target);
+                self.emit(Instr::jmp_args(target, &[arg], loc));
+            }
         }
 
         self.start_block(false_bid);
-        let arg = f_false(self);
-        if !self.func.is_terminated(self.cur_bid()) {
-            self.emit(Instr::jmp_args(join_bid, &[arg], loc));
+        let instr = f_false(self);
+        if !instr.is_tombstone() {
+            let terminated = matches!(instr, Instr::Terminator(_));
+            let arg = self.emit(instr);
+            if !terminated {
+                let target = join_bid.get_or_insert_with(|| self.alloc_bid());
+                self.emit(Instr::jmp_args(*target, &[arg], loc));
+            }
         }
 
-        self.start_block(join_bid);
-        self.alloc_param()
+        if let Some(join_bid) = join_bid {
+            self.start_block(join_bid);
+            self.alloc_param()
+        } else {
+            ValueId::none()
+        }
+    }
+
+    fn emit_string(&mut self, s: &str) -> ValueId {
+        self.emit_constant(Constant::String(self.strings.intern_str(s)))
     }
 
     fn is(&mut self, vid: ValueId, ety: &EnforceableType, loc: LocId) -> Instr {
@@ -172,7 +194,7 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
     }
 
     fn todo_fake_instr(&mut self, reason: &str, loc: LocId) -> Instr {
-        let op = self.emit_constant(Constant::String(self.strings.intern_str(reason)));
+        let op = self.emit_string(reason);
         let fid = FunctionId::from_str("todo", &self.strings);
         Instr::simple_call(fid, &[op], loc)
     }

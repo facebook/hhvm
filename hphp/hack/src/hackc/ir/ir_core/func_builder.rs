@@ -8,8 +8,14 @@ use std::sync::Arc;
 use hash::HashMap;
 
 use crate::func::SrcLoc;
+use crate::instr::BaseOp;
+use crate::instr::FinalOp;
+use crate::instr::HasLoc;
 use crate::instr::HasOperands;
 use crate::instr::Hhbc;
+use crate::instr::IntermediateOp;
+use crate::instr::MemberKey;
+use crate::instr::MemberOp;
 use crate::instr::Special;
 use crate::Block;
 use crate::BlockId;
@@ -20,6 +26,10 @@ use crate::Instr;
 use crate::InstrId;
 use crate::InstrIdMap;
 use crate::LocId;
+use crate::LocalId;
+use crate::MOpMode;
+use crate::QueryMOp;
+use crate::ReadonlyOp;
 use crate::StringInterner;
 use crate::ValueId;
 
@@ -412,5 +422,77 @@ impl TransformState {
             InstrId::from_usize(src_iid.as_usize() + 1 + src_idx),
             dst_vid,
         );
+    }
+}
+
+/// Used like:
+/// let vid = MemberOpBuilder::base_c(vid1, loc).emit_query_ec(builder, vid2);
+pub struct MemberOpBuilder {
+    operands: Vec<ValueId>,
+    locals: Vec<LocalId>,
+    base_op: BaseOp,
+    intermediate_ops: Vec<IntermediateOp>,
+}
+
+impl MemberOpBuilder {
+    // There are a lot of unhandled operations here - feel free to extend as
+    // necessary...
+
+    fn new(base_op: BaseOp) -> MemberOpBuilder {
+        MemberOpBuilder {
+            operands: Default::default(),
+            locals: Default::default(),
+            base_op,
+            intermediate_ops: Default::default(),
+        }
+    }
+
+    fn final_op(self, final_op: FinalOp) -> MemberOp {
+        MemberOp {
+            operands: self.operands.into_boxed_slice(),
+            locals: self.locals.into_boxed_slice(),
+            base_op: self.base_op,
+            intermediate_ops: self.intermediate_ops.into_boxed_slice(),
+            final_op,
+        }
+    }
+
+    pub fn base_c(base: ValueId, loc: LocId) -> Self {
+        let mode = MOpMode::None;
+        let mut mop = Self::new(BaseOp::BaseC { mode, loc });
+        mop.operands.push(base);
+        mop
+    }
+
+    pub fn isset_ec(mut self, key: ValueId) -> MemberOp {
+        self.operands.push(key);
+        let loc = self.base_op.loc_id();
+        self.final_op(FinalOp::QueryM {
+            key: MemberKey::EC,
+            readonly: ReadonlyOp::Any,
+            query_m_op: QueryMOp::Isset,
+            loc,
+        })
+    }
+
+    pub fn emit_isset_ec(self, builder: &mut FuncBuilder<'_>, key: ValueId) -> ValueId {
+        let mop = self.isset_ec(key);
+        builder.emit(Instr::MemberOp(mop))
+    }
+
+    pub fn query_ec(mut self, key: ValueId) -> MemberOp {
+        self.operands.push(key);
+        let loc = self.base_op.loc_id();
+        self.final_op(FinalOp::QueryM {
+            key: MemberKey::EC,
+            readonly: ReadonlyOp::Any,
+            query_m_op: QueryMOp::CGet,
+            loc,
+        })
+    }
+
+    pub fn emit_query_ec(self, builder: &mut FuncBuilder<'_>, key: ValueId) -> ValueId {
+        let mop = self.query_ec(key);
+        builder.emit(Instr::MemberOp(mop))
     }
 }

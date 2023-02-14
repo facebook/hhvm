@@ -107,6 +107,7 @@ pub use self::func::SrcLoc;
 pub use self::func::TParamBounds;
 pub use self::func::TryCatchId;
 pub use self::func_builder::FuncBuilder;
+pub use self::func_builder::MemberOpBuilder;
 pub use self::func_builder_ex::FuncBuilderEx;
 pub use self::instr::Call;
 pub use self::instr::HasEdges;

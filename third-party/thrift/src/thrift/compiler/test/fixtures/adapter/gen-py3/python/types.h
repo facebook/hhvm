@@ -20,7 +20,7 @@ namespace py3 {
 
 
 template<>
-void reset_field<::facebook::thrift::annotation::python::Adapter>(
+inline void reset_field<::facebook::thrift::annotation::python::Adapter>(
     ::facebook::thrift::annotation::python::Adapter& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -33,7 +33,7 @@ void reset_field<::facebook::thrift::annotation::python::Adapter>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::python::Adapter>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

@@ -20,7 +20,7 @@ namespace py3 {
 
 
 template<>
-void reset_field<::cpp2::Fiery>(
+inline void reset_field<::cpp2::Fiery>(
     ::cpp2::Fiery& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -30,7 +30,7 @@ void reset_field<::cpp2::Fiery>(
 }
 
 template<>
-void reset_field<::cpp2::Serious>(
+inline void reset_field<::cpp2::Serious>(
     ::cpp2::Serious& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -40,7 +40,7 @@ void reset_field<::cpp2::Serious>(
 }
 
 template<>
-void reset_field<::cpp2::ComplexFieldNames>(
+inline void reset_field<::cpp2::ComplexFieldNames>(
     ::cpp2::ComplexFieldNames& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -53,7 +53,7 @@ void reset_field<::cpp2::ComplexFieldNames>(
 }
 
 template<>
-void reset_field<::cpp2::CustomFieldNames>(
+inline void reset_field<::cpp2::CustomFieldNames>(
     ::cpp2::CustomFieldNames& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -66,7 +66,7 @@ void reset_field<::cpp2::CustomFieldNames>(
 }
 
 template<>
-void reset_field<::cpp2::ExceptionWithPrimitiveField>(
+inline void reset_field<::cpp2::ExceptionWithPrimitiveField>(
     ::cpp2::ExceptionWithPrimitiveField& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -79,7 +79,7 @@ void reset_field<::cpp2::ExceptionWithPrimitiveField>(
 }
 
 template<>
-void reset_field<::cpp2::ExceptionWithStructuredAnnotation>(
+inline void reset_field<::cpp2::ExceptionWithStructuredAnnotation>(
     ::cpp2::ExceptionWithStructuredAnnotation& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -92,14 +92,14 @@ void reset_field<::cpp2::ExceptionWithStructuredAnnotation>(
 }
 
 template<>
-void reset_field<::cpp2::Banal>(
+inline void reset_field<::cpp2::Banal>(
     ::cpp2::Banal& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Fiery>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -109,7 +109,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Serious>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -119,7 +119,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::ComplexFieldNames>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -129,7 +129,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::CustomFieldNames>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -139,7 +139,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::ExceptionWithPrimitiveField>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -149,7 +149,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::ExceptionWithStructuredAnnotation>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -159,7 +159,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Banal>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

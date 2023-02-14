@@ -20,7 +20,7 @@ namespace py3 {
 
 
 template<>
-void reset_field<::module2::Struct>(
+inline void reset_field<::module2::Struct>(
     ::module2::Struct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -33,7 +33,7 @@ void reset_field<::module2::Struct>(
 }
 
 template<>
-void reset_field<::module2::BigStruct>(
+inline void reset_field<::module2::BigStruct>(
     ::module2::BigStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -46,7 +46,7 @@ void reset_field<::module2::BigStruct>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::module2::Struct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -56,7 +56,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::module2::BigStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

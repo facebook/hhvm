@@ -20,7 +20,7 @@ namespace py3 {
 
 
 template<>
-void reset_field<::cpp2::CustomException>(
+inline void reset_field<::cpp2::CustomException>(
     ::cpp2::CustomException& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -30,7 +30,7 @@ void reset_field<::cpp2::CustomException>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::CustomException>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

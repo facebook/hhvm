@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::cpp2::EmptyEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -30,7 +30,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::cpp2::City>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -41,7 +41,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::cpp2::Company>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -52,7 +52,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::cpp2::union1::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -62,7 +62,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 }
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::cpp2::union2::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -73,7 +73,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::cpp2::Internship>(
+inline void reset_field<::cpp2::Internship>(
     ::cpp2::Internship& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -95,7 +95,7 @@ void reset_field<::cpp2::Internship>(
 }
 
 template<>
-void reset_field<::cpp2::Range>(
+inline void reset_field<::cpp2::Range>(
     ::cpp2::Range& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -108,7 +108,7 @@ void reset_field<::cpp2::Range>(
 }
 
 template<>
-void reset_field<::cpp2::struct1>(
+inline void reset_field<::cpp2::struct1>(
     ::cpp2::struct1& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -121,7 +121,7 @@ void reset_field<::cpp2::struct1>(
 }
 
 template<>
-void reset_field<::cpp2::struct2>(
+inline void reset_field<::cpp2::struct2>(
     ::cpp2::struct2& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -140,7 +140,7 @@ void reset_field<::cpp2::struct2>(
 }
 
 template<>
-void reset_field<::cpp2::struct3>(
+inline void reset_field<::cpp2::struct3>(
     ::cpp2::struct3& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -156,7 +156,7 @@ void reset_field<::cpp2::struct3>(
 }
 
 template<>
-void reset_field<::cpp2::struct4>(
+inline void reset_field<::cpp2::struct4>(
     ::cpp2::struct4& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -172,7 +172,7 @@ void reset_field<::cpp2::struct4>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Internship>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -182,7 +182,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Range>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -192,7 +192,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::struct1>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -202,7 +202,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::struct2>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -212,7 +212,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::struct3>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -222,7 +222,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::struct4>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -232,7 +232,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::union1>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -242,7 +242,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::union2>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

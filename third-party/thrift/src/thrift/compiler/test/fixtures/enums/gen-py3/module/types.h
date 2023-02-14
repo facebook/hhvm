@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::enums::Metasyntactic>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -30,7 +30,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::enums::MyEnum1>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -41,7 +41,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::enums::MyEnum2>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -52,7 +52,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::enums::MyEnum3>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -63,7 +63,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::enums::MyEnum4>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -74,7 +74,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::enums::MyBitmaskEnum1>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -85,7 +85,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::enums::MyBitmaskEnum2>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -97,7 +97,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::test::fixtures::enums::SomeStruct>(
+inline void reset_field<::test::fixtures::enums::SomeStruct>(
     ::test::fixtures::enums::SomeStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -116,7 +116,7 @@ void reset_field<::test::fixtures::enums::SomeStruct>(
 }
 
 template<>
-void reset_field<::test::fixtures::enums::MyStruct>(
+inline void reset_field<::test::fixtures::enums::MyStruct>(
     ::test::fixtures::enums::MyStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -135,7 +135,7 @@ void reset_field<::test::fixtures::enums::MyStruct>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::enums::SomeStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -145,7 +145,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::enums::MyStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

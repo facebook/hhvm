@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::facebook::thrift::test::Color>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -30,7 +30,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::facebook::thrift::test::ThriftAdaptedEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -41,7 +41,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::facebook::thrift::test::Baz::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -51,7 +51,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 }
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::facebook::thrift::test::AdaptTestUnion::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -62,7 +62,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::facebook::thrift::test::MyAnnotation>(
+inline void reset_field<::facebook::thrift::test::MyAnnotation>(
     ::facebook::thrift::test::MyAnnotation& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -75,7 +75,7 @@ void reset_field<::facebook::thrift::test::MyAnnotation>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::Foo>(
+inline void reset_field<::facebook::thrift::test::Foo>(
     ::facebook::thrift::test::Foo& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -115,7 +115,7 @@ void reset_field<::facebook::thrift::test::Foo>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::Bar>(
+inline void reset_field<::facebook::thrift::test::Bar>(
     ::facebook::thrift::test::Bar& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -143,7 +143,7 @@ void reset_field<::facebook::thrift::test::Bar>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::StructWithFieldAdapter>(
+inline void reset_field<::facebook::thrift::test::StructWithFieldAdapter>(
     ::facebook::thrift::test::StructWithFieldAdapter& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -162,7 +162,7 @@ void reset_field<::facebook::thrift::test::StructWithFieldAdapter>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::TerseAdaptedFields>(
+inline void reset_field<::facebook::thrift::test::TerseAdaptedFields>(
     ::facebook::thrift::test::TerseAdaptedFields& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -178,7 +178,7 @@ void reset_field<::facebook::thrift::test::TerseAdaptedFields>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::B>(
+inline void reset_field<::facebook::thrift::test::B>(
     ::facebook::thrift::test::B& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -188,14 +188,14 @@ void reset_field<::facebook::thrift::test::B>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::A>(
+inline void reset_field<::facebook::thrift::test::A>(
     ::facebook::thrift::test::A& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::facebook::thrift::test::Config>(
+inline void reset_field<::facebook::thrift::test::Config>(
     ::facebook::thrift::test::Config& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -205,7 +205,7 @@ void reset_field<::facebook::thrift::test::Config>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::MyStruct>(
+inline void reset_field<::facebook::thrift::test::MyStruct>(
     ::facebook::thrift::test::MyStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -218,7 +218,7 @@ void reset_field<::facebook::thrift::test::MyStruct>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::AdaptTestStruct>(
+inline void reset_field<::facebook::thrift::test::AdaptTestStruct>(
     ::facebook::thrift::test::AdaptTestStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -255,7 +255,7 @@ void reset_field<::facebook::thrift::test::AdaptTestStruct>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::AdaptTemplatedTestStruct>(
+inline void reset_field<::facebook::thrift::test::AdaptTemplatedTestStruct>(
     ::facebook::thrift::test::AdaptTemplatedTestStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -328,7 +328,7 @@ void reset_field<::facebook::thrift::test::AdaptTemplatedTestStruct>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(
+inline void reset_field<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(
     ::facebook::thrift::test::AdaptTemplatedNestedTestStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -338,7 +338,7 @@ void reset_field<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::AdaptedStruct>(
+inline void reset_field<::facebook::thrift::test::AdaptedStruct>(
     ::facebook::thrift::test::AdaptedStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -348,7 +348,7 @@ void reset_field<::facebook::thrift::test::AdaptedStruct>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::StructFieldAdaptedStruct>(
+inline void reset_field<::facebook::thrift::test::StructFieldAdaptedStruct>(
     ::facebook::thrift::test::StructFieldAdaptedStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -367,7 +367,7 @@ void reset_field<::facebook::thrift::test::StructFieldAdaptedStruct>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::CircularAdaptee>(
+inline void reset_field<::facebook::thrift::test::CircularAdaptee>(
     ::facebook::thrift::test::CircularAdaptee& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -377,7 +377,7 @@ void reset_field<::facebook::thrift::test::CircularAdaptee>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::CircularStruct>(
+inline void reset_field<::facebook::thrift::test::CircularStruct>(
     ::facebook::thrift::test::CircularStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -387,7 +387,7 @@ void reset_field<::facebook::thrift::test::CircularStruct>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::ReorderedStruct>(
+inline void reset_field<::facebook::thrift::test::ReorderedStruct>(
     ::facebook::thrift::test::ReorderedStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -397,7 +397,7 @@ void reset_field<::facebook::thrift::test::ReorderedStruct>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::MoveOnly>(
+inline void reset_field<::facebook::thrift::test::MoveOnly>(
     ::facebook::thrift::test::MoveOnly& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -407,7 +407,7 @@ void reset_field<::facebook::thrift::test::MoveOnly>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::AlsoMoveOnly>(
+inline void reset_field<::facebook::thrift::test::AlsoMoveOnly>(
     ::facebook::thrift::test::AlsoMoveOnly& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -417,14 +417,14 @@ void reset_field<::facebook::thrift::test::AlsoMoveOnly>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::ApplyAdapter>(
+inline void reset_field<::facebook::thrift::test::ApplyAdapter>(
     ::facebook::thrift::test::ApplyAdapter& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::facebook::thrift::test::CountingStruct>(
+inline void reset_field<::facebook::thrift::test::CountingStruct>(
     ::facebook::thrift::test::CountingStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -440,7 +440,7 @@ void reset_field<::facebook::thrift::test::CountingStruct>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::Person>(
+inline void reset_field<::facebook::thrift::test::Person>(
     ::facebook::thrift::test::Person& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -450,7 +450,7 @@ void reset_field<::facebook::thrift::test::Person>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::Person2>(
+inline void reset_field<::facebook::thrift::test::Person2>(
     ::facebook::thrift::test::Person2& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -460,7 +460,7 @@ void reset_field<::facebook::thrift::test::Person2>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::MyAnnotation>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -470,7 +470,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::Foo>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -480,7 +480,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::Baz>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -490,7 +490,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::Bar>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -500,7 +500,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::StructWithFieldAdapter>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -510,7 +510,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::TerseAdaptedFields>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -520,7 +520,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::B>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -530,7 +530,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::A>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -540,7 +540,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::Config>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -550,7 +550,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::MyStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -560,7 +560,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::AdaptTestStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -570,7 +570,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::AdaptTemplatedTestStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -580,7 +580,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -590,7 +590,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::AdaptTestUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -600,7 +600,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::AdaptedStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -610,7 +610,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::StructFieldAdaptedStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -620,7 +620,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::CircularAdaptee>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -630,7 +630,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::CircularStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -640,7 +640,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::ReorderedStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -650,7 +650,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::MoveOnly>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -660,7 +660,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::AlsoMoveOnly>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -670,7 +670,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::ApplyAdapter>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -680,7 +680,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::CountingStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -690,7 +690,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::Person>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -700,7 +700,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::Person2>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

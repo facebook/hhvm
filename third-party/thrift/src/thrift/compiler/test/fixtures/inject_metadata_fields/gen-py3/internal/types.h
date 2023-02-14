@@ -20,7 +20,7 @@ namespace py3 {
 
 
 template<>
-void reset_field<::facebook::thrift::annotation::InjectMetadataFields>(
+inline void reset_field<::facebook::thrift::annotation::InjectMetadataFields>(
     ::facebook::thrift::annotation::InjectMetadataFields& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -30,7 +30,7 @@ void reset_field<::facebook::thrift::annotation::InjectMetadataFields>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::InjectMetadataFields>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

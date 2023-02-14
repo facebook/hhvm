@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::facebook::thrift::test::terse_write::MyEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -30,7 +30,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::facebook::thrift::test::terse_write::MyUnion::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -41,14 +41,14 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::facebook::thrift::test::terse_write::MyStruct>(
+inline void reset_field<::facebook::thrift::test::terse_write::MyStruct>(
     ::facebook::thrift::test::terse_write::MyStruct& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(
+inline void reset_field<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(
     ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -58,7 +58,7 @@ void reset_field<::facebook::thrift::test::terse_write::MyStructWithCustomDefaul
 }
 
 template<>
-void reset_field<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(
+inline void reset_field<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(
     ::facebook::thrift::test::terse_write::StructLevelTerseStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -110,7 +110,7 @@ void reset_field<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(
+inline void reset_field<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(
     ::facebook::thrift::test::terse_write::FieldLevelTerseStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -207,7 +207,7 @@ void reset_field<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>(
+inline void reset_field<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>(
     ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -256,7 +256,7 @@ void reset_field<::facebook::thrift::test::terse_write::TerseStructWithCustomDef
 }
 
 template<>
-void reset_field<::facebook::thrift::test::terse_write::AdaptedFields>(
+inline void reset_field<::facebook::thrift::test::terse_write::AdaptedFields>(
     ::facebook::thrift::test::terse_write::AdaptedFields& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -272,7 +272,7 @@ void reset_field<::facebook::thrift::test::terse_write::AdaptedFields>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::terse_write::WrappedFields>(
+inline void reset_field<::facebook::thrift::test::terse_write::WrappedFields>(
     ::facebook::thrift::test::terse_write::WrappedFields& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -282,7 +282,7 @@ void reset_field<::facebook::thrift::test::terse_write::WrappedFields>(
 }
 
 template<>
-void reset_field<::facebook::thrift::test::terse_write::TerseException>(
+inline void reset_field<::facebook::thrift::test::terse_write::TerseException>(
     ::facebook::thrift::test::terse_write::TerseException& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -292,7 +292,7 @@ void reset_field<::facebook::thrift::test::terse_write::TerseException>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::terse_write::MyStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -302,7 +302,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::terse_write::MyUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -312,7 +312,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -322,7 +322,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::terse_write::StructLevelTerseStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -332,7 +332,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -342,7 +342,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -352,7 +352,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::terse_write::AdaptedFields>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -362,7 +362,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::terse_write::WrappedFields>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -372,7 +372,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::terse_write::TerseException>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

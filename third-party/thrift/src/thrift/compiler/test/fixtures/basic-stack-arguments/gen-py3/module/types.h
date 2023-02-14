@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::cpp2::MyEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -31,7 +31,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::cpp2::MyStruct>(
+inline void reset_field<::cpp2::MyStruct>(
     ::cpp2::MyStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -44,7 +44,7 @@ void reset_field<::cpp2::MyStruct>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::MyStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

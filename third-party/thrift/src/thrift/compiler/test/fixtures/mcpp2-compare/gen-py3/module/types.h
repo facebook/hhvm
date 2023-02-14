@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::some::valid::ns::MyEnumA>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -30,7 +30,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::some::valid::ns::AnnotatedEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -41,7 +41,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::some::valid::ns::AnnotatedEnum2>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -52,7 +52,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::some::valid::ns::MyEnumB>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -63,7 +63,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::some::valid::ns::SimpleUnion::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -73,7 +73,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 }
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::some::valid::ns::ComplexUnion::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -83,7 +83,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 }
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::some::valid::ns::FloatUnion::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -94,14 +94,14 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::some::valid::ns::Empty>(
+inline void reset_field<::some::valid::ns::Empty>(
     ::some::valid::ns::Empty& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::some::valid::ns::ASimpleStruct>(
+inline void reset_field<::some::valid::ns::ASimpleStruct>(
     ::some::valid::ns::ASimpleStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -111,7 +111,7 @@ void reset_field<::some::valid::ns::ASimpleStruct>(
 }
 
 template<>
-void reset_field<::some::valid::ns::ASimpleStructNoexcept>(
+inline void reset_field<::some::valid::ns::ASimpleStructNoexcept>(
     ::some::valid::ns::ASimpleStructNoexcept& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -121,7 +121,7 @@ void reset_field<::some::valid::ns::ASimpleStructNoexcept>(
 }
 
 template<>
-void reset_field<::some::valid::ns::MyStruct>(
+inline void reset_field<::some::valid::ns::MyStruct>(
     ::some::valid::ns::MyStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -161,7 +161,7 @@ void reset_field<::some::valid::ns::MyStruct>(
 }
 
 template<>
-void reset_field<::some::valid::ns::AnException>(
+inline void reset_field<::some::valid::ns::AnException>(
     ::some::valid::ns::AnException& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -219,7 +219,7 @@ void reset_field<::some::valid::ns::AnException>(
 }
 
 template<>
-void reset_field<::some::valid::ns::AnotherException>(
+inline void reset_field<::some::valid::ns::AnotherException>(
     ::some::valid::ns::AnotherException& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -235,7 +235,7 @@ void reset_field<::some::valid::ns::AnotherException>(
 }
 
 template<>
-void reset_field<::some::valid::ns::containerStruct>(
+inline void reset_field<::some::valid::ns::containerStruct>(
     ::some::valid::ns::containerStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -380,7 +380,7 @@ void reset_field<::some::valid::ns::containerStruct>(
 }
 
 template<>
-void reset_field<::some::valid::ns::MyIncludedStruct>(
+inline void reset_field<::some::valid::ns::MyIncludedStruct>(
     ::some::valid::ns::MyIncludedStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -399,7 +399,7 @@ void reset_field<::some::valid::ns::MyIncludedStruct>(
 }
 
 template<>
-void reset_field<::some::valid::ns::AnnotatedStruct>(
+inline void reset_field<::some::valid::ns::AnnotatedStruct>(
     ::some::valid::ns::AnnotatedStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -526,7 +526,7 @@ void reset_field<::some::valid::ns::AnnotatedStruct>(
 }
 
 template<>
-void reset_field<::some::valid::ns::ComplexContainerStruct>(
+inline void reset_field<::some::valid::ns::ComplexContainerStruct>(
     ::some::valid::ns::ComplexContainerStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -539,7 +539,7 @@ void reset_field<::some::valid::ns::ComplexContainerStruct>(
 }
 
 template<>
-void reset_field<::some::valid::ns::FloatStruct>(
+inline void reset_field<::some::valid::ns::FloatStruct>(
     ::some::valid::ns::FloatStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -552,7 +552,7 @@ void reset_field<::some::valid::ns::FloatStruct>(
 }
 
 template<>
-void reset_field<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>(
+inline void reset_field<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>(
     ::some::valid::ns::AllRequiredNoExceptMoveCtrStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -562,7 +562,7 @@ void reset_field<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::Empty>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -572,7 +572,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::ASimpleStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -582,7 +582,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::ASimpleStructNoexcept>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -592,7 +592,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::MyStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -602,7 +602,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::SimpleUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -612,7 +612,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::ComplexUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -622,7 +622,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::AnException>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -632,7 +632,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::AnotherException>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -642,7 +642,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::containerStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -652,7 +652,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::MyIncludedStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -662,7 +662,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::AnnotatedStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -672,7 +672,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::ComplexContainerStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -682,7 +682,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::FloatStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -692,7 +692,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::FloatUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -702,7 +702,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

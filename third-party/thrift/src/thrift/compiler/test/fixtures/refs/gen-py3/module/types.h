@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::cpp2::MyEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -30,7 +30,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::cpp2::TypedEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -41,7 +41,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::cpp2::MyUnion::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -52,7 +52,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::cpp2::MyField>(
+inline void reset_field<::cpp2::MyField>(
     ::cpp2::MyField& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -86,7 +86,7 @@ void reset_field<::cpp2::MyField>(
 }
 
 template<>
-void reset_field<::cpp2::MyStruct>(
+inline void reset_field<::cpp2::MyStruct>(
     ::cpp2::MyStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -102,7 +102,7 @@ void reset_field<::cpp2::MyStruct>(
 }
 
 template<>
-void reset_field<::cpp2::StructWithUnion>(
+inline void reset_field<::cpp2::StructWithUnion>(
     ::cpp2::StructWithUnion& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -118,7 +118,7 @@ void reset_field<::cpp2::StructWithUnion>(
 }
 
 template<>
-void reset_field<::cpp2::RecursiveStruct>(
+inline void reset_field<::cpp2::RecursiveStruct>(
     ::cpp2::RecursiveStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -128,7 +128,7 @@ void reset_field<::cpp2::RecursiveStruct>(
 }
 
 template<>
-void reset_field<::cpp2::StructWithContainers>(
+inline void reset_field<::cpp2::StructWithContainers>(
     ::cpp2::StructWithContainers& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -153,7 +153,7 @@ void reset_field<::cpp2::StructWithContainers>(
 }
 
 template<>
-void reset_field<::cpp2::StructWithSharedConst>(
+inline void reset_field<::cpp2::StructWithSharedConst>(
     ::cpp2::StructWithSharedConst& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -169,14 +169,14 @@ void reset_field<::cpp2::StructWithSharedConst>(
 }
 
 template<>
-void reset_field<::cpp2::Empty>(
+inline void reset_field<::cpp2::Empty>(
     ::cpp2::Empty& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::cpp2::StructWithRef>(
+inline void reset_field<::cpp2::StructWithRef>(
     ::cpp2::StructWithRef& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -192,7 +192,7 @@ void reset_field<::cpp2::StructWithRef>(
 }
 
 template<>
-void reset_field<::cpp2::StructWithBox>(
+inline void reset_field<::cpp2::StructWithBox>(
     ::cpp2::StructWithBox& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -208,7 +208,7 @@ void reset_field<::cpp2::StructWithBox>(
 }
 
 template<>
-void reset_field<::cpp2::StructWithInternBox>(
+inline void reset_field<::cpp2::StructWithInternBox>(
     ::cpp2::StructWithInternBox& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -227,7 +227,7 @@ void reset_field<::cpp2::StructWithInternBox>(
 }
 
 template<>
-void reset_field<::cpp2::AdaptedStructWithInternBox>(
+inline void reset_field<::cpp2::AdaptedStructWithInternBox>(
     ::cpp2::AdaptedStructWithInternBox& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -246,7 +246,7 @@ void reset_field<::cpp2::AdaptedStructWithInternBox>(
 }
 
 template<>
-void reset_field<::cpp2::StructWithRefTypeUnique>(
+inline void reset_field<::cpp2::StructWithRefTypeUnique>(
     ::cpp2::StructWithRefTypeUnique& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -262,7 +262,7 @@ void reset_field<::cpp2::StructWithRefTypeUnique>(
 }
 
 template<>
-void reset_field<::cpp2::StructWithRefTypeShared>(
+inline void reset_field<::cpp2::StructWithRefTypeShared>(
     ::cpp2::StructWithRefTypeShared& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -278,7 +278,7 @@ void reset_field<::cpp2::StructWithRefTypeShared>(
 }
 
 template<>
-void reset_field<::cpp2::StructWithRefTypeSharedConst>(
+inline void reset_field<::cpp2::StructWithRefTypeSharedConst>(
     ::cpp2::StructWithRefTypeSharedConst& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -294,7 +294,7 @@ void reset_field<::cpp2::StructWithRefTypeSharedConst>(
 }
 
 template<>
-void reset_field<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>(
+inline void reset_field<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>(
     ::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -304,7 +304,7 @@ void reset_field<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>(
 }
 
 template<>
-void reset_field<::cpp2::StructWithString>(
+inline void reset_field<::cpp2::StructWithString>(
     ::cpp2::StructWithString& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -326,7 +326,7 @@ void reset_field<::cpp2::StructWithString>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::MyUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -336,7 +336,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::MyField>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -346,7 +346,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::MyStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -356,7 +356,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -366,7 +366,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::RecursiveStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -376,7 +376,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithContainers>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -386,7 +386,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithSharedConst>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -396,7 +396,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Empty>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -406,7 +406,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithRef>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -416,7 +416,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithBox>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -426,7 +426,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithInternBox>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -436,7 +436,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::AdaptedStructWithInternBox>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -446,7 +446,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithRefTypeUnique>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -456,7 +456,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithRefTypeShared>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -466,7 +466,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithRefTypeSharedConst>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -476,7 +476,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -486,7 +486,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithString>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

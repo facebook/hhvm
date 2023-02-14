@@ -54,12 +54,12 @@ std::unique_ptr<ClientWrapper> makeClientWrapper(RequestChannel_ptr&& channel) {
   return std::make_unique<U>(std::move(client), std::move(channel_));
 }
 
-void destroyInEventBaseThread(RequestChannel_ptr&& ptr) {
+inline void destroyInEventBaseThread(RequestChannel_ptr&& ptr) {
   auto eb = ptr->getEventBase();
   eb->runInEventBaseThread([ptr = std::move(ptr)] {});
 }
 
-RequestChannel_ptr createHeaderChannel(
+inline RequestChannel_ptr createHeaderChannel(
     folly::AsyncTransport::UniquePtr sock,
     CLIENT_TYPE client,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
@@ -106,7 +106,7 @@ struct FutureConnectCallback : folly::AsyncSocket::ConnectCallback {
  * Asynchronously connect to `address` with a new AsyncSocket. The Future will
  * be completed on the given EventBase.
  */
-folly::Future<folly::AsyncSocket::UniquePtr> asyncSocketConnect(
+inline folly::Future<folly::AsyncSocket::UniquePtr> asyncSocketConnect(
     folly::EventBase* eb,
     const folly::SocketAddress& address,
     uint32_t connect_timeout) {
@@ -119,7 +119,7 @@ folly::Future<folly::AsyncSocket::UniquePtr> asyncSocketConnect(
 /**
  * Create a thrift channel by connecting to a host:port over TCP.
  */
-folly::Future<RequestChannel_ptr> createThriftChannelTCP(
+inline folly::Future<RequestChannel_ptr> createThriftChannelTCP(
     std::string&& host,
     uint16_t port,
     uint32_t connect_timeout,
@@ -148,7 +148,7 @@ folly::Future<RequestChannel_ptr> createThriftChannelTCP(
 /**
  * Create a thrift channel by connecting to a Unix domain socket.
  */
-folly::Future<RequestChannel_ptr> createThriftChannelUnix(
+inline folly::Future<RequestChannel_ptr> createThriftChannelUnix(
     std::string&& path,
     uint32_t connect_timeout,
     CLIENT_TYPE client_t,

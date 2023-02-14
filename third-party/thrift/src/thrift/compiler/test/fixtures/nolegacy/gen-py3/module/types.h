@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::nolegacy::TestEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -30,7 +30,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::nolegacy::TestUnion::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -41,7 +41,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::test::fixtures::nolegacy::TestError>(
+inline void reset_field<::test::fixtures::nolegacy::TestError>(
     ::test::fixtures::nolegacy::TestError& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -54,7 +54,7 @@ void reset_field<::test::fixtures::nolegacy::TestError>(
 }
 
 template<>
-void reset_field<::test::fixtures::nolegacy::TestMixin>(
+inline void reset_field<::test::fixtures::nolegacy::TestMixin>(
     ::test::fixtures::nolegacy::TestMixin& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -64,7 +64,7 @@ void reset_field<::test::fixtures::nolegacy::TestMixin>(
 }
 
 template<>
-void reset_field<::test::fixtures::nolegacy::TestStruct>(
+inline void reset_field<::test::fixtures::nolegacy::TestStruct>(
     ::test::fixtures::nolegacy::TestStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -83,7 +83,7 @@ void reset_field<::test::fixtures::nolegacy::TestStruct>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::nolegacy::TestError>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -93,7 +93,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::nolegacy::TestMixin>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -103,7 +103,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::nolegacy::TestStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -113,7 +113,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::nolegacy::TestUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

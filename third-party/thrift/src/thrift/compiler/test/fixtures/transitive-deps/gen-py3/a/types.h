@@ -20,7 +20,7 @@ namespace py3 {
 
 
 template<>
-void reset_field<::cpp2::A>(
+inline void reset_field<::cpp2::A>(
     ::cpp2::A& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -33,7 +33,7 @@ void reset_field<::cpp2::A>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::A>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::apache::thrift::fixtures::types::has_bitwise_ops>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -30,7 +30,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::apache::thrift::fixtures::types::is_unscoped>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -41,7 +41,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::apache::thrift::fixtures::types::MyForwardRefEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -53,14 +53,14 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::empty_struct>(
+inline void reset_field<::apache::thrift::fixtures::types::empty_struct>(
     ::apache::thrift::fixtures::types::empty_struct& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::decorated_struct>(
+inline void reset_field<::apache::thrift::fixtures::types::decorated_struct>(
     ::apache::thrift::fixtures::types::decorated_struct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -70,7 +70,7 @@ void reset_field<::apache::thrift::fixtures::types::decorated_struct>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::ContainerStruct>(
+inline void reset_field<::apache::thrift::fixtures::types::ContainerStruct>(
     ::apache::thrift::fixtures::types::ContainerStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -101,7 +101,7 @@ void reset_field<::apache::thrift::fixtures::types::ContainerStruct>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::CppTypeStruct>(
+inline void reset_field<::apache::thrift::fixtures::types::CppTypeStruct>(
     ::apache::thrift::fixtures::types::CppTypeStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -111,7 +111,7 @@ void reset_field<::apache::thrift::fixtures::types::CppTypeStruct>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::VirtualStruct>(
+inline void reset_field<::apache::thrift::fixtures::types::VirtualStruct>(
     ::apache::thrift::fixtures::types::VirtualStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -121,7 +121,7 @@ void reset_field<::apache::thrift::fixtures::types::VirtualStruct>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>(
+inline void reset_field<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>(
     ::apache::thrift::fixtures::types::MyStructWithForwardRefEnum& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -134,7 +134,7 @@ void reset_field<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::TrivialNumeric>(
+inline void reset_field<::apache::thrift::fixtures::types::TrivialNumeric>(
     ::apache::thrift::fixtures::types::TrivialNumeric& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -147,7 +147,7 @@ void reset_field<::apache::thrift::fixtures::types::TrivialNumeric>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::TrivialNestedWithDefault>(
+inline void reset_field<::apache::thrift::fixtures::types::TrivialNestedWithDefault>(
     ::apache::thrift::fixtures::types::TrivialNestedWithDefault& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -160,7 +160,7 @@ void reset_field<::apache::thrift::fixtures::types::TrivialNestedWithDefault>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::ComplexString>(
+inline void reset_field<::apache::thrift::fixtures::types::ComplexString>(
     ::apache::thrift::fixtures::types::ComplexString& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -173,7 +173,7 @@ void reset_field<::apache::thrift::fixtures::types::ComplexString>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::ComplexNestedWithDefault>(
+inline void reset_field<::apache::thrift::fixtures::types::ComplexNestedWithDefault>(
     ::apache::thrift::fixtures::types::ComplexNestedWithDefault& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -186,7 +186,7 @@ void reset_field<::apache::thrift::fixtures::types::ComplexNestedWithDefault>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::MinPadding>(
+inline void reset_field<::apache::thrift::fixtures::types::MinPadding>(
     ::apache::thrift::fixtures::types::MinPadding& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -208,7 +208,7 @@ void reset_field<::apache::thrift::fixtures::types::MinPadding>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::MinPaddingWithCustomType>(
+inline void reset_field<::apache::thrift::fixtures::types::MinPaddingWithCustomType>(
     ::apache::thrift::fixtures::types::MinPaddingWithCustomType& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -230,7 +230,7 @@ void reset_field<::apache::thrift::fixtures::types::MinPaddingWithCustomType>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::MyStruct>(
+inline void reset_field<::apache::thrift::fixtures::types::MyStruct>(
     ::apache::thrift::fixtures::types::MyStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -249,14 +249,14 @@ void reset_field<::apache::thrift::fixtures::types::MyStruct>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::MyDataItem>(
+inline void reset_field<::apache::thrift::fixtures::types::MyDataItem>(
     ::apache::thrift::fixtures::types::MyDataItem& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::Renaming>(
+inline void reset_field<::apache::thrift::fixtures::types::Renaming>(
     ::apache::thrift::fixtures::types::Renaming& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -266,7 +266,7 @@ void reset_field<::apache::thrift::fixtures::types::Renaming>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::AnnotatedTypes>(
+inline void reset_field<::apache::thrift::fixtures::types::AnnotatedTypes>(
     ::apache::thrift::fixtures::types::AnnotatedTypes& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -279,7 +279,7 @@ void reset_field<::apache::thrift::fixtures::types::AnnotatedTypes>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::ForwardUsageRoot>(
+inline void reset_field<::apache::thrift::fixtures::types::ForwardUsageRoot>(
     ::apache::thrift::fixtures::types::ForwardUsageRoot& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -292,7 +292,7 @@ void reset_field<::apache::thrift::fixtures::types::ForwardUsageRoot>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::ForwardUsageStruct>(
+inline void reset_field<::apache::thrift::fixtures::types::ForwardUsageStruct>(
     ::apache::thrift::fixtures::types::ForwardUsageStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -302,7 +302,7 @@ void reset_field<::apache::thrift::fixtures::types::ForwardUsageStruct>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::ForwardUsageByRef>(
+inline void reset_field<::apache::thrift::fixtures::types::ForwardUsageByRef>(
     ::apache::thrift::fixtures::types::ForwardUsageByRef& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -312,7 +312,7 @@ void reset_field<::apache::thrift::fixtures::types::ForwardUsageByRef>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::IncompleteMap>(
+inline void reset_field<::apache::thrift::fixtures::types::IncompleteMap>(
     ::apache::thrift::fixtures::types::IncompleteMap& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -322,14 +322,14 @@ void reset_field<::apache::thrift::fixtures::types::IncompleteMap>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::IncompleteMapDep>(
+inline void reset_field<::apache::thrift::fixtures::types::IncompleteMapDep>(
     ::apache::thrift::fixtures::types::IncompleteMapDep& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::CompleteMap>(
+inline void reset_field<::apache::thrift::fixtures::types::CompleteMap>(
     ::apache::thrift::fixtures::types::CompleteMap& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -339,14 +339,14 @@ void reset_field<::apache::thrift::fixtures::types::CompleteMap>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::CompleteMapDep>(
+inline void reset_field<::apache::thrift::fixtures::types::CompleteMapDep>(
     ::apache::thrift::fixtures::types::CompleteMapDep& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::IncompleteList>(
+inline void reset_field<::apache::thrift::fixtures::types::IncompleteList>(
     ::apache::thrift::fixtures::types::IncompleteList& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -356,14 +356,14 @@ void reset_field<::apache::thrift::fixtures::types::IncompleteList>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::IncompleteListDep>(
+inline void reset_field<::apache::thrift::fixtures::types::IncompleteListDep>(
     ::apache::thrift::fixtures::types::IncompleteListDep& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::CompleteList>(
+inline void reset_field<::apache::thrift::fixtures::types::CompleteList>(
     ::apache::thrift::fixtures::types::CompleteList& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -373,14 +373,14 @@ void reset_field<::apache::thrift::fixtures::types::CompleteList>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::CompleteListDep>(
+inline void reset_field<::apache::thrift::fixtures::types::CompleteListDep>(
     ::apache::thrift::fixtures::types::CompleteListDep& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::AdaptedList>(
+inline void reset_field<::apache::thrift::fixtures::types::AdaptedList>(
     ::apache::thrift::fixtures::types::AdaptedList& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -390,7 +390,7 @@ void reset_field<::apache::thrift::fixtures::types::AdaptedList>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::DependentAdaptedList>(
+inline void reset_field<::apache::thrift::fixtures::types::DependentAdaptedList>(
     ::apache::thrift::fixtures::types::DependentAdaptedList& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -400,7 +400,7 @@ void reset_field<::apache::thrift::fixtures::types::DependentAdaptedList>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::AllocatorAware>(
+inline void reset_field<::apache::thrift::fixtures::types::AllocatorAware>(
     ::apache::thrift::fixtures::types::AllocatorAware& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -428,7 +428,7 @@ void reset_field<::apache::thrift::fixtures::types::AllocatorAware>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::AllocatorAware2>(
+inline void reset_field<::apache::thrift::fixtures::types::AllocatorAware2>(
     ::apache::thrift::fixtures::types::AllocatorAware2& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -441,7 +441,7 @@ void reset_field<::apache::thrift::fixtures::types::AllocatorAware2>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::TypedefStruct>(
+inline void reset_field<::apache::thrift::fixtures::types::TypedefStruct>(
     ::apache::thrift::fixtures::types::TypedefStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -457,7 +457,7 @@ void reset_field<::apache::thrift::fixtures::types::TypedefStruct>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>(
+inline void reset_field<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>(
     ::apache::thrift::fixtures::types::StructWithDoubleUnderscores& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -467,7 +467,7 @@ void reset_field<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::empty_struct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -477,7 +477,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::decorated_struct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -487,7 +487,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::ContainerStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -497,7 +497,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::CppTypeStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -507,7 +507,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::VirtualStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -517,7 +517,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -527,7 +527,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::TrivialNumeric>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -537,7 +537,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::TrivialNestedWithDefault>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -547,7 +547,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::ComplexString>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -557,7 +557,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::ComplexNestedWithDefault>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -567,7 +567,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::MinPadding>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -577,7 +577,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::MinPaddingWithCustomType>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -587,7 +587,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::MyStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -597,7 +597,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::MyDataItem>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -607,7 +607,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::Renaming>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -617,7 +617,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::AnnotatedTypes>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -627,7 +627,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::ForwardUsageRoot>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -637,7 +637,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::ForwardUsageStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -647,7 +647,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::ForwardUsageByRef>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -657,7 +657,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::IncompleteMap>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -667,7 +667,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::IncompleteMapDep>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -677,7 +677,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::CompleteMap>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -687,7 +687,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::CompleteMapDep>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -697,7 +697,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::IncompleteList>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -707,7 +707,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::IncompleteListDep>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -717,7 +717,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::CompleteList>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -727,7 +727,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::CompleteListDep>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -737,7 +737,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::AdaptedList>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -747,7 +747,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::DependentAdaptedList>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -757,7 +757,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::AllocatorAware>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -767,7 +767,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::AllocatorAware2>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -777,7 +777,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::TypedefStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -787,7 +787,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

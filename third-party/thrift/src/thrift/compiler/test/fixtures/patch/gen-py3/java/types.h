@@ -20,7 +20,7 @@ namespace py3 {
 
 
 template<>
-void reset_field<::facebook::thrift::annotation::java::Adapter>(
+inline void reset_field<::facebook::thrift::annotation::java::Adapter>(
     ::facebook::thrift::annotation::java::Adapter& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -33,7 +33,7 @@ void reset_field<::facebook::thrift::annotation::java::Adapter>(
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::java::Wrapper>(
+inline void reset_field<::facebook::thrift::annotation::java::Wrapper>(
     ::facebook::thrift::annotation::java::Wrapper& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -46,7 +46,7 @@ void reset_field<::facebook::thrift::annotation::java::Wrapper>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::java::Adapter>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -56,7 +56,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::java::Wrapper>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

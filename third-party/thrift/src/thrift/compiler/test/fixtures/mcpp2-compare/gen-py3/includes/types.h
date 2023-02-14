@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::a::different::ns::AnEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -31,7 +31,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::a::different::ns::AStruct>(
+inline void reset_field<::a::different::ns::AStruct>(
     ::a::different::ns::AStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -41,7 +41,7 @@ void reset_field<::a::different::ns::AStruct>(
 }
 
 template<>
-void reset_field<::a::different::ns::AStructB>(
+inline void reset_field<::a::different::ns::AStructB>(
     ::a::different::ns::AStructB& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -51,7 +51,7 @@ void reset_field<::a::different::ns::AStructB>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::a::different::ns::AStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -61,7 +61,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::a::different::ns::AStructB>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

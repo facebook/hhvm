@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::facebook::thrift::annotation::cpp::RefType>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -30,7 +30,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::facebook::thrift::annotation::cpp::EnumUnderlyingType>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -42,7 +42,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::Ref>(
+inline void reset_field<::facebook::thrift::annotation::cpp::Ref>(
     ::facebook::thrift::annotation::cpp::Ref& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -52,7 +52,7 @@ void reset_field<::facebook::thrift::annotation::cpp::Ref>(
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::Lazy>(
+inline void reset_field<::facebook::thrift::annotation::cpp::Lazy>(
     ::facebook::thrift::annotation::cpp::Lazy& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -62,14 +62,14 @@ void reset_field<::facebook::thrift::annotation::cpp::Lazy>(
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::DisableLazyChecksum>(
+inline void reset_field<::facebook::thrift::annotation::cpp::DisableLazyChecksum>(
     ::facebook::thrift::annotation::cpp::DisableLazyChecksum& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::Adapter>(
+inline void reset_field<::facebook::thrift::annotation::cpp::Adapter>(
     ::facebook::thrift::annotation::cpp::Adapter& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -91,7 +91,7 @@ void reset_field<::facebook::thrift::annotation::cpp::Adapter>(
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::PackIsset>(
+inline void reset_field<::facebook::thrift::annotation::cpp::PackIsset>(
     ::facebook::thrift::annotation::cpp::PackIsset& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -101,35 +101,35 @@ void reset_field<::facebook::thrift::annotation::cpp::PackIsset>(
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::MinimizePadding>(
+inline void reset_field<::facebook::thrift::annotation::cpp::MinimizePadding>(
     ::facebook::thrift::annotation::cpp::MinimizePadding& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::TriviallyRelocatable>(
+inline void reset_field<::facebook::thrift::annotation::cpp::TriviallyRelocatable>(
     ::facebook::thrift::annotation::cpp::TriviallyRelocatable& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::ScopedEnumAsUnionType>(
+inline void reset_field<::facebook::thrift::annotation::cpp::ScopedEnumAsUnionType>(
     ::facebook::thrift::annotation::cpp::ScopedEnumAsUnionType& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::StrongType>(
+inline void reset_field<::facebook::thrift::annotation::cpp::StrongType>(
     ::facebook::thrift::annotation::cpp::StrongType& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::FieldInterceptor>(
+inline void reset_field<::facebook::thrift::annotation::cpp::FieldInterceptor>(
     ::facebook::thrift::annotation::cpp::FieldInterceptor& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -142,14 +142,14 @@ void reset_field<::facebook::thrift::annotation::cpp::FieldInterceptor>(
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::UseOpEncode>(
+inline void reset_field<::facebook::thrift::annotation::cpp::UseOpEncode>(
     ::facebook::thrift::annotation::cpp::UseOpEncode& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::facebook::thrift::annotation::cpp::EnumType>(
+inline void reset_field<::facebook::thrift::annotation::cpp::EnumType>(
     ::facebook::thrift::annotation::cpp::EnumType& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -159,7 +159,7 @@ void reset_field<::facebook::thrift::annotation::cpp::EnumType>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::Ref>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -169,7 +169,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::Lazy>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -179,7 +179,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::DisableLazyChecksum>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -189,7 +189,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::Adapter>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -199,7 +199,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::PackIsset>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -209,7 +209,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::MinimizePadding>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -219,7 +219,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::TriviallyRelocatable>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -229,7 +229,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::ScopedEnumAsUnionType>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -239,7 +239,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::StrongType>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -249,7 +249,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::FieldInterceptor>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -259,7 +259,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::UseOpEncode>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -269,7 +269,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::EnumType>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::cpp2::MyEnumA>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -31,7 +31,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::cpp2::SmallStruct>(
+inline void reset_field<::cpp2::SmallStruct>(
     ::cpp2::SmallStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -44,7 +44,7 @@ void reset_field<::cpp2::SmallStruct>(
 }
 
 template<>
-void reset_field<::cpp2::containerStruct>(
+inline void reset_field<::cpp2::containerStruct>(
     ::cpp2::containerStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -117,7 +117,7 @@ void reset_field<::cpp2::containerStruct>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::SmallStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -127,7 +127,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::containerStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

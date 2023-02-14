@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::py3::simple::AnEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -31,7 +31,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::py3::simple::AnEnumRenamed>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -45,7 +45,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::py3::simple::Flags>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -56,7 +56,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::py3::simple::BinaryUnion::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -67,7 +67,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::py3::simple::SimpleException>(
+inline void reset_field<::py3::simple::SimpleException>(
     ::py3::simple::SimpleException& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -77,7 +77,7 @@ void reset_field<::py3::simple::SimpleException>(
 }
 
 template<>
-void reset_field<::py3::simple::OptionalRefStruct>(
+inline void reset_field<::py3::simple::OptionalRefStruct>(
     ::py3::simple::OptionalRefStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -87,7 +87,7 @@ void reset_field<::py3::simple::OptionalRefStruct>(
 }
 
 template<>
-void reset_field<::py3::simple::SimpleStruct>(
+inline void reset_field<::py3::simple::SimpleStruct>(
     ::py3::simple::SimpleStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -115,7 +115,7 @@ void reset_field<::py3::simple::SimpleStruct>(
 }
 
 template<>
-void reset_field<::py3::simple::ComplexStruct>(
+inline void reset_field<::py3::simple::ComplexStruct>(
     ::py3::simple::ComplexStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -149,7 +149,7 @@ void reset_field<::py3::simple::ComplexStruct>(
 }
 
 template<>
-void reset_field<::py3::simple::BinaryUnionStruct>(
+inline void reset_field<::py3::simple::BinaryUnionStruct>(
     ::py3::simple::BinaryUnionStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -159,7 +159,7 @@ void reset_field<::py3::simple::BinaryUnionStruct>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::py3::simple::SimpleException>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -169,7 +169,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::py3::simple::OptionalRefStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -179,7 +179,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::py3::simple::SimpleStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -189,7 +189,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::py3::simple::ComplexStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -201,7 +201,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::py3::simple::BinaryUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -211,7 +211,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::py3::simple::BinaryUnionStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

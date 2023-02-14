@@ -20,7 +20,7 @@ namespace py3 {
 
 
 template<>
-void reset_field<::cpp2::Mixin1>(
+inline void reset_field<::cpp2::Mixin1>(
     ::cpp2::Mixin1& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -30,7 +30,7 @@ void reset_field<::cpp2::Mixin1>(
 }
 
 template<>
-void reset_field<::cpp2::Mixin2>(
+inline void reset_field<::cpp2::Mixin2>(
     ::cpp2::Mixin2& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -43,7 +43,7 @@ void reset_field<::cpp2::Mixin2>(
 }
 
 template<>
-void reset_field<::cpp2::Mixin3Base>(
+inline void reset_field<::cpp2::Mixin3Base>(
     ::cpp2::Mixin3Base& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -53,7 +53,7 @@ void reset_field<::cpp2::Mixin3Base>(
 }
 
 template<>
-void reset_field<::cpp2::Foo>(
+inline void reset_field<::cpp2::Foo>(
     ::cpp2::Foo& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -69,7 +69,7 @@ void reset_field<::cpp2::Foo>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Mixin1>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -79,7 +79,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Mixin2>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -89,7 +89,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Mixin3Base>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -99,7 +99,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Foo>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

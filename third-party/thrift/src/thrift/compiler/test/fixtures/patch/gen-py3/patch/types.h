@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::apache::thrift::op::PatchOp>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -31,21 +31,21 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::apache::thrift::op::GeneratePatch>(
+inline void reset_field<::apache::thrift::op::GeneratePatch>(
     ::apache::thrift::op::GeneratePatch& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::apache::thrift::op::AssignOnlyPatch>(
+inline void reset_field<::apache::thrift::op::AssignOnlyPatch>(
     ::apache::thrift::op::AssignOnlyPatch& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::op::GeneratePatch>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -55,7 +55,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::op::AssignOnlyPatch>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

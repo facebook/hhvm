@@ -20,7 +20,7 @@ namespace py3 {
 
 
 template<>
-void reset_field<::cpp2::Fields>(
+inline void reset_field<::cpp2::Fields>(
     ::cpp2::Fields& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -30,7 +30,7 @@ void reset_field<::cpp2::Fields>(
 }
 
 template<>
-void reset_field<::cpp2::FieldsInjectedToEmptyStruct>(
+inline void reset_field<::cpp2::FieldsInjectedToEmptyStruct>(
     ::cpp2::FieldsInjectedToEmptyStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -40,7 +40,7 @@ void reset_field<::cpp2::FieldsInjectedToEmptyStruct>(
 }
 
 template<>
-void reset_field<::cpp2::FieldsInjectedToStruct>(
+inline void reset_field<::cpp2::FieldsInjectedToStruct>(
     ::cpp2::FieldsInjectedToStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -53,7 +53,7 @@ void reset_field<::cpp2::FieldsInjectedToStruct>(
 }
 
 template<>
-void reset_field<::cpp2::FieldsInjectedWithIncludedStruct>(
+inline void reset_field<::cpp2::FieldsInjectedWithIncludedStruct>(
     ::cpp2::FieldsInjectedWithIncludedStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -72,7 +72,7 @@ void reset_field<::cpp2::FieldsInjectedWithIncludedStruct>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Fields>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -82,7 +82,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::FieldsInjectedToEmptyStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -92,7 +92,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::FieldsInjectedToStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -102,7 +102,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::FieldsInjectedWithIncludedStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

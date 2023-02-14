@@ -19,7 +19,7 @@ namespace py3 {
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::basic::MyEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -30,7 +30,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::basic::HackEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -41,7 +41,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::basic::MyUnion::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -51,7 +51,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 }
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::test::fixtures::basic::UnionToBeRenamed::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -62,7 +62,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
-void reset_field<::test::fixtures::basic::MyStruct>(
+inline void reset_field<::test::fixtures::basic::MyStruct>(
     ::test::fixtures::basic::MyStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -96,14 +96,14 @@ void reset_field<::test::fixtures::basic::MyStruct>(
 }
 
 template<>
-void reset_field<::test::fixtures::basic::MyDataItem>(
+inline void reset_field<::test::fixtures::basic::MyDataItem>(
     ::test::fixtures::basic::MyDataItem& obj, uint16_t index) {
   switch (index) {
   }
 }
 
 template<>
-void reset_field<::test::fixtures::basic::ReservedKeyword>(
+inline void reset_field<::test::fixtures::basic::ReservedKeyword>(
     ::test::fixtures::basic::ReservedKeyword& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -113,7 +113,7 @@ void reset_field<::test::fixtures::basic::ReservedKeyword>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::basic::MyStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -123,7 +123,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::basic::MyDataItem>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -133,7 +133,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::basic::MyUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -143,7 +143,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::basic::ReservedKeyword>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -153,7 +153,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::basic::UnionToBeRenamed>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

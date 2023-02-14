@@ -65,7 +65,7 @@ createResponseAndServerStream(
 
 void cancelPythonIterator(PyObject*);
 
-folly::Function<void()> pythonFuncToCppFunc(PyObject* func) {
+inline folly::Function<void()> pythonFuncToCppFunc(PyObject* func) {
   Py_INCREF(func);
   return [func = std::move(func)] {
     if (func != Py_None) {

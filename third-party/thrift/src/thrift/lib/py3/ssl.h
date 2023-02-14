@@ -104,7 +104,7 @@ class ConnectHandler : public folly::AsyncSocket::ConnectCallback,
 /**
  * Create a thrift channel by connecting to a host:port over TCP then SSL.
  */
-folly::Future<RequestChannel_ptr> createThriftChannelTCP(
+inline folly::Future<RequestChannel_ptr> createThriftChannelTCP(
     const std::shared_ptr<folly::SSLContext>& ctx,
     std::string&& host,
     const uint16_t port,

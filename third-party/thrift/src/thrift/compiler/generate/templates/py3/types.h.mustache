@@ -36,7 +36,7 @@ namespace py3 {
 {{#program:enums}}
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     {{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{enum:cpp_name}}>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -53,7 +53,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 {{#struct:union?}}
 
 template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     {{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{struct:name}}::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -71,7 +71,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 {{^struct:union?}}
 
 template<>
-void reset_field<{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{struct:name}}>(
+inline void reset_field<{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{struct:name}}>(
     {{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{struct:name}}& obj, uint16_t index) {
   switch (index) {
     {{#struct:py3_fields}}
@@ -91,7 +91,7 @@ void reset_field<{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}
 {{#program:filtered_structs}}
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     {{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{struct:name}}>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

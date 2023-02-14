@@ -20,7 +20,7 @@ namespace py3 {
 
 
 template<>
-void reset_field<::cpp2::InitialResponse>(
+inline void reset_field<::cpp2::InitialResponse>(
     ::cpp2::InitialResponse& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -30,7 +30,7 @@ void reset_field<::cpp2::InitialResponse>(
 }
 
 template<>
-void reset_field<::cpp2::FinalResponse>(
+inline void reset_field<::cpp2::FinalResponse>(
     ::cpp2::FinalResponse& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -40,7 +40,7 @@ void reset_field<::cpp2::FinalResponse>(
 }
 
 template<>
-void reset_field<::cpp2::SinkPayload>(
+inline void reset_field<::cpp2::SinkPayload>(
     ::cpp2::SinkPayload& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -50,7 +50,7 @@ void reset_field<::cpp2::SinkPayload>(
 }
 
 template<>
-void reset_field<::cpp2::CompatibleWithKeywordSink>(
+inline void reset_field<::cpp2::CompatibleWithKeywordSink>(
     ::cpp2::CompatibleWithKeywordSink& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -60,7 +60,7 @@ void reset_field<::cpp2::CompatibleWithKeywordSink>(
 }
 
 template<>
-void reset_field<::cpp2::InitialException>(
+inline void reset_field<::cpp2::InitialException>(
     ::cpp2::InitialException& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -70,7 +70,7 @@ void reset_field<::cpp2::InitialException>(
 }
 
 template<>
-void reset_field<::cpp2::SinkException1>(
+inline void reset_field<::cpp2::SinkException1>(
     ::cpp2::SinkException1& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -80,7 +80,7 @@ void reset_field<::cpp2::SinkException1>(
 }
 
 template<>
-void reset_field<::cpp2::SinkException2>(
+inline void reset_field<::cpp2::SinkException2>(
     ::cpp2::SinkException2& obj, uint16_t index) {
   switch (index) {
     case 0:
@@ -90,7 +90,7 @@ void reset_field<::cpp2::SinkException2>(
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::InitialResponse>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -100,7 +100,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::FinalResponse>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -110,7 +110,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::SinkPayload>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -120,7 +120,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::CompatibleWithKeywordSink>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -130,7 +130,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::InitialException>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -140,7 +140,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::SinkException1>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
@@ -150,7 +150,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 }
 
 template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::SinkException2>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {

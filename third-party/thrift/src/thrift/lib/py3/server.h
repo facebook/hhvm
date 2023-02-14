@@ -56,7 +56,7 @@ class Py3ServerEventHandler
   AddressHandler address_handler_;
 };
 
-std::string getRequestId() {
+inline std::string getRequestId() {
   if (auto rctx = folly::RequestContext::get()) {
     if (auto rootId = rctx->getRootId();
         apache::thrift::RequestsRegistry::isThriftRootId(rootId)) {

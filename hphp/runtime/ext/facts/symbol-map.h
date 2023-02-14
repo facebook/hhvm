@@ -96,7 +96,7 @@ struct SymbolMap {
   explicit SymbolMap(
       std::filesystem::path root,
       AutoloadDB::Handle dbHandle,
-      hphp_hash_set<std::string> indexedMethodAttributes = {});
+      hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes = {});
   SymbolMap() = delete;
   SymbolMap(const SymbolMap&) = delete;
   SymbolMap(SymbolMap&&) noexcept = delete;
@@ -558,7 +558,7 @@ struct SymbolMap {
     void updatePath(
         Path path,
         FileFacts facts,
-        const hphp_hash_set<std::string>& indexedMethodAttrs);
+        const hphp_hash_set<Symbol<SymKind::Type>>& indexedMethodAttrs);
 
     /**
      * Remove the given path from the map, along with all data associated with
@@ -655,7 +655,7 @@ struct SymbolMap {
   const std::filesystem::path m_root;
   const std::string m_schemaHash;
   AutoloadDBVault m_dbVault;
-  const hphp_hash_set<std::string> m_indexedMethodAttrs;
+  const hphp_hash_set<Symbol<SymKind::Type>> m_indexedMethodAttrs;
 };
 
 } // namespace Facts

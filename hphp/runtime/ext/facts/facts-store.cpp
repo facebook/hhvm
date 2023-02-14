@@ -501,7 +501,7 @@ struct FactsStoreImpl final
       AutoloadDB::Handle dbHandle,
       std::shared_ptr<Watcher> watcher,
       Optional<std::filesystem::path> suppressionFilePath,
-      hphp_hash_set<std::string> indexedMethodAttributes)
+      hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes)
       : m_updateExec{1, make_thread_factory("Autoload update")},
         m_root{std::move(root)},
         m_map{m_root, std::move(dbHandle), std::move(indexedMethodAttributes)},
@@ -1477,10 +1477,10 @@ std::shared_ptr<FactsStore> make_watcher_facts(
     bool shouldSubscribe,
     Optional<std::filesystem::path> suppressionFilePath,
     std::vector<std::string> indexedMethodAttrsVec) {
-  hphp_hash_set<std::string> indexedMethodAttrs;
+  hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttrs;
   indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
   for (auto& v : indexedMethodAttrsVec) {
-    indexedMethodAttrs.insert(std::move(v));
+    indexedMethodAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
   }
   auto map = std::make_shared<FactsStoreImpl>(
       std::move(root),

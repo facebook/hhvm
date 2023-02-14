@@ -146,7 +146,7 @@ std::shared_ptr<AutoloadDB> AutoloadDBVault::get() const {
 SymbolMap::SymbolMap(
     fs::path root,
     AutoloadDB::Handle dbHandle,
-    hphp_hash_set<std::string> indexedMethodAttrs)
+    hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttrs)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1,
           std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))},
@@ -1351,7 +1351,8 @@ void SymbolMap::updateDBPath(
         // If we have an allowlist of method attributes to index, then skip any
         // method attribute which isn't in that allowlist.
         if (!m_indexedMethodAttrs.empty() &&
-            !m_indexedMethodAttrs.count(attribute.m_name)) {
+            !m_indexedMethodAttrs.count(
+                Symbol<SymKind::Type>{attribute.m_name})) {
           continue;
         }
         if (attribute.m_args.empty()) {
@@ -1580,7 +1581,7 @@ SymbolMap::Data::Data()
 void SymbolMap::Data::updatePath(
     Path path,
     FileFacts facts,
-    const hphp_hash_set<std::string>& indexedMethodAttrs) {
+    const hphp_hash_set<Symbol<SymKind::Type>>& indexedMethodAttrs) {
   m_versions->bumpVersion(path);
 
   typename PathToSymbolsMap<SymKind::Type>::Symbols types;
@@ -1626,7 +1627,8 @@ void SymbolMap::Data::updatePath(
                 attributes.begin(),
                 attributes.end(),
                 [&](const Attribute& attr) {
-                  return !indexedMethodAttrs.count(attr.m_name);
+                  return !indexedMethodAttrs.count(
+                      Symbol<SymKind::Type>{attr.m_name});
                 }),
             attributes.end());
       }

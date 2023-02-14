@@ -588,10 +588,15 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
   SymbolMap& make(
       std::string root,
       std::shared_ptr<folly::ManualExecutor> exec = nullptr,
-      hphp_hash_set<std::string> indexedMethodAttributes = {}) {
+      std::vector<std::string> indexedMethodAttributesVec = {}) {
     auto dbPath = m_tmpdir->path() /
         folly::to<std::string>(
                       "autoload_", std::hash<std::string>{}(root), "_db.sql3");
+    hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes;
+    indexedMethodAttributes.reserve(indexedMethodAttributesVec.size());
+    for (auto& attr : indexedMethodAttributesVec) {
+      indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});
+    }
     m_wrappers.push_back(SymbolMapWrapper{
         std::make_unique<SymbolMap>(
             std::move(root),
@@ -608,7 +613,12 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
       std::string root,
       std::shared_ptr<MockAutoloadDB> db,
       std::shared_ptr<folly::ManualExecutor> exec = nullptr,
-      hphp_hash_set<std::string> indexedMethodAttributes = {}) {
+      std::vector<std::string> indexedMethodAttributesVec = {}) {
+    hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes;
+    indexedMethodAttributes.reserve(indexedMethodAttributesVec.size());
+    for (auto& attr : indexedMethodAttributesVec) {
+      indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});
+    }
     m_wrappers.push_back(SymbolMapWrapper{
         std::make_unique<SymbolMap>(
             std::move(root),

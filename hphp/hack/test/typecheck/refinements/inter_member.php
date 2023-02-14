@@ -25,8 +25,8 @@ function f(A $x): void {
 
 function g(I $x): void {
   if ($x is B) {
-    expect<(function (string): string)>(inst_meth($x, 'f'));
-    expect<(function (int): int)>(inst_meth($x, 'f'));
+    expect<(function (string): string)>(($y) ==> $x->f($y));
+    expect<(function (int): int)>(($y) ==> $x->f($y));
     expect<string>($x->f(""));
     expect<int>($x->f(0));
   }

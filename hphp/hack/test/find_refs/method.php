@@ -32,13 +32,6 @@ function test(C $c, D $d, E $e, F $f, G $g, Unrelated $u) {
   $g->foo();
   $u->foo();
 
-  inst_meth($c, 'foo');
-  inst_meth($d, 'foo');
-  inst_meth($e, 'foo');
-  inst_meth($f, 'foo');
-  inst_meth($g, 'foo');
-  inst_meth($u, 'foo');
-
   meth_caller('C', 'foo');
   meth_caller('D', 'foo');
   meth_caller('E', 'foo'); // TODO: This is not detected

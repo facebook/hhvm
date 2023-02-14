@@ -2,13 +2,13 @@ File "tconst_bug.php", line 9, characters 5-30:
   (readonly function(vec<StringType> $boxes): vec<string>)
 File "tconst_bug.php", line 10, characters 5-30:
   (readonly function(vec<exact StringType> $boxes): vec<string>)
-File "tconst_bug.php", line 11, characters 5-44:
+File "tconst_bug.php", line 11, characters 5-52:
   (function(vec<StringType> $boxes): vec<string>)
-File "tconst_bug.php", line 12, characters 5-39:
+File "tconst_bug.php", line 12, characters 5-47:
   (function(vec<<expr#1> as StringType> $boxes): vec<string>)
-File "tconst_bug.php", line 13, characters 5-44:
+File "tconst_bug.php", line 13, characters 5-52:
   (function(vec<exact StringType> $boxes): vec<string>)
-File "tconst_bug.php", line 14, characters 5-39:
+File "tconst_bug.php", line 14, characters 5-47:
   (function(vec<<expr#1> as StringType> $boxes): vec<string>)
 File "tconst_bug.php", line 16, characters 37-38:
 Invalid argument (Typing[4110])

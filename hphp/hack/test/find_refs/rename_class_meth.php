@@ -11,7 +11,6 @@ class RenameClassMethClass {
   // the method name
   public function other_method(): int {
     $this->instance_test_method();
-    inst_meth(new RenameClassMethClass(), 'instance_test_method');
     meth_caller(RenameClassMethClass::class, 'instance_test_method');
     return 0;
   }

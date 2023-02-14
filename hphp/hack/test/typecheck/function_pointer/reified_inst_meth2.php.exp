@@ -1,2 +1,0 @@
-File "reified_inst_meth2.php", line 13, characters 3-22:
-Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])

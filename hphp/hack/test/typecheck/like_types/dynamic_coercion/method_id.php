@@ -7,5 +7,5 @@ class C {
 
 function test(dynamic $d): void {
   $c = new C();
-  inst_meth($c, 'f')($d);
+  (($d_) ==> $c->f($d_))($d);
 }

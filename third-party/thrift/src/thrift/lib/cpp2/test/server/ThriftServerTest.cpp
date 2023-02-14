@@ -769,6 +769,7 @@ TEST(ThriftServer, EnforceEgressMemoryLimit) {
 TEST(ThriftServer, SocketWriteTimeout) {
   if (folly::kIsSanitizeThread) {
     GTEST_SUCCEED() << "Disabled in TSAN mode";
+    return;
   }
 
   class TestServiceHandler

@@ -111,9 +111,10 @@ let f5 =
     {|<?hh
 
 function f4main(): int {
-  $a = fun('f5f');
-  $m = inst_meth(new C(), "m");
-  $cm = class_meth(C::class, "sm");
+  $a = f5f<>;
+  $c = new C();
+  $m = () ==> $c->m();
+  $cm = C::sm<>;
 }
 
 function f5f(): int {
@@ -206,13 +207,13 @@ let tests =
     ( (fst f4, 8, 21),
       {|{"position":{"file":"/f4.php","line":8,"character":21},"deps":[{"name":"A1::sm","kind":"method","position":{"filename":"/f4.php","line":3,"char_start":28,"char_end":29}}]}|}
     );
-    (* should find inst_meth, fun_, class_meth, class, methods and function  *)
+    (* should find static method pointer, class, methods and function  *)
     ( (fst f5, 3, 10),
-      {|{"position":{"file":"/f5.php","line":3,"character":10},"deps":[{"name":"HH\\class_meth","kind":"function","position":{"filename":"/hhi/func_pointers.hhi","line":134,"char_start":12,"char_end":21}},{"name":"HH\\fun","kind":"function","position":{"filename":"/hhi/func_pointers.hhi","line":50,"char_start":12,"char_end":14}},{"name":"HH\\inst_meth","kind":"function","position":{"filename":"/hhi/func_pointers.hhi","line":179,"char_start":12,"char_end":20}},{"name":"f5f","kind":"function","position":{"filename":"/f5.php","line":9,"char_start":10,"char_end":12}},{"name":"C","kind":"class","position":{"filename":"/f5.php","line":12,"char_start":7,"char_end":7}},{"name":"C::m","kind":"method","position":{"filename":"/f5.php","line":16,"char_start":19,"char_end":19}},{"name":"C::sm","kind":"method","position":{"filename":"/f5.php","line":13,"char_start":26,"char_end":27}}]}|}
+      {|{"position":{"file":"/f5.php","line":3,"character":10},"deps":[{"name":"f5f","kind":"function","position":{"filename":"/f5.php","line":10,"char_start":10,"char_end":12}},{"name":"C","kind":"class","position":{"filename":"/f5.php","line":13,"char_start":7,"char_end":7}},{"name":"C::m","kind":"method","position":{"filename":"/f5.php","line":17,"char_start":19,"char_end":19}},{"name":"C::sm","kind":"method","position":{"filename":"/f5.php","line":14,"char_start":26,"char_end":27}}]}|}
     );
     (* handle chained calls *)
-    ( (fst f5, 21, 10),
-      {|{"position":{"file":"/f5.php","line":21,"character":10},"deps":[{"name":"D::getc","kind":"method","position":{"filename":"/f5.php","line":26,"char_start":26,"char_end":29}},{"name":"C::m","kind":"method","position":{"filename":"/f5.php","line":16,"char_start":19,"char_end":19}}]}|}
+    ( (fst f5, 22, 10),
+      {|{"position":{"file":"/f5.php","line":22,"character":10},"deps":[{"name":"D::getc","kind":"method","position":{"filename":"/f5.php","line":27,"char_start":26,"char_end":29}},{"name":"C::m","kind":"method","position":{"filename":"/f5.php","line":17,"char_start":19,"char_end":19}}]}|}
     );
     (* should look into lambdas *)
     ( (fst f6, 2, 10),

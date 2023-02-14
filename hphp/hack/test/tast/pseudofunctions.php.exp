@@ -1,6 +1,6 @@
 Errors:
-  [17:3-12] `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode
-  [18:3-13] In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing
+  [16:3-12] `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode
+  [17:3-13] In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing
 [(Class
     { c_span = [3:1-6:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -38,7 +38,7 @@ Errors:
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-14], "\\test");
        fd_fun =
-       { f_span = [8:1-22:2]; f_readonly_this = None; f_annotation = (); 
+       { f_span = [8:1-21:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([8:22-26], (Hprim Tvoid)))); 
          f_tparams = []; f_where_constraints = [];
          f_params =
@@ -52,26 +52,25 @@ Errors:
          { fb_ast =
            [([9:3-15], (Expr ((void), [9:3-15], (Call (((_), [9:3-7], (Id ([9:3-7], "echo"))), [], [(Pnormal, ((string), [9:8-13], (String "foo")))], None)))));
              ([10:3-16], (Expr ((void), [10:3-15], (Call (((_), [10:3-15], (Id ([10:3-15], "echo"))), [], [(Pnormal, ((string), [10:9-14], (String "foo")))], None)))));
-             ([12:3-15], (Expr (((function(C $c): void)), [12:3-14], (Fun_id ([12:7-13], "\\test")))));
-             ([13:3-37], (Expr (((function(): void)), [13:3-36], (Smethod_id (((C), [13:14-15], (CI ([13:14-15], "\\C"))), ([13:24-35], "staticFoo"))))));
-             ([14:3-32], (Expr (((function(): void)), [14:3-31], (Method_id (((C), [14:13-15], (Lvar ([14:13-15], $c))), ([14:17-30], "instanceFoo"))))));
-             ([15:3-40], (Expr (((function(C): void)), [15:3-39], (Method_caller (([15:15-16], "\\C"), ([15:25-38], "instanceFoo"))))));
-             ([17:3-13], (Expr ((bool), [17:3-12], (Call ((((function(mixed $x)[]: bool)), [17:3-8], (Id ([17:3-8], "\\isset"))), [], [(Pnormal, ((C), [17:9-11], (Lvar ([17:9-11], $c))))], None)))));
-             ([18:3-13], (Expr ((void), [18:3-13], (Call ((((function(mixed $x)[]: void)), [18:3-8], (Id ([18:3-8], "\\unset"))), [], [(Pnormal, ((C), [18:9-11], (Lvar ([18:9-11], $c))))], None)))));
-             ([20:3-26],
-              (If (((bool), [20:13-17], (Unop (Unot, ((bool), [20:13-17], True)))),
-                 [([20:3-25],
+             ([12:3-10], (Expr (((readonly function(C $c): void)), [12:3-9], (FunctionPointer ((FP_id ([12:3-7], "\\test")), [])))));
+             ([13:3-18], (Expr (((readonly function(): void)), [13:3-17], (FunctionPointer ((FP_class_const (((C), [13:3-4], (CI ([13:3-4], "\\C"))), ([13:6-15], "staticFoo"))), [])))));
+             ([14:3-40], (Expr (((function(C): void)), [14:3-39], (Method_caller (([14:15-16], "\\C"), ([14:25-38], "instanceFoo"))))));
+             ([16:3-13], (Expr ((bool), [16:3-12], (Call ((((function(mixed $x)[]: bool)), [16:3-8], (Id ([16:3-8], "\\isset"))), [], [(Pnormal, ((C), [16:9-11], (Lvar ([16:9-11], $c))))], None)))));
+             ([17:3-13], (Expr ((void), [17:3-13], (Call ((((function(mixed $x)[]: void)), [17:3-8], (Id ([17:3-8], "\\unset"))), [], [(Pnormal, ((C), [17:9-11], (Lvar ([17:9-11], $c))))], None)))));
+             ([19:3-26],
+              (If (((bool), [19:13-17], (Unop (Unot, ((bool), [19:13-17], True)))),
+                 [([19:3-25],
                    (Expr
-                      ((noreturn), [20:3-25],
-                       (Call ((((function(HH\FormatString<PlainSprintf> $fmt, mixed $fmt_args...)[]: noreturn)), [20:3-12], (Id ([20:3-12], "\\HH\\invariant_violation"))), 
-                          [], [(Pnormal, ((string), [20:19-24], (String "foo")))], None)))))
+                      ((noreturn), [19:3-25],
+                       (Call ((((function(HH\FormatString<PlainSprintf> $fmt, mixed $fmt_args...)[]: noreturn)), [19:3-12], (Id ([19:3-12], "\\HH\\invariant_violation"))), 
+                          [], [(Pnormal, ((string), [19:19-24], (String "foo")))], None)))))
                    ],
                  [([Pos.none], Noop)])));
-             ([21:3-30],
+             ([20:3-30],
               (Expr
-                 ((noreturn), [21:3-29],
-                  (Call ((((function(HH\FormatString<PlainSprintf> $fmt, mixed $fmt_args...)[]: noreturn)), [21:3-22], (Id ([21:3-22], "\\HH\\invariant_violation"))), 
-                     [], [(Pnormal, ((string), [21:23-28], (String "foo")))], None)))))
+                 ((noreturn), [20:3-29],
+                  (Call ((((function(HH\FormatString<PlainSprintf> $fmt, mixed $fmt_args...)[]: noreturn)), [20:3-22], (Id ([20:3-22], "\\HH\\invariant_violation"))), 
+                     [], [(Pnormal, ((string), [20:23-28], (String "foo")))], None)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

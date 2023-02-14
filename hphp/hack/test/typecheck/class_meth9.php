@@ -15,11 +15,11 @@ class A {
   }
 
   public static function f2(): (function(string): int) {
-    return class_meth('A', 'f1');
+    return A::f1<>;
   }
 
   public static function f3(): (function(string): int) {
-    return class_meth(A::class, 'f1');
+    return A::f1<>;
   }
 }
 

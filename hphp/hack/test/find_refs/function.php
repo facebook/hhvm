@@ -2,7 +2,7 @@
 
 function foo() {
   foo();
-  fun('foo');
+  foo<>;
 }
 
 class C {
@@ -10,11 +10,11 @@ class C {
     public $x = foo(),
   ) {
     foo();
-    fun('foo');
+    foo<>;
   }
 }
 
 function test() {
   foo();
-  fun('foo');
+  foo<>;
 }

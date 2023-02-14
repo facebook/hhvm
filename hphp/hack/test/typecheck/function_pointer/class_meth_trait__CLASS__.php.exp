@@ -1,3 +1,0 @@
-File "class_meth_trait__CLASS__.php", line 7, characters 5-14:
-`class_meth` with `__CLASS__` in non-final classes is not allowed.
- (Naming[2114])

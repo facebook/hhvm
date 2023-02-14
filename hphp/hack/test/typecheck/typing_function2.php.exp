@@ -1,6 +1,0 @@
-File "typing_function2.php", line 19, characters 13-18:
-String argument to `fun()` contains `:`; for static class methods, use `class_meth(Cls::class, 'method_name')`, not `fun('Cls::method_name')` (Naming[2027])
-File "typing_function2.php", line 19, characters 13-18:
-Unbound name: `C::f` (a global function) (Naming[2049])
-File "typing_function2.php", line 19, characters 13-18:
-Unbound name (typing): `C::f` (Typing[4107])

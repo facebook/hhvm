@@ -9,9 +9,8 @@ function test(C $c): void {
   echo('foo');
   print('foo');
 
-  fun('test');
-  class_meth(C::class, 'staticFoo');
-  inst_meth($c, 'instanceFoo');
+  test<>;
+  C::staticFoo<>;
   meth_caller(C::class, 'instanceFoo');
 
   isset($c);

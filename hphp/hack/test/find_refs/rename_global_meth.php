@@ -11,7 +11,7 @@ class RenameGlobalMethClass {
   // the method name
   public static function other_method(): int {
     global_test_method();
-    $bar = fun('global_test_method');
+    $bar = global_test_method<>;
     return 0;
   }
 }

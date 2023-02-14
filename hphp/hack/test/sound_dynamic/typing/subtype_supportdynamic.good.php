@@ -102,5 +102,5 @@ function foo(int $x):bool {
 }
 function test_function((function(~int):bool) $f): void {
   e($f);
-  e(fun('foo'));
+  e(foo<>);
 }

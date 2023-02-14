@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import copy
-import functools
 
 from cython.operator cimport dereference as deref
 from thrift.python.serializer cimport cserialize, cdeserialize
@@ -32,7 +31,6 @@ cdef class ApplicationError(Error):
 
     def __init__(ApplicationError self, ApplicationErrorType type, str message):
         assert message, "message is empty"
-        super().__init__(type, message)
 
     @property
     def type(self):
@@ -145,7 +143,7 @@ cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions opt
 
 
 cdef make_fget_error(i):
-    return functools.cached_property(lambda self: (<GeneratedError>self)._fbthrift_get_field_value(i))
+    return property(lambda self: self.args[i])
 
 
 class GeneratedErrorMeta(type):
@@ -194,13 +192,12 @@ cdef class GeneratedError(Error):
                 index,
                 info.type_infos[index].to_internal_data(value),
             )
-        # for builtin.BaseException
-        super().__init__(*(value for _, value in self))
+        self._fbthrift_populate_field_values()
 
     def __iter__(self):
         cdef StructInfo info = self._fbthrift_struct_info
-        for name in info.name_to_index:
-            yield name, getattr(self, name)
+        for name, index in info.name_to_index.items():
+            yield name, self.args[index]
 
     cdef iobuf.IOBuf _serialize(self, Protocol proto):
         cdef StructInfo info = self._fbthrift_struct_info
@@ -210,14 +207,21 @@ cdef class GeneratedError(Error):
 
     cdef uint32_t _deserialize(self, iobuf.IOBuf buf, Protocol proto) except? 0:
         cdef StructInfo info = self._fbthrift_struct_info
-        return cdeserialize(deref(info.cpp_obj), buf._this, self._fbthrift_data, proto)
+        cdef uint32_t size = cdeserialize(deref(info.cpp_obj), buf._this, self._fbthrift_data, proto)
+        self._fbthrift_populate_field_values()
+        return size
 
-    cdef _fbthrift_get_field_value(self, int16_t index):
-        data = self._fbthrift_data[index + 1]
-        if data is None:
-            return
+    cdef void _fbthrift_populate_field_values(self):
         cdef StructInfo info = self._fbthrift_struct_info
-        return info.type_infos[index].to_python_value(data)
+        args = []
+        for index, type_info in enumerate(info.type_infos):
+            data = self._fbthrift_data[index + 1]
+            args.append(None if data is None else type_info.to_python_value(data))
+        self.args = args
+
+    def __repr__(self):
+        fields = ", ".join(f"{name}={repr(value)}" for name, value in self)
+        return f"{type(self).__name__}({fields})"
 
     def __copy__(GeneratedError self):
         # deep copy the instance
@@ -248,6 +252,7 @@ cdef class GeneratedError(Error):
     def _fbthrift_create(cls, data):
         cdef GeneratedError inst = cls.__new__(cls)
         inst._fbthrift_data = data
+        inst._fbthrift_populate_field_values()
         return inst
 
     @staticmethod

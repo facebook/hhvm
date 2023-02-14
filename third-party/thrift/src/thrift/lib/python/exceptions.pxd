@@ -104,7 +104,7 @@ cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions opt
 # Base class for all generated exceptions defined in Thrift IDL
 cdef class GeneratedError(Error):
     cdef object _fbthrift_data
-    cdef _fbthrift_get_field_value(self, int16_t index)
+    cdef void _fbthrift_populate_field_values(self)
     cdef iobuf.IOBuf _serialize(GeneratedError self, Protocol proto)
     cdef uint32_t _deserialize(GeneratedError self, iobuf.IOBuf buf, Protocol proto) except? 0
 

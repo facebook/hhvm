@@ -32,7 +32,7 @@ from thrift.python.exceptions import (
     TransportError,
     TransportErrorType,
 )
-from thrift.python.serializer import deserialize, serialize_iobuf
+from thrift.python.serializer import deserialize, Protocol, serialize_iobuf
 
 
 class ExceptionTests(unittest.TestCase):
@@ -91,6 +91,53 @@ class ExceptionTests(unittest.TestCase):
         self.assertEqual(str(y), "Color.red")
         y2 = SimpleError(color=Color.red)
         self.assertEqual(str(y2), "Color.red")
+        z = UnfriendlyError(errortext="WAT!", code=22)
+        self.assertEqual(str(z), "('WAT!', 22)")
+
+    def test_str_deserialized(self) -> None:
+        x = deserialize(UnusedError, b"{}", protocol=Protocol.JSON)
+        self.assertEqual(str(x), "")
+        x2 = deserialize(UnusedError, b'{"message": "hello"}', protocol=Protocol.JSON)
+        self.assertEqual(str(x2), "hello")
+        y = deserialize(SimpleError, b"{}", protocol=Protocol.JSON)
+        self.assertEqual(str(y), "Color.red")
+        y2 = deserialize(SimpleError, b'{"color": 0}', protocol=Protocol.JSON)
+        self.assertEqual(str(y2), "Color.red")
+        z = deserialize(
+            UnfriendlyError,
+            b'{"errortext": "WAT!", "code": 22}',
+            protocol=Protocol.JSON,
+        )
+        self.assertEqual(str(z), "('WAT!', 22)")
+
+    def test_expr(self) -> None:
+        x = UnusedError()
+        x = deserialize(UnusedError, b"{}", protocol=Protocol.JSON)
+        self.assertEqual(repr(x), "UnusedError(message='')")
+        x2 = UnusedError(message="hello")
+        self.assertEqual(repr(x2), "UnusedError(message='hello')")
+        y = SimpleError()
+        self.assertEqual(repr(y), "SimpleError(color=<Color.red: 0>)")
+        y2 = SimpleError(color=Color.red)
+        self.assertEqual(repr(y2), "SimpleError(color=<Color.red: 0>)")
+        z = UnfriendlyError(errortext="WAT!", code=22)
+        self.assertEqual(repr(z), "UnfriendlyError(errortext='WAT!', code=22)")
+
+    def test_expr_deserialized(self) -> None:
+        x = deserialize(UnusedError, b"{}", protocol=Protocol.JSON)
+        self.assertEqual(repr(x), "UnusedError(message='')")
+        x2 = deserialize(UnusedError, b'{"message": "hello"}', protocol=Protocol.JSON)
+        self.assertEqual(repr(x2), "UnusedError(message='hello')")
+        y = deserialize(SimpleError, b"{}", protocol=Protocol.JSON)
+        self.assertEqual(repr(y), "SimpleError(color=<Color.red: 0>)")
+        y2 = deserialize(SimpleError, b'{"color": 0}', protocol=Protocol.JSON)
+        self.assertEqual(repr(y2), "SimpleError(color=<Color.red: 0>)")
+        z = deserialize(
+            UnfriendlyError,
+            b'{"errortext": "WAT!", "code": 22}',
+            protocol=Protocol.JSON,
+        )
+        self.assertEqual(repr(z), "UnfriendlyError(errortext='WAT!', code=22)")
 
     def test_serialize_deserialize(self) -> None:
         err = HardError(errortext="err", code=2)

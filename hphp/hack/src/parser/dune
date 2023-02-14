@@ -2,7 +2,6 @@
  api
  cargo
  core
- ffi
  ffi_bridge
  lowerer
  bench
@@ -10,6 +9,42 @@
  smart_constructors
  syntax_by_ref
  rust_parser_errors_ffi)
+
+(library
+ (name positioned_by_ref_parser_ffi)
+ (modules)
+ (wrapped false)
+ (c_library_flags -lpthread)
+ (foreign_archives positioned_by_ref_parser_ffi))
+
+(rule
+ (targets libpositioned_by_ref_parser_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
+   positioned_by_ref_parser_ffi
+   positioned_by_ref_parser_ffi)))
+
+(library
+ (name aast_parser_ffi)
+ (modules)
+ (wrapped false)
+ (c_library_flags -lpthread)
+ (foreign_archives aast_parser_ffi))
+
+(rule
+ (targets libaast_parser_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
+   aast_parser_ffi
+   aast_parser_ffi)))
 
 (library
  (name rust_parser_ffi)
@@ -26,7 +61,7 @@
  (action
   (run
    %{workspace_root}/hack/scripts/invoke_cargo.sh
-   hack_parser_ffi
+   rust_parser_ffi
    rust_parser_ffi)))
 
 (library
@@ -49,9 +84,6 @@
 
 (copy_files
  (files smart_constructors/*.ml))
-
-(copy_files
- (files ffi/*.ml))
 
 (library
  (name full_fidelity)
@@ -104,6 +136,7 @@
   parser_options
   parser_schema
   parser_schema_def
+  positioned_by_ref_parser_ffi
   relative_path
   rust_parser_errors_ffi
   rust_parser_ffi
@@ -138,6 +171,7 @@
   logging
   namespace_env
   nast
+  aast_parser_ffi
   rust_parser_ffi
   typing_ast
   utils_lint

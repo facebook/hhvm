@@ -79,7 +79,6 @@ members = [
     "parser/cargo/syntax_smart_constructors",
     "parser/cargo/to_ocaml_impl",
     "parser/core",
-    "parser/ffi",
     "parser/ffi_bridge",
     "parser/lowerer",
     "parser/schema",

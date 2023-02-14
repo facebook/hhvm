@@ -8,6 +8,7 @@ edition = "2021"
 path = "../../rust_parser_ffi.rs"
 test = false
 doctest = false
+crate-type = ["lib", "staticlib"]
 
 [dependencies]
 bumpalo = { version = "3.11.1", features = ["collections"] }

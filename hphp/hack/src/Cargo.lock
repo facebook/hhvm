@@ -2055,14 +2055,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hack_parser_ffi"
-version = "3.49.0"
-dependencies = [
- "aast_parser_ffi",
- "positioned_by_ref_parser_ffi",
-]
-
-[[package]]
 name = "hackc"
 version = "0.0.0"
 dependencies = [

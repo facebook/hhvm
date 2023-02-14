@@ -8,6 +8,7 @@ edition = "2021"
 path = "../../positioned_by_ref_parser_ffi.rs"
 test = false
 doctest = false
+crate-type = ["lib", "staticlib"]
 
 [dependencies]
 ocamlrep = { path = "../../../ocamlrep" }

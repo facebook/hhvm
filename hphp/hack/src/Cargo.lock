@@ -789,7 +789,7 @@ dependencies = [
  "options",
  "parser_core_types",
  "relative_path",
- "sha-1",
+ "sha1",
 ]
 
 [[package]]
@@ -809,7 +809,7 @@ dependencies = [
  "lazy_static",
  "regex",
  "serde_json",
- "sha-1",
+ "sha1",
 ]
 
 [[package]]
@@ -1223,7 +1223,7 @@ dependencies = [
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
- "sha-1",
+ "sha1",
  "thiserror",
 ]
 
@@ -1728,7 +1728,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "sha-1",
+ "sha1",
 ]
 
 [[package]]
@@ -4530,10 +4530,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "sha-1"
-version = "0.10.0"
+name = "sha1"
+version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "028f48d513f9678cda28f6e4064755b3fbb2af6acd672f2c209b62323f7aea0f"
+checksum = "f04293dc80c3993519f2d7f6f511707ee7094fe0c6d3406feb330cdb3540eba3"
 dependencies = [
  "cfg-if 1.0.0",
  "cpufeatures",

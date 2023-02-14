@@ -26,7 +26,7 @@ ocamlrep = { path = "../../ocamlrep" }
 options = { path = "../compile/cargo/options" }
 parser_core_types = { path = "../../parser/cargo/core_types" }
 relative_path = { path = "../../utils/rust/relative_path" }
-sha-1 = "0.10"
+sha1 = "0.10.5"
 
 [build-dependencies]
 cxx-build = "1.0.89"

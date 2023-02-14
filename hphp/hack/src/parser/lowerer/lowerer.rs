@@ -4127,7 +4127,13 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
             };
             let readonly_ret = map_optional(readonly_return, env, p_readonly)?;
             let mut type_parameters = p_tparam_l(false, type_parameter_list, env)?;
-            let mut parameters = could_map(parameter_list, env, p_fun_param)?;
+            let mut parameters = match could_map(parameter_list, env, p_fun_param) {
+                Ok(params) => params,
+                Err(e) => {
+                    emit_error(e, env);
+                    vec![]
+                }
+            };
             let contexts = p_contexts(contexts, env, None);
             let mut constrs = p_where_constraint(false, node, where_clause, env)?;
             rewrite_effect_polymorphism(

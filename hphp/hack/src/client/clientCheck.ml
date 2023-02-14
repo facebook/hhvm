@@ -231,7 +231,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
   ref_local_config := Some local_config;
   (* That's a hack, just to avoid having to pass local_config into loads of callsites
      in this module. *)
-  let mode_s = ClientEnv.mode_to_string args.mode in
+  let mode_s = ClientEnv.Variants_of_client_mode.to_name args.mode in
   HackEventLogger.set_from args.from;
   HackEventLogger.client_set_mode mode_s;
 
@@ -926,7 +926,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
           print_endline error;
           raise Exit_status.(Exit_with Input_error)
       end
-    | MODE_FILE_DEPENDENTS ->
+    | MODE_FILE_LEVEL_DEPENDENCIES ->
       let paths = filter_real_paths args.paths in
       let%lwt (responses, telemetry) = rpc args @@ Rpc.FILE_DEPENDENTS paths in
       if args.output_json then

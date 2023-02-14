@@ -321,7 +321,7 @@ let parse_check_args cmd =
         Arg.Unit
           (fun () ->
             let () = prechecked := Some false in
-            set_mode MODE_FILE_DEPENDENTS),
+            set_mode MODE_FILE_LEVEL_DEPENDENCIES),
         " (mode) Given a list of filepaths, shows list of (possibly) dependent files"
       );
       ( "--find-class-refs",
@@ -805,7 +805,7 @@ let parse_check_args cmd =
     match (mode, args) with
     | (MODE_LINT, _)
     | (MODE_CONCATENATE_ALL, _)
-    | (MODE_FILE_DEPENDENTS, _) ->
+    | (MODE_FILE_LEVEL_DEPENDENCIES, _) ->
       (Wwwroot.get None, args)
     | (_, []) -> (Wwwroot.get None, [])
     | (_, [x]) -> (Wwwroot.get (Some x), [])

@@ -40,7 +40,7 @@
   utils_config_file_lwt
   version)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
+  (pps lwt_ppx ppx_deriving.std ppx_variants_conv)))
 
 (library
  (name client_log_command)

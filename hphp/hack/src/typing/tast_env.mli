@@ -321,3 +321,6 @@ val consts :
     it with the current file. *)
 val fill_in_pos_filename_if_in_current_decl :
   env -> Pos_or_decl.t -> Pos.t option
+
+(** Check if the environment is for a definition in a while that is a builtin. *)
+val is_hhi : env -> bool

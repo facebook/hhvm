@@ -1,0 +1,2 @@
+--everything-sdt --pessimise-builtins --enable-sound-dynamic-type
+--hh-log-level like_type 1

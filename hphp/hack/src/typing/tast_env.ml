@@ -357,3 +357,5 @@ let consts env cls = Typing_env.consts env cls
 
 let fill_in_pos_filename_if_in_current_decl =
   Typing_env.fill_in_pos_filename_if_in_current_decl
+
+let is_hhi = Typing_env.is_hhi

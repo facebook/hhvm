@@ -97,6 +97,8 @@ class Worker : public WorkerIf {
 
   int getID() const { return id_; }
 
+  IntervalTimer* getIntervalTimer() const { return intervalTimer_; }
+
   /**
    * Create a new connection to the server.
    *

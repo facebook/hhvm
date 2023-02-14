@@ -486,6 +486,8 @@ let load ~silent options : t * ServerLocalConfig.t =
       ?tco_require_types_class_consts:
         (int_opt "require_types_tco_require_types_class_consts" config)
       ?tco_type_printer_fuel:(int_opt "type_printer_fuel" config)
+      ?tco_profile_top_level_definitions:
+        (bool_opt "profile_top_level_definitions" config)
       ?tco_is_systemlib:(bool_opt "is_systemlib" config)
       ~tco_saved_state_loading:
         local_config.ServerLocalConfig.saved_state_loading

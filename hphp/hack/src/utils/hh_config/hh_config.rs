@@ -198,6 +198,12 @@ impl HhConfig {
                 "typecheck_sample_rate" => {
                     go.tco_typecheck_sample_rate = parse_json(&value);
                 }
+                "type_printer_fuel" => {
+                    go.tco_type_printer_fuel = parse_json(&value);
+                }
+                "profile_top_level_definitions" => {
+                    go.tco_profile_top_level_definitions = parse_json(&value);
+                }
                 "gc_minor_heap_size" => {
                     value.retain(|c| c != '_');
                     c.gc_minor_heap_size = parse_json(&value);

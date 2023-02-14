@@ -27,13 +27,13 @@ function plus_one_impure(int $i): int {
 }
 
 function pure_caller(vec<int> $v)[]: void {
-  vec_map($v, fun('plus_one_pure'));
+  vec_map($v, plus_one_pure<>);
 
-  vec_map($v, fun('plus_one_impure')); // error
+  vec_map($v, plus_one_impure<>); // error
 }
 
 function impure_caller(vec<int> $v): void {
-  vec_map($v, fun('plus_one_pure'));
+  vec_map($v, plus_one_pure<>);
 
-  vec_map($v, fun('plus_one_impure'));
+  vec_map($v, plus_one_impure<>);
 }

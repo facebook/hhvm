@@ -1,4 +1,4 @@
-File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 8, characters 17-35:
+File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 8, characters 17-30:
 Invalid argument (Typing[4041])
   File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 3, characters 10-21:
   Too many mandatory arguments (expected 0 but got 2)

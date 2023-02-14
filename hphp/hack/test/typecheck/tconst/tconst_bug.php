@@ -6,8 +6,8 @@ function expectVecString(vec<string> $vs):void {
 class W {
   public function testit(vec<StringType> $x, StringType $st): void {
     $exactst = new StringType();
-    hh_show(class_meth(StringType::class, 'foo'));
-    hh_show(class_meth(StringType::class, 'bar'));
+    hh_show(StringType::foo<>);
+    hh_show(StringType::bar<>);
     hh_show(inst_meth($exactst, 'inst_foo'));
     hh_show(inst_meth($st, 'inst_foo'));
     hh_show(inst_meth($exactst, 'inst_bar'));

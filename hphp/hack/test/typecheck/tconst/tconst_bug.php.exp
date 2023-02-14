@@ -1,7 +1,7 @@
-File "tconst_bug.php", line 9, characters 5-49:
-  (function(vec<StringType> $boxes): vec<string>)
-File "tconst_bug.php", line 10, characters 5-49:
-  (function(vec<exact StringType> $boxes): vec<string>)
+File "tconst_bug.php", line 9, characters 5-30:
+  (readonly function(vec<StringType> $boxes): vec<string>)
+File "tconst_bug.php", line 10, characters 5-30:
+  (readonly function(vec<exact StringType> $boxes): vec<string>)
 File "tconst_bug.php", line 11, characters 5-44:
   (function(vec<StringType> $boxes): vec<string>)
 File "tconst_bug.php", line 12, characters 5-39:

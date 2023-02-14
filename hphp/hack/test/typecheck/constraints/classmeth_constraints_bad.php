@@ -7,6 +7,6 @@ class MyClass {
 }
 
 function render(): void {
-  $f = class_meth(MyClass::class, 'element');
+  $f = MyClass::element<>;
   $f(3);
 }

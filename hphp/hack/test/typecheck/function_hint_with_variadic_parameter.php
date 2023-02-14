@@ -11,10 +11,10 @@ function hint_multiple_int((function(int, int, int): void) $f): void {}
 function hint_variadic_int((function(int...): void) $f): void {}
 
 function test(): void {
-  hint_no_args(fun('variadic_int'));
-  hint_single_int(fun('variadic_int'));
-  hint_multiple_int(fun('variadic_int'));
-  hint_variadic_int(fun('variadic_int'));
+  hint_no_args(variadic_int<>);
+  hint_single_int(variadic_int<>);
+  hint_multiple_int(variadic_int<>);
+  hint_variadic_int(variadic_int<>);
 
   $closure = function(int ...$y): void {};
   hint_no_args($closure);

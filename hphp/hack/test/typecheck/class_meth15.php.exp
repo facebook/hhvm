@@ -1,6 +1,2 @@
-File "class_meth15.php", line 4, characters 14-24:
-Cannot access `self::class` when no class scope is active (Parsing[1002])
-File "class_meth15.php", line 4, characters 14-17:
-Unbound name (typing): `*Unknown*` (Typing[4107])
-File "class_meth15.php", line 4, characters 14-17:
+File "class_meth15.php", line 4, characters 3-6:
 `self` is undefined outside of a class (Typing[4059])

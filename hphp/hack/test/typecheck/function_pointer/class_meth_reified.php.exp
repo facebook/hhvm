@@ -1,4 +1,8 @@
-File "class_meth_reified.php", line 8, characters 3-31:
-Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])
-File "class_meth_reified.php", line 10, characters 3-26:
-Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])
+File "class_meth_reified.php", line 8, characters 3-12:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+  File "class_meth_reified.php", line 4, characters 26-28:
+  Definition is here
+File "class_meth_reified.php", line 10, characters 3-12:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+  File "class_meth_reified.php", line 4, characters 26-28:
+  Definition is here

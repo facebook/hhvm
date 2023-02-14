@@ -26,7 +26,7 @@ function f2(C::T2 $g, int $x): int {
 }
 
 function getf(): C::Tf {
-  return fun('f');
+  return f<>;
 }
 
 function h(string $name, inout int $i): void {
@@ -40,7 +40,7 @@ function h(string $name, inout int $i): void {
 }
 
 function test(): int {
-  $h1 = fun('h');
+  $h1 = h<>;
   $h2 = function(string $name, inout int $i): void {
     h($name, inout $i);
   };

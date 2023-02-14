@@ -6,7 +6,7 @@ class C {
   }
 
   public function test(): string {
-    $h = class_meth(static::class, 'aStaticMeth');
+    $h = static::aStaticMeth<>;
     hh_show($h);
     return $h() . ' ';
   }
@@ -14,7 +14,7 @@ class C {
 
 final class D extends C {
   public function test2(): string {
-    $g = class_meth(self::class, 'aStaticMeth');
+    $g = self::aStaticMeth<>;
     hh_show($g);
     return $g() . ' ';
   }
@@ -31,7 +31,7 @@ trait MyTr {
 
   public function test(): string {
     // static::class is the 'use'r class at runtime
-    $h = class_meth(static::class, 'aStaticMeth');
+    $h = static::aStaticMeth<>;
     hh_show($h);
     return $h() . ' ';
   }

@@ -14,5 +14,5 @@ function f(int $x): int {
 }
 
 function test(): void {
-  $y = (fun('f'))(32);
+  $y = (f<>)(32);
 }

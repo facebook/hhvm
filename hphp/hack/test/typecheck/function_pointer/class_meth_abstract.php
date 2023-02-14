@@ -5,7 +5,7 @@ abstract class Foo {
 }
 
 function test(): void {
-  class_meth(Foo::class, 'bar');
+  Foo::bar<>;
 
-  class_meth('Foo', 'bar');
+  Foo::bar<>;
 }

@@ -14,6 +14,6 @@ function id<T>(T $x): T {
 }
 
 function test(): ((function(int): int), (function(string): string)) {
-  $f = fun('id');
+  $f = id<>;
   return tuple($f, $f);
 }

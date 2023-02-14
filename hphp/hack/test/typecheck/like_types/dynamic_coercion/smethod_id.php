@@ -6,5 +6,5 @@ class C {
 }
 
 function test(dynamic $d): void {
-  class_meth(C::class, 'f')($d);
+  (C::f<>)($d);
 }

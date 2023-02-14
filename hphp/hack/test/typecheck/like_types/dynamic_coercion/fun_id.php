@@ -4,5 +4,5 @@
 function f(int $i): void {}
 
 function test(dynamic $d): void {
-  fun('f')($d);
+  (f<>)($d);
 }

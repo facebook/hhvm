@@ -3,8 +3,8 @@
 function foo(): void {}
 
 function test(): void {
-  fun('foo');
+  foo<>;
 
   // Should error
-  fun('not_found');
+  not_found<>;
 }

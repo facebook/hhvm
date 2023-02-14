@@ -1252,9 +1252,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
      *    then C<T1,...,Tn> <: dynamic
      *)
     let dynamic_ty =
-      MakeType.supportdyn
-        (Reason.Rdynamic_coercion (Reason.Rwitness pc))
-        (MakeType.mixed Reason.Rnone)
+      MakeType.supportdyn_mixed (Reason.Rdynamic_coercion (Reason.Rwitness pc))
     in
     let (env, ty_errs) =
       List.fold parents ~init:(env, []) ~f:(fun (env, ty_errs) (_, ty) ->

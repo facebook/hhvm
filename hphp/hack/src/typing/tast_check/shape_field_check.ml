@@ -38,7 +38,7 @@ let shapes_key_exists env shape field_name =
   in
   let tenv = Tast_env.tast_env_as_typing_env env in
   let shape = Typing_utils.strip_dynamic tenv shape in
-  let (_, shape) = Typing_utils.strip_supportdyn shape in
+  let (_, _, shape) = Typing_utils.strip_supportdyn tenv shape in
   let (_, shape) = Tast_env.expand_type env shape in
   match get_node shape with
   | Tshape (shape_kind, fields) ->

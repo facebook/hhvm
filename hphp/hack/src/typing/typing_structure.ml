@@ -87,9 +87,11 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
         | Tgeneric _ -> true
         | _ -> false
       in
-      let (supportdyn, ty) = TUtils.strip_supportdyn ty in
+      let (supportdyn, env, ty) = TUtils.strip_supportdyn env ty in
       let base_type = TUtils.get_base_type ~expand_supportdyn:false env ty in
-      let (supportdyn_bound, base_type) = TUtils.strip_supportdyn base_type in
+      let (supportdyn_bound, env, base_type) =
+        TUtils.strip_supportdyn env base_type
+      in
       let base_type =
         if is_unbound then
           MakeType.mixed (get_reason base_type)

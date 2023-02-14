@@ -120,7 +120,8 @@ let supportdyn_nonnull r = supportdyn r (nonnull r)
 
 let mixed r = mk (r, Toption (nonnull r))
 
-let supportdyn_mixed r = supportdyn r (mixed r)
+let supportdyn_mixed ?(mixed_reason = Reason.Rnone) r =
+  supportdyn r (mixed mixed_reason)
 
 let hh_formatstring r ty =
   mk (r, Tnewtype (SN.Classes.cHHFormatString, [ty], mixed r))

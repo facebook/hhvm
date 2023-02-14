@@ -783,10 +783,7 @@ and strip_dynamic env ty =
   | Some ty -> ty
 
 let is_supportdyn env ty =
-  is_sub_type_for_union
-    env
-    ty
-    (MakeType.supportdyn Reason.Rnone (MakeType.mixed Reason.Rnone))
+  is_sub_type_for_union env ty (MakeType.supportdyn_mixed Reason.Rnone)
 
 let rec make_supportdyn r env ty =
   let (env, ty) = Env.expand_type env ty in
@@ -838,10 +835,12 @@ let is_capability_i ty =
 
 let supports_dynamic env ty =
   let r = get_reason ty in
-  sub_type env ty (MakeType.supportdyn r (MakeType.mixed Reason.Rnone))
+  sub_type env ty (MakeType.supportdyn_mixed r)
 
-let strip_supportdyn ty =
+let rec strip_supportdyn env ty =
+  let (env, ty) = Typing_env.expand_type env ty in
   match get_node ty with
   | Tnewtype (name, [tyarg], _) when String.equal name SN.Classes.cSupportDyn ->
-    (true, tyarg)
-  | _ -> (false, ty)
+    let (_, env, ty) = strip_supportdyn env tyarg in
+    (true, env, ty)
+  | _ -> (false, env, ty)

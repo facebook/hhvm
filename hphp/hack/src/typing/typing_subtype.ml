@@ -523,7 +523,7 @@ let transform_dynamic_upper_bound ~coerce env ty =
     match (coerce, get_node ty) with
     | (Some TL.CoerceToDynamic, Tdynamic) ->
       let r = get_reason ty in
-      MakeType.supportdyn r (MakeType.mixed r)
+      MakeType.supportdyn_mixed ~mixed_reason:r r
     | (Some TL.CoerceToDynamic, _) -> ty
     | _ -> ty
 
@@ -541,7 +541,7 @@ let mk_issubtype_prop ~coerce env ty1 ty2 =
         ( None,
           MakeType.union
             r
-            [non_dyn_ty; MakeType.supportdyn r (MakeType.mixed r)] )
+            [non_dyn_ty; MakeType.supportdyn_mixed ~mixed_reason:r r] )
       | _ -> (coerce, ty2)
     in
     TL.IsSubtype (coerce, ty1, LoclType ty2)
@@ -839,7 +839,7 @@ and default_subtype
         match (subtype_env.coerce, get_node lty_super) with
         | (Some TL.CoerceToDynamic, Tdynamic) ->
           let r = get_reason lty_super in
-          let ty_super = MakeType.supportdyn r (MakeType.mixed r) in
+          let ty_super = MakeType.supportdyn_mixed ~mixed_reason:r r in
           default_subtype_inner env ty_sub (LoclType ty_super)
         | (Some cd, _) ->
           ( env,
@@ -1486,7 +1486,7 @@ and simplify_subtype_i
           when is_sub_type_for_union_i
                  env
                  (LoclType ty)
-                 (LoclType (MakeType.supportdyn r (MakeType.mixed r))) ->
+                 (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r)) ->
           env
           |> simplify_subtype_i
                ~subtype_env
@@ -1699,7 +1699,7 @@ and simplify_subtype_i
               ~sub_supportdyn
               ~super_like
               lty_sub
-              (mk (r_super, Tnewtype (name, [tyarg], tyarg)))
+              (MakeType.supportdyn r_super tyarg)
               env
           (*   supportdyn<t> <: ?u   iff
            *   nonnull & supportdyn<t> <: u   iff
@@ -2358,7 +2358,7 @@ and simplify_subtype_i
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
-        let (sub_supportdyn', lty) = TUtils.strip_supportdyn lty in
+        let (sub_supportdyn', env, lty) = TUtils.strip_supportdyn env lty in
         (match deref lty with
         | (r_sub, Tshape (shape_kind_sub, fdm_sub)) ->
           simplify_subtype_shape
@@ -2892,7 +2892,7 @@ and simplify_subtype_shape
              (is_sub_type_for_union_i
                 env
                 (LoclType ty)
-                (LoclType (MakeType.supportdyn r (MakeType.mixed r))))
+                (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r)))
       then
         MakeType.supportdyn r ty
       else

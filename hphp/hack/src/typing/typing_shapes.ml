@@ -49,11 +49,10 @@ let refine_shape field_name pos env shape =
       Reason.Rmissing_optional_field
         (get_pos shape, TUtils.get_printable_shape_field_name field_name)
     in
-    let mixed = MakeType.mixed r in
     if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-      MakeType.supportdyn r mixed
+      MakeType.supportdyn_mixed ~mixed_reason:r r
     else
-      mixed
+      MakeType.mixed r
   in
   let sft = { sft_optional = false; sft_ty } in
   Option.iter ~f:Errors.add_typing_error e1;
@@ -76,7 +75,7 @@ let make_locl_like_type env ty =
  *)
 (*****************************************************************************)
 
-let rec shrink_shape pos field_name env shape =
+let rec shrink_shape pos ~supportdyn field_name env shape =
   (* Make sure we have a shape type in our hands.
    * Note that we don't want to freshen any types inside the shape
    * e.g. turn shape('a' => C) into shape('a' => #1) with a subtype constraint on #1,
@@ -90,16 +89,9 @@ let rec shrink_shape pos field_name env shape =
       pos
       shape
   in
-  let (supportdyn, shape) = TUtils.strip_supportdyn shape in
-  (fun (env, ty) ->
-    ( env,
-      if supportdyn then
-        let r = get_reason ty in
-        MakeType.supportdyn r ty
-      else
-        ty ))
-  @@
-  match get_node shape with
+  let (supportdyn2, env, stripped_shape) = TUtils.strip_supportdyn env shape in
+  let supportdyn = supportdyn || supportdyn2 in
+  match get_node stripped_shape with
   | Tshape (shape_kind, fields) ->
     let fields =
       match shape_kind with
@@ -115,18 +107,29 @@ let rec shrink_shape pos field_name env shape =
           fields
     in
     let result = mk (Reason.Rwitness pos, Tshape (shape_kind, fields)) in
-    ((env, e1), result)
+    ( (env, e1),
+      if supportdyn then
+        let r = get_reason result in
+        MakeType.supportdyn r result
+      else
+        result )
   | Tunion tyl ->
     let ((env, e2), tyl) =
       List.map_env_ty_err_opt
         env
         tyl
         ~combine_ty_errs:Typing_error.multiple_opt
-        ~f:(shrink_shape pos field_name)
+        ~f:(shrink_shape pos ~supportdyn field_name)
     in
     let result = mk (Reason.Rwitness pos, Tunion tyl) in
     ((env, Option.merge e1 e2 ~f:Typing_error.both), result)
-  | _ -> ((env, e1), shape)
+  | _ ->
+    ( (env, e1),
+      if supportdyn then
+        let r = get_reason shape in
+        MakeType.supportdyn r shape
+      else
+        shape )
 
 (* Refine the type of a shape knowing that a call to Shapes::idx is not null.
  * This means that the shape now has the field, and that the type for this
@@ -348,7 +351,7 @@ let remove_key_with_ty_err p env shape_ty ((_, field_p, _) as field) =
     ((env, None), ty)
   | Some field_name ->
     let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
-    shrink_shape p field_name env shape_ty
+    shrink_shape ~supportdyn:false p field_name env shape_ty
 
 let remove_key p env shape_ty field =
   let ((env, ty_err_opt), res) = remove_key_with_ty_err p env shape_ty field in

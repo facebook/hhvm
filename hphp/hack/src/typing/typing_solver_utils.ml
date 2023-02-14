@@ -58,7 +58,10 @@ let remove_tyvar_from_lower_bound env var lower_bound =
     | (r, Tnewtype (name, [tyarg], _))
       when String.equal name Naming_special_names.Classes.cSupportDyn ->
       let (env, ty) = remove env tyarg in
-      (env, MakeType.supportdyn r ty)
+      if is_nothing ty then
+        (env, MakeType.nothing r)
+      else
+        (env, MakeType.supportdyn r ty)
     | _ -> (env, ty)
   and remove_i env ty =
     match ty with
@@ -114,6 +117,10 @@ let remove_tyvar_from_upper_bound env var upper_bound =
           MakeType.union r tyl
       in
       (env, ty)
+    | (r, Tnewtype (name, [tyarg], _))
+      when String.equal name Naming_special_names.Classes.cSupportDyn ->
+      let (env, ty) = remove env tyarg in
+      (env, MakeType.supportdyn r ty)
     | (r, Tintersection tyl) ->
       let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
       let tyl = List.filter tyl ~f:(fun ty -> not (is_mixed ty)) in

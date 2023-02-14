@@ -23,9 +23,8 @@ let add_require_dynamic_bounds env cls =
         Attributes.mem SN.UserAttributes.uaRequireDynamic tp.tp_user_attributes
       in
       let dtype =
-        Typing_make_type.supportdyn
+        Typing_make_type.supportdyn_mixed
           (Reason.Rwitness_from_decl (fst tp.tp_name))
-          (Typing_make_type.mixed Reason.Rnone)
       in
       let env = Env.add_upper_bound env (snd tp.tp_name) dtype in
       if

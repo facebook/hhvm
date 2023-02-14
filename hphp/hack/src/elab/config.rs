@@ -11,6 +11,7 @@ bitflags! {
         const HKT_ENABLED = 1 << 1;
         const IS_HHI = 1 << 2;
         const IS_SYSTEMLIB= 1 << 3;
+        const LIKE_TYPE_HINTS_ENABLED = 1 << 4;
     }
 }
 
@@ -29,5 +30,9 @@ impl Config {
 
     pub fn is_systemlib(&self) -> bool {
         self.contains(Self::IS_SYSTEMLIB)
+    }
+
+    pub fn like_type_hints_enabled(&self) -> bool {
+        self.contains(Self::LIKE_TYPE_HINTS_ENABLED)
     }
 }

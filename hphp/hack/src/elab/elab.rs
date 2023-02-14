@@ -80,7 +80,7 @@ fn elaborate<T: Transform>(node: &mut T) -> Vec<NamingPhaseError> {
         passes::elab_enum_class::ElabEnumClassPass::default(),
 
         // Elaborate class members & xhp attributes
-        // passes::elab_class_members::ElabClassMembersPass::default(),
+         passes::elab_class_vars::ElabClassVarsPass::default(),
 
         // Elaborate special function calls to canonical representation, if any
         // passes::elab_call::ElabCallPass::default(),

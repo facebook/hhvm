@@ -12,7 +12,7 @@ use depgraph_reader::Dep;
 use hash::DashMap;
 use typing_deps_hash::DepType;
 
-/// A map of `Dep`s to a human readable name.
+/// A map of `Dep`s to a human readable names.
 /// E.g. 9f886cce32ff8ed -> Type Child A
 #[derive(Default)]
 pub struct HumanReadableDepMap {
@@ -37,6 +37,7 @@ impl HumanReadableDepMap {
     /// 1154245141631872204 Extends Base
     /// 718472355108616429 Type ChildA
     pub fn load(&self, path: &Path) -> anyhow::Result<Vec<DepMapCollision>> {
+        use std::str::FromStr;
         let mut collisions = vec![];
         for line in BufReader::new(File::open(path)?).lines() {
             let line = line?;
@@ -46,22 +47,7 @@ impl HumanReadableDepMap {
                 None => anyhow::bail!("expected hash"),
             };
             let kind: DepType = match parts.next() {
-                Some(s) => match s {
-                    "GConst" => DepType::GConst,
-                    "Fun" => DepType::Fun,
-                    "Type" => DepType::Type,
-                    "Extends" => DepType::Extends,
-                    "Const" => DepType::Const,
-                    "Constructor" => DepType::Constructor,
-                    "Prop" => DepType::Prop,
-                    "SProp" => DepType::SProp,
-                    "Method" => DepType::Method,
-                    "SMethod" => DepType::SMethod,
-                    "AllMembers" => DepType::AllMembers,
-                    "GConstName" => DepType::GConstName,
-                    "Module" => DepType::Module,
-                    bad => anyhow::bail!("unexpected DepType {}", bad),
-                },
+                Some(s) => DepType::from_str(s)?,
                 None => anyhow::bail!("expected DepType"),
             };
             let sym: &str = match parts.next() {

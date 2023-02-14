@@ -59,7 +59,6 @@ function unops(int $a): void {
 
 // TEST-CHECK-BAL: define $root.check_shape
 // CHECK: define $root.check_shape($this: *void) : *void {
-// CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("a")
 // CHECK:   n1 = $builtins.hack_string("b")
@@ -75,7 +74,7 @@ function check_shape(): void {
 
 // TEST-CHECK-BAL: define $root.check_closure
 // CHECK: define $root.check_closure($this: *void, $x: *HackInt) : *void {
-// CHECK: local $impl: *void, base: *HackMixed
+// CHECK: local $impl: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$x
 // CHECK:   n1 = __sil_allocate(<Closure$check_closure>)

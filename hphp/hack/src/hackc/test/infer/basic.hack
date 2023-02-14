@@ -5,7 +5,6 @@
 
 // TEST-CHECK-BAL: define $root.main
 // CHECK: define $root.main($this: *void) : *void {
-// CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("Hello, World!\n")
 // CHECK:   n1 = $builtins.hhbc_print(n0)
@@ -17,7 +16,6 @@ function main(): void {
 
 // TEST-CHECK-BAL: define $root.escaped_string
 // CHECK: define $root.escaped_string($this: *void) : *void {
-// CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("This string has \042 a quote")
 // CHECK:   n1 = $builtins.hhbc_print(n0)
@@ -29,7 +27,6 @@ function escaped_string(): void {
 
 // TEST-CHECK-BAL: define $root.cmp
 // CHECK: define $root.cmp($this: *void, $a: *HackMixed, $b: *HackMixed) : *void {
-// CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("equal")
 // CHECK:   n1 = $builtins.hack_string("unequal")
@@ -58,7 +55,6 @@ function cmp(mixed $a, mixed $b): void {
 
 // TEST-CHECK-BAL: define $root.cmp2
 // CHECK: define $root.cmp2($this: *void, $a: *HackInt, $b: *HackInt) : *void {
-// CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("equal")
 // CHECK:   n1 = $builtins.hack_string("unequal")
@@ -87,7 +83,6 @@ function cmp2(int $a, int $b): void {
 
 // TEST-CHECK-BAL: define $root.ret_str
 // CHECK: define $root.ret_str($this: *void) : *HackString {
-// CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("hello, world\n")
 // CHECK:   n1 = $builtins.hhbc_is_type_str(n0)
@@ -100,7 +95,6 @@ function ret_str(): string {
 
 // TEST-CHECK-BAL: define $root.bool_call
 // CHECK: define $root.bool_call($this: *void) : *void {
-// CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $root.f_bool(null, $builtins.hack_bool(false))
 // CHECK:   n1 = $root.f_bool(null, $builtins.hack_bool(true))
@@ -113,7 +107,7 @@ function bool_call(): void {
 
 // TEST-CHECK-BAL: define $root.test_const
 // CHECK: define $root.test_const($this: *void) : *void {
-// CHECK: local $a: *void, $b: *void, $c: *void, base: *HackMixed
+// CHECK: local $a: *void, $b: *void, $c: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_vec($builtins.hack_string("x"), $builtins.hack_float(2.0), $builtins.hack_int(3), $builtins.hack_bool(true))
 // CHECK:   n1 = $builtins.hhbc_new_keyset_array($builtins.hack_string("xyzzy"), $builtins.hack_int(2))
@@ -131,7 +125,6 @@ function test_const(): void {
 
 // TEST-CHECK-BAL: define $root.float_arg
 // CHECK: define $root.float_arg($this: *void) : *void {
-// CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $root.f_float(null, $builtins.hack_float(3.14))
 // CHECK:   n1 = $root.f_float(null, $builtins.hack_float(3.0))
@@ -144,7 +137,6 @@ function float_arg(): void {
 
 // TEST-CHECK-BAL: define $root.check_param_types
 // CHECK: define $root.check_param_types($this: *void, $a: *HackInt, $b: *HackFloat, $c: *HackString) : *void {
-// CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   ret null
 // CHECK: }

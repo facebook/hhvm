@@ -19,7 +19,6 @@ enum A: int {
 
 // TEST-CHECK-BAL: define $root.main
 // CHECK: define $root.main($this: *void) : *void {
-// CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("A::V = ")
 // CHECK:   n1 = $builtins.hack_string("B::V = ")

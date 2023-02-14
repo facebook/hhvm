@@ -2,7 +2,7 @@
 
 // TEST-CHECK-BAL: define $root.test_async
 // CHECK: define $root.test_async($this: *void) : *HackInt {
-// CHECK: local $a: *void, $b: *void, base: *HackMixed
+// CHECK: local $a: *void, $b: *void
 // CHECK: #b0:
 // CHECK:   n0 = $root.bar(null)
 // CHECK:   n1 = $builtins.await(n0)

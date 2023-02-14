@@ -128,10 +128,13 @@ pub(crate) fn write_func(
         .zip(std::iter::repeat(&local_ty))
         .collect::<Vec<_>>();
 
-    // Always add a temp var for use by member_ops.
-    let base = crate::member_op::base_var(&unit_state.strings);
-    let base_ty = textual::Ty::mixed();
-    locals.push((base, &base_ty));
+    // See if we need a temp var for use by member_ops.
+    let base_ty;
+    if crate::member_op::func_needs_base_var(&func) {
+        let base = crate::member_op::base_var(&unit_state.strings);
+        base_ty = textual::Ty::mixed();
+        locals.push((base, &base_ty));
+    }
 
     let name_str = if let Some(method_info) = method_info.as_ref() {
         ir::MethodId::new(name).mangle_with_class(

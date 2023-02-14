@@ -47,7 +47,6 @@ class C {
 
   // TEST-CHECK-BAL: define C.__construct(
   // CHECK: define C.__construct($this: *C, $a: *HackInt, $b: *HackString, $c: *HackInt) : *HackMixed {
-  // CHECK: local base: *HackMixed
   // CHECK: #b0:
   // CHECK:   ret null
   // CHECK: }
@@ -57,7 +56,7 @@ class C {
 
   // TEST-CHECK-BAL: define C.cons_static
   // CHECK: define C.cons_static($this: *C) : *void {
-  // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void, base: *HackMixed
+  // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
   // CHECK:   n0 = $builtins.hack_string("x")
   // CHECK:   jmp b1
@@ -167,7 +166,7 @@ class C {
 
   // TEST-CHECK-BAL: define C.cons_self
   // CHECK: define C.cons_self($this: *C) : *void {
-  // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void, base: *HackMixed
+  // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
   // CHECK:   n0 = $builtins.hack_string("x")
   // CHECK:   jmp b1
@@ -230,7 +229,7 @@ class C {
 
   // TEST-CHECK-BAL: define C.cons_inst
   // CHECK: define C.cons_inst($this: *C) : *void {
-  // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void, base: *HackMixed
+  // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
   // CHECK:   n0 = $builtins.hack_string("x")
   // CHECK:   jmp b1
@@ -293,7 +292,6 @@ class C {
 
   // TEST-CHECK-BAL: define C$static.static_signature
   // CHECK: define C$static.static_signature($this: *C$static, $a: *HackMixed, $b: *HackMixed) : *void {
-  // CHECK: local base: *HackMixed
   // CHECK: #b0:
   // CHECK:   n0 = $builtins.hack_string("equal")
   // CHECK:   n1 = $builtins.hack_string("unequal")
@@ -334,7 +332,7 @@ class C {
 
   // TEST-CHECK-BAL: define C.test_const
   // CHECK: define C.test_const($this: *C) : *void {
-  // CHECK: local $x: *void, base: *HackMixed
+  // CHECK: local $x: *void
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &C$static::MY_CONSTANT
   // CHECK:   store &$x <- n0: *HackMixed
@@ -348,7 +346,6 @@ class C {
 trait T0 {
   // TEST-CHECK-BAL: define T0.trait_parent_caller
   // CHECK: define T0.trait_parent_caller($this: *T0) : *void {
-  // CHECK: local base: *HackMixed
   // CHECK: #b0:
   // CHECK:   n0: *T0 = load &$this
   // CHECK:   n1 = __parent__.test_const(n0)
@@ -365,7 +362,6 @@ trait T1 {
 
   // TEST-CHECK-BAL: define T1.trait_parent_caller
   // CHECK: define T1.trait_parent_caller($this: *T1) : *void {
-  // CHECK: local base: *HackMixed
   // CHECK: #b0:
   // CHECK:   n0: *T1 = load &$this
   // CHECK:   n1 = __parent__.test_const(n0)
@@ -378,7 +374,6 @@ trait T1 {
 
 // TEST-CHECK-BAL: define $root.dynamic_const
 // CHECK: define $root.dynamic_const($this: *void, $c: *C) : *void {
-// CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("MY_CONSTANT")
 // CHECK:   n1: *HackMixed = load &$c

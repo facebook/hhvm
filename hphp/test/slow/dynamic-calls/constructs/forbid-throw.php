@@ -218,7 +218,7 @@ async function negative_tests() {
 
   A::negative_test1();
 
-  HH\class_meth(A::class, 'static_func')();
+  (A::static_func<>)();
 
   new A;
   new Vector;

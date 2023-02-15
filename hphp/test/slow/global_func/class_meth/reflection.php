@@ -6,7 +6,7 @@ class A {
   }
 }
 
-function func($p0 = HH\class_meth(A::class, 'f1')) {
+function func($p0 = A::f1<>) {
 }
 
 <<__EntryPoint>>

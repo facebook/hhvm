@@ -32,7 +32,7 @@ function getFun() {
 }
 
 function getMeth() {
-  return __hhvm_intrinsics\launder_value(HH\class_meth(A::class, 'meth'));
+  return __hhvm_intrinsics\launder_value(A::meth<>);
 }
 
 <<__EntryPoint>>

@@ -30,7 +30,7 @@ function getTestcase(int $num) {
 
 <<__EntryPoint>>
 function main(): void {
-  $x = LV(HH\class_meth(A::class, 'meth'));
+  $x = LV(A::meth<>);
 
   for ($i = 0; $i < 13; $i++) {
     $y = getTestcase($i);

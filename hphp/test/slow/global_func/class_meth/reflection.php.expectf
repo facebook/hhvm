@@ -24,7 +24,7 @@ vec(1) {
         function(f1)
       }
       ["defaultText"]=>
-      string(24) "HH\class_meth("A", "f1")"
+      string(7) "A::f1<>"
       ["attributes"]=>
       dict(0) {
       }

@@ -7,6 +7,6 @@ class A {
 <<__EntryPoint>>
 function main() {
   $k = 'keya';
-  apc_store($k, HH\class_meth(A::class, 'func1'));
+  apc_store($k, A::func1<>);
   var_dump(__hhvm_intrinsics\apc_fetch_no_check($k));
 }

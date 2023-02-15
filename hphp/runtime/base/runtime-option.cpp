@@ -2419,7 +2419,7 @@ void RuntimeOption::Load(
     }
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
-    Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", false);
+    Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", true);
     Config::Bind(AutoloadUserlandEnabled, ini, config, "Autoload.UserlandEnabled", true);
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
     Config::Bind(AutoloadEnableExternFactExtractor, ini, config, "Autoload.EnableExternFactExtractor", true);

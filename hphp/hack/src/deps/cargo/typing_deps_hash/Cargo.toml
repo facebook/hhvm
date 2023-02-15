@@ -10,3 +10,5 @@ path = "../../typing_deps_hash.rs"
 
 [dependencies]
 fnv = "1.0"
+strum = "0.21"
+strum_macros = "0.21"

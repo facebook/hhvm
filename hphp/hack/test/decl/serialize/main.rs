@@ -10,21 +10,20 @@ use std::path::PathBuf;
 
 use ::anyhow::Context;
 use ::anyhow::Result;
+use clap::Parser;
 use oxidized_by_ref::direct_decl_parser::Decls;
 use relative_path::RelativePath;
 use serde::Deserialize;
 use serde::Serialize;
-use structopt::StructOpt;
 use walkdir::WalkDir;
 
-#[derive(StructOpt, Clone, Debug)]
-#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)
+#[derive(Parser, Clone, Debug)]
 pub struct Opts {
     path: PathBuf,
 }
 
 fn main() -> ::anyhow::Result<()> {
-    let opts = Opts::from_args();
+    let opts = Opts::try_parse()?;
     let mut path = std::env::current_dir().expect("current path is none");
     path.push(opts.path);
     let mut results: Vec<Result<Profile, Error>> = vec![];

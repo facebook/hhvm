@@ -366,15 +366,15 @@ let try_bind_to_equal_bound ~freshen env r var =
   else
     let old_env = env in
     let env = Utils.remove_tyvar_from_bounds env var in
-    let expand_all tyset =
-      ITySet.map
-        (fun ty ->
-          let (_, ty) = Env.expand_internal_type env ty in
-          ty)
-        tyset
+    let expand_all env tyset =
+      ITySet.fold_map ~init:env ~f:Env.expand_internal_type tyset
     in
-    let lower_bounds = expand_all (Env.get_tyvar_lower_bounds env var) in
-    let upper_bounds = expand_all (Env.get_tyvar_upper_bounds env var) in
+    let (env, lower_bounds) =
+      expand_all env (Env.get_tyvar_lower_bounds env var)
+    in
+    let (env, upper_bounds) =
+      expand_all env (Env.get_tyvar_upper_bounds env var)
+    in
     let equal_bounds = ITySet.inter lower_bounds upper_bounds in
     let (env, ty_err_opt) =
       match ITySet.choose_opt equal_bounds with

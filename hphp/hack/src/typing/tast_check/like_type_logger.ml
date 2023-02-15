@@ -114,6 +114,9 @@ module Categories : sig
   module Key : sig
     type t =
       | Expression
+      | Obj_get_receiver
+      | Class_get_receiver
+      | Class_const_receiver
       | Property
       | Parameter
       | Return
@@ -132,6 +135,9 @@ end = struct
   module Key = struct
     type t =
       | Expression
+      | Obj_get_receiver
+      | Class_get_receiver
+      | Class_const_receiver
       | Property
       | Parameter
       | Return
@@ -211,8 +217,23 @@ let partition_types =
 
     method plus = Categories.plus
 
-    method! on_expr env (ty, _, _) =
-      Counter.unit env ty |> Categories.singleton Categories.Key.Expression
+    method! on_expr env ((ty, _, e_) as e) =
+      let open Categories in
+      Counter.unit env ty
+      |> Categories.singleton Categories.Key.Expression
+      |> plus
+           begin
+             match e_ with
+             | Aast.Obj_get ((receiver_ty, _, _), _, _, _) ->
+               Counter.unit env receiver_ty |> singleton Key.Obj_get_receiver
+             | Aast.Class_get ((receiver_ty, _, _), _, _) ->
+               Counter.unit env receiver_ty |> singleton Key.Class_get_receiver
+             | Aast.Class_const ((receiver_ty, _, _), _) ->
+               Counter.unit env receiver_ty
+               |> singleton Key.Class_const_receiver
+             | _ -> zero
+           end
+      |> plus (super#on_expr env e)
 
     method! on_method_ env m =
       let declaration =

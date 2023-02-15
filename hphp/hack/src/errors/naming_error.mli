@@ -257,7 +257,7 @@ type t =
   | Type_constant_in_enum_class_outside_allowed_locations of Pos.t
   | Deprecated_use of {
       pos: Pos.t;
-      msg: string;
+      fn_name: string;
     }
 
 include

@@ -267,7 +267,7 @@ type t =
   | Type_constant_in_enum_class_outside_allowed_locations of Pos.t
   | Deprecated_use of {
       pos: Pos.t;
-      msg: string;
+      fn_name: string;
     }
 
 let const_without_typehint pos name type_ =
@@ -1164,7 +1164,12 @@ let type_constant_in_enum_class_outside_allowed_locations pos =
       ^ "The set of approved locations is in .hhconfig" )
     []
 
-let deprecated_use pos msg =
+let deprecated_use pos fn_name =
+  let msg =
+    "The builtin "
+    ^ Markdown_lite.md_codify (Utils.strip_ns fn_name)
+    ^ " is deprecated."
+  in
   User_error.make Error_codes.Typing.(to_enum DeprecatedUse) (pos, msg) []
 
 let to_user_error = function
@@ -1301,4 +1306,4 @@ let to_user_error = function
   | Dynamic_method_access pos -> dynamic_method_access pos
   | Type_constant_in_enum_class_outside_allowed_locations pos ->
     type_constant_in_enum_class_outside_allowed_locations pos
-  | Deprecated_use { pos; msg } -> deprecated_use pos msg
+  | Deprecated_use { pos; fn_name } -> deprecated_use pos fn_name

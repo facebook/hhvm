@@ -25,13 +25,12 @@ use pos::RelativePath;
 use pos::RelativePathCtx;
 use pos::TypeName;
 use rayon::prelude::*;
-use structopt::StructOpt;
 use tempdir::TempDir;
 use ty::reason::BReason;
 use ty::reason::NReason;
 use ty::reason::Reason;
 
-#[derive(StructOpt, Debug)]
+#[derive(clap::Parser, Debug)]
 struct CliOptions {
     /// The repository root (where .hhconfig is), e.g., ~/www
     root: PathBuf,
@@ -41,31 +40,31 @@ struct CliOptions {
     /// If omitted or set to 0, uses the rayon default (the value of the
     /// `RAYON_NUM_THREADS` environment variable if set, or the number of
     /// logical CPUs otherwise).
-    #[structopt(long)]
+    #[clap(long)]
     num_threads: Option<usize>,
 
     /// Path to a SQLite naming table (allowing parsing to be done lazily instead of up-front).
-    #[structopt(long)]
+    #[clap(long)]
     naming_table: Option<PathBuf>,
 
     /// Allocate decls with positions instead of allocating position-free decls.
-    #[structopt(long)]
+    #[clap(long)]
     with_pos: bool,
 
     /// In addition to parsing shallow decls, compute folded class decls.
-    #[structopt(long)]
+    #[clap(long)]
     fold: bool,
 
     /// Keep all decls in memory rather than serializing and compressing them.
-    #[structopt(long)]
+    #[clap(long)]
     no_serialize: bool,
 
     /// Use the given compression algorithm when serializing decls (if serialization is enabled).
-    #[structopt(default_value, long)]
+    #[clap(default_value = "none", long)]
     compression: Compression,
 
     /// Output profiling results for folding (in JSON format) to a separate file.
-    #[structopt(long, parse(from_os_str))]
+    #[clap(long)]
     profile_output: Option<PathBuf>,
 }
 
@@ -76,7 +75,7 @@ struct ProfileFoldResult {
 }
 
 fn main() {
-    let opts = CliOptions::from_args();
+    let opts = <CliOptions as clap::Parser>::parse();
 
     if let Some(num_threads) = opts.num_threads {
         rayon::ThreadPoolBuilder::new()

@@ -11,6 +11,7 @@ path = "../../decl_repo_rust.rs"
 test = false
 
 [dependencies]
+clap = { version = "4.1.4", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 decl_parser = { version = "0.0.0", path = "../../decl_parser/cargo/decl_parser" }
 file_provider = { version = "0.0.0", path = "../../file_provider/cargo/file_provider" }
 find_utils = { version = "0.0.0", path = "../../../utils/find_utils" }
@@ -25,6 +26,5 @@ rayon = "1.2"
 rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
-structopt = "0.3.23"
 tempdir = "0.3"
 ty = { version = "0.0.0", path = "../../ty/cargo/ty" }

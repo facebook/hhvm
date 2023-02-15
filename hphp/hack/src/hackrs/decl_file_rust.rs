@@ -6,6 +6,7 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
+use clap::Parser;
 use decl_parser::DeclParser;
 use folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::decl_provider::make_folded_decl_provider;
@@ -16,41 +17,40 @@ use jwalk::WalkDir;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
-use structopt::StructOpt;
 use ty::decl::shallow;
 use ty::reason::BReason;
 use ty::reason::NReason;
 use ty::reason::Reason;
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct CliOptions {
     /// The Hack source files to declare.
-    #[structopt(value_name("FILEPATH"))]
+    #[clap(value_name("FILEPATH"))]
     filenames: Vec<PathBuf>,
 
     /// The repository root (where .hhconfig is), e.g., ~/www
-    #[structopt(long)]
+    #[clap(long)]
     root: Option<PathBuf>,
 
     /// Path to a SQLite naming table (allowing declaration of a single file in a large repo).
-    #[structopt(long)]
+    #[clap(long)]
     naming_table: Option<PathBuf>,
 
     /// Allocate decls with positions instead of allocating position-free decls.
-    #[structopt(long)]
+    #[clap(long)]
     with_pos: bool,
 
     /// Print the shallow decls in the file.
-    #[structopt(long)]
+    #[clap(long)]
     shallow: bool,
 
     /// Print the folded decls of the classes in the file.
-    #[structopt(long)]
+    #[clap(long)]
     folded: bool,
 }
 
 fn main() {
-    let mut opts = CliOptions::from_args();
+    let mut opts = CliOptions::parse();
 
     // If no modes were specified, print the shallow decls at least.
     if !opts.shallow && !opts.folded {

@@ -54,6 +54,7 @@
   },
   "resolutions": {
     "@braintree/sanitize-url": "^6.0.0",
+    "@sideway/formula": "^3.0.1",
     "d3-color": "^3.1.0",
     "eta": "^2.0.0",
     "got": "^11.8.5",

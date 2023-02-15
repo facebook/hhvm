@@ -30,60 +30,112 @@ let like_type_log_level_of env =
 
 let locl_ty_of_hint (ty, _) = ty
 
-module Counter = struct
-  type t = {
-    like: int;
-    non_like: int;
-  }
+module Counter : sig
+  type t
 
-  let zero = { like = 0; non_like = 0 }
+  val zero : t
 
-  let plus r1 r2 =
-    { like = r1.like + r2.like; non_like = r1.non_like + r2.non_like }
+  val is_zero : t -> bool
+
+  val plus : t -> t -> t
+
+  val unit : Tast_env.t -> Typing_defs.locl_ty -> t
+
+  val json_of : t -> JSON.json
+end = struct
+  module Key = struct
+    type t =
+      | Like
+      | NonLike
+    [@@deriving show { with_path = false }, ord]
+  end
+
+  open WrappedMap.Make (Key)
+
+  type nonrec t = int t
+
+  let zero = empty
+
+  let is_zero = is_empty
+
+  let plus =
+    merge (fun _ c_opt c_opt' ->
+        match (c_opt, c_opt') with
+        | (Some c, Some c') -> Some (c + c')
+        | (None, Some c)
+        | (Some c, None) ->
+          Some c
+        | (None, None) -> None)
+
+  let inc key =
+    update key @@ function
+    | None -> Some 1
+    | Some c -> Some (c + 1)
 
   let unit env ty =
     if is_like_type env ty then
-      { like = 1; non_like = 0 }
+      inc Key.Like empty
     else
-      { like = 0; non_like = 1 }
+      inc Key.NonLike empty
 
   let json_of ctr =
     JSON.JSON_Object
-      [("like", JSON.int_ ctr.like); ("non_like", JSON.int_ ctr.non_like)]
+      (bindings ctr |> List.map ~f:(fun (k, v) -> (Key.show k, JSON.int_ v)))
 end
 
-module Categories = struct
-  type t = {
-    expression: Counter.t;
-    property: Counter.t;
-    parameter: Counter.t;
-    return: Counter.t;
-  }
+module Categories : sig
+  module Key : sig
+    type t =
+      | Expression
+      | Property
+      | Parameter
+      | Return
+  end
 
-  let zero =
-    {
-      expression = Counter.zero;
-      parameter = Counter.zero;
-      property = Counter.zero;
-      return = Counter.zero;
-    }
+  type t
 
-  let plus c1 c2 =
-    {
-      expression = Counter.plus c1.expression c2.expression;
-      parameter = Counter.plus c1.parameter c2.parameter;
-      return = Counter.plus c1.return c2.return;
-      property = Counter.plus c1.property c2.property;
-    }
+  val zero : t
 
-  let json_of c =
+  val plus : t -> t -> t
+
+  val singleton : Key.t -> Counter.t -> t
+
+  val json_of : t -> JSON.json
+end = struct
+  module Key = struct
+    type t =
+      | Expression
+      | Property
+      | Parameter
+      | Return
+    [@@deriving show { with_path = false }, ord]
+  end
+
+  open WrappedMap.Make (Key)
+
+  type nonrec t = Counter.t t
+
+  let zero = empty
+
+  let plus =
+    merge (fun _ c_opt c_opt' ->
+        match (c_opt, c_opt') with
+        | (Some c, Some c') -> Some (Counter.plus c c')
+        | (None, Some c)
+        | (Some c, None) ->
+          Some c
+        | (None, None) -> None)
+
+  let singleton k c =
+    if Counter.is_zero c then
+      empty
+    else
+      singleton k c
+
+  let json_of ctr =
     JSON.JSON_Object
-      [
-        ("expression", Counter.json_of c.expression);
-        ("parameter", Counter.json_of c.parameter);
-        ("return", Counter.json_of c.return);
-        ("property", Counter.json_of c.property);
-      ]
+      (bindings ctr
+      |> List.map ~f:(fun (k, v) -> (Key.show k, Counter.json_of v)))
 end
 
 module Log = struct
@@ -116,15 +168,16 @@ let callable_decl_counter env params ret =
     List.fold params ~init:Counter.zero ~f:(fun acc param ->
         let ty = locl_ty_of_hint param.Aast.param_type_hint in
         Counter.plus acc (Counter.unit env ty))
+    |> Categories.singleton Categories.Key.Parameter
   in
   let return =
     let ty = locl_ty_of_hint ret in
-    Counter.unit env ty
+    Counter.unit env ty |> Categories.singleton Categories.Key.Return
   in
-  Categories.{ zero with return; parameter }
+  Categories.(plus parameter return)
 
 let partition_types =
-  object (self)
+  object
     inherit [_] Tast_visitor.reduce as super
 
     method zero = Categories.zero
@@ -132,33 +185,31 @@ let partition_types =
     method plus = Categories.plus
 
     method! on_expr env (ty, _, _) =
-      Categories.{ (self#zero) with expression = Counter.unit env ty }
+      Counter.unit env ty |> Categories.singleton Categories.Key.Expression
 
     method! on_method_ env m =
       let declaration =
         callable_decl_counter env m.Aast.m_params m.Aast.m_ret
       in
       let expression = super#on_method_ env m in
-      self#plus declaration expression
+      Categories.plus declaration expression
 
     method! on_fun_ env f =
       let declaration =
         callable_decl_counter env f.Aast.f_params f.Aast.f_ret
       in
       let expression = super#on_fun_ env f in
-      self#plus declaration expression
+      Categories.plus declaration expression
 
     method! on_class_ env c =
       let property =
-        let property =
-          List.fold c.Aast.c_vars ~init:Counter.zero ~f:(fun acc prop ->
-              let ty = locl_ty_of_hint prop.Aast.cv_type in
-              Counter.plus acc (Counter.unit env ty))
-        in
-        Categories.{ (self#zero) with property }
+        List.fold c.Aast.c_vars ~init:Counter.zero ~f:(fun acc prop ->
+            let ty = locl_ty_of_hint prop.Aast.cv_type in
+            Counter.plus acc (Counter.unit env ty))
+        |> Categories.singleton Categories.Key.Property
       in
       let method_ = super#on_class_ env c in
-      self#plus property method_
+      Categories.plus property method_
   end
 
 let log_type_partition env log =

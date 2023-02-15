@@ -1,10 +1,5 @@
 [Like_type_logger] {
   "pos":"function_decl2.php:6",
-  "categories":{
-    "expression":{"like":0,"non_like":0},
-    "parameter":{"like":0,"non_like":1},
-    "return":{"like":0,"non_like":1},
-    "property":{"like":0,"non_like":0}
-  }
+  "categories":{"Parameter":{"NonLike":1},"Return":{"NonLike":1}}
 }
 No errors

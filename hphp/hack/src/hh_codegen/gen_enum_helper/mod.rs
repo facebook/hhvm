@@ -14,24 +14,24 @@ use std::path::PathBuf;
 
 use anyhow::anyhow;
 use anyhow::Result;
+use clap::Parser;
 use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
 use ref_kind::RefKind;
-use structopt::StructOpt;
 use syn::*;
 
 use crate::common::*;
 use crate::quote_helper::*;
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 pub struct Args {
     /// Rust files containing the enum types for which codegen will be performed.
-    #[structopt(short, long)]
+    #[clap(short, long)]
     input: Vec<String>,
 
     /// The directory to which generated files will be written.
-    #[structopt(short, long, parse(from_os_str))]
+    #[clap(short, long)]
     output: PathBuf,
 }
 

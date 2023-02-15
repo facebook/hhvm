@@ -5,20 +5,20 @@
 
 use std::path::PathBuf;
 
-#[derive(Debug, structopt::StructOpt)]
+#[derive(Debug, clap::Parser)]
 pub struct Args {
     /// Rust files containing the types for which codegen will be performed.
     /// All types reachable from the given root type must be defined in one of
     /// the files provided as `--input`.
-    #[structopt(short, long, parse(from_os_str))]
+    #[clap(short, long)]
     pub input: Vec<PathBuf>,
 
     /// The root type of the AST. All types reachable from this type will be
     /// visited by the generated visitor.
-    #[structopt(short, long)]
+    #[clap(short, long)]
     pub root: String,
 
     /// The directory to which generated files will be written.
-    #[structopt(short, long, parse(from_os_str))]
+    #[clap(short, long)]
     pub output: PathBuf,
 }

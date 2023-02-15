@@ -2290,11 +2290,11 @@ name = "hh_codegen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "clap 4.1.4",
  "hash",
  "proc-macro2",
  "quote",
  "signed_source",
- "structopt",
  "syn",
  "synstructure",
 ]

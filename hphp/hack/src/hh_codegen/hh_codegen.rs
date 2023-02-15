@@ -19,26 +19,25 @@ use std::process::Command;
 
 use anyhow::Context;
 use anyhow::Result;
+use clap::Parser;
 use common::*;
-use structopt::StructOpt;
 
-#[derive(Debug, StructOpt)]
-#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)
+#[derive(Debug, Parser)]
 struct Opts {
     /// Command to regenerate the output. This text will be included in generated file headers.
-    #[structopt(long)]
+    #[clap(long)]
     regen_cmd: Option<String>,
 
     /// Path to a Rust formatter binary, which will be used on the generated output.
-    #[structopt(long)]
+    #[clap(long)]
     rustfmt: Option<String>,
 
     /// The codegen task to run.
-    #[structopt(subcommand)]
+    #[clap(subcommand)]
     subcommand: Subcommand,
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 enum Subcommand {
     /// Generate convenient factory functions and predicates for enum types.
     EnumHelpers(gen_enum_helper::Args),
@@ -51,7 +50,7 @@ enum Subcommand {
 }
 
 fn main() -> Result<()> {
-    let opts = Opts::from_args();
+    let opts = Opts::parse();
 
     let formatter = opts.rustfmt.as_deref();
     eprintln!("Rust formatter set to {:?}", formatter);

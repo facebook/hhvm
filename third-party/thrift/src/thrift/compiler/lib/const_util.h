@@ -78,7 +78,7 @@ folly::void_t<typename T::mapped_type> hydrate_const(
     typename T::key_type key;
     hydrate_const(key, *pair.first);
     typename T::mapped_type value;
-    hydrate_const(key, *pair.second);
+    hydrate_const(value, *pair.second);
     out.emplace(std::move(key), std::move(value));
   }
 }

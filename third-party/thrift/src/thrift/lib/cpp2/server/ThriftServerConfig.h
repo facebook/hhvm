@@ -817,9 +817,10 @@ class ThriftServerConfig {
 class ThriftServerInitialConfig {
  public:
   FOLLY_CONSTEVAL ThriftServerInitialConfig() = default;
+  ThriftServerInitialConfig(const ThriftServerInitialConfig& rhs) = default;
+
   // to fix oss for now we'll have this as a pair<T, bool> to mimick the
   // behavior of optional
-
 #define THRIFT_SERVER_INITIAL_CONFIG_DEFINE(TYPE, NAME)        \
  private:                                                      \
   std::pair<TYPE, bool> NAME##_ = {{}, false};                 \
@@ -841,8 +842,5 @@ class ThriftServerInitialConfig {
 
  private:
   friend class ThriftServerConfig;
-
-  FOLLY_CONSTEVAL ThriftServerInitialConfig(
-      const ThriftServerInitialConfig& rhs) = default;
 };
 } // namespace apache::thrift

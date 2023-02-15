@@ -1,6 +1,0 @@
-File "anon13.php.pess", line 25, characters 10-11:
-Invalid return type (Typing[4110])
-  File "anon13.php.pess", line 16, characters 18-59:
-  Expected `~Vector<supportdyn<(function(int): ~int)>>`
-  File "anon13.php.pess", line 17, characters 8-62:
-  But got `Vector<supportdyn<(function(_ $x): _)>>`

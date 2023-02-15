@@ -771,6 +771,62 @@ let add_builtin_attribute_result replace_pos ~doc ~name : unit =
   in
   add_res complete
 
+let enclosing_class_decl (env : Tast_env.env) : Cls.t option =
+  match Tast_env.get_self_id env with
+  | Some id -> Tast_env.get_class env id
+  | None -> None
+
+(** Return the inherited class methods whose name starts with [prefix]
+    and haven't already been overridden. *)
+let methods_could_override (cls : Cls.t) ~(is_static : bool) (prefix : string) :
+    (string * class_elt) list =
+  let c_name = Cls.name cls in
+  let methods =
+    if is_static then
+      Cls.smethods cls
+    else
+      Cls.methods cls
+  in
+  List.filter methods ~f:(fun (n, ce) ->
+      (* We're only interested in methods that start with this prefix,
+         and aren't already defined in the current class. *)
+      String.is_prefix n ~prefix && not (String.equal ce.ce_origin c_name))
+
+(** Autocomplete a partially written override method definition.
+
+   <<__Override>>
+   public static function xAUTO332
+*)
+let autocomplete_overriding_method env m : unit =
+  let open Aast in
+  let name = snd m.m_name in
+  if is_auto_complete name then
+    let prefix = strip_suffix name in
+    let has_override =
+      List.exists m.m_user_attributes ~f:(fun { ua_name = (_, attr_name); _ } ->
+          String.equal attr_name Naming_special_names.UserAttributes.uaOverride)
+    in
+    match enclosing_class_decl env with
+    | Some cls when has_override ->
+      List.iter
+        (methods_could_override cls ~is_static:m.m_static prefix)
+        ~f:(fun (name, ce) ->
+          let complete =
+            {
+              res_pos = Pos.to_absolute Pos.none;
+              res_replace_pos = replace_pos_of_id m.m_name;
+              res_base_class = Some ce.ce_origin;
+              res_ty = "method name";
+              res_name = name;
+              res_fullname = name;
+              res_kind = SI_ClassMethod;
+              func_details = None;
+              res_documentation = None;
+            }
+          in
+          add_res complete)
+    | _ -> ()
+
 let autocomplete_builtin_attribute
     ((pos, name) : Pos.t * string) (attr_kind : string) : unit =
   let module UA = Naming_special_names.UserAttributes in
@@ -1416,6 +1472,7 @@ let visitor
       super#on_tparam env tp
 
     method! on_method_ env m =
+      autocomplete_overriding_method env m;
       List.iter m.Aast.m_user_attributes ~f:(fun ua ->
           autocomplete_builtin_attribute
             ua.Aast.ua_name

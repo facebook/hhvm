@@ -259,7 +259,7 @@ fn comp_depgraph64(
     }
 }
 
-use structopt::StructOpt;
+use clap::Parser;
 
 fn parse_hex_or_decimal(src: &str) -> std::result::Result<u64, std::num::ParseIntError> {
     let src_trim = src.trim_start_matches("0x");
@@ -270,8 +270,8 @@ fn parse_hex_or_decimal(src: &str) -> std::result::Result<u64, std::num::ParseIn
     }
 }
 
-#[derive(Debug, structopt::StructOpt)]
-#[structopt(
+#[derive(Debug, Parser)]
+#[clap(
     name = "dump_saved_state_depgraph",
     about = "
 Common usage is to provide two file arguments to compare, 'test' and 'control'.
@@ -284,31 +284,31 @@ Example invocation:
 Exit code will be 0 if 'test' >= 'control' and 1 if 'test' < 'control'."
 )]
 struct Opt {
-    #[structopt(long = "with-progress-bar", help = "Enable progress bar display")]
+    #[clap(long = "with-progress-bar", help = "Enable progress bar display")]
     with_progress_bar: bool,
 
-    #[structopt(long = "dump", help = "graph to render as text")]
+    #[clap(long = "dump", help = "graph to render as text")]
     dump: Option<String>,
 
-    #[structopt(
+    #[clap(
         long = "dependency-hash",
         help = "(with --dump; only for 64-bit) only dump edges for the given dependency hash",
-        parse(try_from_str = parse_hex_or_decimal)
+        value_parser = parse_hex_or_decimal
     )]
     dependency_hash: Option<u64>,
 
-    #[structopt(long = "print-hex", help = "print hexadecimal hashes")]
+    #[clap(long = "print-hex", help = "print hexadecimal hashes")]
     print_hex: bool,
 
-    #[structopt(long = "test", help = "'test' graph")]
+    #[clap(long = "test", help = "'test' graph")]
     test: Option<String>,
 
-    #[structopt(long = "control", help = "'control' graph")]
+    #[clap(long = "control", help = "'control' graph")]
     control: Option<String>,
 }
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let opt = Opt::from_args();
+    let opt = Opt::try_parse()?;
     match match opt {
         Opt {
             dump: Some(file),

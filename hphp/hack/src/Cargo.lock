@@ -1429,9 +1429,9 @@ dependencies = [
 name = "dump_saved_state_depgraph"
 version = "0.0.0"
 dependencies = [
+ "clap 4.1.4",
  "depgraph_reader",
  "indicatif",
- "structopt",
 ]
 
 [[package]]

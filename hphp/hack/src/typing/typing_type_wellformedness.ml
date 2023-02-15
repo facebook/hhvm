@@ -649,10 +649,7 @@ let expr tenv ((), _p, e) =
   | Import _
   | Collection _
   | Lplaceholder _
-  | Fun_id _
-  | Method_id _
   | Method_caller _
-  | Smethod_id _
   | Pair _
   | EnumClassLabel _
   | ET_Splice _

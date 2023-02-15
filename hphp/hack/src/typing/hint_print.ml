@@ -443,16 +443,6 @@ and pp_expr_ ppf = function
         (targs, (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) exprs, expr_opt))
       )
   | Aast.Lplaceholder _ -> Fmt.string ppf "$_"
-  | Aast.Fun_id (_, name) ->
-    Fmt.(prefix (const string "fun") @@ quote string) ppf name
-  | Aast.Method_id (expr, (_, meth)) ->
-    Fmt.(
-      prefix (const string "inst_meth")
-      @@ parens
-      @@ pair ~sep:comma pp_expr
-      @@ quote string)
-      ppf
-      (expr, meth)
   | Aast.Pair (targs_opt, fst, snd) ->
     Fmt.(
       prefix (const string "Pair")
@@ -478,7 +468,6 @@ and pp_expr_ ppf = function
   | Aast.Collection _
   | Aast.ExpressionTree _
   | Aast.Method_caller _
-  | Aast.Smethod_id _
   | Aast.ET_Splice _
   | Aast.Omitted ->
     ()

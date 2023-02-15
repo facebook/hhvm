@@ -1304,11 +1304,6 @@ let visitor
       autocomplete_enum_class_label_call env f args;
       super#on_Call env f targs args unpack_arg
 
-    method! on_Fun_id env id =
-      autocomplete_id id;
-      self#complete_id id;
-      super#on_Fun_id env id
-
     method! on_New env ((_, _, cid_) as cid) el unpacked_element =
       (match cid_ with
       | Aast.CI id -> self#complete_global id Acnew

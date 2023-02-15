@@ -446,12 +446,7 @@ async function fourth_root(num $n): Awaitable<float> {
 
 async function normal_call(): Awaitable<vec<float>> {
   $nums = vec[64, 81];
-  return await Vec\map_async(
-    $nums,
-    fun(
-      '\Hack\UserDocumentation\AsyncOps\Guidelines\Examples\Lambdas\fourth_root',
-    ),
-  );
+  return await Vec\map_async($nums, fourth_root<>);
 }
 
 async function closure_call(): Awaitable<vec<float>> {

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26c4c4eac94d57c610287238dd143d8a>>
+// @generated SignedSource<<1b0c4635be6899df89f0928ac0ece9c2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -923,20 +923,6 @@ pub enum Expr_<Ex, En> {
     ///     $_
     #[rust_to_ocaml(attr = "transform.opaque")]
     Lplaceholder(Box<Pos>),
-    /// Global function reference.
-    ///
-    ///     fun('foo')
-    #[rust_to_ocaml(name = "Fun_id")]
-    FunId(Box<Sid>),
-    /// Instance method reference on a specific instance.
-    ///
-    /// TODO: This is only created in naming, and ought to happen in
-    /// lowering or be removed. The emitter just sees a normal Call.
-    ///
-    ///     inst_meth($f, 'some_meth') // equivalent: $f->some_meth<>
-    #[rust_to_ocaml(name = "Method_id")]
-    #[rust_to_ocaml(inline_tuple)]
-    MethodId(Box<(Expr<Ex, En>, Pstring)>),
     /// Instance method reference that can be called with an instance.
     ///
     ///     meth_caller(FooClass::class, 'some_meth')
@@ -948,13 +934,6 @@ pub enum Expr_<Ex, En> {
     #[rust_to_ocaml(name = "Method_caller")]
     #[rust_to_ocaml(inline_tuple)]
     MethodCaller(Box<(ClassName, Pstring)>),
-    /// Static method reference.
-    ///
-    ///     class_meth('FooClass', 'some_static_meth')
-    ///     // equivalent: FooClass::some_static_meth<>
-    #[rust_to_ocaml(name = "Smethod_id")]
-    #[rust_to_ocaml(inline_tuple)]
-    SmethodId(Box<(ClassId<Ex, En>, Pstring)>),
     /// Pair literal.
     ///
     ///     Pair {$foo, $bar}

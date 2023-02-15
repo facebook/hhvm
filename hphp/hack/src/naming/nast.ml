@@ -468,12 +468,6 @@ module Visitor_DEPRECATED = struct
 
       method on_dollardollar : 'a -> id -> 'a
 
-      method on_fun_id : 'a -> sid -> 'a
-
-      method on_method_id : 'a -> expr -> pstring -> 'a
-
-      method on_smethod_id : 'a -> class_id -> pstring -> 'a
-
       method on_method_caller : 'a -> sid -> pstring -> 'a
 
       method on_obj_get : 'a -> expr -> expr -> 'a
@@ -766,10 +760,7 @@ module Visitor_DEPRECATED = struct
         | Lplaceholder _pos -> acc
         | Dollardollar id -> this#on_dollardollar acc id
         | Lvar id -> this#on_lvar acc id
-        | Fun_id sid -> this#on_fun_id acc sid
-        | Method_id (expr, pstr) -> this#on_method_id acc expr pstr
         | Method_caller (sid, pstr) -> this#on_method_caller acc sid pstr
-        | Smethod_id (cid, pstr) -> this#on_smethod_id acc cid pstr
         | Yield e -> this#on_yield acc e
         | Await e -> this#on_await acc e
         | Tuple el -> this#on_list acc el
@@ -881,12 +872,6 @@ module Visitor_DEPRECATED = struct
       method on_lvar acc _ = acc
 
       method on_dollardollar acc id = this#on_lvar acc id
-
-      method on_fun_id acc _ = acc
-
-      method on_method_id acc _ _ = acc
-
-      method on_smethod_id acc _ _ = acc
 
       method on_method_caller acc _ _ = acc
 

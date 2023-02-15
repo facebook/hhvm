@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4328aed9c7f44226f049a7e7d4cc0515>>
+// @generated SignedSource<<32a9321cbbbf2f9db3ef00594db3bd6b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -838,10 +838,7 @@ const _: () = {
                 Expr_::ExpressionTree(ref mut __binding_0) => {
                     __binding_0.transform(cfg, errs, pass)
                 }
-                Expr_::FunId(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
-                Expr_::MethodId(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
                 Expr_::MethodCaller(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
-                Expr_::SmethodId(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
                 Expr_::Pair(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
                 Expr_::ETSplice(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
                 Expr_::EnumClassLabel(ref mut __binding_0) => {

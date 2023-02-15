@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<86bef3e3cbfcfe6c74997b38d8893f0b>>
+// @generated SignedSource<<09af416864ae06bd7cb8ccb7ce56df20>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1019,17 +1019,8 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_lplaceholder(p0: Pos) -> Self {
         Expr_::Lplaceholder(Box::new(p0))
     }
-    pub fn mk_fun_id(p0: Sid) -> Self {
-        Expr_::FunId(Box::new(p0))
-    }
-    pub fn mk_method_id(p0: Expr<Ex, En>, p1: Pstring) -> Self {
-        Expr_::MethodId(Box::new((p0, p1)))
-    }
     pub fn mk_method_caller(p0: ClassName, p1: Pstring) -> Self {
         Expr_::MethodCaller(Box::new((p0, p1)))
-    }
-    pub fn mk_smethod_id(p0: ClassId<Ex, En>, p1: Pstring) -> Self {
-        Expr_::SmethodId(Box::new((p0, p1)))
     }
     pub fn mk_pair(p0: Option<(Targ<Ex>, Targ<Ex>)>, p1: Expr<Ex, En>, p2: Expr<Ex, En>) -> Self {
         Expr_::Pair(Box::new((p0, p1, p2)))
@@ -1325,27 +1316,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => false,
         }
     }
-    pub fn is_fun_id(&self) -> bool {
-        match self {
-            Expr_::FunId(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_method_id(&self) -> bool {
-        match self {
-            Expr_::MethodId(..) => true,
-            _ => false,
-        }
-    }
     pub fn is_method_caller(&self) -> bool {
         match self {
             Expr_::MethodCaller(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_smethod_id(&self) -> bool {
-        match self {
-            Expr_::SmethodId(..) => true,
             _ => false,
         }
     }
@@ -1661,27 +1634,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_fun_id(&self) -> Option<&Sid> {
-        match self {
-            Expr_::FunId(p0) => Some(&p0),
-            _ => None,
-        }
-    }
-    pub fn as_method_id(&self) -> Option<(&Expr<Ex, En>, &Pstring)> {
-        match self {
-            Expr_::MethodId(p0) => Some((&p0.0, &p0.1)),
-            _ => None,
-        }
-    }
     pub fn as_method_caller(&self) -> Option<(&ClassName, &Pstring)> {
         match self {
             Expr_::MethodCaller(p0) => Some((&p0.0, &p0.1)),
-            _ => None,
-        }
-    }
-    pub fn as_smethod_id(&self) -> Option<(&ClassId<Ex, En>, &Pstring)> {
-        match self {
-            Expr_::SmethodId(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
@@ -2028,27 +1983,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_fun_id_mut(&mut self) -> Option<&mut Sid> {
-        match self {
-            Expr_::FunId(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
-    pub fn as_method_id_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Pstring)> {
-        match self {
-            Expr_::MethodId(p0) => Some((&mut p0.0, &mut p0.1)),
-            _ => None,
-        }
-    }
     pub fn as_method_caller_mut(&mut self) -> Option<(&mut ClassName, &mut Pstring)> {
         match self {
             Expr_::MethodCaller(p0) => Some((&mut p0.0, &mut p0.1)),
-            _ => None,
-        }
-    }
-    pub fn as_smethod_id_mut(&mut self) -> Option<(&mut ClassId<Ex, En>, &mut Pstring)> {
-        match self {
-            Expr_::SmethodId(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
@@ -2370,27 +2307,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_fun_id_into(self) -> Option<Sid> {
-        match self {
-            Expr_::FunId(p0) => Some(*p0),
-            _ => None,
-        }
-    }
-    pub fn as_method_id_into(self) -> Option<(Expr<Ex, En>, Pstring)> {
-        match self {
-            Expr_::MethodId(p0) => Some(((*p0).0, (*p0).1)),
-            _ => None,
-        }
-    }
     pub fn as_method_caller_into(self) -> Option<(ClassName, Pstring)> {
         match self {
             Expr_::MethodCaller(p0) => Some(((*p0).0, (*p0).1)),
-            _ => None,
-        }
-    }
-    pub fn as_smethod_id_into(self) -> Option<(ClassId<Ex, En>, Pstring)> {
-        match self {
-            Expr_::SmethodId(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }

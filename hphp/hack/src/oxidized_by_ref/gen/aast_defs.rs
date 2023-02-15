@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<838501b7adb9ca411dd6ec5403906230>>
+// @generated SignedSource<<d3d4379bd947189fbe8e3458dae07de3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1144,22 +1144,6 @@ pub enum Expr_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.opaque")]
     Lplaceholder(&'a Pos<'a>),
-    /// Global function reference.
-    ///
-    ///     fun('foo')
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Fun_id")]
-    FunId(&'a Sid<'a>),
-    /// Instance method reference on a specific instance.
-    ///
-    /// TODO: This is only created in naming, and ought to happen in
-    /// lowering or be removed. The emitter just sees a normal Call.
-    ///
-    ///     inst_meth($f, 'some_meth') // equivalent: $f->some_meth<>
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Method_id")]
-    #[rust_to_ocaml(inline_tuple)]
-    MethodId(&'a (&'a Expr<'a, Ex, En>, &'a Pstring<'a>)),
     /// Instance method reference that can be called with an instance.
     ///
     ///     meth_caller(FooClass::class, 'some_meth')
@@ -1172,14 +1156,6 @@ pub enum Expr_<'a, Ex, En> {
     #[rust_to_ocaml(name = "Method_caller")]
     #[rust_to_ocaml(inline_tuple)]
     MethodCaller(&'a (&'a ClassName<'a>, &'a Pstring<'a>)),
-    /// Static method reference.
-    ///
-    ///     class_meth('FooClass', 'some_static_meth')
-    ///     // equivalent: FooClass::some_static_meth<>
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Smethod_id")]
-    #[rust_to_ocaml(inline_tuple)]
-    SmethodId(&'a (&'a ClassId<'a, Ex, En>, &'a Pstring<'a>)),
     /// Pair literal.
     ///
     ///     Pair {$foo, $bar}

@@ -1372,12 +1372,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         ArrayGet(_) | As(_) | Await(_) | Binop(_) | Call(_) | Cast(_)
                         | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_) | Darray(_)
                         | Dollardollar(_) | Efun(_) | Eif(_) | EnumClassLabel(_) | ETSplice(_)
-                        | ExpressionTree(_) | FunctionPointer(_) | FunId(_) | Id(_) | Import(_)
-                        | Is(_) | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_)
-                        | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_) | ObjGet(_)
-                        | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_) | Shape(_)
-                        | SmethodId(_) | Tuple(_) | Upcast(_) | ValCollection(_) | Varray(_)
-                        | Xml(_) | Yield(_) | Invalid(_) => None,
+                        | ExpressionTree(_) | FunctionPointer(_) | Id(_) | Import(_) | Is(_)
+                        | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_) | Lvar(_)
+                        | MethodCaller(_) | New(_) | ObjGet(_) | Omitted | Pair(_) | Pipe(_)
+                        | ReadonlyExpr(_) | Shape(_) | Tuple(_) | Upcast(_) | ValCollection(_)
+                        | Varray(_) | Xml(_) | Yield(_) | Invalid(_) => None,
                     }
                 }
                 Some(self.alloc(Ty(

@@ -688,17 +688,6 @@ and ('ex, 'en) expr_ =
       (** Placeholder local variable.
        *
        *     $_ *)
-  | Fun_id of sid
-      (** Global function reference.
-       *
-       *     fun('foo') *)
-  | Method_id of ('ex, 'en) expr * (pstring[@transform.opaque])
-      (** Instance method reference on a specific instance.
-       *
-       * TODO: This is only created in naming, and ought to happen in
-       * lowering or be removed. The emitter just sees a normal Call.
-       *
-       *     inst_meth($f, 'some_meth') // equivalent: $f->some_meth<> *)
   | Method_caller of class_name * (pstring[@transform.opaque])
       (** Instance method reference that can be called with an instance.
        *
@@ -708,11 +697,6 @@ and ('ex, 'en) expr_ =
        * These examples are equivalent to:
        *
        *     (FooClass $f, ...$args) ==> $f->some_meth(...$args) *)
-  | Smethod_id of ('ex, 'en) class_id * (pstring[@transform.opaque])
-      (** Static method reference.
-       *
-       *     class_meth('FooClass', 'some_static_meth')
-       *     // equivalent: FooClass::some_static_meth<> *)
   | Pair of ('ex targ * 'ex targ) option * ('ex, 'en) expr * ('ex, 'en) expr
       (** Pair literal.
        *

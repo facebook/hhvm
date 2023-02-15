@@ -260,9 +260,6 @@ let handler ctx =
           | _ -> ()
         in
         env
-      | Aast.Fun_id id ->
-        let () = check_fun_name env id in
-        env
       | Aast.Method_caller (id, _)
       | Aast.Xml (id, _, _) ->
         let () =

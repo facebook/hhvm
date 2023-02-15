@@ -694,14 +694,11 @@ fn print_expr(
         },
         Expr_::Dollardollar(_)
         | Expr_::ExpressionTree(_)
-        | Expr_::FunId(_)
         | Expr_::Hole(_)
         | Expr_::KeyValCollection(_)
         | Expr_::Lplaceholder(_)
         | Expr_::MethodCaller(_)
-        | Expr_::MethodId(_)
         | Expr_::Pair(_)
-        | Expr_::SmethodId(_)
         | Expr_::This
         | Expr_::Upcast(_)
         | Expr_::ValCollection(_) => {

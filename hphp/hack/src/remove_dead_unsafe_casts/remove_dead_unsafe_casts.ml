@@ -56,10 +56,7 @@ let rec can_be_captured =
   | Xml _
   | Import _
   | Lplaceholder _
-  | Fun_id _
-  | Method_id _
   | Method_caller _
-  | Smethod_id _
   | EnumClassLabel _
   | Invalid None ->
     false

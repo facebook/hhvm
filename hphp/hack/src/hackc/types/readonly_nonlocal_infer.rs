@@ -486,13 +486,7 @@ impl<'decl> Infer<'decl> {
             // $_ = 3; echo $_; // prints `3`, doesn't type-check
             // Soundly approximate by treating such code as ill-formed.
             Lplaceholder(_b) => (exp.clone(), Tyx::GiveUp, ctx),
-            FunId(_b) => (exp.clone(), Tyx::Todo, ctx),
-            MethodId(box (e, p_str)) => {
-                let (e, _ty, ctx) = self.infer_expr(e, ctx, next_where);
-                (MethodId(box_tup!(e, p_str.clone())), Tyx::Todo, ctx)
-            }
             MethodCaller(_b) => (exp.clone(), Tyx::Todo, ctx),
-            SmethodId(_b) => (exp.clone(), Tyx::Todo, ctx),
             Pair(box (ty_args, e1, e2)) => {
                 let (e1, _ty1, ctx) = self.infer_expr(e1, ctx, next_where);
                 let (e2, _ty2, ctx) = self.infer_expr(e2, ctx, next_where);

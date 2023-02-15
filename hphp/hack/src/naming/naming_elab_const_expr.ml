@@ -40,7 +40,6 @@ let rec const_expr_err in_mode acc (_, pos, expr_) =
   | Aast.(Id _ | Null | True | False | Int _ | Float _ | String _) -> acc
   | Aast.(Class_const ((_, _, (CIparent | CIself | CI _)), _)) -> acc
   | Aast.(Class_const ((_, _, Aast.CIexpr (_, _, (This | Id _))), _)) -> acc
-  | Aast.(Smethod_id _ | Fun_id _) -> acc
   | Aast.(FunctionPointer ((FP_id _ | FP_class_const _), _)) -> acc
   | Aast.Upcast (e, _) -> const_expr_err in_mode acc e
   | Aast.(As (e, (_, Hlike _), _)) -> const_expr_err in_mode acc e

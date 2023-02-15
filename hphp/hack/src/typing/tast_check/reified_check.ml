@@ -162,10 +162,7 @@ let handler =
         if equal_reify_kind (Env.get_reified env t) Reified then
           Errors.add_typing_error
             Typing_error.(primary @@ Primary.Class_get_reified call_pos)
-      | (fun_ty, pos, Method_caller _)
-      | (fun_ty, pos, Fun_id _)
-      | (fun_ty, pos, Method_id _)
-      | (fun_ty, pos, Smethod_id _) ->
+      | (fun_ty, pos, Method_caller _) ->
         (match get_ft_tparams fun_ty with
         | Some (ft_tparams, _) ->
           if tparams_has_reified ft_tparams then

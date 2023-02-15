@@ -803,12 +803,6 @@ module AutoimportedFunctions = struct
 
   let invariant = "\\HH\\invariant"
 
-  let fun_ = "\\HH\\fun"
-
-  let inst_meth = "\\HH\\inst_meth"
-
-  let class_meth = "\\HH\\class_meth"
-
   let meth_caller = "\\HH\\meth_caller"
 end
 

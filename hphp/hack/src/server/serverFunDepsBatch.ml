@@ -76,22 +76,13 @@ let collect_in_decl =
       let acc = process_method env ty (p, SN.Members.__construct) in
       acc + super#on_New env c targs el unpacked_element ctor_annot
 
-    method! on_expr env ((_, pos, expr_) as expr) =
+    method! on_expr env ((_, _, expr_) as expr) =
       let ( + ) = self#plus in
       let acc =
         match expr_ with
-        | T.Fun_id id ->
-          process_function (pos, SN.AutoimportedFunctions.fun_)
-          + process_function id
         | T.Method_caller ((p, cid), mid) ->
           process_function (p, SN.AutoimportedFunctions.meth_caller)
           + process_method_cid mid cid
-        | T.Smethod_id ((ty, p, _), mid) ->
-          process_function (p, SN.AutoimportedFunctions.class_meth)
-          + process_method env ty mid
-        | T.Method_id ((ty, p, _), mid) ->
-          process_function (p, SN.AutoimportedFunctions.inst_meth)
-          + process_method env ty mid
         | T.FunctionPointer (T.FP_id id, _targs) -> process_function id
         | T.FunctionPointer (T.FP_class_const ((ty, _, _cid), mid), _targs) ->
           process_method env ty mid

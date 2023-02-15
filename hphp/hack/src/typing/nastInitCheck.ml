@@ -470,9 +470,6 @@ and expr_ env acc p e =
   | This ->
     check_all_init p env acc;
     acc
-  | Fun_id _
-  | Method_id _
-  | Smethod_id _
   | Method_caller _
   | EnumClassLabel _
   | Id _ ->

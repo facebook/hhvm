@@ -322,19 +322,10 @@ let visitor =
           let class_id = process_class_id cid in
           let xhp_attributes = process_xml_attrs (snd cid) attrs in
           self#plus class_id xhp_attributes
-        | Aast.Fun_id id ->
-          process_fun_id (pos, SN.AutoimportedFunctions.fun_)
-          + process_fun_id (remove_apostrophes_from_function_eval id)
         | Aast.FunctionPointer (Aast.FP_id id, _targs) -> process_fun_id id
         | Aast.FunctionPointer (Aast.FP_class_const ((ty, _, _cid), mid), _targs)
           ->
           typed_method env ty mid
-        | Aast.Method_id ((ty, _, _), mid) ->
-          process_fun_id (pos, SN.AutoimportedFunctions.inst_meth)
-          + typed_method env ty (remove_apostrophes_from_function_eval mid)
-        | Aast.Smethod_id ((ty, _, _), mid) ->
-          process_fun_id (pos, SN.AutoimportedFunctions.class_meth)
-          + typed_method env ty (remove_apostrophes_from_function_eval mid)
         | Aast.Method_caller (((_, cid) as pcid), mid) ->
           process_fun_id (pos, SN.AutoimportedFunctions.meth_caller)
           + process_class_id pcid

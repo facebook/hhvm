@@ -1,2 +1,6 @@
 File "inst_meth_disabled.php", line 11, characters 3-11:
 `inst_meth()` is disabled; use a lambda `(...) ==> {...}` instead (Parsing[1002])
+File "inst_meth_disabled.php", line 11, characters 3-11:
+Unbound name: `HH\inst_meth` (a global function) (Naming[2049])
+File "inst_meth_disabled.php", line 11, characters 3-11:
+Unbound name (typing): `HH\inst_meth` (Typing[4107])

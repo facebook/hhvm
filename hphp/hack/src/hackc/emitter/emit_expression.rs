@@ -505,11 +505,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             Expr_::Invalid(_) => Err(Error::unrecoverable(
                 "emit_expr: Invalid should never be encountered by codegen",
             )),
-            Expr_::FunId(_)
-            | Expr_::MethodId(_)
-            | Expr_::MethodCaller(_)
-            | Expr_::SmethodId(_)
-            | Expr_::Hole(_) => {
+            Expr_::MethodCaller(_) | Expr_::Hole(_) => {
                 unimplemented!("TODO(hrust)")
             }
         }

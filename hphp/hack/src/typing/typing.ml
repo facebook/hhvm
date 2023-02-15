@@ -3737,9 +3737,6 @@ and expr_
             primary
             @@ Primary.Re_prefixed_non_string { pos = pe; reason = `non_string });
         expr_error env pe e)
-  | Fun_id x ->
-    let (env, fty, _tal) = fun_type_of_id env x [] [] in
-    make_result env p (Aast.Fun_id x) fty
   | Id ((cst_pos, cst_name) as id) ->
     (match Env.get_gconst env cst_name with
     | None ->
@@ -3753,34 +3750,6 @@ and expr_
       in
       Option.iter ~f:Errors.add_typing_error ty_err_opt;
       make_result env p (Aast.Id id) ty)
-  | Method_id (instance, meth) ->
-    (* Method_id is used when creating a "method pointer" using the magic
-     * inst_meth function.
-     *
-     * Typing this is pretty simple, we just need to check that instance->meth
-     * is public+not static and then return its type.
-     *)
-    let (env, te, ty1) = expr env instance in
-    let ((env, ty_err_opt), (result, _tal)) =
-      TOG.obj_get
-        ~inst_meth:true
-        ~meth_caller:false
-        ~obj_pos:p
-        ~is_method:true
-        ~nullsafe:None
-        ~coerce_from_ty:None
-        ~explicit_targs:[]
-        ~class_id:(CIexpr instance)
-        ~member_id:meth
-        ~on_error:Typing_error.Callback.unify_error
-        env
-        ty1
-    in
-    Option.iter ty_err_opt ~f:Errors.add_typing_error;
-    let (env, result) =
-      Env.FakeMembers.check_instance_invalid env instance (snd meth) result
-    in
-    make_result env p (Aast.Method_id (te, meth)) result
   | Method_caller (((pos, class_name) as pos_cname), meth_name) ->
     (* meth_caller('X', 'foo') desugars to:
      * $x ==> $x->foo()
@@ -3913,140 +3882,6 @@ and expr_
       p
       (Aast.FunctionPointer (FP_class_const (ce, meth), tal))
       fpty
-  | Smethod_id (((_, pc, cid_) as cid), meth) ->
-    (* Smethod_id is used when creating a "method pointer" using the magic
-     * class_meth function.
-     *
-     * Typing this is pretty simple, we just need to check that c::meth is
-     * public+static and then return its type.
-     *)
-    let (class_, classname) =
-      match cid_ with
-      | CIself
-      | CIstatic ->
-        (Env.get_self_class env, Env.get_self_id env)
-      | CI (_, const) when String.equal const SN.PseudoConsts.g__CLASS__ ->
-        (Env.get_self_class env, Env.get_self_id env)
-      | CI (_, id) -> (Env.get_class env id, Some id)
-      | _ -> (None, None)
-    in
-    let classname = Option.value classname ~default:"" in
-    (match class_ with
-    | None ->
-      (* The class given as a static string was not found. *)
-      unbound_name env (pc, classname) outer
-    | Some class_ ->
-      let smethod = Env.get_static_member true env class_ (snd meth) in
-      (match smethod with
-      | None ->
-        (* The static method wasn't found. *)
-        Errors.add_typing_error
-        @@ TOG.smember_not_found
-             (fst meth)
-             ~is_const:false
-             ~is_method:true
-             ~is_function_pointer:false
-             class_
-             (snd meth)
-             Typing_error.Callback.unify_error;
-        expr_error env pc outer
-      | Some ({ ce_type = (lazy ty); ce_pos = (lazy ce_pos); _ } as ce) ->
-        let () =
-          if get_ce_abstract ce then
-            match cid_ with
-            | CIstatic -> ()
-            | _ ->
-              Errors.add_typing_error
-                Typing_error.(
-                  primary
-                  @@ Primary.Class_meth_abstract_call
-                       {
-                         class_name = classname;
-                         meth_name = snd meth;
-                         pos = p;
-                         decl_pos = ce_pos;
-                       })
-        in
-        let ce_visibility = ce.ce_visibility in
-        let ce_deprecated = ce.ce_deprecated in
-        let (env, _tal, te, cid_ty) = class_expr ~exact:Exact env [] cid in
-        let (env, cid_ty) = Env.expand_type env cid_ty in
-        let tyargs =
-          match get_node cid_ty with
-          | Tclass (_, _, tyargs) -> tyargs
-          | _ -> []
-        in
-        let ety_env =
-          {
-            empty_expand_env with
-            substs = TUtils.make_locl_subst_for_class_tparams class_ tyargs;
-            this_ty = cid_ty;
-          }
-        in
-        let r = get_reason ty |> Typing_reason.localize in
-        (match get_node ty with
-        | Tfun ft ->
-          let ft =
-            Typing_enforceability.compute_enforced_and_pessimize_fun_type
-              ~this_class:(Some class_)
-              env
-              ft
-          in
-          let def_pos = ce_pos in
-          let ((env, ty_err_opt1), tal) =
-            Phase.localize_targs
-              ~check_well_kinded:true
-              ~is_method:true
-              ~def_pos:ce_pos
-              ~use_pos:p
-              ~use_name:(strip_ns (snd meth))
-              env
-              ft.ft_tparams
-              []
-          in
-          Option.iter ~f:Errors.add_typing_error ty_err_opt1;
-          let ((env, ty_err_opt2), ft) =
-            Phase.(
-              localize_ft
-                ~instantiation:
-                  Phase.
-                    {
-                      use_name = strip_ns (snd meth);
-                      use_pos = p;
-                      explicit_targs = tal;
-                    }
-                ~ety_env
-                ~def_pos:ce_pos
-                env
-                ft)
-          in
-          Option.iter ~f:Errors.add_typing_error ty_err_opt2;
-          let ty = mk (r, Tfun ft) in
-          let use_pos = fst meth in
-          Option.iter
-            ~f:Errors.add_typing_error
-            (TVis.check_deprecated ~use_pos ~def_pos env ce_deprecated);
-          (match ce_visibility with
-          | Vpublic
-          | Vinternal _ ->
-            make_result env p (Aast.Smethod_id (te, meth)) ty
-          | Vprivate _ ->
-            Errors.add_typing_error
-              Typing_error.(
-                primary
-                @@ Primary.Private_class_meth
-                     { decl_pos = def_pos; pos = use_pos });
-            expr_error env use_pos outer
-          | Vprotected _ ->
-            Errors.add_typing_error
-              Typing_error.(
-                primary
-                @@ Primary.Protected_class_meth
-                     { decl_pos = def_pos; pos = use_pos });
-            expr_error env use_pos outer)
-        | _ ->
-          Errors.internal_error p "We have a method which isn't callable";
-          expr_error env p outer)))
   | Lplaceholder p ->
     let r = Reason.Rplaceholder p in
     let ty = MakeType.void r in
@@ -7521,22 +7356,6 @@ and dispatch_call
     Option.iter ~f:Errors.add_typing_error ty_err_opt1;
     (result, should_forget_fakes)
   (* Function invocation *)
-  | Fun_id x ->
-    let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
-    check_disposable_in_return env fty;
-    let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call ~expected ~expr_pos:p ~recv_pos:fpos env fty el unpacked_element
-    in
-    let result =
-      make_call
-        env
-        (Tast.make_typed_expr fpos fty (Aast.Fun_id x))
-        tal
-        tel
-        typed_unpack_element
-        ty
-    in
-    (result, should_forget_fakes)
   | Id id -> dispatch_id env id
   | _ ->
     let (env, te, fty) = expr env e in

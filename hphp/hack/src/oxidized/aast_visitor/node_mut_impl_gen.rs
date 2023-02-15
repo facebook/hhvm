@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7a2a03e200de11fb60e27f34de18e954>>
+// @generated SignedSource<<d94050acca819b93204883e25c49158f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -959,15 +959,6 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper24<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(Expr<Ex, En>, Pstring)>,
-            c: &mut P::Context,
-            v: &mut dyn VisitorMut<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)
-        }
-        #[inline]
-        fn helper25<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(ClassName, Pstring)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -976,16 +967,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper26<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(ClassId<Ex, En>, Pstring)>,
-            c: &mut P::Context,
-            v: &mut dyn VisitorMut<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)
-        }
-        #[inline]
-        fn helper27<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper25<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(Option<(Targ<Ex>, Targ<Ex>)>, Expr<Ex, En>, Expr<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -995,7 +977,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.2.accept(c, v)
         }
         #[inline]
-        fn helper28<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper26<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(Option<ClassName>, String)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -1004,7 +986,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         #[inline]
-        fn helper29<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+        fn helper27<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node mut Box<(Expr<Ex, En>, Ex, Ex, HoleSource)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
@@ -1062,14 +1044,11 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             Expr_::Collection(a) => helper23(a, c, v),
             Expr_::ExpressionTree(a0) => a0.accept(c, v),
             Expr_::Lplaceholder(a0) => a0.accept(c, v),
-            Expr_::FunId(a0) => a0.accept(c, v),
-            Expr_::MethodId(a) => helper24(a, c, v),
-            Expr_::MethodCaller(a) => helper25(a, c, v),
-            Expr_::SmethodId(a) => helper26(a, c, v),
-            Expr_::Pair(a) => helper27(a, c, v),
+            Expr_::MethodCaller(a) => helper24(a, c, v),
+            Expr_::Pair(a) => helper25(a, c, v),
             Expr_::ETSplice(a0) => a0.accept(c, v),
-            Expr_::EnumClassLabel(a) => helper28(a, c, v),
-            Expr_::Hole(a) => helper29(a, c, v),
+            Expr_::EnumClassLabel(a) => helper26(a, c, v),
+            Expr_::Hole(a) => helper27(a, c, v),
         }
     }
 }

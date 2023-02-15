@@ -79,23 +79,15 @@ let extend_tparams env tparaml =
   in
   { env with type_params }
 
-(* Functions such as fun, class_meth, and meth_caller require additional
- * fixup on the strings that are passed in
- *)
-let handle_special_calls env call =
+(* `meth_caller` needs some fixup on the strings that are passed in *)
+let handle_meth_caller env call =
   match call with
-  | Call (((_, _, Id (_, cn)) as id), targs, [(pk, (ty, p, String fn))], uargs)
-    when String.equal cn SN.AutoimportedFunctions.fun_ ->
-    (* Functions referenced by fun() are always fully-qualified *)
-    let fn = Utils.add_ns fn in
-    Call (id, targs, [(pk, (ty, p, String fn))], uargs)
   | Call
       ( ((_, _, Id (_, cn)) as id),
         targs,
         [(pk, (ty, p1, String cl)); meth],
         unpacked_element )
-    when (String.equal cn SN.AutoimportedFunctions.meth_caller
-         || String.equal cn SN.AutoimportedFunctions.class_meth)
+    when String.equal cn SN.AutoimportedFunctions.meth_caller
          && (not @@ in_codegen env) ->
     let cl = Utils.add_ns cl in
     Call (id, targs, [(pk, (ty, p1, String cl)); meth], unpacked_element)
@@ -304,7 +296,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
               List.map el ~f:(map_arg env),
               Option.map unpacked_element ~f:(self#on_expr env) )
         in
-        handle_special_calls env renamed_call
+        handle_meth_caller env renamed_call
       | FunctionPointer (FP_id fn, targs) ->
         let fn = NS.elaborate_id env.namespace NS.ElaborateFun fn in
         let targs = List.map targs ~f:(self#on_targ env) in

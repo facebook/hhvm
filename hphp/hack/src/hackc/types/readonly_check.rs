@@ -320,7 +320,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         ExpressionTree(_) | EnumClassLabel(_) | ETSplice(_) => Rty::Mutable,
         Import(_) | Lplaceholder(_) => Rty::Mutable,
         // More function values which are always mutable
-        MethodId(_) | MethodCaller(_) | SmethodId(_) | FunId(_) => Rty::Mutable,
+        MethodCaller(_) => Rty::Mutable,
     }
 }
 

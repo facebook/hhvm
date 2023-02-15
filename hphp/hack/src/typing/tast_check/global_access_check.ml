@@ -772,10 +772,7 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
   | Import _
   | Collection _
   | Lplaceholder _
-  | Fun_id _
-  | Method_id _
   | Method_caller _
-  | Smethod_id _
   | ET_Splice _
   | EnumClassLabel _
   | Hole _

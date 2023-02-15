@@ -32,6 +32,9 @@ struct Array;
  * x, X, Z and @.
  */
 struct ZendPack {
+  static ZendPack* getInstance();
+
+  // Do not use, get the singleton through `getInstance` above.
   ZendPack();
 
   /**

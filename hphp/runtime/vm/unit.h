@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/type-alias.h"
 
+#include "hphp/util/check-size.h"
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
@@ -567,8 +568,6 @@ private:
   mutable VMCompactVector<UnsafeLockFreePtrWrapper<ArrayOrToken>> m_arrays;
   mutable VMCompactVector<UnsafeLockFreePtrWrapper<RATArrayOrToken>> m_rats;
 
-  Id m_entryPointId{kInvalidId};
-
   /*
    * The remaining fields are cold, and arbitrarily ordered.
    */
@@ -591,9 +590,13 @@ private:
 
   rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
 
+  Id m_entryPointId{kInvalidId};
+
   static std::atomic<size_t> s_createdUnits;
   static std::atomic<size_t> s_liveUnits;
 };
+
+static_assert(CheckSize<Unit, use_lowptr ? 216 : 224>(), "");
 
 struct UnitExtended : Unit {
   friend struct Unit;
@@ -616,6 +619,8 @@ struct UnitExtended : Unit {
 
   std::atomic<Unit*> m_nextCachedByHash{nullptr};
 };
+
+static_assert(CheckSize<UnitExtended, use_lowptr ? 272 : 280>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

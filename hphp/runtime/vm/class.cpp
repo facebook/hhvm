@@ -52,6 +52,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
+#include "hphp/util/check-size.h"
 #include "hphp/util/logger.h"
 
 #include <folly/Bits.h>
@@ -251,23 +252,15 @@ unsigned loadUsedTraits(PreClass* preClass,
  */
 constexpr size_t sizeof_Class = Class::classVecOff();
 
+static constexpr size_t kClassSize = debug ? (use_lowptr ? 276 : 328)
+                                           : (use_lowptr ? 272 : 320);
+static_assert(CheckSize<sizeof_Class, kClassSize>(), "");
+
 /*
  * For a type-constant, store the ArrayData inside the type-structure with
  * the low bit set to indicate that the type-structure is resolved
  */
 void setResolvedTypeConstVal(Class::Const& cns, ArrayData* ad);
-
-template<size_t sz>
-struct assert_sizeof_class {
-  // If this static_assert fails, the compiler error will have the real value
-  // of sizeof_Class in it since it's in this struct's type.
-#ifndef NDEBUG
-  static_assert(sz == (use_lowptr ? 276 : 328), "Change this only on purpose");
-#else
-  static_assert(sz == (use_lowptr ? 272 : 320), "Change this only on purpose");
-#endif
-};
-template struct assert_sizeof_class<sizeof_Class>;
 
 /*
  * R/W lock for caching scopings of closures.

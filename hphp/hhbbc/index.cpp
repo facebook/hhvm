@@ -66,6 +66,7 @@
 #include "hphp/hhbbc/wide-func.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/check-size.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/lock-free-lazy.h"
 #include "hphp/util/match.h"
@@ -98,8 +99,6 @@ const StaticString s_Awaitable("HH\\Awaitable");
 //////////////////////////////////////////////////////////////////////
 
 // HHBBC consumes a LOT of memory, so we keep representation types small.
-template <typename T, size_t Expected, size_t Actual = sizeof(T)>
-constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
 static_assert(CheckSize<php::Block, 24>(), "");
 static_assert(CheckSize<php::Local, use_lowptr ? 12 : 16>(), "");
 static_assert(CheckSize<php::Param, use_lowptr ? 64 : 96>(), "");

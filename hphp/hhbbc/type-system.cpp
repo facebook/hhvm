@@ -39,6 +39,8 @@
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/type-structure.h"
 
+#include "hphp/util/check-size.h"
+
 namespace HPHP::HHBBC {
 
 TRACE_SET_MOD(hhbbc);
@@ -75,8 +77,6 @@ constexpr trep kNonSupportBits = BCell & ~kSupportBits;
 
 // HHBBC consumes a LOT of memory, and much of it is used by Types.
 // We keep the type representation compact; don't expand it accidentally.
-template <typename T, size_t Expected, size_t Actual = sizeof(T)>
-constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
 static_assert(CheckSize<DCls, 8>(), "");
 static_assert(CheckSize<HAMSandwich, 1>(), "");
 static_assert(CheckSize<Type, 24>(), "");

@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 
+#include "hphp/util/check-size.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/low-ptr.h"
 
@@ -93,11 +94,6 @@ struct EHEnt {
 
   template<class SerDe> void serde(SerDe& sd);
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-template <typename T, size_t Expected, size_t Actual = sizeof(T)>
-constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
 
 ///////////////////////////////////////////////////////////////////////////////
 /*

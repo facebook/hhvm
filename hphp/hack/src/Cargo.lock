@@ -134,7 +134,7 @@ dependencies = [
 name = "arena_deserializer"
 version = "0.0.0"
 dependencies = [
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "serde",
 ]
@@ -145,7 +145,7 @@ version = "0.0.0"
 dependencies = [
  "arena_deserializer",
  "bincode",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "oxidized_by_ref",
  "relative_path",
@@ -191,7 +191,7 @@ name = "assemble_ir"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "ffi",
  "hash",
@@ -340,7 +340,7 @@ name = "bc_to_ir"
 version = "0.0.0"
 dependencies = [
  "b2i_macros",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "ffi",
  "hash",
  "hhbc",
@@ -427,9 +427,9 @@ dependencies = [
 
 [[package]]
 name = "bstr"
-version = "1.0.1"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fca0852af221f458706eb0725c03e4ed6c46af9ac98e6a689d5e634215d594dd"
+checksum = "b7f0778972c64420fdedc63f09919c8a88bda7b25135357fd25a5d9f3257e832"
 dependencies = [
  "memchr",
  "once_cell",
@@ -457,7 +457,7 @@ name = "bytecode_printer"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "escaper",
  "ffi",
  "hash",
@@ -741,7 +741,7 @@ dependencies = [
  "aast_parser",
  "anyhow",
  "bc_to_ir",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "bytecode_printer",
  "clap 4.1.4",
@@ -805,7 +805,7 @@ dependencies = [
 name = "config_file"
 version = "0.0.0"
 dependencies = [
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "lazy_static",
  "regex",
  "serde_json",
@@ -1379,7 +1379,7 @@ name = "direct_decl_smart_constructors"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "escaper",
  "flatten_smart_constructors",
@@ -1445,7 +1445,7 @@ name = "elab"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "file_info",
  "hash",
  "itertools 0.10.5",
@@ -1526,7 +1526,7 @@ version = "0.0.0"
 dependencies = [
  "ast_scope",
  "bitflags",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "constant_folder",
  "core_utils_rust",
@@ -1637,7 +1637,7 @@ name = "eq_modulo_pos"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "eq_modulo_pos_derive",
  "hcons",
  "indexmap",
@@ -1704,7 +1704,7 @@ dependencies = [
 name = "escaper"
 version = "0.0.0"
 dependencies = [
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "pretty_assertions",
 ]
@@ -1756,7 +1756,7 @@ dependencies = [
 name = "ffi"
 version = "0.0.0"
 dependencies = [
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "serde",
  "write_bytes",
@@ -1795,7 +1795,7 @@ name = "file_provider"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "pos",
  "tempdir",
 ]
@@ -2386,7 +2386,7 @@ name = "hhbc"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "emit_opcodes_macro",
  "ffi",
@@ -2617,7 +2617,7 @@ dependencies = [
 name = "ir_core"
 version = "0.0.0"
 dependencies = [
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "ffi",
  "hash",
  "hhbc",
@@ -2850,7 +2850,7 @@ dependencies = [
 name = "lowerer"
 version = "0.0.0"
 dependencies = [
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "escaper",
  "hash",
@@ -3205,7 +3205,7 @@ name = "no_pos_hash"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "fnv",
  "no_pos_hash_derive",
  "ocamlrep",
@@ -3309,7 +3309,7 @@ dependencies = [
 name = "ocamlrep"
 version = "0.0.0"
 dependencies = [
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "hash",
  "indexmap",
@@ -3402,7 +3402,7 @@ dependencies = [
 name = "options"
 version = "0.0.0"
 dependencies = [
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "oxidized",
  "serde",
 ]
@@ -3461,7 +3461,7 @@ dependencies = [
  "arena_deserializer",
  "arena_trait",
  "bitflags",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "eq_modulo_pos",
  "file_info",
@@ -3486,7 +3486,7 @@ dependencies = [
  "arena_deserializer",
  "arena_trait",
  "bitflags",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "eq_modulo_pos",
  "hh24_types",
@@ -3712,7 +3712,7 @@ name = "pos"
 version = "0.0.0"
 dependencies = [
  "arena_trait",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "eq_modulo_pos",
  "hh24_types",
@@ -3806,7 +3806,7 @@ name = "print_expr"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "bumpalo",
  "core_utils_rust",
  "emit_type_hint",
@@ -4577,7 +4577,7 @@ dependencies = [
 name = "signed_source"
 version = "0.0.0"
 dependencies = [
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "hex",
  "md-5",
  "once_cell",
@@ -5658,7 +5658,7 @@ checksum = "447660ad36a13288b1db4d4248e857b510e8c3a225c822ba4fb748c0aafecffd"
 name = "write_bytes"
 version = "0.0.0"
 dependencies = [
- "bstr 1.0.1",
+ "bstr 1.2.0",
  "write_bytes-macro",
 ]
 

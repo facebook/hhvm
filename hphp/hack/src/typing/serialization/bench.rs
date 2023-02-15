@@ -13,63 +13,55 @@ use std::process::Child;
 use std::process::Command;
 use std::process::Stdio;
 
+use clap::Parser;
 use framing::LineFeedUnescaper;
 use itertools::Itertools;
 use rayon::iter::ParallelBridge;
 use rayon::iter::ParallelIterator;
-use structopt::clap::arg_enum;
-use structopt::StructOpt;
 
-arg_enum! {
-    #[derive(Debug)]
-    enum Mode {
-        CheckOnly,
-        TastOnly,
-        Ser,
-        SerDe,
-    }
+#[derive(Clone, clap::ValueEnum, Debug)]
+#[clap(rename_all = "lower")]
+enum Mode {
+    CheckOnly,
+    TastOnly,
+    Ser,
+    SerDe,
 }
 
-#[derive(StructOpt, Debug)]
-#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)
+#[derive(Parser, Debug)]
 #[allow(dead_code)]
 struct Opts {
-    #[structopt(name = "HH_SINGLE_TYPE_CHECK_BINARY")]
+    #[clap(name = "HH_SINGLE_TYPE_CHECK_BINARY")]
     hh_single_type_check_path: PathBuf,
 
     /// Do not do any type-related phase: check, serialization, deserialization
     /// (useful for measuring overhead of the benchmark itself)
-    #[structopt(long, short = "n")]
+    #[clap(long, short = 'n')]
     dry_run: bool,
 
-    #[structopt(
-        long,
-        possible_values = &Mode::variants(),
-        case_insensitive = true,
-        default_value = "serde",
-    )]
+    #[clap(long, value_enum, ignore_case = true, default_value = "serde")]
     mode: Mode,
 
     /// The number of threads and concurrent hh_single_type_check processes
-    #[structopt(long, default_value = "1")]
+    #[clap(long, default_value = "1")]
     num_workers: u16,
 
     /// Increase output (-v to print (de)serialized types, -v -v to print Hack errors)
-    #[structopt(short, parse(from_occurrences))]
+    #[clap(short, action = clap::ArgAction::Count)]
     verbosity: u8,
 
-    #[structopt(long)]
+    #[clap(long)]
     naming_table: Option<PathBuf>,
 
-    #[structopt(long)]
+    #[clap(long)]
     www_root: Option<PathBuf>,
 
-    #[structopt(long, default_value = "0")]
+    #[clap(long, default_value = "0")]
     batch_min_bytes: u64,
 
     /// The (partial) list of input Hack files or directories to process
     /// (the rest is read from the standard input, for practical reasons)
-    #[structopt(name = "PATH")]
+    #[clap(name = "PATH")]
     paths: Vec<PathBuf>,
 }
 
@@ -150,7 +142,7 @@ fn batch(
 }
 
 fn main() {
-    let opts = Opts::from_args();
+    let opts = Opts::parse();
     let www_root = opts.www_root.as_ref().map(|p| path_to_str(p));
     let naming_table = opts.naming_table.as_ref().map(|p| path_to_str(p));
     let job = |filepaths: Vec<String>| {

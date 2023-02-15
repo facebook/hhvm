@@ -13,12 +13,15 @@ let dynamic = Typing_make_type.dynamic Typing_reason.Rnone
 
 let mixed = Typing_make_type.mixed Typing_reason.Rnone
 
-let support_dyn_of_mixed = Typing_make_type.supportdyn_mixed Typing_reason.Rnone
+let supportdyn_of_mixed = Typing_make_type.supportdyn_mixed Typing_reason.Rnone
+
+let is_exactly env ty ty' =
+  Tast_env.is_sub_type env ty ty' && Tast_env.is_sub_type env ty' ty
 
 let is_like_type env ty =
   let is_sub_type = Tast_env.is_sub_type env in
   is_sub_type dynamic ty
-  && not (is_sub_type mixed ty || is_sub_type support_dyn_of_mixed ty)
+  && not (is_sub_type mixed ty || is_sub_type supportdyn_of_mixed ty)
 
 let should_log env = not @@ Tast_env.is_hhi env
 
@@ -47,6 +50,9 @@ end = struct
     type t =
       | Like
       | NonLike
+      | Mixed
+      | SupportdynOfMixed
+      | Dynamic
     [@@deriving show { with_path = false }, ord]
   end
 
@@ -73,10 +79,31 @@ end = struct
     | Some c -> Some (c + 1)
 
   let unit env ty =
-    if is_like_type env ty then
-      inc Key.Like empty
-    else
-      inc Key.NonLike empty
+    empty
+    |> begin
+         if is_like_type env ty then
+           inc Key.Like
+         else
+           inc Key.NonLike
+       end
+    |> begin
+         if is_exactly env ty mixed then
+           inc Key.Mixed
+         else
+           Fn.id
+       end
+    |> begin
+         if is_exactly env ty supportdyn_of_mixed then
+           inc Key.SupportdynOfMixed
+         else
+           Fn.id
+       end
+    |> begin
+         if is_exactly env ty dynamic then
+           inc Key.Dynamic
+         else
+           Fn.id
+       end
 
   let json_of ctr =
     JSON.JSON_Object

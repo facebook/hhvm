@@ -76,7 +76,7 @@ let sealed_not_subtype verb parent_pos parent_name child_name child_kind =
     (child_kind
     ^ " "
     ^ Markdown_lite.md_codify child_name
-    ^ " in sealed whitelist for "
+    ^ " in sealed allowlist for "
     ^ Markdown_lite.md_codify parent_name
     ^ ", but does not "
     ^ verb

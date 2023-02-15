@@ -737,7 +737,7 @@ pub fn declared_name_is_already_in_use(line_num: usize, name: &str, _short_name:
     ))
 }
 pub const sealed_val_not_classname: Error =
-    Cow::Borrowed("Values in sealed whitelist must be classname constants.");
+    Cow::Borrowed("Values in sealed allowlist must be classname constants.");
 pub const sealed_qualifier_invalid: Error =
     Cow::Borrowed("`__Sealed` can only be used with named types, e.g. `Foo::class`");
 pub const list_must_be_lvar: Error =

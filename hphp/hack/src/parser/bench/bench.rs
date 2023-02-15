@@ -10,31 +10,29 @@ use std::time::Duration;
 
 use aast_parser::rust_aast_parser_types::Env as AastParserEnv;
 use bumpalo::Bump;
+use clap::Parser;
 use criterion::Criterion;
 use ocamlrep::rc::RcOc;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::source_text::SourceText;
 use relative_path::Prefix;
 use relative_path::RelativePath;
-use structopt::StructOpt;
 
-#[derive(Debug, StructOpt)]
-#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)
+#[derive(Debug, Parser)]
 struct Options {
-    #[structopt(parse(from_os_str))]
     files: Vec<PathBuf>,
 
     // The total time in seconds to spend measuring each parser.
-    #[structopt(long, default_value = "10")]
+    #[clap(long, default_value = "10")]
     measurement_time: u64,
 
     // If true, only benchmark the direct decl parser.
-    #[structopt(long)]
+    #[clap(long)]
     direct_decl_only: bool,
 }
 
 fn main() {
-    let opts = Options::from_args();
+    let opts = Options::parse();
 
     let mut criterion = Criterion::default()
         .warm_up_time(Duration::from_secs(2))

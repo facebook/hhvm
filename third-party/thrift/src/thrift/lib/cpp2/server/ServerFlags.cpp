@@ -26,10 +26,10 @@ FOLLY_GFLAGS_DEFINE_bool(
 FOLLY_GFLAGS_DEFINE_bool(
     thrift_disable_resource_pools, false, "Disable use of resource pools");
 
-THRIFT_FLAG_DEFINE_bool(allow_resource_pools_for_wildcards, false);
+THRIFT_FLAG_DEFINE_bool(allow_resource_pools_for_wildcards, true);
 FOLLY_GFLAGS_DEFINE_bool(
     thrift_allow_resource_pools_for_wildcards,
-    false,
+    true,
     "Allow resource pools for wildcard processors");
 
 THRIFT_FLAG_DEFINE_bool(allow_wildcard_process_via_execute_request, true);
@@ -49,7 +49,7 @@ bool useResourcePoolsFlagsSet() {
 bool allowResourcePoolsForWildcards() {
   static bool gFlagAllow = FLAGS_thrift_allow_resource_pools_for_wildcards;
   static bool thriftFlag = THRIFT_FLAG(allow_resource_pools_for_wildcards);
-  return gFlagAllow || thriftFlag;
+  return gFlagAllow && thriftFlag;
 }
 
 } // namespace apache::thrift

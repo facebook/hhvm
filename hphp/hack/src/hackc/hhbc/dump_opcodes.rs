@@ -10,22 +10,21 @@ use std::process::Command;
 use std::process::Stdio;
 
 use anyhow::Result;
+use clap::Parser;
 use hhbc_gen::OpcodeData;
 use quote::quote;
-use structopt::StructOpt;
 
-#[derive(StructOpt)]
-#[structopt(no_version)]
+#[derive(Parser)]
 struct Opts {
-    #[structopt(short = "o", long = "out")]
+    #[clap(short = 'o', long = "out")]
     output: Option<PathBuf>,
 
-    #[structopt(long)]
+    #[clap(long)]
     no_format: bool,
 }
 
 fn main() -> Result<()> {
-    let opts = Opts::from_args();
+    let opts = Opts::parse();
     let opcode_data: Vec<OpcodeData> = hhbc_gen::opcode_data().to_vec();
 
     let input = quote!(

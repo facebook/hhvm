@@ -17,5 +17,5 @@ direct_decl_parser = { version = "0.0.0", path = "../../../parser/api/cargo/dire
 facts_rust = { version = "0.0.0", path = "../facts_rust" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../hackc/utils/cargo/hhbc_string_utils" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-ocamlrep_ocamlpool = { version = "0.0.0", path = "../../../ocamlrep_ocamlpool" }
+ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }

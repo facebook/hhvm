@@ -15,6 +15,6 @@ deps_rust = { version = "0.0.0", path = "../deps_rust" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_custom = { version = "0.0.0", path = "../../../ocamlrep_custom" }
-ocamlrep_ocamlpool = { version = "0.0.0", path = "../../../ocamlrep_ocamlpool" }
+ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 rpds = "0.11.0"
 typing_deps_hash = { version = "0.0.0", path = "../typing_deps_hash" }

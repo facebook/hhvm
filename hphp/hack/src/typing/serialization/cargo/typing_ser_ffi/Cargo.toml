@@ -17,5 +17,5 @@ bumpalo = { version = "3.11.1", features = ["collections"] }
 framing = { version = "0.0.0", path = "../../framing" }
 lazy_static = "1.4"
 lz4 = "1.24.0"
-ocamlrep_ocamlpool = { version = "0.0.0", path = "../../../../ocamlrep_ocamlpool" }
+ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }

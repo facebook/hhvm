@@ -15,4 +15,4 @@ crate-type = ["lib", "staticlib"]
 delta_log = { version = "0.0.0", path = "../../../utils/rust/delta_log" }
 env_logger = "0.7"
 hh_fanout_build = { version = "0.0.0", path = "../hh_fanout_build" }
-ocamlrep_ocamlpool = { version = "0.0.0", path = "../../../ocamlrep_ocamlpool" }
+ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

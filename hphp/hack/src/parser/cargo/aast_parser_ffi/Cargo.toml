@@ -14,5 +14,5 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 aast_parser = { version = "0.0.0", path = "../aast_parser" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-ocamlrep_ocamlpool = { version = "0.0.0", path = "../../../ocamlrep_ocamlpool" }
+ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 parser_core_types = { version = "0.0.0", path = "../core_types" }

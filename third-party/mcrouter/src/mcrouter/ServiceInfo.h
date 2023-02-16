@@ -11,6 +11,8 @@
 
 #include <folly/Range.h>
 
+#include "mcrouter/lib/network/gen/MemcacheMessages.h"
+
 namespace facebook {
 namespace memcache {
 namespace mcrouter {

@@ -27,6 +27,7 @@
 #include "mcrouter/config.h"
 #include "mcrouter/lib/network/AsyncMcServer.h"
 #include "mcrouter/lib/network/AsyncMcServerWorker.h"
+#include "mcrouter/lib/network/McSSLUtil.h"
 #include "mcrouter/lib/network/Qos.h"
 #include "mcrouter/standalone_options.h"
 

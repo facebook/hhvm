@@ -70,12 +70,18 @@ mod tests {
     use oxidized::tast::Pos;
 
     use super::*;
+    use crate::config::Flags;
     use crate::Transform;
 
     #[test]
     fn test_hint() {
-        let cfg_hkt_enabled = Config::HKT_ENABLED;
-        let cfg_hkt_disabled = Config::default();
+        let default_config = Config::default();
+        let cfg_hkt_disabled = Config { ..default_config };
+        let cfg_hkt_enabled = Config {
+            flags: Flags::HKT_ENABLED,
+            ..default_config
+        };
+
         let mut errs = Vec::default();
         let mut pass = ElabHktPass;
         let mut elem = Hint(
@@ -105,8 +111,13 @@ mod tests {
 
     #[test]
     fn test_tparam() {
-        let cfg_hkt_enabled = Config::HKT_ENABLED;
-        let cfg_hkt_disabled = Config::default();
+        let default_config = Config::default();
+        let cfg_hkt_disabled = Config { ..default_config };
+        let cfg_hkt_enabled = Config {
+            flags: Flags::HKT_ENABLED,
+            ..default_config
+        };
+
         let mut errs = Vec::default();
         let mut pass = ElabHktPass;
 

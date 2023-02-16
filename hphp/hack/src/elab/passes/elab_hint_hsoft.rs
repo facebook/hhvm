@@ -52,6 +52,7 @@ mod tests {
     use oxidized::tast::Pos;
 
     use super::*;
+    use crate::config::Flags;
     use crate::Transform;
 
     #[test]
@@ -77,7 +78,7 @@ mod tests {
 
         // Transform elem2 with `soft_as_like` set
         // expect Hlike(_,Hdynamic)
-        cfg = Config::SOFT_AS_LIKE;
+        cfg.flags = Flags::SOFT_AS_LIKE;
         elem2.transform(&cfg, &mut errs, &mut pass);
         assert!(matches!(&*elem2.1, Hint_::Hlike(_)));
         assert!(match &*elem2.1 {

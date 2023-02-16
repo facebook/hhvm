@@ -17,10 +17,9 @@ use crate::config::Config;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
-#[allow(non_camel_case_types)]
-pub struct ValidateClass_ReqPass;
+pub struct ValidateClassReqPass;
 
-impl Pass for ValidateClass_ReqPass {
+impl Pass for ValidateClassReqPass {
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         cls: &mut Class_<Ex, En>,

@@ -17,3 +17,5 @@ itertools = "0.10.3"
 naming_special_names_rust = { version = "0.0.0", path = "../naming" }
 ocamlrep = { version = "0.0.0", path = "../ocamlrep" }
 oxidized = { version = "0.0.0", path = "../oxidized" }
+pos = { version = "0.0.0", path = "../hackrs/pos/cargo/pos" }
+special_names = { version = "0.0.0", path = "../hackrs/special_names/cargo/special_names" }

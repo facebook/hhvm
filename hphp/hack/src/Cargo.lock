@@ -1448,6 +1448,8 @@ dependencies = [
  "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
+ "pos",
+ "special_names",
 ]
 
 [[package]]

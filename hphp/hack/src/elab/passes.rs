@@ -18,3 +18,5 @@ pub mod elab_hint_hsoft;
 pub mod elab_hkt;
 pub mod elab_user_attributes;
 pub mod guard_invalid;
+
+pub mod validate_expr_cast;

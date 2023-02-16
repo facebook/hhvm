@@ -25,3 +25,11 @@ let download_and_unpack_saved_state_from_manifold
     ~target_path:_
     ~saved_state_type:_ =
   failwith "Not implemented"
+
+let get_project_metadata
+    ~progress_callback:_
+    ~saved_state_type:_
+    ~repo:_
+    ~saved_state_manifold_api_key:_
+    ~ignore_hh_version:_ =
+  failwith "Not implemented"

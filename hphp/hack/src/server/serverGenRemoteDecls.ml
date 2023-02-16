@@ -26,8 +26,8 @@ let return_ok x = Future.Promise.return (Ok x)
 
 let return_err x = Future.Promise.return (Error x)
 
-let get_hhconfig_version ~(repo : Path.t) :
-    (string * string, string) result Future.Promise.t =
+let get_hhconfig_info ~(repo : Path.t) :
+    (string, string) result Future.Promise.t =
   let hhconfig_path =
     Path.to_string
       (Path.concat repo Config_file.file_path_relative_to_repo_root)
@@ -40,49 +40,29 @@ let get_hhconfig_version ~(repo : Path.t) :
       ^ hhconfig_path
     in
     return_err error)
-  >>= fun (hhconfig_hash, config) ->
+  >>= fun (_hhconfig_hash, config) ->
   let version = Config_file.Getters.string_opt "version" config in
   match version with
   | None -> failwith "Failed to parse hh version"
   | Some version ->
     let version = "v" ^ String_utils.lstrip version "^" in
-    return_ok (hhconfig_hash, version)
+    return_ok version
 
-let get_project_metadata ~hhconfig_hash ~hhconfig_version :
-    (string, string) result Future.Promise.t =
-  let hh_server_path =
-    Printf.sprintf
-      "/usr/local/fbprojects/packages/hack/%s/hh_server"
-      hhconfig_version
+let get_project_metadata ~repo : (string, string) result Future.t =
+  let res =
+    State_loader_futures.get_project_metadata
+      ~progress_callback:(fun _ -> ())
+      ~saved_state_type:Saved_state_loader.Shallow_decls
+      ~saved_state_manifold_api_key:None
+      ~ignore_hh_version:false
+      ~repo
   in
-  let cmd = Printf.sprintf "%s --version" hh_server_path in
-  let process =
-    Process.exec (Exec_command.Hh_server hh_server_path) ["--version"]
-  in
-  let future = FutureProcess.make process (fun str -> str) in
-  let process_result =
-    Future.continue_and_map_err future (function
-        | Ok stdout -> Ok stdout
-        | Error e -> Error (Future.error_to_string e))
-  in
-  Future.Promise.bind process_result (function
-      | Ok stdout ->
-        let hash = String.slice stdout 0 40 in
-        return_ok hash
-      | Error process_failure ->
-        let error =
-          Printf.sprintf
-            "Attempted to invoke hh_server to get version.\n`%s`\nRESPONSE:\n%s"
-            cmd
-            process_failure
-        in
-        return_err error)
-  >>= fun hh_server_hash ->
-  let project_metadata = Printf.sprintf "%s-%s" hhconfig_hash hh_server_hash in
-  return_ok project_metadata
+  Future.Promise.map res (function
+      | Ok (x, _telemetry) -> Ok x
+      | Error (err, _telemetry) ->
+        Error (Saved_state_loader.LoadError.long_user_message_of_error err))
 
-let get_changed_files_since_last_saved_state
-    ~(hhconfig_hash : string) ~(hhconfig_version : string) :
+let get_changed_files_since_last_saved_state () :
     (Relative_path.t list, string) result Future.Promise.t =
   let saved_state_type =
     (* TODO: using shallow_decls_saved_state *)
@@ -90,8 +70,7 @@ let get_changed_files_since_last_saved_state
   in
   let root = Wwwroot.get None in
   let project_name = Saved_state_loader.get_project_name saved_state_type in
-  get_project_metadata ~hhconfig_hash ~hhconfig_version
-  >>= fun project_metadata ->
+  get_project_metadata ~repo:root >>= fun project_metadata ->
   let query =
     Printf.sprintf
       {|
@@ -169,8 +148,8 @@ let go
     ~(incremental : bool) : unit =
   let ctx = Provider_utils.ctx_from_server_env env in
   let repo = Wwwroot.get None in
-  let (hhconfig_hash, hhconfig_version) =
-    match Future.get @@ get_hhconfig_version ~repo with
+  let hhconfig_version =
+    match Future.get @@ get_hhconfig_info ~repo with
     | Ok (Ok result) -> result
     | Ok (Error e) -> failwith (Printf.sprintf "%s" e)
     | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
@@ -185,9 +164,7 @@ let go
   let get_next : Relative_path.t list Bucket.next =
     if incremental then (
       let changed_files_since_last_saved_state =
-        get_changed_files_since_last_saved_state
-          ~hhconfig_hash
-          ~hhconfig_version
+        get_changed_files_since_last_saved_state ()
       in
       let changed_files : Relative_path.t list =
         match Future.get changed_files_since_last_saved_state with

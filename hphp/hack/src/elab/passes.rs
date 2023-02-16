@@ -19,4 +19,6 @@ pub mod elab_hkt;
 pub mod elab_user_attributes;
 pub mod guard_invalid;
 
+#[allow(non_snake_case)]
+pub mod validate_class__req;
 pub mod validate_expr_cast;

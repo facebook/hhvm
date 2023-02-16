@@ -127,7 +127,7 @@ fn elaborate<T: Transform>(node: &mut T) -> Vec<NamingPhaseError> {
 
         // Validate use of `require implements`, `require extends` and
         // `require class` declarations for traits, interfaces and classes
-        // passes::validate_class_req::ValidateClassReqPass::default(),
+        passes::validate_class__req::ValidateClass_ReqPass::default(),
 
         // Validation dealing with common xhp naming errors
         // passes::validate_xhp_name::ValidateXhpNamePass::default(),

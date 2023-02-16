@@ -18,6 +18,7 @@
 #include <folly/json.h>
 
 #include "mcrouter/CarbonRouterInstance.h"
+#include "mcrouter/HostWithShard-fwd.h"
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/Proxy.h"
 #include "mcrouter/ProxyConfigBuilder.h"
@@ -39,6 +40,11 @@ namespace facebook {
 namespace memcache {
 namespace mcrouter {
 namespace detail {
+
+bool srHostWithShardFuncRouteHandlesCommandDispatcher(
+    const HostWithShard& hostWithShard,
+    std::string& tree,
+    const int level);
 
 template <class RouterInfo>
 class RouteHandlesCommandDispatcher {
@@ -89,15 +95,8 @@ class RouteHandlesCommandDispatcher {
         [&tree, &level](
             const HostWithShard& hostWithShard,
             const RequestClass& /* unused */) {
-          const auto& host = hostWithShard.first;
-          bool haveHost = (host != nullptr);
-          tree.append(
-              std::string(level, ' ') + "host: " +
-              (haveHost ? host->location().getIp() : "unknown") + " port:" +
-              (haveHost ? folly::to<std::string>(host->location().getPort())
-                        : "unknown") +
-              '\n');
-          return false;
+          return srHostWithShardFuncRouteHandlesCommandDispatcher(
+              hostWithShard, tree, level);
         },
         [&tree, &level](
             const AccessPoint& srHost, const RequestClass& /* unused */) {

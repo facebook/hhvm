@@ -102,7 +102,6 @@ members = [
     "utils/no_pos_hash",
     "utils/no_pos_hash/derive",
     "utils/ocaml_helper",
-    "utils/ocamlrep_caml_builtins",
     "utils/ocaml_runtime",
     "utils/perf/cargo/profile",
     "utils/perf/cargo/stats",

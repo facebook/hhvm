@@ -33,6 +33,7 @@ AC_CONFIG_LINKS([test/config.py:test/mcrouter_config.py])
 AC_CONFIG_LINKS([RouterRegistry.h:RouterRegistry-impl.h])
 AC_CONFIG_LINKS([ThriftAcceptor.h:ThriftAcceptor-impl.h])
 AC_CONFIG_LINKS([mcrouter_sr_deps.h:mcrouter_sr_deps-impl.h])
+AC_CONFIG_LINKS([HostWithShard-fwd.h:HostWithShard-fwd-impl.h])
 AC_CONFIG_AUX_DIR([build-aux])
 
 AM_INIT_AUTOMAKE([1.14 foreign dist-bzip2 nostdinc subdir-objects parallel-tests])

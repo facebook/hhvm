@@ -6,7 +6,7 @@
 use std::path::PathBuf;
 
 #[derive(Debug, clap::Parser)]
-pub struct Args {
+pub struct CommonArgs {
     /// Rust files containing the types for which codegen will be performed.
     /// All types reachable from the given root type must be defined in one of
     /// the files provided as `--input`.

@@ -6,7 +6,7 @@
 mod pass_generator;
 mod transform_generator;
 
-pub use crate::common::args::Args;
+pub use crate::common::args::CommonArgs as Args;
 use crate::common::context::Context;
 use crate::common::to_snake;
 

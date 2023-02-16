@@ -8,7 +8,7 @@ use std::path::PathBuf;
 #[derive(Debug, clap::Parser)]
 pub struct Args {
     #[clap(flatten)]
-    pub common: crate::common::args::Args,
+    pub common: crate::common::args::CommonArgs,
 
     /// Additional Rust files containing types for which codegen will be performed.
     /// All types reachable from the given root type must be defined in on of

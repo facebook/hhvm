@@ -16,7 +16,7 @@ use super::node_impl_generator::*;
 use super::node_trait_generator::*;
 use super::type_params_generator::*;
 use super::visitor_trait_generator::*;
-pub use crate::common::args::Args;
+pub use crate::common::args::CommonArgs as Args;
 
 pub fn run(args: &Args) -> Result<Vec<(PathBuf, String)>> {
     let inputs = &args.input;

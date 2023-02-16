@@ -6,10 +6,16 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/crypto/ECCurve.h>
+#include <fizz/crypto/exchange/OpenSSLKeyExchange.h>
+#include <fizz/crypto/exchange/X25519.h>
+#include <fizz/protocol/Certificate.h>
 #include <fizz/protocol/ech/Types.h>
 #include <fizz/tool/FizzCommandCommon.h>
 #include <folly/FileUtil.h>
 #include <folly/String.h>
+
+#include <fstream>
 
 using namespace folly;
 
@@ -292,6 +298,59 @@ std::vector<ech::ECHConfig> getDefaultECHConfigs() {
   configs.push_back(std::move(echConfig));
 
   return configs;
+}
+
+std::unique_ptr<KeyExchange> createKeyExchange(
+    hpke::KEMId kemId,
+    const std::string& echPrivateKeyFile) {
+  auto getPrivateKey = [&echPrivateKeyFile]() {
+    std::string keyData;
+    folly::ssl::EvpPkeyUniquePtr privKey;
+    if (readFile(echPrivateKeyFile.c_str(), keyData)) {
+      privKey = CertUtils::readPrivateKeyFromBuffer(keyData);
+    }
+    return privKey;
+  };
+
+  switch (kemId) {
+    case hpke::KEMId::secp256r1: {
+      auto kex = std::make_unique<OpenSSLECKeyExchange<P256>>();
+      kex->setPrivateKey(getPrivateKey());
+      return kex;
+    }
+    case hpke::KEMId::secp384r1: {
+      auto kex = std::make_unique<OpenSSLECKeyExchange<P384>>();
+      kex->setPrivateKey(getPrivateKey());
+      return kex;
+    }
+    case hpke::KEMId::secp521r1: {
+      auto kex = std::make_unique<OpenSSLECKeyExchange<P521>>();
+      kex->setPrivateKey(getPrivateKey());
+      return kex;
+    }
+    case hpke::KEMId::x25519: {
+      auto kex = std::make_unique<X25519KeyExchange>();
+      std::string keyData;
+      std::ifstream infile(echPrivateKeyFile);
+
+      // Assume the first line is the private key in hex, the second line is the
+      // public key in hex.
+      std::string privKeyStr, pubKeyStr;
+      infile >> privKeyStr;
+      infile >> pubKeyStr;
+
+      kex->setKeyPair(
+          folly::IOBuf::copyBuffer(folly::unhexlify(privKeyStr)),
+          folly::IOBuf::copyBuffer(folly::unhexlify(pubKeyStr)));
+
+      return kex;
+    }
+    default: {
+      // We don't support other key exchanges right now.
+      break;
+    }
+  }
+  return nullptr;
 }
 
 } // namespace tool

@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/crypto/exchange/KeyExchange.h>
 #include <fizz/protocol/AsyncFizzBase.h>
 #include <fizz/protocol/ech/Types.h>
 #include <fizz/util/Parse.h>
@@ -42,6 +43,10 @@ folly::Optional<folly::dynamic> readECHConfigsJson(std::string echFile);
 hpke::KEMId getKEMId(std::string kemStr);
 
 std::vector<ech::ECHConfig> getDefaultECHConfigs();
+
+std::unique_ptr<KeyExchange> createKeyExchange(
+    hpke::KEMId kemId,
+    const std::string& echPrivateKeyFile);
 
 inline uint16_t portFromString(const std::string& portStr, bool serverSide) {
   unsigned long converted = 0;

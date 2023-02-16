@@ -1256,7 +1256,9 @@ invocations of `hh` faster.|}
 
 let parse_args () : command =
   match parse_command () with
-  | (CKNone | CKCheck) as cmd -> CCheck (parse_check_args cmd)
+  | CKNone
+  | CKCheck ->
+    CCheck (parse_check_args CKCheck)
   | CKStart -> parse_start_args ()
   | CKStop -> parse_stop_args ()
   | CKRestart -> parse_restart_args ()

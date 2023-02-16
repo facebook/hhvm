@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f654619dcfb1ddbffe3363547a095734>>
+// @generated SignedSource<<4c6401a7abfc3164eb7fb8a56f596d9e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 #![allow(unused_variables)]
+#![allow(clippy::match_single_binding)]
 use std::ops::ControlFlow::Break;
 
 use oxidized::aast_defs::*;

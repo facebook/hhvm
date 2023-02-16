@@ -13,7 +13,6 @@
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/ProxyRequestContextTyped.h"
 #include "mcrouter/lib/RouteHandleTraverser.h"
-#include "mcrouter/mcrouter_sr_deps.h"
 
 namespace facebook {
 namespace memcache {
@@ -85,6 +84,12 @@ template <class Request>
 const Request& unwrapRequest(std::reference_wrapper<const Request>& req) {
   return req.get();
 }
+
+bool srHostWithShardFuncCarbonRouterClient(
+    const HostWithShard& hostWithShard,
+    const RequestClass& requestClass,
+    uint64_t& hash,
+    uint64_t& hint);
 
 } // namespace detail
 
@@ -221,14 +226,8 @@ CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
       [&hash, &hint](
           const HostWithShard& hostWithShard,
           const RequestClass& requestClass) {
-        auto& host = hostWithShard.first;
-        if (!requestClass.is(RequestClass::kShadow) && host &&
-            host->location().getTWTaskID()) {
-          hash = *host->location().getTWTaskID();
-          hint = RoutingHintEncoder::encodeRoutingHint(hostWithShard);
-          return true;
-        }
-        return false;
+        return detail::srHostWithShardFuncCarbonRouterClient(
+            hostWithShard, requestClass, hash, hint);
       },
       [&hash](const AccessPoint& srHost, const RequestClass& requestClass) {
         if (!requestClass.is(RequestClass::kShadow) &&

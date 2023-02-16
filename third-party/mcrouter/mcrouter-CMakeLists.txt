@@ -69,9 +69,19 @@ add_custom_command(
     "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/mcrouter_sr_deps.h"
   COMMENT "Creating mcrouter_sr_deps.h symlink"
 )
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/HostWithShard-fwd.h"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/HostWithShard-fwd-impl.h"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/mcrouter"
+  COMMAND ${CMAKE_COMMAND} -E create_symlink
+    "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/HostWithShard-fwd-impl.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/HostWithShard-fwd.h"
+  COMMENT "Creating HostWithShard-fwd.h symlink"
+)
 list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/RouterRegistry.h")
 list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h")
 list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/mcrouter_sr_deps.h")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/HostWithShard-fwd.h")
 list(APPEND CXX_SOURCES ${files})
 
 add_definitions(-DNO_LIB_GFLAGS)

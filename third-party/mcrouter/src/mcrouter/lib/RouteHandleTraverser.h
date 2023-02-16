@@ -12,6 +12,7 @@
 #include <memory>
 #include <vector>
 
+#include "mcrouter/HostWithShard-fwd.h"
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/lib/PoolContext.h"
 #include "mcrouter/lib/network/AccessPoint.h"

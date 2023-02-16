@@ -9,6 +9,7 @@
 
 #include "mcrouter/CarbonRouterInstance.h"
 #include "mcrouter/ForEachPossibleClient.h"
+#include "mcrouter/HostWithShard-fwd.h"
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/ProxyRequestContextTyped.h"
 #include "mcrouter/lib/RouteHandleTraverser.h"

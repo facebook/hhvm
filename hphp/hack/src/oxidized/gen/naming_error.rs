@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<43eeefea413a5b936246468fea91c93e>>
+// @generated SignedSource<<504e15e244a5d8981ff9a9c246a69b7f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -212,7 +212,11 @@ pub enum NamingError {
     #[rust_to_ocaml(name = "Static_outside_class")]
     StaticOutsideClass(pos::Pos),
     #[rust_to_ocaml(name = "This_type_forbidden")]
-    ThisTypeForbidden(pos::Pos),
+    ThisTypeForbidden {
+        pos: pos::Pos,
+        in_extends: bool,
+        in_req_extends: bool,
+    },
     #[rust_to_ocaml(name = "Nonstatic_property_with_lsb")]
     NonstaticPropertyWithLsb(pos::Pos),
     #[rust_to_ocaml(name = "Lowercase_this")]

@@ -893,7 +893,7 @@ and ('ex, 'en) class_ = {
   c_uses: trait_hint list; [@transform.explicit]
   c_xhp_attr_uses: xhp_attr_hint list; [@transform.explicit]
   c_xhp_category: (pos * pstring list) option; [@transform.opaque]
-  c_reqs: (class_hint * require_kind) list; [@transform.explicit]
+  c_reqs: class_req list; [@transform.explicit]
   c_implements: class_hint list; [@transform.explicit]
   c_where_constraints: where_constraint_hint list;
   c_consts: ('ex, 'en) class_const list; [@transform.explicit]
@@ -912,6 +912,8 @@ and ('ex, 'en) class_ = {
   c_internal: bool;
   c_module: sid option;
 }
+
+and class_req = class_hint * require_kind
 
 and class_hint = hint
 

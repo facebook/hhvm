@@ -1,0 +1,100 @@
+Errors:
+  [5:19-23] This type `this` cannot be used in an `extends` clause
+  [11:29-33] This type `this` cannot be used in an `extends` clause
+  [14:29-33] This type `this` cannot be used in an `extends` clause
+[(Class
+    { c_span = [3:1-14]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+      c_name = ([3:7-8], "\\B"); c_tparams = [{ tp_variance = Invariant; tp_name = ([3:9-10], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+      c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
+      c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
+      c_typeconsts = []; c_vars = []; c_methods = []; c_xhp_children = []; 
+      c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None });
+  (Class
+     { c_span = [5:1-27]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([5:7-8], "\\C"); c_tparams = []; c_extends = [([5:17-24], (Happly (([5:17-18], "\\B"), [([5:19-23], Herr)])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+       c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None });
+  (Class
+     { c_span = [8:1-33]; c_annotation = (); c_mode = Mstrict; c_final = true; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([8:13-14], "\\D"); c_tparams = []; c_extends = [([8:23-30], (Happly (([8:23-24], "\\B"), [([8:25-29], Hthis)])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+       c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None });
+  (Class
+     { c_span = [11:1-37]; c_annotation = (); c_mode = Mstrict; c_final = true; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([11:13-14], "\\E"); c_tparams = [{ tp_variance = Covariant; tp_name = ([11:16-17], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       c_extends = [([11:27-34], (Happly (([11:27-28], "\\B"), [([11:29-33], Herr)])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+       c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None });
+  (Class
+     { c_span = [14:1-37]; c_annotation = (); c_mode = Mstrict; c_final = true; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([14:13-14], "\\F"); c_tparams = [{ tp_variance = Contravariant; tp_name = ([14:16-17], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       c_extends = [([14:27-34], (Happly (([14:27-28], "\\B"), [([14:29-33], Herr)])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+       c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None });
+  (Class
+     { c_span = [17:1-19:2]; c_annotation = (); c_mode = Mstrict; c_final = true; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([17:13-14], "\\G"); c_tparams = [{ tp_variance = Invariant; tp_name = ([17:15-16], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       c_extends = [([17:26-33], (Happly (([17:26-27], "\\B"), [([17:28-32], Hthis)])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = [];
+       c_vars =
+       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Public; cv_type = ((), (Some ([18:10-12], (Hoption ([18:11-12], (Habstr ("T", []))))))); 
+          cv_id = ([18:13-15], "x"); cv_expr = None; cv_user_attributes = []; 
+          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
+          cv_span = [18:13-15] }
+         ];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None })
+  ]

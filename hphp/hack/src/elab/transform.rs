@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<32a9321cbbbf2f9db3ef00594db3bd6b>>
+// @generated SignedSource<<f654619dcfb1ddbffe3363547a095734>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1807,6 +1807,38 @@ const _: () = {
                         __binding_29.transform(cfg, errs, pass)
                     }
                     { __binding_30.transform(cfg, errs, pass) }
+                }
+            }
+        }
+    }
+};
+const _: () = {
+    impl Transform for ClassReq {
+        fn transform(
+            &mut self,
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
+        ) {
+            let mut in_pass = pass.clone();
+            if let Break(..) = pass.on_ty_class_req_top_down(self, cfg, errs) {
+                return;
+            }
+            self.traverse(cfg, errs, pass);
+            in_pass.on_ty_class_req_bottom_up(self, cfg, errs);
+        }
+        fn traverse(
+            &mut self,
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
+        ) {
+            match self {
+                ClassReq(ref mut __binding_0, ref mut __binding_1) => {
+                    {
+                        __binding_0.transform(cfg, errs, pass)
+                    }
+                    { __binding_1.transform(cfg, errs, pass) }
                 }
             }
         }

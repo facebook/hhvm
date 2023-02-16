@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<944bf210226fae1fb458f80c7a321368>>
+// @generated SignedSource<<1e26de0aaa141b14df9c0fa28bfcb5da>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -885,7 +885,7 @@ pub trait Pass {
     #[inline(always)]
     fn on_fld_class__reqs_top_down(
         &mut self,
-        elem: &mut Vec<(ClassHint, RequireKind)>,
+        elem: &mut Vec<ClassReq>,
         cfg: &Config,
         errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
@@ -894,7 +894,7 @@ pub trait Pass {
     #[inline(always)]
     fn on_fld_class__reqs_bottom_up(
         &mut self,
-        elem: &mut Vec<(ClassHint, RequireKind)>,
+        elem: &mut Vec<ClassReq>,
         cfg: &Config,
         errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
@@ -988,6 +988,24 @@ pub trait Pass {
     where
         Ex: Default,
     {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_req_top_down(
+        &mut self,
+        elem: &mut ClassReq,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+    ) -> ControlFlow<(), ()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_req_bottom_up(
+        &mut self,
+        elem: &mut ClassReq,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+    ) -> ControlFlow<(), ()> {
         Continue(())
     }
     #[inline(always)]
@@ -2705,7 +2723,7 @@ where
     #[inline(always)]
     fn on_fld_class__reqs_top_down(
         &mut self,
-        elem: &mut Vec<(ClassHint, RequireKind)>,
+        elem: &mut Vec<ClassReq>,
         cfg: &Config,
         errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
@@ -2715,7 +2733,7 @@ where
     #[inline(always)]
     fn on_fld_class__reqs_bottom_up(
         &mut self,
-        elem: &mut Vec<(ClassHint, RequireKind)>,
+        elem: &mut Vec<ClassReq>,
         cfg: &Config,
         errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
@@ -2826,6 +2844,26 @@ where
             .on_fld_class__user_attributes_bottom_up(elem, cfg, errs)?;
         self.snd
             .on_fld_class__user_attributes_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_req_top_down(
+        &mut self,
+        elem: &mut ClassReq,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_class_req_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_class_req_top_down(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_class_req_bottom_up(
+        &mut self,
+        elem: &mut ClassReq,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+    ) -> ControlFlow<(), ()> {
+        self.fst.on_ty_class_req_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_class_req_bottom_up(elem, cfg, errs)
     }
     #[inline(always)]
     fn on_ty_xhp_attr_top_down<Ex, En>(

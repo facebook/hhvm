@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d3d4379bd947189fbe8e3458dae07de3>>
+// @generated SignedSource<<3287d466f20e7aaa991f2976560fbfbf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1886,7 +1886,7 @@ pub struct Class_<'a, Ex, En> {
     pub xhp_category: Option<&'a (&'a Pos<'a>, &'a [&'a Pstring<'a>])>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.explicit")]
-    pub reqs: &'a [(&'a ClassHint<'a>, &'a oxidized::aast_defs::RequireKind)],
+    pub reqs: &'a [&'a ClassReq<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub implements: &'a [&'a ClassHint<'a>],
@@ -1927,6 +1927,30 @@ pub struct Class_<'a, Ex, En> {
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Class_<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Class_<'arena, Ex, En>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct ClassReq<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a ClassHint<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub  &'a oxidized::aast_defs::RequireKind,
+);
+impl<'a> TrivialDrop for ClassReq<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ClassReq<'arena>);
 
 #[rust_to_ocaml(and)]
 pub type ClassHint<'a> = Hint<'a>;

@@ -119,7 +119,11 @@ type t =
   | Parent_outside_class of Pos.t
   | Self_outside_class of Pos.t
   | Static_outside_class of Pos.t
-  | This_type_forbidden of Pos.t
+  | This_type_forbidden of {
+      pos: Pos.t;
+      in_extends: bool;
+      in_req_extends: bool;
+    }
   | Nonstatic_property_with_lsb of Pos.t
   | Lowercase_this of {
       pos: Pos.t;
@@ -737,13 +741,16 @@ let static_outside_class pos =
     (pos, "`static` is undefined outside of a class")
     []
 
-let this_type_forbidden pos =
-  User_error.make
-    Error_code.(to_enum ThisMustBeReturn)
-    ( pos,
+let this_type_forbidden pos in_extends in_req_extends =
+  let msg =
+    if in_extends then
+      "This type `this` cannot be used in an `extends` clause"
+    else if in_req_extends then
+      "This type `this` cannot be used in an `require extends` clause`"
+    else
       "The type `this` cannot be used as a constraint on a class generic, or as the type of a static member variable"
-    )
-    []
+  in
+  User_error.make Error_code.(to_enum ThisMustBeReturn) (pos, msg) []
 
 let nonstatic_property_with_lsb pos =
   User_error.make
@@ -1211,7 +1218,8 @@ let to_user_error = function
   | Parent_outside_class pos -> parent_outside_class pos
   | Self_outside_class pos -> self_outside_class pos
   | Static_outside_class pos -> static_outside_class pos
-  | This_type_forbidden pos -> this_type_forbidden pos
+  | This_type_forbidden { pos; in_extends; in_req_extends } ->
+    this_type_forbidden pos in_extends in_req_extends
   | Nonstatic_property_with_lsb pos -> nonstatic_property_with_lsb pos
   | Lowercase_this { pos; ty_name } -> lowercase_this pos ty_name
   | Classname_param pos -> classname_param pos

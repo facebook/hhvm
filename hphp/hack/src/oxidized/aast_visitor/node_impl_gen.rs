@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<413ea10df24aa6011979a7d9f5cb72ad>>
+// @generated SignedSource<<36ba3b28819fb91374b5e5f1aa3061ec>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -314,6 +314,23 @@ impl<P: Params> Node<P> for ClassId_<P::Ex, P::En> {
             ClassId_::CIexpr(a0) => a0.accept(c, v),
             ClassId_::CI(a0) => a0.accept(c, v),
         }
+    }
+}
+impl<P: Params> Node<P> for ClassReq {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_class_req(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)?;
+        self.1.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for ClassTypeconst {

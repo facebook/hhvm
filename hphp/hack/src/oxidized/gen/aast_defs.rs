@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1b0c4635be6899df89f0928ac0ece9c2>>
+// @generated SignedSource<<27d3e607a38fe0dad0322ea42d93caec>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1535,7 +1535,7 @@ pub struct Class_<Ex, En> {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub xhp_category: Option<(Pos, Vec<Pstring>)>,
     #[rust_to_ocaml(attr = "transform.explicit")]
-    pub reqs: Vec<(ClassHint, RequireKind)>,
+    pub reqs: Vec<ClassReq>,
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub implements: Vec<ClassHint>,
     pub where_constraints: Vec<WhereConstraintHint>,
@@ -1558,6 +1558,24 @@ pub struct Class_<Ex, En> {
     pub internal: bool,
     pub module: Option<Sid>,
 }
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct ClassReq(pub ClassHint, pub RequireKind);
 
 #[rust_to_ocaml(and)]
 pub type ClassHint = Hint;

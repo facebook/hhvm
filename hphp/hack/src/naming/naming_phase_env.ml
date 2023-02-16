@@ -40,9 +40,23 @@ module Elab_this_hint = struct
     (* `this` is forbidden as a hint in this context *)
     forbid_this: bool;
     lsb: bool option;
+    in_interface: bool;
+    in_req_extends: bool;
+    in_extends: bool;
+    is_top_level_haccess_root: bool;
+    in_invariant_final: bool;
   }
 
-  let empty = { forbid_this = false; lsb = None }
+  let empty =
+    {
+      forbid_this = false;
+      lsb = None;
+      in_interface = false;
+      in_req_extends = false;
+      in_extends = false;
+      is_top_level_haccess_root = false;
+      in_invariant_final = false;
+    }
 end
 
 module Elab_call = struct

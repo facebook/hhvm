@@ -8,6 +8,7 @@ use std::ops::ControlFlow;
 use oxidized::aast::ClassHint;
 use oxidized::aast::Hint;
 use oxidized::aast::RequireKind;
+use oxidized::aast_defs::ClassReq;
 use oxidized::aast_defs::Class_;
 use oxidized::ast_defs::ClassishKind;
 use oxidized::naming_error::NamingError;
@@ -24,13 +25,11 @@ pub struct ValidateClass_ReqPass;
 // 'hphp/hack/src/annotated_ast/aast.ml'
 // TODO(sf, 2023-02-15): Perhaps this should go into a hackrs/annotated_ast
 // crate or elsewhere?
-fn split_reqs(
-    reqs: &[(ClassHint, RequireKind)],
-) -> (Vec<&ClassHint>, Vec<&ClassHint>, Vec<&ClassHint>) {
+fn split_reqs(reqs: &[ClassReq]) -> (Vec<&ClassHint>, Vec<&ClassHint>, Vec<&ClassHint>) {
     let mut extends = vec![];
     let mut implements = vec![];
     let mut class_ = vec![];
-    for (h, require_kind) in reqs {
+    for ClassReq(h, require_kind) in reqs {
         match require_kind {
             RequireKind::RequireExtends => extends.push(h),
             RequireKind::RequireImplements => implements.push(h),

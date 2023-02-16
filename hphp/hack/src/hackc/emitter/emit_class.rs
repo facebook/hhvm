@@ -44,6 +44,7 @@ use instruction_sequence::InstrSeq;
 use itertools::Itertools;
 use naming_special_names_rust as special_names;
 use oxidized::ast;
+use oxidized::ast::ClassReq;
 use oxidized::ast::Hint;
 use oxidized::ast::ReifyKind;
 use oxidized::ast::RequireKind;
@@ -335,7 +336,7 @@ fn from_class_elt_requirements<'a, 'arena>(
     class_
         .reqs
         .iter()
-        .map(|(h, req_kind)| {
+        .map(|ClassReq(h, req_kind)| {
             let name = emit_type_hint::hint_to_class(alloc, h);
             let kind = match *req_kind {
                 RequireKind::RequireExtends => TraitReqKind::MustExtend,

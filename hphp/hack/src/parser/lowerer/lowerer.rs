@@ -34,6 +34,7 @@ use ocaml_helper::parse_int;
 use ocaml_helper::ParseIntError;
 use ocamlrep::rc::RcOc;
 use oxidized::aast;
+use oxidized::aast_defs::ClassReq;
 use oxidized::aast_defs::DocComment;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::Node;
@@ -5161,7 +5162,7 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                 }
             };
             if let Some(require_kind) = require_kind {
-                class.reqs.push((hint, require_kind));
+                class.reqs.push(ClassReq(hint, require_kind));
             }
         }
         XHPClassAttributeDeclaration(c) => {

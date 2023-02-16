@@ -109,7 +109,11 @@ type t =
   | Parent_outside_class of Pos.t
   | Self_outside_class of Pos.t
   | Static_outside_class of Pos.t
-  | This_type_forbidden of Pos.t
+  | This_type_forbidden of {
+      pos: Pos.t;
+      in_extends: bool;
+      in_req_extends: bool;
+    }
   | Nonstatic_property_with_lsb of Pos.t
   | Lowercase_this of {
       pos: Pos.t;

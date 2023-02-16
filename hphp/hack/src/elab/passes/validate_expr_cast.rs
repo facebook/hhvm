@@ -5,16 +5,14 @@
 
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Expr;
+use naming_special_names_rust as sn;
 use oxidized::aast_defs::Expr_;
 use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::Hint_;
-use oxidized::aast_defs::Tprim;
+use oxidized::aast_defs::Tprim::*;
 use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::NamingPhaseError;
-use pos;
-use special_names;
 
 use crate::config::Config;
 use crate::Pass;
@@ -23,47 +21,38 @@ use crate::Pass;
 pub struct ValidateExprCastPass;
 
 impl Pass for ValidateExprCastPass {
-    fn on_ty_expr_bottom_up<Ex: Default, En>(
+    fn on_ty_expr__bottom_up<Ex: Default, En>(
         &mut self,
-        elem: &mut Expr<Ex, En>,
-        _cfg: &Config,
+        expr: &mut Expr_<Ex, En>,
+        _: &Config,
         errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
-        if let Expr(_, _, Expr_::Cast(target)) = elem {
-            let (Hint(pos, hint_), _) = target as &_;
-            match hint_ as &_ {
-                Hint_::Hprim(Tprim::Tint | Tprim::Tbool | Tprim::Tfloat | Tprim::Tstring) => {
-                    return ControlFlow::Continue(());
-                }
-                Hint_::Happly(Id(_, tycon_nm), _)
-                    if (pos::TypeName(tycon_nm.into()) == *special_names::collections::cDict)
-                        || (pos::TypeName(tycon_nm.into())
-                            == *special_names::collections::cVec) =>
-                {
-                    return ControlFlow::Continue(());
-                }
-                Hint_::HvecOrDict(_, _) => return ControlFlow::Continue(()),
-                Hint_::Hany =>
-                // We end up with a `Hany` when we have an arity error for
-                // `dict`/`vec` we don't error on this case to preserve
-                // behaviour.
-                {
-                    return ControlFlow::Continue(());
-                }
-                _ => {
-                    let pos = pos.clone();
-                    // Record the error and break.
-                    errs.push(NamingPhaseError::Naming(NamingError::ObjectCast(pos)));
-                    return ControlFlow::Break(());
-                }
+        match &*expr {
+            Expr_::Cast(box (Hint(_, box Hint_::Hprim(Tint | Tbool | Tfloat | Tstring)), _)) => {
+                ControlFlow::Continue(())
             }
+            Expr_::Cast(box (Hint(_, box Hint_::Happly(Id(_, tycon_nm), _)), _))
+                if tycon_nm == sn::collections::DICT || tycon_nm == sn::collections::VEC =>
+            {
+                ControlFlow::Continue(())
+            }
+            Expr_::Cast(box (Hint(_, box Hint_::HvecOrDict(_, _)), _)) => ControlFlow::Continue(()),
+            // We end up with a `Hany` when we have an arity error for
+            // `dict`/`vec`--we don't error on this case to preserve behaviour.
+            Expr_::Cast(box (Hint(_, box Hint_::Hany), _)) => ControlFlow::Continue(()),
+            Expr_::Cast(box (Hint(p, _), _)) => {
+                errs.push(NamingPhaseError::Naming(NamingError::ObjectCast(p.clone())));
+                ControlFlow::Break(())
+            }
+            _ => ControlFlow::Continue(()),
         }
-        ControlFlow::Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use oxidized::ast::Expr;
+    use rc_pos::Pos;
 
     use super::*;
     use crate::elab_utils;
@@ -71,15 +60,12 @@ mod tests {
 
     #[test]
     fn test_invalid_cast() {
-        let cfg = Config::default();
         let mut errs = Vec::default();
-        let mut pass = ValidateExprCastPass;
-        let bad_hint_for_cast = Hint(elab_utils::pos::null(), Box::new(Hint_::Hthis));
-        let mut elem: Expr<(), ()> = elab_utils::expr::from_expr_(Expr_::Cast(Box::new((
-            bad_hint_for_cast,
+        let mut expr: Expr = elab_utils::expr::from_expr_(Expr_::Cast(Box::new((
+            Hint(Pos::make_none(), Box::new(Hint_::Hthis)),
             elab_utils::expr::null(),
         ))));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        expr.transform(&Config::default(), &mut errs, &mut ValidateExprCastPass);
         assert_eq!(errs.len(), 1);
     }
 }

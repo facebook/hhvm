@@ -5,7 +5,6 @@
 
 use std::ops::ControlFlow;
 
-use oxidized::aast::ClassHint;
 use oxidized::aast::Hint;
 use oxidized::aast::RequireKind;
 use oxidized::aast_defs::ClassReq;
@@ -21,64 +20,37 @@ use crate::Pass;
 #[allow(non_camel_case_types)]
 pub struct ValidateClass_ReqPass;
 
-// Splits `reqs` into "extends", "implements" and "class" requirements c.f.
-// 'hphp/hack/src/annotated_ast/aast.ml'
-// TODO(sf, 2023-02-15): Perhaps this should go into a hackrs/annotated_ast
-// crate or elsewhere?
-fn split_reqs(reqs: &[ClassReq]) -> (Vec<&ClassHint>, Vec<&ClassHint>, Vec<&ClassHint>) {
-    let mut extends = vec![];
-    let mut implements = vec![];
-    let mut class_ = vec![];
-    for ClassReq(h, require_kind) in reqs {
-        match require_kind {
-            RequireKind::RequireExtends => extends.push(h),
-            RequireKind::RequireImplements => implements.push(h),
-            RequireKind::RequireClass => class_.push(h),
-        }
-    }
-    (extends, implements, class_)
-}
-
 impl Pass for ValidateClass_ReqPass {
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
-        elem: &mut Class_<Ex, En>,
-        _cfg: &Config,
+        cls: &mut Class_<Ex, En>,
+        _: &Config,
         errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
-        let Class_ { reqs, kind, .. } = elem;
-        let (req_extends, req_implements, req_class) = split_reqs(reqs);
-        let is_trait = *kind == ClassishKind::Ctrait;
-        let is_interface = *kind == ClassishKind::Cinterface;
-        match &req_implements[..] {
-            // If `req_implements` is non-empty & this class like thing is not a
-            // trait then that's an error.
-            [Hint(pos, _), ..] if !is_trait => {
+        let is_trait = cls.kind == ClassishKind::Ctrait;
+        let is_interface = cls.kind == ClassishKind::Cinterface;
+        let find_req = |kind| cls.reqs.iter().find(|&&ClassReq(_, k)| k == kind);
+        // `require implements` and `require class` are only allowed in traits.
+        if !is_trait {
+            if let Some(ClassReq(Hint(pos, _), _)) = find_req(RequireKind::RequireImplements) {
                 errs.push(NamingPhaseError::Naming(
                     NamingError::InvalidRequireImplements(pos.clone()),
                 ));
             }
-            _ => (),
-        }
-        match &req_class[..] {
-            // If `req_class` is non-empty & this class like thing is not a
-            // trait then that's an error.
-            [Hint(pos, _), ..] if !is_trait => {
+            if let Some(ClassReq(Hint(pos, _), _)) = find_req(RequireKind::RequireClass) {
                 errs.push(NamingPhaseError::Naming(NamingError::InvalidRequireClass(
                     pos.clone(),
                 )));
             }
-            _ => (),
         }
-        match &req_extends[..] {
-            // If `req_extends` is non-empty & this class like thing is not a
-            // trait or an interface then that's an error.
-            [Hint(pos, _), ..] if !(is_trait || is_interface) => {
+        // `require extends` is only allowed in traits and interfaces, so if
+        // this classish is neither that's an error.
+        if !(is_trait || is_interface) {
+            if let Some(ClassReq(Hint(pos, _), _)) = find_req(RequireKind::RequireExtends) {
                 errs.push(NamingPhaseError::Naming(
                     NamingError::InvalidRequireExtends(pos.clone()),
                 ));
             }
-            _ => (),
         }
         ControlFlow::Continue(())
     }

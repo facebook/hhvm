@@ -127,11 +127,7 @@ final class TClientBufferedStream {
         }
       }
       if ($ex_msg !== null) {
-        $streamDecode(
-          null,
-          /* HH_FIXME[2049] TODO(T128347870) */
-          new TApplicationException($ex_msg, TApplicationException::UNKNOWN),
-        );
+        $streamDecode(null, new ThriftApplicationException($ex_msg));
         break;
       }
     }
@@ -162,10 +158,7 @@ final class TClientSink {
     return tuple(
       $credits,
       $final_response,
-      $exception !== null
-        /* HH_FIXME[2049] TODO(T128347870) */
-        ? new TApplicationException($exception, TApplicationException::UNKNOWN)
-        : null,
+      $exception !== null ? new ThriftApplicationException($exception) : null,
     );
   }
 

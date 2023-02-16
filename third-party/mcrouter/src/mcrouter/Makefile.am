@@ -27,6 +27,7 @@ libmcroutercore_a_SOURCES = \
   AsyncWriterEntry.h \
   CallbackPool-inl.h \
   CallbackPool.h \
+  CarbonRouterClient.cpp \
   CarbonRouterClient-inl.h \
   CarbonRouterClient.h \
   CarbonRouterClientBase.cpp \

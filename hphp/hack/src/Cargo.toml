@@ -45,7 +45,6 @@ members = [
     "naming/names_rust",
     "ocamlrep",
     "ocamlrep_custom",
-    "ocamlrep_derive",
     "ocamlrep_marshal/cargo/ocamlrep_marshal",
     "ocamlrep_marshal/cargo/ocamlrep_marshal_ffi_bindings",
     "ocamlrep_ocamlpool",

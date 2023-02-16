@@ -8,7 +8,7 @@ Thrift Adapters allow the native type used in Thrift code gen, to be customized 
 
 To use Adapter, we can apply structured annotation `@{lang}.Adapter{name = "..."}` to a field or a typedef, with the name of adapter class. Adapter provides `from_thrift` and `to_thrift` APIs. Here is an example in C++ (The APIs are similar in other languages)
 
-```
+```cpp
 struct Adapter {
   static AdaptedType fromThrift(DefaultType);
   static DefaultType toThrift(const AdaptedType&);
@@ -29,7 +29,7 @@ This completely replaces the underlying type of a thrift from default type to ad
 
 C++ adapter can be enabled via `cpp.Adapter` annotation. e.g.
 
-```
+```cpp
 // In C++ Header
 struct BitsetAdapter {
   static std::bitset<32> fromThrift(std::uint32_t t) { return {t}; }
@@ -45,7 +45,7 @@ struct Foo {
   1: i32 flags;
 }
 ```
-```
+```cpp
 // In C++ file
 Foo foo;
 foo.flags()->set(0); // set 0th bit
@@ -58,7 +58,7 @@ foo.flags()->set(0); // set 0th bit
 
 Type adapter’s APIs are mentioned above. It’s worth noting that API doesn’t need to be identical — it can be template function. In addition, the user can use reference to avoid making extra copy/move. e.g.
 
-```
+```cpp
 struct ThriftTypeAdapter {
   static AdaptedType fromThrift(DefaultType&& thrift);
   static const DefaultType& toThrift(const AdaptedType& native);
@@ -68,7 +68,7 @@ struct ThriftTypeAdapter {
 
 Field adapter requires the user to provide the following APIs.
 
-```
+```cpp
 struct ThriftFieldAdapter {
   template<class Context>
   static void construct(AdaptedType& thrift, Context ctx);
@@ -82,7 +82,7 @@ struct ThriftFieldAdapter {
 ```
 `Context` is an instantiation of [FieldAdapterContext](https://www.internalfb.com/code/fbsource/[388310ab2f4d793c6b1056369cedfa9fd12ff51b]/fbcode/thrift/lib/cpp2/Adapt.h?lines=31) which can access field id and parent struct. e.g.
 
-```
+```cpp
 template<class Context>
 AdaptedType ThriftFieldAdapter::fromThriftField(DefaultType thrift, Context ctx) {
   constexpr int16_t kFieldId = Context::kFieldId;
@@ -154,7 +154,7 @@ Thrift Adapter allows further customization points to avoid calling `fromThrift`
 
 Hack type adapter can be enabled via [`hack.Adapter`](https://www.internalfb.com/code/fbsource/[8155292d2d170907326ad48d3a070ebe3ccb1be3]/fbcode/thrift/annotation/hack.thrift?lines=55). It should implement [`IThriftAdapter` ](https://www.internalfb.com/code/www/[1cce1dcd39b3d25482944ebc796fafb4c3a3d4fd]/flib/thrift/core/IThriftAdapter.php?lines=19-29)interface. For example
 
-```
+```hack
 // In Hack file
 final class TimestampToTimeAdapter implements IThriftAdapter {
   const type TThriftType = int;
@@ -317,7 +317,7 @@ struct Foo {
 
 Python adapter can be enabled via `python.Adapter`. e.g.
 
-```
+```python
 # In Python file
 class DatetimeAdapter(Adapter[int, datetime]):
     @classmethod
@@ -339,7 +339,7 @@ struct Foo {
   1: i32 dt;
 }
 ```
-```
+```python
 // In python file
 foo = Foo()
 assert isinstance(foo.dt, datetime)
@@ -404,7 +404,7 @@ struct MyStruct {
 
 A new type adapter can be defined by implementing the [TypeAdapter](https://github.com/facebook/fbthrift/blob/main/thrift/lib/java/common/src/main/java/com/facebook/thrift/adapter/TypeAdapter.java) interface.
 
-```
+```java
 public interface TypeAdapter<T, P> extends Adapter<P> {
   /**
    * Converts given type to the adapted type.
@@ -427,7 +427,7 @@ public interface TypeAdapter<T, P> extends Adapter<P> {
 Thrift Java already defines a type adapter interface for each thrift type by extending the TypeAdapter interface. It is recommended to implement one of the existing interfaces defined in [com.facebook.thrift.adapter.common](https://github.com/facebook/fbthrift/tree/main/thrift/lib/java/common/src/main/java/com/facebook/thrift/adapter/common) package when creating a new type adapter. There are also predefined type adapters in the same package for `java.util.Date`, `CopiedPooledByteBuf`, `RetainedSlicedPooledByteBuf` and `UnpooledByteBuf`.
 
 
-```
+```java
 public interface IntegerTypeAdapter<T> extends TypeAdapter<Integer, T> {}
 
 public class DateTypeAdapter implements LongTypeAdapter<Date> {
@@ -500,7 +500,7 @@ struct MyStruct {
 
 A new wrapper can be defined by implementing the [Wrapper](https://github.com/facebook/fbthrift/blob/main/thrift/lib/java/common/src/main/java/com/facebook/thrift/adapter/Wrapper.java) interface.
 
-```
+```java
 public interface Wrapper<T, P, R> extends Adapter<P> {
   /**
    * Converts given type to the wrapped type.
@@ -523,7 +523,7 @@ public interface Wrapper<T, P, R> extends Adapter<P> {
 
 [FieldContext](https://github.com/facebook/fbthrift/blob/main/thrift/lib/java/common/src/main/java/com/facebook/thrift/adapter/FieldContext.java) object provides access to the field id of the struct/exception which the wrapper is applied and the parent object (struct/exception).
 
-```
+```java
 public class FieldContext<T> {
   private int fieldId;
   private T t;

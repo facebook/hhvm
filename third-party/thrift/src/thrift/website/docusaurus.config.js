@@ -137,7 +137,10 @@ const config = {
       },
       // Please do not remove the credits, help to publicize Docusaurus :)
       copyright: `Copyright © ${new Date().getFullYear()} Meta Platforms, Inc. Built with Docusaurus.`
-    }
+    },
+    prism: {
+      additionalLanguages: ['java'],
+    },
   }
 };
 module.exports = config;

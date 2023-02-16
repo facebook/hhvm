@@ -3343,9 +3343,10 @@ dependencies = [
 
 [[package]]
 name = "ocamlrep_marshal"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "bitflags",
+ "cc",
  "ocamlrep",
 ]
 

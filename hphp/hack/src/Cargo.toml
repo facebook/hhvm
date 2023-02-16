@@ -43,7 +43,6 @@ members = [
     "naming/cargo/elaborate_namespaces",
     "naming/cargo/naming_attributes",
     "naming/names_rust",
-    "ocamlrep_marshal/cargo/ocamlrep_marshal",
     "ocamlrep_marshal/cargo/ocamlrep_marshal_ffi_bindings",
     "oxidized",
     "oxidized_by_ref",

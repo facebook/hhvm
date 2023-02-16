@@ -536,11 +536,11 @@ let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
       ( env,
         (match ty1 with
         | LoclType ty ->
-          (match get_node ty with
-          | Tvar _ -> ty1
-          | _ ->
+          if is_tyvar ty then
+            ty1
+          else
             let ty = MakeType.supportdyn r ty in
-            LoclType ty)
+            LoclType ty
         | _ -> ty1) )
   in
   ( env,
@@ -2091,10 +2091,10 @@ and simplify_subtype_i
         in
         postprocess
         @@
-        (match sub_supportdyn with
-        | Some _ -> valid env
-        | None ->
-          (match deref lty_sub with
+        if Option.is_some sub_supportdyn then
+          valid env
+        else (
+          match deref lty_sub with
           | (_, Tany _)
           | ( _,
               Tprim
@@ -2333,7 +2333,8 @@ and simplify_subtype_i
                       env
                   | None -> default_subtype env)
                 | _ -> default_subtype env
-              )))))
+              ))
+        ))
     | (_, Tdynamic) ->
       (match ety_sub with
       | LoclType lty when is_dynamic lty -> valid env

@@ -15,7 +15,7 @@ eq_modulo_pos = { version = "0.0.0", path = "../../../../utils/eq_modulo_pos" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hcons = { version = "0.0.0", path = "../../../../hcons" }
 im = { version = "15.1", features = ["rayon", "serde"] }
-ocamlrep = { version = "0.0.0", path = "../../../../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 once_cell = "1.12"
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }

@@ -13,7 +13,7 @@ doctest = false
 
 [dependencies]
 bumpalo = { version = "3.11.1", features = ["collections"] }
-ocamlrep = { version = "0.0.0", path = "../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 
 [build-dependencies]
 cc = {}

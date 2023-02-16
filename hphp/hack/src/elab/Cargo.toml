@@ -15,7 +15,7 @@ file_info = { version = "0.0.0", path = "../deps/rust/file_info" }
 hash = { version = "0.0.0", path = "../utils/hash" }
 itertools = "0.10.3"
 naming_special_names_rust = { version = "0.0.0", path = "../naming" }
-ocamlrep = { version = "0.0.0", path = "../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../oxidized" }
 pos = { version = "0.0.0", path = "../hackrs/pos/cargo/pos" }
 special_names = { version = "0.0.0", path = "../hackrs/special_names/cargo/special_names" }

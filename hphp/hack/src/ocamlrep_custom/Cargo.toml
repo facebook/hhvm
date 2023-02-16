@@ -9,5 +9,5 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-ocamlrep = { version = "0.0.0", path = "../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.0.0", path = "../ocamlrep_ocamlpool" }

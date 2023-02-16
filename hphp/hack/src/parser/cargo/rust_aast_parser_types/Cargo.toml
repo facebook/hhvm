@@ -10,6 +10,6 @@ path = "../../rust_aast_parser_types.rs"
 
 [dependencies]
 lint_rust = { version = "0.0.0", path = "../../../utils/lint" }
-ocamlrep = { version = "0.0.0", path = "../../../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../core_types" }

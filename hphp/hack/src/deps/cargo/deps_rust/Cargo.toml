@@ -14,7 +14,7 @@ dep_graph_delta = { version = "0.0.0", path = "../.." }
 depgraph_reader = { version = "0.0.0", path = "../../../depgraph/cargo/depgraph_reader" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 hh_fanout_rust_ffi = { version = "0.0.0", path = "../hh_fanout_rust_ffi" }
-ocamlrep = { version = "0.0.0", path = "../../../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_custom = { version = "0.0.0", path = "../../../ocamlrep_custom" }
 once_cell = "1.12"
 parking_lot = { version = "0.11.2", features = ["send_guard"] }

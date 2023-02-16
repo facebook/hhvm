@@ -19,7 +19,7 @@ file_info = { version = "0.0.0", path = "../../../deps/rust/file_info" }
 file_provider = { version = "0.0.0", path = "../../../hackrs/file_provider/cargo/file_provider" }
 hackrs_provider_backend = { version = "0.0.0", path = "../../hackrs_provider_backend" }
 naming_provider = { version = "0.0.0", path = "../../../hackrs/naming_provider/cargo/naming_provider" }
-ocamlrep = { version = "0.0.0", path = "../../../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_custom = { version = "0.0.0", path = "../../../ocamlrep_custom" }
 ocamlrep_ocamlpool = { version = "0.0.0", path = "../../../ocamlrep_ocamlpool" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }

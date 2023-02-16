@@ -3305,13 +3305,13 @@ dependencies = [
 
 [[package]]
 name = "ocamlrep"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "bstr 1.2.0",
  "bumpalo",
- "hash",
  "indexmap",
  "ocamlrep_derive",
+ "rustc-hash",
  "serde",
 ]
 

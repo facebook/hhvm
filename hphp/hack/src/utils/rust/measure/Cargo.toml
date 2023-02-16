@@ -10,6 +10,6 @@ path = "measure.rs"
 
 [dependencies]
 hash = { version = "0.0.0", path = "../../hash" }
-ocamlrep = { version = "0.0.0", path = "../../../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 once_cell = "1.12"
 parking_lot = { version = "0.11.2", features = ["send_guard"] }

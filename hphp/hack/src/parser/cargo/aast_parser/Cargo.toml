@@ -19,7 +19,7 @@ lowerer = { version = "0.0.0", path = "../../lowerer" }
 mode_parser = { version = "0.0.0", path = "../mode_parser" }
 namespaces_rust = { version = "0.0.0", path = "../namespaces" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
-ocamlrep = { version = "0.0.0", path = "../../../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../core_types" }
 positioned_by_ref_parser = { version = "0.0.0", path = "../../api/cargo/positioned_by_ref_parser" }

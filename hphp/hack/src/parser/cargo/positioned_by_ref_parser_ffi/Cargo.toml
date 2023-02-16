@@ -12,7 +12,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-ocamlrep = { version = "0.0.0", path = "../../../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.0.0", path = "../../../ocamlrep_ocamlpool" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 positioned_by_ref_parser = { version = "0.0.0", path = "../../api/cargo/positioned_by_ref_parser" }

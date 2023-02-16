@@ -13,7 +13,7 @@ crate-type = ["lib", "staticlib"]
 dep = { version = "0.0.0", path = "../../../depgraph/cargo/dep" }
 deps_rust = { version = "0.0.0", path = "../deps_rust" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
-ocamlrep = { version = "0.0.0", path = "../../../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_custom = { version = "0.0.0", path = "../../../ocamlrep_custom" }
 ocamlrep_ocamlpool = { version = "0.0.0", path = "../../../ocamlrep_ocamlpool" }
 rpds = "0.11.0"

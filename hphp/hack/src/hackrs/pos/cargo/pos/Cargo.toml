@@ -17,7 +17,7 @@ hh24_types = { version = "0.0.0", path = "../../../../utils/hh24_types" }
 im = { version = "15.1", features = ["rayon", "serde"] }
 indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }
 intern = { version = "0.1.0", path = "../../../../utils/intern" }
-ocamlrep = { version = "0.0.0", path = "../../../../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }
 relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }

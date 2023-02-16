@@ -16,6 +16,6 @@ bumpalo = { version = "3.11.1", features = ["collections"] }
 direct_decl_parser = { version = "0.0.0", path = "../../../parser/api/cargo/direct_decl_parser" }
 facts_rust = { version = "0.0.0", path = "../facts_rust" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../hackc/utils/cargo/hhbc_string_utils" }
-ocamlrep = { version = "0.0.0", path = "../../../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.0.0", path = "../../../ocamlrep_ocamlpool" }
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }

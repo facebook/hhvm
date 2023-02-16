@@ -20,7 +20,7 @@ hh24_test = { version = "0.0.0", path = "../../../../facebook/utils/cargo/hh24_t
 itertools = "0.10.3"
 maplit = "1.0"
 naming_provider = { version = "0.0.0", path = "../../../naming_provider/cargo/naming_provider" }
-ocamlrep = { version = "0.0.0", path = "../../../../ocamlrep" }
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
 relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }

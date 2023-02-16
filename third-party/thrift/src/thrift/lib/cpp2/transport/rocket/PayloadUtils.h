@@ -48,8 +48,6 @@ extern template Payload makePayload<>(
     const ResponseRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
 extern template Payload makePayload<>(
     const StreamPayloadMetadata&, std::unique_ptr<folly::IOBuf> data);
-extern template Payload makePayload<>(
-    const HeadersPayloadMetadata&, std::unique_ptr<folly::IOBuf> data);
 
 template <typename Metadata>
 void setCompressionCodec(

@@ -401,8 +401,8 @@ void Clusterizer::clusterizeGreedy() {
 using SuccInfos = jit::hash_map<uint32_t, int64_t>; // cluster id => weight
 
 struct DFSSortClusters {
-  DFSSortClusters(const jit::vector<SuccInfos>&& succInfos, const Vunit& unit)
-    : m_clusterSuccs(succInfos)
+  DFSSortClusters(jit::vector<SuccInfos>&& succInfos, const Vunit& unit)
+    : m_clusterSuccs(std::move(succInfos))
     , m_visited(unit.blocks.size()) { }
 
   jit::vector<Vlabel> sort(uint32_t initialCid);

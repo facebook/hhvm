@@ -39,17 +39,14 @@ use itertools::Itertools;
 
 use super::func_builder::FuncBuilderEx as _;
 use crate::class::IsStatic;
-use crate::func::MethodInfo;
+use crate::func::FuncInfo;
 use crate::hack;
 
 /// Lower individual Instrs in the Func to simpler forms.
-pub(crate) fn lower_instrs(
-    builder: &mut FuncBuilder<'_>,
-    method_info: Option<Arc<MethodInfo<'_>>>,
-) {
+pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, func_info: Arc<FuncInfo<'_>>) {
     let mut lowerer = LowerInstrs {
         changed: false,
-        method_info,
+        func_info,
     };
 
     let mut bid = Func::ENTRY_BID;
@@ -68,7 +65,7 @@ pub(crate) fn lower_instrs(
 
 struct LowerInstrs<'a> {
     changed: bool,
-    method_info: Option<Arc<MethodInfo<'a>>>,
+    func_info: Arc<FuncInfo<'a>>,
 }
 
 impl LowerInstrs<'_> {
@@ -358,8 +355,8 @@ impl TransformInstr for LowerInstrs<'_> {
                 let op = builder.emit_constant(Constant::Int(op));
                 builder.hhbc_builtin(builtin, &[obj, ts, op], loc)
             }
-            Instr::Hhbc(Hhbc::LateBoundCls(loc)) => {
-                match self.method_info.as_ref().unwrap().is_static {
+            Instr::Hhbc(Hhbc::LateBoundCls(loc)) => match *self.func_info {
+                FuncInfo::Method(ref mi) => match mi.is_static {
                     IsStatic::Static => {
                         let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
                         builder.hack_builtin(Builtin::GetClass, &[this], loc)
@@ -368,8 +365,9 @@ impl TransformInstr for LowerInstrs<'_> {
                         let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
                         builder.hack_builtin(Builtin::GetStaticClass, &[this], loc)
                     }
-                }
-            }
+                },
+                FuncInfo::Function(_) => unreachable!(),
+            },
             Instr::Hhbc(Hhbc::LazyClass(clsid, _)) => {
                 // Treat a lazy class as a simple string.
                 let c = builder.emit_constant(Constant::String(clsid.id));

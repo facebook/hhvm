@@ -22,6 +22,7 @@ use log::trace;
 use super::func;
 use super::hack;
 use super::textual;
+use crate::func::FuncInfo;
 use crate::func::MethodInfo;
 use crate::lower;
 use crate::mangle::Mangle;
@@ -361,15 +362,16 @@ impl ClassState<'_, '_, '_> {
 
         let this_ty = class_ty(self.class.name, is_static, &self.unit_state.strings);
         let func = {
-            let method_info = Arc::new(MethodInfo {
+            let method_info = MethodInfo {
+                name: method.name,
                 class: &self.class,
                 is_static,
                 strings: Arc::clone(&self.unit_state.strings),
                 flags: method.flags,
-            });
+            };
             let func = lower::lower_func(
                 method.func,
-                Some(method_info),
+                Arc::new(FuncInfo::Method(method_info)),
                 Arc::clone(&self.unit_state.strings),
             );
             ir::verify::verify_func(&func, &Default::default(), &self.unit_state.strings);
@@ -395,19 +397,19 @@ impl ClassState<'_, '_, '_> {
             )?;
         }
 
-        let method_info = Arc::new(MethodInfo {
+        let method_info = MethodInfo {
+            name: method.name,
             class: &self.class,
             is_static,
             strings: Arc::clone(&self.unit_state.strings),
             flags: method.flags,
-        });
+        };
         func::write_func(
             self.txf,
             self.unit_state,
-            method.name.id,
             this_ty,
             func,
-            Some(method_info),
+            Arc::new(FuncInfo::Method(method_info)),
         )?;
 
         Ok(())

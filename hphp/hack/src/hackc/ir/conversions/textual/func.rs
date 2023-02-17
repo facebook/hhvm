@@ -23,15 +23,16 @@ use ir::ClassName;
 use ir::ConstId;
 use ir::Constant;
 use ir::Func;
+use ir::FunctionId;
 use ir::IncDecOp;
 use ir::Instr;
 use ir::InstrId;
 use ir::LocId;
 use ir::LocalId;
 use ir::MethodFlags;
+use ir::MethodId;
 use ir::SpecialClsRef;
 use ir::StringInterner;
-use ir::UnitBytesId;
 use ir::ValueId;
 use itertools::Itertools;
 use log::trace;
@@ -62,16 +63,23 @@ pub(crate) fn write_function(
 ) -> Result {
     trace!("Convert Function {}", function.name.as_bstr(&state.strings));
 
-    let func = lower::lower_func(function.func, None, Arc::clone(&state.strings));
+    let func = lower::lower_func(
+        function.func,
+        Arc::new(FuncInfo::Function(FunctionInfo {
+            name: function.name,
+        })),
+        Arc::clone(&state.strings),
+    );
     ir::verify::verify_func(&func, &Default::default(), &state.strings);
 
     write_func(
         txf,
         state,
-        function.name.id,
         textual::Ty::VoidPtr,
         func,
-        None,
+        Arc::new(FuncInfo::Function(FunctionInfo {
+            name: function.name,
+        })),
     )
 }
 
@@ -100,10 +108,9 @@ pub(crate) fn compute_func_params<'a>(
 pub(crate) fn write_func(
     txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,
-    name: UnitBytesId,
     this_ty: textual::Ty,
     mut func: ir::Func<'_>,
-    method_info: Option<Arc<MethodInfo<'_>>>,
+    func_info: Arc<FuncInfo<'_>>,
 ) -> Result {
     let params = std::mem::take(&mut func.params);
     let (param_names, param_tys, param_lids) = compute_func_params(&params, unit_state, this_ty)?;
@@ -137,24 +144,22 @@ pub(crate) fn write_func(
         locals.push((base, &base_ty));
     }
 
-    let name_str = if let Some(method_info) = method_info.as_ref() {
-        ir::MethodId::new(name).mangle_with_class(
-            method_info.class.name,
-            method_info.is_static,
-            &unit_state.strings,
-        )
-    } else {
-        ir::FunctionId::new(name).mangle(&unit_state.strings)
+    let name_str = match *func_info {
+        FuncInfo::Method(ref mi) => {
+            mi.name
+                .mangle_with_class(mi.class.name, mi.is_static, &unit_state.strings)
+        }
+        FuncInfo::Function(ref fi) => fi.name.mangle(&unit_state.strings),
     };
 
     let span = func.loc(func.loc_id).clone();
     txf.define_function(&name_str, &span, &tx_params, &ret_ty, &locals, {
-        let method_info = method_info.as_ref().map(Arc::clone);
+        let func_info = Arc::clone(&func_info);
         |fb| {
             let mut func = rewrite_jmp_ops(func);
             ir::passes::clean::run(&mut func);
 
-            let mut state = FuncState::new(fb, Arc::clone(&unit_state.strings), &func, method_info);
+            let mut state = FuncState::new(fb, Arc::clone(&unit_state.strings), &func, func_info);
 
             for bid in func.block_ids() {
                 write_block(&mut state, bid)?;
@@ -167,18 +172,13 @@ pub(crate) fn write_func(
     // For a static method also generate an instance stub which forwards to the
     // static method.
 
-    if let Some(method_info) = &method_info {
-        if method_info.is_static == IsStatic::Static {
-            write_instance_stub(
-                txf,
-                unit_state,
-                name,
-                method_info,
-                &tx_params,
-                &ret_ty,
-                &span,
-            )?;
+    match *func_info {
+        FuncInfo::Method(ref mi) => {
+            if mi.is_static == IsStatic::Static {
+                write_instance_stub(txf, unit_state, mi, &tx_params, &ret_ty, &span)?;
+            }
         }
+        FuncInfo::Function(_) => {}
     }
 
     Ok(())
@@ -190,18 +190,16 @@ pub(crate) fn write_func(
 fn write_instance_stub(
     txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,
-    name: UnitBytesId,
     method_info: &MethodInfo<'_>,
     tx_params: &[(&str, &textual::Ty)],
     ret_ty: &textual::Ty,
     span: &ir::SrcLoc,
 ) -> Result {
     let strings = &unit_state.strings;
-    let name_str = ir::MethodId::new(name).mangle_with_class(
-        method_info.class.name,
-        IsStatic::NonStatic,
-        strings,
-    );
+    let name_str =
+        method_info
+            .name
+            .mangle_with_class(method_info.class.name, IsStatic::NonStatic, strings);
 
     let mut tx_params = tx_params.to_vec();
     let inst_ty = method_info.non_static_ty();
@@ -214,11 +212,10 @@ fn write_instance_stub(
         let this_lid = LocalId::Named(this_str);
         let this = fb.load(&inst_ty, textual::Expr::deref(this_lid))?;
         let static_this = hack::call_builtin(fb, hack::Builtin::GetStaticClass, [this])?;
-        let target = ir::MethodId::new(name).mangle_with_class(
-            method_info.class.name,
-            IsStatic::Static,
-            strings,
-        );
+        let target =
+            method_info
+                .name
+                .mangle_with_class(method_info.class.name, IsStatic::Static, strings);
 
         let params: Vec<Sid> = std::iter::once(Ok(static_this))
             .chain(tx_params.iter().skip(1).map(|(name, ty)| {
@@ -314,9 +311,8 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         }
         Instr::Hhbc(Hhbc::SelfCls(_)) => {
             let method_info = state
-                .method_info
-                .as_ref()
-                .expect("SelfCls used in non-method context");
+                .func_info
+                .expect_method("SelfCls used in non-method context");
             let cid = method_info.class.name;
             let vid = state.load_static_class(cid)?;
             state.set_iid(iid, vid);
@@ -768,7 +764,7 @@ pub(crate) struct FuncState<'a, 'b, 'c> {
     pub(crate) fb: &'a mut textual::FuncBuilder<'b, 'c>,
     func: &'a ir::Func<'a>,
     iid_mapping: ir::InstrIdMap<textual::Expr>,
-    method_info: Option<Arc<MethodInfo<'a>>>,
+    func_info: Arc<FuncInfo<'a>>,
     pub(crate) strings: Arc<StringInterner>,
 }
 
@@ -777,13 +773,13 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
         fb: &'a mut textual::FuncBuilder<'b, 'c>,
         strings: Arc<StringInterner>,
         func: &'a ir::Func<'a>,
-        method_info: Option<Arc<MethodInfo<'a>>>,
+        func_info: Arc<FuncInfo<'a>>,
     ) -> Self {
         Self {
             fb,
             func,
             iid_mapping: Default::default(),
-            method_info,
+            func_info,
             strings,
         }
     }
@@ -808,7 +804,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     fn expect_method_info(&self) -> &MethodInfo<'_> {
-        self.method_info.as_ref().expect("not in class context")
+        self.func_info.expect_method("not in class context")
     }
 
     fn load_static_class(&mut self, cid: ClassId) -> Result<textual::Sid> {
@@ -976,7 +972,29 @@ fn rewrite_jmp_ops<'a>(mut func: ir::Func<'a>) -> ir::Func<'a> {
     func
 }
 
+pub(crate) enum FuncInfo<'a> {
+    Function(FunctionInfo),
+    Method(MethodInfo<'a>),
+}
+
+impl<'a> FuncInfo<'a> {
+    pub(crate) fn expect_method(&self, why: &str) -> &MethodInfo<'a> {
+        match self {
+            FuncInfo::Function(_) => panic!("{}", why),
+            FuncInfo::Method(mi) => mi,
+        }
+    }
+}
+
+// Extra data associated with a (non-class) function that aren't stored on the
+// Func.
+pub(crate) struct FunctionInfo {
+    pub(crate) name: FunctionId,
+}
+
+// Extra data associated with class methods that aren't stored on the Func.
 pub(crate) struct MethodInfo<'a> {
+    pub(crate) name: MethodId,
     pub(crate) class: &'a ir::Class<'a>,
     pub(crate) is_static: IsStatic,
     pub(crate) strings: Arc<ir::StringInterner>,

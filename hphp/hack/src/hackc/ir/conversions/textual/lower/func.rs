@@ -15,11 +15,12 @@ use ir::MethodFlags;
 use ir::StringInterner;
 use log::trace;
 
+use crate::func::FuncInfo;
 use crate::func::MethodInfo;
 
 pub(crate) fn lower_func<'a>(
     mut func: Func<'a>,
-    method_info: Option<Arc<MethodInfo<'_>>>,
+    func_info: Arc<FuncInfo<'_>>,
     strings: Arc<StringInterner>,
 ) -> Func<'a> {
     trace!(
@@ -29,10 +30,13 @@ pub(crate) fn lower_func<'a>(
 
     // In a closure we implicitly load all the properties as locals - so start
     // with that as a prelude to all entrypoints.
-    if let Some(method_info) = method_info.as_ref() {
-        if method_info.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
-            load_closure_vars(&mut func, method_info, &strings);
+    match *func_info {
+        FuncInfo::Method(ref method_info) => {
+            if method_info.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
+                load_closure_vars(&mut func, method_info, &strings);
+            }
         }
+        FuncInfo::Function(_) => {}
     }
 
     // Start by 'unasync'ing the Func.
@@ -45,7 +49,7 @@ pub(crate) fn lower_func<'a>(
     let mut builder = FuncBuilder::with_func(func, Arc::clone(&strings));
 
     // Simplify various Instrs.
-    super::instrs::lower_instrs(&mut builder, method_info);
+    super::instrs::lower_instrs(&mut builder, func_info);
 
     // Write the complex constants out as a prelude to the function.
     super::constants::write_constants(&mut builder);

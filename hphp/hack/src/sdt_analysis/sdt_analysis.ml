@@ -20,7 +20,7 @@ let do_ (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
     |> List.sort ~compare:(fun c1 c2 -> Pos.compare c1.hack_pos c2.hack_pos)
     |> List.iter ~f:(fun constr ->
            Format.printf "%s\n" (PP.decorated_constraint ~verbosity constr));
-    Format.printf "\n"
+    Format.printf "\n%!"
   in
   match command with
   | Options.DumpConstraints ->

@@ -2738,6 +2738,7 @@ and simplify_subtype_i
             ~sub_supportdyn
             ~this_ty
             ~super_like
+            ~force_supportdyn_push:false
             ty_sub
             ty_super
             env
@@ -2994,6 +2995,12 @@ and simplify_subtype_classes
     ~(sub_supportdyn : Reason.t option)
     ~(this_ty : locl_ty option)
     ~(super_like : bool)
+    ~(* force_supportdyn_push indicates that supportdyn should be pushed to the
+        type arguments to the subclass in all cases. Usually this only sound
+        when it is a subtype of Container. This is used in the case that the
+        supertype is a traversable and so we need to promte the subtype, and
+        remember that it was a Container to still apply supportdyn pushing to it *)
+    (force_supportdyn_push : bool)
     ty_sub
     ty_super
     env : env * TL.subtype_prop =
@@ -3052,6 +3059,7 @@ and simplify_subtype_classes
             ~subtype_env
             ~sub_supportdyn
             ~super_like
+            ~force_supportdyn_push
             cid_sub
             class_def_sub
             variance_reifiedl
@@ -3081,6 +3089,21 @@ and simplify_subtype_classes
             this_ty = Option.value this_ty ~default:ty_sub;
           }
         in
+        let is_sub_class_refl cid_sub class_sub cid_super =
+          String.equal cid_sub cid_super || Cls.has_ancestor class_sub cid_super
+        in
+        let force_supportdyn_push =
+          (* If the subtype is supportdyn, we need to special case for the subtype being
+             a Container, and the supertype being Traversable or KeyedTraversable, otherwise
+             we will promote the subtype to Traversable or KeyedTraversable and miss
+             the chance to push supportdyn onto the parameters *)
+          Option.is_some sub_supportdyn
+          && (is_sub_class_refl cid_sub class_sub SN.Collections.cKeyedContainer
+              && String.equal cid_super SN.Collections.cKeyedTraversable
+             || String.equal cid_super SN.Collections.cTraversable
+                && is_sub_class_refl cid_sub class_sub SN.Collections.cContainer
+             )
+        in
         let up_obj = Cls.get_ancestor class_sub cid_super in
         (match up_obj with
         | Some up_obj ->
@@ -3089,11 +3112,13 @@ and simplify_subtype_classes
           let ((env, _ty_err_opt), up_obj) =
             Phase.localize ~ety_env env up_obj
           in
-          simplify_subtype
+          simplify_subtype_classes
+            ~fail
             ~subtype_env
             ~sub_supportdyn
             ~this_ty
             ~super_like
+            ~force_supportdyn_push
             up_obj
             ty_super
             env
@@ -3669,25 +3694,36 @@ and simplify_subtype_has_member
             obj_get_ty
             member_ty)
 
+(* Given an injective type constructor C (e.g., a class)
+ * C<t1, .., tn> <: C<u1, .., un> iff
+ * t1 <:v1> u1 /\ ... /\ tn <:vn> un
+ * where vi is the variance of the i'th generic parameter of C,
+ * and <:v denotes the appropriate direction of subtyping for variance v *)
 and simplify_subtype_variance_for_injective
     ~(subtype_env : subtype_env)
     ~(sub_supportdyn : Reason.t option)
+    ~(force_supportdyn_push : bool)
     ?(super_like = false)
     (cid : string)
     (class_sub : Cls.t option) =
+  (* Before looping through the generic arguments, check to see if we should push
+     supportdyn onto them. This depends on the generic class itself. *)
   let sub_supportdyn =
-    match (sub_supportdyn, class_sub) with
-    | (None, _)
-    | (_, None) ->
-      None
-    | (Some _, Some class_sub) ->
-      if
-        String.equal cid SN.Collections.cContainer
-        || Cls.has_ancestor class_sub SN.Collections.cContainer
-      then
-        sub_supportdyn
-      else
+    if force_supportdyn_push then
+      sub_supportdyn
+    else
+      match (sub_supportdyn, class_sub) with
+      | (None, _)
+      | (_, None) ->
         None
+      | (Some _, Some class_sub) ->
+        if
+          String.equal cid SN.Collections.cContainer
+          || Cls.has_ancestor class_sub SN.Collections.cContainer
+        then
+          sub_supportdyn
+        else
+          None
   in
   simplify_subtype_variance_for_injective_loop
     ~subtype_env
@@ -3695,11 +3731,6 @@ and simplify_subtype_variance_for_injective
     ~super_like
     cid
 
-(* Given an injective type constructor C (e.g., a class)
- * C<t1, .., tn> <: C<u1, .., un> iff
- * t1 <:v1> u1 /\ ... /\ tn <:vn> un
- * where vi is the variance of the i'th generic parameter of C,
- * and <:v denotes the appropriate direction of subtyping for variance v *)
 and simplify_subtype_variance_for_injective_loop
     ~(subtype_env : subtype_env)
     ~(sub_supportdyn : Reason.t option)
@@ -3804,6 +3835,7 @@ and simplify_subtype_variance_for_non_injective
       ~subtype_env
       ~sub_supportdyn
       ?super_like
+      ~force_supportdyn_push:false
       cid
       class_sub
       variance_reifiedl

@@ -57,12 +57,6 @@ std::string serialize(const T& val) {
   auto br = buf->coalesce();
   return std::string(reinterpret_cast<const char*>(br.data()), br.size());
 }
-
-template <typename Id>
-Id positionToId(size_t pos) {
-  return Id{util::zigzagToI64(pos + 1)};
-}
-
 } // namespace
 
 /**
@@ -88,6 +82,8 @@ class t_ast_generator : public t_generator {
           throw std::runtime_error(
               fmt::format("Unknown protocol `{}`", pair.second));
         }
+      } else if (pair.first == "zigzag") {
+        useZigzag_ = pair.second != "0";
       } else if (pair.first == "ast") {
       } else {
         throw std::runtime_error(
@@ -99,8 +95,14 @@ class t_ast_generator : public t_generator {
   void generate_program() override;
 
  private:
+  template <typename Id>
+  Id positionToId(size_t pos) {
+    return Id{useZigzag_ ? util::zigzagToI64(pos + 1) : int64_t(pos + 1)};
+  }
+
   std::ofstream f_out_;
   ast_protocol protocol_;
+  bool useZigzag_{false};
 };
 
 void t_ast_generator::generate_program() {

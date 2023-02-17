@@ -1,0 +1,4 @@
+--enable-sound-dynamic-type
+--pessimise-builtins
+--everything-sdt
+--tast-under-dynamic

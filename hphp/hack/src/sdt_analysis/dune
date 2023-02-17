@@ -1,0 +1,17 @@
+(library
+ (name sdt_analysis)
+ (wrapped false)
+ (flags
+  (:standard -linkall))
+ (modules
+  sdt_analysis)
+ (libraries
+  core_kernel
+  provider_context
+  aast_names_utils
+  relative_path
+  tast_env
+  typing_defs
+  typing_env_types)
+ (preprocess
+  (pps visitors.ppx ppx_deriving.std)))

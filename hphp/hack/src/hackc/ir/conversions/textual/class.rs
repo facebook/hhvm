@@ -77,8 +77,10 @@ impl<'a, 'b, 'c> ClassState<'a, 'b, 'c> {
         unit_state: &'a mut UnitState,
         class: ir::Class<'c>,
     ) -> Self {
-        let needs_factory =
-            !class.flags.is_interface() && !class.flags.is_trait() && !class.flags.is_enum();
+        let needs_factory = !class.flags.is_interface()
+            && !class.flags.is_trait()
+            && !class.flags.is_enum()
+            && !class.flags.contains(ir::Attr::AttrIsClosureClass);
         ClassState {
             class,
             needs_factory,
@@ -114,6 +116,7 @@ impl ClassState<'_, '_, '_> {
         }
 
         if self.needs_factory {
+            // TODO: This should be the parameters from the constructor.
             self.write_factory(std::iter::empty())?;
         }
 
@@ -362,6 +365,7 @@ impl ClassState<'_, '_, '_> {
                 class: &self.class,
                 is_static,
                 strings: Arc::clone(&self.unit_state.strings),
+                flags: method.flags,
             });
             let func = lower::lower_func(
                 method.func,
@@ -395,6 +399,7 @@ impl ClassState<'_, '_, '_> {
             class: &self.class,
             is_static,
             strings: Arc::clone(&self.unit_state.strings),
+            flags: method.flags,
         });
         func::write_func(
             self.txf,

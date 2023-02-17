@@ -5,8 +5,13 @@
 
 use std::sync::Arc;
 
+use ir::instr::Hhbc;
 use ir::Func;
 use ir::FuncBuilder;
+use ir::Instr;
+use ir::LocalId;
+use ir::MemberOpBuilder;
+use ir::MethodFlags;
 use ir::StringInterner;
 use log::trace;
 
@@ -21,6 +26,14 @@ pub(crate) fn lower_func<'a>(
         "Before Lower: {}",
         ir::print::DisplayFunc::new(&func, true, &strings)
     );
+
+    // In a closure we implicitly load all the properties as locals - so start
+    // with that as a prelude to all entrypoints.
+    if let Some(method_info) = method_info.as_ref() {
+        if method_info.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
+            load_closure_vars(&mut func, method_info, &strings);
+        }
+    }
 
     // Start by 'unasync'ing the Func.
     ir::passes::unasync(&mut func);
@@ -49,4 +62,26 @@ pub(crate) fn lower_func<'a>(
     );
 
     func
+}
+
+fn load_closure_vars(func: &mut Func<'_>, method_info: &MethodInfo<'_>, strings: &StringInterner) {
+    let mut instrs = Vec::new();
+
+    let loc = func.loc_id;
+
+    for prop in &method_info.class.properties {
+        // Property names are the variable names without the '$'.
+        let prop_str = strings.lookup_bstr(prop.name.id);
+        let mut var = prop_str.to_vec();
+        var.insert(0, b'$');
+        let lid = LocalId::Named(strings.intern_bytes(var));
+
+        let iid = func.alloc_instr(Instr::MemberOp(
+            MemberOpBuilder::base_h(loc).query_pt(prop.name),
+        ));
+        instrs.push(iid);
+        instrs.push(func.alloc_instr(Instr::Hhbc(Hhbc::SetL(iid.into(), lid, loc))));
+    }
+
+    func.block_mut(Func::ENTRY_BID).iids.splice(0..0, instrs);
 }

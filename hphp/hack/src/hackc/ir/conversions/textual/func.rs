@@ -28,6 +28,7 @@ use ir::Instr;
 use ir::InstrId;
 use ir::LocId;
 use ir::LocalId;
+use ir::MethodFlags;
 use ir::SpecialClsRef;
 use ir::StringInterner;
 use ir::UnitBytesId;
@@ -923,8 +924,8 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     pub(crate) fn write_todo(&mut self, msg: &str) -> Result<Sid> {
-        trace!("TODO: {}", msg);
         textual_todo! {
+            message = ("TODO: {msg}"),
             let target = format!("$todo.{msg}");
             self.fb.call(&target, ())
         }
@@ -979,6 +980,7 @@ pub(crate) struct MethodInfo<'a> {
     pub(crate) class: &'a ir::Class<'a>,
     pub(crate) is_static: IsStatic,
     pub(crate) strings: Arc<ir::StringInterner>,
+    pub(crate) flags: MethodFlags,
 }
 
 impl MethodInfo<'_> {

@@ -23,6 +23,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+// This is needed so we can build hackc on mac.
+#ifdef __APPLE__
+#include <crt_externs.h>
+#include <sys/utsname.h>
+#include <sys/types.h>
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

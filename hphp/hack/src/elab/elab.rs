@@ -147,7 +147,7 @@ fn elaborate<T: Transform>(node: &mut T) -> Vec<NamingPhaseError> {
 
         // Validate constructors under
         // `consistent-explicit_consistent_constructors` typechecker option
-        // passes::validate_consistent_construct::ValidateConsistentConstructPass::default(),
+        passes::validate_class_consistent_construct::ValidateClassConsistentConstructPass::default(),
 
         // Validate  use of `SupportDyn` class - depends on `enable-supportdyn`
         // and `everything_sdt` typechecker options

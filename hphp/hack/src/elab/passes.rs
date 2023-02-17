@@ -8,6 +8,8 @@ pub mod elab_class_id;
 pub mod elab_class_vars;
 pub mod elab_defs;
 pub mod elab_enum_class;
+pub mod elab_expr_call_call_user_func;
+pub mod elab_expr_call_hh_meth_caller;
 pub mod elab_expr_collection;
 pub mod elab_expr_import;
 pub mod elab_expr_lvar;
@@ -18,6 +20,6 @@ pub mod elab_hint_hsoft;
 pub mod elab_hkt;
 pub mod elab_user_attributes;
 pub mod guard_invalid;
-
 pub mod validate_class_req;
+pub mod validate_expr_call_echo;
 pub mod validate_expr_cast;

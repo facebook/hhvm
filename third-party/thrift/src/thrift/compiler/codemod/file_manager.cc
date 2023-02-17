@@ -65,6 +65,7 @@ void file_manager::remove(const t_annotation& annotation) {
   add({begin_offset, end_offset, ""});
 }
 
+// Also expands over trailing commas.
 void file_manager::expand_over_whitespaces(
     size_t& begin_offset, size_t& end_offset) const noexcept {
   while (begin_offset >= 1 && std::isspace(old_content_[begin_offset - 1])) {
@@ -72,7 +73,8 @@ void file_manager::expand_over_whitespaces(
   }
 
   while (end_offset < old_content_.length() &&
-         std::isspace(old_content_[end_offset])) {
+         (std::isspace(old_content_[end_offset]) ||
+          old_content_[end_offset] == ',')) {
     end_offset++;
   }
 }

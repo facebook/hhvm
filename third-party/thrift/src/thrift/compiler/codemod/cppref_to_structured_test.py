@@ -153,6 +153,7 @@ class CppRefToUnstructured(unittest.TestCase):
                     1: i32 faa1;
                     2: optional Faa faa2 (cpp.ref = "true", cpp2.ref = "true");
                     3: i32 faa3;
+                    4: optional Faa faa4 (cpp.ref = "true", cpp2.ref = "true",);
                 }
                 """
             ),
@@ -171,6 +172,8 @@ class CppRefToUnstructured(unittest.TestCase):
                     @cpp.Ref{type = cpp.RefType.Unique}
                 2: optional Faa faa2 ;
                     3: i32 faa3;
+                    @cpp.Ref{type = cpp.RefType.Unique}
+                4: optional Faa faa4 ;
                 }
                 """
             ),

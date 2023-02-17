@@ -958,11 +958,19 @@ let requires_consistent_construct = function
  *)
 let expand_expected_and_get_node
     ?(strip_supportdyn = false) env (expected : ExpectedTy.t option) =
-  let rec unbox env ty =
+  let rec unbox ~under_supportdyn env ty =
     let (env, ty) = Env.expand_type env ty in
     match TUtils.try_strip_dynamic env ty with
     | Some stripped_ty ->
-      if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
+      (* We've got a type ty = ~stripped_ty so under Sound Dynamic we need to
+       * account for like-pushing: the rule (shown here for vec)
+       *     t <:D dynamic
+       *     ----------------------
+       *     vec<~t> <: ~vec<t>
+       * So if expected type is ~vec<t> then we can actually ask for vec<~t>
+       * which is more generous.
+       *)
+      if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then begin
         let (env, opt_ty) =
           if
             (not strip_supportdyn)
@@ -973,33 +981,46 @@ let expand_expected_and_get_node
             Typing_dynamic.try_push_like env stripped_ty
         in
         match opt_ty with
-        | None -> unbox env stripped_ty
-        | Some ty ->
-          if Typing_utils.is_supportdyn env ty then
-            unbox env ty
+        | None -> unbox ~under_supportdyn env stripped_ty
+        | Some rty ->
+          (* We can only apply like-pushing if the type actually supports dynamic.
+           * We know this if we've gone under a supportdyn, *OR* if the type is
+           * known to be a dynamic-aware subtype of dynamic. The latter might fail
+           * if it's yet to be resolved i.e. a type variable, in which case we just
+           * remove the expected type.
+           *)
+          if under_supportdyn || Typing_utils.is_supportdyn env rty then
+            unbox ~under_supportdyn:true env rty
           else
-            unbox env stripped_ty
-      else
-        unbox env stripped_ty
+            (env, None)
+      end else
+        unbox ~under_supportdyn env stripped_ty
     | None -> begin
       match get_node ty with
-      | Tunion [ty] -> unbox env ty
-      | Toption ty -> unbox env ty
+      | Tunion [ty] -> unbox ~under_supportdyn env ty
+      | Toption ty -> unbox ~under_supportdyn env ty
       | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn
         ->
-        let (env, ty, _) = unbox env ty in
-        (env, ty, true)
-      | _ -> (env, ty, false)
+        let (env, result) = unbox ~under_supportdyn:true env ty in
+        begin
+          match result with
+          | None -> (env, None)
+          | Some (ty, _) -> (env, Some (ty, true))
+        end
+      | _ -> (env, Some (ty, false))
     end
   in
   match expected with
   | None -> (env, None)
   | Some ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } ->
-    let (env, uty, supportdyn) = unbox env ty in
-    if supportdyn && not strip_supportdyn then
-      (env, None)
-    else
-      (env, Some (p, ur, supportdyn, uty, get_node uty))
+    let (env, res) = unbox ~under_supportdyn:false env ty in
+    (match res with
+    | None -> (env, None)
+    | Some (uty, supportdyn) ->
+      if supportdyn && not strip_supportdyn then
+        (env, None)
+      else
+        (env, Some (p, ur, supportdyn, uty, get_node uty)))
 
 let uninstantiable_error env reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
   let reason_ty_opt =

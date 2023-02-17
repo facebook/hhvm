@@ -4,12 +4,6 @@ Invalid return type (Typing[4110])
   Expected `dynamic`
   File "push_like.bad.php", line 24, characters 10-35:
   But got `(~int, NoSDTC)`
-File "push_like.bad.php", line 24, characters 10-35:
-Invalid return type (Typing[4110])
-  File "push_like.bad.php", line 23, characters 33-35:
-  Expected `int`
-  File "push_like.bad.php", line 19, characters 16-19:
-  But got `dynamic`
 File "push_like.bad.php", line 29, characters 10-11:
 Invalid return type (Typing[4110])
   File "push_like.bad.php", line 27, characters 24-36:

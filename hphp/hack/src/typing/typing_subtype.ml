@@ -1981,6 +1981,7 @@ and simplify_subtype_i
               ~subtype_env
               ~sub_supportdyn
               name_sub
+              None
               variance_reifiedl
               tyargs_sub
               tyargs_super
@@ -2550,6 +2551,7 @@ and simplify_subtype_i
                   ~sub_supportdyn
                   ~super_like
                   name_sub
+                  None
                   variance_reifiedl
                   tyl_sub
                   tyl_super
@@ -2782,8 +2784,10 @@ and simplify_subtype_i
                 in
                 simplify_subtype_variance_for_injective
                   ~subtype_env
+                  ~sub_supportdyn
                   ~super_like
                   cid_sub
+                  class_def_sub
                   variance_reifiedl
                   tyl_sub
                   tyl_super
@@ -3647,13 +3651,40 @@ and simplify_subtype_has_member
             obj_get_ty
             member_ty)
 
+and simplify_subtype_variance_for_injective
+    ~(subtype_env : subtype_env)
+    ~(sub_supportdyn : Reason.t option)
+    ?(super_like = false)
+    (cid : string)
+    (class_sub : Cls.t option) =
+  let sub_supportdyn =
+    match (sub_supportdyn, class_sub) with
+    | (None, _)
+    | (_, None) ->
+      None
+    | (Some _, Some class_sub) ->
+      if
+        String.equal cid SN.Collections.cContainer
+        || Cls.has_ancestor class_sub SN.Collections.cContainer
+      then
+        sub_supportdyn
+      else
+        None
+  in
+  simplify_subtype_variance_for_injective_loop
+    ~subtype_env
+    ~sub_supportdyn
+    ~super_like
+    cid
+
 (* Given an injective type constructor C (e.g., a class)
  * C<t1, .., tn> <: C<u1, .., un> iff
  * t1 <:v1> u1 /\ ... /\ tn <:vn> un
  * where vi is the variance of the i'th generic parameter of C,
  * and <:v denotes the appropriate direction of subtyping for variance v *)
-and simplify_subtype_variance_for_injective
+and simplify_subtype_variance_for_injective_loop
     ~(subtype_env : subtype_env)
+    ~(sub_supportdyn : Reason.t option)
     ?(super_like = false)
     (cid : string)
     (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
@@ -3691,7 +3722,10 @@ and simplify_subtype_variance_for_injective
     simplify_subtype ~subtype_env ~this_ty:None
   in
   let simplify_subtype_variance_for_injective =
-    simplify_subtype_variance_for_injective ~subtype_env ~super_like
+    simplify_subtype_variance_for_injective_loop
+      ~subtype_env
+      ~sub_supportdyn
+      ~super_like
   in
   match (variance_reifiedl, children_tyl, super_tyl) with
   | ([], _, _)
@@ -3706,24 +3740,21 @@ and simplify_subtype_variance_for_injective
       match variance with
       | Ast_defs.Covariant ->
         let super = liken ~super_like env super in
-        simplify_subtype ~sub_supportdyn:None child super env
+        simplify_subtype ~sub_supportdyn child super env
       | Ast_defs.Contravariant ->
         let super =
           mk
             ( Reason.Rcontravariant_generic (get_reason super, cid),
               get_node super )
         in
-        simplify_subtype ~sub_supportdyn:None super child env
+        simplify_subtype ~sub_supportdyn super child env
       | Ast_defs.Invariant ->
         let super' =
           mk (Reason.Rinvariant_generic (get_reason super, cid), get_node super)
         in
         env
-        |> simplify_subtype
-             ~sub_supportdyn:None
-             child
-             (liken ~super_like env super')
-        &&& simplify_subtype ~sub_supportdyn:None super' child
+        |> simplify_subtype ~sub_supportdyn child (liken ~super_like env super')
+        &&& simplify_subtype ~sub_supportdyn super' child
     end
     &&& simplify_subtype_variance_for_injective
           cid
@@ -3743,6 +3774,7 @@ and simplify_subtype_variance_for_non_injective
     ~sub_supportdyn
     ?super_like
     (cid : string)
+    class_sub
     (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
     (children_tyl : locl_ty list)
     (super_tyl : locl_ty list)
@@ -3752,8 +3784,10 @@ and simplify_subtype_variance_for_non_injective
   let ((env, p) as res) =
     simplify_subtype_variance_for_injective
       ~subtype_env
+      ~sub_supportdyn
       ?super_like
       cid
+      class_sub
       variance_reifiedl
       children_tyl
       super_tyl

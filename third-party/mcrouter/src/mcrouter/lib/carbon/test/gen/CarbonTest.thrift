@@ -19,6 +19,7 @@ include "mcrouter/lib/network/gen/Common.thrift"
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 
 namespace cpp2 carbon.test.thrift
+namespace py3 carbon.test.thrift
 
 struct TestRequest {
   1: carbon.IOBufKey key

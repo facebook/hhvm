@@ -20,6 +20,7 @@ include "common/fb303/if/fb303.thrift"
 cpp_include "mcrouter/lib/carbon/example/gen/HelloGoodbyeMessages.h"
 
 namespace cpp2 hellogoodbye.thrift
+namespace py3 hellogoodbye.thrift
 
 service HelloGoodbye extends fb303.FacebookService {
   HelloGoodbye.GoodbyeReply (cpp.type = "hellogoodbye::GoodbyeReply") goodbye(1: HelloGoodbye.GoodbyeRequest (cpp.type = "hellogoodbye::GoodbyeRequest") request) (thread = "eb")

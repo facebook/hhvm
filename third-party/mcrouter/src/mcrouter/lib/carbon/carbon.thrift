@@ -6,6 +6,7 @@
  */
 
 namespace cpp2 carbon.thrift
+namespace py3 carbon.thrift
 
 cpp_include "<mcrouter/lib/carbon/Keys.h>"
 

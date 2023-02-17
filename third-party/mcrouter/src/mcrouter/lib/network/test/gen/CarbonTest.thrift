@@ -19,6 +19,7 @@ include "mcrouter/lib/carbon/carbon_result.thrift"
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 
 namespace cpp2 facebook.memcache.test.thrift
+namespace py3 facebook.memcache.test.thrift
 
 struct ManyFields {
   1: binary (cpp.type = "folly::IOBuf") buf1

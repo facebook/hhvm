@@ -19,6 +19,7 @@ include "mcrouter/lib/network/gen/Common.thrift"
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 
 namespace cpp2 hellogoodbye.thrift
+namespace py3 hellogoodbye.thrift
 
 enum EnumUInt32 {
   HIGH = 0,

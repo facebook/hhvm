@@ -19,6 +19,7 @@ include "mcrouter/lib/network/gen/Common.thrift"
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 
 namespace cpp2 facebook.memcache.thrift
+namespace py3 facebook.memcache.thrift
 
 struct MemcacheRequestCommon {
   1: optional i64 (cpp.type = "uint64_t") beforeLatencyUs

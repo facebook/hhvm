@@ -6,6 +6,7 @@
  */
 
 namespace cpp2 carbon
+namespace py3 carbon
 
 enum Result {
   UNKNOWN = 0,

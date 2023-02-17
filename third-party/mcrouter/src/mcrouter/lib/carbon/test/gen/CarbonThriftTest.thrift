@@ -21,6 +21,7 @@ cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 cpp_include "<mcrouter/lib/carbon/test/Timestamp.h>"
 
 namespace cpp2 carbon.test.thrift
+namespace py3 carbon.test.thrift
 @cpp.Adapter{name = "carbon::test::TimestampAdapter"}
 typedef i64 CustomAdapterTypeI64
 

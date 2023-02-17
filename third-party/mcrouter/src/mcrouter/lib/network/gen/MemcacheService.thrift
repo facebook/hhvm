@@ -18,6 +18,7 @@ include "mcrouter/lib/network/gen/Memcache.thrift"
 cpp_include "mcrouter/lib/network/gen/MemcacheMessages.h"
 
 namespace cpp2 facebook.memcache.thrift
+namespace py3 facebook.memcache.thrift
 
 service Memcache {
   Memcache.McAddReply (cpp.type = "facebook::memcache::McAddReply") mcAdd(1: Memcache.McAddRequest (cpp.type = "facebook::memcache::McAddRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")

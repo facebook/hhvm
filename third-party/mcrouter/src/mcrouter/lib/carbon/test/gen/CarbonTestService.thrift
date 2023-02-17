@@ -20,6 +20,7 @@ include "common/fb303/if/fb303.thrift"
 cpp_include "mcrouter/lib/carbon/test/gen/CarbonTestMessages.h"
 
 namespace cpp2 carbon.test.thrift
+namespace py3 carbon.test.thrift
 
 service CarbonTest extends fb303.FacebookService {
   CarbonTest.TestReply (cpp.type = "carbon::test::TestReply") test(1: CarbonTest.TestRequest (cpp.type = "carbon::test::TestRequest") request) (thread = "eb")

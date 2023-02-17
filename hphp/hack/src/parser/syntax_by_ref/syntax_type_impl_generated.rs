@@ -88,11 +88,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_prefixed_code_expression(ctx: &C, prefix: Self, left_backtick: Self, expression: Self, right_backtick: Self) -> Self {
+    fn make_prefixed_code_expression(ctx: &C, prefix: Self, left_backtick: Self, body: Self, right_backtick: Self) -> Self {
         let syntax = SyntaxVariant::PrefixedCodeExpression(ctx.get_arena().alloc(PrefixedCodeExpressionChildren {
             prefix,
             left_backtick,
-            expression,
+            body,
             right_backtick,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));

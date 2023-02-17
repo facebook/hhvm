@@ -489,7 +489,7 @@
       "fields" : [
         { "field_name" : "prefix" },
         { "field_name" : "left_backtick" },
-        { "field_name" : "expression" },
+        { "field_name" : "body" },
         { "field_name" : "right_backtick" }
       ] },
     { "kind_name" : "VariableExpression",

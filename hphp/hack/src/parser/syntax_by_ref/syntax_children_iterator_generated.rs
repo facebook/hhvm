@@ -96,7 +96,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(4).and_then(|index| { match index {
                         0 => Some(&x.prefix),
                     1 => Some(&x.left_backtick),
-                    2 => Some(&x.expression),
+                    2 => Some(&x.body),
                     3 => Some(&x.right_backtick),
                         _ => None,
                     }

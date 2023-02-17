@@ -1,0 +1,7 @@
+() ==> {
+}()
+() ==> {
+1 __plus 2
+true __barbar false
+while (true) {
+}}()

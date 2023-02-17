@@ -94,8 +94,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_prefixed_string_expression(self, name, str)
     }
 
-    fn make_prefixed_code_expression(&mut self, prefix: Self::Output, left_backtick: Self::Output, expression: Self::Output, right_backtick: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_prefixed_code_expression(self, prefix, left_backtick, expression, right_backtick)
+    fn make_prefixed_code_expression(&mut self, prefix: Self::Output, left_backtick: Self::Output, body: Self::Output, right_backtick: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_prefixed_code_expression(self, prefix, left_backtick, body, right_backtick)
     }
 
     fn make_variable_expression(&mut self, expression: Self::Output) -> Self::Output {

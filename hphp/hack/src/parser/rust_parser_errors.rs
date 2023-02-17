@@ -103,6 +103,7 @@ enum UnstableFeatures {
     RequireClass,
     EnumClassTypeConstants,
     NewtypeSuperBounds,
+    ExpressionTreeBlocks,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -129,6 +130,7 @@ impl UnstableFeatures {
             UnstableFeatures::RequireClass => Preview,
             UnstableFeatures::EnumClassTypeConstants => Preview,
             UnstableFeatures::NewtypeSuperBounds => Unstable,
+            UnstableFeatures::ExpressionTreeBlocks => OngoingRelease,
         }
     }
 }
@@ -5415,6 +5417,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 if c.kind.is_class() {
                     self.check_can_use_feature(node, &UnstableFeatures::RequireClass)
                 }
+            }
+            PrefixedCodeExpression(x) if x.body.is_compound_statement() => {
+                self.check_can_use_feature(&x.body, &UnstableFeatures::ExpressionTreeBlocks);
             }
             _ => {}
         }

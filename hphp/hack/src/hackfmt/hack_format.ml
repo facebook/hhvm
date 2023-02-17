@@ -2371,11 +2371,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         {
           prefixed_code_prefix = prefix;
           prefixed_code_left_backtick = left_bt;
-          prefixed_code_expression = expression;
+          prefixed_code_body = body;
           prefixed_code_right_backtick = right_bt;
         } ->
-      Concat
-        [t env prefix; transform_braced_item env left_bt expression right_bt]
+      Concat [t env prefix; transform_braced_item env left_bt body right_bt]
     | Syntax.DecoratedExpression
         {
           decorated_expression_decorator = op;

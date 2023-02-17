@@ -27,7 +27,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_simple_type_specifier(ctx: &C, simple_type_specifier: Self) -> Self;
     fn make_literal_expression(ctx: &C, literal_expression: Self) -> Self;
     fn make_prefixed_string_expression(ctx: &C, prefixed_string_name: Self, prefixed_string_str: Self) -> Self;
-    fn make_prefixed_code_expression(ctx: &C, prefixed_code_prefix: Self, prefixed_code_left_backtick: Self, prefixed_code_expression: Self, prefixed_code_right_backtick: Self) -> Self;
+    fn make_prefixed_code_expression(ctx: &C, prefixed_code_prefix: Self, prefixed_code_left_backtick: Self, prefixed_code_body: Self, prefixed_code_right_backtick: Self) -> Self;
     fn make_variable_expression(ctx: &C, variable_expression: Self) -> Self;
     fn make_pipe_variable_expression(ctx: &C, pipe_variable_expression: Self) -> Self;
     fn make_file_attribute_specification(ctx: &C, file_attribute_specification_left_double_angle: Self, file_attribute_specification_keyword: Self, file_attribute_specification_colon: Self, file_attribute_specification_attributes: Self, file_attribute_specification_right_double_angle: Self) -> Self;

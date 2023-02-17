@@ -1898,7 +1898,7 @@ where
         if self.peek_token_kind() == TokenKind::LeftBrace {
             self.parse_compound_statement()
         } else {
-            self.with_reset_precedence(|x| x.parse_expression())
+            self.parse_expression_with_reset_precedence()
         }
     }
 
@@ -2228,13 +2228,13 @@ where
                     let prefix = self.sc_mut().make_simple_type_specifier(name);
                     let left_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
                     self.in_expression_tree = true;
-                    let expr = self.parse_expression_with_reset_precedence();
+                    let body = self.parse_lambda_body();
                     self.in_expression_tree = false;
                     let right_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
                     self.sc_mut().make_prefixed_code_expression(
                         prefix,
                         left_backtick,
-                        expr,
+                        body,
                         right_backtick,
                     )
                 }

@@ -51,7 +51,7 @@ module type Syntax_S = sig
     | PrefixedCodeExpression of {
         prefixed_code_prefix: t;
         prefixed_code_left_backtick: t;
-        prefixed_code_expression: t;
+        prefixed_code_body: t;
         prefixed_code_right_backtick: t;
       }
     | VariableExpression of { variable_expression: t }

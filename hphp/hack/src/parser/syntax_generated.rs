@@ -82,11 +82,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_prefixed_code_expression(_: &C, prefixed_code_prefix: Self, prefixed_code_left_backtick: Self, prefixed_code_expression: Self, prefixed_code_right_backtick: Self) -> Self {
+    fn make_prefixed_code_expression(_: &C, prefixed_code_prefix: Self, prefixed_code_left_backtick: Self, prefixed_code_body: Self, prefixed_code_right_backtick: Self) -> Self {
         let syntax = SyntaxVariant::PrefixedCodeExpression(Box::new(PrefixedCodeExpressionChildren {
             prefixed_code_prefix,
             prefixed_code_left_backtick,
-            prefixed_code_expression,
+            prefixed_code_body,
             prefixed_code_right_backtick,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -2003,10 +2003,10 @@ where
                 acc
             },
             SyntaxVariant::PrefixedCodeExpression(x) => {
-                let PrefixedCodeExpressionChildren { prefixed_code_prefix, prefixed_code_left_backtick, prefixed_code_expression, prefixed_code_right_backtick } = *x;
+                let PrefixedCodeExpressionChildren { prefixed_code_prefix, prefixed_code_left_backtick, prefixed_code_body, prefixed_code_right_backtick } = *x;
                 let acc = f(prefixed_code_prefix, acc);
                 let acc = f(prefixed_code_left_backtick, acc);
-                let acc = f(prefixed_code_expression, acc);
+                let acc = f(prefixed_code_body, acc);
                 let acc = f(prefixed_code_right_backtick, acc);
                 acc
             },
@@ -3581,7 +3581,7 @@ where
              })),
              (SyntaxKind::PrefixedCodeExpression, 4) => SyntaxVariant::PrefixedCodeExpression(Box::new(PrefixedCodeExpressionChildren {
                  prefixed_code_right_backtick: ts.pop().unwrap(),
-                 prefixed_code_expression: ts.pop().unwrap(),
+                 prefixed_code_body: ts.pop().unwrap(),
                  prefixed_code_left_backtick: ts.pop().unwrap(),
                  prefixed_code_prefix: ts.pop().unwrap(),
                  
@@ -5187,7 +5187,7 @@ pub struct PrefixedStringExpressionChildren<T, V> {
 pub struct PrefixedCodeExpressionChildren<T, V> {
     pub prefixed_code_prefix: Syntax<T, V>,
     pub prefixed_code_left_backtick: Syntax<T, V>,
-    pub prefixed_code_expression: Syntax<T, V>,
+    pub prefixed_code_body: Syntax<T, V>,
     pub prefixed_code_right_backtick: Syntax<T, V>,
 }
 
@@ -6965,7 +6965,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(4).and_then(|index| { match index {
                         0 => Some(&x.prefixed_code_prefix),
                     1 => Some(&x.prefixed_code_left_backtick),
-                    2 => Some(&x.prefixed_code_expression),
+                    2 => Some(&x.prefixed_code_body),
                     3 => Some(&x.prefixed_code_right_backtick),
                         _ => None,
                     }

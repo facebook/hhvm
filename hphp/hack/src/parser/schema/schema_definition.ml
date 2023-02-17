@@ -119,7 +119,7 @@ let schema : schema_node list =
         [
           ("prefix", Token);
           ("left_backtick", Token);
-          ("expression", Aggregate Expression);
+          ("body", Aggregate LambdaBody);
           ("right_backtick", Token);
         ];
     };

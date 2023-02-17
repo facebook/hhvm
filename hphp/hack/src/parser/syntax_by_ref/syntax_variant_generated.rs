@@ -244,7 +244,7 @@ pub struct PrefixedStringExpressionChildren<'a, T, V> {
 pub struct PrefixedCodeExpressionChildren<'a, T, V> {
     pub prefix: Syntax<'a, T, V>,
     pub left_backtick: Syntax<'a, T, V>,
-    pub expression: Syntax<'a, T, V>,
+    pub body: Syntax<'a, T, V>,
     pub right_backtick: Syntax<'a, T, V>,
 }
 

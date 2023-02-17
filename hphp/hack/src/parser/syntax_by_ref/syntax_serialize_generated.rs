@@ -86,12 +86,12 @@ SyntaxVariant::PrefixedStringExpression (PrefixedStringExpressionChildren{name,s
 ss.serialize_field("prefixed_string_str", &self.with(str))?;
       ss.end()
 } 
-SyntaxVariant::PrefixedCodeExpression (PrefixedCodeExpressionChildren{prefix,left_backtick,expression,right_backtick} ) => {
+SyntaxVariant::PrefixedCodeExpression (PrefixedCodeExpressionChildren{prefix,left_backtick,body,right_backtick} ) => {
       let mut ss = s.serialize_struct("", 5)?;
       ss.serialize_field("kind", "prefixed_code")?;
       ss.serialize_field("prefixed_code_prefix", &self.with(prefix))?;
 ss.serialize_field("prefixed_code_left_backtick", &self.with(left_backtick))?;
-ss.serialize_field("prefixed_code_expression", &self.with(expression))?;
+ss.serialize_field("prefixed_code_body", &self.with(body))?;
 ss.serialize_field("prefixed_code_right_backtick", &self.with(right_backtick))?;
       ss.end()
 } 

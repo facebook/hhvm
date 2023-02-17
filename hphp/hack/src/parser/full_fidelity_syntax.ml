@@ -764,12 +764,12 @@ module WithToken (Token : TokenType) = struct
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           } ->
         let acc = f acc prefixed_code_prefix in
         let acc = f acc prefixed_code_left_backtick in
-        let acc = f acc prefixed_code_expression in
+        let acc = f acc prefixed_code_body in
         let acc = f acc prefixed_code_right_backtick in
         acc
       | VariableExpression { variable_expression } ->
@@ -2548,13 +2548,13 @@ module WithToken (Token : TokenType) = struct
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           } ->
         [
           prefixed_code_prefix;
           prefixed_code_left_backtick;
-          prefixed_code_expression;
+          prefixed_code_body;
           prefixed_code_right_backtick;
         ]
       | VariableExpression { variable_expression } -> [variable_expression]
@@ -4239,13 +4239,13 @@ module WithToken (Token : TokenType) = struct
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           } ->
         [
           "prefixed_code_prefix";
           "prefixed_code_left_backtick";
-          "prefixed_code_expression";
+          "prefixed_code_body";
           "prefixed_code_right_backtick";
         ]
       | VariableExpression { variable_expression } -> ["variable_expression"]
@@ -6051,14 +6051,14 @@ module WithToken (Token : TokenType) = struct
           [
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           ] ) ->
         PrefixedCodeExpression
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           }
       | (SyntaxKind.VariableExpression, [variable_expression]) ->
@@ -7977,14 +7977,14 @@ module WithToken (Token : TokenType) = struct
       let make_prefixed_code_expression
           prefixed_code_prefix
           prefixed_code_left_backtick
-          prefixed_code_expression
+          prefixed_code_body
           prefixed_code_right_backtick =
         let syntax =
           PrefixedCodeExpression
             {
               prefixed_code_prefix;
               prefixed_code_left_backtick;
-              prefixed_code_expression;
+              prefixed_code_body;
               prefixed_code_right_backtick;
             }
         in

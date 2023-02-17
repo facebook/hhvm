@@ -2151,7 +2151,36 @@ fn p_prefixed_code_expr<'a>(
     c: &'a PrefixedCodeExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
-    let src_expr = p_expr(&c.expression, env)?;
+    let src_expr = if !c.body.is_compound_statement() {
+        p_expr(&c.body, env)?
+    } else {
+        let pos = p_pos(&c.body, env);
+        // Take the body and create a no argument lambda expression
+        let (body, yield_) = map_yielding(&c.body, env, p_function_body)?;
+        let external = c.body.is_external();
+        let fun = ast::Fun_ {
+            span: pos.clone(),
+            readonly_this: None, // filled in by mk_unop
+            annotation: (),
+            readonly_ret: None,
+            ret: ast::TypeHint((), None),
+            tparams: vec![],
+            where_constraints: vec![],
+            body: ast::FuncBody { fb_ast: body },
+            fun_kind: mk_fun_kind(SuspensionKind::SKSync, yield_),
+            params: vec![],
+            ctxs: None,
+            unsafe_ctxs: None,
+            user_attributes: ast::UserAttributes(vec![]),
+            external,
+            doc_comment: None,
+        };
+        let recv = ast::Expr::new((), pos.clone(), Expr_::mk_lfun(fun, vec![]));
+
+        // Immediately invoke the lambda by wrapping in a call expression node
+        let expr = Expr_::mk_call(recv, vec![], vec![], None);
+        ast::Expr::new((), pos, expr)
+    };
 
     let hint = p_hint(&c.prefix, env)?;
 

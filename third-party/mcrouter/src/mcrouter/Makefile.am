@@ -85,6 +85,7 @@ libmcroutercore_a_SOURCES = \
   ProxyConfig.h \
   ProxyConfigBuilder.cpp \
   ProxyConfigBuilder.h \
+  ProxyDestination.cpp \
   ProxyDestination-inl.h \
   ProxyDestination.h \
   ProxyDestinationBase.cpp \

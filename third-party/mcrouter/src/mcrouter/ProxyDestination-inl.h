@@ -5,10 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#pragma once
+
+#include "mcrouter/ProxyDestination.h"
+
 #include <limits>
 #include <random>
-
-#include <folly/io/async/AsyncSSLSocket.h>
 
 #include "mcrouter/OptionsUtil.h"
 #include "mcrouter/ProxyBase.h"
@@ -19,13 +21,13 @@
 #include "mcrouter/lib/Reply.h"
 #include "mcrouter/lib/fbi/cpp/util.h"
 #include "mcrouter/lib/mc/protocol.h"
-#include "mcrouter/lib/network/AsyncTlsToPlaintextSocket.h"
 #include "mcrouter/lib/network/ConnectionDownReason.h"
 #include "mcrouter/lib/network/ConnectionOptions.h"
-#include "mcrouter/lib/network/McFizzClient.h"
-#include "mcrouter/lib/network/McSSLUtil.h"
 #include "mcrouter/lib/network/RpcStatsContext.h"
-#include "mcrouter/lib/network/TlsToPlainTransport.h"
+
+namespace folly {
+class AsyncTransport;
+} // namespace folly
 
 namespace facebook {
 namespace memcache {
@@ -264,6 +266,13 @@ void ProxyDestination<Transport>::resetInactive() {
   }
 }
 
+namespace detail {
+void incrementProxyTlsKtlsSslStats(
+    const folly::AsyncTransport& socket,
+    SecurityMech mech,
+    ProxyBase& proxy);
+} // namespace detail
+
 template <class Transport>
 void ProxyDestination<Transport>::initializeTransport() {
   assert(!transport_);
@@ -349,94 +358,19 @@ void ProxyDestination<Transport>::initializeTransport() {
 
   transport_->setConnectionStatusCallbacks(ConnectionStatusCallbacks{
       [this](
-          const folly::AsyncTransportWrapper& socket,
+          const folly::AsyncTransport& socket,
           int64_t numConnectRetries) mutable {
         setState(State::Up);
         proxy().stats().increment(num_connections_opened_stat);
 
         updatePoolStatConnections(true);
-        auto mech = accessPoint()->getSecurityMech();
-        if (mech == SecurityMech::TLS_TO_PLAINTEXT) {
-          if (const auto* tlsToPlainSock =
-                  socket.getUnderlyingTransport<TlsToPlainTransport>()) {
-            auto stats = tlsToPlainSock->getStats();
-            proxy().stats().increment(num_tls_to_plain_connections_opened_stat);
-            if (stats.sessionReuseAttempted) {
-              proxy().stats().increment(
-                  num_tls_to_plain_resumption_attempts_stat);
-            }
-            if (stats.sessionReuseSuccess) {
-              proxy().stats().increment(
-                  num_tls_to_plain_resumption_successes_stat);
-            }
-          } else if (
-              const auto* thriftTlsToPlainSock =
-                  socket.getUnderlyingTransport<AsyncTlsToPlaintextSocket>()) {
-            proxy().stats().increment(num_tls_to_plain_connections_opened_stat);
-
-            using Status = AsyncTlsToPlaintextSocket::SessionResumptionStatus;
-            switch (thriftTlsToPlainSock->getSessionResumptionStatus()) {
-              case Status::RESUMPTION_NOT_ATTEMPTED:
-                break;
-              case Status::RESUMPTION_ATTEMPTED_AND_SUCCEEDED:
-                proxy().stats().increment(
-                    num_tls_to_plain_resumption_successes_stat);
-                FOLLY_FALLTHROUGH;
-              case Status::RESUMPTION_ATTEMPTED_AND_FAILED:
-                proxy().stats().increment(
-                    num_tls_to_plain_resumption_attempts_stat);
-            };
-          } else {
-            proxy().stats().increment(num_tls_to_plain_fallback_failures_stat);
-          }
-        }
-        if (mech == SecurityMech::KTLS12) {
-          auto stats = McSSLUtil::getKtlsStats(socket);
-          if (stats) {
-            proxy().stats().increment(num_ktls_connections_opened_stat);
-            if (stats->sessionReuseAttempted) {
-              proxy().stats().increment(num_ktls_resumption_attempts_stat);
-            }
-            if (stats->sessionReuseSuccess) {
-              proxy().stats().increment(num_ktls_resumption_successes_stat);
-            }
-          } else {
-            proxy().stats().increment(num_ktls_fallback_failures_stat);
-          }
-        }
-        // no else if here in case the tls to plain didn't work - we can capture
-        // ssl socket stats here
-        if (const auto* sslSocket =
-                socket.getUnderlyingTransport<folly::AsyncSSLSocket>()) {
-          proxy().stats().increment(num_ssl_connections_opened_stat);
-          if (sslSocket->sessionResumptionAttempted()) {
-            proxy().stats().increment(num_ssl_resumption_attempts_stat);
-          }
-          if (sslSocket->getSSLSessionReused()) {
-            proxy().stats().increment(num_ssl_resumption_successes_stat);
-          }
-        } else if (
-            const auto* fizzSock =
-                socket.getUnderlyingTransport<McFizzClient>()) {
-          proxy().stats().increment(num_ssl_connections_opened_stat);
-          if (fizzSock->pskResumed()) {
-            proxy().stats().increment(num_ssl_resumption_successes_stat);
-            proxy().stats().increment(num_ssl_resumption_attempts_stat);
-          } else {
-            auto pskState = fizzSock->getState().pskType();
-            if (pskState && pskState.value() == fizz::PskType::Rejected) {
-              // session resumption was attempted, but failed
-              proxy().stats().increment(num_ssl_resumption_attempts_stat);
-            }
-          }
-        }
-
+        detail::incrementProxyTlsKtlsSslStats(
+            socket, accessPoint()->getSecurityMech(), proxy());
         if (numConnectRetries > 0) {
           proxy().stats().increment(num_connect_success_after_retrying_stat);
           proxy().stats().increment(
               num_connect_retries_stat, numConnectRetries);
         }
-
         updateConnectionClosedInternalStat();
       },
       [pdstnPtr = selfPtr_](
@@ -485,7 +419,7 @@ void ProxyDestination<Transport>::initializeTransport() {
 
   transport_->setAuthorizationCallbacks(AuthorizationCallbacks{
       [this](
-          const folly::AsyncTransportWrapper& socket,
+          const folly::AsyncTransport& socket,
           const ConnectionOptions& connectionOptions) mutable {
         if (auto& callback = proxy().router().svcIdentAuthCallbackFunc()) {
           if (!callback(socket, connectionOptions)) {

@@ -95,6 +95,7 @@ pub(crate) fn parse_attr(tokenizer: &mut Tokenizer<'_>) -> Result<Attr> {
         Some(match id {
             "abstract" => Attr::AttrAbstract,
             "builtin" => Attr::AttrBuiltin,
+            "is_closure_class" => Attr::AttrIsClosureClass,
             "const" => Attr::AttrIsConst,
             "deep_init" => Attr::AttrDeepInit,
             "dynamically_callable" => Attr::AttrDynamicallyCallable,

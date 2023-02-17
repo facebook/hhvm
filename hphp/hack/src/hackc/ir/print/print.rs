@@ -300,7 +300,7 @@ fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner) -
         w,
         "class {} {} {{",
         FmtIdentifierId(class.name.id, strings),
-        FmtAttr(class.flags)
+        FmtAttr(class.flags, AttrContext::Class)
     )?;
 
     if let Some(doc_comment) = class.doc_comment.as_ref() {
@@ -621,7 +621,7 @@ fn print_function(
         shadowed_tparams = FmtShadowedTParams(&f.func.shadowed_tparams, strings),
         params = FmtFuncParams(&f.func, strings),
         ret_type = FmtTypeInfo(&f.func.return_type, strings),
-        attr = FmtAttr(f.attrs),
+        attr = FmtAttr(f.attrs, AttrContext::Function),
     )?;
     print_function_flags(w, f.flags)?;
     print_attributes(w, &f.attributes, strings)?;
@@ -1782,7 +1782,7 @@ fn print_method(
         params = FmtFuncParams(&method.func, strings),
         ret_type = FmtTypeInfo(&method.func.return_type, strings),
         vis = FmtVisibility(method.visibility),
-        attr = FmtAttr(method.attrs),
+        attr = FmtAttr(method.attrs, AttrContext::Method),
     )?;
     print_method_flags(w, method.flags)?;
     print_attributes(w, &method.attributes, strings)?;
@@ -1878,7 +1878,7 @@ fn print_property(w: &mut dyn Write, property: &Property<'_>, strings: &StringIn
         w,
         "  property {name} {flags}{attributes} {vis} : {ty} {doc}",
         name = FmtIdentifierId(property.name.id, strings),
-        flags = FmtAttr(property.flags),
+        flags = FmtAttr(property.flags, AttrContext::Property),
         attributes = FmtSep::new(" <", ", ", ">", property.attributes.iter(), |w, attr| {
             write!(
                 w,
@@ -2145,7 +2145,7 @@ fn print_typedef(w: &mut dyn Write, typedef: &Typedef, strings: &StringInterner)
         )
         .fmt(w)),
         ts = FmtTypedValue(type_structure, strings),
-        attrs = FmtAttr(*attrs)
+        attrs = FmtAttr(*attrs, AttrContext::Typedef)
     )
 }
 

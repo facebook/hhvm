@@ -25,6 +25,9 @@ namespace HPHP {
  * Attr unions are stored as integers in .hhbc repositories, so incompatible
  * changes here require a schema version bump.
  *
+ * NOTE: Make sure to keep this in sync with HHAS_ATTRS in as-base-hhas.h so it
+ * prints properly.
+ *
  * TODO(#4513748): We're almost out of space in Attr---in fact, we already have
  * too many Attrs to fit in Class, which packs them into only 28 bits.  There's
  * no reason to share Attrs among unrelated objects, so we should really have

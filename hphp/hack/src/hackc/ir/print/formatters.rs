@@ -55,11 +55,46 @@ where
     }
 }
 
-pub(crate) struct FmtAttr(pub Attr);
+pub(crate) fn flag_get_bit<T>(
+    flag: bool,
+    attr: &mut T,
+    bit: T,
+    s: &'static str,
+) -> Option<&'static str>
+where
+    T: Copy
+        + std::ops::BitAnd<T, Output = T>
+        + std::ops::SubAssign
+        + std::ops::BitAndAssign<T>
+        + PartialEq<T>,
+{
+    if !flag {
+        None
+    } else if *attr & bit == bit {
+        *attr -= bit;
+        Some(s)
+    } else {
+        None
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub(crate) enum AttrContext {
+    Class,
+    Function,
+    Method,
+    Property,
+    Typedef,
+}
+
+pub(crate) struct FmtAttr(pub Attr, pub AttrContext);
 
 impl Display for FmtAttr {
     fn fmt(&self, w: &mut Formatter<'_>) -> Result {
-        let FmtAttr(mut attr) = *self;
+        let FmtAttr(mut attr, ctx) = *self;
+
+        let is_class = ctx == AttrContext::Class;
+        let is_func = ctx == AttrContext::Function;
 
         #[rustfmt::skip]
         FmtSep::new(
@@ -78,8 +113,9 @@ impl Display for FmtAttr {
                 get_bit(&mut attr, Attr::AttrInterceptable, "interceptable"),
                 get_bit(&mut attr, Attr::AttrInterface, "interface"),
                 get_bit(&mut attr, Attr::AttrInternal, "internal"),
+                flag_get_bit(is_class, &mut attr, Attr::AttrIsClosureClass, "is_closure_class"),
                 get_bit(&mut attr, Attr::AttrIsConst, "const"),
-                get_bit(&mut attr, Attr::AttrIsMethCaller, "is_meth_caller"),
+                flag_get_bit(is_func, &mut attr, Attr::AttrIsMethCaller, "is_meth_caller"),
                 get_bit(&mut attr, Attr::AttrIsReadonly, "readonly"),
                 get_bit(&mut attr, Attr::AttrLSB, "lsb"),
                 get_bit(&mut attr, Attr::AttrLateInit, "late_init"),

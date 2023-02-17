@@ -901,6 +901,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         enum_type.is_some() && !hhbc::has_enum_class(&attributes),
     );
     flags.set(Attr::AttrInternal, ast_class.internal);
+    flags.set(Attr::AttrIsClosureClass, is_closure);
 
     add_symbol_refs(emitter, base.as_ref(), &implements, &uses, &requirements);
     Ok(Class {

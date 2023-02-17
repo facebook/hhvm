@@ -7,7 +7,6 @@ a way that specific _type_ or _context_ constant(s) are more specific
 For example, given the definition
 
 ```Hack file:box-with-type+ctx.hack
-
 <<file:__EnableUnstableFeatures('type_refinements')>>
 
 interface Box {
@@ -130,7 +129,7 @@ to define a method `unloadByQuantity` that is only callable on
 subclasses of `Box` where `TQuantity` is an integer (representing
 boxes with quantity that is countable exactly), one could write:
 
-```
+```Hack no-extract
 class Warehouse<TBox as Box> {
   public function unloadByCount(TBox $boxes): void
   where TBox::TQuantity = int
@@ -140,7 +139,7 @@ class Warehouse<TBox as Box> {
 
 This can be translated to type refinements with a nuance:
 
-```
+```Hack no-extract
 class Warehouse<TBox as Box> {
   public function unloadByCount(TBox $boxes): int
   where TBox as Box with { type TQuantity = int }
@@ -155,7 +154,7 @@ because it is actually sound. Notably, the migrated method, which now
 uses type refinements, is _uncallable_ from unmigrated methods that
 still use where-clauses.
 
-```
+```Hack no-extract
 function callee_that_now_errs<TBox as Box>(
   Warehouse<TBox> $warehouse,
   TBox $unknown_box,

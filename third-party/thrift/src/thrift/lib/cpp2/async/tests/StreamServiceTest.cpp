@@ -216,6 +216,18 @@ TEST_F(InitialThrowTest, InitialThrow) {
       });
 }
 
+TYPED_TEST(StreamServiceTest, EmptyRocketExceptionCrash) {
+  this->connectToServer(
+      [&](Client<TestStreamService>& client) -> folly::coro::Task<void> {
+        auto gen = (co_await client.co_range(0, 100)).toAsyncGenerator();
+        this->server_->setIngressMemoryLimit(1);
+        this->server_->setMinPayloadSizeToEnforceIngressMemoryLimit(0);
+        EXPECT_THROW(co_await client.co_test(), TApplicationException);
+        EXPECT_THROW(
+            while (auto t = co_await gen.next()){}, rocket::RocketException);
+      });
+}
+
 template <typename Service>
 class MultiStreamServiceTest
     : public AsyncTestSetup<Service, Client<TestStreamService>> {

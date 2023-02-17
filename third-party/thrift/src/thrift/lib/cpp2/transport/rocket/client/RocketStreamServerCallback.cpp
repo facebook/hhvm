@@ -82,12 +82,16 @@ StreamChannelStatusResponse RocketStreamServerCallback::onStreamError(
     folly::exception_wrapper ew) {
   ew.handle(
       [&](RocketException& ex) {
-        if (client_.getServerVersion() >= 8) {
-          clientCallback_->onStreamError(
-              thrift::detail::EncodedStreamRpcError(ex.moveErrorData()));
+        if (ex.hasErrorData()) {
+          if (client_.getServerVersion() >= 8) {
+            clientCallback_->onStreamError(
+                thrift::detail::EncodedStreamRpcError(ex.moveErrorData()));
+          } else {
+            clientCallback_->onStreamError(
+                thrift::detail::EncodedError(ex.moveErrorData()));
+          }
         } else {
-          clientCallback_->onStreamError(
-              thrift::detail::EncodedError(ex.moveErrorData()));
+          clientCallback_->onStreamError(std::move(ew));
         }
       },
       [&](...) {
@@ -222,12 +226,16 @@ StreamChannelStatusResponse RocketSinkServerCallback::onFinalResponseError(
     folly::exception_wrapper ew) {
   ew.handle(
       [&](RocketException& ex) {
-        if (client_.getServerVersion() >= 8) {
-          clientCallback_->onFinalResponseError(
-              thrift::detail::EncodedStreamRpcError(ex.moveErrorData()));
+        if (ex.hasErrorData()) {
+          if (client_.getServerVersion() >= 8) {
+            clientCallback_->onFinalResponseError(
+                thrift::detail::EncodedStreamRpcError(ex.moveErrorData()));
+          } else {
+            clientCallback_->onFinalResponseError(
+                thrift::detail::EncodedError(ex.moveErrorData()));
+          }
         } else {
-          clientCallback_->onFinalResponseError(
-              thrift::detail::EncodedError(ex.moveErrorData()));
+          clientCallback_->onFinalResponseError(std::move(ew));
         }
       },
       [&](...) { clientCallback_->onFinalResponseError(std::move(ew)); });

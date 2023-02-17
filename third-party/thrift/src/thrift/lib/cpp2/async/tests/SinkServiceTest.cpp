@@ -400,6 +400,17 @@ TEST_F(SinkServiceTest, SinkEarlyClose) {
   }
 }
 
+TEST_F(SinkServiceTest, SinkEmptyRocketExceptionCrash) {
+  connectToServer(
+      [&](Client<TestSinkService>& client) -> folly::coro::Task<void> {
+        auto sink = co_await client.co_range(0, 100);
+        server_->setIngressMemoryLimit(1);
+        server_->setMinPayloadSizeToEnforceIngressMemoryLimit(0);
+        EXPECT_THROW(co_await client.co_test(), TApplicationException);
+        EXPECT_THROW(co_await sink.sink({}), rocket::RocketException);
+      });
+}
+
 TEST_F(SinkServiceTest, SinkServerCancellation) {
   connectToServer(
       [](Client<TestSinkService>& client) -> folly::coro::Task<void> {

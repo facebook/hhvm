@@ -53,6 +53,8 @@ class FOLLY_EXPORT RocketException : public std::exception {
     return std::move(errorData_);
   }
 
+  bool hasErrorData() const noexcept { return !!errorData_; }
+
  private:
   ErrorCode rsocketErrorCode_{ErrorCode::RESERVED};
   std::unique_ptr<folly::IOBuf> errorData_;

@@ -2692,8 +2692,7 @@ and simplify_subtype_i
         ~super_like
         ety_sub
         (LoclType ty_super)
-    | (_r_super, Tclass (((_, class_name) as x_super), exact_super, tyl_super))
-      ->
+    | (_, Tclass ((_, class_name), exact_super, tyl_super)) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType ty_sub ->
@@ -2732,152 +2731,16 @@ and simplify_subtype_i
                && is_nonexact exact_super ->
           valid env
         (* Match what's done in unify for non-strict code *)
-        | (r_sub, Tclass (x_sub, exact_sub, tyl_sub)) ->
-          let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
-          let (exact_match, both_exact) =
-            match (exact_sub, exact_super) with
-            | (Nonexact _, Exact) -> (false, false)
-            | (Exact, Exact) -> (true, true)
-            | (_, _) -> (true, false)
-          in
-          if String.equal cid_super cid_sub then
-            if List.is_empty tyl_sub && List.is_empty tyl_super && exact_match
-            then
-              valid env
-            else
-              (* This is side-effecting as it registers a dependency *)
-              let class_def_sub = Env.get_class env cid_sub in
-              (* If class is final then exactness is superfluous *)
-              let (has_generics, is_final) =
-                match class_def_sub with
-                | Some tc -> (not (List.is_empty (Cls.tparams tc)), Cls.final tc)
-                | None -> (false, false)
-              in
-              if not (exact_match || is_final) then
-                invalid_env env
-              else if has_generics && List.is_empty tyl_super then
-                (* C<t> <: C where C represents all possible instantiations of C's generics *)
-                valid env
-              else if has_generics && List.is_empty tyl_sub then
-                (* C </: C<t>, since C's generic can be instantiated to other things than t *)
-                invalid_env env
-              else
-                let variance_reifiedl =
-                  if List.is_empty tyl_sub then
-                    []
-                  else if both_exact then
-                    (* Subtyping exact class types following variance
-                     * annotations is unsound in general (see T142810099).
-                     * When the class is exact, we must treat all generic
-                     * parameters as invariant.
-                     *)
-                    List.map tyl_sub ~f:(fun _ ->
-                        (Ast_defs.Invariant, Aast.Erased))
-                  else
-                    match class_def_sub with
-                    | None ->
-                      List.map tyl_sub ~f:(fun _ ->
-                          (Ast_defs.Invariant, Aast.Erased))
-                    | Some class_sub ->
-                      List.map (Cls.tparams class_sub) ~f:(fun t ->
-                          (t.tp_variance, t.tp_reified))
-                in
-                simplify_subtype_variance_for_injective
-                  ~subtype_env
-                  ~sub_supportdyn
-                  ~super_like
-                  cid_sub
-                  class_def_sub
-                  variance_reifiedl
-                  tyl_sub
-                  tyl_super
-                  env
-          else if not exact_match then
-            invalid_env env
-          else
-            let class_def_sub = Env.get_class env cid_sub in
-            (match class_def_sub with
-            | None ->
-              (* This should have been caught already in the naming phase *)
-              valid env
-            | Some class_sub ->
-              (* We handle the case where a generic A<T> is used as A for the sub-class.
-                 This works because there will be no locls to substitute for type parameters
-                 T in the type build by get_ancestor. If T does show up in that type, then
-                 the call to simplify subtype will fail. This is what we expect since we
-                 would need it to be a sub-type of the super-type for all T. If T is not there,
-                 then simplify_subtype should succeed. *)
-              let ety_env =
-                {
-                  empty_expand_env with
-                  substs =
-                    TUtils.make_locl_subst_for_class_tparams class_sub tyl_sub;
-                  (* FIXME(T59448452): Unsound in general *)
-                  this_ty = Option.value this_ty ~default:ty_sub;
-                }
-              in
-              let up_obj = Cls.get_ancestor class_sub cid_super in
-              (match up_obj with
-              | Some up_obj ->
-                (* Since we have provided no `Typing_error.Reasons_callback.t`
-                 * in the `expand_env`, this will not generate any errors *)
-                let ((env, _ty_err_opt), up_obj) =
-                  Phase.localize ~ety_env env up_obj
-                in
-                simplify_subtype
-                  ~subtype_env
-                  ~sub_supportdyn
-                  ~this_ty
-                  ~super_like
-                  up_obj
-                  ty_super
-                  env
-              | None ->
-                if
-                  Ast_defs.is_c_trait (Cls.kind class_sub)
-                  || Ast_defs.is_c_interface (Cls.kind class_sub)
-                then
-                  let reqs_class =
-                    List.map
-                      (Cls.all_ancestor_req_class_requirements class_sub)
-                      ~f:snd
-                  in
-                  let rec try_upper_bounds_on_this up_objs env =
-                    match up_objs with
-                    | [] ->
-                      (* It's crucial that we don't lose updates to tpenv in
-                       * env that were introduced by Phase.localize.
-                       * TODO: avoid this requirement *)
-                      invalid_env env
-                    | ub_obj_typ :: up_objs
-                      when List.mem reqs_class ub_obj_typ ~equal:equal_decl_ty
-                      ->
-                      (* `require class` constraints do not induce subtyping,
-                       * so skipping them *)
-                      try_upper_bounds_on_this up_objs env
-                    | ub_obj_typ :: up_objs ->
-                      (* A trait is never the runtime type, but it can be used
-                       * as a constraint if it has requirements or where
-                       * constraints for its using classes *)
-                      (* Since we have provided no `Typing_error.Reasons_callback.t`
-                       * in the `expand_env`, this will not generate any errors *)
-                      let ((env, _ty_err_opt), ub_obj_typ) =
-                        Phase.localize ~ety_env env ub_obj_typ
-                      in
-                      env
-                      |> simplify_subtype
-                           ~subtype_env
-                           ~sub_supportdyn
-                           ~this_ty
-                           (mk (r_sub, get_node ub_obj_typ))
-                           ty_super
-                      ||| try_upper_bounds_on_this up_objs
-                  in
-                  try_upper_bounds_on_this
-                    (Cls.upper_bounds_on_this class_sub)
-                    env
-                else
-                  invalid_env env))
+        | (_, Tclass _) ->
+          simplify_subtype_classes
+            ~fail
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            ~super_like
+            ty_sub
+            ty_super
+            env
         | (_r_sub, Tvec_or_dict (_, tv)) ->
           (match (exact_super, tyl_super) with
           | (Nonexact _, [tv_super])
@@ -3123,6 +2986,161 @@ and simplify_subtype_shape
          (supportdyn_super, r_super, shape_kind_super, fdm_super))
       (TShapeSet.of_list (TShapeMap.keys fdm_sub @ TShapeMap.keys fdm_super))
       (env, TL.valid)
+
+(* Suptyping when the two types are classish *)
+and simplify_subtype_classes
+    ~fail
+    ~(subtype_env : subtype_env)
+    ~(sub_supportdyn : Reason.t option)
+    ~(this_ty : locl_ty option)
+    ~(super_like : bool)
+    ty_sub
+    ty_super
+    env : env * TL.subtype_prop =
+  let invalid_env = invalid ~fail in
+  let ( ||| ) = ( ||| ) ~fail in
+  match (deref ty_sub, deref ty_super) with
+  | ( (r_sub, Tclass (x_sub, exact_sub, tyl_sub)),
+      (_r_super, Tclass (x_super, exact_super, tyl_super)) ) ->
+    let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
+    let (exact_match, both_exact) =
+      match (exact_sub, exact_super) with
+      | (Nonexact _, Exact) -> (false, false)
+      | (Exact, Exact) -> (true, true)
+      | (_, _) -> (true, false)
+    in
+    if String.equal cid_super cid_sub then
+      if List.is_empty tyl_sub && List.is_empty tyl_super && exact_match then
+        valid env
+      else
+        (* This is side-effecting as it registers a dependency *)
+        let class_def_sub = Env.get_class env cid_sub in
+        (* If class is final then exactness is superfluous *)
+        let (has_generics, is_final) =
+          match class_def_sub with
+          | Some tc -> (not (List.is_empty (Cls.tparams tc)), Cls.final tc)
+          | None -> (false, false)
+        in
+        if not (exact_match || is_final) then
+          invalid_env env
+        else if has_generics && List.is_empty tyl_super then
+          (* C<t> <: C where C represents all possible instantiations of C's generics *)
+          valid env
+        else if has_generics && List.is_empty tyl_sub then
+          (* C </: C<t>, since C's generic can be instantiated to other things than t *)
+          invalid_env env
+        else
+          let variance_reifiedl =
+            if List.is_empty tyl_sub then
+              []
+            else if both_exact then
+              (* Subtyping exact class types following variance
+               * annotations is unsound in general (see T142810099).
+               * When the class is exact, we must treat all generic
+               * parameters as invariant.
+               *)
+              List.map tyl_sub ~f:(fun _ -> (Ast_defs.Invariant, Aast.Erased))
+            else
+              match class_def_sub with
+              | None ->
+                List.map tyl_sub ~f:(fun _ -> (Ast_defs.Invariant, Aast.Erased))
+              | Some class_sub ->
+                List.map (Cls.tparams class_sub) ~f:(fun t ->
+                    (t.tp_variance, t.tp_reified))
+          in
+          simplify_subtype_variance_for_injective
+            ~subtype_env
+            ~sub_supportdyn
+            ~super_like
+            cid_sub
+            class_def_sub
+            variance_reifiedl
+            tyl_sub
+            tyl_super
+            env
+    else if not exact_match then
+      invalid_env env
+    else
+      let class_def_sub = Env.get_class env cid_sub in
+      (match class_def_sub with
+      | None ->
+        (* This should have been caught already in the naming phase *)
+        valid env
+      | Some class_sub ->
+        (* We handle the case where a generic A<T> is used as A for the sub-class.
+           This works because there will be no locls to substitute for type parameters
+           T in the type build by get_ancestor. If T does show up in that type, then
+           the call to simplify subtype will fail. This is what we expect since we
+           would need it to be a sub-type of the super-type for all T. If T is not there,
+           then simplify_subtype should succeed. *)
+        let ety_env =
+          {
+            empty_expand_env with
+            substs = TUtils.make_locl_subst_for_class_tparams class_sub tyl_sub;
+            (* FIXME(T59448452): Unsound in general *)
+            this_ty = Option.value this_ty ~default:ty_sub;
+          }
+        in
+        let up_obj = Cls.get_ancestor class_sub cid_super in
+        (match up_obj with
+        | Some up_obj ->
+          (* Since we have provided no `Typing_error.Reasons_callback.t`
+           * in the `expand_env`, this will not generate any errors *)
+          let ((env, _ty_err_opt), up_obj) =
+            Phase.localize ~ety_env env up_obj
+          in
+          simplify_subtype
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            ~super_like
+            up_obj
+            ty_super
+            env
+        | None ->
+          if
+            Ast_defs.is_c_trait (Cls.kind class_sub)
+            || Ast_defs.is_c_interface (Cls.kind class_sub)
+          then
+            let reqs_class =
+              List.map
+                (Cls.all_ancestor_req_class_requirements class_sub)
+                ~f:snd
+            in
+            let rec try_upper_bounds_on_this up_objs env =
+              match up_objs with
+              | [] ->
+                (* It's crucial that we don't lose updates to tpenv in
+                 * env that were introduced by Phase.localize.
+                 * TODO: avoid this requirement *)
+                invalid_env env
+              | ub_obj_typ :: up_objs
+                when List.mem reqs_class ub_obj_typ ~equal:equal_decl_ty ->
+                (* `require class` constraints do not induce subtyping,
+                 * so skipping them *)
+                try_upper_bounds_on_this up_objs env
+              | ub_obj_typ :: up_objs ->
+                (* A trait is never the runtime type, but it can be used
+                 * as a constraint if it has requirements or where
+                 * constraints for its using classes *)
+                (* Since we have provided no `Typing_error.Reasons_callback.t`
+                 * in the `expand_env`, this will not generate any errors *)
+                let ((env, _ty_err_opt), ub_obj_typ) =
+                  Phase.localize ~ety_env env ub_obj_typ
+                in
+                env
+                |> simplify_subtype
+                     ~subtype_env
+                     ~sub_supportdyn
+                     ~this_ty
+                     (mk (r_sub, get_node ub_obj_typ))
+                     ty_super
+                ||| try_upper_bounds_on_this up_objs
+            in
+            try_upper_bounds_on_this (Cls.upper_bounds_on_this class_sub) env
+          else
+            invalid_env env))
+  | (_, _) -> invalid_env env
 
 and simplify_subtype_can_index
     ~subtype_env ~sub_supportdyn ~this_ty ~fail ty_sub ty_super (_r, _ci) env =

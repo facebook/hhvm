@@ -46,6 +46,9 @@ const config = {
       })
     },
     staticDocsProject: 'thrift',
+    theme: {
+      customCss: [require.resolve('./src/css/custom.css')],
+    },
     trackingFile: 'xplat/staticdocs/WATCHED_FILES',
     'remark-code-snippets': {
       baseDir: '..'

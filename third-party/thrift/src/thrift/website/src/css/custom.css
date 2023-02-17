@@ -44,3 +44,16 @@
   --ifm-color-primary-lighter: #a5c3ef;
   --ifm-color-primary-lightest: #d1e1f7;
 }
+
+td:has(> .feature-supported) {
+  color: black;
+  background: #c3e6cb;
+}
+td:has(> .feature-partial) {
+  color: black;
+  background: #ffeeba;
+}
+td:has(> .feature-unsupported) {
+  color: black;
+  background: #f5c6cb;
+}

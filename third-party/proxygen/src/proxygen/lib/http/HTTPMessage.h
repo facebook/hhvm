@@ -34,6 +34,7 @@ namespace proxygen {
 constexpr uint8_t kDefaultHttpPriorityUrgency = 3;
 // We default incremental to True, different from the draft
 constexpr bool kDefaultHttpPriorityIncremental = true;
+constexpr int8_t kMinPriority = 0;
 constexpr int8_t kMaxPriority = 7;
 
 struct HTTPPriority {

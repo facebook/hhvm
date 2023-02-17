@@ -12,6 +12,28 @@
 
 namespace proxygen {
 
+namespace {
+template <class T>
+T getWithDefault(StructuredHeaders::Dictionary& dict,
+                 const std::string& key,
+                 T value,
+                 bool& missing,
+                 bool& malformed) {
+  auto it = dict.find(key);
+  if (it == dict.end()) {
+    missing = true;
+    return value;
+  }
+
+  try {
+    return it->second.get<T>();
+  } catch (const boost::bad_get&) {
+    malformed = true;
+    return value;
+  }
+}
+} // namespace
+
 folly::Optional<HTTPPriority> httpPriorityFromHTTPMessage(
     const HTTPMessage& message) {
   return httpPriorityFromString(
@@ -24,10 +46,10 @@ folly::Optional<HTTPPriority> httpPriorityFromString(
     return folly::none;
   }
   bool logBadHeader = false;
-  folly::Optional<HTTPPriority> httpPriority;
   SCOPE_EXIT {
     if (logBadHeader) {
-      LOG(ERROR) << "Received ill-formated priority header=" << priority;
+      LOG_EVERY_N(ERROR, 100)
+          << "Received ill-formated priority header=" << priority;
     }
   };
   StructuredHeadersDecoder decoder(priority);
@@ -37,38 +59,20 @@ folly::Optional<HTTPPriority> httpPriorityFromString(
     logBadHeader = true;
     return folly::none;
   }
-  if (dict.size() > 2) {
+
+  bool uMissing = false;
+  bool iMissing = false;
+  bool malformed = false;
+  int64_t urgency = getWithDefault<int64_t>(
+      dict, "u", (int64_t)kDefaultHttpPriorityUrgency, uMissing, malformed);
+  bool incremental = getWithDefault(dict, "i", false, iMissing, malformed);
+
+  if ((urgency > kMaxPriority || urgency < kMinPriority) ||
+      (uMissing && iMissing) || malformed) {
     logBadHeader = true;
     return folly::none;
   }
-  bool hasUrgency = dict.find("u") != dict.end();
-  bool hasIncremental = dict.find("i") != dict.end();
-  if (dict.size() == 2 && !(hasUrgency && hasIncremental)) {
-    logBadHeader = true;
-    return folly::none;
-  }
-  if (dict.size() == 1 && !hasUrgency) {
-    logBadHeader = true;
-    return folly::none;
-  }
-  if (!hasUrgency || dict["u"].tag != StructuredHeaderItem::Type::INT64) {
-    logBadHeader = true;
-    return folly::none;
-  }
-  folly::tryTo<uint8_t>(dict["u"].get<int64_t>()).then([&](uint8_t urgency) {
-    if (urgency > kMaxPriority) {
-      logBadHeader = true;
-    }
-    bool incremental = false;
-    if (hasIncremental) {
-      if (dict["i"].tag != StructuredHeaderItem::Type::BOOLEAN) {
-        logBadHeader = true;
-      }
-      incremental = true;
-    }
-    httpPriority.emplace(urgency, incremental);
-  });
-  return httpPriority;
+  return HTTPPriority(static_cast<uint8_t>(urgency), incremental);
 }
 
 } // namespace proxygen

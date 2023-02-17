@@ -84,11 +84,18 @@ let is_auto_complete str : bool =
   else
     false
 
-let replace_pos_of_id (pos, text) : Ide_api_types.range =
+let replace_pos_of_id ?(strip_xhp_colon = false) (pos, text) :
+    Ide_api_types.range =
   let (_, name) = Utils.split_ns_from_name text in
   let name =
     if matches_auto_complete_suffix name then
       strip_suffix name
+    else
+      name
+  in
+  let name =
+    if strip_xhp_colon then
+      Utils.strip_xhp_ns name
     else
       name
   in
@@ -1005,6 +1012,7 @@ let find_global_results
     ~(completion_type : SearchUtils.autocomplete_type option)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv : SearchUtils.si_env)
+    ~(strip_xhp_colon : bool)
     ~(pctx : Provider_context.t) : unit =
   (* First step: Check obvious cases where autocomplete is not warranted.   *)
   (*                                                                        *)
@@ -1044,16 +1052,8 @@ let find_global_results
     *)
     ()
   else
-    (* Ensure that we do not have a leading backslash for Hack classes,
-     * while ensuring that we have colons for XHP classes.  That's how we
-     * differentiate between them. *)
     let query_text = strip_suffix (snd id) in
-    let query_text =
-      if autocomplete_context.is_xhp_classname then
-        Utils.add_xhp_ns query_text
-      else
-        Utils.strip_ns query_text
-    in
+    let query_text = Utils.strip_ns query_text in
     auto_complete_for_global := query_text;
     let (ns, _) = Utils.split_ns_from_name query_text in
     let absolute_none = Pos.none |> Pos.to_absolute in
@@ -1082,10 +1082,8 @@ let find_global_results
      * memory and performance.
      *)
     List.iter results ~f:(fun r ->
-        (* If we are autocompleting XHP using "$x = <" then the suggestions we
-         * return should omit the leading colon *)
         let (res_name, res_fullname) =
-          if autocomplete_context.is_xhp_classname then
+          if strip_xhp_colon then
             (Utils.strip_xhp_ns r.si_name, Utils.add_xhp_ns r.si_fullname)
           else
             (r.si_name, r.si_fullname)
@@ -1122,7 +1120,7 @@ let find_global_results
         let complete =
           {
             res_pos;
-            res_replace_pos = replace_pos_of_id id;
+            res_replace_pos = replace_pos_of_id ~strip_xhp_colon id;
             res_base_class = None;
             res_ty;
             res_name;
@@ -1273,13 +1271,16 @@ let visitor
   object (self)
     inherit Tast_visitor.iter as super
 
-    method complete_global id ac_type : unit =
+    method complete_global
+        ?(strip_xhp_colon = false) (id : sid) (ac_type : autocomplete_type)
+        : unit =
       if is_auto_complete (snd id) then
         let completion_type = Some ac_type in
         find_global_results
           ~id
           ~completion_type
           ~autocomplete_context
+          ~strip_xhp_colon
           ~sienv
           ~pctx:ctx
 
@@ -1396,20 +1397,8 @@ let visitor
       super#on_expr env expr
 
     method! on_Xml env sid attrs el =
-      (* In the case where we're autocompleting an open XHP bracket but haven't
-         typed anything beyond that yet:
-
-            $x = <
-
-         we'll end up with the following AST:
-
-            (Xml () () (:AUTO332))
-
-         In order to handle this, we strip off the leading `:` if one exists and
-         use that as the search term. *)
-      let trimmed_sid = (fst sid, snd sid |> Utils.strip_both_ns) in
-      autocomplete_id trimmed_sid;
-      self#complete_id trimmed_sid;
+      autocomplete_id sid;
+      self#complete_global sid Acid ~strip_xhp_colon:true;
 
       let cid = Aast.CI sid in
       Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)

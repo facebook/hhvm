@@ -1,0 +1,4 @@
+=== SDT analysis results for normal_call_to_function_under_dynamic.php
+Constraints for \f:
+   8: SDT
+

@@ -8,4 +8,4 @@
 
 open Sdt_analysis_types
 
-val do_ : Options.t -> Provider_context.t -> Tast.program -> unit
+val decorated_constraint : verbosity:int -> DecoratedConstraint.t -> string

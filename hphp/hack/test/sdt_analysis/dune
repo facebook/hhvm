@@ -17,6 +17,7 @@
    .php
    --flags
    --sdt-analysis
+   dump
    --error-format
    plain)))
 

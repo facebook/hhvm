@@ -8,4 +8,5 @@
 
 open Sdt_analysis_types
 
-val do_ : Options.t -> Provider_context.t -> Tast.program -> unit
+val program :
+  unit -> Provider_context.t -> Tast.program -> DecoratedConstraint.Set.t SMap.t

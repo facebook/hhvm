@@ -73,7 +73,7 @@ type mode =
   | Refactor_sound_dynamic of string * string * string
   | RemoveDeadUnsafeCasts
   | CountImpreciseTypes
-  | SDT_analysis
+  | SDT_analysis of string
 
 type options = {
   files: string list;
@@ -871,10 +871,10 @@ let parse_options () =
         " Produce variations of definitions as they are checked under dynamic assumptions"
       );
       ( "--sdt-analysis",
-        Arg.Unit
-          (fun () ->
+        Arg.String
+          (fun command ->
             batch_mode := true;
-            set_mode SDT_analysis ()),
+            set_mode (SDT_analysis command) ()),
         " Analyses to support Sound Dynamic rollout" );
     ]
   in
@@ -1927,11 +1927,19 @@ let handle_mode
       ~iter_over_files
       ~profile_type_check_multi
       ~memtrace
-  | SDT_analysis ->
+  | SDT_analysis command ->
+    let opts =
+      let command =
+        match Sdt_analysis_options.parse_command command with
+        | Some command -> command
+        | None -> die "invalid SDT analysis mode"
+      in
+      Sdt_analysis_options.mk ~verbosity ~command
+    in
     handle_constraint_mode
       ~do_:Sdt_analysis.do_
       "SDT"
-      ()
+      opts
       ctx
       error_format
       ~iter_over_files

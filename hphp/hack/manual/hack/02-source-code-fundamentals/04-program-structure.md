@@ -49,10 +49,9 @@ this extension *must* start with an optional shebang line (e.g. `#!/usr/bin/env 
 
 The following file is equivalent to the earlier example:
 
-```legacy.php
+```hack no-extract
 #!/usr/bin/env hhvm
 <?hh
-namespace Hack\UserDocumentation\Fundamentals\ProgramStructure\Examples\LegacyHelloWorld;
 
 <<__EntryPoint>>
 function main(): void {

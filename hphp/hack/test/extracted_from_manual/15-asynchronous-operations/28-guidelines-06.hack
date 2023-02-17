@@ -16,7 +16,7 @@ async function batching(): Awaitable<void> {
 
 <<__EntryPoint>>
 function main(): void {
-  \HH\Asio\join(batching());
+  HH\Asio\join(batching());
 }
 
 class Batcher {

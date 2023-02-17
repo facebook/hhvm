@@ -37,7 +37,6 @@ module.exports = {
         id: 'fb/quick-start/index',
       },
       items: [
-        'fb/quick-start/java',
         'fb/quick-start/python'
       ]
     },
@@ -61,8 +60,7 @@ module.exports = {
             'fb/howtos/implementing-a-server/cpp',
             'fb/howtos/implementing-a-server/java'
           ]
-        },
-        'fb/howtos/calling-python-from-hack'
+        }
       ]
     }]),
     {

@@ -9,6 +9,7 @@ use ir::instr::FinalOp;
 use ir::instr::MemberKey;
 use ir::InstrId;
 use ir::LocalId;
+use ir::QueryMOp;
 use ir::StringInterner;
 use ir::ValueId;
 
@@ -138,7 +139,17 @@ fn write_final(
                 _ => unreachable!(),
             })
         }
-        FinalOp::QueryM { .. } => state.load_mixed(base),
+        FinalOp::QueryM { query_m_op, .. } => match query_m_op {
+            QueryMOp::CGet | QueryMOp::CGetQuiet => state.load_mixed(base),
+            QueryMOp::Isset => {
+                let value = state.load_mixed(base)?;
+                state.call_builtin(hack::Builtin::Hhbc(hack::Hhbc::IsTypeNull), [value])
+            }
+            QueryMOp::InOut => textual_todo! {
+                state.load_mixed(base)
+            },
+            _ => unreachable!(),
+        },
         FinalOp::SetM { .. } => {
             let src = state.lookup_vid(operands.next().unwrap());
             let src = state.fb.write_expr_stmt(src)?;

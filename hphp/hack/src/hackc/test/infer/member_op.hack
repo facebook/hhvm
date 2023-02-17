@@ -96,6 +96,26 @@ function mop_basel_querym_ei(vec<int> $a): int {
   return $a[5];
 }
 
+// TEST-CHECK-BAL: define $root.mop_basel_querym_ei_isset
+// CHECK: define $root.mop_basel_querym_ei_isset($this: *void, $a: *HackVec) : *HackBool {
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_string("BaseType::Bool")
+// CHECK:   n1 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(20), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
+// CHECK:   n2: *HackMixed = load &$a
+// CHECK:   n3 = $builtins.hhbc_verify_param_type_ts(n2, n1)
+// CHECK:   n4 = &$a
+// CHECK:   n5 = $builtins.hack_int(5)
+// CHECK:   n6 = $builtins.hack_dim_array_get(n4, n5)
+// CHECK:   n7: *HackMixed = load n6
+// CHECK:   n8 = $builtins.hhbc_is_type_null(n7)
+// CHECK:   n9 = $root.todo(null, n0)
+// CHECK:   n10 = $builtins.hhbc_verify_type_pred(n8, n9)
+// CHECK:   ret n8
+// CHECK: }
+function mop_basel_querym_ei_isset(vec<int> $a): bool {
+  return isset($a[5]);
+}
+
 // TEST-CHECK-BAL: define $root.mop_basel_querym_pc
 // CHECK: define $root.mop_basel_querym_pc($this: *void, $a: *C) : *HackInt {
 // CHECK: #b0:

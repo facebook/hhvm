@@ -122,13 +122,40 @@ def count_balance(input):
     return count
 
 
+def is_identifier(c):
+    return c.isidentifier() or c == "$" or c == ":"
+
+
+def is_match(inp, expect, any_match):
+    # If inp is smaller then they can't match.
+    if len(inp) < len(expect):
+        return False
+
+    # If they're exactly equal they must match.
+    if inp == expect:
+        return True
+
+    if any_match:
+        # For any_match mode then just look for any match.
+        return expect in inp
+
+    # If inp doesn't start with expect then they can't match.
+    if not inp.startswith(expect):
+        return False
+
+    # If expect ends with an identifier char then we expect that the next char
+    # in inp must NOT be an identifier char.
+    if is_identifier(expect[-1]) and is_identifier(inp[len(expect)]):
+        return False
+
+    return True
+
+
 def find_line_with(filename, line, check, expect, any_match):
     idx = 0
     while idx < len(check):
         inp = check[idx]
-        if (any_match and (expect in inp)) or (
-            not any_match and inp.startswith(expect)
-        ):
+        if is_match(inp, expect, any_match):
             return idx
         idx += 1
     bail(filename, line, f"Expected string '{expect}' not found")

@@ -13,7 +13,7 @@
 // CHECK:   type_: .public *HackInt
 // CHECK: }
 
-// TEST-CHECK-BAL: define C$static.$init_static()
+// TEST-CHECK-BAL: define C$static.$init_static
 // CHECK: define C$static.$init_static() : void {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.alloc_words(0)
@@ -35,7 +35,7 @@ class C {
   // Test reserved token.
   public int $type = 2;
 
-  // TEST-CHECK-BAL: define C$static.__factory(
+  // TEST-CHECK-BAL: define C$static.__factory
   // CHECK: define C$static.__factory($this: *C$static, $a: *HackInt, $b: *HackString, $c: *HackInt) : *C {
   // CHECK: #b0:
   // CHECK:   n0: *HackInt = load &$a
@@ -46,7 +46,7 @@ class C {
   // CHECK:   ret n3
   // CHECK: }
 
-  // TEST-CHECK-BAL: define C.__construct(
+  // TEST-CHECK-BAL: define C.__construct
   // CHECK: define C.__construct($this: *C, $a: *HackInt, $b: *HackString, $c: *HackInt) : *HackMixed {
   // CHECK: #b0:
   // CHECK:   ret null

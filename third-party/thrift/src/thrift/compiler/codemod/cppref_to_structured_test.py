@@ -38,6 +38,7 @@ class CppRefToUnstructured(unittest.TestCase):
             "foo.thrift",
             textwrap.dedent(
                 """\
+                /* License header */
                 struct Faa {
                     1: i32 faa1;
                     2: optional Faa faa2 (cpp.ref);
@@ -55,7 +56,9 @@ class CppRefToUnstructured(unittest.TestCase):
             read_file("foo.thrift"),
             textwrap.dedent(
                 """\
+                /* License header */
                 include "thrift/annotation/cpp.thrift"
+
                 struct Faa {
                     1: i32 faa1;
                     @cpp.Ref{type = cpp.RefType.Unique}
@@ -167,6 +170,7 @@ class CppRefToUnstructured(unittest.TestCase):
             textwrap.dedent(
                 """\
                 include "thrift/annotation/cpp.thrift"
+
                 struct Faa {
                     1: i32 faa1;
                     @cpp.Ref{type = cpp.RefType.Unique}

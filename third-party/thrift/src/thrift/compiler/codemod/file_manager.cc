@@ -83,9 +83,15 @@ void file_manager::add_include(std::string include) {
   if (includes_.find(include) == includes_.end()) {
     std::string curr_include = "include \"" + include + "\"\n";
     includes_.insert(std::move(include));
-    auto offset = !program_->includes().empty()
-        ? to_offset(program_->includes().back()->src_range().end) + 1
-        : 0;
+    size_t offset;
+    if (!program_->includes().empty()) {
+      offset = to_offset(program_->includes().back()->src_range().end) + 1;
+    } else {
+      offset = program_->definitions().empty()
+          ? 0
+          : to_offset(program_->definitions().front().src_range().begin);
+      curr_include += "\n";
+    }
     replacements_.insert({offset, offset, curr_include});
   }
 }

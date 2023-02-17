@@ -1,4 +1,4 @@
 === SDT analysis results for dynamically_callable_function.php
 Constraints for \f:
-   3: SDT
+   3: NeedsSDT
 

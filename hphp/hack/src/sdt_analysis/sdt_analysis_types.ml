@@ -18,7 +18,7 @@ module Options = struct
 end
 
 module Constraint = struct
-  type t = SDT [@@deriving ord, show { with_path = false }]
+  type t = NeedsSDT [@@deriving ord, show { with_path = false }]
 end
 
 module DecoratedConstraint = struct

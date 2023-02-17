@@ -11,6 +11,26 @@ open Sdt_analysis_types
 module A = Aast
 module T = Typing_defs
 module SN = Naming_special_names
+module MakeType = Typing_make_type
+module Reason = Typing_reason
+module TPEnv = Type_parameter_env
+
+let mixed = MakeType.mixed Reason.Rnone
+
+let supportdyn_of_mixed = MakeType.supportdyn Reason.Rnone mixed
+
+let remove_supportdyn_of_mixed_upper_bound_from_tparams env =
+  let typing_env = Tast_env.tast_env_as_typing_env env in
+  let tpenv = Typing_env.get_tpenv typing_env in
+  let remove_upper_bound tpname tpinfo tpenv =
+    let open Typing_kinding_defs in
+    let upper_bounds = TySet.remove supportdyn_of_mixed tpinfo.upper_bounds in
+    let tpinfo = { tpinfo with upper_bounds } in
+    TPEnv.add ~def_pos:Pos_or_decl.none tpname tpinfo tpenv
+  in
+  let tpenv = TPEnv.fold remove_upper_bound tpenv TPEnv.empty in
+  let typing_env = Typing_env_types.{ typing_env with tpenv } in
+  Tast_env.typing_env_as_tast_env typing_env
 
 let collect_sdts =
   object
@@ -20,11 +40,14 @@ let collect_sdts =
 
     method plus = ( @ )
 
-    method! on_expr env e =
+    method! on_expr env ((_, e_pos, e_) as e) =
+      let decorated_constraint ~origin =
+        DecoratedConstraint.
+          { origin; hack_pos = e_pos; constraint_ = Constraint.NeedsSDT }
+      in
       let ids =
-        match e with
-        | (_, hack_pos, A.Call ((base_ty, _, base_exp), _tel, el, _unpacked_el))
-          ->
+        match e_ with
+        | A.Call ((base_ty, _, base_exp), _tel, el, _unpacked_el) ->
           let doesnt_subtype (fp, (_, (arg_ty, _, _))) =
             not @@ Tast_env.is_sub_type env arg_ty fp.T.fp_type.T.et_type
           in
@@ -38,14 +61,7 @@ let collect_sdts =
                 | Unequal_lengths -> []
               in
               if List.exists ~f:doesnt_subtype param_arg_pairs then
-                let constraint_ =
-                  DecoratedConstraint.
-                    {
-                      origin = __LINE__;
-                      hack_pos;
-                      constraint_ = Constraint.SDT;
-                    }
-                in
+                let constraint_ = decorated_constraint ~origin:__LINE__ in
                 [(id, DecoratedConstraint.Set.singleton constraint_)]
               else
                 []
@@ -67,27 +83,43 @@ let collect_sdts =
       ids @ super#on_expr env e
 
     method! on_fun_def env (A.{ fd_name = (_, id); fd_fun; _ } as fd) =
-      let is_dynamically_callable =
-        List.exists ~f:(fun attr ->
-            String.equal
-              (snd attr.A.ua_name)
-              SN.UserAttributes.uaDynamicallyCallable)
+      let env = remove_supportdyn_of_mixed_upper_bound_from_tparams env in
+      let decorated_constraint ~origin =
+        let hack_pos = fd_fun.A.f_span in
+        DecoratedConstraint.
+          { origin; hack_pos; constraint_ = Constraint.NeedsSDT }
       in
-      let ids =
+      let ids_through_dynamically_callable =
+        let is_dynamically_callable =
+          List.exists ~f:(fun attr ->
+              String.equal
+                (snd attr.A.ua_name)
+                SN.UserAttributes.uaDynamicallyCallable)
+        in
         if is_dynamically_callable fd_fun.A.f_user_attributes then
-          let constraint_ =
-            DecoratedConstraint.
-              {
-                origin = __LINE__;
-                hack_pos = fd_fun.A.f_span;
-                constraint_ = Constraint.SDT;
-              }
-          in
+          let constraint_ = decorated_constraint ~origin:__LINE__ in
           [(id, DecoratedConstraint.Set.singleton constraint_)]
         else
           []
       in
-      ids @ super#on_fun_def env fd
+      let ids_through_signature_check =
+        let is_supportdyn_of_mixed ty =
+          Tast_env.is_sub_type env ty supportdyn_of_mixed
+        in
+        let fails_formation =
+          List.exists fd_fun.A.f_params ~f:(fun param ->
+              not @@ is_supportdyn_of_mixed @@ fst param.A.param_type_hint)
+          || (not @@ is_supportdyn_of_mixed @@ fst fd_fun.A.f_ret)
+        in
+        if fails_formation then
+          let constraint_ = decorated_constraint ~origin:__LINE__ in
+          [(id, DecoratedConstraint.Set.singleton constraint_)]
+        else
+          []
+      in
+      ids_through_dynamically_callable
+      @ ids_through_signature_check
+      @ super#on_fun_def env fd
   end
 
 let program () (ctx : Provider_context.t) (tast : Tast.program) =

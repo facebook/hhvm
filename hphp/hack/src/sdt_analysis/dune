@@ -15,6 +15,7 @@
   aast_names_utils
   relative_path
   tast_env
+  typing_ast
   typing_defs
   typing_env_types)
  (preprocess

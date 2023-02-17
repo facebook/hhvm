@@ -16,7 +16,7 @@ module Options : sig
 end
 
 module Constraint : sig
-  type t = SDT [@@deriving ord, show]
+  type t = NeedsSDT [@@deriving ord, show]
 end
 
 module DecoratedConstraint : sig

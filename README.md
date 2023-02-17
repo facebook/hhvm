@@ -32,7 +32,7 @@ Our [getting started guide](https://docs.hhvm.com/hhvm/getting-started/getting-s
 
 ## Contributing
 
-We'd love to have your help in making HHVM better. If you're interested, please read our [guide to contributing](CONTRIBUTING.md).
+We'd love to have your help in making HHVM better. If you're interested, please read our [guide to contributing](CONTRIBUTING.md)...
 
 ## License
 

@@ -9,6 +9,7 @@ pub mod elab_class_vars;
 pub mod elab_defs;
 pub mod elab_enum_class;
 pub mod elab_expr_call_call_user_func;
+pub mod elab_expr_call_hh_invariant;
 pub mod elab_expr_call_hh_meth_caller;
 pub mod elab_expr_collection;
 pub mod elab_expr_import;

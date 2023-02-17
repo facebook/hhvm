@@ -84,13 +84,12 @@ fn elaborate<T: Transform>(node: &mut T) -> Vec<NamingPhaseError> {
         passes::elab_class_vars::ElabClassVarsPass::default(),
 
         // Elaborate special function calls to canonical representation, if any
-        // passes::elab_call::ElabCallPass::default(),
         passes::validate_expr_call_echo::ValidateExprCallEchoPass::default(),
         passes::elab_expr_call_call_user_func::ElabExprCallCallUserFuncPass::default(),
         passes::elab_expr_call_hh_meth_caller::ElabExprCallHhMethCallerPass::default(),
 
         // Elaborate invariant calls to canonical representation
-        // passes::elab_invariant::ElabInvariantPass::default(),
+        passes::elab_expr_call_hh_invariant::ElabExprCallHhInvariantPass::default(),
 
         // -- Mark invalid hints and expressions & miscellaneous validation ---
 

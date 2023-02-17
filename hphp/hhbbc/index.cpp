@@ -3997,6 +3997,11 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
     always_assert(!cinfo->hasRegularSubclass);
   }
 
+  if (cinfo->cls->attrs & AttrNoMock) {
+    always_assert(!cinfo->isMocked);
+    always_assert(!cinfo->isSubMocked);
+  }
+
   for (size_t idx = 0; idx < cinfo->cls->methods.size(); ++idx) {
     // Each method in a class has an entry in its ClassInfo method
     // table.
@@ -5768,6 +5773,10 @@ private:
       attribute_setter(cinfo->attrs, false, AttrNoOverride);
       attribute_setter(cinfo->attrs, false, AttrNoOverrideRegular);
     }
+
+    // Assume this. If not a leaf, will be updated in
+    // BuildSubclassList job.
+    attribute_setter(cinfo->attrs, true, AttrNoMock);
 
     if (cls.parentName) {
       assertx(!is_closure_base(cls));
@@ -9150,6 +9159,7 @@ protected:
       // This class is mocked if its on the mocked classes list.
       cinfo->isMocked = data.mockedClasses.count(cinfo->name) > 0;
       cinfo->isSubMocked = data.isSubMocked || cinfo->isMocked;
+      attribute_setter(cinfo->attrs, !cinfo->isSubMocked, AttrNoMock);
 
       // We can use whether we saw regular/non-regular subclasses to
       // infer if this class is overridden.

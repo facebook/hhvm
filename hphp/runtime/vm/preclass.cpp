@@ -109,6 +109,7 @@ void PreClass::prettyPrint(std::ostream &out) const {
     out << " (no-dynamic-props)";
   }
   if (m_attrs & AttrDynamicallyConstructible) out << " (dyn_constructible)";
+  if (m_attrs & AttrNoMock) out << " (no-mock)";
   out << std::endl;
 
   for (Func* const* it = methods(); it != methods() + numMethods(); ++it) {

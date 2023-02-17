@@ -106,11 +106,6 @@ struct TypeConstraint {
     m_clsName = clsName;
   }
 
-  void setNoMockObjects() {
-    auto flags = m_flags | Flags::NoMockObjects;
-    m_flags = static_cast<Flags>(flags);
-  }
-
   void addFlags(Flags flags) {
     m_flags = static_cast<Flags>(m_flags | flags);
   }
@@ -202,7 +197,6 @@ struct TypeConstraint {
   bool isTypeVar()  const { return m_flags & TypeVar; }
   bool isTypeConstant() const { return m_flags & TypeConstant; }
   bool isUpperBound() const { return m_flags & UpperBound; }
-  bool couldSeeMockObject() const { return !(m_flags & NoMockObjects); }
 
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
   bool isMixed()    const { return m_type == Type::Mixed; }

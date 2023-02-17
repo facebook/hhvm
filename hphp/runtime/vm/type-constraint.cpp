@@ -875,7 +875,7 @@ void TypeConstraint::verifyParamFail(tv_lval val,
   verifyFail(val, ctx, func, paramNums);
   assertx(
     isSoft() ||
-    (isThis() && couldSeeMockObject()) ||
+    isThis() ||
     (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
     MysteryBox::IsMysteryBox(*val) ||
     check(val, ctx)

@@ -212,7 +212,7 @@ void verifyTypeImpl(IRGS& env,
 
     auto const failHard = RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
-      && (!tc.isThis() || !tc.couldSeeMockObject())
+      && !tc.isThis()
       && (!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
     return fail(val, thisCls, failHard);
   };

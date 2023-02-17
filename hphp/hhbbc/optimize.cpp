@@ -674,13 +674,16 @@ void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
   auto const resolved = index.resolve_type_name(tc.typeName());
   if (resolved.type == AnnotType::Unresolved) return;
 
-  if (resolved.type == AnnotType::Object) {
-    assertx(resolved.cls.has_value());
-    tc.resolveType(resolved.type, resolved.nullable, resolved.cls->name());
-    if (!resolved.cls->couldHaveMockedSubClass()) tc.setNoMockObjects();
-  } else {
-    tc.resolveType(resolved.type, resolved.nullable, nullptr);
-  }
+  assertx(
+    IMPLIES(resolved.type == AnnotType::Object, resolved.cls.has_value())
+  );
+  tc.resolveType(
+    resolved.type,
+    resolved.nullable,
+    resolved.type == AnnotType::Object
+      ? resolved.cls->name()
+      : nullptr
+  );
 
   FTRACE(1, "Retype tc {} -> {}\n", tc.typeName(), tc.displayName());
 }

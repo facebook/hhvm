@@ -87,7 +87,6 @@ pub mod ffi {
         Soft = 0x10,
         TypeConstant = 0x20,
         Resolved = 0x40,
-        NoMockObjects = 0x80,
         DisplayNullable = 0x100,
         UpperBound = 0x200,
     }

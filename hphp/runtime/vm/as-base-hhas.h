@@ -75,6 +75,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrSystemInitialValue,       P,       "sys_initial_val");      \
   X(AttrNoImplicitNullable,       P,       "no_implicit_null");     \
   X(AttrInitialSatisfiesTC,       P,       "initial_satisfies_tc"); \
+  X(AttrNoMock,                   C,       "no_mock");              \
   X(AttrLateInit,                 P,       "late_init");            \
   X(AttrNoReifiedInit,            C,       "noreifiedinit");        \
   X(AttrIsMethCaller,             F,       "is_meth_caller");       \

@@ -1072,7 +1072,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
 
   auto const getThisType = [&] {
     always_assert(propCls != nullptr);
-    return isSProp && !tc.couldSeeMockObject()
+    return isSProp && (propCls->attrs() & AttrNoMock)
       ? Type::ExactObj(propCls)
       : Type::SubObj(propCls);
   };

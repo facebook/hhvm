@@ -171,7 +171,6 @@ impl EnforceableType {
             check(TypeConstraintFlags::Soft, "soft")?;
             check(TypeConstraintFlags::TypeConstant, "type_constant")?;
             check(TypeConstraintFlags::Resolved, "resolved")?;
-            check(TypeConstraintFlags::NoMockObjects, "no_mock_objects")?;
             check(TypeConstraintFlags::DisplayNullable, "display_nullable")?;
             check(TypeConstraintFlags::UpperBound, "upper_bound")?;
         }

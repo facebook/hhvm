@@ -819,7 +819,6 @@ impl<'a> Display for FmtTypeInfo<'a> {
         [
             get_bit(&mut mods, TCF::DisplayNullable, "display_nullable"),
             get_bit(&mut mods, TCF::ExtendedHint, "extended"),
-            get_bit(&mut mods, TCF::NoMockObjects, "no_mock"),
             get_bit(&mut mods, TCF::Nullable, "nullable"),
             get_bit(&mut mods, TCF::Resolved, "resolved"),
             get_bit(&mut mods, TCF::Soft, "soft"),

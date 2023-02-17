@@ -725,7 +725,6 @@ fn parse_type_constraint_flag(
             "soft" => TypeConstraintFlags::Soft,
             "type_constant" => TypeConstraintFlags::TypeConstant,
             "resolved" => TypeConstraintFlags::Resolved,
-            "no_mock" => TypeConstraintFlags::NoMockObjects,
             "display_nullable" => TypeConstraintFlags::DisplayNullable,
             "upper_bound" => TypeConstraintFlags::UpperBound,
             _ => return None,

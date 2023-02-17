@@ -11,13 +11,12 @@ abstract class C {
   // TEST-CHECK-BAL: define C$static.check2
   // CHECK: define C$static.check2($this: *C$static, $a: *HackMixed) : *HackBool {
   // CHECK: #b0:
-  // CHECK:   n0 = $builtins.hack_string("BaseType::Bool")
-  // CHECK:   n1 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(102), $builtins.hack_string("root_name"), $builtins.hack_string("self"), $builtins.hack_string("access_list"), $builtins.hhbc_new_vec($builtins.hack_string("TMyShape")))
-  // CHECK:   n2: *HackMixed = load &$a
-  // CHECK:   n3 = $builtins.hhbc_is_type_struct_c(n2, n1, $builtins.hack_int(1))
-  // CHECK:   n4 = $root.todo(null, n0)
-  // CHECK:   n5 = $builtins.hhbc_verify_type_pred(n3, n4)
-  // CHECK:   ret n3
+  // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(102), $builtins.hack_string("root_name"), $builtins.hack_string("self"), $builtins.hack_string("access_list"), $builtins.hhbc_new_vec($builtins.hack_string("TMyShape")))
+  // CHECK:   n1: *HackMixed = load &$a
+  // CHECK:   n2 = $builtins.hhbc_is_type_struct_c(n1, n0, $builtins.hack_int(1))
+  // CHECK:   n3 = $root.todo(null, $builtins.hack_string("BaseType::Bool"))
+  // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
+  // CHECK:   ret n2
   // CHECK: }
   public static function check2(mixed $a): bool {
     return $a is self::TMyShape;
@@ -47,13 +46,12 @@ class D extends C {
 // TEST-CHECK-BAL: define $root.check1
 // CHECK: define $root.check1($this: *void, $a: *HackMixed) : *HackBool {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_string("BaseType::Bool")
-// CHECK:   n1 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(102), $builtins.hack_string("root_name"), $builtins.hack_string("D"), $builtins.hack_string("access_list"), $builtins.hhbc_new_vec($builtins.hack_string("TMyShape")))
-// CHECK:   n2: *HackMixed = load &$a
-// CHECK:   n3 = $builtins.hhbc_is_type_struct_c(n2, n1, $builtins.hack_int(1))
-// CHECK:   n4 = $root.todo(null, n0)
-// CHECK:   n5 = $builtins.hhbc_verify_type_pred(n3, n4)
-// CHECK:   ret n3
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(102), $builtins.hack_string("root_name"), $builtins.hack_string("D"), $builtins.hack_string("access_list"), $builtins.hhbc_new_vec($builtins.hack_string("TMyShape")))
+// CHECK:   n1: *HackMixed = load &$a
+// CHECK:   n2 = $builtins.hhbc_is_type_struct_c(n1, n0, $builtins.hack_int(1))
+// CHECK:   n3 = $root.todo(null, $builtins.hack_string("BaseType::Bool"))
+// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
+// CHECK:   ret n2
 // CHECK: }
 function check1(mixed $a): bool {
   return $a is D::TMyShape;

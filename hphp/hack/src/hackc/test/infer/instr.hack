@@ -60,12 +60,10 @@ function unops(int $a): void {
 // TEST-CHECK-BAL: define $root.check_shape
 // CHECK: define $root.check_shape($this: *void) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_string("a")
-// CHECK:   n1 = $builtins.hack_string("b")
-// CHECK:   n2 = $root.a(null)
-// CHECK:   n3 = $root.b(null)
-// CHECK:   n4 = $builtins.hack_new_dict(n0, n2, n1, n3)
-// CHECK:   n5 = $root.f(null, n4)
+// CHECK:   n0 = $root.a(null)
+// CHECK:   n1 = $root.b(null)
+// CHECK:   n2 = $builtins.hack_new_dict($builtins.hack_string("a"), n0, $builtins.hack_string("b"), n1)
+// CHECK:   n3 = $root.f(null, n2)
 // CHECK:   ret null
 // CHECK: }
 function check_shape(): void {

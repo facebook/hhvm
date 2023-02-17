@@ -3,25 +3,19 @@
 // TEST-CHECK-BAL: define C$static._86cinit
 // CHECK: define C$static._86cinit($this: *C$static, $constName: *HackMixed) : *HackMixed {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_string("id")
-// CHECK:   n1 = $builtins.hack_string("type")
-// CHECK:   n2 = $builtins.hack_string(" in 86cinit")
-// CHECK:   n3 = $builtins.hack_string("var")
-// CHECK:   n4 = $builtins.hack_string("Could not find initializer for ")
-// CHECK:   n5 = $builtins.hack_string("CONST_REQUIRES_CINIT")
-// CHECK:   n6: *HackMixed = load &$constName
-// CHECK:   n7 = $builtins.hhbc_cmp_same(n5, n6)
+// CHECK:   n0: *HackMixed = load &$constName
+// CHECK:   n1 = $builtins.hhbc_cmp_same($builtins.hack_string("CONST_REQUIRES_CINIT"), n0)
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
-// CHECK:   prune $builtins.hack_is_true(n7)
-// CHECK:   n8: *HackMixed = load &D$static::STRING
-// CHECK:   n9 = $builtins.hack_new_dict(n3, n0, n1, n8)
-// CHECK:   ret n9
+// CHECK:   prune $builtins.hack_is_true(n1)
+// CHECK:   n2: *HackMixed = load &D$static::STRING
+// CHECK:   n3 = $builtins.hack_new_dict($builtins.hack_string("var"), $builtins.hack_string("id"), $builtins.hack_string("type"), n2)
+// CHECK:   ret n3
 // CHECK: #b2:
-// CHECK:   prune ! $builtins.hack_is_true(n7)
-// CHECK:   n10: *HackMixed = load &$constName
-// CHECK:   n11 = $builtins.hhbc_concat(n4, n10, n2)
-// CHECK:   n12 = $builtins.hhbc_fatal(n11)
+// CHECK:   prune ! $builtins.hack_is_true(n1)
+// CHECK:   n4: *HackMixed = load &$constName
+// CHECK:   n5 = $builtins.hhbc_concat($builtins.hack_string("Could not find initializer for "), n4, $builtins.hack_string(" in 86cinit"))
+// CHECK:   n6 = $builtins.hhbc_fatal(n5)
 // CHECK:   unreachable
 // CHECK: }
 

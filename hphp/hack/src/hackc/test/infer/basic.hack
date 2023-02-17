@@ -6,8 +6,7 @@
 // TEST-CHECK-BAL: define $root.main
 // CHECK: define $root.main($this: *void) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_string("Hello, World!\n")
-// CHECK:   n1 = $builtins.hhbc_print(n0)
+// CHECK:   n0 = $builtins.hhbc_print($builtins.hack_string("Hello, World!\n"))
 // CHECK:   ret null
 // CHECK: }
 function main(): void {
@@ -17,8 +16,7 @@ function main(): void {
 // TEST-CHECK-BAL: define $root.escaped_string
 // CHECK: define $root.escaped_string($this: *void) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_string("This string has \042 a quote")
-// CHECK:   n1 = $builtins.hhbc_print(n0)
+// CHECK:   n0 = $builtins.hhbc_print($builtins.hack_string("This string has \042 a quote"))
 // CHECK:   ret null
 // CHECK: }
 function escaped_string(): void {
@@ -28,19 +26,17 @@ function escaped_string(): void {
 // TEST-CHECK-BAL: define $root.cmp
 // CHECK: define $root.cmp($this: *void, $a: *HackMixed, $b: *HackMixed) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_string("equal")
-// CHECK:   n1 = $builtins.hack_string("unequal")
-// CHECK:   n2: *HackMixed = load &$b
-// CHECK:   n3: *HackMixed = load &$a
-// CHECK:   n4 = $builtins.hhbc_cmp_eq(n3, n2)
+// CHECK:   n0: *HackMixed = load &$b
+// CHECK:   n1: *HackMixed = load &$a
+// CHECK:   n2 = $builtins.hhbc_cmp_eq(n1, n0)
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
-// CHECK:   prune ! $builtins.hack_is_true(n4)
-// CHECK:   n5 = $builtins.hhbc_print(n1)
+// CHECK:   prune ! $builtins.hack_is_true(n2)
+// CHECK:   n3 = $builtins.hhbc_print($builtins.hack_string("unequal"))
 // CHECK:   jmp b3
 // CHECK: #b2:
-// CHECK:   prune $builtins.hack_is_true(n4)
-// CHECK:   n6 = $builtins.hhbc_print(n0)
+// CHECK:   prune $builtins.hack_is_true(n2)
+// CHECK:   n4 = $builtins.hhbc_print($builtins.hack_string("equal"))
 // CHECK:   jmp b3
 // CHECK: #b3:
 // CHECK:   ret null
@@ -56,19 +52,17 @@ function cmp(mixed $a, mixed $b): void {
 // TEST-CHECK-BAL: define $root.cmp2
 // CHECK: define $root.cmp2($this: *void, $a: *HackInt, $b: *HackInt) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_string("equal")
-// CHECK:   n1 = $builtins.hack_string("unequal")
-// CHECK:   n2: *HackMixed = load &$b
-// CHECK:   n3: *HackMixed = load &$a
-// CHECK:   n4 = $builtins.hhbc_cmp_eq(n3, n2)
+// CHECK:   n0: *HackMixed = load &$b
+// CHECK:   n1: *HackMixed = load &$a
+// CHECK:   n2 = $builtins.hhbc_cmp_eq(n1, n0)
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
-// CHECK:   prune ! $builtins.hack_is_true(n4)
-// CHECK:   n5 = $builtins.hhbc_print(n1)
+// CHECK:   prune ! $builtins.hack_is_true(n2)
+// CHECK:   n3 = $builtins.hhbc_print($builtins.hack_string("unequal"))
 // CHECK:   jmp b3
 // CHECK: #b2:
-// CHECK:   prune $builtins.hack_is_true(n4)
-// CHECK:   n6 = $builtins.hhbc_print(n0)
+// CHECK:   prune $builtins.hack_is_true(n2)
+// CHECK:   n4 = $builtins.hhbc_print($builtins.hack_string("equal"))
 // CHECK:   jmp b3
 // CHECK: #b3:
 // CHECK:   ret null
@@ -84,10 +78,9 @@ function cmp2(int $a, int $b): void {
 // TEST-CHECK-BAL: define $root.ret_str
 // CHECK: define $root.ret_str($this: *void) : *HackString {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_string("hello, world\n")
-// CHECK:   n1 = $builtins.hhbc_is_type_str(n0)
-// CHECK:   n2 = $builtins.hhbc_verify_type_pred(n0, n1)
-// CHECK:   ret n0
+// CHECK:   n0 = $builtins.hhbc_is_type_str($builtins.hack_string("hello, world\n"))
+// CHECK:   n1 = $builtins.hhbc_verify_type_pred($builtins.hack_string("hello, world\n"), n0)
+// CHECK:   ret $builtins.hack_string("hello, world\n")
 // CHECK: }
 function ret_str(): string {
   return "hello, world\n";

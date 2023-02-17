@@ -15,6 +15,7 @@ use ir::Func;
 use ir::FuncBuilder;
 use ir::HasEdges;
 use ir::Instr;
+use ir::StringInterner;
 use ir::ValueId;
 use ir::ValueIdMap;
 use log::trace;
@@ -91,7 +92,7 @@ fn insert_constants(builder: &mut FuncBuilder<'_>, start_bid: BlockId) {
     let bids = follow_block_successors(&builder.func, start_bid);
     let constants = compute_live_constants(&builder.func, &bids);
 
-    let constants = sort_and_filter_constants(&builder.func, constants);
+    let constants = sort_and_filter_constants(&builder.func, constants, &builder.strings);
 
     let mut remap = ValueIdMap::default();
     let mut fixups = Vec::default();
@@ -122,7 +123,11 @@ fn insert_constants(builder: &mut FuncBuilder<'_>, start_bid: BlockId) {
 /// Arrays can refer to some prior constants (like Strings) so they need to be
 /// sorted before being written. Right now arrays can't refer to other arrays so
 /// they don't need to be sorted relative to each other.
-fn sort_and_filter_constants(func: &Func<'_>, constants: ConstantIdSet) -> Vec<ConstantId> {
+fn sort_and_filter_constants(
+    func: &Func<'_>,
+    constants: ConstantIdSet,
+    string_intern: &StringInterner,
+) -> Vec<ConstantId> {
     let mut strings = Vec::with_capacity(constants.len());
     let mut arrays = Vec::with_capacity(constants.len());
     for cid in constants {
@@ -143,8 +148,13 @@ fn sort_and_filter_constants(func: &Func<'_>, constants: ConstantIdSet) -> Vec<C
             Constant::Array(_) => {
                 arrays.push(cid);
             }
-            Constant::String(_) => {
-                strings.push(cid);
+            Constant::String(s) => {
+                // If the string is short then just keep it inline. This makes
+                // it easier to visually read the output but may be more work
+                // for infer (because it's a call)...
+                if string_intern.lookup_bstr(*s).len() > 40 {
+                    strings.push(cid);
+                }
             }
         }
     }

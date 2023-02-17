@@ -20,17 +20,14 @@ enum A: int {
 // TEST-CHECK-BAL: define $root.main
 // CHECK: define $root.main($this: *void) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_string("A::V = ")
-// CHECK:   n1 = $builtins.hack_string("B::V = ")
-// CHECK:   n2 = $builtins.hack_string("\n")
-// CHECK:   n3 = $builtins.hhbc_print(n0)
-// CHECK:   n4: *HackMixed = load &A$static::V
-// CHECK:   n5 = $builtins.hhbc_print(n4)
-// CHECK:   n6 = $builtins.hhbc_print(n2)
-// CHECK:   n7 = $builtins.hhbc_print(n1)
-// CHECK:   n8: *HackMixed = load &B$static::V
-// CHECK:   n9 = $builtins.hhbc_print(n8)
-// CHECK:   n10 = $builtins.hhbc_print(n2)
+// CHECK:   n0 = $builtins.hhbc_print($builtins.hack_string("A::V = "))
+// CHECK:   n1: *HackMixed = load &A$static::V
+// CHECK:   n2 = $builtins.hhbc_print(n1)
+// CHECK:   n3 = $builtins.hhbc_print($builtins.hack_string("\n"))
+// CHECK:   n4 = $builtins.hhbc_print($builtins.hack_string("B::V = "))
+// CHECK:   n5: *HackMixed = load &B$static::V
+// CHECK:   n6 = $builtins.hhbc_print(n5)
+// CHECK:   n7 = $builtins.hhbc_print($builtins.hack_string("\n"))
 // CHECK:   ret null
 // CHECK: }
 function main(): void {

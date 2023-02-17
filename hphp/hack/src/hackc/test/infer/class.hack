@@ -59,106 +59,105 @@ class C {
   // CHECK: define C.cons_static($this: *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
-  // CHECK:   n0 = $builtins.hack_string("x")
   // CHECK:   jmp b1
   // CHECK: #b1:
-  // CHECK:   n1: *C = load &$this
-  // CHECK:   n2 = $builtins.hack_get_static_class(n1)
-  // CHECK:   store &$0 <- n2: *HackMixed
-  // CHECK:   n3: *C = load &$this
-  // CHECK:   n4 = $builtins.hack_get_static_class(n3)
-  // CHECK:   n5 = n4.HackMixed.__factory()
-  // CHECK:   store &$2 <- n5: *HackMixed
-  // CHECK:   n6: *HackMixed = load &$0
-  // CHECK:   n7 = $builtins.hhbc_class_has_reified_generics(n6)
+  // CHECK:   n0: *C = load &$this
+  // CHECK:   n1 = $builtins.hack_get_static_class(n0)
+  // CHECK:   store &$0 <- n1: *HackMixed
+  // CHECK:   n2: *C = load &$this
+  // CHECK:   n3 = $builtins.hack_get_static_class(n2)
+  // CHECK:   n4 = n3.HackMixed.__factory()
+  // CHECK:   store &$2 <- n4: *HackMixed
+  // CHECK:   n5: *HackMixed = load &$0
+  // CHECK:   n6 = $builtins.hhbc_class_has_reified_generics(n5)
   // CHECK:   jmp b2, b3
   // CHECK:   .handlers b17
   // CHECK: #b2:
-  // CHECK:   prune ! $builtins.hack_is_true(n7)
+  // CHECK:   prune ! $builtins.hack_is_true(n6)
   // CHECK:   jmp b7
   // CHECK: #b3:
-  // CHECK:   prune $builtins.hack_is_true(n7)
-  // CHECK:   n8: *HackMixed = load &$0
-  // CHECK:   n9 = $builtins.hhbc_get_cls_rg_prop(n8)
-  // CHECK:   store &$1 <- n9: *HackMixed
-  // CHECK:   n10 = $builtins.hhbc_is_type_null(n9)
+  // CHECK:   prune $builtins.hack_is_true(n6)
+  // CHECK:   n7: *HackMixed = load &$0
+  // CHECK:   n8 = $builtins.hhbc_get_cls_rg_prop(n7)
+  // CHECK:   store &$1 <- n8: *HackMixed
+  // CHECK:   n9 = $builtins.hhbc_is_type_null(n8)
   // CHECK:   jmp b4, b5
   // CHECK:   .handlers b17
   // CHECK: #b4:
-  // CHECK:   prune $builtins.hack_is_true(n10)
+  // CHECK:   prune $builtins.hack_is_true(n9)
   // CHECK:   jmp b7
   // CHECK: #b5:
-  // CHECK:   prune ! $builtins.hack_is_true(n10)
-  // CHECK:   n11: *HackMixed = load &$1
-  // CHECK:   n12 = $root.count(null, n11)
-  // CHECK:   n13 = $builtins.hhbc_cmp_eq(n12, $builtins.hack_int(0))
+  // CHECK:   prune ! $builtins.hack_is_true(n9)
+  // CHECK:   n10: *HackMixed = load &$1
+  // CHECK:   n11 = $root.count(null, n10)
+  // CHECK:   n12 = $builtins.hhbc_cmp_eq(n11, $builtins.hack_int(0))
   // CHECK:   jmp b6, b10
   // CHECK:   .handlers b17
   // CHECK: #b6:
-  // CHECK:   prune $builtins.hack_is_true(n13)
+  // CHECK:   prune $builtins.hack_is_true(n12)
   // CHECK:   jmp b7
   // CHECK: #b7:
-  // CHECK:   n14: *HackMixed = load &$0
-  // CHECK:   n15 = $builtins.hhbc_class_has_reified_generics(n14)
+  // CHECK:   n13: *HackMixed = load &$0
+  // CHECK:   n14 = $builtins.hhbc_class_has_reified_generics(n13)
   // CHECK:   jmp b8, b9
   // CHECK:   .handlers b17
   // CHECK: #b8:
-  // CHECK:   prune ! $builtins.hack_is_true(n15)
+  // CHECK:   prune ! $builtins.hack_is_true(n14)
   // CHECK:   jmp b12
   // CHECK: #b9:
-  // CHECK:   prune $builtins.hack_is_true(n15)
-  // CHECK:   n16: *HackMixed = load &$0
-  // CHECK:   n17 = $builtins.hhbc_class_get_c(n16)
+  // CHECK:   prune $builtins.hack_is_true(n14)
+  // CHECK:   n15: *HackMixed = load &$0
+  // CHECK:   n16 = $builtins.hhbc_class_get_c(n15)
   // CHECK:   jmp b16
   // CHECK:   .handlers b17
   // CHECK: #b10:
-  // CHECK:   prune ! $builtins.hack_is_true(n13)
-  // CHECK:   n18: *HackMixed = load &$0
-  // CHECK:   n19 = $builtins.hhbc_class_has_reified_generics(n18)
+  // CHECK:   prune ! $builtins.hack_is_true(n12)
+  // CHECK:   n17: *HackMixed = load &$0
+  // CHECK:   n18 = $builtins.hhbc_class_has_reified_generics(n17)
   // CHECK:   jmp b11, b15
   // CHECK:   .handlers b17
   // CHECK: #b11:
-  // CHECK:   prune ! $builtins.hack_is_true(n19)
+  // CHECK:   prune ! $builtins.hack_is_true(n18)
   // CHECK:   jmp b12
   // CHECK: #b12:
-  // CHECK:   n20: *HackMixed = load &$0
-  // CHECK:   n21 = $builtins.hhbc_has_reified_parent(n20)
+  // CHECK:   n19: *HackMixed = load &$0
+  // CHECK:   n20 = $builtins.hhbc_has_reified_parent(n19)
   // CHECK:   jmp b13, b14
   // CHECK:   .handlers b17
   // CHECK: #b13:
-  // CHECK:   prune ! $builtins.hack_is_true(n21)
+  // CHECK:   prune ! $builtins.hack_is_true(n20)
   // CHECK:   jmp b16
   // CHECK: #b14:
-  // CHECK:   prune $builtins.hack_is_true(n21)
-  // CHECK:   n22: *HackMixed = load &$2
-  // CHECK:   n23 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-  // CHECK:   n24 = n22.HackMixed._86reifiedinit(n23)
+  // CHECK:   prune $builtins.hack_is_true(n20)
+  // CHECK:   n21: *HackMixed = load &$2
+  // CHECK:   n22 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
+  // CHECK:   n23 = n21.HackMixed._86reifiedinit(n22)
   // CHECK:   jmp b16
   // CHECK:   .handlers b17
   // CHECK: #b15:
-  // CHECK:   prune $builtins.hack_is_true(n19)
-  // CHECK:   n25: *HackMixed = load &$2
-  // CHECK:   n26: *HackMixed = load &$1
-  // CHECK:   n27 = n25.HackMixed._86reifiedinit(n26)
+  // CHECK:   prune $builtins.hack_is_true(n18)
+  // CHECK:   n24: *HackMixed = load &$2
+  // CHECK:   n25: *HackMixed = load &$1
+  // CHECK:   n26 = n24.HackMixed._86reifiedinit(n25)
   // CHECK:   jmp b16
   // CHECK:   .handlers b17
   // CHECK: #b16:
-  // CHECK:   n28: *HackMixed = load &$2
+  // CHECK:   n27: *HackMixed = load &$2
   // CHECK:   jmp b18
   // CHECK:   .handlers b17
-  // CHECK: #b17(n29: *HackMixed):
+  // CHECK: #b17(n28: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n30 = $builtins.hhbc_throw(n29)
+  // CHECK:   n29 = $builtins.hhbc_throw(n28)
   // CHECK:   unreachable
   // CHECK: #b18:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n31 = n28.HackMixed.__construct($builtins.hack_int(1), n0, $builtins.hack_int(3))
-  // CHECK:   n32 = $builtins.hhbc_lock_obj(n28)
-  // CHECK:   store &$a <- n28: *HackMixed
+  // CHECK:   n30 = n27.HackMixed.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n31 = $builtins.hhbc_lock_obj(n27)
+  // CHECK:   store &$a <- n27: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_static(): void {
@@ -169,59 +168,58 @@ class C {
   // CHECK: define C.cons_self($this: *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
-  // CHECK:   n0 = $builtins.hack_string("x")
   // CHECK:   jmp b1
   // CHECK: #b1:
-  // CHECK:   n1: *C$static = load &C$static::static_singleton
-  // CHECK:   n2 = $builtins.lazy_initialize(n1)
-  // CHECK:   store &$0 <- n1: *HackMixed
-  // CHECK:   n3: *C$static = load &C$static::static_singleton
-  // CHECK:   n4 = $builtins.lazy_initialize(n3)
-  // CHECK:   n5 = n3.HackMixed.__factory()
-  // CHECK:   store &$2 <- n5: *HackMixed
-  // CHECK:   n6: *HackMixed = load &$0
-  // CHECK:   n7 = $builtins.hhbc_class_has_reified_generics(n6)
+  // CHECK:   n0: *C$static = load &C$static::static_singleton
+  // CHECK:   n1 = $builtins.lazy_initialize(n0)
+  // CHECK:   store &$0 <- n0: *HackMixed
+  // CHECK:   n2: *C$static = load &C$static::static_singleton
+  // CHECK:   n3 = $builtins.lazy_initialize(n2)
+  // CHECK:   n4 = n2.HackMixed.__factory()
+  // CHECK:   store &$2 <- n4: *HackMixed
+  // CHECK:   n5: *HackMixed = load &$0
+  // CHECK:   n6 = $builtins.hhbc_class_has_reified_generics(n5)
   // CHECK:   jmp b2, b5
   // CHECK:   .handlers b7
   // CHECK: #b2:
-  // CHECK:   prune ! $builtins.hack_is_true(n7)
-  // CHECK:   n8: *HackMixed = load &$0
-  // CHECK:   n9 = $builtins.hhbc_has_reified_parent(n8)
+  // CHECK:   prune ! $builtins.hack_is_true(n6)
+  // CHECK:   n7: *HackMixed = load &$0
+  // CHECK:   n8 = $builtins.hhbc_has_reified_parent(n7)
   // CHECK:   jmp b3, b4
   // CHECK:   .handlers b7
   // CHECK: #b3:
-  // CHECK:   prune ! $builtins.hack_is_true(n9)
+  // CHECK:   prune ! $builtins.hack_is_true(n8)
   // CHECK:   jmp b6
   // CHECK: #b4:
-  // CHECK:   prune $builtins.hack_is_true(n9)
-  // CHECK:   n10: *HackMixed = load &$2
-  // CHECK:   n11 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-  // CHECK:   n12 = n10.HackMixed._86reifiedinit(n11)
+  // CHECK:   prune $builtins.hack_is_true(n8)
+  // CHECK:   n9: *HackMixed = load &$2
+  // CHECK:   n10 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
+  // CHECK:   n11 = n9.HackMixed._86reifiedinit(n10)
   // CHECK:   jmp b6
   // CHECK:   .handlers b7
   // CHECK: #b5:
-  // CHECK:   prune $builtins.hack_is_true(n7)
-  // CHECK:   n13: *HackMixed = load &$0
-  // CHECK:   n14 = $builtins.hhbc_class_get_c(n13)
+  // CHECK:   prune $builtins.hack_is_true(n6)
+  // CHECK:   n12: *HackMixed = load &$0
+  // CHECK:   n13 = $builtins.hhbc_class_get_c(n12)
   // CHECK:   jmp b6
   // CHECK:   .handlers b7
   // CHECK: #b6:
-  // CHECK:   n15: *HackMixed = load &$2
+  // CHECK:   n14: *HackMixed = load &$2
   // CHECK:   jmp b8
   // CHECK:   .handlers b7
-  // CHECK: #b7(n16: *HackMixed):
+  // CHECK: #b7(n15: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n17 = $builtins.hhbc_throw(n16)
+  // CHECK:   n16 = $builtins.hhbc_throw(n15)
   // CHECK:   unreachable
   // CHECK: #b8:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n18 = n15.HackMixed.__construct($builtins.hack_int(1), n0, $builtins.hack_int(3))
-  // CHECK:   n19 = $builtins.hhbc_lock_obj(n15)
-  // CHECK:   store &$a <- n15: *HackMixed
+  // CHECK:   n17 = n14.HackMixed.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n18 = $builtins.hhbc_lock_obj(n14)
+  // CHECK:   store &$a <- n14: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_self(): void {
@@ -232,59 +230,58 @@ class C {
   // CHECK: define C.cons_inst($this: *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
-  // CHECK:   n0 = $builtins.hack_string("x")
   // CHECK:   jmp b1
   // CHECK: #b1:
-  // CHECK:   n1: *C$static = load &C$static::static_singleton
-  // CHECK:   n2 = $builtins.lazy_initialize(n1)
-  // CHECK:   store &$0 <- n1: *HackMixed
-  // CHECK:   n3: *C$static = load &C$static::static_singleton
-  // CHECK:   n4 = $builtins.lazy_initialize(n3)
-  // CHECK:   n5 = n3.HackMixed.__factory()
-  // CHECK:   store &$2 <- n5: *HackMixed
-  // CHECK:   n6: *HackMixed = load &$0
-  // CHECK:   n7 = $builtins.hhbc_class_has_reified_generics(n6)
+  // CHECK:   n0: *C$static = load &C$static::static_singleton
+  // CHECK:   n1 = $builtins.lazy_initialize(n0)
+  // CHECK:   store &$0 <- n0: *HackMixed
+  // CHECK:   n2: *C$static = load &C$static::static_singleton
+  // CHECK:   n3 = $builtins.lazy_initialize(n2)
+  // CHECK:   n4 = n2.HackMixed.__factory()
+  // CHECK:   store &$2 <- n4: *HackMixed
+  // CHECK:   n5: *HackMixed = load &$0
+  // CHECK:   n6 = $builtins.hhbc_class_has_reified_generics(n5)
   // CHECK:   jmp b2, b5
   // CHECK:   .handlers b7
   // CHECK: #b2:
-  // CHECK:   prune ! $builtins.hack_is_true(n7)
-  // CHECK:   n8: *HackMixed = load &$0
-  // CHECK:   n9 = $builtins.hhbc_has_reified_parent(n8)
+  // CHECK:   prune ! $builtins.hack_is_true(n6)
+  // CHECK:   n7: *HackMixed = load &$0
+  // CHECK:   n8 = $builtins.hhbc_has_reified_parent(n7)
   // CHECK:   jmp b3, b4
   // CHECK:   .handlers b7
   // CHECK: #b3:
-  // CHECK:   prune ! $builtins.hack_is_true(n9)
+  // CHECK:   prune ! $builtins.hack_is_true(n8)
   // CHECK:   jmp b6
   // CHECK: #b4:
-  // CHECK:   prune $builtins.hack_is_true(n9)
-  // CHECK:   n10: *HackMixed = load &$2
-  // CHECK:   n11 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-  // CHECK:   n12 = n10.HackMixed._86reifiedinit(n11)
+  // CHECK:   prune $builtins.hack_is_true(n8)
+  // CHECK:   n9: *HackMixed = load &$2
+  // CHECK:   n10 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
+  // CHECK:   n11 = n9.HackMixed._86reifiedinit(n10)
   // CHECK:   jmp b6
   // CHECK:   .handlers b7
   // CHECK: #b5:
-  // CHECK:   prune $builtins.hack_is_true(n7)
-  // CHECK:   n13: *HackMixed = load &$0
-  // CHECK:   n14 = $builtins.hhbc_class_get_c(n13)
+  // CHECK:   prune $builtins.hack_is_true(n6)
+  // CHECK:   n12: *HackMixed = load &$0
+  // CHECK:   n13 = $builtins.hhbc_class_get_c(n12)
   // CHECK:   jmp b6
   // CHECK:   .handlers b7
   // CHECK: #b6:
-  // CHECK:   n15: *HackMixed = load &$2
+  // CHECK:   n14: *HackMixed = load &$2
   // CHECK:   jmp b8
   // CHECK:   .handlers b7
-  // CHECK: #b7(n16: *HackMixed):
+  // CHECK: #b7(n15: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n17 = $builtins.hhbc_throw(n16)
+  // CHECK:   n16 = $builtins.hhbc_throw(n15)
   // CHECK:   unreachable
   // CHECK: #b8:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n18 = n15.HackMixed.__construct($builtins.hack_int(1), n0, $builtins.hack_int(3))
-  // CHECK:   n19 = $builtins.hhbc_lock_obj(n15)
-  // CHECK:   store &$a <- n15: *HackMixed
+  // CHECK:   n17 = n14.HackMixed.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n18 = $builtins.hhbc_lock_obj(n14)
+  // CHECK:   store &$a <- n14: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_inst(): void {
@@ -294,19 +291,17 @@ class C {
   // TEST-CHECK-BAL: define C$static.static_signature
   // CHECK: define C$static.static_signature($this: *C$static, $a: *HackMixed, $b: *HackMixed) : *void {
   // CHECK: #b0:
-  // CHECK:   n0 = $builtins.hack_string("equal")
-  // CHECK:   n1 = $builtins.hack_string("unequal")
-  // CHECK:   n2: *HackMixed = load &$b
-  // CHECK:   n3: *HackMixed = load &$a
-  // CHECK:   n4 = $builtins.hhbc_cmp_eq(n3, n2)
+  // CHECK:   n0: *HackMixed = load &$b
+  // CHECK:   n1: *HackMixed = load &$a
+  // CHECK:   n2 = $builtins.hhbc_cmp_eq(n1, n0)
   // CHECK:   jmp b1, b2
   // CHECK: #b1:
-  // CHECK:   prune ! $builtins.hack_is_true(n4)
-  // CHECK:   n5 = $builtins.hhbc_print(n1)
+  // CHECK:   prune ! $builtins.hack_is_true(n2)
+  // CHECK:   n3 = $builtins.hhbc_print($builtins.hack_string("unequal"))
   // CHECK:   jmp b3
   // CHECK: #b2:
-  // CHECK:   prune $builtins.hack_is_true(n4)
-  // CHECK:   n6 = $builtins.hhbc_print(n0)
+  // CHECK:   prune $builtins.hack_is_true(n2)
+  // CHECK:   n4 = $builtins.hhbc_print($builtins.hack_string("equal"))
   // CHECK:   jmp b3
   // CHECK: #b3:
   // CHECK:   ret null
@@ -376,11 +371,10 @@ trait T1 {
 // TEST-CHECK-BAL: define $root.dynamic_const
 // CHECK: define $root.dynamic_const($this: *void, $c: *C) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_string("MY_CONSTANT")
-// CHECK:   n1: *HackMixed = load &$c
-// CHECK:   n2 = $builtins.hhbc_class_get_c(n1)
-// CHECK:   n3 = $builtins.hhbc_cls_cns(n2, n0)
-// CHECK:   n4 = $builtins.hhbc_print(n3)
+// CHECK:   n0: *HackMixed = load &$c
+// CHECK:   n1 = $builtins.hhbc_class_get_c(n0)
+// CHECK:   n2 = $builtins.hhbc_cls_cns(n1, $builtins.hack_string("MY_CONSTANT"))
+// CHECK:   n3 = $builtins.hhbc_print(n2)
 // CHECK:   ret null
 // CHECK: }
 function dynamic_const(C $c): void {

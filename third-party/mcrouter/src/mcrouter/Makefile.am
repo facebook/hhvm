@@ -207,6 +207,7 @@ libmcroutercore_a_SOURCES = \
   RoutingPrefix.h \
   RuntimeVarsData.cpp \
   RuntimeVarsData.h \
+  ServiceInfo.cpp \
   ServiceInfo-inl.h \
   ServiceInfo.h \
   stat_list.h \

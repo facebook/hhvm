@@ -16,7 +16,6 @@
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/lib/PoolContext.h"
 #include "mcrouter/lib/network/AccessPoint.h"
-#include "mcrouter/mcrouter_sr_deps.h"
 
 namespace facebook {
 namespace memcache {

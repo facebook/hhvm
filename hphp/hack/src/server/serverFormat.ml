@@ -58,23 +58,21 @@ let go_hackfmt ?filename_for_logging ~content args =
     | Some filename -> args @ ["--filename-for-logging"; filename]
     | None -> args
   in
-  let path =
+  Hh_logger.log "%s" (String.concat ~sep:" " args);
+  let paths = [Path.to_string (Path.make BuildOptions.default_hackfmt_path)] in
+  let paths =
     match Sys.getenv_opt "HACKFMT_TEST_PATH" with
-    | Some path ->
-      Hh_logger.log "Using HACKFMT_TEST_PATH override";
-      path
-    | None ->
-      BuildOptions.default_hackfmt_path
-      |> Path.make
-      |> Path.to_string (* realpath *)
+    | Some p -> [p] @ paths
+    | None -> paths
   in
-  Hh_logger.log "%s %s" path (String.concat ~sep:" " args);
-  if Sys.file_exists path then
+  let path = List.find ~f:Sys.file_exists paths in
+  match path with
+  | Some path ->
     call_external_formatter (Exec_command.Hackfmt path) content args
-  else begin
-    Hh_logger.log "hackfmt not found";
-    Error ("hackfmt not found " ^ path)
-  end
+  | _ ->
+    Hh_logger.log "Formatter not found";
+    Error
+      ("Could not locate formatter - looked in: " ^ String.concat ~sep:" " paths)
 
 (* This function takes 1-based offsets, and 'to_' is exclusive. *)
 let go ?filename_for_logging ~content from to_ options =

@@ -4,6 +4,13 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+# Dummy Thrift client
+class ThriftTestClient:
+    def __init__(self, addr, port) -> None:
+        raise NotImplementedError
+    def sendVersion(self) -> str:
+        raise NotImplementedError
+
 class McrouterGlobals:
     @staticmethod
     def binPath(name):
@@ -18,3 +25,11 @@ class McrouterGlobals:
     @staticmethod
     def preprocessArgs(args):
         return args
+
+    @staticmethod
+    def useThriftClient():
+        return False
+
+    @staticmethod
+    def createThriftTestClient(addr, port) -> ThriftTestClient:
+        raise NotImplementedError

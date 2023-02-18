@@ -18,8 +18,8 @@ import tempfile
 import time
 import ssl
 
+from carbon.carbon_result.thrift_types import Result
 from mcrouter.test.config import McrouterGlobals
-
 
 class BaseDirectory:
     def __init__(self, prefix="mctest"):
@@ -134,7 +134,8 @@ class MCProcess(ProcessBase):
             junk_fill=False,
             pass_fds=(),
             use_ssl=False,
-            versionPing=False):
+            versionPing=False,
+            thriftPort=None):
         self.fd = None
         self.versionPing = versionPing
         if cmd is not None and '-s' in cmd:
@@ -165,6 +166,12 @@ class MCProcess(ProcessBase):
         self.socket = None
         self.use_ssl = use_ssl
         self.fd = None
+        if McrouterGlobals.useThriftClient() and thriftPort is not None:
+            self.thrift_client = McrouterGlobals.createThriftTestClient(
+                addr="::1", port=thriftPort
+            )
+        else:
+            self.thrift_client = None
 
     def _sendall(self, s):
         if type(s) is not bytes:
@@ -233,7 +240,19 @@ class MCProcess(ProcessBase):
                 if len(fds[0]) > 0:
                     line = self._fdreadline()
                     if line.startswith("VERSION"):
+                        break
+                retry_count += 1
+                if self.max_retries and retry_count >= self.max_retries:
+                    raise RuntimeError("MCProcess connected but did not respond to ping")
+        if self.versionPing and self.thrift_client is not None:
+            retry_count = 0
+            while True:
+                try:
+                    res = self.thrift_client.mcVersion()
+                    if (res == Result.OK):
                         return
+                except Exception as e:
+                    print("Error on sending mcVersion in Thrift: {}".format(e))
                 retry_count += 1
                 if self.max_retries and retry_count >= self.max_retries:
                     raise RuntimeError("MCProcess connected but did not respond to ping")
@@ -1010,12 +1029,13 @@ class Memcached(MCProcess):
             thrift_listen_sock_fd = thrift_listen_sock.fileno()
             args.extend(['--thrift_listen_sock_fd', str(thrift_listen_sock_fd)])
             pass_fds.append(thrift_listen_sock_fd)
+            thrift_port = thrift_listen_sock.getsockname()[1]
 
             if ssl_port:
                 self.ssl_port = ssl_port
                 args.extend(['--ssl_port', str(self.ssl_port)])
 
-            MCProcess.__init__(self, args, port, pass_fds=pass_fds)
+            MCProcess.__init__(self, args, port, pass_fds=pass_fds, thriftPort=thrift_port)
 
             thrift_listen_sock.close()
 

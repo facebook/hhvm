@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<36daf7c8e7656cf7ed5ff81784cfac57>>
+// @generated SignedSource<<ca2c6a263367dd587aedd3a003557717>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -73,6 +73,7 @@ pub struct SavedEnv<'a> {
     pub condition_types: s_map::SMap<'a, &'a Ty<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub fun_tast_info: Option<&'a FunTastInfo>,
+    pub in_support_dynamic_type_method_check: bool,
 }
 impl<'a> TrivialDrop for SavedEnv<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(SavedEnv<'arena>);

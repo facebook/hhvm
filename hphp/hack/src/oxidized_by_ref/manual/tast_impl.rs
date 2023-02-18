@@ -40,6 +40,7 @@ impl Default for SavedEnv<'_> {
             tpenv: &TPENV,
             condition_types: Default::default(),
             fun_tast_info: Default::default(),
+            in_support_dynamic_type_method_check: false,
         }
     }
 }

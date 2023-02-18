@@ -79,6 +79,8 @@ struct BootStats {
   // Computes the time elapsed from start or from the previous call to this
   // method and stores it as a sample with the given name
   static void mark(const std::string& name);
+  // Compute the time and resoruce used from start
+  static void markFromStart(const std::string& name);
 
   // Add a column with name and string value.
   static void set(const std::string& name, const std::string& value);
@@ -107,4 +109,3 @@ struct BootStats {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

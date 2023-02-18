@@ -134,10 +134,6 @@ void BootStats::done() {
   if (!s_started) return;
   s_started = false;
 
-  auto total = ResourceUsage::sinceEpoch() - s_start;
-  Logger::FInfo("BootStats: all done, took {} total", total.toString());
-
-  BootStats::s_instance->add("TOTAL", total);
   BootStats::s_instance->dumpMarks();
 
   if (StructuredLog::enabled()) {
@@ -167,6 +163,15 @@ void BootStats::mark(const std::string& info) {
   auto elapsed = BootStats::s_instance->computeDeltaFromLast();
   Logger::FInfo("BootStats: {} done, took {}", info, elapsed.toString());
   BootStats::s_instance->add(info, elapsed);
+}
+
+void BootStats::markFromStart(const std::string& info) {
+  if (!s_started) return;
+  {
+    std::lock_guard<std::mutex> lock(s_instance->m_last_guard_);
+    s_instance->m_last = s_start;
+  }
+  mark(info);
 }
 
 void BootStats::add(const std::string& info, const ResourceUsage value) {

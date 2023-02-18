@@ -27,6 +27,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/server/ext_server.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/memory-stats.h"
@@ -463,7 +464,11 @@ void HttpServer::runOrExitProcess() {
     }
     createPid();
     Lock lock(this);
-    BootStats::done();
+    BootStats::markFromStart("start_server");
+    if (!jit::mcgen::retranslateAllPending()) {
+      BootStats::done();
+    } // else we log after retranslateAll finishes
+
     // Play extended warmup requests after server starts running.
     if (isJitSerializing() &&
         RuntimeOption::ServerExtendedWarmupThreadCount > 0 &&

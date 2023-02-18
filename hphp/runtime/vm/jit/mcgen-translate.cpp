@@ -481,8 +481,15 @@ void retranslateAll(bool skipSerialize) {
   }
 
   if (serverMode) {
-    Logger::Info("retranslateAll: finished retranslating all optimized "
-                 "translations!");
+    auto const uptime = HHVM_FN(server_uptime)();
+    if (uptime > 0) {
+      BootStats::set("jit_profile_and_optimize", uptime);
+      BootStats::done();
+      Logger::FInfo("retranslateAll finished {} seconds after server started",
+                    uptime);
+    } else {
+      Logger::Info("retranslateAll finished");
+    }
   }
 
   // This will enable live translations to happen again.

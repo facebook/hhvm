@@ -501,7 +501,7 @@ class ClientBufferedStream {
 
     ~Continuation() { state_->promise.setValue(); }
 
-    // takes ownerhsip of pointer on success
+    // takes ownership of pointer on success
     static bool wait(std::unique_ptr<Continuation>& cb) {
       bool ret = cb->state_->streamBridge->wait(cb.get());
       if (ret) {

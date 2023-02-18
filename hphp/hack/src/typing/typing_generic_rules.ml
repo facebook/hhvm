@@ -129,8 +129,8 @@ let apply_rules_with_array_index_value_ty_mismatches
       (env, (ty, arr_ty_mismatch, key_ty_mismatch, val_ty_mismatch))
     | (_, Tnewtype (cid, _, _))
       when String.equal cid SN.Classes.cSupportDyn
-           && env.Typing_env_types.in_support_dynamic_type_method_check ->
-      (* If we are in_support_dynamic_type_method_check, we might want to take advantage of
+           && env.Typing_env_types.under_dynamic_assumptions ->
+      (* If we are under_dynamic_assumptions, we might want to take advantage of
          the dynamic in supportdyn<t>, so don't break it apart as in the next case. *)
       default ()
     (* Preserve supportdyn<_> across operation *)

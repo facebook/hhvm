@@ -570,7 +570,7 @@ let env_as_value env =
     in_try;
     in_expr_tree;
     inside_constructor;
-    in_support_dynamic_type_method_check;
+    under_dynamic_assumptions;
     tpenv;
     log_levels = _;
     allow_wildcards;
@@ -589,8 +589,7 @@ let env_as_value env =
       ("in_try", bool_as_value in_try);
       ("in_expr_tree", bool_as_value in_expr_tree);
       ("inside_constructor", bool_as_value inside_constructor);
-      ( "in_support_dynamic_type_method_check",
-        bool_as_value in_support_dynamic_type_method_check );
+      ("under_dynamic_assumptions", bool_as_value under_dynamic_assumptions);
       ("tpenv", tpenv_as_value env tpenv);
       ("allow_wildcards", bool_as_value allow_wildcards);
       ( "inference_env",

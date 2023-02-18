@@ -54,7 +54,7 @@ type saved_env = {
   tpenv: Type_parameter_env.t;
   condition_types: decl_ty SMap.t;
   fun_tast_info: fun_tast_info option;
-  in_support_dynamic_type_method_check: bool;
+  under_dynamic_assumptions: bool;
 }
 [@@deriving show]
 
@@ -121,7 +121,7 @@ let empty_saved_env tcopt : saved_env =
     tpenv = Type_parameter_env.empty;
     condition_types = SMap.empty;
     fun_tast_info = None;
-    in_support_dynamic_type_method_check = false;
+    under_dynamic_assumptions = false;
   }
 
 (* Used when an env is needed in codegen.

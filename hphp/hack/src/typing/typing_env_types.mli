@@ -25,7 +25,7 @@ type env = {
   in_try: bool;
   in_expr_tree: bool;
   inside_constructor: bool;
-  in_support_dynamic_type_method_check: bool;
+  under_dynamic_assumptions: bool;
       (** Set to true when checking if a <<__SoundDynamicallyCallable>> method body
           is well-typed under dyn..dyn->dyn assumptions, that is if it can be safely called
           in a dynamic environment. *)

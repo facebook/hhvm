@@ -865,7 +865,7 @@ and obj_get_concrete_class_with_member_info
      error evaluation *)
   let eff () =
     let open Typing_env_types in
-    if env.in_support_dynamic_type_method_check then
+    if env.under_dynamic_assumptions then
       Typing_log.log_pessimise_prop
         env
         (Pos_or_decl.unsafe_to_raw_pos mem_pos)
@@ -1469,7 +1469,7 @@ let obj_get_with_mismatches
      *)
     if
       Option.is_some e2
-      && env.Typing_env_types.in_support_dynamic_type_method_check
+      && env.Typing_env_types.under_dynamic_assumptions
       && (not (is_dynamic receiver_or_parent_ty))
       && Typing_utils.is_sub_type
            env

@@ -45,7 +45,7 @@ let is_literal_with_trivially_inferable_type (_, _, e) =
   Option.is_some @@ Decl_utils.infer_const e
 
 let method_dynamically_callable env cls m params_decl_ty return =
-  let env = { env with in_support_dynamic_type_method_check = true } in
+  let env = { env with under_dynamic_assumptions = true } in
   (* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>> *)
   let env_with_require_dynamic =
     Typing_dynamic.add_require_dynamic_bounds env cls

@@ -1411,8 +1411,7 @@ let save local_tpenv env =
     Tast.tpenv = TPEnv.union local_tpenv env.tpenv;
     Tast.condition_types = env.genv.condition_types;
     Tast.fun_tast_info = env.fun_tast_info;
-    Tast.in_support_dynamic_type_method_check =
-      env.in_support_dynamic_type_method_check;
+    Tast.under_dynamic_assumptions = env.under_dynamic_assumptions;
   }
 
 (* Compute the type variables appearing covariantly (positively)

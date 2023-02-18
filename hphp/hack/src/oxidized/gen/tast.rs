@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0b8d577ba786176f33534413ac9c1c15>>
+// @generated SignedSource<<b1ed251b388e54a6e5a9f4d338fc4ac6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -65,7 +65,7 @@ pub struct SavedEnv {
     pub tpenv: type_parameter_env::TypeParameterEnv,
     pub condition_types: s_map::SMap<Ty>,
     pub fun_tast_info: Option<FunTastInfo>,
-    pub in_support_dynamic_type_method_check: bool,
+    pub under_dynamic_assumptions: bool,
 }
 
 #[rust_to_ocaml(attr = "deriving show")]

@@ -349,8 +349,7 @@ let rec array_get
 
       let nullable_container_get env ty_actual ty =
         if
-          lhs_of_null_coalesce
-          || env.Typing_env_types.in_support_dynamic_type_method_check
+          lhs_of_null_coalesce || env.Typing_env_types.under_dynamic_assumptions
           (* Normally, we would not allow indexing into a nullable container,
              however, because the pattern shows up so frequently, we are allowing
              indexing into a nullable container as long as it is on the lhs of a
@@ -739,7 +738,7 @@ let rec array_get
         in
         (env, (ty, err_res_arr, err_res_idx))
       | Tprim Tnull ->
-        if env.Typing_env_types.in_support_dynamic_type_method_check then
+        if env.Typing_env_types.under_dynamic_assumptions then
           got_dynamic ()
         else
           let ty = MakeType.nothing Reason.Rnone in
@@ -760,7 +759,7 @@ let rec array_get
           in
           (env, (ty, err_res_arr, err_res_idx))
       | Tnewtype (cid, _, bound) when String.equal cid SN.Classes.cSupportDyn ->
-        (* We must be in_support_dynamic_type_method_check because
+        (* We must be under_dynamic_assumptions because
            apply_rules_with_index_value_ty_mismatches otherwise decends into the newtype *)
         let ty = mk (r, Tintersection [MakeType.dynamic r; bound]) in
         let (env, (ty, err_opt_arr, err_opt_idx)) =
@@ -916,9 +915,7 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       (* In dynamic mode strip off nullable because we can always upcast to dynamic *)
       let ty1 =
         match get_node ty1 with
-        | Toption ty
-          when env.Typing_env_types.in_support_dynamic_type_method_check ->
-          ty
+        | Toption ty when env.Typing_env_types.under_dynamic_assumptions -> ty
         | _ -> ty1
       in
       let dflt_arr_res = Ok ty1 in
@@ -1048,12 +1045,11 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       | (_, Tdynamic) -> (env, (ty1, Ok ty1, Ok ty2))
       | (_, Tunapplied_alias _) ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-      | (_, Tprim Tnull)
-        when env.Typing_env_types.in_support_dynamic_type_method_check ->
+      | (_, Tprim Tnull) when env.Typing_env_types.under_dynamic_assumptions ->
         got_dynamic ()
       | (r, Tnewtype (cid, _, bound))
         when String.equal cid SN.Classes.cSupportDyn ->
-        (* We must be in_support_dynamic_type_method_check because
+        (* We must be under_dynamic_assumptions because
            apply_rules_with_index_value_ty_mismatches otherwise decends into the newtype *)
         let ty = mk (r, Tintersection [MakeType.dynamic r; bound]) in
         let (env, (ty, err_opt_arr, err_opt_idx)) =
@@ -1351,7 +1347,7 @@ let rec assign_array_get
         (env, (ety1, Error (ety1, ty_expect), Ok tkey, Ok ty2))
       | Tclass ((_, cn), _, _)
         when String.equal cn SN.Collections.cAnyArray
-             && env.Typing_env_types.in_support_dynamic_type_method_check ->
+             && env.Typing_env_types.under_dynamic_assumptions ->
         got_dynamic ()
       | Tclass ((_, cn), _, _)
         when String.equal cn SN.Collections.cKeyedContainer
@@ -1398,8 +1394,7 @@ let rec assign_array_get
         got_dynamic ()
       | Tdynamic -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
       | Tany _ -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
-      | Tprim Tnull
-        when env.Typing_env_types.in_support_dynamic_type_method_check ->
+      | Tprim Tnull when env.Typing_env_types.under_dynamic_assumptions ->
         got_dynamic ()
       | Tprim Tstring ->
         let (_, p, _) = key in
@@ -1473,7 +1468,7 @@ let rec assign_array_get
           (env, (ty, Ok ty, Ok tkey, Ok ty2))
       end
       | Tnewtype (cid, _, bound) when String.equal cid SN.Classes.cSupportDyn ->
-        (* We must be in_support_dynamic_type_method_check because
+        (* We must be under_dynamic_assumptions because
            apply_rules_with_index_value_ty_mismatches otherwise decends into the newtype *)
         let ty = mk (r, Tintersection [MakeType.dynamic r; bound]) in
         let (env, (ty, err_opt_arr, err_opt_tk, err_opt_idx)) =

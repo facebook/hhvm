@@ -56,14 +56,22 @@ def _standard_protocol_to_serializer_protocol(
 
 
 def _infer_type_name_from_value(value: PrimitiveType) -> TypeName:
+    if isinstance(value, bool):
+        return TypeName(boolType=Void.Unused)
     if isinstance(value, int):
         return TypeName(i64Type=Void.Unused)
     if isinstance(value, float):
         return TypeName(doubleType=Void.Unused)
+    if isinstance(value, str):
+        return TypeName(stringType=Void.Unused)
+    if isinstance(value, bytes):
+        return TypeName(binaryType=Void.Unused)
     raise ValueError(f"Can not infer thrift type from: {value}")
 
 
 def _type_name_to_primitive_type(type_name: TypeName) -> typing.Type[PrimitiveType]:
+    if type_name.type is TypeName.Type.boolType:
+        return bool
     if type_name.type in (
         TypeName.Type.i16Type,
         TypeName.Type.i32Type,
@@ -75,6 +83,10 @@ def _type_name_to_primitive_type(type_name: TypeName) -> typing.Type[PrimitiveTy
         TypeName.Type.doubleType,
     ):
         return float
+    if type_name.type is TypeName.Type.stringType:
+        return str
+    if type_name.type is TypeName.Type.binaryType:
+        return bytes
     raise ValueError(f"Unsupported primitive type: {type_name}")
 
 
@@ -113,7 +125,7 @@ class AnyRegistry:
             )
         if isinstance(obj, StructOrUnion):
             return self._store_struct(obj, protocol=protocol)
-        if isinstance(obj, (int, float)):
+        if isinstance(obj, (bool, int, float, str, bytes)):
             return self._store_primitive(obj, protocol=protocol)
         raise ValueError(f"Unsupported type: f{type(obj)}")
 
@@ -166,14 +178,17 @@ class AnyRegistry:
         if any_obj.type.name.type is TypeName.Type.structType:
             return self._load_struct(any_obj)
         if any_obj.type.name.type in [
+            TypeName.Type.boolType,
             TypeName.Type.i16Type,
             TypeName.Type.i32Type,
             TypeName.Type.i64Type,
             TypeName.Type.floatType,
             TypeName.Type.doubleType,
+            TypeName.Type.stringType,
+            TypeName.Type.binaryType,
         ]:
             return self._load_primitive(any_obj)
-        raise NotImplementedError(f"Unsupported type: {any_obj.type.name.value}")
+        raise NotImplementedError(f"Unsupported type: {any_obj.type.name}")
 
     def _load_struct(self, any_obj: Any) -> StructOrUnion:
         return serializer.deserialize(

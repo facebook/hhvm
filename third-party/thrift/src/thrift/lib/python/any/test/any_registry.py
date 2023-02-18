@@ -32,8 +32,11 @@ TEST_STRUCT = thrift_types.struct_map_string_i32(
 )
 
 TEST_PRIMITIVES = [
+    True,
     42,
     123456.789,
+    "thrift-python",
+    b"raw bytes",
 ]
 
 
@@ -81,7 +84,9 @@ class AnyRegistryTest(unittest.TestCase):
                         )
                         loaded = registry.load(any_obj)
                         if isinstance(loaded, float):
-                            self.assertAlmostEqual(primitive, loaded, places=3)
+                            self.assertAlmostEqual(
+                                float(primitive), float(loaded), places=3
+                            )
                         else:
                             self.assertEqual(primitive, loaded)
 

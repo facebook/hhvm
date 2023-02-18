@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import typing
 import unittest
 
 from apache.thrift.type.standard.thrift_types import TypeName, Void
@@ -24,42 +25,59 @@ from apache.thrift.type.type.thrift_types import Type
 from thrift.python.any.serializer import deserialize_primitive, serialize_primitive
 
 
-class SerializerTests(unittest.TestCase):
-    def test_int_round_trip(self) -> None:
-        i = 42
-        iobuf = serialize_primitive(i)
-        decoded = deserialize_primitive(int, iobuf)
-        self.assertEqual(i, decoded)
+if typing.TYPE_CHECKING:
+    from thrift.python.any.serializer import PrimitiveType
 
-    def test_int_round_trip_with_type_name(self) -> None:
-        i = 42
-        for type_name in [
-            TypeName(i16Type=Void.Unused),
-            TypeName(i32Type=Void.Unused),
-            TypeName(i64Type=Void.Unused),
-        ]:
-            with self.subTest(type_name=type_name):
-                iobuf = serialize_primitive(i, thrift_type=Type(name=type_name))
-                decoded = deserialize_primitive(
-                    int, iobuf, thrift_type=Type(name=type_name)
-                )
-                self.assertEqual(i, decoded)
+
+class SerializerTests(unittest.TestCase):
+    def _test_round_trip(
+        self, value: PrimitiveType, thrift_type: typing.Optional[Type] = None
+    ) -> None:
+        iobuf = serialize_primitive(value, thrift_type=thrift_type)
+        decoded = deserialize_primitive(type(value), iobuf, thrift_type=thrift_type)
+        if isinstance(value, float):
+            self.assertAlmostEqual(value, float(decoded), places=3)
+        else:
+            self.assertEqual(value, decoded)
+
+    def test_bool_round_trip(self) -> None:
+        self._test_round_trip(True)
+
+    def test_int_round_trip(self) -> None:
+        self._test_round_trip(42)
 
     def test_float_round_trip(self) -> None:
-        f = 123456.789
-        iobuf = serialize_primitive(f)
-        decoded = deserialize_primitive(float, iobuf)
-        self.assertAlmostEqual(f, decoded, delta=0.001)
+        self._test_round_trip(123456.789)
+
+    def test_str_round_trip(self) -> None:
+        self._test_round_trip("thrift-python")
+
+    def test_bytes_round_trip(self) -> None:
+        self._test_round_trip(b"raw bytes")
+
+    def _test_round_trip_with_type_names(
+        self, value: PrimitiveType, type_names: typing.Sequence[TypeName]
+    ) -> None:
+        for type_name in type_names:
+            with self.subTest(type_name=type_name):
+                self._test_round_trip(value, thrift_type=Type(name=type_name))
+
+    def test_int_round_trip_with_type_name(self) -> None:
+        self._test_round_trip_with_type_names(
+            42,
+            [
+                TypeName(byteType=Void.Unused),
+                TypeName(i16Type=Void.Unused),
+                TypeName(i32Type=Void.Unused),
+                TypeName(i64Type=Void.Unused),
+            ],
+        )
 
     def test_float_round_trip_with_type_name(self) -> None:
-        f = 123456.789
-        for type_name in [
-            TypeName(floatType=Void.Unused),
-            TypeName(doubleType=Void.Unused),
-        ]:
-            with self.subTest(type_name=type_name):
-                iobuf = serialize_primitive(f, thrift_type=Type(name=type_name))
-                decoded = deserialize_primitive(
-                    float, iobuf, thrift_type=Type(name=type_name)
-                )
-                self.assertAlmostEqual(f, decoded, delta=0.001)
+        self._test_round_trip_with_type_names(
+            123456.789,
+            [
+                TypeName(floatType=Void.Unused),
+                TypeName(doubleType=Void.Unused),
+            ],
+        )

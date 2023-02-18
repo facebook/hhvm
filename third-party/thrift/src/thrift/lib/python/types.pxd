@@ -178,3 +178,5 @@ cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *
 
 cdef class ServiceInterface:
     pass
+
+cdef const cTypeInfo* getCTypeInfo(type_info)

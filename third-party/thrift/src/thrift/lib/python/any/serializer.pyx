@@ -16,53 +16,90 @@ from apache.thrift.type.standard.thrift_types import TypeName
 from apache.thrift.type.type.thrift_types import Type
 from cython.view cimport memoryview
 from folly.iobuf cimport IOBuf, from_unique_ptr
+from libcpp cimport bool as cbool
 from libcpp.utility cimport move as cmove
-from thrift.python.types cimport Struct, StructOrUnion, Union, doubleTypeInfo, floatTypeInfo, i16TypeInfo, i32TypeInfo, i64TypeInfo
+from thrift.python.types cimport Struct, StructOrUnion, Union, getCTypeInfo
+from thrift.python.types import (
+    typeinfo_bool,
+    typeinfo_byte,
+    typeinfo_i16,
+    typeinfo_i32,
+    typeinfo_i64,
+    typeinfo_double,
+    typeinfo_float,
+    typeinfo_string,
+    typeinfo_binary,
+)
+from cython.operator cimport dereference as deref
 
 import cython
 import typing
 
 Buf = cython.fused_type(IOBuf, bytes, bytearray, memoryview)
-Primitive = cython.fused_type(int, float)
 
-cdef cTypeInfo _thrift_type_to_type_info(thrift_type):
+
+def _thrift_type_to_type_info(thrift_type):
+    if thrift_type.name.type is TypeName.Type.boolType:
+        return typeinfo_bool
+    if thrift_type.name.type is TypeName.Type.byteType:
+        return typeinfo_byte
     if thrift_type.name.type is TypeName.Type.i16Type:
-        return i16TypeInfo
+        return typeinfo_i16
     if thrift_type.name.type is TypeName.Type.i32Type:
-        return i32TypeInfo
+        return typeinfo_i32
     if thrift_type.name.type is TypeName.Type.i64Type:
-        return i64TypeInfo
+        return typeinfo_i64
     if thrift_type.name.type is TypeName.Type.floatType:
-        return floatTypeInfo
+        return typeinfo_float
     if thrift_type.name.type is TypeName.Type.doubleType:
-        return doubleTypeInfo
+        return typeinfo_double
+    if thrift_type.name.type is TypeName.Type.stringType:
+        return typeinfo_string
+    if thrift_type.name.type is TypeName.Type.binaryType:
+        return typeinfo_binary
     raise NotImplementedError(f"Unsupported type: {thrift_type}")
 
 
-cdef cTypeInfo _infer_type_info_from_cls(cls):
+def _infer_type_info_from_cls(cls):
+    if issubclass(cls, bool):
+        return typeinfo_bool
     if issubclass(cls, int):
-        return i64TypeInfo
+        return typeinfo_i64
     if issubclass(cls, float):
-        return doubleTypeInfo
+        return typeinfo_double
+    if issubclass(cls, str):
+        return typeinfo_string
+    if issubclass(cls, bytes):
+        return typeinfo_binary
     raise NotImplementedError(f"Can not infer thrift type from: {cls}")
 
 
-def serialize_primitive(Primitive obj, Protocol protocol=Protocol.COMPACT, thrift_type=None):
-    cdef cTypeInfo type_info
+def serialize_primitive(obj, Protocol protocol=Protocol.COMPACT, thrift_type=None):
     if thrift_type is None:
         type_info = _infer_type_info_from_cls(type(obj))
     else:
         type_info = _thrift_type_to_type_info(thrift_type)
     return folly.iobuf.from_unique_ptr(
-        cmove(cserialize_type(type_info, obj, protocol))
+        cmove(
+            cserialize_type(
+                deref(getCTypeInfo(type_info)),
+                type_info.to_internal_data(obj),
+                protocol,
+            )
+        )
     )
 
 
 def deserialize_primitive(cls, Buf buf, Protocol protocol=Protocol.COMPACT, thrift_type=None):
-    cdef cTypeInfo type_info
     if thrift_type is None:
         type_info = _infer_type_info_from_cls(cls)
     else:
         type_info = _thrift_type_to_type_info(thrift_type)
     cdef IOBuf iobuf = buf if isinstance(buf, IOBuf) else IOBuf(buf)
-    return cdeserialize_type(type_info, iobuf._this, protocol)
+    return type_info.to_python_value(
+        cdeserialize_type(
+            deref(getCTypeInfo(type_info)),
+            iobuf._this,
+            protocol,
+        )
+    )

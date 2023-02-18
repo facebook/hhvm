@@ -10,6 +10,7 @@ use anyhow::anyhow;
 use anyhow::Context;
 use ocamlrep::rc::RcOc;
 use oxidized::naming_phase_error::NamingPhaseError;
+use oxidized::typechecker_options::TypecheckerOptions;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
@@ -50,7 +51,8 @@ fn process_one_file(single_file: bool, path: &Path, _: &Opts) -> anyhow::Result<
     let source_text = IndexedSourceText::new(SourceText::make(rel_path, &content));
     let mut parser_result = AastParser::from_text(&Default::default(), &source_text)
         .map_err(|e| anyhow!("failed to parse {}: {:#?}", path.display(), e))?;
-    let errs = elab::elaborate_program(&mut parser_result.aast);
+    let tco = TypecheckerOptions::default();
+    let errs = elab::elaborate_program(&mut parser_result.aast, &tco);
     print_parse_result(single_file, path, &parser_result, &errs)?;
     Ok(())
 }

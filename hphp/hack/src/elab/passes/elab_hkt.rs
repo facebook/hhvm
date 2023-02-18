@@ -68,19 +68,26 @@ mod tests {
     use oxidized::aast_defs::UserAttributes;
     use oxidized::ast_defs::Variance;
     use oxidized::tast::Pos;
+    use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
-    use crate::config::Flags;
     use crate::Transform;
 
     #[test]
     fn test_hint() {
-        let default_config = Config::default();
-        let cfg_hkt_disabled = Config { ..default_config };
-        let cfg_hkt_enabled = Config {
-            flags: Flags::HKT_ENABLED,
-            ..default_config
-        };
+        let cfg_hkt_disabled = Config::new(
+            &TypecheckerOptions {
+                ..Default::default()
+            },
+            false,
+        );
+        let cfg_hkt_enabled = Config::new(
+            &TypecheckerOptions {
+                tco_higher_kinded_types: true,
+                ..Default::default()
+            },
+            false,
+        );
 
         let mut errs = Vec::default();
         let mut pass = ElabHktPass;
@@ -111,12 +118,19 @@ mod tests {
 
     #[test]
     fn test_tparam() {
-        let default_config = Config::default();
-        let cfg_hkt_disabled = Config { ..default_config };
-        let cfg_hkt_enabled = Config {
-            flags: Flags::HKT_ENABLED,
-            ..default_config
-        };
+        let cfg_hkt_disabled = Config::new(
+            &TypecheckerOptions {
+                ..Default::default()
+            },
+            false,
+        );
+        let cfg_hkt_enabled = Config::new(
+            &TypecheckerOptions {
+                tco_higher_kinded_types: true,
+                ..Default::default()
+            },
+            false,
+        );
 
         let mut errs = Vec::default();
         let mut pass = ElabHktPass;

@@ -50,9 +50,9 @@ mod tests {
     use oxidized::aast_defs::Hint;
     use oxidized::aast_defs::Hint_;
     use oxidized::tast::Pos;
+    use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
-    use crate::config::Flags;
     use crate::Transform;
 
     #[test]
@@ -67,18 +67,24 @@ mod tests {
                 Box::new(Hint_::Hdynamic),
             ))),
         );
-
         let mut elem2 = elem1.clone();
 
-        // Transform elem1 without `soft_as_like` set
-        // expect Hdynamic
-        let mut cfg = Config::default();
+        // Transform `elem1` without flag `SOFT_AS_LIKE` set and expect
+        // `Hdynamic`.
+        let tco = TypecheckerOptions {
+            ..Default::default()
+        };
+        let cfg = Config::new(&tco, false);
         elem1.transform(&cfg, &mut errs, &mut pass);
         assert!(matches!(*elem1.1, Hint_::Hdynamic));
 
-        // Transform elem2 with `soft_as_like` set
-        // expect Hlike(_,Hdynamic)
-        cfg.flags = Flags::SOFT_AS_LIKE;
+        // Transform `elem2` with flag `SOFT_AS_LIKE` set & expect `Hlike(_,
+        // Hdynamic)`.
+        let tco = TypecheckerOptions {
+            po_interpret_soft_types_as_like_types: true,
+            ..Default::default()
+        };
+        let cfg = Config::new(&tco, false);
         elem2.transform(&cfg, &mut errs, &mut pass);
         assert!(matches!(&*elem2.1, Hint_::Hlike(_)));
         assert!(match &*elem2.1 {

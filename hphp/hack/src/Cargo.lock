@@ -1448,7 +1448,7 @@ dependencies = [
  "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
- "rc_pos",
+ "relative_path",
 ]
 
 [[package]]

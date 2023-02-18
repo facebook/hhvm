@@ -179,6 +179,23 @@ impl<Ex, En> Program<Ex, En> {
         };
         DefsIterator { stack: vec![iter] }
     }
+
+    pub fn first_pos(&self) -> Option<&Pos> {
+        self.iter().find_map(|def| match def {
+            Def::Fun(fd) => Some(fd.name.pos()),
+            Def::Class(class) => Some(class.name.pos()),
+            Def::Stmt(stmt) => Some(&stmt.0),
+            Def::Typedef(td) => Some(td.name.pos()),
+            Def::Constant(gc) => Some(gc.name.pos()),
+            Def::Namespace(ns) => Some(ns.0.pos()),
+            Def::Module(md) => Some(md.name.pos()),
+            Def::Package(pd) => Some(pd.name.pos()),
+            Def::SetModule(sid) => Some(sid.pos()),
+            Def::NamespaceUse(sids) => sids.first().map(|(_, sid, _)| sid.pos()),
+            Def::SetNamespaceEnv(..) => None,
+            Def::FileAttributes(fa) => fa.user_attributes.first().map(|ua| ua.name.pos()),
+        })
+    }
 }
 
 pub struct DefsIterator<'a, Ex, En> {

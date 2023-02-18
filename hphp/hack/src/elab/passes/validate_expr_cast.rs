@@ -52,7 +52,7 @@ impl Pass for ValidateExprCastPass {
 #[cfg(test)]
 mod tests {
     use oxidized::ast::Expr;
-    use rc_pos::Pos;
+    use oxidized::tast::Pos;
 
     use super::*;
     use crate::elab_utils;

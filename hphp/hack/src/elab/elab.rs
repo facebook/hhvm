@@ -18,7 +18,7 @@ macro_rules! passes {
     };
 }
 
-mod config;
+pub mod config;
 mod elab_utils;
 mod pass;
 mod passes;
@@ -26,14 +26,25 @@ mod transform;
 
 use oxidized::ast;
 use oxidized::naming_phase_error::NamingPhaseError;
+use oxidized::typechecker_options::TypecheckerOptions;
 use pass::Pass;
 use transform::Transform;
 
-pub fn elaborate_program(program: &mut ast::Program) -> Vec<NamingPhaseError> {
-    elaborate(program)
+pub fn elaborate_program(
+    program: &mut ast::Program,
+    tco: &TypecheckerOptions,
+) -> Vec<NamingPhaseError> {
+    let is_hhi = program.first_pos().map_or(false, |pos| {
+        pos.filename().prefix() == relative_path::Prefix::Hhi
+    });
+    elaborate(program, tco, is_hhi)
 }
 
-fn elaborate<T: Transform>(node: &mut T) -> Vec<NamingPhaseError> {
+fn elaborate<T: Transform>(
+    node: &mut T,
+    tco: &TypecheckerOptions,
+    is_hhi: bool,
+) -> Vec<NamingPhaseError> {
     #[rustfmt::skip]
     let mut passes = passes![
         // Stop on `Invalid` expressions
@@ -166,6 +177,7 @@ fn elaborate<T: Transform>(node: &mut T) -> Vec<NamingPhaseError> {
         // passes::validate_module::ValidateModulePass::default(),
     ];
     let mut errs = Vec::default();
-    node.transform(&Default::default(), &mut errs, &mut passes);
+    let cfg = config::Config::new(tco, is_hhi);
+    node.transform(&cfg, &mut errs, &mut passes);
     errs
 }

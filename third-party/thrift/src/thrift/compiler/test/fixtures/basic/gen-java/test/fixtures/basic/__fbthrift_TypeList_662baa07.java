@@ -15,14 +15,22 @@ public class __fbthrift_TypeList_662baa07 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
+  private static void add(String uri, String className) {
+    list.add(new TypeList.TypeMapping(uri, className));
+  }
+
+  private static void addToList0() {
+    add("test.dev/fixtures/basic/MyStruct", "test.fixtures.basic.MyStruct");
+    add("test.dev/fixtures/basic/MyDataItem", "test.fixtures.basic.MyDataItem");
+    add("test.dev/fixtures/basic/MyUnion", "test.fixtures.basic.MyUnion");
+    add("test.dev/fixtures/basic/ReservedKeyword", "test.fixtures.basic.ReservedKeyword");
+    add("test.dev/fixtures/basic/UnionToBeRenamed", "test.fixtures.basic.UnionToBeRenamed");
+    add("test.dev/fixtures/basic/MyEnum", "test.fixtures.basic.MyEnum");
+    add("test.dev/fixtures/basic/HackEnum", "test.fixtures.basic.HackEnum");
+  }
+
   static {
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/basic/MyStruct", "test.fixtures.basic.MyStruct"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/basic/MyDataItem", "test.fixtures.basic.MyDataItem"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/basic/MyUnion", "test.fixtures.basic.MyUnion"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/basic/ReservedKeyword", "test.fixtures.basic.ReservedKeyword"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/basic/UnionToBeRenamed", "test.fixtures.basic.UnionToBeRenamed"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/basic/MyEnum", "test.fixtures.basic.MyEnum"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/basic/HackEnum", "test.fixtures.basic.HackEnum"));
+    addToList0();
   }
 
   @java.lang.Override

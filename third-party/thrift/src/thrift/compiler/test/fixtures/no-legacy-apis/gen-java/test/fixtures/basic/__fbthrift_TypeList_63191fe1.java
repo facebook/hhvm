@@ -15,10 +15,18 @@ public class __fbthrift_TypeList_63191fe1 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
+  private static void add(String uri, String className) {
+    list.add(new TypeList.TypeMapping(uri, className));
+  }
+
+  private static void addToList0() {
+    add("test.dev/fixtures/no-legacy-apis/MyStruct", "test.fixtures.basic.MyStruct");
+    add("test.dev/fixtures/no-legacy-apis/MyUnion", "test.fixtures.basic.MyUnion");
+    add("test.dev/fixtures/no-legacy-apis/MyEnum", "test.fixtures.basic.MyEnum");
+  }
+
   static {
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/no-legacy-apis/MyStruct", "test.fixtures.basic.MyStruct"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/no-legacy-apis/MyUnion", "test.fixtures.basic.MyUnion"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/no-legacy-apis/MyEnum", "test.fixtures.basic.MyEnum"));
+    addToList0();
   }
 
   @java.lang.Override

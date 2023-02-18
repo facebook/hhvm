@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <cctype>
 #include <iomanip>
 #include <set>
@@ -419,6 +420,8 @@ class t_mstch_java_generator : public t_mstch_generator {
 };
 
 class mstch_java_program : public mstch_program {
+  static constexpr int32_t BATCH_SIZE = 512;
+
  public:
   mstch_java_program(
       const t_program* p, mstch_context& ctx, mstch_element_position pos)
@@ -439,14 +442,25 @@ class mstch_java_program : public mstch_program {
   }
   mstch::node list_hash() { return type_list_hash; }
   mstch::node list() {
-    mstch::array a;
-    for (const auto& m : type_list) {
-      a.push_back(mstch::map{
-          {"uri", m.uri},
-          {"className", m.className},
+    int32_t size = type_list.size();
+    mstch::array arr;
+    int n = 0;
+    while (n * BATCH_SIZE < size) {
+      mstch::array a;
+      for (int32_t i = n * BATCH_SIZE; i < std::min((n + 1) * BATCH_SIZE, size);
+           i++) {
+        const auto& m = type_list[i];
+        a.push_back(mstch::map{
+            {"typeList:uri", m.uri},
+            {"typeList:className", m.className},
+        });
+      }
+      arr.push_back(mstch::map{
+          {"typeList:index", n++},
+          {"typeList:batch", a},
       });
     }
-    return a;
+    return arr;
   }
 };
 

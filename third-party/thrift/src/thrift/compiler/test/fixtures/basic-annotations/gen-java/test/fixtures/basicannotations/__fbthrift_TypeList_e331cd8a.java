@@ -15,8 +15,16 @@ public class __fbthrift_TypeList_e331cd8a implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
+  private static void add(String uri, String className) {
+    list.add(new TypeList.TypeMapping(uri, className));
+  }
+
+  private static void addToList0() {
+    add("facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct", "test.fixtures.basicannotations.MyStruct");
+  }
+
   static {
-    list.add(new TypeList.TypeMapping("facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct", "test.fixtures.basicannotations.MyStruct"));
+    addToList0();
   }
 
   @java.lang.Override

@@ -15,16 +15,24 @@ public class __fbthrift_TypeList_082887bf implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
+  private static void add(String uri, String className) {
+    list.add(new TypeList.TypeMapping(uri, className));
+  }
+
+  private static void addToList0() {
+    add("test.dev/fixtures/enums/SomeStruct", "test.fixtures.enums.SomeStruct");
+    add("test.dev/fixtures/enums/MyStruct", "test.fixtures.enums.MyStruct");
+    add("test.dev/fixtures/enums/Metasyntactic", "test.fixtures.enums.Metasyntactic");
+    add("test.dev/fixtures/enums/MyEnum1", "test.fixtures.enums.MyEnum1");
+    add("test.dev/fixtures/enums/MyEnum2", "test.fixtures.enums.MyEnum2");
+    add("test.dev/fixtures/enums/MyEnum3", "test.fixtures.enums.MyEnum3");
+    add("test.dev/fixtures/enums/MyEnum4", "test.fixtures.enums.MyEnum4");
+    add("test.dev/fixtures/enums/MyBitmaskEnum1", "test.fixtures.enums.MyBitmaskEnum1");
+    add("test.dev/fixtures/enums/MyBitmaskEnum2", "test.fixtures.enums.MyBitmaskEnum2");
+  }
+
   static {
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/enums/SomeStruct", "test.fixtures.enums.SomeStruct"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/enums/MyStruct", "test.fixtures.enums.MyStruct"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/enums/Metasyntactic", "test.fixtures.enums.Metasyntactic"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/enums/MyEnum1", "test.fixtures.enums.MyEnum1"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/enums/MyEnum2", "test.fixtures.enums.MyEnum2"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/enums/MyEnum3", "test.fixtures.enums.MyEnum3"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/enums/MyEnum4", "test.fixtures.enums.MyEnum4"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/enums/MyBitmaskEnum1", "test.fixtures.enums.MyBitmaskEnum1"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/enums/MyBitmaskEnum2", "test.fixtures.enums.MyBitmaskEnum2"));
+    addToList0();
   }
 
   @java.lang.Override

@@ -15,8 +15,16 @@ public class __fbthrift_TypeList_f34d8dc8 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
+  private static void add(String uri, String className) {
+    list.add(new TypeList.TypeMapping(uri, className));
+  }
+
+  private static void addToList0() {
+    add("test.dev/namespace_from_package/module/Foo", "dev.test.namespace_from_package.module.Foo");
+  }
+
   static {
-    list.add(new TypeList.TypeMapping("test.dev/namespace_from_package/module/Foo", "dev.test.namespace_from_package.module.Foo"));
+    addToList0();
   }
 
   @java.lang.Override

@@ -203,6 +203,10 @@ cdef void _async_client_send_request_callback(
     if resp.buf.hasError():
         pyfuture.set_exception(create_py_exception(resp.buf.error(), rpc_options))
         return
+
+    if rpc_options is not None and not resp.headers.empty():
+        (<RpcOptions>rpc_options)._cpp_obj.setReadHeaders(cmove(resp.headers))
+
     if not resp.buf.hasValue():
         pyfuture.set_exception(ApplicationError(
             ApplicationErrorType.MISSING_RESULT,

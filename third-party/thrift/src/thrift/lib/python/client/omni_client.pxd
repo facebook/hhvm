@@ -59,6 +59,7 @@ cdef extern from "folly/container/F14Map.h" namespace "folly":
     iterator begin()
     iterator end()
     T& operator[](const K&)
+    bool empty()
 
 cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::python::client":
     cdef cppclass cIOBufClientBufferedStream "::thrift::python::client::IOBufClientBufferedStream":

@@ -82,6 +82,7 @@ cdef extern from "thrift/lib/cpp2/async/RpcOptions.h" namespace "apache::thrift"
         cRpcOptions& setChunkBufferSize(int32_t chunkBufferSize)
         int32_t getChunkBufferSize()
         void setWriteHeader(const string& key, const string value)
+        void setReadHeaders(F14NodeMap[string, string]&& map)
         const F14NodeMap[string, string]& getReadHeaders()
         const F14NodeMap[string, string]& getWriteHeaders()
 

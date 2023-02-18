@@ -129,6 +129,59 @@ class ClientServerTests(unittest.TestCase):
     These are tests where a client and server talk to each other
     """
 
+    def test_get_context(self) -> None:
+        loop = asyncio.get_event_loop()
+
+        async def inner_test() -> None:
+            async with TestServer(ip="::1") as sa:
+                ip, port = sa.ip, sa.port
+                assert ip and port
+                async with get_client(TestingService, host=ip, port=port) as client:
+                    options = RpcOptions()
+                    options.timeout = 100.0
+
+                    self.assertEqual(
+                        "Testing", await client.getName(rpc_options=options)
+                    )
+                    self.assertEqual("true", options.read_headers["contextvar"])
+                    self.assertEqual(
+                        "getMethodName",
+                        await client.getMethodName(),
+                    )
+                    # requestId is a 16 char wide hex string
+                    self.assertEqual(
+                        len(await client.getRequestId()),
+                        16,
+                    )
+                    self.assertEqual(
+                        100.0,
+                        await client.getRequestTimeout(rpc_options=options),
+                    )
+
+        loop.run_until_complete(inner_test())
+
+        async def outside_context_test() -> None:
+            handler = Handler()  # so we can call it outside the thrift server
+            with self.assertRaises(LookupError):
+                await handler.getName()
+
+        loop.run_until_complete(outside_context_test())
+
+    def test_rpc_headers(self) -> None:
+        loop = asyncio.get_event_loop()
+
+        async def inner_test() -> None:
+            async with TestServer(ip="::1") as sa:
+                ip, port = sa.ip, sa.port
+                assert ip and port
+                async with get_client(TestingService, host=ip, port=port) as client:
+                    options = RpcOptions()
+                    options.set_header("from client", "with love")
+                    self.assertFalse(await client.invert(True, rpc_options=options))
+                    self.assertIn("from server", options.read_headers)
+
+        loop.run_until_complete(inner_test())
+
     def test_server_localhost(self) -> None:
         loop = asyncio.get_event_loop()
 

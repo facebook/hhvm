@@ -19,9 +19,15 @@ import types
 import typing
 
 from apache.thrift.type.any.thrift_types import Any
-from apache.thrift.type.standard.thrift_types import StandardProtocol, TypeName, TypeUri
+from apache.thrift.type.standard.thrift_types import (
+    StandardProtocol,
+    TypeName,
+    TypeUri,
+    Void,
+)
 from apache.thrift.type.type.thrift_types import Protocol, Type
 from thrift.python import serializer
+from thrift.python.any.serializer import deserialize_primitive, serialize_primitive
 from thrift.python.conformance.universal_name import (
     find_by_universal_hash,
     get_universal_hash,
@@ -29,6 +35,12 @@ from thrift.python.conformance.universal_name import (
     UniversalHashAlgorithm,
 )
 from thrift.python.types import StructOrUnion
+
+
+if typing.TYPE_CHECKING:
+    from thrift.python.any.serializer import PrimitiveType
+
+    SupportedType = typing.Union[StructOrUnion, PrimitiveType]
 
 
 def _standard_protocol_to_serializer_protocol(
@@ -41,6 +53,29 @@ def _standard_protocol_to_serializer_protocol(
     if protocol is StandardProtocol.SimpleJson:
         return serializer.Protocol.JSON
     raise NotImplementedError(f"Unsupported standard protocol: {protocol}")
+
+
+def _infer_type_name_from_value(value: PrimitiveType) -> TypeName:
+    if isinstance(value, int):
+        return TypeName(i64Type=Void.Unused)
+    if isinstance(value, float):
+        return TypeName(doubleType=Void.Unused)
+    raise ValueError(f"Can not infer thrift type from: {value}")
+
+
+def _type_name_to_primitive_type(type_name: TypeName) -> typing.Type[PrimitiveType]:
+    if type_name.type in (
+        TypeName.Type.i16Type,
+        TypeName.Type.i32Type,
+        TypeName.Type.i64Type,
+    ):
+        return int
+    if type_name.type in (
+        TypeName.Type.floatType,
+        TypeName.Type.doubleType,
+    ):
+        return float
+    raise ValueError(f"Unsupported primitive type: {type_name}")
 
 
 class AnyRegistry:
@@ -68,7 +103,7 @@ class AnyRegistry:
         return any_change
 
     def store(
-        self, obj: StructOrUnion, protocol: typing.Optional[Protocol] = None
+        self, obj: SupportedType, protocol: typing.Optional[Protocol] = None
     ) -> Any:
         if protocol is None:
             protocol = Protocol(standard=StandardProtocol.Compact)
@@ -76,6 +111,13 @@ class AnyRegistry:
             raise NotImplementedError(
                 f"Unsupported non-standard protocol: {protocol.value}"
             )
+        if isinstance(obj, StructOrUnion):
+            return self._store_struct(obj, protocol=protocol)
+        if isinstance(obj, (int, float)):
+            return self._store_primitive(obj, protocol=protocol)
+        raise ValueError(f"Unsupported type: f{type(obj)}")
+
+    def _store_struct(self, obj: StructOrUnion, protocol: Protocol) -> Any:
         uri = obj.__get_thrift_uri__()
         if uri is None:
             raise ValueError("Thrift struct doesn't have URI")
@@ -94,6 +136,18 @@ class AnyRegistry:
             ),
         )
 
+    def _store_primitive(self, obj: PrimitiveType, protocol: Protocol) -> Any:
+        thrift_type = Type(name=_infer_type_name_from_value(obj))
+        return Any(
+            type=thrift_type,
+            protocol=protocol,
+            data=serialize_primitive(
+                obj,
+                protocol=_standard_protocol_to_serializer_protocol(protocol.standard),
+                thrift_type=thrift_type,
+            ),
+        )
+
     def _type_uri_to_cls(self, uri: TypeUri) -> typing.Type[StructOrUnion]:
         if uri.type == TypeUri.Type.uri:
             return self._uri_to_cls[uri.uri]
@@ -104,15 +158,35 @@ class AnyRegistry:
             )
         raise ValueError("No type information found")
 
-    def load(self, any_obj: Any) -> StructOrUnion:
-        if any_obj.type.name.type != TypeName.Type.structType:
-            raise NotImplementedError(f"Unsupported type: {any_obj.type.name.value}")
+    def load(self, any_obj: Any) -> SupportedType:
         if any_obj.protocol.type != Protocol.Type.standard:
             raise NotImplementedError(
                 f"Unsupported non-standard protocol: {any_obj.protocol.value}"
             )
+        if any_obj.type.name.type is TypeName.Type.structType:
+            return self._load_struct(any_obj)
+        if any_obj.type.name.type in [
+            TypeName.Type.i16Type,
+            TypeName.Type.i32Type,
+            TypeName.Type.i64Type,
+            TypeName.Type.floatType,
+            TypeName.Type.doubleType,
+        ]:
+            return self._load_primitive(any_obj)
+        raise NotImplementedError(f"Unsupported type: {any_obj.type.name.value}")
+
+    def _load_struct(self, any_obj: Any) -> StructOrUnion:
         return serializer.deserialize(
             self._type_uri_to_cls(any_obj.type.name.structType),
+            any_obj.data,
+            protocol=_standard_protocol_to_serializer_protocol(
+                any_obj.protocol.standard
+            ),
+        )
+
+    def _load_primitive(self, any_obj: Any) -> PrimitiveType:
+        return deserialize_primitive(
+            _type_name_to_primitive_type(any_obj.type.name),
             any_obj.data,
             protocol=_standard_protocol_to_serializer_protocol(
                 any_obj.protocol.standard

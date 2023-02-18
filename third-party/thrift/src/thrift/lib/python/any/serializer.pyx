@@ -20,9 +20,9 @@ from libcpp.utility cimport move as cmove
 from thrift.python.types cimport Struct, StructOrUnion, Union, doubleTypeInfo, floatTypeInfo, i16TypeInfo, i32TypeInfo, i64TypeInfo
 
 import cython
+import typing
 
 Buf = cython.fused_type(IOBuf, bytes, bytearray, memoryview)
-
 Primitive = cython.fused_type(int, float)
 
 cdef cTypeInfo _thrift_type_to_type_info(thrift_type):

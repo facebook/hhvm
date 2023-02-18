@@ -31,6 +31,11 @@ TEST_STRUCT = thrift_types.struct_map_string_i32(
     }
 )
 
+TEST_PRIMITIVES = [
+    42,
+    123456.789,
+]
+
 
 class AnyRegistryTest(unittest.TestCase):
     def test_register_type(self) -> None:
@@ -58,6 +63,27 @@ class AnyRegistryTest(unittest.TestCase):
                 )
                 loaded = registry.load(any_obj)
                 self.assertEqual(TEST_STRUCT, loaded)
+
+    def test_primitive_round_trip(self) -> None:
+        registry = AnyRegistry()
+        registry.register_module(thrift_types)
+
+        for standard_protocol in [
+            StandardProtocol.Binary,
+            StandardProtocol.Compact,
+            StandardProtocol.SimpleJson,
+        ]:
+            with self.subTest(standard_protocol=standard_protocol):
+                for primitive in TEST_PRIMITIVES:
+                    with self.subTest(primitive=primitive):
+                        any_obj = registry.store(
+                            primitive, protocol=Protocol(standard=standard_protocol)
+                        )
+                        loaded = registry.load(any_obj)
+                        if isinstance(loaded, float):
+                            self.assertAlmostEqual(primitive, loaded, places=3)
+                        else:
+                            self.assertEqual(primitive, loaded)
 
     def test_unsupported_protocol(self) -> None:
         registry = AnyRegistry()

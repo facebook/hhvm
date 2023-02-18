@@ -19,7 +19,8 @@ from apache.thrift.type.type.thrift_types import Type
 from folly.iobuf import IOBuf
 from thrift.python.serializer import Protocol
 
-Primitive = typing.TypeVar("Primitive", bound=typing.Union[int, float])
+PrimitiveType = typing.Union[int, float]
+Primitive = typing.TypeVar("Primitive", bound=PrimitiveType)
 
 def serialize_primitive(
     obj: Primitive,

@@ -1,0 +1,4 @@
+=== SDT analysis results for dynamic_static_method_call.php
+Constraints for \C:
+   8: NeedsSDT
+

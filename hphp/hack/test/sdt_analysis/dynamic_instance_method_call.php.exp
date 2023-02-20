@@ -1,0 +1,4 @@
+=== SDT analysis results for dynamic_instance_method_call.php
+Constraints for \C:
+   8: NeedsSDT
+

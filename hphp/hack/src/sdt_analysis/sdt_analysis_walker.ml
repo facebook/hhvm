@@ -67,15 +67,23 @@ let collect_sdts =
                 []
             | _ -> []
           in
+          let handle_supportdyn_of_fx_ty id =
+            match T.get_node base_ty with
+            | T.Tnewtype (c, [ty], _) when String.equal c SN.Classes.cSupportDyn
+              ->
+              go id ty
+            | _ -> go id base_ty
+          in
           begin
             match base_exp with
-            | A.Id (_, id) -> begin
-              match T.get_node base_ty with
-              | T.Tnewtype (c, [ty], _)
-                when String.equal c SN.Classes.cSupportDyn ->
-                go id ty
-              | _ -> go id base_ty
+            | A.Id (_, id) -> handle_supportdyn_of_fx_ty id
+            | A.Obj_get ((receiver_ty, _, _), _, _, _) -> begin
+              match T.get_node receiver_ty with
+              | T.Tclass ((_, id), _, _) -> handle_supportdyn_of_fx_ty id
+              | _ -> []
             end
+            | A.Class_const ((_, _, A.CI (_, id)), _) ->
+              handle_supportdyn_of_fx_ty id
             | _ -> []
           end
         | _ -> []

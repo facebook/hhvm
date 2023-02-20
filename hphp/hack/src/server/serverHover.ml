@@ -509,72 +509,109 @@ let go_quarantined
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
   let env_and_ty =
-    ServerInferType.human_friendly_type_at_pos ctx tast line column
+    ServerInferType.human_friendly_type_at_pos
+      ~under_dynamic:false
+      ctx
+      tast
+      line
+      column
   in
-  match (identities, env_and_ty) with
-  | ([], Some (env, ty)) ->
-    (* There are no identities (named entities) at the cursor, but we
-       know the type of the expression. Just show the type.
-
-       This can occur if the user hovers over a literal such as `123`. *)
-    [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
-  | ( [
-        ( {
-            SymbolOccurrence.type_ =
-              SymbolOccurrence.BestEffortArgument (recv, i);
-            _;
-          },
-          _ );
-      ],
-      _ ) ->
-    (* There are no identities (named entities) at the cursor, but we
-       know the type of the expression and the name of the parameter
-       from the definition site.
-
-       This can occur if the user hovers over a literal in a call,
-       e.g. `foo(123)`. *)
-    let ty_result =
-      match env_and_ty with
-      | Some (env, ty) ->
-        [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
+  let env_and_ty_dynamic =
+    ServerInferType.human_friendly_type_at_pos
+      ~under_dynamic:true
+      ctx
+      tast
+      line
+      column
+  in
+  let under_dynamic_result =
+    match env_and_ty_dynamic with
+    | Some (env, ty') ->
+      (match env_and_ty with
       | None -> []
-    in
-    let param_result =
-      match nth_param ctx recv i with
-      | Some param_name ->
-        [
-          {
-            snippet = Printf.sprintf "Parameter: %s" param_name;
-            addendum = [];
-            pos = None;
-          };
-        ]
-      | None -> []
-    in
-    ty_result @ param_result
-  | (identities, _) ->
-    (* We have a list of named things at the cursor. Show the
-       docblock and type of each thing. *)
-    identities
-    |> List.map ~f:(fun (occurrence, def_opt) ->
-           (* If we're hovering over a type hint, we're not interested
-              in the type of the enclosing expression. *)
-           let env_and_ty =
-             match occurrence.SymbolOccurrence.type_ with
-             | SymbolOccurrence.TypeVar -> None
-             | SymbolOccurrence.BuiltInType _ -> None
-             | _ -> env_and_ty
-           in
-           let path =
-             def_opt
-             |> Option.map ~f:(fun def -> def.SymbolDefinition.pos)
-             |> Option.map ~f:Pos.filename
-             |> Option.value ~default:entry.Provider_context.path
-           in
-           let (ctx, entry) =
-             Provider_context.add_entry_if_missing ~ctx ~path
-           in
-           (ctx, env_and_ty, entry, occurrence, def_opt))
-    |> make_hover_info_with_fallback
-    |> filter_class_and_constructor
-    |> List.remove_consecutive_duplicates ~equal:equal_hover_info
+      | Some (_, ty) ->
+        if Typing_defs.ty_equal ty ty' then
+          []
+        else
+          [
+            {
+              snippet =
+                Printf.sprintf
+                  "%s when called dynamically"
+                  (Tast_env.print_ty env ty');
+              addendum = [];
+              pos = None;
+            };
+          ])
+    | None -> []
+  in
+  let result =
+    match (identities, env_and_ty) with
+    | ([], Some (env, ty)) ->
+      (* There are no identities (named entities) at the cursor, but we
+         know the type of the expression. Just show the type.
+
+         This can occur if the user hovers over a literal such as `123`. *)
+      [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
+    | ( [
+          ( {
+              SymbolOccurrence.type_ =
+                SymbolOccurrence.BestEffortArgument (recv, i);
+              _;
+            },
+            _ );
+        ],
+        _ ) ->
+      (* There are no identities (named entities) at the cursor, but we
+         know the type of the expression and the name of the parameter
+         from the definition site.
+
+         This can occur if the user hovers over a literal in a call,
+         e.g. `foo(123)`. *)
+      let ty_result =
+        match env_and_ty with
+        | Some (env, ty) ->
+          [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
+        | None -> []
+      in
+      let param_result =
+        match nth_param ctx recv i with
+        | Some param_name ->
+          [
+            {
+              snippet = Printf.sprintf "Parameter: %s" param_name;
+              addendum = [];
+              pos = None;
+            };
+          ]
+        | None -> []
+      in
+      ty_result @ under_dynamic_result @ param_result
+    | (identities, _) ->
+      (* We have a list of named things at the cursor. Show the
+         docblock and type of each thing. *)
+      identities
+      |> List.map ~f:(fun (occurrence, def_opt) ->
+             (* If we're hovering over a type hint, we're not interested
+                in the type of the enclosing expression. *)
+             let env_and_ty =
+               match occurrence.SymbolOccurrence.type_ with
+               | SymbolOccurrence.TypeVar -> None
+               | SymbolOccurrence.BuiltInType _ -> None
+               | _ -> env_and_ty
+             in
+             let path =
+               def_opt
+               |> Option.map ~f:(fun def -> def.SymbolDefinition.pos)
+               |> Option.map ~f:Pos.filename
+               |> Option.value ~default:entry.Provider_context.path
+             in
+             let (ctx, entry) =
+               Provider_context.add_entry_if_missing ~ctx ~path
+             in
+             (ctx, env_and_ty, entry, occurrence, def_opt))
+      |> make_hover_info_with_fallback
+      |> filter_class_and_constructor
+      |> List.remove_consecutive_duplicates ~equal:equal_hover_info
+  in
+  result @ under_dynamic_result

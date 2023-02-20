@@ -14,6 +14,7 @@ val type_at_pos :
   (Tast_env.env * Tast.ty) option
 
 val human_friendly_type_at_pos :
+  under_dynamic:bool ->
   Provider_context.t ->
   Tast.program ->
   int ->

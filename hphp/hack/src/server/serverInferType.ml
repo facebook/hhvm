@@ -86,11 +86,17 @@ let class_id_ty env (id : Ast_defs.id) : Tast.ty =
  * cannot assume that the structure of the CST is reflected in the TAST.
  *)
 
-let base_visitor ~human_friendly line char =
+let base_visitor ~human_friendly ~under_dynamic line char =
   object (self)
     inherit [_] Tast_visitor.reduce as super
 
     inherit [Pos.t * _ * _] Visitors_runtime.option_monoid
+
+    method private correct_assumptions env =
+      Bool.equal
+        (Tast_env.tast_env_as_typing_env env)
+          .Typing_env_types.under_dynamic_assumptions
+        under_dynamic
 
     method private merge lhs rhs =
       (* A node with position P is not always a parent of every other node with
@@ -113,7 +119,7 @@ let base_visitor ~human_friendly line char =
       | (None, None) -> None
 
     method! on_expr env ((ty, pos, _) as expr) =
-      if Pos.inside pos line char then
+      if Pos.inside pos line char && self#correct_assumptions env then begin
         match shape_indexing_receiver env expr with
         | Some recv when human_friendly ->
           (* If we're looking at a shape indexing expression, we don't
@@ -123,11 +129,12 @@ let base_visitor ~human_friendly line char =
              over 'age', we want the hover type to be int, not string. *)
           self#merge_opt (Some (pos, env, ty)) (self#on_expr env recv)
         | _ -> self#merge_opt (Some (pos, env, ty)) (super#on_expr env expr)
-      else
+      end else
         super#on_expr env expr
 
     method! on_fun_param env fp =
-      if Pos.inside fp.Aast.param_pos line char then
+      if Pos.inside fp.Aast.param_pos line char && self#correct_assumptions env
+      then
         self#merge_opt
           (Some (fp.Aast.param_pos, env, fp.Aast.param_annotation))
           (super#on_fun_param env fp)
@@ -136,7 +143,7 @@ let base_visitor ~human_friendly line char =
 
     method! on_xhp_simple env attribute =
       let (pos, _) = attribute.Aast.xs_name in
-      if Pos.inside pos line char then
+      if Pos.inside pos line char && self#correct_assumptions env then
         Some (pos, env, attribute.Aast.xs_type)
       else
         super#on_xhp_simple env attribute
@@ -149,7 +156,7 @@ let base_visitor ~human_friendly line char =
          smaller position. *)
       | (_, _, Aast.CIexpr e) -> self#on_expr env e
       | _ ->
-        if Pos.inside pos line char then
+        if Pos.inside pos line char && self#correct_assumptions env then
           self#merge_opt (Some (pos, env, ty)) (super#on_class_id env cid)
         else
           super#on_class_id env cid
@@ -158,7 +165,7 @@ let base_visitor ~human_friendly line char =
       let acc = super#on_class_const env cc in
 
       let (pos, _) = cc.Aast.cc_id in
-      if Pos.inside pos line char then
+      if Pos.inside pos line char && self#correct_assumptions env then
         match class_const_ty env cc with
         | Some ty -> self#merge_opt (Some (pos, env, ty)) acc
         | None -> acc
@@ -168,7 +175,8 @@ let base_visitor ~human_friendly line char =
     method! on_EnumClassLabel env id label_name =
       let acc = super#on_EnumClassLabel env id label_name in
       match id with
-      | Some ((pos, _) as id) when Pos.inside pos line char ->
+      | Some ((pos, _) as id)
+        when Pos.inside pos line char && self#correct_assumptions env ->
         let ty = class_id_ty env id in
         Some (pos, env, ty)
       | _ -> acc
@@ -230,16 +238,24 @@ let range_visitor startl startc endl endc =
 let type_at_pos
     (ctx : Provider_context.t) (tast : Tast.program) (line : int) (char : int) :
     (Tast_env.env * Tast.ty) option =
-  (base_visitor ~human_friendly:false line char)#go ctx tast
+  (base_visitor ~human_friendly:false ~under_dynamic:false line char)#go
+    ctx
+    tast
   >>| fun (_, env, ty) -> (env, ty)
 
 (* Return the expanded type of smallest expression at this
    position. Skips string literals in shape indexing expressions so
-   hover results are more relevant. *)
+   hover results are more relevant.
+   If [under_dynamic] is true, look for type produced when env.under_dynamic_assumptions = true
+   Otherwise look for type produced in normal checking when env.under_dyhnamic_assumptions = false
+*)
 let human_friendly_type_at_pos
-    (ctx : Provider_context.t) (tast : Tast.program) (line : int) (char : int) :
-    (Tast_env.env * Tast.ty) option =
-  (base_visitor ~human_friendly:true line char)#go ctx tast
+    ~under_dynamic
+    (ctx : Provider_context.t)
+    (tast : Tast.program)
+    (line : int)
+    (char : int) : (Tast_env.env * Tast.ty) option =
+  (base_visitor ~human_friendly:true ~under_dynamic line char)#go ctx tast
   |> Option.map ~f:(fun (_, env, ty) -> (env, Tast_expand.expand_ty env ty))
 
 let type_at_range

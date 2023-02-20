@@ -159,11 +159,11 @@ fn gen_variant_traverse(ty_name: &str, v: &synstructure::VariantInfo<'_>) -> Tok
         panic!("transform.explicit only supports variants with 1 field")
     }
     v.each(|bi| {
-        gen_transform_body(
+        gen_transform_body_explicit(
             &pass_method_td,
             &pass_method_bu,
             quote!(#bi),
-            quote! { #bi.transform(cfg, errs, pass) },
+            quote! { #bi.transform(cfg, errs, &mut td_pass) },
         )
     })
 }
@@ -190,7 +190,7 @@ fn gen_fld_traverse(ty_name: &str, bi: &synstructure::BindingInfo<'_>) -> TokenS
             .unwrap_or_default(),
         Direction::BottomUp,
     );
-    gen_transform_body(&pass_method_td, &pass_method_bu, quote!(#bi), transform_bi)
+    gen_transform_body_explicit(&pass_method_td, &pass_method_bu, quote!(#bi), transform_bi)
 }
 
 fn gen_transform_body(
@@ -206,6 +206,21 @@ fn gen_transform_body(
         }
         #recurse;
         in_pass.#pass_method_bu(#elem, cfg, errs);
+    }
+}
+
+fn gen_transform_body_explicit(
+    pass_method_td: &syn::Ident,
+    pass_method_bu: &syn::Ident,
+    elem: TokenStream,
+    recurse: TokenStream,
+) -> TokenStream {
+    let body = gen_transform_body(&pass_method_td, &pass_method_bu, elem, recurse);
+    quote! {
+        {
+            let pass = &mut pass.clone();
+            #body
+        }
     }
 }
 

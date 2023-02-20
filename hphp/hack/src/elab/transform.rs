@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6e1e60df46bc4ed7b2ade9507303b010>>
+// @generated SignedSource<<4ece941473b1a082e8df413a68a2a380>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1289,14 +1289,16 @@ const _: () = {
                         __binding_2.transform(cfg, errs, pass)
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) = td_pass.on_fld_fun__ret_top_down(__binding_4, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) = pass.on_fld_fun__ret_top_down(__binding_4, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_4.transform(cfg, errs, pass);
+                            in_pass.on_fld_fun__ret_bottom_up(__binding_4, cfg, errs);
                         }
-                        __binding_4.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_fun__ret_bottom_up(__binding_4, cfg, errs);
                     }
                     {
                         __binding_5.transform(cfg, errs, pass)
@@ -1686,84 +1688,98 @@ const _: () = {
                         __binding_7.transform(cfg, errs, pass)
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_class__tparams_top_down(__binding_8, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_class__tparams_top_down(__binding_8, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_8.transform(cfg, errs, pass);
+                            in_pass.on_fld_class__tparams_bottom_up(__binding_8, cfg, errs);
                         }
-                        __binding_8.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_class__tparams_bottom_up(__binding_8, cfg, errs);
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_class__extends_top_down(__binding_9, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_class__extends_top_down(__binding_9, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_9.transform(cfg, errs, pass);
+                            in_pass.on_fld_class__extends_bottom_up(__binding_9, cfg, errs);
                         }
-                        __binding_9.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_class__extends_bottom_up(__binding_9, cfg, errs);
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_class__uses_top_down(__binding_10, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_class__uses_top_down(__binding_10, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_10.transform(cfg, errs, pass);
+                            in_pass.on_fld_class__uses_bottom_up(__binding_10, cfg, errs);
                         }
-                        __binding_10.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_class__uses_bottom_up(__binding_10, cfg, errs);
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_class__xhp_attr_uses_top_down(__binding_11, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_class__xhp_attr_uses_top_down(__binding_11, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_11.transform(cfg, errs, pass);
+                            in_pass.on_fld_class__xhp_attr_uses_bottom_up(__binding_11, cfg, errs);
                         }
-                        __binding_11.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_class__xhp_attr_uses_bottom_up(__binding_11, cfg, errs);
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_class__reqs_top_down(__binding_13, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_class__reqs_top_down(__binding_13, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_13.transform(cfg, errs, pass);
+                            in_pass.on_fld_class__reqs_bottom_up(__binding_13, cfg, errs);
                         }
-                        __binding_13.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_class__reqs_bottom_up(__binding_13, cfg, errs);
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_class__implements_top_down(__binding_14, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_class__implements_top_down(__binding_14, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_14.transform(cfg, errs, pass);
+                            in_pass.on_fld_class__implements_bottom_up(__binding_14, cfg, errs);
                         }
-                        __binding_14.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_class__implements_bottom_up(__binding_14, cfg, errs);
                     }
                     {
                         __binding_15.transform(cfg, errs, pass)
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_class__consts_top_down(__binding_16, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_class__consts_top_down(__binding_16, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_16.transform(cfg, errs, pass);
+                            in_pass.on_fld_class__consts_bottom_up(__binding_16, cfg, errs);
                         }
-                        __binding_16.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_class__consts_bottom_up(__binding_16, cfg, errs);
                     }
                     {
                         __binding_17.transform(cfg, errs, pass)
@@ -1778,29 +1794,37 @@ const _: () = {
                         __binding_20.transform(cfg, errs, pass)
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_class__xhp_attrs_top_down(__binding_21, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_class__xhp_attrs_top_down(__binding_21, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_21.transform(cfg, errs, pass);
+                            in_pass.on_fld_class__xhp_attrs_bottom_up(__binding_21, cfg, errs);
                         }
-                        __binding_21.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_class__xhp_attrs_bottom_up(__binding_21, cfg, errs);
                     }
                     {
                         __binding_22.transform(cfg, errs, pass)
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_class__user_attributes_top_down(__binding_23, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_class__user_attributes_top_down(__binding_23, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_23.transform(cfg, errs, pass);
+                            in_pass.on_fld_class__user_attributes_bottom_up(
+                                __binding_23,
+                                cfg,
+                                errs,
+                            );
                         }
-                        __binding_23.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_class__user_attributes_bottom_up(__binding_23, cfg, errs);
                     }
                     {
                         __binding_24.transform(cfg, errs, pass)
@@ -2236,15 +2260,17 @@ const _: () = {
                         __binding_3.transform(cfg, errs, pass)
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_class_var_type__top_down(__binding_5, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_class_var_type__top_down(__binding_5, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_5.transform(cfg, errs, pass);
+                            in_pass.on_fld_class_var_type__bottom_up(__binding_5, cfg, errs);
                         }
-                        __binding_5.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_class_var_type__bottom_up(__binding_5, cfg, errs);
                     }
                     {
                         __binding_6.transform(cfg, errs, pass)
@@ -2353,15 +2379,17 @@ const _: () = {
                         __binding_15.transform(cfg, errs, pass)
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_method__ret_top_down(__binding_17, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_method__ret_top_down(__binding_17, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_17.transform(cfg, errs, pass);
+                            in_pass.on_fld_method__ret_bottom_up(__binding_17, cfg, errs);
                         }
-                        __binding_17.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_method__ret_bottom_up(__binding_17, cfg, errs);
                     }
                     {
                         __binding_18.transform(cfg, errs, pass)
@@ -2507,15 +2535,17 @@ const _: () = {
                         __binding_3.transform(cfg, errs, pass)
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_gconst_value_top_down(__binding_4, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_gconst_value_top_down(__binding_4, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_4.transform(cfg, errs, pass);
+                            in_pass.on_fld_gconst_value_bottom_up(__binding_4, cfg, errs);
                         }
-                        __binding_4.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_gconst_value_bottom_up(__binding_4, cfg, errs);
                     }
                     {
                         __binding_5.transform(cfg, errs, pass)
@@ -2921,15 +2951,17 @@ const _: () = {
                         __binding_4.transform(cfg, errs, pass)
                     }
                     {
-                        let mut td_pass = pass.clone();
-                        let mut in_pass = pass.clone();
-                        if let Break(..) =
-                            td_pass.on_fld_hint_fun_return_ty_top_down(__binding_5, cfg, errs)
                         {
-                            return;
+                            let pass = &mut pass.clone();
+                            let mut in_pass = pass.clone();
+                            if let Break(..) =
+                                pass.on_fld_hint_fun_return_ty_top_down(__binding_5, cfg, errs)
+                            {
+                                return;
+                            }
+                            __binding_5.transform(cfg, errs, pass);
+                            in_pass.on_fld_hint_fun_return_ty_bottom_up(__binding_5, cfg, errs);
                         }
-                        __binding_5.transform(cfg, errs, &mut td_pass);
-                        in_pass.on_fld_hint_fun_return_ty_bottom_up(__binding_5, cfg, errs);
                     }
                 }
             }

@@ -1463,7 +1463,21 @@ and simplify_subtype_i
               env
               (LoclType ty_sub)
               (LoclType ty_super)
-          | None -> default env
+          | None ->
+            if super_like then
+              let (env, ty_sub) =
+                Typing_dynamic.strip_covariant_like env ty_sub
+              in
+              env
+              |> simplify_subtype_i
+                   ~subtype_env
+                   ~sub_supportdyn
+                   ~this_ty
+                   ~super_like:false
+                   (LoclType ty_sub)
+                   (LoclType ty_super)
+            else
+              default env
         end))
     | (_, Tintersection tyl) ->
       (match ety_sub with
@@ -1561,7 +1575,25 @@ and simplify_subtype_i
               in
               let (env, opt_ty) = Typing_dynamic.try_push_like env ty in
               (match opt_ty with
-              | None -> finish env
+              | None ->
+                if is_tyvar ty then
+                  env
+                  |> simplify_subtype_i
+                       ~subtype_env
+                       ~sub_supportdyn
+                       ~this_ty
+                       ~super_like:true
+                       ty_sub
+                       (LoclType ty)
+                  ||| simplify_subtype_i
+                        ~subtype_env
+                        ~sub_supportdyn
+                        ~this_ty
+                        ty_sub
+                        (LoclType (MakeType.dynamic r))
+                  ||| finish
+                else
+                  finish env
               | Some ty ->
                 let simplify_pushed_like env =
                   env

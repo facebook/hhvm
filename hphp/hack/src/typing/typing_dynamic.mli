@@ -72,3 +72,12 @@ val try_push_like :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty option
+
+(* If ty is ~ty0 then return ty0
+ * Otherwise, recursively apply like-stripping to all covariant positions
+ *   e.g. tuple and shape components, covariant type arguments to generic classes.
+ *)
+val strip_covariant_like :
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty

@@ -282,3 +282,63 @@ let rec try_push_like env ty =
     else
       (env, None)
   | _ -> (env, None)
+
+(* If ty is ~ty0 then return ty0
+ * Otherwise, recursively apply like-stripping to all covariant positions
+ *   e.g. tuple and shape components, covariant type arguments to generic classes.
+ *)
+let rec strip_covariant_like env ty =
+  match Typing_utils.try_strip_dynamic env ty with
+  | Some ty -> (env, ty)
+  | None ->
+    (match deref ty with
+    | (r, Ttuple tyl) ->
+      let (env, tyl) = List.map_env env ~f:strip_covariant_like tyl in
+      (env, mk (r, Ttuple tyl))
+    | (r, Tfun ft) ->
+      let (env, ret_ty) = strip_covariant_like env ft.ft_ret.et_type in
+      ( env,
+        mk (r, Tfun { ft with ft_ret = { ft.ft_ret with et_type = ret_ty } }) )
+    | (r, Tshape (kind, fields)) ->
+      let strip_shape_field env _name { sft_optional; sft_ty } =
+        let (env, sft_ty) = strip_covariant_like env sft_ty in
+        (env, { sft_optional; sft_ty })
+      in
+      let (env, fields) = TShapeMap.map_env strip_shape_field env fields in
+      (env, mk (r, Tshape (kind, fields)))
+    | (r, Tnewtype (n, tyl, bound)) -> begin
+      match Env.get_typedef env n with
+      | None -> (env, ty)
+      | Some td ->
+        let (env, tyl) = strip_covariant_like_tyargs env tyl td.td_tparams in
+        (env, mk (r, Tnewtype (n, tyl, bound)))
+    end
+    | (r, Tclass ((p, n), exact, tyl)) -> begin
+      match Env.get_class env n with
+      | None -> (env, ty)
+      | Some cd ->
+        let (env, tyl) = strip_covariant_like_tyargs env tyl (Cls.tparams cd) in
+        (env, mk (r, Tclass ((p, n), exact, tyl)))
+    end
+    | (r, Toption ty) -> begin
+      let (env, ty) = strip_covariant_like env ty in
+      (env, mk (r, Toption ty))
+    end
+    | (r, Tvec_or_dict (tk, tv)) ->
+      let (env, tk) = strip_covariant_like env tk in
+      let (env, tv) = strip_covariant_like env tv in
+      (env, mk (r, Tvec_or_dict (tk, tv)))
+    | _ -> (env, ty))
+
+and strip_covariant_like_tyargs env tyl tparams =
+  if List.length tyl <> List.length tparams then
+    (env, tyl)
+  else
+    let strip_covariant_like_tyarg env ty tp =
+      match tp.tp_variance with
+      | Ast_defs.Contravariant
+      | Ast_defs.Invariant ->
+        (env, ty)
+      | Ast_defs.Covariant -> strip_covariant_like env ty
+    in
+    List.map2_env env tyl tparams ~f:strip_covariant_like_tyarg

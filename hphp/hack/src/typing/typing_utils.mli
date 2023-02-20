@@ -487,6 +487,12 @@ val make_supportdyn :
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
 
+val simple_make_supportdyn :
+  Typing_reason.t ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty
+
 val make_supportdyn_decl_type :
   Pos_or_decl.t ->
   Typing_defs.Reason.decl_t ->

@@ -682,7 +682,7 @@ let normalize_union env ?on_tyvar tyl :
           when String.equal n Naming_special_names.Classes.cSupportDyn ->
           let (_, env, ty) = Typing_utils.strip_supportdyn env ty in
           let (env, ty) = Utils.simplify_intersections env ty ?on_tyvar in
-          let (env, ty) = Typing_utils.make_supportdyn r env ty in
+          let (env, ty) = Typing_utils.simple_make_supportdyn r env ty in
           proceed env ty
         | ((_, Tintersection _), _) ->
           let (env, ty) = Utils.simplify_intersections env ty ?on_tyvar in

@@ -800,6 +800,15 @@ let rec make_supportdyn r env ty =
     else
       (env, Typing_make_type.supportdyn r ty)
 
+let simple_make_supportdyn r env ty =
+  let (env, ty) = Env.expand_type env ty in
+  ( env,
+    match get_node ty with
+    | Tnewtype (n, _, _)
+      when String.equal n Naming_special_names.Classes.cSupportDyn ->
+      ty
+    | _ -> Typing_make_type.supportdyn r ty )
+
 let make_supportdyn_decl_type p r ty =
   mk (r, Tapply ((p, Naming_special_names.Classes.cSupportDyn), [ty]))
 

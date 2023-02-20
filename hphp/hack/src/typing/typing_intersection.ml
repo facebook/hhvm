@@ -188,13 +188,13 @@ let rec intersect env ~r ty1 ty2 =
             when String.equal name1 Naming_special_names.Classes.cSupportDyn
                  && not (is_tyvar ty2) ->
             let (env, ty) = intersect ~r env ty1arg ty2 in
-            let (env, res) = Typing_utils.make_supportdyn r env ty in
+            let (env, res) = Typing_utils.simple_make_supportdyn r env ty in
             (env, res)
           | (_, (r, Tnewtype (name1, [ty2arg], _)))
             when String.equal name1 Naming_special_names.Classes.cSupportDyn
                  && not (is_tyvar ty1) ->
             let (env, ty) = intersect ~r env ty1 ty2arg in
-            let (env, res) = Typing_utils.make_supportdyn r env ty in
+            let (env, res) = Typing_utils.simple_make_supportdyn r env ty in
             (env, res)
           | ((_, Tintersection tyl), _) -> intersect_lists env r [ty2] tyl
           | (_, (_, Tintersection tyl)) -> intersect_lists env r [ty1] tyl

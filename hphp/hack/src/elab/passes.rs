@@ -18,6 +18,7 @@ pub mod elab_expr_tuple;
 pub mod elab_func_body;
 pub mod elab_hint_happly;
 pub mod elab_hint_hsoft;
+pub mod elab_hint_retonly;
 pub mod elab_hkt;
 pub mod elab_user_attributes;
 pub mod guard_invalid;

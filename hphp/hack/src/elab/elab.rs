@@ -105,7 +105,7 @@ fn elaborate<T: Transform>(
         // -- Mark invalid hints and expressions & miscellaneous validation ---
 
         // Replace invalid uses of `void` and `noreturn` with `Herr`
-        // passes::elab_retonly_hint::ElabRetonlyHintPass::default(),
+        passes::elab_hint_retonly::ElabHintRetonlyPass::default(),
 
         // Replace invalid uses of wildcard hints with `Herr`
         // passes::elab_wildcard_hint::ElabWildcardHintPass::default(),

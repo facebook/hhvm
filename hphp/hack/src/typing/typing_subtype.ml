@@ -2500,7 +2500,7 @@ and simplify_subtype_i
                ~this_ty
                ~super_like
                ~super_supportdyn:true
-               ~sub_supportdyn:None
+               ~sub_supportdyn
                tyarg_sub
                tyarg_super
         | (_, (Tgeneric _ | Tvar _)) -> default_subtype env

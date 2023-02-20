@@ -41,6 +41,13 @@ impl Id {
     }
 }
 
+#[allow(clippy::derivable_impls)]
+impl Default for Id {
+    fn default() -> Self {
+        Id(Default::default(), Default::default())
+    }
+}
+
 impl Bop {
     pub fn is_any_eq(&self) -> bool {
         match self {

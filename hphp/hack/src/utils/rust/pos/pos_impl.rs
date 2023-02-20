@@ -371,6 +371,12 @@ impl std::fmt::Display for Pos {
     }
 }
 
+impl Default for Pos {
+    fn default() -> Self {
+        Self::make_none()
+    }
+}
+
 impl Ord for Pos {
     // Intended to match the implementation of `Pos.compare` in OCaml.
     fn cmp(&self, other: &Pos) -> Ordering {

@@ -6,6 +6,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::mem::take;
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
@@ -13,7 +14,6 @@ use oxidized::aast_defs::ClassId;
 use oxidized::aast_defs::ClassId_;
 use oxidized::aast_defs::Expr;
 use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::Pstring;
 use oxidized::ast_defs::Id;
 use oxidized::ast_defs::ParamKind;
 use oxidized::naming_error::NamingError;
@@ -27,141 +27,88 @@ use crate::Pass;
 pub struct ElabExprCallHhMethCallerPass;
 
 impl Pass for ElabExprCallHhMethCallerPass {
-    #[allow(non_snake_case)]
     fn on_ty_expr__bottom_up<Ex: Default, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,
         _cfg: &Config,
         errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
-        match check_call(elem, errs) {
-            Check::Ignore => ControlFlow::Continue(()),
-            Check::Invalidate => {
-                let expr_ = std::mem::replace(elem, Expr_::Null);
-                let inner_expr = elab_utils::expr::from_expr_(expr_);
-                *elem = Expr_::Invalid(Box::new(Some(inner_expr)));
-                ControlFlow::Break(())
-            }
-            Check::Elaborate => {
-                let expr_ = std::mem::replace(elem, Expr_::Null);
-                if let Expr_::Call(box (_, _, mut fn_param_exprs, _)) = expr_ {
-                    let meth_arg = fn_param_exprs.pop();
-                    let rcvr_arg = fn_param_exprs.pop();
-                    match rcvr_arg.zip(meth_arg) {
-                        Some((
-                            (_, Expr(_, pc, Expr_::String(rcvr))),
-                            (_, Expr(_, pm, Expr_::String(meth))),
-                        )) => {
-                            *elem = Expr_::MethodCaller(Box::new((
-                                Id(pc, rcvr.to_string()),
-                                (pm, meth.to_string()),
-                            )))
-                        }
-                        Some((
-                            (
-                                _,
-                                Expr(
-                                    _,
-                                    _,
-                                    Expr_::ClassConst(box (ClassId(_, _, ClassId_::CI(id)), _)),
-                                ),
-                            ),
-                            (_, Expr(_, pm, Expr_::String(meth))),
-                        )) => *elem = Expr_::MethodCaller(Box::new((id, (pm, meth.to_string())))),
-                        _ => (),
-                    }
+        let invalid = |expr_: &mut Expr_<_, _>| {
+            let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
+            let inner_expr = elab_utils::expr::from_expr_(inner_expr_);
+            *expr_ = Expr_::Invalid(Box::new(Some(inner_expr)));
+            ControlFlow::Break(())
+        };
+
+        match elem {
+            Expr_::Call(box (
+                Expr(_, fn_expr_pos, Expr_::Id(box id)),
+                _,
+                fn_param_exprs,
+                fn_variadic_param_opt,
+            )) if id.name() == sn::autoimported_functions::METH_CALLER => {
+                // Raise an error if we have a variadic arg
+                if let Some(Expr(_, pos, _)) = fn_variadic_param_opt {
+                    errs.push(NamingPhaseError::Naming(NamingError::TooFewArguments(
+                        pos.clone(),
+                    )))
                 }
-                ControlFlow::Continue(())
-            }
-        }
-    }
-}
 
-enum Check {
-    Ignore,
-    Invalidate,
-    Elaborate,
-}
-
-fn check_call<Ex, En>(expr_: &Expr_<Ex, En>, errs: &mut Vec<NamingPhaseError>) -> Check {
-    match expr_ {
-        Expr_::Call(box (
-            Expr(_, fn_expr_pos, Expr_::Id(box Id(_, fn_name))),
-            _,
-            fn_param_exprs,
-            fn_variadic_param_opt,
-        )) if fn_name == sn::autoimported_functions::METH_CALLER => {
-            // Raise an error if we have a variadic arg
-            if let Some(Expr(_, pos, _)) = fn_variadic_param_opt {
-                errs.push(NamingPhaseError::Naming(NamingError::TooFewArguments(
-                    pos.clone(),
-                )))
-            }
-
-            if fn_param_exprs.len() > 2 {
-                errs.push(NamingPhaseError::Naming(NamingError::TooManyArguments(
-                    fn_expr_pos.clone(),
-                )));
-                return Check::Invalidate;
-            }
-
-            match fn_param_exprs.get(0..2) {
-                Some(
-                    &[
-                        (ParamKind::Pnormal, Expr(_, ref pos, ref expr_1)),
-                        (ParamKind::Pnormal, Expr(_, _, ref expr_2)),
-                    ],
-                ) => {
-                    // Exactly two non-inout args; ensure the second is a string literal
-                    // and the first is either a string literal or a reference to `class`
-                    match (expr_1, expr_2) {
-                        (Expr_::String(_), Expr_::String(_)) => Check::Elaborate,
-                        (Expr_::ClassConst(cc), Expr_::String(_)) => {
-                            let (ClassId(_, _, class_id_), (_, mem)) =
-                                cc as &(ClassId<_, _>, Pstring);
-                            match class_id_ {
-                                ClassId_::CI(_) if mem == sn::members::M_CLASS => Check::Elaborate,
-                                _ => {
-                                    errs.push(NamingPhaseError::Naming(
-                                        NamingError::IllegalMethCaller(pos.clone()),
-                                    ));
-                                    Check::Invalidate
-                                }
-                            }
+                match fn_param_exprs.as_mut_slice() {
+                    [_, _, _, ..] => {
+                        errs.push(NamingPhaseError::Naming(NamingError::TooManyArguments(
+                            fn_expr_pos.clone(),
+                        )));
+                        invalid(elem)
+                    }
+                    [
+                        (ParamKind::Pnormal, Expr(_, rcvr_pos, rcvr)),
+                        (ParamKind::Pnormal, Expr(_, meth_pos, Expr_::String(meth))),
+                    ] => match rcvr {
+                        Expr_::String(rcvr) => {
+                            *elem = Expr_::MethodCaller(Box::new((
+                                Id(take(rcvr_pos), rcvr.to_string()),
+                                (take(meth_pos), meth.to_string()),
+                            )));
+                            ControlFlow::Continue(())
+                        }
+                        Expr_::ClassConst(box (ClassId(_, _, ClassId_::CI(id)), (_, mem)))
+                            if mem == sn::members::M_CLASS =>
+                        {
+                            *elem = Expr_::MethodCaller(Box::new((
+                                take(id),
+                                (take(meth_pos), meth.to_string()),
+                            )));
+                            ControlFlow::Continue(())
                         }
                         _ => {
                             errs.push(NamingPhaseError::Naming(NamingError::IllegalMethCaller(
-                                pos.clone(),
+                                fn_expr_pos.clone(),
                             )));
-                            Check::Invalidate
+                            invalid(elem)
                         }
-                    }
-                }
-                Some(&[_, _]) => {
+                    },
+
                     // We expect a string literal as the second argument and neither param
                     // can be inout; raise an error and invalidate
-                    errs.push(NamingPhaseError::Naming(NamingError::IllegalMethCaller(
-                        fn_expr_pos.clone(),
-                    )));
-                    Check::Invalidate
-                }
+                    [_, _] => {
+                        errs.push(NamingPhaseError::Naming(NamingError::IllegalMethCaller(
+                            fn_expr_pos.clone(),
+                        )));
+                        invalid(elem)
+                    }
 
-                // We are expecting exactly two args
-                Some(&[]) | Some(&[_]) => {
-                    errs.push(NamingPhaseError::Naming(NamingError::TooFewArguments(
-                        fn_expr_pos.clone(),
-                    )));
-                    Check::Invalidate
-                }
-                _ => {
-                    errs.push(NamingPhaseError::Naming(NamingError::TooFewArguments(
-                        fn_expr_pos.clone(),
-                    )));
-                    Check::Invalidate
+                    // We are expecting exactly two args
+                    [] | [_] => {
+                        errs.push(NamingPhaseError::Naming(NamingError::TooFewArguments(
+                            fn_expr_pos.clone(),
+                        )));
+                        invalid(elem)
+                    }
                 }
             }
+            _ => ControlFlow::Continue(()),
         }
-        _ => Check::Ignore,
     }
 }
 

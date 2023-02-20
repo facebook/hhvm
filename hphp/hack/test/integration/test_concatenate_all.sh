@@ -62,7 +62,7 @@ trap cleanup exit
 
 cd "${DATA_DIR}"
 "${HH_CLIENT}" stop || true
-"${HH_CLIENT}"
+"${HH_CLIENT}" --no-load
 
 # syntax tests
 "${HH_CLIENT}" --concatenate-all no_ns*.hack > "${OUTPUT_DIR}/no_ns.hack.out"

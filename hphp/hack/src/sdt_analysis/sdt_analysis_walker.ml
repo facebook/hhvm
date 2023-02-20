@@ -32,6 +32,11 @@ let remove_supportdyn_of_mixed_upper_bound_from_tparams env =
   let typing_env = Typing_env_types.{ typing_env with tpenv } in
   Tast_env.typing_env_as_tast_env typing_env
 
+let remove_supportdyn_from_ty ty =
+  match T.get_node ty with
+  | T.Tnewtype (c, [ty], _) when String.equal c SN.Classes.cSupportDyn -> ty
+  | _ -> ty
+
 let collect_sdts =
   object
     inherit [_] Tast_visitor.reduce as super
@@ -51,7 +56,8 @@ let collect_sdts =
           let doesnt_subtype (fp, (_, (arg_ty, _, _))) =
             not @@ Tast_env.is_sub_type env arg_ty fp.T.fp_type.T.et_type
           in
-          let go id ty =
+          let constraints_of_id id =
+            let ty = remove_supportdyn_from_ty base_ty in
             match T.get_node ty with
             | T.Tfun ft ->
               let param_arg_pairs =
@@ -67,23 +73,15 @@ let collect_sdts =
                 []
             | _ -> []
           in
-          let handle_supportdyn_of_fx_ty id =
-            match T.get_node base_ty with
-            | T.Tnewtype (c, [ty], _) when String.equal c SN.Classes.cSupportDyn
-              ->
-              go id ty
-            | _ -> go id base_ty
-          in
           begin
             match base_exp with
-            | A.Id (_, id) -> handle_supportdyn_of_fx_ty id
+            | A.Id (_, id) -> constraints_of_id id
             | A.Obj_get ((receiver_ty, _, _), _, _, _) -> begin
               match T.get_node receiver_ty with
-              | T.Tclass ((_, id), _, _) -> handle_supportdyn_of_fx_ty id
+              | T.Tclass ((_, id), _, _) -> constraints_of_id id
               | _ -> []
             end
-            | A.Class_const ((_, _, A.CI (_, id)), _) ->
-              handle_supportdyn_of_fx_ty id
+            | A.Class_const ((_, _, A.CI (_, id)), _) -> constraints_of_id id
             | _ -> []
           end
         | _ -> []

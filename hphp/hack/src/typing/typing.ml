@@ -957,7 +957,10 @@ let requires_consistent_construct = function
  * Note: we currently do not generally expand ?t into (null | t), so ~?t is (dynamic | Toption t).
  *)
 let expand_expected_and_get_node
-    ?(strip_supportdyn = false) env (expected : ExpectedTy.t option) =
+    ?(strip_supportdyn = false)
+    ?(pessimisable_builtin = true)
+    env
+    (expected : ExpectedTy.t option) =
   let rec unbox ~under_supportdyn env ty =
     let (env, ty) = Env.expand_type env ty in
     match TUtils.try_strip_dynamic env ty with
@@ -975,6 +978,7 @@ let expand_expected_and_get_node
           if
             (not strip_supportdyn)
             && TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
+            && pessimisable_builtin
           then
             (env, None)
           else
@@ -3921,26 +3925,16 @@ and expr_
     in
     make_result env p (Aast.Lvar id) ty
   | Tuple el ->
-    let (env, expected) = expand_expected_and_get_node env expected in
+    let (env, expected) =
+      expand_expected_and_get_node ~pessimisable_builtin:false env expected
+    in
     let (env, tel, tyl) =
       match expected with
       | Some (pos, ur, _, _, Ttuple expected_tyl) ->
-        let (env, pess_expected_tyl) =
-          if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-            List.map_env env expected_tyl ~f:Typing_array_access.pessimise_type
-          else
-            (env, expected_tyl)
-        in
-        exprs_expected (pos, ur, pess_expected_tyl) env el
+        exprs_expected (pos, ur, expected_tyl) env el
       | _ -> exprs env el
     in
-    let (env, pess_tyl) =
-      if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-        List.map_env env tyl ~f:(Typing_array_access.pessimised_tup_assign p)
-      else
-        (env, tyl)
-    in
-    let ty = MakeType.tuple (Reason.Rwitness p) pess_tyl in
+    let ty = MakeType.tuple (Reason.Rwitness p) tyl in
     make_result env p (Aast.Tuple tel) ty
   | List el ->
     let (env, tel, tyl) =

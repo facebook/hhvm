@@ -587,9 +587,7 @@ let rec array_get
         | (_, p, Int n) ->
           let idx = int_of_string_opt n in
           (match Option.bind idx ~f:(List.nth tyl) with
-          | Some nth ->
-            let (env, pess_ty) = maybe_pessimise_type env nth in
-            (env, (pess_ty, dflt_arr_res, Ok ty2))
+          | Some nth -> (env, (nth, dflt_arr_res, Ok ty2))
           | None ->
             Errors.add_typing_error
               Typing_error.(
@@ -1434,15 +1432,8 @@ let rec assign_array_get
             let idx = int_of_string_opt n in
             (match Option.map ~f:(List.split_n tyl) idx with
             | Some (tyl', _ :: tyl'') ->
-              let (env, pess_ty2) =
-                if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
-                then
-                  pessimised_tup_assign expr_pos env ty2
-                else
-                  (env, ty2)
-              in
               ( env,
-                ( MakeType.tuple r (tyl' @ (pess_ty2 :: tyl'')),
+                ( MakeType.tuple r (tyl' @ (ty2 :: tyl'')),
                   Ok ety1,
                   Ok tkey,
                   Ok ty2 ) )

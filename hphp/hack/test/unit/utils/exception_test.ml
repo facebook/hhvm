@@ -8,9 +8,11 @@
  *
  *)
 
+open Hh_prelude
+
 let expect file stack =
   let matches s = String_utils.string_starts_with s file in
-  if List.exists matches (String_utils.split_on_newlines stack) then
+  if List.exists ~f:matches (String_utils.split_on_newlines stack) then
     ()
   else
     let () =

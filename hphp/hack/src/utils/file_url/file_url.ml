@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 (* File urls: https://tools.ietf.org/html/rfc8089                             *)
 (* Related definitions: https://tools.ietf.org/html/rfc3986                   *)
 (* Notes on UNC file urls and edge-cases:                                     *)
@@ -44,7 +46,7 @@ let decode s =
     if String.length hex <> 2 then failwith ("incorrect %-escape in " ^ s);
     let code = int_of_string ("0x" ^ hex) in
     if code < 32 || code > 127 then failwith ("only 7bit ascii allowed in " ^ s);
-    String.make 1 (Char.chr code)
+    String.make 1 (Char.of_int_exn code)
   in
   let s = Str.global_substitute percent_re subst s in
   if Sys.win32 then
@@ -61,17 +63,17 @@ let decode s =
 let encode ~(safe_chars : string) (s : string) : string =
   let buf = Buffer.create (String.length s * 2) in
   let f (c : char) : unit =
-    if Sys.win32 && c = '\\' then
+    if Sys.win32 && Char.equal c '\\' then
       Buffer.add_char buf '/'
     else if String.contains safe_chars c then
       Buffer.add_char buf c
     else
-      let code = Char.code c in
+      let code = Char.to_int c in
       if code < 32 || code > 127 then
         failwith ("only 7bit ascii allowed in " ^ s);
       Buffer.add_string buf (Printf.sprintf "%%%02X" code)
   in
-  String.iter f s;
+  String.iter ~f s;
   Buffer.contents buf
 
 (**
@@ -94,6 +96,7 @@ let parse uri =
   let path = Str.matched_group 2 uri in
   let query_fragment = Str.matched_group 3 uri in
   let path = decode path in
+  let ( <> ) = String.( <> ) in
   (* this uses regexp internally *)
   if host <> "" && host <> "localhost" then failwith ("not localhost - " ^ uri);
   if query_fragment <> "" then
@@ -102,7 +105,7 @@ let parse uri =
     let drive_letter = Str.matched_group 1 path in
     let rest = Str.matched_group 2 path in
     drive_letter ^ ":" ^ rest
-  else if String.length path > 0 && path.[0] = '/' then
+  else if String.length path > 0 && Char.equal path.[0] '/' then
     failwith ("UNC file urls not supported - " ^ uri)
   else
     "/" ^ path

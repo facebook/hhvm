@@ -1,4 +1,5 @@
 open Asserter
+open Hh_prelude
 
 let test_echo () =
   let process =
@@ -50,7 +51,7 @@ let test_env_variable () =
   | Ok { Process_types.stdout; _ } ->
     let env = String_utils.split_into_lines stdout in
     let name_env =
-      List.filter (fun s -> String_utils.string_starts_with s "NAME=") env
+      List.filter ~f:(fun s -> String_utils.string_starts_with s "NAME=") env
     in
     (match name_env with
     | [] -> false
@@ -79,7 +80,7 @@ let test_future () =
   let future =
     FutureProcess.make
       (Process.exec (Exec_command.For_use_in_testing_only "sleep") ["1"])
-      String.trim
+      String.strip
   in
   let result = Future.get_exn future in
   let () = String_asserter.assert_equals "" result "" in
@@ -89,7 +90,7 @@ let test_future_is_ready () =
   let future =
     FutureProcess.make
       (Process.exec (Exec_command.For_use_in_testing_only "sleep") ["1"])
-      String.trim
+      String.strip
   in
   (* Shouldn't be ready immediately. *)
   if Future.is_ready future then
@@ -111,8 +112,8 @@ let test_future_continue_with () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir_path]
       in
-      let future = FutureProcess.make ls_proc String.trim in
-      let future = Future.continue_with future String.uppercase_ascii in
+      let future = FutureProcess.make ls_proc String.strip in
+      let future = Future.continue_with future String.uppercase in
       String_asserter.assert_equals
         "TEST.TXT"
         (Future.get_exn future)
@@ -128,7 +129,7 @@ let test_future_continue_with_future () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir_path]
       in
-      let future = FutureProcess.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.strip in
       let future =
         Future.continue_with_future future (fun a ->
             let cat_proc =
@@ -136,7 +137,7 @@ let test_future_continue_with_future () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [Path.to_string (Path.concat dir_path a)]
             in
-            FutureProcess.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.strip)
       in
       String_asserter.assert_equals
         "my file contents"
@@ -153,11 +154,11 @@ let test_future_continue_and_map_err_ok () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir_path]
       in
-      let future = FutureProcess.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.strip in
       let future =
         Future.continue_and_map_err future (fun res ->
             match res with
-            | Ok str -> Ok (String.uppercase_ascii str)
+            | Ok str -> Ok (String.uppercase str)
             | Error _ -> Error "should not hit this point")
       in
       match Future.get_exn future with
@@ -175,7 +176,7 @@ let test_future_continue_and_map_err_error () =
       (Exec_command.For_use_in_testing_only "command_that_doesnt_exist")
       []
   in
-  let future = FutureProcess.make fail_proc String.trim in
+  let future = FutureProcess.make fail_proc String.strip in
   let future =
     Future.continue_and_map_err future (fun res ->
         match res with
@@ -206,7 +207,7 @@ let test_future_long_continuation_chain_ok () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir1]
       in
-      let future = FutureProcess.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.strip in
       let future =
         Future.continue_with_future future (fun ls_result ->
             let cat_proc =
@@ -214,7 +215,7 @@ let test_future_long_continuation_chain_ok () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [Path.to_string (Path.concat dir1 ls_result)]
             in
-            FutureProcess.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.strip)
       in
       let future =
         Future.continue_with_future future (fun cat_result ->
@@ -223,7 +224,7 @@ let test_future_long_continuation_chain_ok () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [cat_result]
             in
-            FutureProcess.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.strip)
       in
       String_asserter.assert_equals
         "my file contents"
@@ -246,7 +247,7 @@ let test_future_long_continuation_chain_error () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir1]
       in
-      let future = FutureProcess.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.strip in
       let future =
         Future.continue_with_future future (fun ls_result ->
             let cat_proc =
@@ -254,7 +255,7 @@ let test_future_long_continuation_chain_error () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [Path.to_string (Path.concat dir1 ls_result)]
             in
-            FutureProcess.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.strip)
       in
       let future =
         Future.continue_with_future future (fun cat_result ->
@@ -263,7 +264,7 @@ let test_future_long_continuation_chain_error () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [cat_result]
             in
-            FutureProcess.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.strip)
       in
       let future =
         Future.continue_and_map_err future (fun res ->
@@ -274,8 +275,8 @@ let test_future_long_continuation_chain_error () =
       let future =
         Future.continue_with future (fun res ->
             match res with
-            | Ok s -> Ok (String.uppercase_ascii s)
-            | Error s -> Error (String.uppercase_ascii s))
+            | Ok s -> Ok (String.uppercase s)
+            | Error s -> Error (String.uppercase s))
       in
       match Future.get_exn future with
       | Ok s -> failwith (Printf.sprintf "Expected failure, got Ok '%s'" s)
@@ -350,7 +351,7 @@ let open_an_fd () = Unix.openfile "/dev/null" [Unix.O_RDONLY] 0o440
 
 let int_of_fd (x : Unix.file_descr) : int = Obj.magic x
 
-let close_fds fds = List.iter Unix.close fds
+let close_fds fds = List.iter ~f:Unix.close fds
 
 (** Asserts the next opened file descriptor is exactly 1 greater
  * than the "last_fd". Repeats this "repeats" times. Accumulates all opened

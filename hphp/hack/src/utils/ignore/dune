@@ -10,6 +10,8 @@
   hh_json
   str
   string
+  base
+  core
   (select
    filesToIgnore.ml
    from

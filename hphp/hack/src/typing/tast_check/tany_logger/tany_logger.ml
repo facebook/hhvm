@@ -9,13 +9,11 @@
 open Hh_prelude
 open Tany_logger_types
 open Tany_logger_file
-open Tany_logger_scuba
 
 (* A bad type is a Tany *)
 
 let log_info env (infos : info list) : unit =
-  List.iter ~f:(log_info_to_file env) infos;
-  log_info_to_scuba env infos
+  List.iter ~f:(log_info_to_file env) infos
 
 let _extract_bad_type_indicator ty =
   let finder =

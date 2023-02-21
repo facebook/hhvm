@@ -5,7 +5,6 @@
  (libraries
   ast
   tany_logger_common
-  tany_logger_scuba
   core_kernel
   tast_env
   utils_core)

@@ -243,13 +243,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name tany_logger_scuba_stubs)
- (wrapped false)
- (modules tany_logger_scuba)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name shape_analysis_scuba_stubs)
  (wrapped false)
  (modules shape_analysis_scuba))

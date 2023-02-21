@@ -792,6 +792,11 @@ struct FactsStoreImpl final
 
   Array getMethodsWithAttribute(const String& attr) override {
     return logPerformance(__func__, [&]() {
+      if (UNLIKELY(!m_map.isAttrIndexed(*attr.get()))) {
+        HPHP::SystemLib::throwRuntimeExceptionObject(fmt::format(
+            "Queried attribute {} not found in IndexedMethodAttributes",
+            attr.get()->data()));
+      }
       return makeVecOfStringString(m_map.getMethodsWithAttribute(*attr.get()));
     });
   }

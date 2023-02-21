@@ -175,7 +175,14 @@ function print_attr_type_aliases(
 function print_attr_methods(
   classname<\HH\MethodAttribute> $attr,
 ): void {
-  $method_tuples = HH\Facts\methods_with_attribute($attr);
+  try {
+    $method_tuples = HH\Facts\methods_with_attribute($attr);
+  } catch (Exception $e) {
+    print HH\Lib\Str\format(
+      'Threw %s:"%s" trying to get methods with %s%s',
+      get_class($e), $e->getMessage(), $attr, "\n");
+    return;
+  }
   $methods = vec[];
   foreach ($method_tuples as list($type, $method)) {
     $methods[] = "$type::$method";
@@ -631,6 +638,7 @@ function facts(): void {
   print_attr_types(TwoArgAttr::class);
   print_attr_methods(NoArgMethodAttr::class);
   print_attr_methods(TwoArgMethodAttr::class);
+  print_attr_methods(DontIndexThisMethodAttr::class);
 
   print "\nGetting type aliases with attribute\n";
   print_attr_type_aliases(TypeAliasAttr::class);

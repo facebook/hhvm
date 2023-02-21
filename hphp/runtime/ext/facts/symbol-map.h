@@ -340,6 +340,8 @@ struct SymbolMap {
   bool isTypeFinal(Symbol<SymKind::Type> type);
   bool isTypeFinal(const StringData& type);
 
+  bool isAttrIndexed(const StringData& attr);
+
   /**
    * Return a hash representing the given path's last-known checksum.
    */

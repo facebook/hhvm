@@ -1038,6 +1038,10 @@ bool SymbolMap::isTypeFinal(const StringData& type) {
   return isTypeFinal(Symbol<SymKind::Type>{type});
 }
 
+bool SymbolMap::isAttrIndexed(const StringData& attr) {
+  return m_indexedMethodAttrs.contains(Symbol<SymKind::Type>{attr});
+}
+
 std::pair<TypeKind, TypeFlagMask> SymbolMap::getKindAndFlags(
     Symbol<SymKind::Type> type) {
   return getKindAndFlags(type, getSymbolPath(type));

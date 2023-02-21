@@ -52,7 +52,7 @@ MyStruct s;
 s.field() = "hi";
 
 MyStructPatch patch;
-op::StringPatch stringPatch = patch.patch<ident::field>();
+op::StringPatch& stringPatch = patch.patch<ident::field>();
 stringPatch.prepend("(");
 stringPatch += ")";
 patch.apply(s);

@@ -46,90 +46,73 @@ let is_literal_with_trivially_inferable_type (_, _, e) =
 
 let method_dynamically_callable env cls m params_decl_ty return =
   let env = { env with under_dynamic_assumptions = true } in
-  (* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>> *)
-  let env_with_require_dynamic =
-    Typing_dynamic.add_require_dynamic_bounds env cls
-  in
   let ret_locl_ty = return.Typing_env_return_info.return_type.et_type in
-  let interface_check =
-    Typing_dynamic.sound_dynamic_interface_check
-      ~this_class:(Some cls)
-      env_with_require_dynamic
+  (* Here the body of the method is typechecked again to ensure it is safe
+   * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
+   * The code below must be kept in sync with with the method_def checks.
+   *)
+  let make_dynamic pos =
+    Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
+  in
+  let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
+  let dynamic_return_info =
+    Typing_env_return_info.
+      { return with return_type = MakeType.unenforced dynamic_return_ty }
+  in
+  let (env, param_tys) =
+    Typing_param.make_param_local_tys
+      ~dynamic_mode:true
+      env
       params_decl_ty
-      ret_locl_ty
+      m.m_params
   in
-  let method_body_check () =
-    (* Here the body of the method is typechecked again to ensure it is safe
-     * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
-     * The code below must be kept in sync with with the method_def checks.
-     *)
-    let make_dynamic pos =
-      Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
-    in
-    let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
-    let dynamic_return_info =
-      Typing_env_return_info.
-        { return with return_type = MakeType.unenforced dynamic_return_ty }
-    in
-    let (env, param_tys) =
-      Typing_param.make_param_local_tys
-        ~dynamic_mode:true
-        env
-        params_decl_ty
-        m.m_params
-    in
-    let (env, dynamic_params) =
-      Typing.bind_params env m.m_ctxs param_tys m.m_params
-    in
-    let pos = fst m.m_name in
-    let env = set_tyvars_variance_in_callable env dynamic_return_ty param_tys in
-
-    let env =
-      if Cls.get_support_dynamic_type cls then
-        let this_ty =
-          Typing_make_type.intersection
-            (Reason.Rsupport_dynamic_type Pos_or_decl.none)
-            [Env.get_local env this; make_dynamic Pos_or_decl.none]
-        in
-        Env.set_local env this this_ty Pos.none
-      else
-        env
-    in
-
-    let disable =
-      Naming_attributes.mem
-        SN.UserAttributes.uaDisableTypecheckerInternal
-        m.m_user_attributes
-    in
-
-    let (env, dynamic_body) =
-      Errors.try_with_result
-        (fun () ->
-          Typing.fun_
-            ~abstract:m.m_abstract
-            ~native:(Typing_native.is_native_meth ~env m)
-            ~disable
-            env
-            dynamic_return_info
-            pos
-            m.m_body
-            m.m_fun_kind)
-        (fun env_and_dynamic_body error ->
-          Errors.method_is_not_dynamically_callable
-            pos
-            (snd m.m_name)
-            (Cls.name cls)
-            (Env.get_support_dynamic_type env)
-            None
-            (Some error);
-          env_and_dynamic_body)
-    in
-    Some (env, dynamic_params, dynamic_body, dynamic_return_ty)
+  let (env, dynamic_params) =
+    Typing.bind_params env m.m_ctxs param_tys m.m_params
   in
-  if not interface_check then
-    method_body_check ()
-  else
-    None
+  let pos = fst m.m_name in
+  let env = set_tyvars_variance_in_callable env dynamic_return_ty param_tys in
+
+  let env =
+    if Cls.get_support_dynamic_type cls then
+      let this_ty =
+        Typing_make_type.intersection
+          (Reason.Rsupport_dynamic_type Pos_or_decl.none)
+          [Env.get_local env this; make_dynamic Pos_or_decl.none]
+      in
+      Env.set_local env this this_ty Pos.none
+    else
+      env
+  in
+
+  let disable =
+    Naming_attributes.mem
+      SN.UserAttributes.uaDisableTypecheckerInternal
+      m.m_user_attributes
+  in
+
+  let (env, dynamic_body) =
+    Errors.try_with_result
+      (fun () ->
+        Typing.fun_
+          ~abstract:m.m_abstract
+          ~native:(Typing_native.is_native_meth ~env m)
+          ~disable
+          env
+          dynamic_return_info
+          pos
+          m.m_body
+          m.m_fun_kind)
+      (fun env_and_dynamic_body error ->
+        Errors.method_is_not_dynamically_callable
+          pos
+          (snd m.m_name)
+          (Cls.name cls)
+          (Env.get_support_dynamic_type env)
+          None
+          (Some error);
+        env_and_dynamic_body)
+  in
+  (env, dynamic_params, dynamic_body, dynamic_return_ty)
 
 let method_return ~supportdyn env cls m ret_decl_ty =
   let hint_pos =
@@ -344,6 +327,22 @@ let method_def ~is_disposable env cls m =
       Aast.m_doc_comment = m.m_doc_comment;
     }
   in
+  let sdt_dynamic_check_required =
+    sdt_dynamic_check_required
+    && not
+       @@
+       (* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>> *)
+       let env_with_require_dynamic =
+         Typing_dynamic.add_require_dynamic_bounds
+           sound_dynamic_check_saved_env
+           cls
+       in
+       Typing_dynamic.sound_dynamic_interface_check
+         ~this_class:(Some cls)
+         env_with_require_dynamic
+         params_decl_ty
+         return.Typing_env_return_info.return_type.et_type
+  in
   let method_defs =
     let method_def_of_dynamic
         (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
@@ -368,9 +367,7 @@ let method_def ~is_disposable env cls m =
           return
       in
       if TypecheckerOptions.tast_under_dynamic tcopt then
-        dynamic_components
-        |> Option.value_map ~default:[] ~f:(fun dyn_comps ->
-               [method_def_of_dynamic dyn_comps])
+        [method_def_of_dynamic dynamic_components]
       else
         []
     else

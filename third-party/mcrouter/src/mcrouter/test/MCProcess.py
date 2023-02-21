@@ -244,6 +244,7 @@ class MCProcess(ProcessBase):
                 retry_count += 1
                 if self.max_retries and retry_count >= self.max_retries:
                     raise RuntimeError("MCProcess connected but did not respond to ping")
+                time.sleep(1)
         if self.versionPing and self.thrift_client is not None:
             retry_count = 0
             while True:
@@ -256,6 +257,7 @@ class MCProcess(ProcessBase):
                 retry_count += 1
                 if self.max_retries and retry_count >= self.max_retries:
                     raise RuntimeError("MCProcess connected but did not respond to ping")
+                time.sleep(1)
 
     def disconnect(self):
         try:

@@ -2884,7 +2884,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             TokenKind::Arraykey => self.prim_ty(aast::Tprim::Tarraykey, token_pos(self)),
             TokenKind::Noreturn => self.prim_ty(aast::Tprim::Tnoreturn, token_pos(self)),
             TokenKind::Resource => self.prim_ty(aast::Tprim::Tresource, token_pos(self)),
-            TokenKind::Class => {
+            TokenKind::Class | TokenKind::Interface => {
                 if self.under_no_auto_dynamic {
                     let this = Rc::make_mut(&mut self.state);
                     this.inside_no_auto_dynamic_class = true;
@@ -2938,7 +2938,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             | TokenKind::Final
             | TokenKind::Implements
             | TokenKind::Inout
-            | TokenKind::Interface
             | TokenKind::Newctx
             | TokenKind::Newtype
             | TokenKind::Type

@@ -841,24 +841,39 @@ TEST_F(
 class ServerInstrumentationTest : public testing::Test {};
 
 TEST_F(ServerInstrumentationTest, simpleServerTest) {
-  ThriftServer serverNotServing;
-  ScopedServerInterfaceThread server0(std::make_shared<TestInterface>());
-  // We need to make sure server is really serving, the simplest way is
-  // to wait for the first request to be completed.
-  folly::coro::blockingWait(
-      server0.newClient<InstrumentationTestServiceAsyncClient>()->co_noop());
+  EXPECT_EQ(
+      instrumentation::getServerCount(instrumentation::kThriftServerTrackerKey),
+      0);
+  instrumentation::forEachServer(
+      instrumentation::kThriftServerTrackerKey, [](auto&) {
+        FAIL()
+            << "No ThriftServer instances have been created, so none should be registered";
+      });
+
+  // Create a ThriftServer instance
   {
-    ScopedServerInterfaceThread server1(std::make_shared<TestInterface>());
-    folly::coro::blockingWait(
-        server1.newClient<InstrumentationTestServiceAsyncClient>()->co_noop());
+    ThriftServer server0;
     EXPECT_EQ(
         instrumentation::getServerCount(
             instrumentation::kThriftServerTrackerKey),
-        2);
+        1);
+    instrumentation::forEachServer(
+        instrumentation::kThriftServerTrackerKey, [&server0](auto& server) {
+          EXPECT_EQ(&server, &server0);
+          EXPECT_EQ(
+              server.getServerStatus(),
+              ThriftServer::ServerStatus::NOT_RUNNING);
+        });
   }
+
   EXPECT_EQ(
       instrumentation::getServerCount(instrumentation::kThriftServerTrackerKey),
-      1);
+      0);
+  instrumentation::forEachServer(
+      instrumentation::kThriftServerTrackerKey, [](auto&) {
+        FAIL()
+            << "All ThriftServer instances have been destroyed, so none should be registered";
+      });
 }
 
 TEST(ThriftServerDeathTest, getSnapshotOnServerShutdown) {

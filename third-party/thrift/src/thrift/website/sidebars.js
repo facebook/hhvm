@@ -524,18 +524,28 @@ module.exports = {
         'fb/contributions/troubleshooting',
         'fb/contributions/xplat',
         ]),
-        'contributions/conformance/index',
         {
           type: 'category',
-          label: 'Test Suite',
+          label: 'Conformance',
           link: {
             type: 'doc',
-            id: "contributions/conformance/testsuite/index",
+            id: 'contributions/conformance/index',
           },
           items: [
-            'contributions/conformance/testsuite/data',
-            'contributions/conformance/testsuite/client-rpc',
-            'contributions/conformance/testsuite/server-rpc',
+            ...fbInternalOnly(["fb/conformance/quickstart"]),
+            {
+              type: 'category',
+              label: 'Test Suite',
+              link: {
+                type: 'doc',
+                id: 'contributions/conformance/testsuite/index'
+              },
+              items: [
+                "contributions/conformance/testsuite/data",
+                "contributions/conformance/testsuite/client-rpc",
+                "contributions/conformance/testsuite/server-rpc",
+              ]
+            }
           ]
         },
         'contributions/universal-name',

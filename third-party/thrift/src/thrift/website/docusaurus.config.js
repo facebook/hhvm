@@ -142,7 +142,7 @@ const config = {
       copyright: `Copyright © ${new Date().getFullYear()} Meta Platforms, Inc. Built with Docusaurus.`
     },
     prism: {
-      additionalLanguages: ['java'],
+      additionalLanguages: ['java', 'php'],
     },
   }
 };

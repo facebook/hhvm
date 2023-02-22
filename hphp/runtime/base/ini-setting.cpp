@@ -159,7 +159,9 @@ Variant ini_get_vec(std::vector<T>& p) {
   }                                                                       \
   static void ini_log(Ty& t, const char* name, StructuredLogEntry& ent) { \
     ent.setInt(name, t);                                                  \
-  }
+  }                                                                       \
+  static folly::dynamic ini_dyn(Ty& t) { return t; }                      \
+/**/
 
 #define U(Ty) \
   Variant ini_get(Ty& p) { return p; }                                    \
@@ -173,7 +175,9 @@ Variant ini_get_vec(std::vector<T>& p) {
   }                                                                       \
   static void ini_log(Ty& t, const char* name, StructuredLogEntry& ent) { \
     ent.setInt(name, t);                                                  \
-  }
+  }                                                                       \
+  static folly::dynamic ini_dyn(Ty& t) { return t; }                      \
+/**/
 
 #define M(Ty)                                                             \
   Variant ini_get(Ty& p) {                                                \
@@ -199,7 +203,15 @@ Variant ini_get_vec(std::vector<T>& p) {
       tags.emplace(strs.back());                                          \
     }                                                                     \
     ent.setSet(name, tags);                                               \
-  }
+  }                                                                       \
+  static folly::dynamic ini_dyn(Ty& t) {                                  \
+    folly::dynamic obj = folly::dynamic::object;                          \
+    for (auto& [k, v] : t) {                                              \
+      obj[k] = v;                                                         \
+    }                                                                     \
+    return obj;                                                           \
+  }                                                                       \
+  /**/
 
 #define S(Ty)                                                             \
   Variant ini_get(Ty& p) {                                                \
@@ -220,7 +232,13 @@ Variant ini_get_vec(std::vector<T>& p) {
     std::set<folly::StringPiece> tags;                                    \
     for (auto& v : t) tags.emplace(v);                                    \
     ent.setSet(name, tags);                                               \
-  }
+  }                                                                       \
+  static folly::dynamic ini_dyn(Ty& t) {                                  \
+    auto arr = folly::dynamic::array();                                   \
+    for (auto& v : t) arr.push_back(v);                                   \
+    return arr;                                                           \
+  }                                                                       \
+  /**/
 
 INI_TYPES4(N, U, M, S)
 
@@ -246,6 +264,7 @@ bool ini_on_update(const Variant& value, bool& p) {
 static void ini_log(bool& t, const char* name, StructuredLogEntry& ent) {
   ent.setInt(name, t ? 1 : 0);
 }
+static folly::dynamic ini_dyn(bool& t) { return t; }
 
 Variant ini_get(double& p) { return p; }
 bool ini_on_update(const Variant& value, double& p) {
@@ -256,6 +275,7 @@ bool ini_on_update(const Variant& value, double& p) {
 static void ini_log(double& t, const char* name, StructuredLogEntry& ent) {
   ent.setStr(name, folly::to<std::string>(t));
 }
+static folly::dynamic ini_dyn(double& t) { return t; }
 
 Variant ini_get(std::string& p) { return p.data(); }
 bool ini_on_update(const Variant& value, std::string& p) {
@@ -266,6 +286,7 @@ bool ini_on_update(const Variant& value, std::string& p) {
 static void ini_log(std::string& t, const char* name, StructuredLogEntry& ent) {
   ent.setStr(name, t);
 }
+static folly::dynamic ini_dyn(std::string& t) { return t; }
 
 Variant ini_get(std::unordered_map<std::string, int>& p) {
   DictInit ret(p.size());
@@ -292,6 +313,11 @@ static void ini_log(std::unordered_map<std::string, int>& t,
   }
   ent.setSet(name, tags);
 }
+static folly::dynamic ini_dyn(std::unordered_map<std::string, int>& t) {
+  folly::dynamic obj = folly::dynamic::object;
+  for (auto& [k, v] : t) obj[k] = v;
+  return obj;
+}
 
 Variant ini_get(Array& p) { return p; }
 bool ini_on_update(const Variant& value, Array& p) {
@@ -301,6 +327,10 @@ bool ini_on_update(const Variant& value, Array& p) {
 }
 static void ini_log(Array& t, const char* name, StructuredLogEntry& ent) {
   // Do nothing
+}
+static folly::dynamic ini_dyn(Array& t) {
+  // Ignore
+  return folly::dynamic::array();
 }
 
 Variant ini_get(std::vector<uint32_t>& p) { return ini_get_vec(p); }
@@ -321,6 +351,11 @@ static void ini_log(std::vector<uint32_t>& t, const char* name,
   }
   ent.setVec(name, v);
 }
+static folly::dynamic ini_dyn(std::vector<uint32_t>& t) {
+  auto arr = folly::dynamic::array();
+  for (auto i : t) arr.push_back(i);
+  return arr;
+}
 
 Variant ini_get(std::vector<std::string>& p) { return ini_get_vec(p); }
 bool ini_on_update(const Variant& value, std::vector<std::string>& p) {
@@ -335,6 +370,11 @@ static void ini_log(std::vector<std::string>& t, const char* name,
   std::vector<folly::StringPiece> v;
   for (auto& s : t) v.emplace_back(s);
   ent.setVec(name, v);
+}
+static folly::dynamic ini_dyn(std::vector<std::string>& t) {
+  auto arr = folly::dynamic::array();
+  for (auto& s : t) arr.push_back(s);
+  return arr;
 }
 
 const IniSettingMap ini_iterate(const IniSettingMap &ini,
@@ -775,6 +815,22 @@ void doLog(IniSetting::OptionData& data, const char* name,
 #undef F
 }
 
+folly::dynamic doDyn(IniSetting::OptionData& data) {
+#define F(Ty) \
+  [] (IniSetting::SetAndGetImpl<Ty>& data) { \
+    Ty v;                                    \
+    if (data.getter) v = data.getter();      \
+    else if (data.val) v = *data.val;        \
+    return ini_dyn(v);                       \
+  },
+  return folly::variant_match<folly::dynamic>(
+    data,
+    INI_TYPES(F)
+    [] (std::nullptr_t) { always_assert(false); return folly::dynamic(); }
+  );
+#undef F
+}
+
 using CallbackMap = folly::F14FastMap<
   String, IniCallbackData, hphp_string_hash, hphp_string_same>;
 
@@ -1062,6 +1118,16 @@ void IniSetting::Log(StructuredLogEntry& ent,
 
     doLog(iter.second.callbacks, iter.first.data(), ent);
   }
+}
+
+folly::dynamic IniSetting::GetAllAsDynamic() {
+  folly::dynamic obj = folly::dynamic::object;
+  for (auto& iter: boost::join(s_system_ini_callbacks, *s_user_callbacks)) {
+    if (shouldHideSetting(iter.first)) continue;
+
+    obj[iter.first.toCppString()] = doDyn(iter.second.callbacks);
+  }
+  return obj;
 }
 
 Array IniSetting::GetAll(const String& ext_name, bool details) {

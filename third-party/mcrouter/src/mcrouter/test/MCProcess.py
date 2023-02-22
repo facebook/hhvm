@@ -1010,7 +1010,7 @@ class Memcached(MCProcess):
                 '-t', '1',
                 '--enable_hash_aliases',
                 '--enable_unchecked_l1_sentinel_reads',
-                '--reaper_throttle=100',
+                '--items_reaper_interval_secs=1',
                 '--ini_hashpower=16',
                 '--num_listening_sockets=1',
             ])

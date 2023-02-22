@@ -52,7 +52,7 @@ function test(): void {
 
   $v = vec[];
   extend(inout $v, vec[0, 1, 2]);
-  herp(fun('extend'), inout $v);
+  herp(extend<>, inout $v);
 
   $d = dict['derp' => dict[6 => vec['burp']]];
   $derp = () ==> 'derp';

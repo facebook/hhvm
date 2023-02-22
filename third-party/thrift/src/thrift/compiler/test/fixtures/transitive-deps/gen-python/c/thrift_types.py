@@ -88,6 +88,9 @@ class E(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 import c.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 def _fbthrift_metadata__struct_C():
     return c.thrift_metadata.gen_metadata_struct_C()
 def _fbthrift_metadata__exception_E():

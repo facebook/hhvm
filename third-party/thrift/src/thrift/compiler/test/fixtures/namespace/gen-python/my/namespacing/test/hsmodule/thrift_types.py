@@ -56,6 +56,9 @@ class HsFoo(metaclass=_fbthrift_python_types.StructMeta):
 import python_module_root.my.namespacing.test.hsmodule.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 def _fbthrift_metadata__struct_HsFoo():
     return python_module_root.my.namespacing.test.hsmodule.thrift_metadata.gen_metadata_struct_HsFoo()
 

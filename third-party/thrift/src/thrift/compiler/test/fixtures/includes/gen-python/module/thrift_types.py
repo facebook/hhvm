@@ -74,6 +74,9 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
 import module.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 def _fbthrift_metadata__struct_MyStruct():
     return module.thrift_metadata.gen_metadata_struct_MyStruct()
 

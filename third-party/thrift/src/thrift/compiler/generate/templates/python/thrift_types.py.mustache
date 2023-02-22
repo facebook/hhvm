@@ -118,6 +118,11 @@ class {{enum:name}}(_fbthrift_python_types.{{!
         return "{{program:name}}.{{enum:name}}"
 
     @staticmethod
+    def __get_thrift_uri__():
+        return {{#enum:thrift_uri}}"{{enum:thrift_uri}}"{{/enum:thrift_uri}}{{!
+            }}{{^enum:thrift_uri}}None{{/enum:thrift_uri}}
+
+    @staticmethod
     def __get_metadata__():
         return {{program:module_path}}.thrift_metadata.gen_metadata_enum_{{enum:name}}()
 
@@ -134,6 +139,12 @@ class {{enum:name}}(_fbthrift_python_types.{{!
         return self.value
     {{/enum:legacy_api?}}
 {{/program:enums}}
+
+_fbthrift_all_enums = [
+    {{#program:enums}}
+    {{enum:name}},
+    {{/program:enums}}
+]
 
 {{#program:structs}}
 def _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}():

@@ -22,6 +22,9 @@ import transitive.thrift_types
 import service.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 
 _fbthrift_all_structs = [
 ]

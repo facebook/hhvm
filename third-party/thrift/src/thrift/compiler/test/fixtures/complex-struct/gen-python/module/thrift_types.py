@@ -1378,6 +1378,10 @@ class MyEnum(_fbthrift_python_types.Enum, int):
         return "module.MyEnum"
 
     @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
     def __get_metadata__():
         return module.thrift_metadata.gen_metadata_enum_MyEnum()
 
@@ -1391,6 +1395,10 @@ class MyEnum(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+_fbthrift_all_enums = [
+    MyEnum,
+]
 
 def _fbthrift_metadata__struct_MyStructFloatFieldThrowExp():
     return module.thrift_metadata.gen_metadata_struct_MyStructFloatFieldThrowExp()

@@ -66,6 +66,9 @@ class Included(metaclass=_fbthrift_python_types.StructMeta):
 import includes.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 def _fbthrift_metadata__struct_Included():
     return includes.thrift_metadata.gen_metadata_struct_Included()
 

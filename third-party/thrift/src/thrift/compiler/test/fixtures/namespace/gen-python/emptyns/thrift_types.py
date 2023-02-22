@@ -56,6 +56,9 @@ class Foo(metaclass=_fbthrift_python_types.StructMeta):
 import emptyns.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 def _fbthrift_metadata__struct_Foo():
     return emptyns.thrift_metadata.gen_metadata_struct_Foo()
 

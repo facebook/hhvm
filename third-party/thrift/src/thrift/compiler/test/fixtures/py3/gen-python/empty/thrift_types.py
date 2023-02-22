@@ -16,6 +16,9 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import empty.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 
 _fbthrift_all_structs = [
 ]

@@ -112,6 +112,9 @@ class FooEx2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 import module.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 def _fbthrift_metadata__exception_FooStreamEx():
     return module.thrift_metadata.gen_metadata_exception_FooStreamEx()
 def _fbthrift_metadata__exception_FooEx():

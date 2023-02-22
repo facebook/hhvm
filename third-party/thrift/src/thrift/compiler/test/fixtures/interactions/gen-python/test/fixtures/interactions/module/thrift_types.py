@@ -56,6 +56,9 @@ class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 import test.fixtures.interactions.module.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 def _fbthrift_metadata__exception_CustomException():
     return test.fixtures.interactions.module.thrift_metadata.gen_metadata_exception_CustomException()
 

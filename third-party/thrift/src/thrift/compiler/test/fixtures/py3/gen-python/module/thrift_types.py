@@ -512,6 +512,10 @@ class AnEnum(_fbthrift_python_types.Enum, int):
         return "module.AnEnum"
 
     @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
     def __get_metadata__():
         return module.thrift_metadata.gen_metadata_enum_AnEnum()
 
@@ -532,6 +536,10 @@ class AnEnumRenamed(_fbthrift_python_types.Enum, int):
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.AnEnumRenamed"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
 
     @staticmethod
     def __get_metadata__():
@@ -557,6 +565,10 @@ class Flags(_fbthrift_python_types.Flag):
         return "module.Flags"
 
     @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
     def __get_metadata__():
         return module.thrift_metadata.gen_metadata_enum_Flags()
 
@@ -570,6 +582,12 @@ class Flags(_fbthrift_python_types.Flag):
 
     def _to_py_deprecated(self):
         return self.value
+
+_fbthrift_all_enums = [
+    AnEnum,
+    AnEnumRenamed,
+    Flags,
+]
 
 def _fbthrift_metadata__exception_SimpleException():
     return module.thrift_metadata.gen_metadata_exception_SimpleException()

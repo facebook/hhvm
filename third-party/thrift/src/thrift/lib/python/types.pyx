@@ -1373,6 +1373,10 @@ class Enum(metaclass=EnumMeta):
     def __get_thrift_name__():
         return NotImplementedError()
 
+    @staticmethod
+    def __get_thrift_uri__():
+        return NotImplementedError()
+
     def __bool__(self):
         return True
 

@@ -357,6 +357,9 @@ class Banal(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 import module.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 def _fbthrift_metadata__exception_Fiery():
     return module.thrift_metadata.gen_metadata_exception_Fiery()
 def _fbthrift_metadata__exception_Serious():

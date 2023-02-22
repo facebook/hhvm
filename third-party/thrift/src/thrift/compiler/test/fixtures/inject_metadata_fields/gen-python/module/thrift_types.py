@@ -212,6 +212,9 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
 import module.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 def _fbthrift_metadata__struct_Fields():
     return module.thrift_metadata.gen_metadata_struct_Fields()
 def _fbthrift_metadata__struct_FieldsInjectedToEmptyStruct():

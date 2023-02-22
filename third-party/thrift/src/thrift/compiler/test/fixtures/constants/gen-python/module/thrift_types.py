@@ -477,6 +477,10 @@ class EmptyEnum(_fbthrift_python_types.Enum, int):
         return "module.EmptyEnum"
 
     @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
     def __get_metadata__():
         return module.thrift_metadata.gen_metadata_enum_EmptyEnum()
 
@@ -498,6 +502,10 @@ class City(_fbthrift_python_types.Enum, int):
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.City"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
 
     @staticmethod
     def __get_metadata__():
@@ -523,6 +531,10 @@ class Company(_fbthrift_python_types.Enum, int):
         return "module.Company"
 
     @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
     def __get_metadata__():
         return module.thrift_metadata.gen_metadata_enum_Company()
 
@@ -536,6 +548,12 @@ class Company(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+_fbthrift_all_enums = [
+    EmptyEnum,
+    City,
+    Company,
+]
 
 def _fbthrift_metadata__struct_Internship():
     return module.thrift_metadata.gen_metadata_struct_Internship()

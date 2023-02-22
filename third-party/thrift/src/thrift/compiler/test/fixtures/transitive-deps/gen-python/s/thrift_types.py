@@ -20,6 +20,9 @@ import c.thrift_types
 import s.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 
 _fbthrift_all_structs = [
 ]

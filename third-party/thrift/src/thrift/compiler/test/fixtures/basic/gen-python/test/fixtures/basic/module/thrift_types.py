@@ -305,6 +305,10 @@ class MyEnum(_fbthrift_python_types.Enum, int):
         return "module.MyEnum"
 
     @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic/MyEnum"
+
+    @staticmethod
     def __get_metadata__():
         return test.fixtures.basic.module.thrift_metadata.gen_metadata_enum_MyEnum()
 
@@ -326,6 +330,10 @@ class HackEnum(_fbthrift_python_types.Enum, int):
         return "module.HackEnum"
 
     @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic/HackEnum"
+
+    @staticmethod
     def __get_metadata__():
         return test.fixtures.basic.module.thrift_metadata.gen_metadata_enum_HackEnum()
 
@@ -339,6 +347,11 @@ class HackEnum(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+
+_fbthrift_all_enums = [
+    MyEnum,
+    HackEnum,
+]
 
 def _fbthrift_metadata__struct_MyStruct():
     return test.fixtures.basic.module.thrift_metadata.gen_metadata_struct_MyStruct()

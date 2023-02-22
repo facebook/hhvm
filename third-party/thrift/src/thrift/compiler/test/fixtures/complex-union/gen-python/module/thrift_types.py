@@ -424,6 +424,9 @@ class NonCopyableUnion(metaclass=_fbthrift_python_types.UnionMeta):
 import module.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 def _fbthrift_metadata__struct_ComplexUnion():
     return module.thrift_metadata.gen_metadata_struct_ComplexUnion()
 def _fbthrift_metadata__struct_ListUnion():

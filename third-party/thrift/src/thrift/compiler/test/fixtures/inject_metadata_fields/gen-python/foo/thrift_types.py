@@ -74,6 +74,9 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
 import foo.thrift_metadata
 
 
+_fbthrift_all_enums = [
+]
+
 def _fbthrift_metadata__struct_Fields():
     return foo.thrift_metadata.gen_metadata_struct_Fields()
 

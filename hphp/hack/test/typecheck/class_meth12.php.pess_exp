@@ -1,4 +1,0 @@
-File "class_meth12.php.pess", line 19, characters 14-16:
-This argument should be annotated with `inout` (Typing[4182])
-  File "class_meth12.php.pess", line 9, characters 53-54:
-  Because this is an `inout` parameter

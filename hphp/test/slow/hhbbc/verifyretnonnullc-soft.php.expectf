@@ -1,0 +1,5 @@
+object(stdClass) (0) {
+}
+
+Warning: Value returned from function boom() must be of type @stdclass, null given in %s on line 8
+NULL

@@ -5296,6 +5296,9 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
 }
 
 void in(ISS& env, const bc::VerifyRetNonNullC&) {
+  auto const constraint = env.ctx.func->retTypeConstraint;
+  if (constraint.isSoft()) return;
+
   auto stackT = topC(env);
   if (!stackT.couldBe(BInitNull)) return reduce(env);
   if (stackT.subtypeOf(BInitNull)) {

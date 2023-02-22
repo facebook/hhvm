@@ -35,6 +35,7 @@ namespace HPHP {
 struct Array;
 struct Extension;
 struct String;
+struct StructuredLogEntry;
 
 /**
  * If given an ini setting like "hhvm.abc[def][ghi]=yyy" and we have
@@ -202,6 +203,8 @@ public:
   static std::string Get(const String& name);
   static Array GetAll(const String& extension, bool details);
   static std::string GetAllAsJSON();
+  static void Log(StructuredLogEntry& ent, const hphp_fast_string_set& toLog,
+                  const hphp_fast_string_set& toExclude);
 
   /**
    * Change an INI setting as if it was in the php.ini file

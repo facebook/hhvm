@@ -148,58 +148,78 @@ Variant ini_get_vec(std::vector<T>& p) {
   }
 
 #define N(Ty) \
-  Variant ini_get(Ty& p) { return p; }                    \
-  bool ini_on_update(const Variant& value, Ty& p) {       \
-    INI_ASSERT_STR(value);                                \
-    auto n = convert_bytes_to_long(str);                  \
-    using L = std::numeric_limits<Ty>;                    \
-    if (n > L::max() || n < L::min()) return false;       \
-    p = n;                                                \
-    return true;                                          \
+  Variant ini_get(Ty& p) { return p; }                                    \
+  bool ini_on_update(const Variant& value, Ty& p) {                       \
+    INI_ASSERT_STR(value);                                                \
+    auto n = convert_bytes_to_long(str);                                  \
+    using L = std::numeric_limits<Ty>;                                    \
+    if (n > L::max() || n < L::min()) return false;                       \
+    p = n;                                                                \
+    return true;                                                          \
+  }                                                                       \
+  static void ini_log(Ty& t, const char* name, StructuredLogEntry& ent) { \
+    ent.setInt(name, t);                                                  \
   }
 
 #define U(Ty) \
-  Variant ini_get(Ty& p) { return p; }                    \
-  bool ini_on_update(const Variant& value, Ty& p) {       \
-    INI_ASSERT_STR(value);                                \
-    auto n = convert_bytes_to_long(str);                  \
-    auto mask = ~size_t((Ty)(-1));                        \
-    if (size_t(n) & mask) return false;                   \
-    p = n;                                                \
-    return true;                                          \
+  Variant ini_get(Ty& p) { return p; }                                    \
+  bool ini_on_update(const Variant& value, Ty& p) {                       \
+    INI_ASSERT_STR(value);                                                \
+    auto n = convert_bytes_to_long(str);                                  \
+    auto mask = ~size_t((Ty)(-1));                                        \
+    if (size_t(n) & mask) return false;                                   \
+    p = n;                                                                \
+    return true;                                                          \
+  }                                                                       \
+  static void ini_log(Ty& t, const char* name, StructuredLogEntry& ent) { \
+    ent.setInt(name, t);                                                  \
   }
 
-#define M(Ty)                                             \
-  Variant ini_get(Ty& p) {                                \
-    DictInit ret(p.size());                               \
-    for (auto& [f, s] : p) {                              \
-      set(ret, f, s);                                     \
-    }                                                     \
-    return ret.toArray();                                 \
-  }                                                       \
-  bool ini_on_update(const Variant& value, Ty& p) {       \
-    INI_ASSERT_ARR_INNER(value, String);                  \
-    for (ArrayIter iter(value.toArray()); iter; ++iter) { \
-      p[iter.first().toString().toCppString()] =          \
-        iter.second().toString().toCppString();           \
-    }                                                     \
-    return true;                                          \
+#define M(Ty)                                                             \
+  Variant ini_get(Ty& p) {                                                \
+    DictInit ret(p.size());                                               \
+    for (auto& [f, s] : p) {                                              \
+      set(ret, f, s);                                                     \
+    }                                                                     \
+    return ret.toArray();                                                 \
+  }                                                                       \
+  bool ini_on_update(const Variant& value, Ty& p) {                       \
+    INI_ASSERT_ARR_INNER(value, String);                                  \
+    for (ArrayIter iter(value.toArray()); iter; ++iter) {                 \
+      p[iter.first().toString().toCppString()] =                          \
+        iter.second().toString().toCppString();                           \
+    }                                                                     \
+    return true;                                                          \
+  }                                                                       \
+  static void ini_log(Ty& t, const char* name, StructuredLogEntry& ent) { \
+    std::vector<std::string> strs;                                        \
+    std::set<folly::StringPiece> tags;                                    \
+    for (auto& [k, v] : t) {                                              \
+      strs.emplace_back(folly::to<std::string>(k, ": ", v));              \
+      tags.emplace(strs.back());                                          \
+    }                                                                     \
+    ent.setSet(name, tags);                                               \
   }
 
-#define S(Ty)                                             \
-  Variant ini_get(Ty& p) {                                \
-    VecInit ret(p.size());                                \
-    for (auto& s : p) {                                   \
-      ret.append(s);                                      \
-    }                                                     \
-    return ret.toArray();                                 \
-  }                                                       \
-  bool ini_on_update(const Variant& value, Ty& p) {       \
-    INI_ASSERT_ARR_INNER(value, String);                  \
-    for (ArrayIter iter(value.toArray()); iter; ++iter) { \
-      p.insert(iter.second().toString().toCppString());   \
-    }                                                     \
-    return true;                                          \
+#define S(Ty)                                                             \
+  Variant ini_get(Ty& p) {                                                \
+    VecInit ret(p.size());                                                \
+    for (auto& s : p) {                                                   \
+      ret.append(s);                                                      \
+    }                                                                     \
+    return ret.toArray();                                                 \
+  }                                                                       \
+  bool ini_on_update(const Variant& value, Ty& p) {                       \
+    INI_ASSERT_ARR_INNER(value, String);                                  \
+    for (ArrayIter iter(value.toArray()); iter; ++iter) {                 \
+      p.insert(iter.second().toString().toCppString());                   \
+    }                                                                     \
+    return true;                                                          \
+  }                                                                       \
+  static void ini_log(Ty& t, const char* name, StructuredLogEntry& ent) { \
+    std::set<folly::StringPiece> tags;                                    \
+    for (auto& v : t) tags.emplace(v);                                    \
+    ent.setSet(name, tags);                                               \
   }
 
 INI_TYPES4(N, U, M, S)
@@ -223,6 +243,9 @@ bool ini_on_update(const Variant& value, bool& p) {
   }
   return true;
 }
+static void ini_log(bool& t, const char* name, StructuredLogEntry& ent) {
+  ent.setInt(name, t ? 1 : 0);
+}
 
 Variant ini_get(double& p) { return p; }
 bool ini_on_update(const Variant& value, double& p) {
@@ -230,13 +253,18 @@ bool ini_on_update(const Variant& value, double& p) {
   p = zend_strtod(str.data(), nullptr);
   return true;
 }
-
+static void ini_log(double& t, const char* name, StructuredLogEntry& ent) {
+  ent.setStr(name, folly::to<std::string>(t));
+}
 
 Variant ini_get(std::string& p) { return p.data(); }
 bool ini_on_update(const Variant& value, std::string& p) {
   INI_ASSERT_STR(value);
   p = str;
   return true;
+}
+static void ini_log(std::string& t, const char* name, StructuredLogEntry& ent) {
+  ent.setStr(name, t);
 }
 
 Variant ini_get(std::unordered_map<std::string, int>& p) {
@@ -254,12 +282,25 @@ bool ini_on_update(const Variant& value,
   }
   return true;
 }
+static void ini_log(std::unordered_map<std::string, int>& t,
+                    const char* name, StructuredLogEntry& ent) {
+  std::vector<std::string> strs;
+  std::set<folly::StringPiece> tags;
+  for (auto& [k, v] : t) {
+    strs.emplace_back(folly::to<std::string>(k, ": ", v));
+    tags.emplace(strs.back());
+  }
+  ent.setSet(name, tags);
+}
 
 Variant ini_get(Array& p) { return p; }
 bool ini_on_update(const Variant& value, Array& p) {
   INI_ASSERT_ARR(value);
   p = value.toArray();
   return true;
+}
+static void ini_log(Array& t, const char* name, StructuredLogEntry& ent) {
+  // Do nothing
 }
 
 Variant ini_get(std::vector<uint32_t>& p) { return ini_get_vec(p); }
@@ -270,6 +311,16 @@ bool ini_on_update(const Variant& value, std::vector<uint32_t>& p) {
   }
   return true;
 }
+static void ini_log(std::vector<uint32_t>& t, const char* name,
+                    StructuredLogEntry& ent) {
+  std::vector<std::string> strs;
+  std::vector<folly::StringPiece> v;
+  for (auto i : t) {
+    strs.emplace_back(folly::to<std::string>(i));
+    v.emplace_back(strs.back());
+  }
+  ent.setVec(name, v);
+}
 
 Variant ini_get(std::vector<std::string>& p) { return ini_get_vec(p); }
 bool ini_on_update(const Variant& value, std::vector<std::string>& p) {
@@ -278,6 +329,12 @@ bool ini_on_update(const Variant& value, std::vector<std::string>& p) {
     p.push_back(iter.second().toString().toCppString());
   }
   return true;
+}
+static void ini_log(std::vector<std::string>& t, const char* name,
+                    StructuredLogEntry& ent) {
+  std::vector<folly::StringPiece> v;
+  for (auto& s : t) v.emplace_back(s);
+  ent.setVec(name, v);
 }
 
 const IniSettingMap ini_iterate(const IniSettingMap &ini,
@@ -701,6 +758,23 @@ bool doSet(IniSetting::OptionData& data, const Variant& value) {
 #undef F
 }
 
+void doLog(IniSetting::OptionData& data, const char* name,
+           StructuredLogEntry& ent) {
+#define F(Ty) \
+  [&] (IniSetting::SetAndGetImpl<Ty>& data) { \
+    Ty v;                                     \
+    if (data.getter) v = data.getter();       \
+    else if (data.val) v = *data.val;         \
+    ini_log(v, name, ent);                    \
+  },
+  folly::variant_match<void>(
+    data,
+    INI_TYPES(F)
+    [] (std::nullptr_t) {}
+  );
+#undef F
+}
+
 using CallbackMap = folly::F14FastMap<
   String, IniCallbackData, hphp_string_hash, hphp_string_same>;
 
@@ -976,6 +1050,18 @@ bool IniSetting::GetMode(const String& name, Mode& mode) {
   }
   mode = cb->mode;
   return true;
+}
+
+void IniSetting::Log(StructuredLogEntry& ent,
+                     const hphp_fast_string_set& toLog,
+                     const hphp_fast_string_set& toExclude) {
+  for (auto& iter: boost::join(s_system_ini_callbacks, *s_user_callbacks)) {
+    if (shouldHideSetting(iter.first)) continue;
+    if (!toLog.empty() && !toLog.count(iter.first.toCppString())) continue;
+    if (toExclude.count(iter.first.toCppString())) continue;
+
+    doLog(iter.second.callbacks, iter.first.data(), ent);
+  }
 }
 
 Array IniSetting::GetAll(const String& ext_name, bool details) {

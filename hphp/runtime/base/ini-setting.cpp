@@ -20,7 +20,9 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/req-optional.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/string-functors.h"
 #include "hphp/runtime/base/runtime-option.h"
 
@@ -31,6 +33,7 @@
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 
+#include "hphp/util/build-info.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/logger.h"
@@ -48,6 +51,7 @@
 
 #include <folly/container/F14Map.h>
 #include <folly/Hash.h>
+#include <folly/FileUtil.h>
 #include <folly/Overload.h>
 
 namespace HPHP {
@@ -804,11 +808,7 @@ IniSettingMap IniSetting::FromStringAsMap(const std::string& ini,
   return parsed;
 }
 
-struct IniCallbackData {
-  const Extension* extension{nullptr};
-  IniSetting::Mode mode{IniSetting::PHP_INI_NONE};
-  IniSetting::OptionData callbacks{nullptr};
-};
+namespace {
 
 Variant doGet(IniSetting::OptionData& data) {
 #define F(Ty) \
@@ -892,27 +892,53 @@ size_t doHash(IniSetting::OptionData& data) {
 #undef F
 }
 
+void logSettings() {
+  if (RO::RepoAuthoritative) return;
+  if (!StructuredLog::coinflip(RO::EvalStartOptionLogRate)) return;
+
+  auto const hash = IniSetting::HashAll(RO::EvalStartOptionLogOptions,
+                                        RO::EvalStartOptionLogExcludeOptions);
+  if (!RO::EvalStartOptionLogCache.empty()) {
+    auto name = RO::EvalStartOptionLogCache;
+    replacePlaceholders(name, {{"%{hash}", folly::to<std::string>(hash)}});
+    struct stat s;
+    if (statSyscall(name.data(), &s) != 0) {
+      if (time(nullptr) - s.st_mtim.tv_sec < RO::EvalStartOptionLogWindow) {
+        return;
+      }
+    }
+    auto f = open(name.data(), O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR | S_IWUSR);
+    if (f >= 0) {
+      SCOPE_EXIT { close(f); };
+      auto id = compilerId();
+      folly::writeFull(f, id.data(), id.size());
+    }
+  }
+
+  StructuredLogEntry ent;
+  ent.force_init = true;
+  ent.setStr("cmd_line", Process::GetAppName());
+  ent.setInt("server_mode", RO::ServerExecutionMode() ? 1 : 0);
+  ent.setInt("sample_rate", RO::EvalStartOptionLogRate);
+  ent.setInt("hash", hash);
+  IniSetting::Log(ent,
+                  RO::EvalStartOptionLogOptions,
+                  RO::EvalStartOptionLogExcludeOptions);
+  StructuredLog::log("hhvm_runtime_options", ent);
+}
+
+InitFiniNode s_logSettings(logSettings, InitFiniNode::When::ProcessInit);
+
+}
+
+struct IniCallbackData {
+  const Extension* extension{nullptr};
+  IniSetting::Mode mode{IniSetting::PHP_INI_NONE};
+  IniSetting::OptionData callbacks{nullptr};
+};
+
 using CallbackMap = folly::F14FastMap<
   String, IniCallbackData, hphp_string_hash, hphp_string_same>;
-
-//
-// These are for settings/callbacks only settable at startup.
-//
-// Empirically and surprisingly (20Jan2015):
-//   * server mode: the contents of system map are     destructed on SIGTERM
-//   * CLI    mode: the contents of system map are NOT destructed on SIGTERM
-//
-static CallbackMap s_system_ini_callbacks;
-
-//
-// These are for settings/callbacks that the script
-// can change during the request.
-//
-// Empirically and surprisingly (20Jan2015), when there are N threads:
-//   * server mode: the contents of user map are     destructed N-1 times
-//   * CLI    mode: the contents of user map are NOT destructed on SIGTERM
-//
-static RDS_LOCAL(CallbackMap, s_user_callbacks);
 
 struct SystemSettings {
   std::unordered_map<std::string,Variant> settings;
@@ -931,11 +957,32 @@ struct LocalSettings {
   bool empty() { return !settings.has_value() || settings.value().empty(); }
 };
 
+namespace {
+
+//
+// These are for settings/callbacks only settable at startup.
+//
+// Empirically and surprisingly (20Jan2015):
+//   * server mode: the contents of system map are     destructed on SIGTERM
+//   * CLI    mode: the contents of system map are NOT destructed on SIGTERM
+//
+CallbackMap s_system_ini_callbacks;
+
+//
+// These are for settings/callbacks that the script
+// can change during the request.
+//
+// Empirically and surprisingly (20Jan2015), when there are N threads:
+//   * server mode: the contents of user map are     destructed N-1 times
+//   * CLI    mode: the contents of user map are NOT destructed on SIGTERM
+//
+RDS_LOCAL(CallbackMap, s_user_callbacks);
+
 // Set by a .ini file at the start
-static SystemSettings s_system_settings;
+SystemSettings s_system_settings;
 
 // Changed during the course of the request
-static RDS_LOCAL(LocalSettings, s_saved_defaults);
+RDS_LOCAL(LocalSettings, s_saved_defaults);
 
 struct IniSettingExtension final : Extension {
   IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}
@@ -945,6 +992,8 @@ struct IniSettingExtension final : Extension {
     assertx(!s_saved_defaults->settings.has_value());
   }
 } s_ini_extension;
+
+}
 
 void IniSetting::Bind(
   const Extension* extension,

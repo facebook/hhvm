@@ -1447,6 +1447,11 @@ struct RuntimeOption {
   F(uint32_t, NFLogSlowWatchmanSampleRate, 1)                           \
   F(uint32_t, LogSlowWatchmanQueriesMsec, 500)                          \
   F(uint32_t, LogSlowWatchmanQueriesRate, 1)                            \
+  F(uint32_t, StartOptionLogRate, 0)                                    \
+  F(std::string, StartOptionLogCache, "/tmp/hhvm-options-%{user}-%{hash}")\
+  F(uint64_t, StartOptionLogWindow, 86400)                              \
+  F(hphp_fast_string_set, StartOptionLogOptions, {})                    \
+  F(hphp_fast_string_set, StartOptionLogExcludeOptions, {})             \
   /* */
 
 private:

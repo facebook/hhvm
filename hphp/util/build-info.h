@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/util/hash-map.h"
 #include <folly/Range.h>
 
 namespace HPHP {
@@ -63,6 +64,8 @@ folly::StringPiece hhjsBabelTransform();
  *  - %{uid} -> user id
  *  - %{euid} -> effective user id
  */
+void replacePlaceholders(std::string&,
+                         const hphp_fast_string_map<std::string>& replaces);
 void replacePlaceholders(std::string&);
 
 }

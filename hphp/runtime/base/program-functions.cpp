@@ -115,6 +115,7 @@
 #include "hphp/zend/zend-strtod.h"
 
 #include <folly/CPortability.h>
+#include <folly/json.h>
 #include <folly/Portability.h>
 #include <folly/Random.h>
 #include <folly/Range.h>
@@ -1189,7 +1190,8 @@ static int start_server(const std::string &username, int xhprof) {
 
 static void logSettings() {
   if (RuntimeOption::ServerLogSettingsOnStartup) {
-    Logger::Info("Settings: %s\n", IniSetting::GetAllAsJSON().c_str());
+    Logger::Info("Settings: %s\n",
+                 folly::toJson(IniSetting::GetAllAsDynamic()).c_str());
   }
 }
 

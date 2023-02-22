@@ -75,6 +75,7 @@
 #include <folly/Conv.h>
 #include <folly/File.h>
 #include <folly/FileUtil.h>
+#include <folly/json.h>
 #include <folly/Random.h>
 #include <folly/portability/Unistd.h>
 
@@ -823,7 +824,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (cmd == "ini-get-all") {
-      auto out = IniSetting::GetAllAsJSON();
+      auto out = folly::toJson(IniSetting::GetAllAsDynamic());
       transport->sendString(out.c_str());
       break;
     }

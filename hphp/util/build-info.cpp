@@ -125,7 +125,8 @@ folly::StringPiece hhjsBabelTransform() {
   return hhjsbabeltransform;
 }
 
-void replacePlaceholders(std::string& s) {
+void replacePlaceholders(std::string& s,
+                         const hphp_fast_string_map<std::string>& replaces) {
   replacePlaceholder(s, "%{schema}", [] { return repoSchemaId().begin(); });
   replacePlaceholder(s, "%{euid}", [] {
     return folly::to<std::string>(geteuid());
@@ -138,6 +139,13 @@ void replacePlaceholders(std::string& s) {
   replacePlaceholder(s, "%{pid}", [] {
     return folly::to<std::string>(getpid());
   });
+  for (auto& p : replaces) {
+    replacePlaceholder(s, p.first.data(), [&] { return p.second; });
+  }
+}
+
+void replacePlaceholders(std::string& s) {
+  replacePlaceholders(s, {});
 }
 
 ////////////////////////////////////////////////////////////////////////////////

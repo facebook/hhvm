@@ -116,6 +116,10 @@ let rec freshen_inside_ty env ty =
           (env, { p with fp_type }))
     in
     (env, mk (r, Tfun { ft with ft_ret; ft_params }))
+  | Tnewtype (name, _, ty)
+    when String.equal name Naming_special_names.Classes.cSupportDyn ->
+    let (env, ty) = freshen_inside_ty env ty in
+    (env, Typing_make_type.supportdyn r ty)
   | Tnewtype (name, tyl, ty) ->
     if List.is_empty tyl then
       default ()

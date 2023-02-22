@@ -1,0 +1,22 @@
+File "crash.bad.php", line 12, characters 39-40:
+Function  `;anonymous` is not dynamically callable. (Typing[4110])
+  File "crash.bad.php", line 12, characters 39-40:
+  Invalid argument
+  File "Shapes.hhi", line 40, characters 8-17:
+  Expected `shape(...)`
+  File "crash.bad.php", line 12, characters 20-21:
+  But got `dynamic` because method must be callable in a dynamic context
+File "crash.bad.php", line 13, characters 39-40:
+Function  `;anonymous` is not dynamically callable. (Typing[4110])
+  File "crash.bad.php", line 13, characters 39-40:
+  Invalid argument
+  File "Shapes.hhi", line 40, characters 8-17:
+  Expected `shape(...)`
+  File "crash.bad.php", line 13, characters 20-21:
+  But got `dynamic` because method must be callable in a dynamic context
+File "crash.bad.php", line 20, characters 11-13:
+Invalid argument (Typing[4110])
+  File "crash.bad.php", line 13, characters 20-21:
+  Expected `~_` because a type could not be determined here
+  File "crash.bad.php", line 13, characters 15-17:
+  But got `string`

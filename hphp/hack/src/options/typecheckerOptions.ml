@@ -265,11 +265,13 @@ let require_types_class_consts t =
 let type_printer_fuel t = t.GlobalOptions.tco_type_printer_fuel
 
 let log_saved_state_age_and_distance t =
-  GlobalOptions.(t.tco_saved_state_loading.log_saved_state_age_and_distance)
+  GlobalOptions.(t.tco_saved_state.loading.log_saved_state_age_and_distance)
 
 let specify_manifold_api_key t = t.GlobalOptions.tco_specify_manifold_api_key
 
-let saved_state_loading t = t.GlobalOptions.tco_saved_state_loading
+let saved_state t = t.GlobalOptions.tco_saved_state
+
+let saved_state_loading t = GlobalOptions.(t.tco_saved_state.loading)
 
 let profile_top_level_definitions t =
   t.GlobalOptions.tco_profile_top_level_definitions

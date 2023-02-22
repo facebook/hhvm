@@ -22,6 +22,7 @@ pub mod namespace_env_impl;
 pub mod phase_map;
 pub mod s_map;
 pub mod s_set;
+pub mod saved_state_rollouts_impl;
 pub mod scoured_comments_impl;
 pub mod shape_map;
 pub mod symbol_name;

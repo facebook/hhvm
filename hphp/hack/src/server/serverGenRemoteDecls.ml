@@ -48,7 +48,8 @@ let get_hhconfig_info ~(repo : Path.t) :
     let version = "v" ^ String_utils.lstrip version "^" in
     return_ok version
 
-let get_project_metadata ~repo : (string, string) result Future.t =
+let get_project_metadata ~repo ~rollouts ~project_metadata_w_flags :
+    (string, string) result Future.t =
   let res =
     State_loader_futures.get_project_metadata
       ~progress_callback:(fun _ -> ())
@@ -56,21 +57,24 @@ let get_project_metadata ~repo : (string, string) result Future.t =
       ~saved_state_manifold_api_key:None
       ~ignore_hh_version:false
       ~repo
+      ~rollouts
+      ~project_metadata_w_flags
   in
   Future.Promise.map res (function
       | Ok (x, _telemetry) -> Ok x
       | Error (err, _telemetry) ->
         Error (Saved_state_loader.LoadError.long_user_message_of_error err))
 
-let get_changed_files_since_last_saved_state () :
-    (Relative_path.t list, string) result Future.Promise.t =
+let get_changed_files_since_last_saved_state ~rollouts ~project_metadata_w_flags
+    : (Relative_path.t list, string) result Future.Promise.t =
   let saved_state_type =
     (* TODO: using shallow_decls_saved_state *)
     Saved_state_loader.Naming_and_dep_table { naming_sqlite = false }
   in
   let root = Wwwroot.get None in
   let project_name = Saved_state_loader.get_project_name saved_state_type in
-  get_project_metadata ~repo:root >>= fun project_metadata ->
+  get_project_metadata ~repo:root ~rollouts ~project_metadata_w_flags
+  >>= fun project_metadata ->
   let query =
     Printf.sprintf
       {|
@@ -164,7 +168,13 @@ let go
   let get_next : Relative_path.t list Bucket.next =
     if incremental then (
       let changed_files_since_last_saved_state =
-        get_changed_files_since_last_saved_state ()
+        get_changed_files_since_last_saved_state
+          ~rollouts:
+            genv.ServerEnv.local_config.ServerLocalConfig.saved_state
+              .GlobalOptions.rollouts
+          ~project_metadata_w_flags:
+            genv.ServerEnv.local_config.ServerLocalConfig.saved_state
+              .GlobalOptions.project_metadata_w_flags
       in
       let changed_files : Relative_path.t list =
         match Future.get changed_files_since_last_saved_state with

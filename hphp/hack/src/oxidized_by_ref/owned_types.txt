@@ -8,6 +8,9 @@ ident::Ident
 lazy::Lazy
 method_flags::MethodFlags
 prop_flags::PropFlags
+saved_state_rollouts::Flag
+saved_state_rollouts::FlagName
+saved_state_rollouts::SavedStateRollouts
 shallow_decl_defs::Visibility
 tany_sentinel::TanySentinel
 tast::FunTastInfo

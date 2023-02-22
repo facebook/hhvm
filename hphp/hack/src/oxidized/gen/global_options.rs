@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f2e6d6eb03539b9ee90170388a11d959>>
+// @generated SignedSource<<085848bf594668e2163d8aed9a805959>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -41,6 +41,29 @@ pub struct SavedStateLoading {
     pub use_manifold_cython_client: bool,
 }
 
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (show, eq)")]
+#[repr(C)]
+pub struct SavedState {
+    pub loading: SavedStateLoading,
+    pub rollouts: saved_state_rollouts::SavedStateRollouts,
+    pub project_metadata_w_flags: bool,
+}
+
 /// Naming conventions for fields in this struct:
 /// - tco_<feature/flag/setting> - type checker option
 /// - po_<feature/flag/setting> - parser option
@@ -58,7 +81,7 @@ pub struct SavedStateLoading {
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct GlobalOptions {
-    pub tco_saved_state_loading: SavedStateLoading,
+    pub tco_saved_state: SavedState,
     pub tco_experimental_features: s_set::SSet,
     pub tco_migration_flags: s_set::SSet,
     pub tco_num_local_workers: Option<isize>,

@@ -269,8 +269,7 @@ let load_saved_state
             |> TypecheckerOptions.ide_should_use_hack_64_distc
           in
           let ssopt =
-            TypecheckerOptions.saved_state_loading
-              (Provider_context.get_tcopt ctx)
+            TypecheckerOptions.saved_state (Provider_context.get_tcopt ctx)
           in
           let%lwt result =
             if ide_should_use_hack_64_distc then

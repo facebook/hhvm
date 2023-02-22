@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<187c390177928eaeb8756acc69403ec7>>
+// @generated SignedSource<<62579ace8d5328d7d34e0bb8752effc9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -45,6 +45,33 @@ pub struct SavedStateLoading<'a> {
 impl<'a> TrivialDrop for SavedStateLoading<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(SavedStateLoading<'arena>);
 
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (show, eq)")]
+#[repr(C)]
+pub struct SavedState<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub loading: &'a SavedStateLoading<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub rollouts: &'a saved_state_rollouts::SavedStateRollouts,
+    pub project_metadata_w_flags: bool,
+}
+impl<'a> TrivialDrop for SavedState<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(SavedState<'arena>);
+
 /// Naming conventions for fields in this struct:
 /// - tco_<feature/flag/setting> - type checker option
 /// - po_<feature/flag/setting> - parser option
@@ -63,7 +90,7 @@ arena_deserializer::impl_deserialize_in_arena!(SavedStateLoading<'arena>);
 #[repr(C)]
 pub struct GlobalOptions<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub tco_saved_state_loading: &'a SavedStateLoading<'a>,
+    pub tco_saved_state: &'a SavedState<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_experimental_features: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

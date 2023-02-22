@@ -69,10 +69,8 @@ let set_up_global_environment (env : env) ~(deps_mode : Typing_deps_mode.t) :
 let load_saved_state ~(env : env) : saved_state_result Lwt.t =
   let genv = create_global_env env in
   let ssopt =
-    {
-      genv.ServerEnv.local_config.ServerLocalConfig.saved_state_loading with
-      GlobalOptions.log_saved_state_age_and_distance = false;
-    }
+    genv.ServerEnv.local_config.ServerLocalConfig.saved_state
+    |> GlobalOptions.with_log_saved_state_age_and_distance false
   in
   let%lwt (naming_table_path, naming_table_changed_files) =
     match env.naming_table_path with

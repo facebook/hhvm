@@ -288,9 +288,13 @@ let load_saved_state :
  fun ~env ~local_config ~saved_state_type ->
   let ssopt =
     {
-      local_config.ServerLocalConfig.saved_state_loading with
-      GlobalOptions.log_saved_state_age_and_distance = false;
-      saved_state_manifold_api_key = env.saved_state_manifold_api_key;
+      local_config.ServerLocalConfig.saved_state with
+      GlobalOptions.loading =
+        {
+          local_config.ServerLocalConfig.saved_state.GlobalOptions.loading with
+          GlobalOptions.log_saved_state_age_and_distance = false;
+          saved_state_manifold_api_key = env.saved_state_manifold_api_key;
+        };
     }
   in
   match env.replay_token with
@@ -326,7 +330,7 @@ let load_saved_state :
     in
     let%lwt result =
       State_loader_lwt.download_and_unpack_saved_state_from_manifold
-        ~ssopt
+        ~ssopt:ssopt.GlobalOptions.loading
         ~progress_callback:(fun _ -> ())
         ~manifold_path
         ~target_path

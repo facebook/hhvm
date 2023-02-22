@@ -317,8 +317,7 @@ type quantile = {
 }
 
 type t = {
-  saved_state_loading: GlobalOptions.saved_state_loading;
-  saved_state_flags: Saved_state_rollouts.t;
+  saved_state: GlobalOptions.saved_state;
   min_log_level: Hh_logger.Level.t;
   attempt_fix_credentials: bool;
       (** Indicates whether we attempt to fix the credentials if they're broken *)
@@ -502,8 +501,7 @@ type t = {
 
 let default =
   {
-    saved_state_loading = GlobalOptions.default_saved_state_loading;
-    saved_state_flags = Saved_state_rollouts.default;
+    saved_state = GlobalOptions.default_saved_state;
     min_log_level = Hh_logger.Level.Info;
     attempt_fix_credentials = false;
     log_categories = [];
@@ -768,6 +766,12 @@ let load_
   (if not silent then
     output_config_section "Saved state rollout flags" @@ fun () ->
     Saved_state_rollouts.output saved_state_flags);
+  let project_metadata_w_flags =
+    bool_
+      "project_metadata_w_flags"
+      ~default:default.saved_state.GlobalOptions.project_metadata_w_flags
+      config
+  in
   let attempt_fix_credentials =
     bool_if_min_version
       "attempt_fix_credentials"
@@ -1218,8 +1222,8 @@ let load_
     bool_if_min_version
       "log_saved_state_age_and_distance"
       ~default:
-        default.saved_state_loading
-          .GlobalOptions.log_saved_state_age_and_distance
+        GlobalOptions.(
+          default_saved_state_loading.log_saved_state_age_and_distance)
       ~current_version
       config
   in
@@ -1227,7 +1231,7 @@ let load_
     bool_if_min_version
       "use_manifold_cython_client"
       ~default:
-        default.saved_state_loading.GlobalOptions.use_manifold_cython_client
+        GlobalOptions.(default_saved_state_loading.use_manifold_cython_client)
       ~current_version
       config
   in
@@ -1367,13 +1371,17 @@ let load_
       config
   in
   {
-    saved_state_loading =
+    saved_state =
       {
-        GlobalOptions.saved_state_manifold_api_key;
-        log_saved_state_age_and_distance;
-        use_manifold_cython_client;
+        GlobalOptions.loading =
+          {
+            GlobalOptions.saved_state_manifold_api_key;
+            log_saved_state_age_and_distance;
+            use_manifold_cython_client;
+          };
+        rollouts = saved_state_flags;
+        project_metadata_w_flags;
       };
-    saved_state_flags;
     min_log_level;
     attempt_fix_credentials;
     log_categories;
@@ -1503,8 +1511,8 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       log_from_client_when_slow_monitor_connections =
         options.log_from_client_when_slow_monitor_connections;
       log_saved_state_age_and_distance =
-        options.saved_state_loading
-          .GlobalOptions.log_saved_state_age_and_distance;
+        GlobalOptions.(
+          options.saved_state.loading.log_saved_state_age_and_distance);
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
       use_hack_64_naming_table = options.use_hack_64_naming_table;
       fetch_remote_old_decls = options.fetch_remote_old_decls;
@@ -1524,7 +1532,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;
       shm_cache_size = options.shm_cache_size;
       use_manifold_cython_client =
-        options.saved_state_loading.GlobalOptions.use_manifold_cython_client;
+        GlobalOptions.(options.saved_state.loading.use_manifold_cython_client);
       disable_naming_table_fallback_loading =
         options.disable_naming_table_fallback_loading;
       use_type_alias_heap = options.use_type_alias_heap;

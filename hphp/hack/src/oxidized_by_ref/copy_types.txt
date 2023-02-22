@@ -133,6 +133,7 @@ quickfix::QfPos
 relative_path::map::Map
 s_map::SMap
 s_set::SSet
+saved_state_rollouts::Flag
 shallow_decl_defs::Decl
 tany_sentinel::TanySentinel
 tast::MutabilityEnv

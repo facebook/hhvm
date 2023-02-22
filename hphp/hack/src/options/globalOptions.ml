@@ -36,13 +36,36 @@ let default_saved_state_loading =
     use_manifold_cython_client = false;
   }
 
+type saved_state = {
+  loading: saved_state_loading;
+  rollouts: Saved_state_rollouts.t;
+  project_metadata_w_flags: bool;
+}
+[@@deriving show, eq]
+
+let default_saved_state =
+  {
+    loading = default_saved_state_loading;
+    rollouts = Saved_state_rollouts.default;
+    project_metadata_w_flags = false;
+  }
+
+let with_saved_state_manifold_api_key saved_state_manifold_api_key ss =
+  { ss with loading = { ss.loading with saved_state_manifold_api_key } }
+
+let with_use_manifold_cython_client use_manifold_cython_client ss =
+  { ss with loading = { ss.loading with use_manifold_cython_client } }
+
+let with_log_saved_state_age_and_distance log_saved_state_age_and_distance ss =
+  { ss with loading = { ss.loading with log_saved_state_age_and_distance } }
+
 (** Naming conventions for fields in this struct:
   - tco_<feature/flag/setting> - type checker option
   - po_<feature/flag/setting> - parser option
   - so_<feature/flag/setting> - server option
 *)
 type t = {
-  tco_saved_state_loading: saved_state_loading;
+  tco_saved_state: saved_state;
   tco_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
   tco_num_local_workers: int option;
@@ -182,7 +205,7 @@ type t = {
 
 let default =
   {
-    tco_saved_state_loading = default_saved_state_loading;
+    tco_saved_state = default_saved_state;
     tco_experimental_features = SSet.empty;
     tco_migration_flags = SSet.empty;
     tco_num_local_workers = None;
@@ -320,7 +343,7 @@ let default =
   }
 
 let make
-    ~tco_saved_state_loading
+    ~tco_saved_state
     ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
     ?(po_disallow_toplevel_requires = default.po_disallow_toplevel_requires)
     ?tco_log_large_fanouts_threshold
@@ -490,7 +513,7 @@ let make
     ?(tco_tast_under_dynamic = default.tco_tast_under_dynamic)
     () =
   {
-    tco_saved_state_loading;
+    tco_saved_state;
     tco_experimental_features;
     tco_migration_flags;
     tco_num_local_workers;

@@ -51,9 +51,13 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
            { naming_sqlite = config.ServerLocalConfig.use_hack_64_naming_table })
       ~repo:root
       ~saved_state_manifold_api_key:
-        config.ServerLocalConfig.saved_state_loading
+        config.ServerLocalConfig.saved_state.GlobalOptions.loading
           .GlobalOptions.saved_state_manifold_api_key
       ~ignore_hh_version
+      ~rollouts:config.ServerLocalConfig.saved_state.GlobalOptions.rollouts
+      ~project_metadata_w_flags:
+        config.ServerLocalConfig.saved_state
+          .GlobalOptions.project_metadata_w_flags
   in
   match result with
   | Error (error, _telemetry) ->

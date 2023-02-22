@@ -8,7 +8,7 @@
 
 type flag_name = string
 
-type t
+type t [@@deriving eq, show]
 
 val default : t
 
@@ -19,3 +19,5 @@ val make :
   t
 
 val output : t -> unit
+
+val to_bit_array_string : t -> string

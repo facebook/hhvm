@@ -4,7 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::gen::global_options::GlobalOptions;
+use crate::gen::global_options::SavedState;
 use crate::gen::global_options::SavedStateLoading;
+use crate::gen::saved_state_rollouts::SavedStateRollouts;
 use crate::i_set;
 use crate::s_map;
 use crate::s_set;
@@ -19,10 +21,20 @@ impl Default for SavedStateLoading {
     }
 }
 
+impl Default for SavedState {
+    fn default() -> Self {
+        Self {
+            loading: SavedStateLoading::default(),
+            rollouts: SavedStateRollouts::default(),
+            project_metadata_w_flags: false,
+        }
+    }
+}
+
 impl Default for GlobalOptions {
     fn default() -> Self {
         Self {
-            tco_saved_state_loading: SavedStateLoading::default(),
+            tco_saved_state: SavedState::default(),
             tco_experimental_features: s_set::SSet::new(),
             tco_migration_flags: s_set::SSet::new(),
             tco_num_local_workers: None,

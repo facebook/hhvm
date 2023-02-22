@@ -19,12 +19,28 @@ type saved_state_loading = {
 
 val default_saved_state_loading : saved_state_loading
 
+type saved_state = {
+  loading: saved_state_loading;
+  rollouts: Saved_state_rollouts.t;
+  project_metadata_w_flags: bool;
+}
+[@@deriving show, eq]
+
+val default_saved_state : saved_state
+
+val with_saved_state_manifold_api_key :
+  string option -> saved_state -> saved_state
+
+val with_use_manifold_cython_client : bool -> saved_state -> saved_state
+
+val with_log_saved_state_age_and_distance : bool -> saved_state -> saved_state
+
 (** Naming conventions for fieds:
   - tco_<feature/flag/setting> - type checker option
   - po_<feature/flag/setting> - parser option
   - so_<feature/flag/setting> - server option *)
 type t = {
-  tco_saved_state_loading: saved_state_loading;
+  tco_saved_state: saved_state;
   (* Set of experimental features, in lowercase. *)
   tco_experimental_features: SSet.t;
   (* Set of opt-in migration behavior flags, in lowercase. *)
@@ -347,7 +363,7 @@ type t = {
 [@@deriving eq, show]
 
 val make :
-  tco_saved_state_loading:saved_state_loading ->
+  tco_saved_state:saved_state ->
   ?po_deregister_php_stdlib:bool ->
   ?po_disallow_toplevel_requires:bool ->
   ?tco_log_large_fanouts_threshold:int ->

@@ -2,7 +2,10 @@
  (name global_options)
  (wrapped false)
  (modules globalOptions)
- (libraries collections utils_find)
+ (libraries
+  collections
+  saved_state_rollouts
+  utils_find)
  (preprocess
   (pps ppx_deriving.std)))
 

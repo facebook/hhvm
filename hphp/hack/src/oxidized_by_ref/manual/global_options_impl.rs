@@ -4,8 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::gen::global_options::GlobalOptions;
+use crate::gen::global_options::SavedState;
 use crate::gen::global_options::SavedStateLoading;
 use crate::i_set;
+use crate::manual::saved_state_rollouts_impl::DEFAULT_SAVED_STATE_ROLLOUTS;
 use crate::s_map;
 use crate::s_set;
 
@@ -15,8 +17,14 @@ const DEFAULT_SAVED_STATE_LOADING: SavedStateLoading<'_> = SavedStateLoading {
     use_manifold_cython_client: false,
 };
 
+const DEFAULT_SAVED_STATE: SavedState<'_> = SavedState {
+    loading: &DEFAULT_SAVED_STATE_LOADING,
+    rollouts: &DEFAULT_SAVED_STATE_ROLLOUTS,
+    project_metadata_w_flags: false,
+};
+
 const DEFAULT: GlobalOptions<'_> = GlobalOptions {
-    tco_saved_state_loading: &DEFAULT_SAVED_STATE_LOADING,
+    tco_saved_state: &DEFAULT_SAVED_STATE,
     tco_experimental_features: s_set::SSet::empty(),
     tco_migration_flags: s_set::SSet::empty(),
     tco_num_local_workers: None,

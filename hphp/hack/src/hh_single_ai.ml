@@ -165,7 +165,7 @@ let parse_options () =
   let root = Path.make "/" (* if none specified, we use this dummy *) in
   let tcopt =
     GlobalOptions.make
-      ~tco_saved_state_loading:GlobalOptions.default_saved_state_loading
+      ~tco_saved_state:GlobalOptions.default_saved_state
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
       ~po_disable_hh_ignore_error:!disable_hh_ignore_error

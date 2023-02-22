@@ -130,12 +130,10 @@ let parse_options () =
 
   let tcopt =
     GlobalOptions.make
-      ~tco_saved_state_loading:
-        {
-          GlobalOptions.default_saved_state_loading with
-          GlobalOptions.saved_state_manifold_api_key =
-            !saved_state_manifold_api_key;
-        }
+      ~tco_saved_state:
+        (GlobalOptions.default_saved_state
+        |> GlobalOptions.with_saved_state_manifold_api_key
+             !saved_state_manifold_api_key)
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations

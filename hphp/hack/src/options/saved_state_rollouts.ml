@@ -13,6 +13,7 @@ type t = {
   dummy_two: bool;
   dummy_three: bool;
 }
+[@@deriving eq, show]
 
 (* The names of these should be exactly the capitalized flag names.
    For example for a flag named
@@ -32,13 +33,13 @@ type flag =
 type flag_name = string
 
 (** This module allows to handle the config flag 'ss_force',
-      which can have the following values:
-      'prod' or 'candidate' or 'prod_with_flag_on:my_flag_name' where 'my_flag_name'
-      is a saved state flag from this module.
+  which can have the following values:
+  'prod' or 'candidate' or 'prod_with_flag_on:my_flag_name' where 'my_flag_name'
+  is a saved state flag from this module.
 
-      This is useful to force using (or creating) the production or candidate saved state,
-      or for using/creating an alternative candidate saved state
-      (with 'prod_with_flag_on:my_flag_name') *)
+  This is useful to force using (or creating) the production or candidate saved state,
+  or for using/creating an alternative candidate saved state
+  (with 'prod_with_flag_on:my_flag_name') *)
 module ForcedFlags : sig
   (** Type to represent the possible values of config flag 'ss_force' *)
   type t
@@ -157,3 +158,11 @@ let output t =
   print_flag Dummy_one dummy_one;
   print_flag Dummy_two dummy_two;
   print_flag Dummy_three dummy_three
+
+let to_bit_array_string t : string =
+  let s : bool -> string = function
+    | true -> "1"
+    | false -> "0"
+  in
+  let { dummy_one; dummy_two; dummy_three } = t in
+  s dummy_one ^ s dummy_two ^ s dummy_three

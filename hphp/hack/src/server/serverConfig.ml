@@ -489,8 +489,7 @@ let load ~silent options : t * ServerLocalConfig.t =
       ?tco_profile_top_level_definitions:
         (bool_opt "profile_top_level_definitions" config)
       ?tco_is_systemlib:(bool_opt "is_systemlib" config)
-      ~tco_saved_state_loading:
-        local_config.ServerLocalConfig.saved_state_loading
+      ~tco_saved_state:local_config.ServerLocalConfig.saved_state
       ~log_levels:(prepare_log_levels config)
       ?tco_allowed_files_for_module_declarations:
         (string_list_opt "allowed_files_for_module_declarations" config)

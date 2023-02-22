@@ -26,6 +26,7 @@
 
 #include <thrift/conformance/cpp2/Object.h>
 #include <thrift/conformance/data/ValueGenerator.h>
+#include <thrift/lib/cpp/util/SaturatingMath.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/Patch.h>
@@ -93,16 +94,11 @@ PatchOpTestCase makeClearTest(
 }
 
 template <typename TT, typename T>
-T makeAddExpectedResult(T value, int add = 1) {
+T makeAddExpectedResult(T value, T add) {
   if constexpr (std::is_convertible_v<TT, type::bool_t>) {
     return !value;
   } else {
-    if (std::numeric_limits<T>::max() == value && add > 0) {
-      return value;
-    } else if (std::numeric_limits<T>::min() == value && add < 0) {
-      return value;
-    }
-    return value + add;
+    return util::add_saturating(value, add);
   }
 }
 
@@ -130,7 +126,8 @@ PatchOpTestCase makeAddTest(
       registry.store(asValueStruct<type::struct_c>(patch.toThrift()), protocol);
   opTest.request() = req;
   opTest.result() = registry.store(
-      asValueStruct<TT>(makeAddExpectedResult<TT>(value.value)), protocol);
+      asValueStruct<TT>(makeAddExpectedResult<TT>(value.value, toAdd)),
+      protocol);
   return opTest;
 }
 

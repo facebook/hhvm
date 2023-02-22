@@ -486,7 +486,8 @@ void raiseModuleBoundaryViolation(const Class* ctx,
   assertx(IMPLIES(callee->isMethod(), ctx));
   assertx(callee->isInternal());
   return moduleBoundaryViolationImpl(
-    ctx ? folly::sformat("method {}::{}", ctx->name(), callee->name())
+    ctx && callee->isMethod()
+        ? folly::sformat("method {}::{}", ctx->name(), callee->name())
         : folly::sformat("function {}", callee->name()),
     callee->moduleName(),
     callerModule,

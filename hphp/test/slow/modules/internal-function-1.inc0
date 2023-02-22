@@ -1,0 +1,4 @@
+<?hh
+
+new module A {}
+new module B {}

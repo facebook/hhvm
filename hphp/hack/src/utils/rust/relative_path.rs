@@ -56,31 +56,46 @@ impl Display for Prefix {
 }
 
 #[derive(Clone, Eq, Hash, PartialEq)]
-#[derive(EqModuloPos, FromOcamlRep, ToOcamlRep, NoPosHash)]
+#[derive(EqModuloPos, NoPosHash)]
 pub struct RelativePath {
     prefix: Prefix,
-    path: PathBuf,
+    /// Representation invariant: the empty path is always encoded as `None`.
+    /// This allows us to construct `RelativePath` in `const` contexts
+    /// (because `Path::new` is not a `const fn`).
+    path: Option<PathBuf>,
 }
 
 impl RelativePath {
     pub fn make(prefix: Prefix, path: PathBuf) -> Self {
-        Self { prefix, path }
+        Self {
+            prefix,
+            path: if path.as_os_str().is_empty() {
+                None
+            } else {
+                Some(path)
+            },
+        }
     }
 
+    pub const EMPTY: Self = Self {
+        prefix: Prefix::Dummy,
+        path: None,
+    };
+
     pub fn is_empty(&self) -> bool {
-        self.prefix == Prefix::Dummy && self.path.as_os_str().is_empty()
+        self == &Self::EMPTY
     }
 
     pub fn has_extension(&self, s: impl AsRef<Path>) -> bool {
-        self.path.extension() == Some(s.as_ref().as_os_str())
+        self.path().extension() == Some(s.as_ref().as_os_str())
     }
 
     pub fn path(&self) -> &Path {
-        &self.path
+        self.path.as_deref().unwrap_or(Path::new(""))
     }
 
     pub fn path_str(&self) -> &str {
-        self.path.to_str().unwrap()
+        self.path().to_str().unwrap()
     }
 
     pub fn prefix(&self) -> Prefix {
@@ -88,13 +103,13 @@ impl RelativePath {
     }
 
     pub fn to_absolute(&self, ctx: &RelativePathCtx) -> PathBuf {
-        ctx.prefix_path(self.prefix).join(&self.path)
+        ctx.prefix_path(self.prefix).join(self.path())
     }
 }
 
 impl Display for RelativePath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}|{}", self.prefix, self.path.display())
+        write!(f, "{}|{}", self.prefix, self.path().display())
     }
 }
 
@@ -112,7 +127,7 @@ impl Ord for RelativePath {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.prefix
             .cmp(&other.prefix)
-            .then(self.path.as_os_str().cmp(other.path.as_os_str()))
+            .then(self.path().as_os_str().cmp(other.path().as_os_str()))
     }
 }
 
@@ -126,7 +141,7 @@ impl PartialOrd for RelativePath {
 // as a string. This allows using it as a map key in serde_json.
 impl Serialize for RelativePath {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let path_str = (self.path.to_str())
+        let path_str = (self.path().to_str())
             .ok_or_else(|| serde::ser::Error::custom("path contains invalid UTF-8 characters"))?;
         serializer.serialize_str(&format!("{}|{}", self.prefix, path_str))
     }
@@ -171,7 +186,8 @@ impl<'de> Deserialize<'de> for RelativePath {
                     }
                 };
                 let path = match path_str {
-                    Some(path_str) => PathBuf::from(path_str),
+                    Some(path_str) if path_str.is_empty() => None,
+                    Some(path_str) => Some(PathBuf::from(path_str)),
                     None => {
                         return Err(E::invalid_value(
                             serde::de::Unexpected::Other(
@@ -187,6 +203,24 @@ impl<'de> Deserialize<'de> for RelativePath {
         }
 
         deserializer.deserialize_str(Visitor)
+    }
+}
+
+impl ToOcamlRep for RelativePath {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
+        let mut block = alloc.block_with_size(2);
+        alloc.set_field(&mut block, 0, alloc.add(&self.prefix));
+        alloc.set_field(&mut block, 1, alloc.add(self.path()));
+        block.build()
+    }
+}
+
+impl FromOcamlRep for RelativePath {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        let block = ocamlrep::from::expect_tuple(value, 2)?;
+        let prefix = ocamlrep::from::field(block, 0)?;
+        let path: PathBuf = ocamlrep::from::field(block, 1)?;
+        Ok(Self::make(prefix, path))
     }
 }
 

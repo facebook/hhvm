@@ -6,14 +6,11 @@
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::ops::Range;
-use std::path::PathBuf;
 
 use eq_modulo_pos::EqModuloPos;
 use ocamlrep::rc::RcOc;
 use ocamlrep::FromOcamlRep;
-use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
-use relative_path::Prefix;
 use relative_path::RelativePath;
 use relative_path::RelativePathCtx;
 use serde::Deserialize;
@@ -25,15 +22,7 @@ use crate::file_pos_small::FilePosSmall;
 use crate::pos_span_raw::PosSpanRaw;
 use crate::pos_span_tiny::PosSpanTiny;
 
-#[derive(
-    Clone,
-    Deserialize,
-    Hash,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    ToOcamlRep,
-    Serialize
-)]
+#[derive(Clone, Deserialize, Hash, Serialize)]
 enum PosImpl {
     Small {
         file: RcOc<RelativePath>,
@@ -46,36 +35,32 @@ enum PosImpl {
         end: Box<FilePosLarge>,
     },
     Tiny {
-        file: RcOc<RelativePath>,
+        /// Representation invariant: `RelativePath::EMPTY` is always encoded as
+        /// `None`. This allows us to construct `Pos` in `const` contexts.
+        file: Option<RcOc<RelativePath>>,
         span: PosSpanTiny,
     },
     FromReason(Box<PosImpl>),
 }
 
-#[derive(
-    Clone,
-    Deserialize,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    ToOcamlRep,
-    Serialize
-)]
+#[derive(Clone, Deserialize, FromOcamlRep, ToOcamlRep, Serialize)]
 pub struct Pos(PosImpl);
 
 pub type PosR<'a> = &'a Pos;
 
 impl Pos {
-    pub fn make_none() -> Self {
-        // TODO: shiqicao make NONE static, lazy_static doesn't allow Rc
-        Pos(PosImpl::Tiny {
-            file: RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
-            span: PosSpanTiny::make_dummy(),
-        })
+    pub const fn make_none() -> Self {
+        Self::NONE
     }
+
+    pub const NONE: Self = Self(PosImpl::Tiny {
+        file: None,
+        span: PosSpanTiny::make_dummy(),
+    });
 
     pub fn is_none(&self) -> bool {
         match self {
-            Pos(PosImpl::Tiny { file, span }) => span.is_dummy() && file.is_empty(),
+            Pos(PosImpl::Tiny { file, span }) => span.is_dummy() && file.is_none(),
             _ => false,
         }
     }
@@ -88,7 +73,10 @@ impl Pos {
 
     pub fn from_raw_span(file: RcOc<RelativePath>, span: PosSpanRaw) -> Self {
         if let Some(span) = PosSpanTiny::make(&span.start, &span.end) {
-            return Pos(PosImpl::Tiny { file, span });
+            return Pos(PosImpl::Tiny {
+                file: if file.is_empty() { None } else { Some(file) },
+                span,
+            });
         }
         let (lnum, bol, offset) = span.start.line_beg_offset();
         if let Some(start) = FilePosSmall::from_lnum_bol_offset(lnum, bol, offset) {
@@ -120,14 +108,25 @@ impl Pos {
     }
 
     pub fn filename(&self) -> &RelativePath {
-        self.filename_rc_ref()
-    }
-
-    pub fn filename_rc_ref(&self) -> &RcOc<RelativePath> {
         match &self.0 {
             PosImpl::Small { file, .. }
             | PosImpl::Large { file, .. }
-            | PosImpl::Tiny { file, .. } => file,
+            | PosImpl::Tiny {
+                file: Some(file), ..
+            } => file,
+            PosImpl::Tiny { file: None, .. } => &RelativePath::EMPTY,
+            PosImpl::FromReason(_p) => unimplemented!(),
+        }
+    }
+
+    pub fn filename_rc(&self) -> RcOc<RelativePath> {
+        match &self.0 {
+            PosImpl::Small { file, .. }
+            | PosImpl::Large { file, .. }
+            | PosImpl::Tiny {
+                file: Some(file), ..
+            } => RcOc::clone(file),
+            PosImpl::Tiny { file: None, .. } => RcOc::new(RelativePath::EMPTY),
             PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
@@ -136,7 +135,10 @@ impl Pos {
         match self.0 {
             PosImpl::Small { file, .. }
             | PosImpl::Large { file, .. }
-            | PosImpl::Tiny { file, .. } => file,
+            | PosImpl::Tiny {
+                file: Some(file), ..
+            } => file,
+            PosImpl::Tiny { file: None, .. } => RcOc::new(RelativePath::EMPTY),
             PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
@@ -288,7 +290,7 @@ impl Pos {
         };
 
         Ok(Self::from_raw_span(
-            RcOc::clone(x1.filename_rc_ref()),
+            x1.filename_rc(),
             PosSpanRaw { start, end },
         ))
     }
@@ -299,7 +301,7 @@ impl Pos {
         } else {
             let end = self.to_raw_span().end;
             Cow::Owned(Self::from_raw_span(
-                RcOc::clone(self.filename_rc_ref()),
+                self.filename_rc(),
                 PosSpanRaw { start: end, end },
             ))
         }
@@ -311,7 +313,7 @@ impl Pos {
         } else {
             let start = self.to_raw_span().start.with_column(0);
             Cow::Owned(Self::from_raw_span(
-                RcOc::clone(self.filename_rc_ref()),
+                self.filename_rc(),
                 PosSpanRaw { start, end: start },
             ))
         }
@@ -360,12 +362,12 @@ impl std::fmt::Display for Pos {
             PosImpl::Large {
                 file, start, end, ..
             } => do_fmt(f, file, &**start, &**end),
-            PosImpl::Tiny { file, span } => {
+            PosImpl::Tiny { span, .. } => {
                 if self.is_none() {
                     return write!(f, "Pos::NONE");
                 }
                 let PosSpanRaw { start, end } = span.to_raw_span();
-                do_fmt(f, file, &start, &end)
+                do_fmt(f, self.filename(), &start, &end)
             }
             PosImpl::FromReason(_p) => unimplemented!(),
         }
@@ -424,6 +426,84 @@ impl EqModuloPos for Pos {
     }
 }
 
+impl ToOcamlRep for PosImpl {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
+        match self {
+            PosImpl::Small { file, start, end } => {
+                let mut block = alloc.block_with_size_and_tag(3, 0);
+                alloc.set_field(&mut block, 0, alloc.add(file));
+                alloc.set_field(&mut block, 1, alloc.add(start));
+                alloc.set_field(&mut block, 2, alloc.add(end));
+                block.build()
+            }
+            PosImpl::Large { file, start, end } => {
+                let mut block = alloc.block_with_size_and_tag(3, 1);
+                alloc.set_field(&mut block, 0, alloc.add(file));
+                alloc.set_field(&mut block, 1, alloc.add(start));
+                alloc.set_field(&mut block, 2, alloc.add(end));
+                block.build()
+            }
+            PosImpl::Tiny { file, span } => {
+                let file = file.as_deref().unwrap_or(&RelativePath::EMPTY);
+                let mut block = alloc.block_with_size_and_tag(2, 2);
+                alloc.set_field(&mut block, 0, alloc.add(file));
+                alloc.set_field(&mut block, 1, alloc.add(span));
+                block.build()
+            }
+            PosImpl::FromReason(pos) => {
+                let mut block = alloc.block_with_size_and_tag(1, 3);
+                alloc.set_field(&mut block, 0, alloc.add(pos));
+                block.build()
+            }
+        }
+    }
+}
+
+impl FromOcamlRep for PosImpl {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        use ocamlrep::from;
+        let block = from::expect_block(value)?;
+        match block.tag() {
+            0 => {
+                from::expect_block_size(block, 3)?;
+                Ok(PosImpl::Small {
+                    file: from::field(block, 0)?,
+                    start: from::field(block, 1)?,
+                    end: from::field(block, 2)?,
+                })
+            }
+            1 => {
+                from::expect_block_size(block, 3)?;
+                Ok(PosImpl::Large {
+                    file: from::field(block, 0)?,
+                    start: from::field(block, 1)?,
+                    end: from::field(block, 2)?,
+                })
+            }
+            2 => {
+                from::expect_block_size(block, 2)?;
+                let file: RelativePath = from::field(block, 0)?;
+                Ok(PosImpl::Tiny {
+                    file: if file.is_empty() {
+                        None
+                    } else {
+                        Some(RcOc::new(file))
+                    },
+                    span: from::field(block, 1)?,
+                })
+            }
+            3 => {
+                from::expect_block_size(block, 1)?;
+                Ok(PosImpl::FromReason(from::field(block, 0)?))
+            }
+            tag => Err(ocamlrep::FromError::BlockTagOutOfRange {
+                max: 3,
+                actual: tag,
+            }),
+        }
+    }
+}
+
 impl Pos {
     /// Returns a struct implementing Display which produces the same format as
     /// `Pos.string` in OCaml.
@@ -476,7 +556,10 @@ impl From<parser_core_types::indexed_source_text::Pos> for Pos {
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use pretty_assertions::assert_eq;
+    use relative_path::Prefix;
 
     use super::*;
 

@@ -5,8 +5,6 @@
 
 use std::cmp::Ordering;
 
-use ocamlrep::rc::RcOc;
-
 use crate::errors::*;
 use crate::message::Message;
 use crate::pos::Pos;
@@ -122,7 +120,7 @@ impl Naming {
 
     pub fn method_needs_visibility(first_token_p: Pos, name_p: Pos) -> Error {
         // Create a zero width position at the start of the first token.
-        let file = RcOc::clone(first_token_p.filename_rc_ref());
+        let file = first_token_p.filename_rc();
         let mut p_span = first_token_p.to_raw_span();
         p_span.end = p_span.start;
         let fix_pos = Pos::from_raw_span(file, p_span);

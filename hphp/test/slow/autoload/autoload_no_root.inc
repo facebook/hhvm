@@ -1,3 +1,0 @@
-<?hh // strict
-
-function foo() {}

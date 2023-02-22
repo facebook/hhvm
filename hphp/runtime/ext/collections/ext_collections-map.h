@@ -227,8 +227,6 @@ private:
   friend struct c_Vector;
   friend struct c_Map;
   friend struct c_ImmMap;
-  friend struct c_AwaitAllWaitHandle;
-  friend struct c_GenMapWaitHandle;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field

@@ -29,8 +29,8 @@ namespace HH\Asio {
 async function m<Tk, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
 ): Awaitable<Map<Tk, Tv>> {
-  $awaitables = new Map($awaitables);
-  await AwaitAllWaitHandle::fromMap($awaitables);
+  $awaitables = dict($awaitables);
+  await AwaitAllWaitHandle::fromDict($awaitables);
   // TODO: When systemlib supports closures
   // return $awaitables->map($o ==> $o->result());
   $ret = Map {};
@@ -64,8 +64,8 @@ async function m<Tk, Tv>(
 async function v<Tv>(
   Traversable<Awaitable<Tv>> $awaitables,
 ): Awaitable<Vector<Tv>> {
-  $awaitables = new Vector($awaitables);
-  await AwaitAllWaitHandle::fromVector($awaitables);
+  $awaitables = vec($awaitables);
+  await AwaitAllWaitHandle::fromVec($awaitables);
   // TODO: When systemlib supports closures
   // return $awaitables->map($o ==> $o->result());
   $ret = Vector {};
@@ -86,8 +86,7 @@ async function v<Tv>(
  *
  *     Awaitable<(T1, T2, ..., Tn)>
  *
- * @deprecated Use `Tuple\from_async()` instead.
- * @fbdeprecated Use `genva()` instead.
+ * @deprecated Use `concurrent {}` instead.
  */
 async function va(...$awaitables): Awaitable/*<(...)>*/ {
   await AwaitAllWaitHandle::fromVec(vec($awaitables));

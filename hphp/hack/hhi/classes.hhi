@@ -205,17 +205,8 @@ namespace HH {
     public static function fromDict(
       dict<arraykey, Awaitable<mixed>> $deps,
     )[]: Awaitable<void>;
-    public static function fromMap(
-      \ConstMap<arraykey, Awaitable<mixed>> $deps,
-    )[]: Awaitable<void>;
     public static function fromVec(
       vec<Awaitable<mixed>> $deps,
-    )[]: Awaitable<void>;
-    public static function fromVector(
-      \ConstVector<Awaitable<mixed>> $deps,
-    )[]: Awaitable<void>;
-    public static function fromContainer(
-      Container<Awaitable<mixed>> $deps,
     )[]: Awaitable<void>;
     public static function setOnCreateCallback(
       ?(function(AwaitAllWaitHandle, Vector<mixed>): void) $callback,

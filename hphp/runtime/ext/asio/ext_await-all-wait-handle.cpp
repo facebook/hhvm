@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 
-#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
@@ -25,7 +24,6 @@
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
-#include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
@@ -45,18 +43,6 @@ req::ptr<c_AwaitAllWaitHandle> c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
 
 namespace {
   StaticString s_awaitAll("<await-all>");
-
-  [[noreturn]] NEVER_INLINE
-  void failMap() {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Expected dependencies to be a Map");
-  }
-
-  [[noreturn]] NEVER_INLINE
-  void failVector() {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Expected dependencies to be a Vector");
-  }
 
   [[noreturn]] NEVER_INLINE
   void failWaitHandle() {
@@ -182,37 +168,6 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
   });
 }
 
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
-                          const Variant& dependencies) {
-  if (LIKELY(dependencies.isObject())) {
-    auto obj = dependencies.getObjectData();
-    if (LIKELY(obj->isCollection() && isMapCollection(obj->collectionType()))) {
-      assertx(collections::isType(obj->getVMClass(), CollectionType::Map,
-                                                     CollectionType::ImmMap));
-      return c_AwaitAllWaitHandle::Create([=](auto fn) {
-        VanillaDict::IterateV(static_cast<BaseMap*>(obj)->arrayData(), fn);
-      });
-    }
-  }
-  failMap();
-}
-
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
-                          const Variant& dependencies) {
-  if (LIKELY(dependencies.isObject())) {
-    auto obj = dependencies.getObjectData();
-    if (LIKELY(obj->isCollection() &&
-               isVectorCollection(obj->collectionType()))) {
-      assertx(collections::isType(obj->getVMClass(), CollectionType::Vector,
-                                                  CollectionType::ImmVector));
-      return c_AwaitAllWaitHandle::Create([=](auto fn) {
-        VanillaVec::IterateV(static_cast<BaseVector*>(obj)->arrayData(), fn);
-      });
-    }
-  }
-  failVector();
-}
-
 void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
   setState(STATE_BLOCKED);
   setContextIdx(ctx_idx);
@@ -296,8 +251,6 @@ void AsioExtension::initAwaitAllWaitHandle() {
   HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, meth, AwaitAllWaitHandle, meth)
   AAWH_SME(fromVec);
   AAWH_SME(fromDict);
-  AAWH_SME(fromMap);
-  AAWH_SME(fromVector);
   AAWH_SME(setOnCreateCallback);
 #undef AAWH_SME
 }

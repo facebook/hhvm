@@ -14,7 +14,6 @@ namespace HPHP {
 struct BaseMap;
 struct BaseSet;
 struct c_Pair;
-struct c_AwaitAllWaitHandle;
 
 namespace collections {
 void append(ObjectData*, TypedValue*);
@@ -347,7 +346,6 @@ private:
   friend struct BaseMap;
   friend struct BaseSet;
   friend struct c_Pair;
-  friend struct c_AwaitAllWaitHandle;
 
   friend void collections::deepCopy(tv_lval);
 

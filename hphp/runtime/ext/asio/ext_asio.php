@@ -147,56 +147,6 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
     dict<arraykey, Awaitable<mixed>> $dependencies
   )[]: Awaitable<void>;
 
-  /** Create a wait handle that waits for a given Map of dependencies
-   * @param mixed $dependencies - A Map of dependencies to wait for
-   * @return object - A WaitHandle that will wait for a given Map of
-   * dependencies
-   */
-  <<__Native>>
-  public static function fromMap(mixed $dependencies)[]: Awaitable<void>;
-
-  /** Create a wait handle that waits for a given Vector of dependencies
-   * @param mixed $dependencies - A Vector of dependencies to wait for
-   * @return object - A WaitHandle that will wait for a given Vector of
-   * dependencies
-   */
-  <<__Native>>
-  public static function fromVector(mixed $dependencies)[]: Awaitable<void>;
-
-  /** Create a wait handle that can, generically, wait for a given Container<_>
-   * of dependencies.
-   *
-   * This should only be used if accepting a generic Container
-   * _and_ it's required to reuse the same container for performance reasons.
-   * otherwise prefer to use `fromVec` or `fromDict`
-   */
-  public static function fromContainer(mixed $dependencies)[]: Awaitable<void> {
-    if ($dependencies is dict<_, _>) {
-      return self::fromDict(
-        \HH\FIXME\UNSAFE_CAST<mixed, dict<arraykey, Awaitable<mixed>>>(
-          $dependencies
-        )
-      );
-    }
-    if ($dependencies is vec<_>) {
-      return self::fromVec(
-        \HH\FIXME\UNSAFE_CAST<mixed, vec<Awaitable<mixed>>>($dependencies)
-      );
-    }
-    if ($dependencies is \ConstMap<_, _>) {
-      return self::fromMap($dependencies);
-    }
-    // can't use `is \ConstVector<_>` here because that also matches Pair
-    if ($dependencies is \HH\Vector<_> || $dependencies is \HH\ImmVector<_>) {
-      return self::fromVector($dependencies);
-    }
-    throw new \InvalidArgumentException(
-      $dependencies is \HH\Container<_>
-        ? "Dependencies cannot be a set-like container or Pair"
-        : "Expected dependencies to be a container"
-    );
-  }
-
   /** Set callback for when a AwaitAllWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */

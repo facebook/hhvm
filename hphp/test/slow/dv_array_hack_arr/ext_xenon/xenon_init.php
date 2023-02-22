@@ -64,7 +64,7 @@ function entrypoint_xenon_init(): void {
     'include',
     'count',
     Vector::class.'::__construct',
-    AwaitAllWaitHandle::class.'::fromVector',
+    AwaitAllWaitHandle::class.'::fromVec',
     RescheduleWaitHandle::class.'::create',
   ];
 

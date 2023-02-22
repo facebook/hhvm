@@ -18,16 +18,14 @@
 #ifndef incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
 #define incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
 
-#include "hphp/runtime/base/vanilla-dict.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/extension.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class AwaitAllWaitHandle
-
-struct BaseMap;
-struct BaseVector;
 
 /**
  * A wait handle that waits for a list of wait handles. The wait handle succeeds
@@ -126,10 +124,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
                                    const Array& dependencies);
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
                                    const Array& dependencies);
-  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
-                          const Variant& dependencies);
-  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
-                          const Variant& dependencies);
  private:
   uint32_t const m_cap; // how many children we have room for.
   uint32_t m_unfinished; // index of the first unfinished child

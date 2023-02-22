@@ -8,6 +8,7 @@
 
 namespace fixtures\basic;
 
+module hack.module.test;
 /**
  * Original thrift enum:-
  * MyEnum

@@ -19,6 +19,7 @@ package "test.dev/fixtures/basic"
 namespace android test.fixtures.basic
 namespace java test.fixtures.basic
 namespace java.swift test.fixtures.basic
+namespace hack.module hack.module.test
 
 include "thrift/annotation/hack.thrift"
 

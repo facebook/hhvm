@@ -1527,6 +1527,10 @@ void t_hack_generator::init_codegen_file(
       file_ << "namespace " << ns << ";\n\n";
     }
   }
+  const std::string module = program_->get_namespace("hack.module");
+  if (!module.empty()) {
+    file_ << "module " << module << ";\n";
+  }
 }
 
 /**

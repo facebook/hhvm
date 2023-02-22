@@ -6,6 +6,14 @@
  (preprocess
   (pps ppx_deriving.std)))
 
+(library
+  (name saved_state_rollouts)
+  (wrapped false)
+  (modules saved_state_rollouts)
+  (libraries utils_core)
+  (preprocess
+    (pps ppx_deriving.std)))
+
 (executable
  (name discover)
  (modules discover)

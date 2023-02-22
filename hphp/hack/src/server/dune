@@ -140,6 +140,7 @@
   parser_options
   pos
   procs_bucket
+  saved_state_rollouts
   server_client_provider
   server_command_types
   server_monitor

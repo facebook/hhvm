@@ -106,6 +106,7 @@ impl ::std::fmt::Debug for self::FooStreamEx {
 
 unsafe impl ::std::marker::Send for self::FooStreamEx {}
 unsafe impl ::std::marker::Sync for self::FooStreamEx {}
+impl ::std::marker::Unpin for self::FooStreamEx {}
 
 impl ::fbthrift::GetTType for self::FooStreamEx {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -165,6 +166,7 @@ impl ::std::fmt::Debug for self::FooEx {
 
 unsafe impl ::std::marker::Send for self::FooEx {}
 unsafe impl ::std::marker::Sync for self::FooEx {}
+impl ::std::marker::Unpin for self::FooEx {}
 
 impl ::fbthrift::GetTType for self::FooEx {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -224,6 +226,7 @@ impl ::std::fmt::Debug for self::FooEx2 {
 
 unsafe impl ::std::marker::Send for self::FooEx2 {}
 unsafe impl ::std::marker::Sync for self::FooEx2 {}
+impl ::std::marker::Unpin for self::FooEx2 {}
 
 impl ::fbthrift::GetTType for self::FooEx2 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

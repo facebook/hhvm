@@ -325,6 +325,7 @@ impl ::std::fmt::Debug for self::MyStruct {
 
 unsafe impl ::std::marker::Send for self::MyStruct {}
 unsafe impl ::std::marker::Sync for self::MyStruct {}
+impl ::std::marker::Unpin for self::MyStruct {}
 
 impl ::fbthrift::GetTType for self::MyStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -595,6 +596,7 @@ impl ::std::fmt::Debug for self::MyStructWithCustomDefault {
 
 unsafe impl ::std::marker::Send for self::MyStructWithCustomDefault {}
 unsafe impl ::std::marker::Sync for self::MyStructWithCustomDefault {}
+impl ::std::marker::Unpin for self::MyStructWithCustomDefault {}
 
 impl ::fbthrift::GetTType for self::MyStructWithCustomDefault {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -697,6 +699,7 @@ impl ::std::fmt::Debug for self::StructLevelTerseStruct {
 
 unsafe impl ::std::marker::Send for self::StructLevelTerseStruct {}
 unsafe impl ::std::marker::Sync for self::StructLevelTerseStruct {}
+impl ::std::marker::Unpin for self::StructLevelTerseStruct {}
 
 impl ::fbthrift::GetTType for self::StructLevelTerseStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -927,6 +930,7 @@ impl ::std::fmt::Debug for self::FieldLevelTerseStruct {
 
 unsafe impl ::std::marker::Send for self::FieldLevelTerseStruct {}
 unsafe impl ::std::marker::Sync for self::FieldLevelTerseStruct {}
+impl ::std::marker::Unpin for self::FieldLevelTerseStruct {}
 
 impl ::fbthrift::GetTType for self::FieldLevelTerseStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1240,6 +1244,7 @@ impl ::std::fmt::Debug for self::TerseStructWithCustomDefault {
 
 unsafe impl ::std::marker::Send for self::TerseStructWithCustomDefault {}
 unsafe impl ::std::marker::Sync for self::TerseStructWithCustomDefault {}
+impl ::std::marker::Unpin for self::TerseStructWithCustomDefault {}
 
 impl ::fbthrift::GetTType for self::TerseStructWithCustomDefault {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1419,6 +1424,7 @@ impl ::std::fmt::Debug for self::AdaptedFields {
 
 unsafe impl ::std::marker::Send for self::AdaptedFields {}
 unsafe impl ::std::marker::Sync for self::AdaptedFields {}
+impl ::std::marker::Unpin for self::AdaptedFields {}
 
 impl ::fbthrift::GetTType for self::AdaptedFields {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1507,6 +1513,7 @@ impl ::std::fmt::Debug for self::WrappedFields {
 
 unsafe impl ::std::marker::Send for self::WrappedFields {}
 unsafe impl ::std::marker::Sync for self::WrappedFields {}
+impl ::std::marker::Unpin for self::WrappedFields {}
 
 impl ::fbthrift::GetTType for self::WrappedFields {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1581,6 +1588,7 @@ impl ::std::fmt::Debug for self::TerseException {
 
 unsafe impl ::std::marker::Send for self::TerseException {}
 unsafe impl ::std::marker::Sync for self::TerseException {}
+impl ::std::marker::Unpin for self::TerseException {}
 
 impl ::fbthrift::GetTType for self::TerseException {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

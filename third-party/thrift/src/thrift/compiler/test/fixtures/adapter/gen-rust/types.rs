@@ -765,6 +765,7 @@ impl ::std::fmt::Debug for self::MyAnnotation {
 
 unsafe impl ::std::marker::Send for self::MyAnnotation {}
 unsafe impl ::std::marker::Sync for self::MyAnnotation {}
+impl ::std::marker::Unpin for self::MyAnnotation {}
 
 impl ::fbthrift::GetTType for self::MyAnnotation {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -866,6 +867,7 @@ impl ::std::fmt::Debug for self::Foo {
 
 unsafe impl ::std::marker::Send for self::Foo {}
 unsafe impl ::std::marker::Sync for self::Foo {}
+impl ::std::marker::Unpin for self::Foo {}
 
 impl ::fbthrift::GetTType for self::Foo {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1141,6 +1143,7 @@ impl ::std::fmt::Debug for self::Bar {
 
 unsafe impl ::std::marker::Send for self::Bar {}
 unsafe impl ::std::marker::Sync for self::Bar {}
+impl ::std::marker::Unpin for self::Bar {}
 
 impl ::fbthrift::GetTType for self::Bar {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1263,6 +1266,7 @@ impl ::std::fmt::Debug for self::DirectlyAdapted {
 
 unsafe impl ::std::marker::Send for self::DirectlyAdapted {}
 unsafe impl ::std::marker::Sync for self::DirectlyAdapted {}
+impl ::std::marker::Unpin for self::DirectlyAdapted {}
 
 impl ::fbthrift::GetTType for self::DirectlyAdapted {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1337,6 +1341,7 @@ impl ::std::fmt::Debug for self::IndependentDirectlyAdapted {
 
 unsafe impl ::std::marker::Send for self::IndependentDirectlyAdapted {}
 unsafe impl ::std::marker::Sync for self::IndependentDirectlyAdapted {}
+impl ::std::marker::Unpin for self::IndependentDirectlyAdapted {}
 
 impl ::fbthrift::GetTType for self::IndependentDirectlyAdapted {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1417,6 +1422,7 @@ impl ::std::fmt::Debug for self::StructWithFieldAdapter {
 
 unsafe impl ::std::marker::Send for self::StructWithFieldAdapter {}
 unsafe impl ::std::marker::Sync for self::StructWithFieldAdapter {}
+impl ::std::marker::Unpin for self::StructWithFieldAdapter {}
 
 impl ::fbthrift::GetTType for self::StructWithFieldAdapter {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1520,6 +1526,7 @@ impl ::std::fmt::Debug for self::TerseAdaptedFields {
 
 unsafe impl ::std::marker::Send for self::TerseAdaptedFields {}
 unsafe impl ::std::marker::Sync for self::TerseAdaptedFields {}
+impl ::std::marker::Unpin for self::TerseAdaptedFields {}
 
 impl ::fbthrift::GetTType for self::TerseAdaptedFields {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1608,6 +1615,7 @@ impl ::std::fmt::Debug for self::B {
 
 unsafe impl ::std::marker::Send for self::B {}
 unsafe impl ::std::marker::Sync for self::B {}
+impl ::std::marker::Unpin for self::B {}
 
 impl ::fbthrift::GetTType for self::B {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1680,6 +1688,7 @@ impl ::std::fmt::Debug for self::A {
 
 unsafe impl ::std::marker::Send for self::A {}
 unsafe impl ::std::marker::Sync for self::A {}
+impl ::std::marker::Unpin for self::A {}
 
 impl ::fbthrift::GetTType for self::A {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1747,6 +1756,7 @@ impl ::std::fmt::Debug for self::Config {
 
 unsafe impl ::std::marker::Send for self::Config {}
 unsafe impl ::std::marker::Sync for self::Config {}
+impl ::std::marker::Unpin for self::Config {}
 
 impl ::fbthrift::GetTType for self::Config {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1823,6 +1833,7 @@ impl ::std::fmt::Debug for self::MyStruct {
 
 unsafe impl ::std::marker::Send for self::MyStruct {}
 unsafe impl ::std::marker::Sync for self::MyStruct {}
+impl ::std::marker::Unpin for self::MyStruct {}
 
 impl ::fbthrift::GetTType for self::MyStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1922,6 +1933,7 @@ impl ::std::fmt::Debug for self::AdaptTestStruct {
 
 unsafe impl ::std::marker::Send for self::AdaptTestStruct {}
 unsafe impl ::std::marker::Sync for self::AdaptTestStruct {}
+impl ::std::marker::Unpin for self::AdaptTestStruct {}
 
 impl ::fbthrift::GetTType for self::AdaptTestStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -2111,6 +2123,7 @@ impl ::std::fmt::Debug for self::AdaptTemplatedTestStruct {
 
 unsafe impl ::std::marker::Send for self::AdaptTemplatedTestStruct {}
 unsafe impl ::std::marker::Sync for self::AdaptTemplatedTestStruct {}
+impl ::std::marker::Unpin for self::AdaptTemplatedTestStruct {}
 
 impl ::fbthrift::GetTType for self::AdaptTemplatedTestStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -2342,6 +2355,7 @@ impl ::std::fmt::Debug for self::AdaptTemplatedNestedTestStruct {
 
 unsafe impl ::std::marker::Send for self::AdaptTemplatedNestedTestStruct {}
 unsafe impl ::std::marker::Sync for self::AdaptTemplatedNestedTestStruct {}
+impl ::std::marker::Unpin for self::AdaptTemplatedNestedTestStruct {}
 
 impl ::fbthrift::GetTType for self::AdaptTemplatedNestedTestStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -2499,6 +2513,7 @@ impl ::std::fmt::Debug for self::AdaptedStruct {
 
 unsafe impl ::std::marker::Send for self::AdaptedStruct {}
 unsafe impl ::std::marker::Sync for self::AdaptedStruct {}
+impl ::std::marker::Unpin for self::AdaptedStruct {}
 
 impl ::fbthrift::GetTType for self::AdaptedStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -2573,6 +2588,7 @@ impl ::std::fmt::Debug for self::DirectlyAdaptedStruct {
 
 unsafe impl ::std::marker::Send for self::DirectlyAdaptedStruct {}
 unsafe impl ::std::marker::Sync for self::DirectlyAdaptedStruct {}
+impl ::std::marker::Unpin for self::DirectlyAdaptedStruct {}
 
 impl ::fbthrift::GetTType for self::DirectlyAdaptedStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -2653,6 +2669,7 @@ impl ::std::fmt::Debug for self::StructFieldAdaptedStruct {
 
 unsafe impl ::std::marker::Send for self::StructFieldAdaptedStruct {}
 unsafe impl ::std::marker::Sync for self::StructFieldAdaptedStruct {}
+impl ::std::marker::Unpin for self::StructFieldAdaptedStruct {}
 
 impl ::fbthrift::GetTType for self::StructFieldAdaptedStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -2748,6 +2765,7 @@ impl ::std::fmt::Debug for self::CircularAdaptee {
 
 unsafe impl ::std::marker::Send for self::CircularAdaptee {}
 unsafe impl ::std::marker::Sync for self::CircularAdaptee {}
+impl ::std::marker::Unpin for self::CircularAdaptee {}
 
 impl ::fbthrift::GetTType for self::CircularAdaptee {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -2822,6 +2840,7 @@ impl ::std::fmt::Debug for self::CircularStruct {
 
 unsafe impl ::std::marker::Send for self::CircularStruct {}
 unsafe impl ::std::marker::Sync for self::CircularStruct {}
+impl ::std::marker::Unpin for self::CircularStruct {}
 
 impl ::fbthrift::GetTType for self::CircularStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -2898,6 +2917,7 @@ impl ::std::fmt::Debug for self::ReorderedStruct {
 
 unsafe impl ::std::marker::Send for self::ReorderedStruct {}
 unsafe impl ::std::marker::Sync for self::ReorderedStruct {}
+impl ::std::marker::Unpin for self::ReorderedStruct {}
 
 impl ::fbthrift::GetTType for self::ReorderedStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -2970,6 +2990,7 @@ impl ::std::fmt::Debug for self::DeclaredAfterStruct {
 
 unsafe impl ::std::marker::Send for self::DeclaredAfterStruct {}
 unsafe impl ::std::marker::Sync for self::DeclaredAfterStruct {}
+impl ::std::marker::Unpin for self::DeclaredAfterStruct {}
 
 impl ::fbthrift::GetTType for self::DeclaredAfterStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -3037,6 +3058,7 @@ impl ::std::fmt::Debug for self::RenamedStruct {
 
 unsafe impl ::std::marker::Send for self::RenamedStruct {}
 unsafe impl ::std::marker::Sync for self::RenamedStruct {}
+impl ::std::marker::Unpin for self::RenamedStruct {}
 
 impl ::fbthrift::GetTType for self::RenamedStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -3111,6 +3133,7 @@ impl ::std::fmt::Debug for self::SameNamespaceStruct {
 
 unsafe impl ::std::marker::Send for self::SameNamespaceStruct {}
 unsafe impl ::std::marker::Sync for self::SameNamespaceStruct {}
+impl ::std::marker::Unpin for self::SameNamespaceStruct {}
 
 impl ::fbthrift::GetTType for self::SameNamespaceStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -3183,6 +3206,7 @@ impl ::std::fmt::Debug for self::HeapAllocated {
 
 unsafe impl ::std::marker::Send for self::HeapAllocated {}
 unsafe impl ::std::marker::Sync for self::HeapAllocated {}
+impl ::std::marker::Unpin for self::HeapAllocated {}
 
 impl ::fbthrift::GetTType for self::HeapAllocated {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -3250,6 +3274,7 @@ impl ::std::fmt::Debug for self::MoveOnly {
 
 unsafe impl ::std::marker::Send for self::MoveOnly {}
 unsafe impl ::std::marker::Sync for self::MoveOnly {}
+impl ::std::marker::Unpin for self::MoveOnly {}
 
 impl ::fbthrift::GetTType for self::MoveOnly {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -3324,6 +3349,7 @@ impl ::std::fmt::Debug for self::AlsoMoveOnly {
 
 unsafe impl ::std::marker::Send for self::AlsoMoveOnly {}
 unsafe impl ::std::marker::Sync for self::AlsoMoveOnly {}
+impl ::std::marker::Unpin for self::AlsoMoveOnly {}
 
 impl ::fbthrift::GetTType for self::AlsoMoveOnly {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -3396,6 +3422,7 @@ impl ::std::fmt::Debug for self::ApplyAdapter {
 
 unsafe impl ::std::marker::Send for self::ApplyAdapter {}
 unsafe impl ::std::marker::Sync for self::ApplyAdapter {}
+impl ::std::marker::Unpin for self::ApplyAdapter {}
 
 impl ::fbthrift::GetTType for self::ApplyAdapter {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -3461,6 +3488,7 @@ impl ::std::fmt::Debug for self::TransitiveAdapted {
 
 unsafe impl ::std::marker::Send for self::TransitiveAdapted {}
 unsafe impl ::std::marker::Sync for self::TransitiveAdapted {}
+impl ::std::marker::Unpin for self::TransitiveAdapted {}
 
 impl ::fbthrift::GetTType for self::TransitiveAdapted {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -3532,6 +3560,7 @@ impl ::std::fmt::Debug for self::CountingStruct {
 
 unsafe impl ::std::marker::Send for self::CountingStruct {}
 unsafe impl ::std::marker::Sync for self::CountingStruct {}
+impl ::std::marker::Unpin for self::CountingStruct {}
 
 impl ::fbthrift::GetTType for self::CountingStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -3626,6 +3655,7 @@ impl ::std::fmt::Debug for self::Person {
 
 unsafe impl ::std::marker::Send for self::Person {}
 unsafe impl ::std::marker::Sync for self::Person {}
+impl ::std::marker::Unpin for self::Person {}
 
 impl ::fbthrift::GetTType for self::Person {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -3700,6 +3730,7 @@ impl ::std::fmt::Debug for self::Person2 {
 
 unsafe impl ::std::marker::Send for self::Person2 {}
 unsafe impl ::std::marker::Sync for self::Person2 {}
+impl ::std::marker::Unpin for self::Person2 {}
 
 impl ::fbthrift::GetTType for self::Person2 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

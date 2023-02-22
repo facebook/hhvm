@@ -221,6 +221,7 @@ impl ::std::fmt::Debug for self::MyStructNestedAnnotation {
 
 unsafe impl ::std::marker::Send for self::MyStructNestedAnnotation {}
 unsafe impl ::std::marker::Sync for self::MyStructNestedAnnotation {}
+impl ::std::marker::Unpin for self::MyStructNestedAnnotation {}
 
 impl ::fbthrift::GetTType for self::MyStructNestedAnnotation {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -344,6 +345,7 @@ impl ::std::fmt::Debug for self::MyException {
 
 unsafe impl ::std::marker::Send for self::MyException {}
 unsafe impl ::std::marker::Sync for self::MyException {}
+impl ::std::marker::Unpin for self::MyException {}
 
 impl ::fbthrift::GetTType for self::MyException {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -423,6 +425,7 @@ impl ::std::fmt::Debug for self::MyStruct {
 
 unsafe impl ::std::marker::Send for self::MyStruct {}
 unsafe impl ::std::marker::Sync for self::MyStruct {}
+impl ::std::marker::Unpin for self::MyStruct {}
 
 impl ::fbthrift::GetTType for self::MyStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -562,6 +565,7 @@ impl ::std::fmt::Debug for self::SecretStruct {
 
 unsafe impl ::std::marker::Send for self::SecretStruct {}
 unsafe impl ::std::marker::Sync for self::SecretStruct {}
+impl ::std::marker::Unpin for self::SecretStruct {}
 
 impl ::fbthrift::GetTType for self::SecretStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

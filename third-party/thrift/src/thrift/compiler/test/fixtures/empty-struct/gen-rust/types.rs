@@ -40,6 +40,7 @@ impl ::std::fmt::Debug for self::Empty {
 
 unsafe impl ::std::marker::Send for self::Empty {}
 unsafe impl ::std::marker::Sync for self::Empty {}
+impl ::std::marker::Unpin for self::Empty {}
 
 impl ::fbthrift::GetTType for self::Empty {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

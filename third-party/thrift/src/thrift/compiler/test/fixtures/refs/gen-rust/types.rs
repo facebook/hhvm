@@ -561,6 +561,7 @@ impl ::std::fmt::Debug for self::MyField {
 
 unsafe impl ::std::marker::Send for self::MyField {}
 unsafe impl ::std::marker::Sync for self::MyField {}
+impl ::std::marker::Unpin for self::MyField {}
 
 impl ::fbthrift::GetTType for self::MyField {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -695,6 +696,7 @@ impl ::std::fmt::Debug for self::MyStruct {
 
 unsafe impl ::std::marker::Send for self::MyStruct {}
 unsafe impl ::std::marker::Sync for self::MyStruct {}
+impl ::std::marker::Unpin for self::MyStruct {}
 
 impl ::fbthrift::GetTType for self::MyStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -783,6 +785,7 @@ impl ::std::fmt::Debug for self::StructWithUnion {
 
 unsafe impl ::std::marker::Send for self::StructWithUnion {}
 unsafe impl ::std::marker::Sync for self::StructWithUnion {}
+impl ::std::marker::Unpin for self::StructWithUnion {}
 
 impl ::fbthrift::GetTType for self::StructWithUnion {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -865,6 +868,7 @@ impl ::std::fmt::Debug for self::RecursiveStruct {
 
 unsafe impl ::std::marker::Send for self::RecursiveStruct {}
 unsafe impl ::std::marker::Sync for self::RecursiveStruct {}
+impl ::std::marker::Unpin for self::RecursiveStruct {}
 
 impl ::fbthrift::GetTType for self::RecursiveStruct {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -945,6 +949,7 @@ impl ::std::fmt::Debug for self::StructWithContainers {
 
 unsafe impl ::std::marker::Send for self::StructWithContainers {}
 unsafe impl ::std::marker::Sync for self::StructWithContainers {}
+impl ::std::marker::Unpin for self::StructWithContainers {}
 
 impl ::fbthrift::GetTType for self::StructWithContainers {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1052,6 +1057,7 @@ impl ::std::fmt::Debug for self::StructWithSharedConst {
 
 unsafe impl ::std::marker::Send for self::StructWithSharedConst {}
 unsafe impl ::std::marker::Sync for self::StructWithSharedConst {}
+impl ::std::marker::Unpin for self::StructWithSharedConst {}
 
 impl ::fbthrift::GetTType for self::StructWithSharedConst {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1134,6 +1140,7 @@ impl ::std::fmt::Debug for self::Empty {
 
 unsafe impl ::std::marker::Send for self::Empty {}
 unsafe impl ::std::marker::Sync for self::Empty {}
+impl ::std::marker::Unpin for self::Empty {}
 
 impl ::fbthrift::GetTType for self::Empty {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1199,6 +1206,7 @@ impl ::std::fmt::Debug for self::StructWithRef {
 
 unsafe impl ::std::marker::Send for self::StructWithRef {}
 unsafe impl ::std::marker::Sync for self::StructWithRef {}
+impl ::std::marker::Unpin for self::StructWithRef {}
 
 impl ::fbthrift::GetTType for self::StructWithRef {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1287,6 +1295,7 @@ impl ::std::fmt::Debug for self::StructWithBox {
 
 unsafe impl ::std::marker::Send for self::StructWithBox {}
 unsafe impl ::std::marker::Sync for self::StructWithBox {}
+impl ::std::marker::Unpin for self::StructWithBox {}
 
 impl ::fbthrift::GetTType for self::StructWithBox {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1381,6 +1390,7 @@ impl ::std::fmt::Debug for self::StructWithInternBox {
 
 unsafe impl ::std::marker::Send for self::StructWithInternBox {}
 unsafe impl ::std::marker::Sync for self::StructWithInternBox {}
+impl ::std::marker::Unpin for self::StructWithInternBox {}
 
 impl ::fbthrift::GetTType for self::StructWithInternBox {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1476,6 +1486,7 @@ impl ::std::fmt::Debug for self::AdaptedStructWithInternBox {
 
 unsafe impl ::std::marker::Send for self::AdaptedStructWithInternBox {}
 unsafe impl ::std::marker::Sync for self::AdaptedStructWithInternBox {}
+impl ::std::marker::Unpin for self::AdaptedStructWithInternBox {}
 
 impl ::fbthrift::GetTType for self::AdaptedStructWithInternBox {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1569,6 +1580,7 @@ impl ::std::fmt::Debug for self::StructWithRefTypeUnique {
 
 unsafe impl ::std::marker::Send for self::StructWithRefTypeUnique {}
 unsafe impl ::std::marker::Sync for self::StructWithRefTypeUnique {}
+impl ::std::marker::Unpin for self::StructWithRefTypeUnique {}
 
 impl ::fbthrift::GetTType for self::StructWithRefTypeUnique {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1657,6 +1669,7 @@ impl ::std::fmt::Debug for self::StructWithRefTypeShared {
 
 unsafe impl ::std::marker::Send for self::StructWithRefTypeShared {}
 unsafe impl ::std::marker::Sync for self::StructWithRefTypeShared {}
+impl ::std::marker::Unpin for self::StructWithRefTypeShared {}
 
 impl ::fbthrift::GetTType for self::StructWithRefTypeShared {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1745,6 +1758,7 @@ impl ::std::fmt::Debug for self::StructWithRefTypeSharedConst {
 
 unsafe impl ::std::marker::Send for self::StructWithRefTypeSharedConst {}
 unsafe impl ::std::marker::Sync for self::StructWithRefTypeSharedConst {}
+impl ::std::marker::Unpin for self::StructWithRefTypeSharedConst {}
 
 impl ::fbthrift::GetTType for self::StructWithRefTypeSharedConst {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1829,6 +1843,7 @@ impl ::std::fmt::Debug for self::StructWithRefAndAnnotCppNoexceptMoveCtor {
 
 unsafe impl ::std::marker::Send for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
 unsafe impl ::std::marker::Sync for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
+impl ::std::marker::Unpin for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
 
 impl ::fbthrift::GetTType for self::StructWithRefAndAnnotCppNoexceptMoveCtor {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -1905,6 +1920,7 @@ impl ::std::fmt::Debug for self::StructWithString {
 
 unsafe impl ::std::marker::Send for self::StructWithString {}
 unsafe impl ::std::marker::Sync for self::StructWithString {}
+impl ::std::marker::Unpin for self::StructWithString {}
 
 impl ::fbthrift::GetTType for self::StructWithString {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

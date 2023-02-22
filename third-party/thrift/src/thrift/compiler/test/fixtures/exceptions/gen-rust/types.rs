@@ -226,6 +226,7 @@ impl ::std::fmt::Debug for self::Fiery {
 
 unsafe impl ::std::marker::Send for self::Fiery {}
 unsafe impl ::std::marker::Sync for self::Fiery {}
+impl ::std::marker::Unpin for self::Fiery {}
 
 impl ::fbthrift::GetTType for self::Fiery {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -294,6 +295,7 @@ impl ::std::fmt::Debug for self::Serious {
 
 unsafe impl ::std::marker::Send for self::Serious {}
 unsafe impl ::std::marker::Sync for self::Serious {}
+impl ::std::marker::Unpin for self::Serious {}
 
 impl ::fbthrift::GetTType for self::Serious {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -366,6 +368,7 @@ impl ::std::fmt::Debug for self::ComplexFieldNames {
 
 unsafe impl ::std::marker::Send for self::ComplexFieldNames {}
 unsafe impl ::std::marker::Sync for self::ComplexFieldNames {}
+impl ::std::marker::Unpin for self::ComplexFieldNames {}
 
 impl ::fbthrift::GetTType for self::ComplexFieldNames {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -443,6 +446,7 @@ impl ::std::fmt::Debug for self::CustomFieldNames {
 
 unsafe impl ::std::marker::Send for self::CustomFieldNames {}
 unsafe impl ::std::marker::Sync for self::CustomFieldNames {}
+impl ::std::marker::Unpin for self::CustomFieldNames {}
 
 impl ::fbthrift::GetTType for self::CustomFieldNames {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -520,6 +524,7 @@ impl ::std::fmt::Debug for self::ExceptionWithPrimitiveField {
 
 unsafe impl ::std::marker::Send for self::ExceptionWithPrimitiveField {}
 unsafe impl ::std::marker::Sync for self::ExceptionWithPrimitiveField {}
+impl ::std::marker::Unpin for self::ExceptionWithPrimitiveField {}
 
 impl ::fbthrift::GetTType for self::ExceptionWithPrimitiveField {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -597,6 +602,7 @@ impl ::std::fmt::Debug for self::ExceptionWithStructuredAnnotation {
 
 unsafe impl ::std::marker::Send for self::ExceptionWithStructuredAnnotation {}
 unsafe impl ::std::marker::Sync for self::ExceptionWithStructuredAnnotation {}
+impl ::std::marker::Unpin for self::ExceptionWithStructuredAnnotation {}
 
 impl ::fbthrift::GetTType for self::ExceptionWithStructuredAnnotation {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
@@ -670,6 +676,7 @@ impl ::std::fmt::Debug for self::Banal {
 
 unsafe impl ::std::marker::Send for self::Banal {}
 unsafe impl ::std::marker::Sync for self::Banal {}
+impl ::std::marker::Unpin for self::Banal {}
 
 impl ::fbthrift::GetTType for self::Banal {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;

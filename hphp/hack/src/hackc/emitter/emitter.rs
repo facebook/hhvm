@@ -248,8 +248,8 @@ impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> 
                 None,
                 ast::Expr(
                     (),
-                    Pos::make_none(),
-                    ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),
+                    Pos::NONE,
+                    ast::Expr_::mk_id(ast_defs::Id(Pos::NONE, id.into())),
                 ),
             ),
             Some(body_env) => ClassExpr::expr_to_class_expr_(
@@ -260,8 +260,8 @@ impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> 
                 body_env.parent_name.clone().map(|s| s.to_owned()),
                 ast::Expr(
                     (),
-                    Pos::make_none(),
-                    ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),
+                    Pos::NONE,
+                    ast::Expr_::mk_id(ast_defs::Id(Pos::NONE, id.into())),
                 ),
             ),
         };

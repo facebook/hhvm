@@ -59,7 +59,7 @@ mod tests {
             }
         }
 
-        let expr = Expr((), crate::pos::Pos::make_none(), Expr_::Null);
+        let expr = Expr((), crate::pos::Pos::NONE, Expr_::Null);
         let mut v: usize = 0;
         v.visit_expr(&mut (), &expr).unwrap();
         assert_eq!(v, 1);
@@ -83,7 +83,7 @@ mod tests {
             }
         }
 
-        let mut expr = Expr((), crate::pos::Pos::make_none(), Expr_::True);
+        let mut expr = Expr((), crate::pos::Pos::NONE, Expr_::True);
         let mut v = ();
         v.visit_expr(&mut (), &mut expr).unwrap();
         match expr.2 {
@@ -91,7 +91,7 @@ mod tests {
             e => panic!("Expect Expr_::Null, but got {:?}", e),
         }
 
-        let mut expr = Expr((), crate::pos::Pos::make_none(), Expr_::True);
+        let mut expr = Expr((), crate::pos::Pos::NONE, Expr_::True);
         let mut v = ();
         visitor_mut::visit(&mut v, &mut (), &mut expr).unwrap();
         match expr.2 {
@@ -124,9 +124,9 @@ mod tests {
         }
 
         let mut map: BTreeMap<LocalId, (Pos, u8)> = BTreeMap::new();
-        map.insert((0, "".into()), (Pos::make_none(), 1));
-        map.insert((1, "".into()), (Pos::make_none(), 3));
-        map.insert((2, "".into()), (Pos::make_none(), 5));
+        map.insert((0, "".into()), (Pos::NONE, 1));
+        map.insert((1, "".into()), (Pos::NONE, 3));
+        map.insert((2, "".into()), (Pos::NONE, 5));
         let stmt_ = Stmt_::AssertEnv(Box::new((EnvAnnot::Join, LocalIdMap(map))));
         let mut s = 0u8;
         visitor::visit(&mut s, &mut (), &stmt_).unwrap();

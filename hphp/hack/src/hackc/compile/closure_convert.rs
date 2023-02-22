@@ -390,7 +390,7 @@ impl<'b, 'arena> Scope<'b, 'arena> {
         if let Some(pos) = self.span() {
             Cow::Borrowed(pos)
         } else {
-            Cow::Owned(Pos::make_none())
+            Cow::Owned(Pos::NONE)
         }
     }
 
@@ -816,7 +816,7 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
 
 fn add_reified_property(tparams: &[Tparam], vars: &mut Vec<ClassVar>) {
     if !tparams.iter().all(|t| t.reified == ReifyKind::Erased) {
-        let p = Pos::make_none();
+        let p = Pos::NONE;
         // varray/vec that holds a list of type structures
         // this prop will be initilized during runtime
         let hint = Hint(
@@ -1374,7 +1374,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         let current_generics = state.capture_state.generics.clone();
 
         // TODO(hrust): produce real unique local ids
-        let fresh_lid = |name: String| Lid(Pos::make_none(), (12345, name));
+        let fresh_lid = |name: String| Lid(Pos::NONE, (12345, name));
 
         let lambda_vars: Vec<&String> = state
             .capture_state

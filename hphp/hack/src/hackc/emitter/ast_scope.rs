@@ -66,7 +66,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
         if let Some(pos) = self.get_span() {
             Cow::Borrowed(pos)
         } else {
-            Cow::Owned(Pos::make_none())
+            Cow::Owned(Pos::NONE)
         }
     }
 

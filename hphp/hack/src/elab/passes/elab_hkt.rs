@@ -92,10 +92,10 @@ mod tests {
         let mut errs = Vec::default();
         let mut pass = ElabHktPass;
         let mut elem = Hint(
-            Pos::make_none(),
+            Pos::NONE,
             Box::new(Hint_::Habstr(
                 "T".to_string(),
-                vec![Hint(Pos::make_none(), Box::new(Hint_::Hmixed))],
+                vec![Hint(Pos::NONE, Box::new(Hint_::Hmixed))],
             )),
         );
 
@@ -137,10 +137,10 @@ mod tests {
 
         let mut elem: Tparam<(), ()> = Tparam {
             variance: Variance::Invariant,
-            name: Id(Pos::make_none(), "T".to_string()),
+            name: Id(Pos::NONE, "T".to_string()),
             parameters: vec![Tparam {
                 variance: Variance::Invariant,
-                name: Id(Pos::make_none(), "TInner".to_string()),
+                name: Id(Pos::NONE, "TInner".to_string()),
                 parameters: vec![],
                 constraints: vec![],
                 reified: ReifyKind::Erased,

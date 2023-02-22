@@ -24,7 +24,7 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
     class_is_const: bool,
     class_is_closure: bool,
 ) -> Result<PropAndInit<'arena>> {
-    let initial_value = Some(Expr((), Pos::make_none(), Expr_::mk_null()));
+    let initial_value = Some(Expr((), Pos::NONE, Expr_::mk_null()));
     emit_property::from_ast(
         emitter,
         class,
@@ -40,7 +40,7 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
             typehint: None,
             doc_comment: None,
             user_attributes: &[],
-            id: &ast_defs::Id(Pos::make_none(), "__xhpAttributeDeclarationCache".into()),
+            id: &ast_defs::Id(Pos::NONE, "__xhpAttributeDeclarationCache".into()),
         },
     )
 }
@@ -387,18 +387,18 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
     fb_ast: Block,
 ) -> Result<Method<'arena>> {
     let meth = Method_ {
-        span: pos.clone().unwrap_or_else(Pos::make_none),
+        span: pos.clone().unwrap_or(Pos::NONE),
         annotation: (),
         final_,
         abstract_,
         static_,
         readonly_this: false, // TODO readonly emitter
         visibility,
-        name: ast_defs::Id(Pos::make_none(), name.into()),
+        name: ast_defs::Id(Pos::NONE, name.into()),
         tparams: vec![],
         where_constraints: vec![],
         params: vec![],
-        ctxs: Some(Contexts(pos.unwrap_or_else(Pos::make_none), vec![])),
+        ctxs: Some(Contexts(pos.unwrap_or(Pos::NONE), vec![])),
         unsafe_ctxs: None,
         body: FuncBody { fb_ast },
         fun_kind: ast_defs::FunKind::FSync,
@@ -412,9 +412,9 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
 }
 
 fn mk_expr(expr_: Expr_) -> Expr {
-    Expr((), Pos::make_none(), expr_)
+    Expr((), Pos::NONE, expr_)
 }
 
 fn mk_stmt(stmt_: Stmt_) -> Stmt {
-    Stmt(Pos::make_none(), stmt_)
+    Stmt(Pos::NONE, stmt_)
 }

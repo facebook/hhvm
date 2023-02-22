@@ -424,9 +424,9 @@ fn parse_file(
     let ast_result =
         AastParser::from_text_with_namespace_env(&aast_env, namespace_env, &indexed_source_text);
     match ast_result {
-        Err(AastError::Other(msg)) => Err(ParseError(Pos::make_none(), msg, FatalOp::Parse)),
+        Err(AastError::Other(msg)) => Err(ParseError(Pos::NONE, msg, FatalOp::Parse)),
         Err(AastError::NotAHackFile()) => Err(ParseError(
-            Pos::make_none(),
+            Pos::NONE,
             "Not a Hack file".to_string(),
             FatalOp::Parse,
         )),

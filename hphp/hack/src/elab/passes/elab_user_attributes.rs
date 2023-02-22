@@ -61,27 +61,27 @@ mod tests {
         let mut pass = ElabUserAttributesPass;
         let mut elem: UserAttributes<(), ()> = UserAttributes(vec![
             UserAttribute {
-                name: Id(Pos::make_none(), "One".to_string()),
+                name: Id(Pos::NONE, "One".to_string()),
                 params: vec![],
             },
             UserAttribute {
-                name: Id(Pos::make_none(), "Two".to_string()),
+                name: Id(Pos::NONE, "Two".to_string()),
                 params: vec![],
             },
             UserAttribute {
-                name: Id(Pos::make_none(), "One".to_string()),
+                name: Id(Pos::NONE, "One".to_string()),
                 params: vec![],
             },
             UserAttribute {
-                name: Id(Pos::make_none(), "Two".to_string()),
+                name: Id(Pos::NONE, "Two".to_string()),
                 params: vec![],
             },
             UserAttribute {
-                name: Id(Pos::make_none(), "One".to_string()),
+                name: Id(Pos::NONE, "One".to_string()),
                 params: vec![],
             },
             UserAttribute {
-                name: Id(Pos::make_none(), "Two".to_string()),
+                name: Id(Pos::NONE, "Two".to_string()),
                 params: vec![],
             },
         ]);

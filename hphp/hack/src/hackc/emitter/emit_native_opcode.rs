@@ -83,7 +83,7 @@ fn emit_native_opcode_impl<'arena>(
         }
     };
     Err(Error::fatal_runtime(
-        &Pos::make_none(),
+        &Pos::NONE,
         format!("OpCodeImpl attribute is not applicable to {}", name),
     ))
 }
@@ -117,7 +117,7 @@ fn emit_generator_method<'arena>(name: &str, params: &[ast::FunParam]) -> Result
         "getReturn" => instr::cont_get_return(),
         _ => {
             return Err(Error::fatal_runtime(
-                &Pos::make_none(),
+                &Pos::NONE,
                 "incorrect native generator function",
             ));
         }

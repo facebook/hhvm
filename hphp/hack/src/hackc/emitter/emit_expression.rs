@@ -812,12 +812,7 @@ fn emit_lambda<'a, 'arena, 'decl>(
                                 );
                                 Ok(instr::c_get_l(e.named_local(name.as_str().into())))
                             } else {
-                                emit_reified_generic_instrs(
-                                    e,
-                                    &Pos::make_none(),
-                                    is_fun,
-                                    i as usize,
-                                )
+                                emit_reified_generic_instrs(e, &Pos::NONE, is_fun, i as usize)
                             }
                         }
                         None => Ok({
@@ -2578,7 +2573,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 pos.clone(),
                 ast::Expr_::mk_call(expr_id, vec![], args[1..].to_owned(), uarg.cloned()),
             );
-            let ignored_expr = emit_ignored_expr(e, env, &Pos::make_none(), &call)?;
+            let ignored_expr = emit_ignored_expr(e, env, &Pos::NONE, &call)?;
             Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, error::expect_normal_paramkind(&args[0])?)?,
                 instr::jmp_nz(l),
@@ -3020,8 +3015,8 @@ fn istype_op(id: impl AsRef<str>) -> Option<IsTypeOp> {
 fn is_isexp_op(lower_fq_id: impl AsRef<str>) -> Option<ast::Hint> {
     let h = |s: &str| {
         Some(ast::Hint::new(
-            Pos::make_none(),
-            ast::Hint_::mk_happly(ast::Id(Pos::make_none(), s.into()), vec![]),
+            Pos::NONE,
+            ast::Hint_::mk_happly(ast::Id(Pos::NONE, s.into()), vec![]),
         ))
     };
     match lower_fq_id.as_ref() {
@@ -3421,7 +3416,7 @@ fn emit_reified_type<'a, 'arena>(
     name: &str,
 ) -> Result<InstrSeq<'arena>> {
     emit_reified_type_opt(e, env, pos, name)?
-        .ok_or_else(|| Error::fatal_runtime(&Pos::make_none(), "Invalid reified param"))
+        .ok_or_else(|| Error::fatal_runtime(&Pos::NONE, "Invalid reified param"))
 }
 
 fn emit_reified_type_opt<'a, 'arena>(
@@ -5715,7 +5710,6 @@ pub fn emit_ignored_exprs<'a, 'arena, 'decl>(
         .map(InstrSeq::gather)
 }
 
-// TODO(hrust): change pos from &Pos to Option<&Pos>, since Pos::make_none() still allocate mem.
 pub fn emit_ignored_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,

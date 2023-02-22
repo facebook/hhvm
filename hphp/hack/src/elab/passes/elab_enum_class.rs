@@ -101,14 +101,14 @@ mod tests {
 
     fn make_enum_class_(kind: ClassishKind, enum_: Enum_) -> Class_<(), ()> {
         Class_ {
-            span: Pos::make_none(),
+            span: Pos::NONE,
             annotation: (),
             mode: file_info::Mode::Mstrict,
             final_: false,
             is_xhp: false,
             has_xhp_keyword: false,
             kind,
-            name: Id(Pos::make_none(), "Classy".to_string()),
+            name: Id(Pos::NONE, "Classy".to_string()),
             tparams: vec![],
             extends: vec![],
             uses: vec![],
@@ -153,7 +153,7 @@ mod tests {
         let mut elem: Class_<(), ()> = make_enum_class_(
             ClassishKind::CenumClass(Abstraction::Concrete),
             Enum_ {
-                base: Hint(Pos::make_none(), Box::new(Hint_::Herr)),
+                base: Hint(Pos::NONE, Box::new(Hint_::Herr)),
                 constraint: None,
                 includes: vec![],
             },
@@ -191,7 +191,7 @@ mod tests {
         let mut elem: Class_<(), ()> = make_enum_class_(
             ClassishKind::CenumClass(Abstraction::Abstract),
             Enum_ {
-                base: Hint(Pos::make_none(), Box::new(Hint_::Herr)),
+                base: Hint(Pos::NONE, Box::new(Hint_::Herr)),
                 constraint: None,
                 includes: vec![],
             },
@@ -217,7 +217,7 @@ mod tests {
         let mut elem: Class_<(), ()> = make_enum_class_(
             ClassishKind::Cenum,
             Enum_ {
-                base: Hint(Pos::make_none(), Box::new(Hint_::Herr)),
+                base: Hint(Pos::NONE, Box::new(Hint_::Herr)),
                 constraint: None,
                 includes: vec![],
             },

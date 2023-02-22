@@ -299,7 +299,7 @@ fn emit_case<'c, 'a, 'arena, 'decl>(
     let label = e.label_gen_mut().next_regular();
     let mut res = vec![instr::label(label), emit_block(env, e, body)?];
     if addbreak {
-        res.push(emit_break(e, env, &Pos::make_none()));
+        res.push(emit_break(e, env, &Pos::NONE));
     }
     Ok((InstrSeq::gather(res), (case_expr, label)))
 }
@@ -610,7 +610,7 @@ fn emit_using<'a, 'arena, 'decl>(
 
 fn block_pos(block: &[ast::Stmt]) -> Result<Pos> {
     if block.iter().all(|b| b.0.is_none()) {
-        return Ok(Pos::make_none());
+        return Ok(Pos::NONE);
     }
     let mut first = 0;
     let mut last = block.len() - 1;
@@ -1463,10 +1463,10 @@ fn emit_for<'a, 'arena, 'decl>(
     //  instr_jmp start_label;
     //  instr_label break_label;
     let i5 = emit_cond(e, env, false, start_label, e2)?;
-    let i4 = emit_expr::emit_ignored_exprs(e, env, &Pos::make_none(), e3)?;
+    let i4 = emit_expr::emit_ignored_exprs(e, env, &Pos::NONE, e3)?;
     let i3 = env.do_in_loop_body(e, break_label, cont_label, None, body, emit_block)?;
     let i2 = emit_cond(e, env, true, break_label, e2)?;
-    let i1 = emit_expr::emit_ignored_exprs(e, env, &Pos::make_none(), e1)?;
+    let i1 = emit_expr::emit_ignored_exprs(e, env, &Pos::NONE, e1)?;
     Ok(InstrSeq::gather(vec![
         i1,
         i2,
@@ -1560,7 +1560,7 @@ pub fn emit_markup<'a, 'arena, 'decl>(
             instr::empty()
         } else {
             let call_expr = hack_expr!("echo #{str(tail)}");
-            emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), &call_expr)?
+            emit_expr::emit_ignored_expr(e, env, &Pos::NONE, &call_expr)?
         }
     };
     Ok(markup)

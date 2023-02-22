@@ -109,7 +109,7 @@ mod tests {
         let cfg = Config::default();
 
         let mut elem: FuncBody<(), ()> = FuncBody {
-            fb_ast: oxidized::ast::Block(vec![Stmt(Pos::make_none(), Stmt_::Noop)]),
+            fb_ast: oxidized::ast::Block(vec![Stmt(Pos::NONE, Stmt_::Noop)]),
         };
 
         let mut errs = Vec::default();

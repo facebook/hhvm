@@ -240,7 +240,7 @@ impl Input {
             }
         }
 
-        let pos = pos.map_or_else(|| quote!(Pos::make_none()), |p| p.to_token_stream());
+        let pos = pos.map_or_else(|| quote!(Pos::NONE), |p| p.to_token_stream());
         let hack_src =
             hack_src.ok_or_else(|| Error::new(Span::call_site(), "Missing hack source string"))?;
 

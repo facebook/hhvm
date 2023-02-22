@@ -561,7 +561,7 @@ fn merge_positions(positions: &[&Pos]) -> Pos {
             Some(res) => Some(Pos::merge(&res, pos).expect("Positions should be in the same file")),
             None => Some((*pos).clone()),
         })
-        .unwrap_or_else(Pos::make_none)
+        .unwrap_or(Pos::NONE)
 }
 
 fn create_temp_statements(exprs: Vec<Expr>, mk_lvar: fn(&Pos, usize) -> Expr) -> Vec<Stmt> {

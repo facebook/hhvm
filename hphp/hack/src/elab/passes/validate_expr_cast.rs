@@ -62,7 +62,7 @@ mod tests {
     fn test_invalid_cast() {
         let mut errs = Vec::default();
         let mut expr: Expr = elab_utils::expr::from_expr_(Expr_::Cast(Box::new((
-            Hint(Pos::make_none(), Box::new(Hint_::Hthis)),
+            Hint(Pos::NONE, Box::new(Hint_::Hthis)),
             elab_utils::expr::null(),
         ))));
         expr.transform(&Config::default(), &mut errs, &mut ValidateExprCastPass);

@@ -32,13 +32,13 @@ impl Pass for ElabExprLvarPass {
                 if lcl_id_str == sn::special_idents::THIS {
                     *elem = Expr_::This;
                 } else if lcl_id_str == sn::special_idents::DOLLAR_DOLLAR {
-                    let pos = std::mem::replace(pos, Pos::make_none());
+                    let pos = std::mem::replace(pos, Pos::NONE);
                     *elem = Expr_::Dollardollar(Box::new(Lid(
                         pos,
                         local_id::make_unscoped(sn::special_idents::DOLLAR_DOLLAR),
                     )));
                 } else if lcl_id_str == sn::special_idents::PLACEHOLDER {
-                    let pos = std::mem::replace(pos, Pos::make_none());
+                    let pos = std::mem::replace(pos, Pos::NONE);
                     *elem = Expr_::Lplaceholder(Box::new(pos));
                 }
                 ControlFlow::Continue(())
@@ -66,7 +66,7 @@ mod tests {
         let mut pass = ElabExprLvarPass;
 
         let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
-            Pos::make_none(),
+            Pos::NONE,
             local_id::make_unscoped(sn::special_idents::THIS),
         )));
         elem.transform(&cfg, &mut errs, &mut pass);
@@ -80,7 +80,7 @@ mod tests {
         let mut pass = ElabExprLvarPass;
 
         let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
-            Pos::make_none(),
+            Pos::NONE,
             local_id::make_unscoped(sn::special_idents::PLACEHOLDER),
         )));
         elem.transform(&cfg, &mut errs, &mut pass);
@@ -94,7 +94,7 @@ mod tests {
         let mut pass = ElabExprLvarPass;
 
         let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
-            Pos::make_none(),
+            Pos::NONE,
             local_id::make_unscoped(sn::special_idents::DOLLAR_DOLLAR),
         )));
         elem.transform(&cfg, &mut errs, &mut pass);

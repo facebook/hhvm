@@ -27,7 +27,7 @@ impl Pass for ElabHintHsoftPass {
             if cfg.soft_as_like() {
                 // Replace `Hsoft` with `Hlike` retaining the original position
                 // (pos, Hsoft(hint)) ==> (pos, Hlike(hint))
-                let herr = Hint(Pos::make_none(), Box::new(Hint_::Herr));
+                let herr = Hint(Pos::NONE, Box::new(Hint_::Herr));
                 let inner_hint = std::mem::replace(inner, herr);
                 **hint_ = Hint_::Hlike(inner_hint)
             } else {
@@ -61,11 +61,8 @@ mod tests {
         let mut pass = ElabHintHsoftPass;
 
         let mut elem1: Hint = Hint(
-            Pos::make_none(),
-            Box::new(Hint_::Hsoft(Hint(
-                Pos::make_none(),
-                Box::new(Hint_::Hdynamic),
-            ))),
+            Pos::NONE,
+            Box::new(Hint_::Hsoft(Hint(Pos::NONE, Box::new(Hint_::Hdynamic)))),
         );
         let mut elem2 = elem1.clone();
 

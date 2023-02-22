@@ -83,28 +83,28 @@ mod tests {
         let cfg = Config::default();
 
         let mut elem: Program<(), ()> = Program(vec![
-            Def::Stmt(Box::new(Stmt(Pos::make_none(), Stmt_::Break))),
+            Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Break))),
             Def::NamespaceUse(Vec::default()),
-            Def::Stmt(Box::new(Stmt(Pos::make_none(), Stmt_::Noop))),
+            Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Noop))),
             Def::Namespace(Box::new((
-                Id(Pos::make_none(), String::default()),
+                Id(Pos::NONE, String::default()),
                 vec![
                     Def::NamespaceUse(Vec::default()),
-                    Def::Stmt(Box::new(Stmt(Pos::make_none(), Stmt_::Fallthrough))),
-                    Def::Stmt(Box::new(Stmt(Pos::make_none(), Stmt_::Noop))),
+                    Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Fallthrough))),
+                    Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Noop))),
                     Def::Namespace(Box::new((
-                        Id(Pos::make_none(), String::default()),
+                        Id(Pos::NONE, String::default()),
                         vec![
-                            Def::Stmt(Box::new(Stmt(Pos::make_none(), Stmt_::Break))),
+                            Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Break))),
                             Def::NamespaceUse(Vec::default()),
-                            Def::Stmt(Box::new(Stmt(Pos::make_none(), Stmt_::Noop))),
+                            Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Noop))),
                         ],
                     ))),
                 ],
             ))),
-            Def::Stmt(Box::new(Stmt(Pos::make_none(), Stmt_::Fallthrough))),
+            Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Fallthrough))),
             Def::NamespaceUse(Vec::default()),
-            Def::Stmt(Box::new(Stmt(Pos::make_none(), Stmt_::Noop))),
+            Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Noop))),
         ]);
 
         let mut errs = Vec::default();

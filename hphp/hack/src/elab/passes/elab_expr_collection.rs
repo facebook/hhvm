@@ -61,7 +61,7 @@ impl Pass for ElabExprCollectionPass {
                         .map(|afield| expr_from_afield(afield, errs, cname))
                         .collect();
                     *expr_ = Expr_::ValCollection(Box::new((
-                        (std::mem::replace(pos, Pos::make_none()), vc_kind),
+                        (std::mem::replace(pos, Pos::NONE), vc_kind),
                         targ_opt,
                         exprs,
                     )));
@@ -75,7 +75,7 @@ impl Pass for ElabExprCollectionPass {
                         .map(|afield| field_from_afield(afield, errs, cname))
                         .collect();
                     *expr_ = Expr_::KeyValCollection(Box::new((
-                        (std::mem::replace(pos, Pos::make_none()), kvc_kind),
+                        (std::mem::replace(pos, Pos::NONE), kvc_kind),
                         targs_opt,
                         fields,
                     )));
@@ -101,7 +101,7 @@ impl Pass for ElabExprCollectionPass {
                             )));
                             let inner_expr = std::mem::replace(
                                 elem,
-                                Expr(Ex::default(), Pos::make_none(), Expr_::Null),
+                                Expr(Ex::default(), Pos::NONE, Expr_::Null),
                             );
                             *elem = Expr(
                                 Ex::default(),
@@ -119,7 +119,7 @@ impl Pass for ElabExprCollectionPass {
                             )));
                             let inner_expr = std::mem::replace(
                                 elem,
-                                Expr(Ex::default(), Pos::make_none(), Expr_::Null),
+                                Expr(Ex::default(), Pos::NONE, Expr_::Null),
                             );
                             *elem = Expr(
                                 Ex::default(),
@@ -137,7 +137,7 @@ impl Pass for ElabExprCollectionPass {
                         cname: cname.clone(),
                     }));
                     let inner_expr =
-                        std::mem::replace(elem, Expr(Ex::default(), Pos::make_none(), Expr_::Null));
+                        std::mem::replace(elem, Expr(Ex::default(), Pos::NONE, Expr_::Null));
                     let Expr(_, expr_pos, _) = &inner_expr;
                     *elem = Expr(
                         Ex::default(),
@@ -162,16 +162,14 @@ fn expr_from_afield<Ex: Default, En>(
     cname: &str,
 ) -> Expr<Ex, En> {
     match afield {
-        Afield::AFvalue(e) => {
-            std::mem::replace(e, Expr(Ex::default(), Pos::make_none(), Expr_::Null))
-        }
+        Afield::AFvalue(e) => std::mem::replace(e, Expr(Ex::default(), Pos::NONE, Expr_::Null)),
         Afield::AFkvalue(e, _) => {
             let Expr(_, expr_pos, _) = &e;
             errs.push(NamingPhaseError::Naming(NamingError::UnexpectedArrow {
                 pos: expr_pos.clone(),
                 cname: cname.to_string(),
             }));
-            std::mem::replace(e, Expr(Ex::default(), Pos::make_none(), Expr_::Null))
+            std::mem::replace(e, Expr(Ex::default(), Pos::NONE, Expr_::Null))
         }
     }
 }
@@ -186,8 +184,8 @@ fn field_from_afield<Ex: Default, En>(
 ) -> Field<Ex, En> {
     match afield {
         Afield::AFkvalue(ek, ev) => {
-            let ek = std::mem::replace(ek, Expr(Ex::default(), Pos::make_none(), Expr_::Null));
-            let ev = std::mem::replace(ev, Expr(Ex::default(), Pos::make_none(), Expr_::Null));
+            let ek = std::mem::replace(ek, Expr(Ex::default(), Pos::NONE, Expr_::Null));
+            let ev = std::mem::replace(ev, Expr(Ex::default(), Pos::NONE, Expr_::Null));
             Field(ek, ev)
         }
         Afield::AFvalue(e) => {
@@ -195,11 +193,11 @@ fn field_from_afield<Ex: Default, En>(
                 pos: e.1.clone(),
                 cname: cname.to_string(),
             }));
-            let ek = std::mem::replace(e, Expr(Ex::default(), Pos::make_none(), Expr_::Null));
+            let ek = std::mem::replace(e, Expr(Ex::default(), Pos::NONE, Expr_::Null));
             // TODO[mjt]: replace with `Invalid` expression?
             let ev = Expr(
                 Ex::default(),
-                Pos::make_none(),
+                Pos::NONE,
                 Expr_::Lvar(Box::new(Lid(
                     ek.1.clone(),
                     local_id::make_unscoped("__internal_placeholder"),
@@ -221,7 +219,7 @@ fn targ_from_collection_targs<Ex: Default>(
             CollectionTarg::CollectionTV(tv) => {
                 let tv = std::mem::replace(
                     tv,
-                    Targ(Ex::default(), Hint(Pos::make_none(), Box::new(Hint_::Herr))),
+                    Targ(Ex::default(), Hint(Pos::NONE, Box::new(Hint_::Herr))),
                 );
                 Some(tv)
             }
@@ -248,11 +246,11 @@ fn targs_from_collection_targs<Ex: Default>(
             CollectionTarg::CollectionTKV(tk, tv) => {
                 let tk = std::mem::replace(
                     tk,
-                    Targ(Ex::default(), Hint(Pos::make_none(), Box::new(Hint_::Herr))),
+                    Targ(Ex::default(), Hint(Pos::NONE, Box::new(Hint_::Herr))),
                 );
                 let tv = std::mem::replace(
                     tv,
-                    Targ(Ex::default(), Hint(Pos::make_none(), Box::new(Hint_::Herr))),
+                    Targ(Ex::default(), Hint(Pos::NONE, Box::new(Hint_::Herr))),
                 );
                 Some((tk, tv))
             }
@@ -325,9 +323,9 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::VEC.to_string()),
+                Id(Pos::NONE, sn::collections::VEC.to_string()),
                 None,
                 vec![],
             ))),
@@ -348,13 +346,13 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::VEC.to_string()),
+                Id(Pos::NONE, sn::collections::VEC.to_string()),
                 None,
                 vec![Afield::AFvalue(Expr(
                     (),
-                    Pos::make_none(),
+                    Pos::NONE,
                     Expr_::Int("42".to_string()),
                 ))],
             ))),
@@ -375,13 +373,13 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::VEC.to_string()),
+                Id(Pos::NONE, sn::collections::VEC.to_string()),
                 None,
                 vec![Afield::AFkvalue(
-                    Expr((), Pos::make_none(), Expr_::Int("42".to_string())),
-                    Expr((), Pos::make_none(), Expr_::True),
+                    Expr((), Pos::NONE, Expr_::Int("42".to_string())),
+                    Expr((), Pos::NONE, Expr_::True),
                 )],
             ))),
         );
@@ -406,12 +404,12 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::VEC.to_string()),
+                Id(Pos::NONE, sn::collections::VEC.to_string()),
                 Some(CollectionTarg::CollectionTV(Targ(
                     (),
-                    Hint(Pos::make_none(), Box::new(Hint_::Hnothing)),
+                    Hint(Pos::NONE, Box::new(Hint_::Hnothing)),
                 ))),
                 vec![],
             ))),
@@ -432,12 +430,12 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::VEC.to_string()),
+                Id(Pos::NONE, sn::collections::VEC.to_string()),
                 Some(CollectionTarg::CollectionTKV(
-                    Targ((), Hint(Pos::make_none(), Box::new(Hint_::Hnothing))),
-                    Targ((), Hint(Pos::make_none(), Box::new(Hint_::Hnothing))),
+                    Targ((), Hint(Pos::NONE, Box::new(Hint_::Hnothing))),
+                    Targ((), Hint(Pos::NONE, Box::new(Hint_::Hnothing))),
                 )),
                 vec![],
             ))),
@@ -469,9 +467,9 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::DICT.to_string()),
+                Id(Pos::NONE, sn::collections::DICT.to_string()),
                 None,
                 vec![],
             ))),
@@ -492,13 +490,13 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::MAP.to_string()),
+                Id(Pos::NONE, sn::collections::MAP.to_string()),
                 None,
                 vec![Afield::AFvalue(Expr(
                     (),
-                    Pos::make_none(),
+                    Pos::NONE,
                     Expr_::Int("42".to_string()),
                 ))],
             ))),
@@ -522,13 +520,13 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::MAP.to_string()),
+                Id(Pos::NONE, sn::collections::MAP.to_string()),
                 None,
                 vec![Afield::AFkvalue(
-                    Expr((), Pos::make_none(), Expr_::Int("42".to_string())),
-                    Expr((), Pos::make_none(), Expr_::True),
+                    Expr((), Pos::NONE, Expr_::Int("42".to_string())),
+                    Expr((), Pos::NONE, Expr_::True),
                 )],
             ))),
         );
@@ -548,12 +546,12 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::MAP.to_string()),
+                Id(Pos::NONE, sn::collections::MAP.to_string()),
                 Some(CollectionTarg::CollectionTV(Targ(
                     (),
-                    Hint(Pos::make_none(), Box::new(Hint_::Hnothing)),
+                    Hint(Pos::NONE, Box::new(Hint_::Hnothing)),
                 ))),
                 vec![],
             ))),
@@ -583,12 +581,12 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::MAP.to_string()),
+                Id(Pos::NONE, sn::collections::MAP.to_string()),
                 Some(CollectionTarg::CollectionTKV(
-                    Targ((), Hint(Pos::make_none(), Box::new(Hint_::Hnothing))),
-                    Targ((), Hint(Pos::make_none(), Box::new(Hint_::Hnothing))),
+                    Targ((), Hint(Pos::NONE, Box::new(Hint_::Hnothing))),
+                    Targ((), Hint(Pos::NONE, Box::new(Hint_::Hnothing))),
                 )),
                 vec![],
             ))),
@@ -609,13 +607,13 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::PAIR.to_string()),
+                Id(Pos::NONE, sn::collections::PAIR.to_string()),
                 None,
                 vec![
-                    Afield::AFvalue(Expr((), Pos::make_none(), Expr_::Int("42".to_string()))),
-                    Afield::AFvalue(Expr((), Pos::make_none(), Expr_::True)),
+                    Afield::AFvalue(Expr((), Pos::NONE, Expr_::Int("42".to_string()))),
+                    Afield::AFvalue(Expr((), Pos::NONE, Expr_::True)),
                 ],
             ))),
         );
@@ -635,13 +633,13 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::PAIR.to_string()),
+                Id(Pos::NONE, sn::collections::PAIR.to_string()),
                 None,
                 vec![Afield::AFvalue(Expr(
                     (),
-                    Pos::make_none(),
+                    Pos::NONE,
                     Expr_::Int("42".to_string()),
                 ))],
             ))),
@@ -665,14 +663,14 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::PAIR.to_string()),
+                Id(Pos::NONE, sn::collections::PAIR.to_string()),
                 None,
                 vec![
-                    Afield::AFvalue(Expr((), Pos::make_none(), Expr_::Int("42".to_string()))),
-                    Afield::AFvalue(Expr((), Pos::make_none(), Expr_::True)),
-                    Afield::AFvalue(Expr((), Pos::make_none(), Expr_::Null)),
+                    Afield::AFvalue(Expr((), Pos::NONE, Expr_::Int("42".to_string()))),
+                    Afield::AFvalue(Expr((), Pos::NONE, Expr_::True)),
+                    Afield::AFvalue(Expr((), Pos::NONE, Expr_::Null)),
                 ],
             ))),
         );
@@ -695,16 +693,16 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::PAIR.to_string()),
+                Id(Pos::NONE, sn::collections::PAIR.to_string()),
                 Some(CollectionTarg::CollectionTV(Targ(
                     (),
-                    Hint(Pos::make_none(), Box::new(Hint_::Hnothing)),
+                    Hint(Pos::NONE, Box::new(Hint_::Hnothing)),
                 ))),
                 vec![
-                    Afield::AFvalue(Expr((), Pos::make_none(), Expr_::Int("42".to_string()))),
-                    Afield::AFvalue(Expr((), Pos::make_none(), Expr_::True)),
+                    Afield::AFvalue(Expr((), Pos::NONE, Expr_::Int("42".to_string()))),
+                    Afield::AFvalue(Expr((), Pos::NONE, Expr_::True)),
                 ],
             ))),
         );
@@ -733,16 +731,16 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::collections::PAIR.to_string()),
+                Id(Pos::NONE, sn::collections::PAIR.to_string()),
                 Some(CollectionTarg::CollectionTKV(
-                    Targ((), Hint(Pos::make_none(), Box::new(Hint_::Hnothing))),
-                    Targ((), Hint(Pos::make_none(), Box::new(Hint_::Hnothing))),
+                    Targ((), Hint(Pos::NONE, Box::new(Hint_::Hnothing))),
+                    Targ((), Hint(Pos::NONE, Box::new(Hint_::Hnothing))),
                 )),
                 vec![
-                    Afield::AFvalue(Expr((), Pos::make_none(), Expr_::Int("42".to_string()))),
-                    Afield::AFvalue(Expr((), Pos::make_none(), Expr_::True)),
+                    Afield::AFvalue(Expr((), Pos::NONE, Expr_::Int("42".to_string()))),
+                    Afield::AFvalue(Expr((), Pos::NONE, Expr_::True)),
                 ],
             ))),
         );
@@ -762,9 +760,9 @@ mod tests {
 
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Collection(Box::new((
-                Id(Pos::make_none(), sn::classes::DATE_TIME.to_string()),
+                Id(Pos::NONE, sn::classes::DATE_TIME.to_string()),
                 None,
                 vec![],
             ))),

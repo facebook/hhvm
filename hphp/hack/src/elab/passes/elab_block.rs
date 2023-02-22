@@ -63,38 +63,35 @@ mod tests {
         let mut pass = ElabBlockPass;
 
         let mut elem: Block<(), ()> = Block(vec![Stmt(
-            Pos::make_none(),
+            Pos::NONE,
             Stmt_::Block(Block(vec![
-                Stmt(Pos::make_none(), Stmt_::Noop),
+                Stmt(Pos::NONE, Stmt_::Noop),
                 Stmt(
-                    Pos::make_none(),
+                    Pos::NONE,
                     Stmt_::Block(Block(vec![
-                        Stmt(Pos::make_none(), Stmt_::Noop),
+                        Stmt(Pos::NONE, Stmt_::Noop),
                         Stmt(
-                            Pos::make_none(),
+                            Pos::NONE,
                             Stmt_::Block(Block(vec![
-                                Stmt(Pos::make_none(), Stmt_::Noop),
+                                Stmt(Pos::NONE, Stmt_::Noop),
                                 Stmt(
-                                    Pos::make_none(),
+                                    Pos::NONE,
                                     Stmt_::Block(Block(vec![
-                                        Stmt(Pos::make_none(), Stmt_::Noop),
+                                        Stmt(Pos::NONE, Stmt_::Noop),
                                         Stmt(
-                                            Pos::make_none(),
-                                            Stmt_::Block(Block(vec![Stmt(
-                                                Pos::make_none(),
-                                                Stmt_::Noop,
-                                            )])),
+                                            Pos::NONE,
+                                            Stmt_::Block(Block(vec![Stmt(Pos::NONE, Stmt_::Noop)])),
                                         ),
-                                        Stmt(Pos::make_none(), Stmt_::Noop),
+                                        Stmt(Pos::NONE, Stmt_::Noop),
                                     ])),
                                 ),
-                                Stmt(Pos::make_none(), Stmt_::Noop),
+                                Stmt(Pos::NONE, Stmt_::Noop),
                             ])),
                         ),
-                        Stmt(Pos::make_none(), Stmt_::Noop),
+                        Stmt(Pos::NONE, Stmt_::Noop),
                     ])),
                 ),
-                Stmt(Pos::make_none(), Stmt_::Noop),
+                Stmt(Pos::NONE, Stmt_::Noop),
             ])),
         )]);
         elem.transform(&cfg, &mut errs, &mut pass);

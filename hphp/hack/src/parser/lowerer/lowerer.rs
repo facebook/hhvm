@@ -232,7 +232,7 @@ impl<'a> Env<'a> {
             tmp_var_counter: 1,
             indexed_source_text,
             parser_options,
-            pos_none: Pos::make_none(),
+            pos_none: Pos::NONE,
             empty_ns_env: namespace_env,
             token_factory,
             arena,

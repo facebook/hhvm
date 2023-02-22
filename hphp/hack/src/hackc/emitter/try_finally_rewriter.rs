@@ -154,7 +154,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                             reified::simplify_verify_type(
                                 e,
                                 env,
-                                &Pos::make_none(),
+                                &Pos::NONE,
                                 check,
                                 &h,
                                 instr::verify_ret_type_ts(),

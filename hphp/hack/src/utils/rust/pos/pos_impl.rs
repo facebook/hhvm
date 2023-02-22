@@ -49,10 +49,6 @@ pub struct Pos(PosImpl);
 pub type PosR<'a> = &'a Pos;
 
 impl Pos {
-    pub const fn make_none() -> Self {
-        Self::NONE
-    }
-
     pub const NONE: Self = Self(PosImpl::Tiny {
         file: None,
         span: PosSpanTiny::make_dummy(),
@@ -382,7 +378,7 @@ impl std::fmt::Debug for Pos {
 
 impl Default for Pos {
     fn default() -> Self {
-        Self::make_none()
+        Self::NONE
     }
 }
 
@@ -573,7 +569,7 @@ mod tests {
 
     #[test]
     fn test_pos() {
-        assert!(Pos::make_none().is_none());
+        assert!(Pos::NONE.is_none());
         assert!(
             !Pos::from_lnum_bol_offset(
                 RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a"))),
@@ -599,7 +595,7 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(
-            Pos::make_none().absolute(&ctx).to_string(),
+            Pos::NONE.absolute(&ctx).to_string(),
             r#"File "dummy/", line 0, characters 0-0:"#
         );
         let path = RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a.php")));
@@ -614,7 +610,7 @@ mod tests {
     #[test]
     fn test_pos_string() {
         assert_eq!(
-            Pos::make_none().string().to_string(),
+            Pos::NONE.string().to_string(),
             r#"File "", line 0, characters 0-0:"#
         );
         let path = RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a.php")));

@@ -13,7 +13,7 @@ pub(crate) mod pos {
     #[inline(always)]
     #[allow(dead_code)]
     pub(crate) fn null() -> Pos {
-        Pos::make_none()
+        Pos::NONE
     }
 }
 

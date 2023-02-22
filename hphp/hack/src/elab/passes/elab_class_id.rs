@@ -64,33 +64,33 @@ impl Pass for ElabClassIdPass {
                     let Id(id_pos, cname) = sid as &mut Sid;
                     if cname == sn::classes::PARENT {
                         if !self.in_class {
-                            let err_pos = std::mem::replace(id_pos, Pos::make_none());
+                            let err_pos = std::mem::replace(id_pos, Pos::NONE);
                             let err =
                                 NamingPhaseError::Naming(NamingError::ParentOutsideClass(err_pos));
                             errs.push(err);
-                            let ci_pos = std::mem::replace(expr_pos, Pos::make_none());
+                            let ci_pos = std::mem::replace(expr_pos, Pos::NONE);
                             *class_id_ = ClassId_::CI(Id(ci_pos, sn::classes::UNKNOWN.to_string()))
                         } else {
                             *class_id_ = ClassId_::CIparent
                         }
                     } else if cname == sn::classes::SELF {
                         if !self.in_class {
-                            let err_pos = std::mem::replace(id_pos, Pos::make_none());
+                            let err_pos = std::mem::replace(id_pos, Pos::NONE);
                             let err =
                                 NamingPhaseError::Naming(NamingError::SelfOutsideClass(err_pos));
                             errs.push(err);
-                            let ci_pos = std::mem::replace(expr_pos, Pos::make_none());
+                            let ci_pos = std::mem::replace(expr_pos, Pos::NONE);
                             *class_id_ = ClassId_::CI(Id(ci_pos, sn::classes::UNKNOWN.to_string()))
                         } else {
                             *class_id_ = ClassId_::CIself
                         }
                     } else if cname == sn::classes::STATIC {
                         if !self.in_class {
-                            let err_pos = std::mem::replace(id_pos, Pos::make_none());
+                            let err_pos = std::mem::replace(id_pos, Pos::NONE);
                             let err =
                                 NamingPhaseError::Naming(NamingError::StaticOutsideClass(err_pos));
                             errs.push(err);
-                            let ci_pos = std::mem::replace(expr_pos, Pos::make_none());
+                            let ci_pos = std::mem::replace(expr_pos, Pos::NONE);
                             *class_id_ = ClassId_::CI(Id(ci_pos, sn::classes::UNKNOWN.to_string()))
                         } else {
                             *class_id_ = ClassId_::CIstatic
@@ -98,7 +98,7 @@ impl Pass for ElabClassIdPass {
                     } else {
                         // Otherwise, replace occurrences of CIexpr(_,_,Id(..))
                         // with CI(..)
-                        let ci_pos = std::mem::replace(expr_pos, Pos::make_none());
+                        let ci_pos = std::mem::replace(expr_pos, Pos::NONE);
                         let ci_name = std::mem::take(cname);
                         *class_id_ = ClassId_::CI(Id(ci_pos, ci_name))
                     }
@@ -166,11 +166,11 @@ mod tests {
         for (cname, repr) in cases {
             let mut elem_outside = ClassId(
                 (),
-                Pos::make_none(),
+                Pos::NONE,
                 ClassId_::CIexpr(Expr(
                     (),
-                    Pos::make_none(),
-                    Expr_::Id(Box::new(Id(Pos::make_none(), cname.to_string()))),
+                    Pos::NONE,
+                    Expr_::Id(Box::new(Id(Pos::NONE, cname.to_string()))),
                 )),
             );
             let mut elem_inside = elem_outside.clone();
@@ -205,11 +205,11 @@ mod tests {
 
         let mut elem_outside: ClassId<(), ()> = ClassId(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             ClassId_::CIexpr(Expr(
                 (),
-                Pos::make_none(),
-                Expr_::Id(Box::new(Id(Pos::make_none(), cname.to_string()))),
+                Pos::NONE,
+                Expr_::Id(Box::new(Id(Pos::NONE, cname.to_string()))),
             )),
         );
         let mut elem_inside = elem_outside.clone();
@@ -244,12 +244,12 @@ mod tests {
 
         let mut elem_outside: ClassId<(), ()> = ClassId(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             ClassId_::CIexpr(Expr(
                 (),
-                Pos::make_none(),
+                Pos::NONE,
                 Expr_::Lvar(Box::new(Lid(
-                    Pos::make_none(),
+                    Pos::NONE,
                     local_id::make_unscoped(sn::special_idents::THIS),
                 ))),
             )),
@@ -290,7 +290,7 @@ mod tests {
 
         let exprs_ = vec![
             Expr_::Lvar(Box::new(Lid(
-                Pos::make_none(),
+                Pos::NONE,
                 local_id::make_unscoped("wut".to_string()),
             ))),
             Expr_::Null,
@@ -299,8 +299,8 @@ mod tests {
         for expr_ in exprs_ {
             let mut elem_outside: ClassId<(), ()> = ClassId(
                 (),
-                Pos::make_none(),
-                ClassId_::CIexpr(Expr((), Pos::make_none(), expr_.clone())),
+                Pos::NONE,
+                ClassId_::CIexpr(Expr((), Pos::NONE, expr_.clone())),
             );
             let mut elem_inside = elem_outside.clone();
 

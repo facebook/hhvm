@@ -30,7 +30,7 @@ impl Pass for ElabExprImportPass {
         match expr_ {
             Expr_::Import(_) => {
                 let inner_expr =
-                    std::mem::replace(elem, Expr(Ex::default(), Pos::make_none(), Expr_::Null));
+                    std::mem::replace(elem, Expr(Ex::default(), Pos::NONE, Expr_::Null));
                 *elem = Expr(
                     Ex::default(),
                     inner_expr.1.clone(),
@@ -59,10 +59,10 @@ mod tests {
         let mut pass = ElabExprImportPass;
         let mut elem: Expr<(), ()> = Expr(
             (),
-            Pos::make_none(),
+            Pos::NONE,
             Expr_::Import(Box::new((
                 ImportFlavor::Include,
-                Expr((), Pos::make_none(), Expr_::Null),
+                Expr((), Pos::NONE, Expr_::Null),
             ))),
         );
 

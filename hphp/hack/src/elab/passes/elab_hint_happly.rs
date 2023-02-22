@@ -282,7 +282,7 @@ fn canonical_happly(
         }
         CanonResult::VecOrDict => match hints.pop() {
             None => {
-                let mut pos_canon = Pos::make_none();
+                let mut pos_canon = Pos::NONE;
                 std::mem::swap(&mut id.0, &mut pos_canon);
                 let hint_ = Hint_::HvecOrDict(None, Hint(pos_canon, Box::new(Hint_::Hany)));
                 let err = NamingPhaseError::Naming(NamingError::TooFewTypeArguments(id.0.clone()));
@@ -390,12 +390,12 @@ mod tests {
         let mut pass = ElabHintHapplyPass::default();
 
         let mut elem = Hint(
-            Pos::make_none(),
+            Pos::NONE,
             Box::new(Hint_::Happly(
-                Id(Pos::make_none(), sn::typehints::VEC_OR_DICT.to_string()),
+                Id(Pos::NONE, sn::typehints::VEC_OR_DICT.to_string()),
                 vec![
-                    Hint(Pos::make_none(), Box::new(Hint_::Hmixed)),
-                    Hint(Pos::make_none(), Box::new(Hint_::Hnothing)),
+                    Hint(Pos::NONE, Box::new(Hint_::Hmixed)),
+                    Hint(Pos::NONE, Box::new(Hint_::Hnothing)),
                 ],
             )),
         );
@@ -419,10 +419,10 @@ mod tests {
         let mut pass = ElabHintHapplyPass::default();
 
         let mut elem = Hint(
-            Pos::make_none(),
+            Pos::NONE,
             Box::new(Hint_::Happly(
-                Id(Pos::make_none(), sn::typehints::VEC_OR_DICT.to_string()),
-                vec![Hint(Pos::make_none(), Box::new(Hint_::Hnothing))],
+                Id(Pos::NONE, sn::typehints::VEC_OR_DICT.to_string()),
+                vec![Hint(Pos::NONE, Box::new(Hint_::Hnothing))],
             )),
         );
 
@@ -444,9 +444,9 @@ mod tests {
         let mut pass = ElabHintHapplyPass::default();
 
         let mut elem = Hint(
-            Pos::make_none(),
+            Pos::NONE,
             Box::new(Hint_::Happly(
-                Id(Pos::make_none(), sn::typehints::VEC_OR_DICT.to_string()),
+                Id(Pos::NONE, sn::typehints::VEC_OR_DICT.to_string()),
                 vec![],
             )),
         );

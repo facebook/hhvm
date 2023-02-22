@@ -117,7 +117,7 @@ fn extract_debugger_main(
         } else {
             stmts
         };
-    let p = Pos::make_none;
+    let p = || Pos::NONE;
     let mut unsets: ast::Block = vars
         .iter()
         .map(|name| {
@@ -179,7 +179,7 @@ fn extract_debugger_main(
         body: FuncBody { fb_ast: body },
         fun_kind: FunKind::FSync,
         user_attributes: ast::UserAttributes(vec![UserAttribute {
-            name: Id(Pos::make_none(), "__DebuggerMain".into()),
+            name: Id(Pos::NONE, "__DebuggerMain".into()),
             params: vec![],
         }]),
         external: false,
@@ -189,7 +189,7 @@ fn extract_debugger_main(
         namespace: RcOc::clone(empty_namespace),
         file_attributes: vec![],
         mode: Mode::Mstrict,
-        name: Id(Pos::make_none(), "include".into()),
+        name: Id(Pos::NONE, "include".into()),
         fun: f,
         // TODO(T116039119): Populate value with presence of internal attribute
         internal: false,

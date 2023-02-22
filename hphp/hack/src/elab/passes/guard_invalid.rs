@@ -71,14 +71,14 @@ mod tests {
             Bop::Lt,
             Expr(
                 (),
-                Pos::make_none(),
+                Pos::NONE,
                 Expr_::Invalid(Box::new(Some(Expr(
                     (),
-                    Pos::make_none(),
+                    Pos::NONE,
                     Expr_::Int("42".to_string()),
                 )))),
             ),
-            Expr((), Pos::make_none(), Expr_::Int("43".to_string())),
+            Expr((), Pos::NONE, Expr_::Int("43".to_string())),
         )));
 
         elem.transform(&cfg, &mut errs, &mut pass);

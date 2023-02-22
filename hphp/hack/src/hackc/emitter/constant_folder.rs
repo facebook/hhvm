@@ -263,11 +263,7 @@ fn shape_to_typed_value<'arena, 'decl>(
                     ast_defs::ShapeFieldName::SFclassConst(class_id, id) => {
                         class_const_to_typed_value(
                             emitter,
-                            &ast::ClassId(
-                                (),
-                                Pos::make_none(),
-                                ast::ClassId_::CI(class_id.clone()),
-                            ),
+                            &ast::ClassId((), Pos::NONE, ast::ClassId_::CI(class_id.clone())),
                             id,
                         )?
                     }

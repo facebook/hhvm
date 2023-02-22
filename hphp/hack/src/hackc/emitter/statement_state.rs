@@ -26,7 +26,7 @@ impl<'arena> StatementState<'arena> {
             default_dropthrough: None,
             verify_out: instr::empty(),
             num_out: 0,
-            function_pos: Pos::make_none(),
+            function_pos: Pos::NONE,
         }
     }
 }

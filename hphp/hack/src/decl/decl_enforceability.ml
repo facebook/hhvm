@@ -8,7 +8,7 @@
 open Hh_prelude
 open Typing_defs
 
-let ( let* ) = Caml.Option.bind
+let ( let* ) = Option.Let_syntax.( let* )
 
 let is_typedef ctx x =
   match Naming_provider.get_type_kind ctx x with

@@ -256,27 +256,26 @@ module Inter (I : Intra) = struct
                 input_constr_list_map
             | None -> input_constr_list_map)
           | Constant (_, qualified_name) ->
-            let open Option.Monad_infix in
-            split_const_name qualified_name
-            >>= (fun (class_name, const_name) ->
-                  let current_class_const =
-                    find_const_in_current_class
-                      qualified_name
-                      input_constr_list_map
-                  in
-                  let ancestor_class_const =
-                    find_const_in_ancestors
-                      ~constraint_map:input_constr_list_map
-                      ~const_name
-                      class_name
-                  in
-                  Option.both current_class_const ancestor_class_const)
-            >>| (fun ((constr_list_at_const, _), (_, ancestor_const_name)) ->
-                  input_constr_list_map
-                  |> propagate_const_inheritance_constraints
-                       constr_list_at_const
-                       ancestor_const_name)
-            |> Option.value ~default:input_constr_list_map
+            let open Option.Let_syntax in
+            Option.value ~default:input_constr_list_map
+            @@ let* (class_name, const_name) =
+                 split_const_name qualified_name
+               in
+               let* (constr_list_at_const, _) =
+                 find_const_in_current_class
+                   qualified_name
+                   input_constr_list_map
+               in
+               let+ (_, ancestor_const_name) =
+                 find_const_in_ancestors
+                   ~constraint_map:input_constr_list_map
+                   ~const_name
+                   class_name
+               in
+               input_constr_list_map
+               |> propagate_const_inheritance_constraints
+                    constr_list_at_const
+                    ancestor_const_name
           | _ -> input_constr_list_map)
       in
       List.fold_left

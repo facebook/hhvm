@@ -56,3 +56,43 @@ let ( <> ) (x : int) (y : int) = not (Int.equal x y)
 
 module Unix = Caml_unix
 module Sys = Stdlib.Sys
+
+module Option = struct
+  include Option
+
+  module Let_syntax = struct
+    include Option.Let_syntax
+
+    let ( let* ) = Option.( >>= )
+
+    let ( and* ) = Option.both
+
+    let ( let+ ) = Option.( >>| )
+
+    let ( and+ ) = Option.both
+  end
+end
+
+module List = struct
+  include List
+
+  module Let_syntax = struct
+    include List.Let_syntax
+
+    let ( let* ) = List.( >>= )
+
+    let ( let+ ) = List.( >>| )
+  end
+end
+
+module Result = struct
+  include Result
+
+  module Let_syntax = struct
+    include Result.Let_syntax
+
+    let ( let* ) = Result.( >>= )
+
+    let ( let+ ) = Result.( >>| )
+  end
+end

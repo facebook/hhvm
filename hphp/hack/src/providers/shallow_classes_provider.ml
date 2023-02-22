@@ -63,7 +63,7 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
       (match Naming_provider.get_class_path ctx name with
       | None -> None
       | Some path ->
-        let ( let* ) = Caml.Option.bind in
+        let open Option.Let_syntax in
         let* original_sc = find_in_direct_decl_parse ~fill_caches:false path in
         let sc =
           info.Provider_backend.pessimise_shallow_class path ~name original_sc

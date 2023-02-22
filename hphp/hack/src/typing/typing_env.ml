@@ -576,7 +576,7 @@ let set_fun_is_constructor env is_ctor =
   { env with genv = { env.genv with fun_is_ctor = is_ctor } }
 
 let add_fine_dep_if_enabled env dependency =
-  let ( let* ) = Caml.Option.bind in
+  let open Option.Let_syntax in
   let ctx = get_ctx env in
   (* We resolve the dependency to its origin. See
    * [Typing_extends.add_pessimisation_dependency] for details. *)

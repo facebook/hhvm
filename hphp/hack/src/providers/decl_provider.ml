@@ -27,8 +27,6 @@ type gconst_decl = Typing_defs.const_decl
 
 type module_decl = Typing_defs.module_def_type
 
-let ( let* ) = Caml.Option.bind
-
 let err_not_found = Typedef_provider.err_not_found
 
 let find_in_direct_decl_parse = Typedef_provider.find_in_direct_decl_parse
@@ -154,6 +152,7 @@ let get_fun
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (fun_name : fun_key) : fun_decl option =
+  let open Option.Let_syntax in
   Option.map ~f:(maybe_pessimise_fun_decl ctx)
   @@ Decl_counters.count_decl Decl_counters.Fun ?tracing_info fun_name
   @@ fun _counter ->
@@ -247,6 +246,7 @@ let get_typedef
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (typedef_name : type_key) : typedef_decl option =
+  let open Option.Let_syntax in
   Option.map ~f:(maybe_pessimise_typedef_decl ctx)
   @@ Decl_counters.count_decl Decl_counters.Typedef ?tracing_info typedef_name
   @@ fun _counter ->
@@ -304,6 +304,7 @@ let get_gconst
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (gconst_name : gconst_key) : gconst_decl option =
+  let open Option.Let_syntax in
   Decl_counters.count_decl Decl_counters.GConst ?tracing_info gconst_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with

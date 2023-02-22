@@ -122,6 +122,8 @@ class FOLLY_EXPORT TApplicationException : public TException {
           return "TApplicationException: Checksum mismatch";
         case INTERRUPTION:
           return "TApplicationException: interruption";
+        case TENANT_QUOTA_EXCEEDED:
+          return "TApplicationException: Tenant quota exceeded";
         default:
           return "TApplicationException: (Invalid exception type)";
       };

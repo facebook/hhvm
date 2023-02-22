@@ -45,11 +45,20 @@ class CPUConcurrencyController {
  public:
   enum class Mode {
     DISABLED,
-    ENABLED_CONCURRENCY_LIMITS,
-    ENABLED_TOKEN_BUCKET
+    DRY_RUN,
+    ENABLED,
   };
+
+  enum class Method {
+    CONCURRENCY_LIMITS,
+    TOKEN_BUCKET,
+  };
+
   struct Config {
+    // Operating mode
     Mode mode = Mode::DISABLED;
+    // CPU concurrency enforcement method
+    Method method = Method::TOKEN_BUCKET;
     // CPU target in the range [0, 100]
     uint8_t cpuTarget = 90;
     // Source of CPU load metrics (container-only, host-only, or
@@ -86,6 +95,17 @@ class CPUConcurrencyController {
     uint32_t concurrencyUpperBound = 1 << 16;
     // Don't go below this concurrency limit, ever.
     uint32_t concurrencyLowerBound = 1;
+
+    // Returns a string representation of the Config mode
+    std::string_view modeName() const;
+
+    // Returns a string representation of the Config mode
+    std::string_view methodName() const;
+
+    std::string_view concurrencyUnit() const;
+
+    // Returns a string description of the Config
+    std::string describe() const;
   };
 
   CPUConcurrencyController(
@@ -135,6 +155,7 @@ class CPUConcurrencyController {
       activeRequestsLimit_{std::nullopt};
   folly::observer::SimpleObservable<std::optional<uint32_t>> qpsLimit_{
       std::nullopt};
+  uint32_t dryRunLimit_{0};
   apache::thrift::server::ServerConfigs& serverConfigs_;
   apache::thrift::ThriftServerConfig& thriftServerConfig_;
 

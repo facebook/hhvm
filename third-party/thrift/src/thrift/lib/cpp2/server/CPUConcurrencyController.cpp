@@ -18,6 +18,8 @@
 #include <thrift/lib/cpp2/server/ServerAttribute.h>
 
 #include <algorithm>
+#include <fmt/core.h>
+#include <folly/lang/Assume.h>
 
 namespace apache::thrift {
 
@@ -34,26 +36,6 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   return -1;
 }
 } // namespace detail
-
-namespace {
-
-struct ModeInfo {
-  std::string_view name;
-  std::string_view concurrencyUnit;
-};
-
-ModeInfo getModeInfo(CPUConcurrencyController::Mode mode) {
-  if (mode == CPUConcurrencyController::Mode::ENABLED_CONCURRENCY_LIMITS) {
-    return {"CONCURRENCY_LIMITS", "Active Requests"};
-  } else if (mode == CPUConcurrencyController::Mode::ENABLED_TOKEN_BUCKET) {
-    return {"TOKEN_BUCKET", "QPS"};
-  }
-
-  DCHECK(false);
-  return {"UNKNOWN", "UNKNOWN"};
-}
-
-} // namespace
 
 CPUConcurrencyController::CPUConcurrencyController(
     folly::observer::Observer<Config> config,
@@ -174,13 +156,7 @@ void CPUConcurrencyController::schedule() {
     return;
   }
 
-  auto modeInfo = getModeInfo(config().mode);
-  LOG(INFO) << "Enabling CPUConcurrencyController. Mode: " << modeInfo.name
-            << " CPU Target: " << static_cast<int32_t>(this->config().cpuTarget)
-            << " Refresh Period (Ms): "
-            << this->config().refreshPeriodMs.count()
-            << " Concurrency Upper Bound (" << modeInfo.concurrencyUnit
-            << "): " << this->config().concurrencyUpperBound;
+  LOG(INFO) << "Enabling CPUConcurrencyController: " << config().describe();
   this->setLimit(this->config().concurrencyUpperBound);
   scheduler_.addFunctionGenericNextRunTimeFunctor(
       [this] { this->cycleOnce(); },
@@ -196,6 +172,7 @@ void CPUConcurrencyController::cancel() {
   scheduler_.cancelAllFunctionsAndWait();
   activeRequestsLimit_.setValue(std::nullopt);
   qpsLimit_.setValue(std::nullopt);
+  dryRunLimit_ = 0;
   stableConcurrencySamples_.clear();
   stableEstimate_.exchange(-1);
 }
@@ -218,17 +195,21 @@ void CPUConcurrencyController::requestShed() {
 
 uint32_t CPUConcurrencyController::getLimit() const {
   uint32_t limit = 0;
-  switch (config().mode) {
-    case Mode::ENABLED_CONCURRENCY_LIMITS:
-      // Using ServiceConfigs instead of ThriftServerConfig, because the value
-      // may come from AdaptiveConcurrencyController
-      limit = serverConfigs_.getMaxRequests();
-      break;
-    case Mode::ENABLED_TOKEN_BUCKET:
-      limit = thriftServerConfig_.getMaxQps().get();
-      break;
-    default:
-      DCHECK(false);
+  if (config().mode == Mode::DRY_RUN) {
+    limit = dryRunLimit_;
+  } else {
+    switch (config().method) {
+      case Method::CONCURRENCY_LIMITS:
+        // Using ServiceConfigs instead of ThriftServerConfig, because the value
+        // may come from AdaptiveConcurrencyController
+        limit = serverConfigs_.getMaxRequests();
+        break;
+      case Method::TOKEN_BUCKET:
+        limit = thriftServerConfig_.getMaxQps().get();
+        break;
+      default:
+        DCHECK(false);
+    }
   }
 
   // Fallback to concurrency upper bound if no limit is set yet.
@@ -238,29 +219,33 @@ uint32_t CPUConcurrencyController::getLimit() const {
 }
 
 void CPUConcurrencyController::setLimit(uint32_t newLimit) {
-  switch (config().mode) {
-    case Mode::ENABLED_CONCURRENCY_LIMITS:
-      activeRequestsLimit_.setValue(newLimit);
-      break;
-    case Mode::ENABLED_TOKEN_BUCKET:
-      qpsLimit_.setValue(newLimit);
-      break;
-    default:
-      DCHECK(false);
+  if (config().mode == Mode::DRY_RUN) {
+    dryRunLimit_ = newLimit;
+  } else if (config().mode == Mode::ENABLED) {
+    switch (config().method) {
+      case Method::CONCURRENCY_LIMITS:
+        activeRequestsLimit_.setValue(newLimit);
+        break;
+      case Method::TOKEN_BUCKET:
+        qpsLimit_.setValue(newLimit);
+        break;
+      default:
+        DCHECK(false);
+    }
   }
 }
 
 uint32_t CPUConcurrencyController::getLimitUsage() {
   using namespace std::chrono;
-  switch (config().mode) {
-    case Mode::ENABLED_CONCURRENCY_LIMITS:
+  switch (config().method) {
+    case Method::CONCURRENCY_LIMITS:
       // Note: estimating concurrency from this is fairly lossy as it's a
       // gauge metric and we can't use techniques to measure it over a duration.
       // We may be able to get much better estimates if we switch to use QPS
       // and a token bucket for rate limiting.
       // TODO: We should exclude fb303 methods.
       return serverConfigs_.getActiveRequests();
-    case Mode::ENABLED_TOKEN_BUCKET: {
+    case Method::TOKEN_BUCKET: {
       auto now = steady_clock::now();
       auto milliSince =
           duration_cast<milliseconds>(now - lastTotalRequestReset_).count();
@@ -277,4 +262,56 @@ uint32_t CPUConcurrencyController::getLimitUsage() {
       return 0;
   }
 }
+
+/**
+ * CPUConcurrencyController Config helper methods
+ */
+std::string_view CPUConcurrencyController::Config::modeName() const {
+  switch (mode) {
+    case Mode::DISABLED:
+      return "DISABLED";
+    case Mode::DRY_RUN:
+      return "DRY_RUN";
+    case Mode::ENABLED:
+      return "ENABLED";
+  }
+  folly::assume_unreachable();
+}
+
+std::string_view CPUConcurrencyController::Config::methodName() const {
+  switch (method) {
+    case Method::CONCURRENCY_LIMITS:
+      return "CONCURRENCY_LIMITS";
+    case Method::TOKEN_BUCKET:
+      return "TOKEN_BUCKET";
+  }
+  folly::assume_unreachable();
+}
+
+std::string_view CPUConcurrencyController::Config::concurrencyUnit() const {
+  switch (method) {
+    case Method::CONCURRENCY_LIMITS:
+      return "Active Requests";
+    case Method::TOKEN_BUCKET:
+      return "QPS";
+  }
+  folly::assume_unreachable();
+}
+
+std::string CPUConcurrencyController::Config::describe() const {
+  return fmt::format(
+      "CPUConcurrencyController Config: "
+      "Mode: {}, "
+      "Method: {}, "
+      "CPU Target: {}, "
+      "Refresh Period (ms): {}, "
+      "Concurrency Upper Bound({}): {}",
+      modeName(),
+      methodName(),
+      cpuTarget,
+      refreshPeriodMs.count(),
+      concurrencyUnit(),
+      concurrencyUpperBound);
+}
+
 } // namespace apache::thrift

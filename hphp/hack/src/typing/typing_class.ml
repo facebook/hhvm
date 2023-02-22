@@ -71,7 +71,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
   in
   let pos = fst m.m_name in
   let env = set_tyvars_variance_in_callable env dynamic_return_ty param_tys in
-
+  let env = Typing_dynamic.add_require_dynamic_bounds env cls in
   let env =
     if Cls.get_support_dynamic_type cls then
       let this_ty =

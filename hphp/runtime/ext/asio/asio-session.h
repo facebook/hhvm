@@ -15,11 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_SESSION_H_
-#define incl_HPHP_EXT_ASIO_SESSION_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
 #include "hphp/util/rds-local.h"
@@ -127,7 +128,7 @@ struct AsioSession final {
   // AwaitAllWaitHandle callbacks:
   void setOnAwaitAllCreate(const Variant& callback);
   bool hasOnAwaitAllCreate() { return !!m_onAwaitAllCreate; }
-  void onAwaitAllCreate(c_AwaitAllWaitHandle* wh, const Variant& dependencies);
+  void onAwaitAllCreate(c_AwaitAllWaitHandle* wh, Array&& dependencies);
 
   // ConditionWaitHandle callbacks:
   void setOnConditionCreate(const Variant& callback);
@@ -184,5 +185,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-#endif // incl_HPHP_EXT_ASIO_SESSION_H_

@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
@@ -24,7 +26,6 @@
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
-#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
 
@@ -176,12 +177,12 @@ void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
   incRefCount();
 
   if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreate())) {
-    auto vector = req::make<c_Vector>();
+    VecInit dependencies(m_cap);
     for (int32_t idx = m_cap - 1; idx >= 0; --idx) {
       auto const child = make_tv<KindOfObject>(m_children[idx].m_child);
-      vector->add(child);
+      dependencies.append(child);
     }
-    AsioSession::Get()->onAwaitAllCreate(this, Variant(std::move(vector)));
+    AsioSession::Get()->onAwaitAllCreate(this, dependencies.toArray());
   }
 }
 

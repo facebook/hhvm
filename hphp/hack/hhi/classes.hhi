@@ -209,7 +209,7 @@ namespace HH {
       vec<Awaitable<mixed>> $deps,
     )[]: Awaitable<void>;
     public static function setOnCreateCallback(
-      ?(function(AwaitAllWaitHandle, Vector<mixed>): void) $callback,
+      ?(function(AwaitAllWaitHandle, vec<WaitableWaitHandle<mixed>>): void) $callback,
     ): void {}
   }
 

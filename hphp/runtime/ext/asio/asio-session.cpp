@@ -214,11 +214,11 @@ void AsioSession::setOnAwaitAllCreate(const Variant& callback) {
 
 void AsioSession::onAwaitAllCreate(
   c_AwaitAllWaitHandle* waitHandle,
-  const Variant &dependencies
+  Array&& dependencies
 ) {
   runCallback(
     m_onAwaitAllCreate,
-    make_vec_array(waitHandle, dependencies),
+    make_vec_array(waitHandle, std::move(dependencies)),
     "AwaitAllWaitHandle::onCreate"
   );
 }

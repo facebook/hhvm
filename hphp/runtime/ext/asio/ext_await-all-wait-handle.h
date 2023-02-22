@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
-#define incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
+#pragma once
 
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
@@ -142,6 +141,6 @@ inline c_AwaitAllWaitHandle* c_Awaitable::asAwaitAll() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
+#define incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle-inl.h"
-
-#endif // incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
+#undef incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_

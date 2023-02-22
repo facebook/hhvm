@@ -253,6 +253,46 @@ The built-in enum type of `E::A` is just `E`. All we know is that value `A` is d
 
 But if we look at the enum class `EC::A` its type is `HH\MemberOf<EC, int>`. We know that it's declared within the enum class `EC`, with type `int`.
 
+## Declaring type constants in an enum class
+
+Like normal classes, enum classes can declare type constants. Abstract type
+constants are also supported:
+
+```Hack
+<<file:__EnableUnstableFeatures('enum_class_type_constants')>>
+interface IGet<+T> {
+  public function get(): T;
+}
+
+class Box<T> implements IGet<T> {
+  public function __construct(private T $data)[] {}
+  public function get(): T { return $this->data; }
+  public function set(T $data): void { $this->data = $data; }
+}
+
+abstract enum class E : IGet<mixed> {
+  abstract const type T;
+  abstract Box<this::T> A;
+  Box<int> B = new Box(42);
+}
+
+enum class F : IGet<mixed> extends E {
+  const type T = string;
+  Box<this::T> A = new Box('zuck');
+}
+```
+
+As you can see, the feature is currently available as an unstable feature.
+It is also gated by a `.hhconfig` option,
+`allowed_locations_for_type_constant_in_enum_class`, in order to implement
+a fine-grained control of the locations where this feature is used.
+If you do not need such level of control, the
+`allow_all_locations_for_type_constant_in_enum_class` will enable it
+everywhere.
+
+All these restrictions will be lifted when the feature is finally released.
+
+
 ## Full Example: Dependent Dictionary
 
 First, a couple of general Hack definitions:

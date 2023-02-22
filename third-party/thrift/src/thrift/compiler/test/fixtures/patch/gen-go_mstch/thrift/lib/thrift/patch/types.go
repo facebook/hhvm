@@ -40,7 +40,7 @@ const (
 
 // Enum value maps for PatchOp
 var (
-    PatchOp_name = map[PatchOp]string {
+    PatchOpToName = map[PatchOp]string {
         PatchOp_Assign: "Assign",
         PatchOp_Clear: "Clear",
         PatchOp_PatchPrior: "PatchPrior",
@@ -53,7 +53,7 @@ var (
         PatchOp_Unspecified: "Unspecified",
     }
 
-    PatchOp_value = map[string]PatchOp {
+    PatchOpToValue = map[string]PatchOp {
         "Assign": PatchOp_Assign,
         "Clear": PatchOp_Clear,
         "PatchPrior": PatchOp_PatchPrior,
@@ -66,13 +66,6 @@ var (
         "Unspecified": PatchOp_Unspecified,
     }
 
-    // Deprecated: Use PatchOp_name instead.
-    PatchOpToName = PatchOp_name
-
-    // Deprecated: Use PatchOp_value instead.
-    PatchOpToValue = PatchOp_value
-
-    // Deprecated: Use PatchOp_name instead (e.g. `for name, _ := range PatchOp_name {}`).
     PatchOpNames = []string{
         "Assign",
         "Clear",
@@ -86,7 +79,6 @@ var (
         "Unspecified",
     }
 
-    // Deprecated: Use PatchOp_value instead (e.g. `for value, _ := range PatchOp_value {}`).
     PatchOpValues = []PatchOp{
         1,
         2,
@@ -112,9 +104,9 @@ func (x PatchOp) Ptr() *PatchOp {
     return &x
 }
 
-// Deprecated: Use PatchOp_value instead (e.g. `x, ok := PatchOp_value["name"]`).
+// Deprecated: Use PatchOpToValue instead (e.g. `x, ok := PatchOpToValue["name"]`).
 func PatchOpFromString(s string) (PatchOp, error) {
-    if v, ok := PatchOp_value[s]; ok {
+    if v, ok := PatchOpToValue[s]; ok {
         return v, nil
     }
     return PatchOp(0), fmt.Errorf("not a valid PatchOp string")

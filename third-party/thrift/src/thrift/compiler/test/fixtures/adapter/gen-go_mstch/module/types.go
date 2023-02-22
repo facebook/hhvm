@@ -90,27 +90,20 @@ const (
 
 // Enum value maps for Color
 var (
-    Color_name = map[Color]string {
+    ColorToName = map[Color]string {
         Color_UNKNOWN: "UNKNOWN",
         Color_RED: "RED",
         Color_GREEN: "GREEN",
         Color_BLUE: "BLUE",
     }
 
-    Color_value = map[string]Color {
+    ColorToValue = map[string]Color {
         "UNKNOWN": Color_UNKNOWN,
         "RED": Color_RED,
         "GREEN": Color_GREEN,
         "BLUE": Color_BLUE,
     }
 
-    // Deprecated: Use Color_name instead.
-    ColorToName = Color_name
-
-    // Deprecated: Use Color_value instead.
-    ColorToValue = Color_value
-
-    // Deprecated: Use Color_name instead (e.g. `for name, _ := range Color_name {}`).
     ColorNames = []string{
         "UNKNOWN",
         "RED",
@@ -118,7 +111,6 @@ var (
         "BLUE",
     }
 
-    // Deprecated: Use Color_value instead (e.g. `for value, _ := range Color_value {}`).
     ColorValues = []Color{
         0,
         1,
@@ -138,9 +130,9 @@ func (x Color) Ptr() *Color {
     return &x
 }
 
-// Deprecated: Use Color_value instead (e.g. `x, ok := Color_value["name"]`).
+// Deprecated: Use ColorToValue instead (e.g. `x, ok := ColorToValue["name"]`).
 func ColorFromString(s string) (Color, error) {
-    if v, ok := Color_value[s]; ok {
+    if v, ok := ColorToValue[s]; ok {
         return v, nil
     }
     return Color(0), fmt.Errorf("not a valid Color string")
@@ -161,29 +153,21 @@ const (
 
 // Enum value maps for ThriftAdaptedEnum
 var (
-    ThriftAdaptedEnum_name = map[ThriftAdaptedEnum]string {
+    ThriftAdaptedEnumToName = map[ThriftAdaptedEnum]string {
         ThriftAdaptedEnum_Zero: "Zero",
         ThriftAdaptedEnum_One: "One",
     }
 
-    ThriftAdaptedEnum_value = map[string]ThriftAdaptedEnum {
+    ThriftAdaptedEnumToValue = map[string]ThriftAdaptedEnum {
         "Zero": ThriftAdaptedEnum_Zero,
         "One": ThriftAdaptedEnum_One,
     }
 
-    // Deprecated: Use ThriftAdaptedEnum_name instead.
-    ThriftAdaptedEnumToName = ThriftAdaptedEnum_name
-
-    // Deprecated: Use ThriftAdaptedEnum_value instead.
-    ThriftAdaptedEnumToValue = ThriftAdaptedEnum_value
-
-    // Deprecated: Use ThriftAdaptedEnum_name instead (e.g. `for name, _ := range ThriftAdaptedEnum_name {}`).
     ThriftAdaptedEnumNames = []string{
         "Zero",
         "One",
     }
 
-    // Deprecated: Use ThriftAdaptedEnum_value instead (e.g. `for value, _ := range ThriftAdaptedEnum_value {}`).
     ThriftAdaptedEnumValues = []ThriftAdaptedEnum{
         0,
         1,
@@ -201,9 +185,9 @@ func (x ThriftAdaptedEnum) Ptr() *ThriftAdaptedEnum {
     return &x
 }
 
-// Deprecated: Use ThriftAdaptedEnum_value instead (e.g. `x, ok := ThriftAdaptedEnum_value["name"]`).
+// Deprecated: Use ThriftAdaptedEnumToValue instead (e.g. `x, ok := ThriftAdaptedEnumToValue["name"]`).
 func ThriftAdaptedEnumFromString(s string) (ThriftAdaptedEnum, error) {
-    if v, ok := ThriftAdaptedEnum_value[s]; ok {
+    if v, ok := ThriftAdaptedEnumToValue[s]; ok {
         return v, nil
     }
     return ThriftAdaptedEnum(0), fmt.Errorf("not a valid ThriftAdaptedEnum string")

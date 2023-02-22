@@ -29,32 +29,24 @@ const (
 
 // Enum value maps for RefType
 var (
-    RefType_name = map[RefType]string {
+    RefTypeToName = map[RefType]string {
         RefType_Unique: "Unique",
         RefType_Shared: "Shared",
         RefType_SharedMutable: "SharedMutable",
     }
 
-    RefType_value = map[string]RefType {
+    RefTypeToValue = map[string]RefType {
         "Unique": RefType_Unique,
         "Shared": RefType_Shared,
         "SharedMutable": RefType_SharedMutable,
     }
 
-    // Deprecated: Use RefType_name instead.
-    RefTypeToName = RefType_name
-
-    // Deprecated: Use RefType_value instead.
-    RefTypeToValue = RefType_value
-
-    // Deprecated: Use RefType_name instead (e.g. `for name, _ := range RefType_name {}`).
     RefTypeNames = []string{
         "Unique",
         "Shared",
         "SharedMutable",
     }
 
-    // Deprecated: Use RefType_value instead (e.g. `for value, _ := range RefType_value {}`).
     RefTypeValues = []RefType{
         0,
         1,
@@ -73,9 +65,9 @@ func (x RefType) Ptr() *RefType {
     return &x
 }
 
-// Deprecated: Use RefType_value instead (e.g. `x, ok := RefType_value["name"]`).
+// Deprecated: Use RefTypeToValue instead (e.g. `x, ok := RefTypeToValue["name"]`).
 func RefTypeFromString(s string) (RefType, error) {
-    if v, ok := RefType_value[s]; ok {
+    if v, ok := RefTypeToValue[s]; ok {
         return v, nil
     }
     return RefType(0), fmt.Errorf("not a valid RefType string")
@@ -99,7 +91,7 @@ const (
 
 // Enum value maps for EnumUnderlyingType
 var (
-    EnumUnderlyingType_name = map[EnumUnderlyingType]string {
+    EnumUnderlyingTypeToName = map[EnumUnderlyingType]string {
         EnumUnderlyingType_I8: "I8",
         EnumUnderlyingType_U8: "U8",
         EnumUnderlyingType_I16: "I16",
@@ -107,7 +99,7 @@ var (
         EnumUnderlyingType_U32: "U32",
     }
 
-    EnumUnderlyingType_value = map[string]EnumUnderlyingType {
+    EnumUnderlyingTypeToValue = map[string]EnumUnderlyingType {
         "I8": EnumUnderlyingType_I8,
         "U8": EnumUnderlyingType_U8,
         "I16": EnumUnderlyingType_I16,
@@ -115,13 +107,6 @@ var (
         "U32": EnumUnderlyingType_U32,
     }
 
-    // Deprecated: Use EnumUnderlyingType_name instead.
-    EnumUnderlyingTypeToName = EnumUnderlyingType_name
-
-    // Deprecated: Use EnumUnderlyingType_value instead.
-    EnumUnderlyingTypeToValue = EnumUnderlyingType_value
-
-    // Deprecated: Use EnumUnderlyingType_name instead (e.g. `for name, _ := range EnumUnderlyingType_name {}`).
     EnumUnderlyingTypeNames = []string{
         "I8",
         "U8",
@@ -130,7 +115,6 @@ var (
         "U32",
     }
 
-    // Deprecated: Use EnumUnderlyingType_value instead (e.g. `for value, _ := range EnumUnderlyingType_value {}`).
     EnumUnderlyingTypeValues = []EnumUnderlyingType{
         0,
         1,
@@ -151,9 +135,9 @@ func (x EnumUnderlyingType) Ptr() *EnumUnderlyingType {
     return &x
 }
 
-// Deprecated: Use EnumUnderlyingType_value instead (e.g. `x, ok := EnumUnderlyingType_value["name"]`).
+// Deprecated: Use EnumUnderlyingTypeToValue instead (e.g. `x, ok := EnumUnderlyingTypeToValue["name"]`).
 func EnumUnderlyingTypeFromString(s string) (EnumUnderlyingType, error) {
-    if v, ok := EnumUnderlyingType_value[s]; ok {
+    if v, ok := EnumUnderlyingTypeToValue[s]; ok {
         return v, nil
     }
     return EnumUnderlyingType(0), fmt.Errorf("not a valid EnumUnderlyingType string")

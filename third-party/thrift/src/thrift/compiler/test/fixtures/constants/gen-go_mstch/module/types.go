@@ -30,23 +30,15 @@ const (
 
 // Enum value maps for EmptyEnum
 var (
-    EmptyEnum_name = map[EmptyEnum]string {
+    EmptyEnumToName = map[EmptyEnum]string {
     }
 
-    EmptyEnum_value = map[string]EmptyEnum {
+    EmptyEnumToValue = map[string]EmptyEnum {
     }
 
-    // Deprecated: Use EmptyEnum_name instead.
-    EmptyEnumToName = EmptyEnum_name
-
-    // Deprecated: Use EmptyEnum_value instead.
-    EmptyEnumToValue = EmptyEnum_value
-
-    // Deprecated: Use EmptyEnum_name instead (e.g. `for name, _ := range EmptyEnum_name {}`).
     EmptyEnumNames = []string{
     }
 
-    // Deprecated: Use EmptyEnum_value instead (e.g. `for value, _ := range EmptyEnum_value {}`).
     EmptyEnumValues = []EmptyEnum{
     }
 )
@@ -62,9 +54,9 @@ func (x EmptyEnum) Ptr() *EmptyEnum {
     return &x
 }
 
-// Deprecated: Use EmptyEnum_value instead (e.g. `x, ok := EmptyEnum_value["name"]`).
+// Deprecated: Use EmptyEnumToValue instead (e.g. `x, ok := EmptyEnumToValue["name"]`).
 func EmptyEnumFromString(s string) (EmptyEnum, error) {
-    if v, ok := EmptyEnum_value[s]; ok {
+    if v, ok := EmptyEnumToValue[s]; ok {
         return v, nil
     }
     return EmptyEnum(0), fmt.Errorf("not a valid EmptyEnum string")
@@ -87,27 +79,20 @@ const (
 
 // Enum value maps for City
 var (
-    City_name = map[City]string {
+    CityToName = map[City]string {
         City_NYC: "NYC",
         City_MPK: "MPK",
         City_SEA: "SEA",
         City_LON: "LON",
     }
 
-    City_value = map[string]City {
+    CityToValue = map[string]City {
         "NYC": City_NYC,
         "MPK": City_MPK,
         "SEA": City_SEA,
         "LON": City_LON,
     }
 
-    // Deprecated: Use City_name instead.
-    CityToName = City_name
-
-    // Deprecated: Use City_value instead.
-    CityToValue = City_value
-
-    // Deprecated: Use City_name instead (e.g. `for name, _ := range City_name {}`).
     CityNames = []string{
         "NYC",
         "MPK",
@@ -115,7 +100,6 @@ var (
         "LON",
     }
 
-    // Deprecated: Use City_value instead (e.g. `for value, _ := range City_value {}`).
     CityValues = []City{
         0,
         1,
@@ -135,9 +119,9 @@ func (x City) Ptr() *City {
     return &x
 }
 
-// Deprecated: Use City_value instead (e.g. `x, ok := City_value["name"]`).
+// Deprecated: Use CityToValue instead (e.g. `x, ok := CityToValue["name"]`).
 func CityFromString(s string) (City, error) {
-    if v, ok := City_value[s]; ok {
+    if v, ok := CityToValue[s]; ok {
         return v, nil
     }
     return City(0), fmt.Errorf("not a valid City string")
@@ -160,27 +144,20 @@ const (
 
 // Enum value maps for Company
 var (
-    Company_name = map[Company]string {
+    CompanyToName = map[Company]string {
         Company_FACEBOOK: "FACEBOOK",
         Company_WHATSAPP: "WHATSAPP",
         Company_OCULUS: "OCULUS",
         Company_INSTAGRAM: "INSTAGRAM",
     }
 
-    Company_value = map[string]Company {
+    CompanyToValue = map[string]Company {
         "FACEBOOK": Company_FACEBOOK,
         "WHATSAPP": Company_WHATSAPP,
         "OCULUS": Company_OCULUS,
         "INSTAGRAM": Company_INSTAGRAM,
     }
 
-    // Deprecated: Use Company_name instead.
-    CompanyToName = Company_name
-
-    // Deprecated: Use Company_value instead.
-    CompanyToValue = Company_value
-
-    // Deprecated: Use Company_name instead (e.g. `for name, _ := range Company_name {}`).
     CompanyNames = []string{
         "FACEBOOK",
         "WHATSAPP",
@@ -188,7 +165,6 @@ var (
         "INSTAGRAM",
     }
 
-    // Deprecated: Use Company_value instead (e.g. `for value, _ := range Company_value {}`).
     CompanyValues = []Company{
         0,
         1,
@@ -208,9 +184,9 @@ func (x Company) Ptr() *Company {
     return &x
 }
 
-// Deprecated: Use Company_value instead (e.g. `x, ok := Company_value["name"]`).
+// Deprecated: Use CompanyToValue instead (e.g. `x, ok := CompanyToValue["name"]`).
 func CompanyFromString(s string) (Company, error) {
-    if v, ok := Company_value[s]; ok {
+    if v, ok := CompanyToValue[s]; ok {
         return v, nil
     }
     return Company(0), fmt.Errorf("not a valid Company string")

@@ -33,26 +33,18 @@ const (
 
 // Enum value maps for Void
 var (
-    Void_name = map[Void]string {
+    VoidToName = map[Void]string {
         Void_Unused: "Unused",
     }
 
-    Void_value = map[string]Void {
+    VoidToValue = map[string]Void {
         "Unused": Void_Unused,
     }
 
-    // Deprecated: Use Void_name instead.
-    VoidToName = Void_name
-
-    // Deprecated: Use Void_value instead.
-    VoidToValue = Void_value
-
-    // Deprecated: Use Void_name instead (e.g. `for name, _ := range Void_name {}`).
     VoidNames = []string{
         "Unused",
     }
 
-    // Deprecated: Use Void_value instead (e.g. `for value, _ := range Void_value {}`).
     VoidValues = []Void{
         0,
     }
@@ -69,9 +61,9 @@ func (x Void) Ptr() *Void {
     return &x
 }
 
-// Deprecated: Use Void_value instead (e.g. `x, ok := Void_value["name"]`).
+// Deprecated: Use VoidToValue instead (e.g. `x, ok := VoidToValue["name"]`).
 func VoidFromString(s string) (Void, error) {
-    if v, ok := Void_value[s]; ok {
+    if v, ok := VoidToValue[s]; ok {
         return v, nil
     }
     return Void(0), fmt.Errorf("not a valid Void string")
@@ -95,7 +87,7 @@ const (
 
 // Enum value maps for StandardProtocol
 var (
-    StandardProtocol_name = map[StandardProtocol]string {
+    StandardProtocolToName = map[StandardProtocol]string {
         StandardProtocol_Custom: "Custom",
         StandardProtocol_Binary: "Binary",
         StandardProtocol_Compact: "Compact",
@@ -103,7 +95,7 @@ var (
         StandardProtocol_SimpleJson: "SimpleJson",
     }
 
-    StandardProtocol_value = map[string]StandardProtocol {
+    StandardProtocolToValue = map[string]StandardProtocol {
         "Custom": StandardProtocol_Custom,
         "Binary": StandardProtocol_Binary,
         "Compact": StandardProtocol_Compact,
@@ -111,13 +103,6 @@ var (
         "SimpleJson": StandardProtocol_SimpleJson,
     }
 
-    // Deprecated: Use StandardProtocol_name instead.
-    StandardProtocolToName = StandardProtocol_name
-
-    // Deprecated: Use StandardProtocol_value instead.
-    StandardProtocolToValue = StandardProtocol_value
-
-    // Deprecated: Use StandardProtocol_name instead (e.g. `for name, _ := range StandardProtocol_name {}`).
     StandardProtocolNames = []string{
         "Custom",
         "Binary",
@@ -126,7 +111,6 @@ var (
         "SimpleJson",
     }
 
-    // Deprecated: Use StandardProtocol_value instead (e.g. `for value, _ := range StandardProtocol_value {}`).
     StandardProtocolValues = []StandardProtocol{
         0,
         1,
@@ -147,9 +131,9 @@ func (x StandardProtocol) Ptr() *StandardProtocol {
     return &x
 }
 
-// Deprecated: Use StandardProtocol_value instead (e.g. `x, ok := StandardProtocol_value["name"]`).
+// Deprecated: Use StandardProtocolToValue instead (e.g. `x, ok := StandardProtocolToValue["name"]`).
 func StandardProtocolFromString(s string) (StandardProtocol, error) {
-    if v, ok := StandardProtocol_value[s]; ok {
+    if v, ok := StandardProtocolToValue[s]; ok {
         return v, nil
     }
     return StandardProtocol(0), fmt.Errorf("not a valid StandardProtocol string")

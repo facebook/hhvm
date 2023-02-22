@@ -39,7 +39,7 @@ const (
 
 // Enum value maps for HasBitwiseOps
 var (
-    HasBitwiseOps_name = map[HasBitwiseOps]string {
+    HasBitwiseOpsToName = map[HasBitwiseOps]string {
         HasBitwiseOps_None: "none",
         HasBitwiseOps_Zero: "zero",
         HasBitwiseOps_One: "one",
@@ -47,7 +47,7 @@ var (
         HasBitwiseOps_Three: "three",
     }
 
-    HasBitwiseOps_value = map[string]HasBitwiseOps {
+    HasBitwiseOpsToValue = map[string]HasBitwiseOps {
         "none": HasBitwiseOps_None,
         "zero": HasBitwiseOps_Zero,
         "one": HasBitwiseOps_One,
@@ -55,13 +55,6 @@ var (
         "three": HasBitwiseOps_Three,
     }
 
-    // Deprecated: Use HasBitwiseOps_name instead.
-    HasBitwiseOpsToName = HasBitwiseOps_name
-
-    // Deprecated: Use HasBitwiseOps_value instead.
-    HasBitwiseOpsToValue = HasBitwiseOps_value
-
-    // Deprecated: Use HasBitwiseOps_name instead (e.g. `for name, _ := range HasBitwiseOps_name {}`).
     HasBitwiseOpsNames = []string{
         "none",
         "zero",
@@ -70,7 +63,6 @@ var (
         "three",
     }
 
-    // Deprecated: Use HasBitwiseOps_value instead (e.g. `for value, _ := range HasBitwiseOps_value {}`).
     HasBitwiseOpsValues = []HasBitwiseOps{
         0,
         1,
@@ -91,9 +83,9 @@ func (x HasBitwiseOps) Ptr() *HasBitwiseOps {
     return &x
 }
 
-// Deprecated: Use HasBitwiseOps_value instead (e.g. `x, ok := HasBitwiseOps_value["name"]`).
+// Deprecated: Use HasBitwiseOpsToValue instead (e.g. `x, ok := HasBitwiseOpsToValue["name"]`).
 func HasBitwiseOpsFromString(s string) (HasBitwiseOps, error) {
-    if v, ok := HasBitwiseOps_value[s]; ok {
+    if v, ok := HasBitwiseOpsToValue[s]; ok {
         return v, nil
     }
     return HasBitwiseOps(0), fmt.Errorf("not a valid HasBitwiseOps string")
@@ -114,29 +106,21 @@ const (
 
 // Enum value maps for IsUnscoped
 var (
-    IsUnscoped_name = map[IsUnscoped]string {
+    IsUnscopedToName = map[IsUnscoped]string {
         IsUnscoped_Hello: "hello",
         IsUnscoped_World: "world",
     }
 
-    IsUnscoped_value = map[string]IsUnscoped {
+    IsUnscopedToValue = map[string]IsUnscoped {
         "hello": IsUnscoped_Hello,
         "world": IsUnscoped_World,
     }
 
-    // Deprecated: Use IsUnscoped_name instead.
-    IsUnscopedToName = IsUnscoped_name
-
-    // Deprecated: Use IsUnscoped_value instead.
-    IsUnscopedToValue = IsUnscoped_value
-
-    // Deprecated: Use IsUnscoped_name instead (e.g. `for name, _ := range IsUnscoped_name {}`).
     IsUnscopedNames = []string{
         "hello",
         "world",
     }
 
-    // Deprecated: Use IsUnscoped_value instead (e.g. `for value, _ := range IsUnscoped_value {}`).
     IsUnscopedValues = []IsUnscoped{
         0,
         1,
@@ -154,9 +138,9 @@ func (x IsUnscoped) Ptr() *IsUnscoped {
     return &x
 }
 
-// Deprecated: Use IsUnscoped_value instead (e.g. `x, ok := IsUnscoped_value["name"]`).
+// Deprecated: Use IsUnscopedToValue instead (e.g. `x, ok := IsUnscopedToValue["name"]`).
 func IsUnscopedFromString(s string) (IsUnscoped, error) {
-    if v, ok := IsUnscoped_value[s]; ok {
+    if v, ok := IsUnscopedToValue[s]; ok {
         return v, nil
     }
     return IsUnscoped(0), fmt.Errorf("not a valid IsUnscoped string")
@@ -177,29 +161,21 @@ const (
 
 // Enum value maps for MyForwardRefEnum
 var (
-    MyForwardRefEnum_name = map[MyForwardRefEnum]string {
+    MyForwardRefEnumToName = map[MyForwardRefEnum]string {
         MyForwardRefEnum_ZERO: "ZERO",
         MyForwardRefEnum_NONZERO: "NONZERO",
     }
 
-    MyForwardRefEnum_value = map[string]MyForwardRefEnum {
+    MyForwardRefEnumToValue = map[string]MyForwardRefEnum {
         "ZERO": MyForwardRefEnum_ZERO,
         "NONZERO": MyForwardRefEnum_NONZERO,
     }
 
-    // Deprecated: Use MyForwardRefEnum_name instead.
-    MyForwardRefEnumToName = MyForwardRefEnum_name
-
-    // Deprecated: Use MyForwardRefEnum_value instead.
-    MyForwardRefEnumToValue = MyForwardRefEnum_value
-
-    // Deprecated: Use MyForwardRefEnum_name instead (e.g. `for name, _ := range MyForwardRefEnum_name {}`).
     MyForwardRefEnumNames = []string{
         "ZERO",
         "NONZERO",
     }
 
-    // Deprecated: Use MyForwardRefEnum_value instead (e.g. `for value, _ := range MyForwardRefEnum_value {}`).
     MyForwardRefEnumValues = []MyForwardRefEnum{
         0,
         12,
@@ -217,9 +193,9 @@ func (x MyForwardRefEnum) Ptr() *MyForwardRefEnum {
     return &x
 }
 
-// Deprecated: Use MyForwardRefEnum_value instead (e.g. `x, ok := MyForwardRefEnum_value["name"]`).
+// Deprecated: Use MyForwardRefEnumToValue instead (e.g. `x, ok := MyForwardRefEnumToValue["name"]`).
 func MyForwardRefEnumFromString(s string) (MyForwardRefEnum, error) {
-    if v, ok := MyForwardRefEnum_value[s]; ok {
+    if v, ok := MyForwardRefEnumToValue[s]; ok {
         return v, nil
     }
     return MyForwardRefEnum(0), fmt.Errorf("not a valid MyForwardRefEnum string")

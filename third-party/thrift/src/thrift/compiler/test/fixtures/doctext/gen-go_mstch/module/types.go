@@ -27,26 +27,18 @@ const (
 
 // Enum value maps for B
 var (
-    B_name = map[B]string {
+    BToName = map[B]string {
         B_HELLO: "HELLO",
     }
 
-    B_value = map[string]B {
+    BToValue = map[string]B {
         "HELLO": B_HELLO,
     }
 
-    // Deprecated: Use B_name instead.
-    BToName = B_name
-
-    // Deprecated: Use B_value instead.
-    BToValue = B_value
-
-    // Deprecated: Use B_name instead (e.g. `for name, _ := range B_name {}`).
     BNames = []string{
         "HELLO",
     }
 
-    // Deprecated: Use B_value instead (e.g. `for value, _ := range B_value {}`).
     BValues = []B{
         0,
     }
@@ -63,9 +55,9 @@ func (x B) Ptr() *B {
     return &x
 }
 
-// Deprecated: Use B_value instead (e.g. `x, ok := B_value["name"]`).
+// Deprecated: Use BToValue instead (e.g. `x, ok := BToValue["name"]`).
 func BFromString(s string) (B, error) {
-    if v, ok := B_value[s]; ok {
+    if v, ok := BToValue[s]; ok {
         return v, nil
     }
     return B(0), fmt.Errorf("not a valid B string")

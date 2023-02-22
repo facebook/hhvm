@@ -27,32 +27,24 @@ const (
 
 // Enum value maps for Animal
 var (
-    Animal_name = map[Animal]string {
+    AnimalToName = map[Animal]string {
         Animal_DOG: "DOG",
         Animal_CAT: "CAT",
         Animal_TARANTULA: "TARANTULA",
     }
 
-    Animal_value = map[string]Animal {
+    AnimalToValue = map[string]Animal {
         "DOG": Animal_DOG,
         "CAT": Animal_CAT,
         "TARANTULA": Animal_TARANTULA,
     }
 
-    // Deprecated: Use Animal_name instead.
-    AnimalToName = Animal_name
-
-    // Deprecated: Use Animal_value instead.
-    AnimalToValue = Animal_value
-
-    // Deprecated: Use Animal_name instead (e.g. `for name, _ := range Animal_name {}`).
     AnimalNames = []string{
         "DOG",
         "CAT",
         "TARANTULA",
     }
 
-    // Deprecated: Use Animal_value instead (e.g. `for value, _ := range Animal_value {}`).
     AnimalValues = []Animal{
         1,
         2,
@@ -71,9 +63,9 @@ func (x Animal) Ptr() *Animal {
     return &x
 }
 
-// Deprecated: Use Animal_value instead (e.g. `x, ok := Animal_value["name"]`).
+// Deprecated: Use AnimalToValue instead (e.g. `x, ok := AnimalToValue["name"]`).
 func AnimalFromString(s string) (Animal, error) {
-    if v, ok := Animal_value[s]; ok {
+    if v, ok := AnimalToValue[s]; ok {
         return v, nil
     }
     return Animal(0), fmt.Errorf("not a valid Animal string")

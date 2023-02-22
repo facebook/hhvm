@@ -25,32 +25,24 @@ const (
 
 // Enum value maps for Enum
 var (
-    Enum_name = map[Enum]string {
+    EnumToName = map[Enum]string {
         Enum_A: "A",
         Enum_B: "B",
         Enum_C: "C",
     }
 
-    Enum_value = map[string]Enum {
+    EnumToValue = map[string]Enum {
         "A": Enum_A,
         "B": Enum_B,
         "C": Enum_C,
     }
 
-    // Deprecated: Use Enum_name instead.
-    EnumToName = Enum_name
-
-    // Deprecated: Use Enum_value instead.
-    EnumToValue = Enum_value
-
-    // Deprecated: Use Enum_name instead (e.g. `for name, _ := range Enum_name {}`).
     EnumNames = []string{
         "A",
         "B",
         "C",
     }
 
-    // Deprecated: Use Enum_value instead (e.g. `for value, _ := range Enum_value {}`).
     EnumValues = []Enum{
         0,
         1,
@@ -69,9 +61,9 @@ func (x Enum) Ptr() *Enum {
     return &x
 }
 
-// Deprecated: Use Enum_value instead (e.g. `x, ok := Enum_value["name"]`).
+// Deprecated: Use EnumToValue instead (e.g. `x, ok := EnumToValue["name"]`).
 func EnumFromString(s string) (Enum, error) {
-    if v, ok := Enum_value[s]; ok {
+    if v, ok := EnumToValue[s]; ok {
         return v, nil
     }
     return Enum(0), fmt.Errorf("not a valid Enum string")

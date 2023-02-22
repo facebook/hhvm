@@ -29,7 +29,7 @@ const (
 
 // Enum value maps for Metasyntactic
 var (
-    Metasyntactic_name = map[Metasyntactic]string {
+    MetasyntacticToName = map[Metasyntactic]string {
         Metasyntactic_FOO: "FOO",
         Metasyntactic_BAR: "BAR",
         Metasyntactic_BAZ: "BAZ",
@@ -37,7 +37,7 @@ var (
         Metasyntactic_Unspecified: "Unspecified",
     }
 
-    Metasyntactic_value = map[string]Metasyntactic {
+    MetasyntacticToValue = map[string]Metasyntactic {
         "FOO": Metasyntactic_FOO,
         "BAR": Metasyntactic_BAR,
         "BAZ": Metasyntactic_BAZ,
@@ -45,13 +45,6 @@ var (
         "Unspecified": Metasyntactic_Unspecified,
     }
 
-    // Deprecated: Use Metasyntactic_name instead.
-    MetasyntacticToName = Metasyntactic_name
-
-    // Deprecated: Use Metasyntactic_value instead.
-    MetasyntacticToValue = Metasyntactic_value
-
-    // Deprecated: Use Metasyntactic_name instead (e.g. `for name, _ := range Metasyntactic_name {}`).
     MetasyntacticNames = []string{
         "FOO",
         "BAR",
@@ -60,7 +53,6 @@ var (
         "Unspecified",
     }
 
-    // Deprecated: Use Metasyntactic_value instead (e.g. `for value, _ := range Metasyntactic_value {}`).
     MetasyntacticValues = []Metasyntactic{
         1,
         2,
@@ -81,9 +73,9 @@ func (x Metasyntactic) Ptr() *Metasyntactic {
     return &x
 }
 
-// Deprecated: Use Metasyntactic_value instead (e.g. `x, ok := Metasyntactic_value["name"]`).
+// Deprecated: Use MetasyntacticToValue instead (e.g. `x, ok := MetasyntacticToValue["name"]`).
 func MetasyntacticFromString(s string) (Metasyntactic, error) {
-    if v, ok := Metasyntactic_value[s]; ok {
+    if v, ok := MetasyntacticToValue[s]; ok {
         return v, nil
     }
     return Metasyntactic(0), fmt.Errorf("not a valid Metasyntactic string")
@@ -108,7 +100,7 @@ const (
 
 // Enum value maps for MyEnum1
 var (
-    MyEnum1_name = map[MyEnum1]string {
+    MyEnum1ToName = map[MyEnum1]string {
         MyEnum1_ME1_1: "ME1_1",
         MyEnum1_ME1_2: "ME1_2",
         MyEnum1_ME1_3: "ME1_3",
@@ -117,7 +109,7 @@ var (
         MyEnum1_ME1_0: "ME1_0",
     }
 
-    MyEnum1_value = map[string]MyEnum1 {
+    MyEnum1ToValue = map[string]MyEnum1 {
         "ME1_1": MyEnum1_ME1_1,
         "ME1_2": MyEnum1_ME1_2,
         "ME1_3": MyEnum1_ME1_3,
@@ -126,13 +118,6 @@ var (
         "ME1_0": MyEnum1_ME1_0,
     }
 
-    // Deprecated: Use MyEnum1_name instead.
-    MyEnum1ToName = MyEnum1_name
-
-    // Deprecated: Use MyEnum1_value instead.
-    MyEnum1ToValue = MyEnum1_value
-
-    // Deprecated: Use MyEnum1_name instead (e.g. `for name, _ := range MyEnum1_name {}`).
     MyEnum1Names = []string{
         "ME1_1",
         "ME1_2",
@@ -142,7 +127,6 @@ var (
         "ME1_0",
     }
 
-    // Deprecated: Use MyEnum1_value instead (e.g. `for value, _ := range MyEnum1_value {}`).
     MyEnum1Values = []MyEnum1{
         1,
         2,
@@ -164,9 +148,9 @@ func (x MyEnum1) Ptr() *MyEnum1 {
     return &x
 }
 
-// Deprecated: Use MyEnum1_value instead (e.g. `x, ok := MyEnum1_value["name"]`).
+// Deprecated: Use MyEnum1ToValue instead (e.g. `x, ok := MyEnum1ToValue["name"]`).
 func MyEnum1FromString(s string) (MyEnum1, error) {
-    if v, ok := MyEnum1_value[s]; ok {
+    if v, ok := MyEnum1ToValue[s]; ok {
         return v, nil
     }
     return MyEnum1(0), fmt.Errorf("not a valid MyEnum1 string")
@@ -188,32 +172,24 @@ const (
 
 // Enum value maps for MyEnum2
 var (
-    MyEnum2_name = map[MyEnum2]string {
+    MyEnum2ToName = map[MyEnum2]string {
         MyEnum2_ME2_0: "ME2_0",
         MyEnum2_ME2_1: "ME2_1",
         MyEnum2_ME2_2: "ME2_2",
     }
 
-    MyEnum2_value = map[string]MyEnum2 {
+    MyEnum2ToValue = map[string]MyEnum2 {
         "ME2_0": MyEnum2_ME2_0,
         "ME2_1": MyEnum2_ME2_1,
         "ME2_2": MyEnum2_ME2_2,
     }
 
-    // Deprecated: Use MyEnum2_name instead.
-    MyEnum2ToName = MyEnum2_name
-
-    // Deprecated: Use MyEnum2_value instead.
-    MyEnum2ToValue = MyEnum2_value
-
-    // Deprecated: Use MyEnum2_name instead (e.g. `for name, _ := range MyEnum2_name {}`).
     MyEnum2Names = []string{
         "ME2_0",
         "ME2_1",
         "ME2_2",
     }
 
-    // Deprecated: Use MyEnum2_value instead (e.g. `for value, _ := range MyEnum2_value {}`).
     MyEnum2Values = []MyEnum2{
         0,
         1,
@@ -232,9 +208,9 @@ func (x MyEnum2) Ptr() *MyEnum2 {
     return &x
 }
 
-// Deprecated: Use MyEnum2_value instead (e.g. `x, ok := MyEnum2_value["name"]`).
+// Deprecated: Use MyEnum2ToValue instead (e.g. `x, ok := MyEnum2ToValue["name"]`).
 func MyEnum2FromString(s string) (MyEnum2, error) {
-    if v, ok := MyEnum2_value[s]; ok {
+    if v, ok := MyEnum2ToValue[s]; ok {
         return v, nil
     }
     return MyEnum2(0), fmt.Errorf("not a valid MyEnum2 string")
@@ -259,7 +235,7 @@ const (
 
 // Enum value maps for MyEnum3
 var (
-    MyEnum3_name = map[MyEnum3]string {
+    MyEnum3ToName = map[MyEnum3]string {
         MyEnum3_ME3_0: "ME3_0",
         MyEnum3_ME3_1: "ME3_1",
         MyEnum3_ME3_N2: "ME3_N2",
@@ -268,7 +244,7 @@ var (
         MyEnum3_ME3_10: "ME3_10",
     }
 
-    MyEnum3_value = map[string]MyEnum3 {
+    MyEnum3ToValue = map[string]MyEnum3 {
         "ME3_0": MyEnum3_ME3_0,
         "ME3_1": MyEnum3_ME3_1,
         "ME3_N2": MyEnum3_ME3_N2,
@@ -277,13 +253,6 @@ var (
         "ME3_10": MyEnum3_ME3_10,
     }
 
-    // Deprecated: Use MyEnum3_name instead.
-    MyEnum3ToName = MyEnum3_name
-
-    // Deprecated: Use MyEnum3_value instead.
-    MyEnum3ToValue = MyEnum3_value
-
-    // Deprecated: Use MyEnum3_name instead (e.g. `for name, _ := range MyEnum3_name {}`).
     MyEnum3Names = []string{
         "ME3_0",
         "ME3_1",
@@ -293,7 +262,6 @@ var (
         "ME3_10",
     }
 
-    // Deprecated: Use MyEnum3_value instead (e.g. `for value, _ := range MyEnum3_value {}`).
     MyEnum3Values = []MyEnum3{
         0,
         1,
@@ -315,9 +283,9 @@ func (x MyEnum3) Ptr() *MyEnum3 {
     return &x
 }
 
-// Deprecated: Use MyEnum3_value instead (e.g. `x, ok := MyEnum3_value["name"]`).
+// Deprecated: Use MyEnum3ToValue instead (e.g. `x, ok := MyEnum3ToValue["name"]`).
 func MyEnum3FromString(s string) (MyEnum3, error) {
-    if v, ok := MyEnum3_value[s]; ok {
+    if v, ok := MyEnum3ToValue[s]; ok {
         return v, nil
     }
     return MyEnum3(0), fmt.Errorf("not a valid MyEnum3 string")
@@ -341,7 +309,7 @@ const (
 
 // Enum value maps for MyEnum4
 var (
-    MyEnum4_name = map[MyEnum4]string {
+    MyEnum4ToName = map[MyEnum4]string {
         MyEnum4_ME4_A: "ME4_A",
         MyEnum4_ME4_B: "ME4_B",
         MyEnum4_ME4_C: "ME4_C",
@@ -349,7 +317,7 @@ var (
         MyEnum4_Unspecified: "Unspecified",
     }
 
-    MyEnum4_value = map[string]MyEnum4 {
+    MyEnum4ToValue = map[string]MyEnum4 {
         "ME4_A": MyEnum4_ME4_A,
         "ME4_B": MyEnum4_ME4_B,
         "ME4_C": MyEnum4_ME4_C,
@@ -357,13 +325,6 @@ var (
         "Unspecified": MyEnum4_Unspecified,
     }
 
-    // Deprecated: Use MyEnum4_name instead.
-    MyEnum4ToName = MyEnum4_name
-
-    // Deprecated: Use MyEnum4_value instead.
-    MyEnum4ToValue = MyEnum4_value
-
-    // Deprecated: Use MyEnum4_name instead (e.g. `for name, _ := range MyEnum4_name {}`).
     MyEnum4Names = []string{
         "ME4_A",
         "ME4_B",
@@ -372,7 +333,6 @@ var (
         "Unspecified",
     }
 
-    // Deprecated: Use MyEnum4_value instead (e.g. `for value, _ := range MyEnum4_value {}`).
     MyEnum4Values = []MyEnum4{
         2147483645,
         2147483646,
@@ -393,9 +353,9 @@ func (x MyEnum4) Ptr() *MyEnum4 {
     return &x
 }
 
-// Deprecated: Use MyEnum4_value instead (e.g. `x, ok := MyEnum4_value["name"]`).
+// Deprecated: Use MyEnum4ToValue instead (e.g. `x, ok := MyEnum4ToValue["name"]`).
 func MyEnum4FromString(s string) (MyEnum4, error) {
-    if v, ok := MyEnum4_value[s]; ok {
+    if v, ok := MyEnum4ToValue[s]; ok {
         return v, nil
     }
     return MyEnum4(0), fmt.Errorf("not a valid MyEnum4 string")
@@ -418,27 +378,20 @@ const (
 
 // Enum value maps for MyBitmaskEnum1
 var (
-    MyBitmaskEnum1_name = map[MyBitmaskEnum1]string {
+    MyBitmaskEnum1ToName = map[MyBitmaskEnum1]string {
         MyBitmaskEnum1_ONE: "ONE",
         MyBitmaskEnum1_TWO: "TWO",
         MyBitmaskEnum1_FOUR: "FOUR",
         MyBitmaskEnum1_Unspecified: "Unspecified",
     }
 
-    MyBitmaskEnum1_value = map[string]MyBitmaskEnum1 {
+    MyBitmaskEnum1ToValue = map[string]MyBitmaskEnum1 {
         "ONE": MyBitmaskEnum1_ONE,
         "TWO": MyBitmaskEnum1_TWO,
         "FOUR": MyBitmaskEnum1_FOUR,
         "Unspecified": MyBitmaskEnum1_Unspecified,
     }
 
-    // Deprecated: Use MyBitmaskEnum1_name instead.
-    MyBitmaskEnum1ToName = MyBitmaskEnum1_name
-
-    // Deprecated: Use MyBitmaskEnum1_value instead.
-    MyBitmaskEnum1ToValue = MyBitmaskEnum1_value
-
-    // Deprecated: Use MyBitmaskEnum1_name instead (e.g. `for name, _ := range MyBitmaskEnum1_name {}`).
     MyBitmaskEnum1Names = []string{
         "ONE",
         "TWO",
@@ -446,7 +399,6 @@ var (
         "Unspecified",
     }
 
-    // Deprecated: Use MyBitmaskEnum1_value instead (e.g. `for value, _ := range MyBitmaskEnum1_value {}`).
     MyBitmaskEnum1Values = []MyBitmaskEnum1{
         1,
         2,
@@ -466,9 +418,9 @@ func (x MyBitmaskEnum1) Ptr() *MyBitmaskEnum1 {
     return &x
 }
 
-// Deprecated: Use MyBitmaskEnum1_value instead (e.g. `x, ok := MyBitmaskEnum1_value["name"]`).
+// Deprecated: Use MyBitmaskEnum1ToValue instead (e.g. `x, ok := MyBitmaskEnum1ToValue["name"]`).
 func MyBitmaskEnum1FromString(s string) (MyBitmaskEnum1, error) {
-    if v, ok := MyBitmaskEnum1_value[s]; ok {
+    if v, ok := MyBitmaskEnum1ToValue[s]; ok {
         return v, nil
     }
     return MyBitmaskEnum1(0), fmt.Errorf("not a valid MyBitmaskEnum1 string")
@@ -491,27 +443,20 @@ const (
 
 // Enum value maps for MyBitmaskEnum2
 var (
-    MyBitmaskEnum2_name = map[MyBitmaskEnum2]string {
+    MyBitmaskEnum2ToName = map[MyBitmaskEnum2]string {
         MyBitmaskEnum2_ONE: "ONE",
         MyBitmaskEnum2_TWO: "TWO",
         MyBitmaskEnum2_FOUR: "FOUR",
         MyBitmaskEnum2_Unspecified: "Unspecified",
     }
 
-    MyBitmaskEnum2_value = map[string]MyBitmaskEnum2 {
+    MyBitmaskEnum2ToValue = map[string]MyBitmaskEnum2 {
         "ONE": MyBitmaskEnum2_ONE,
         "TWO": MyBitmaskEnum2_TWO,
         "FOUR": MyBitmaskEnum2_FOUR,
         "Unspecified": MyBitmaskEnum2_Unspecified,
     }
 
-    // Deprecated: Use MyBitmaskEnum2_name instead.
-    MyBitmaskEnum2ToName = MyBitmaskEnum2_name
-
-    // Deprecated: Use MyBitmaskEnum2_value instead.
-    MyBitmaskEnum2ToValue = MyBitmaskEnum2_value
-
-    // Deprecated: Use MyBitmaskEnum2_name instead (e.g. `for name, _ := range MyBitmaskEnum2_name {}`).
     MyBitmaskEnum2Names = []string{
         "ONE",
         "TWO",
@@ -519,7 +464,6 @@ var (
         "Unspecified",
     }
 
-    // Deprecated: Use MyBitmaskEnum2_value instead (e.g. `for value, _ := range MyBitmaskEnum2_value {}`).
     MyBitmaskEnum2Values = []MyBitmaskEnum2{
         1,
         2,
@@ -539,9 +483,9 @@ func (x MyBitmaskEnum2) Ptr() *MyBitmaskEnum2 {
     return &x
 }
 
-// Deprecated: Use MyBitmaskEnum2_value instead (e.g. `x, ok := MyBitmaskEnum2_value["name"]`).
+// Deprecated: Use MyBitmaskEnum2ToValue instead (e.g. `x, ok := MyBitmaskEnum2ToValue["name"]`).
 func MyBitmaskEnum2FromString(s string) (MyBitmaskEnum2, error) {
-    if v, ok := MyBitmaskEnum2_value[s]; ok {
+    if v, ok := MyBitmaskEnum2ToValue[s]; ok {
         return v, nil
     }
     return MyBitmaskEnum2(0), fmt.Errorf("not a valid MyBitmaskEnum2 string")

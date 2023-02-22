@@ -26,29 +26,21 @@ const (
 
 // Enum value maps for MyEnum
 var (
-    MyEnum_name = map[MyEnum]string {
+    MyEnumToName = map[MyEnum]string {
         MyEnum_MyValue1: "MyValue1",
         MyEnum_MyValue2: "MyValue2",
     }
 
-    MyEnum_value = map[string]MyEnum {
+    MyEnumToValue = map[string]MyEnum {
         "MyValue1": MyEnum_MyValue1,
         "MyValue2": MyEnum_MyValue2,
     }
 
-    // Deprecated: Use MyEnum_name instead.
-    MyEnumToName = MyEnum_name
-
-    // Deprecated: Use MyEnum_value instead.
-    MyEnumToValue = MyEnum_value
-
-    // Deprecated: Use MyEnum_name instead (e.g. `for name, _ := range MyEnum_name {}`).
     MyEnumNames = []string{
         "MyValue1",
         "MyValue2",
     }
 
-    // Deprecated: Use MyEnum_value instead (e.g. `for value, _ := range MyEnum_value {}`).
     MyEnumValues = []MyEnum{
         0,
         1,
@@ -66,9 +58,9 @@ func (x MyEnum) Ptr() *MyEnum {
     return &x
 }
 
-// Deprecated: Use MyEnum_value instead (e.g. `x, ok := MyEnum_value["name"]`).
+// Deprecated: Use MyEnumToValue instead (e.g. `x, ok := MyEnumToValue["name"]`).
 func MyEnumFromString(s string) (MyEnum, error) {
-    if v, ok := MyEnum_value[s]; ok {
+    if v, ok := MyEnumToValue[s]; ok {
         return v, nil
     }
     return MyEnum(0), fmt.Errorf("not a valid MyEnum string")
@@ -89,29 +81,21 @@ const (
 
 // Enum value maps for HackEnum
 var (
-    HackEnum_name = map[HackEnum]string {
+    HackEnumToName = map[HackEnum]string {
         HackEnum_Value1: "Value1",
         HackEnum_Value2: "Value2",
     }
 
-    HackEnum_value = map[string]HackEnum {
+    HackEnumToValue = map[string]HackEnum {
         "Value1": HackEnum_Value1,
         "Value2": HackEnum_Value2,
     }
 
-    // Deprecated: Use HackEnum_name instead.
-    HackEnumToName = HackEnum_name
-
-    // Deprecated: Use HackEnum_value instead.
-    HackEnumToValue = HackEnum_value
-
-    // Deprecated: Use HackEnum_name instead (e.g. `for name, _ := range HackEnum_name {}`).
     HackEnumNames = []string{
         "Value1",
         "Value2",
     }
 
-    // Deprecated: Use HackEnum_value instead (e.g. `for value, _ := range HackEnum_value {}`).
     HackEnumValues = []HackEnum{
         0,
         1,
@@ -129,9 +113,9 @@ func (x HackEnum) Ptr() *HackEnum {
     return &x
 }
 
-// Deprecated: Use HackEnum_value instead (e.g. `x, ok := HackEnum_value["name"]`).
+// Deprecated: Use HackEnumToValue instead (e.g. `x, ok := HackEnumToValue["name"]`).
 func HackEnumFromString(s string) (HackEnum, error) {
-    if v, ok := HackEnum_value[s]; ok {
+    if v, ok := HackEnumToValue[s]; ok {
         return v, nil
     }
     return HackEnum(0), fmt.Errorf("not a valid HackEnum string")

@@ -202,8 +202,8 @@ void RequestInjectionData::threadInit() {
                        setMemoryLimit(value);
                        return true;
                      },
-                     nullptr
-                   ), &m_maxMemory);
+                     nullptr,
+                     &m_maxMemory));
 
   // Data Handling
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
@@ -306,9 +306,9 @@ void RequestInjectionData::threadInit() {
         m_htmlErrors = on;
         return true;
       },
-      [&] () { return m_htmlErrors; }
-    ),
-    &m_htmlErrors
+      [&] () { return m_htmlErrors; },
+      &m_htmlErrors
+    )
   );
 
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
@@ -326,9 +326,9 @@ void RequestInjectionData::threadInit() {
                        }
                        return true;
                      },
-                     nullptr
-                   ),
-                   &m_logErrors);
+                     nullptr,
+                     &m_logErrors
+                   ));
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "error_log",
                    IniSetting::SetAndGet<std::string>(
@@ -338,8 +338,9 @@ void RequestInjectionData::threadInit() {
                        }
                        return true;
                      },
-                     nullptr
-                   ), &m_errorLog);
+                     nullptr,
+                     &m_errorLog
+                   ));
 
   // Filesystem and Streams Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,

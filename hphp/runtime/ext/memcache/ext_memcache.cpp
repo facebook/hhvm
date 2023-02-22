@@ -766,16 +766,16 @@ struct MemcacheExtension final : Extension {
                        "memcache.hash_strategy", "standard",
                        IniSetting::SetAndGet<std::string>(
                          ini_on_update_hash_strategy,
-                         nullptr
-                       ),
-                       &MEMCACHEG(hash_strategy));
+                         nullptr,
+                         &MEMCACHEG(hash_strategy)
+                       ));
       IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                        "memcache.hash_function", "crc32",
                        IniSetting::SetAndGet<std::string>(
                          ini_on_update_hash_function,
-                         nullptr
-                       ),
-                       &MEMCACHEG(hash_function));
+                         nullptr,
+                         &MEMCACHEG(hash_function)
+                       ));
     }
     void threadShutdown() override {
       delete *s_memcache_globals;

@@ -173,9 +173,9 @@ void StandardExtension::threadInitMisc() {
           }
           return false;
         },
-        nullptr
-      ),
-      s_misc_display_errors.get()
+        nullptr,
+        s_misc_display_errors.get()
+      )
     );
   }
 

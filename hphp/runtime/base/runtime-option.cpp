@@ -2841,9 +2841,9 @@ void RuntimeOption::Load(
                      nullptr,
                      []() {
                        return VirtualHost::GetMaxPostSize();
-                     }
-                   ),
-                   &RuntimeOption::MaxPostSize);
+                     },
+                     &RuntimeOption::MaxPostSize
+                   ));
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "always_populate_raw_post_data",
                    &RuntimeOption::AlwaysPopulateRawPostData);
@@ -2907,8 +2907,10 @@ void RuntimeOption::Load(
   IniSetting::Bind(
     IniSetting::CORE, IniSetting::PHP_INI_NONE, "hphp.build_id",
     IniSetting::SetAndGet<std::string>(
-      [](const std::string& /*value*/) { return false; }, nullptr),
-    &RuntimeOption::BuildId);
+      [](const std::string& /*value*/) { return false; },
+      nullptr,
+      &RuntimeOption::BuildId)
+  );
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "notice_frequency",
                    &RuntimeOption::NoticeFrequency);

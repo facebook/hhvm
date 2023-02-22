@@ -47,6 +47,7 @@
 #include <map>
 
 #include <folly/container/F14Map.h>
+#include <folly/Overload.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,6 +104,30 @@ std::string convert_long_to_bytes(int64_t value) {
   }
 }
 
+namespace {
+
+template<typename T>
+void set(DictInit& arr, const std::string& key, const T& value) {
+  auto keyStr = String(key);
+  int64_t n;
+  if (keyStr.get()->isStrictlyInteger(n)) {
+    arr.set(n, value);
+    return;
+  }
+  arr.set(keyStr.get(), value);
+}
+
+template<typename T>
+Variant ini_get_vec(std::vector<T>& p) {
+  VecInit ret(p.size());
+  for (auto& s : p) {
+    ret.append(s);
+  }
+  return ret.toArray();
+}
+
+}
+
 #define INI_ASSERT_STR(v) \
   if (!v.isScalar()) { \
     return false; \
@@ -122,7 +147,69 @@ std::string convert_long_to_bytes(int64_t value) {
     if (!iter.second().is##t()) return false; \
   }
 
+#define N(Ty) \
+  Variant ini_get(Ty& p) { return p; }                    \
+  bool ini_on_update(const Variant& value, Ty& p) {       \
+    INI_ASSERT_STR(value);                                \
+    auto n = convert_bytes_to_long(str);                  \
+    using L = std::numeric_limits<Ty>;                    \
+    if (n > L::max() || n < L::min()) return false;       \
+    p = n;                                                \
+    return true;                                          \
+  }
 
+#define U(Ty) \
+  Variant ini_get(Ty& p) { return p; }                    \
+  bool ini_on_update(const Variant& value, Ty& p) {       \
+    INI_ASSERT_STR(value);                                \
+    auto n = convert_bytes_to_long(str);                  \
+    auto mask = ~size_t((Ty)(-1));                        \
+    if (size_t(n) & mask) return false;                   \
+    p = n;                                                \
+    return true;                                          \
+  }
+
+#define M(Ty)                                             \
+  Variant ini_get(Ty& p) {                                \
+    DictInit ret(p.size());                               \
+    for (auto& [f, s] : p) {                              \
+      set(ret, f, s);                                     \
+    }                                                     \
+    return ret.toArray();                                 \
+  }                                                       \
+  bool ini_on_update(const Variant& value, Ty& p) {       \
+    INI_ASSERT_ARR_INNER(value, String);                  \
+    for (ArrayIter iter(value.toArray()); iter; ++iter) { \
+      p[iter.first().toString().toCppString()] =          \
+        iter.second().toString().toCppString();           \
+    }                                                     \
+    return true;                                          \
+  }
+
+#define S(Ty)                                             \
+  Variant ini_get(Ty& p) {                                \
+    VecInit ret(p.size());                                \
+    for (auto& s : p) {                                   \
+      ret.append(s);                                      \
+    }                                                     \
+    return ret.toArray();                                 \
+  }                                                       \
+  bool ini_on_update(const Variant& value, Ty& p) {       \
+    INI_ASSERT_ARR_INNER(value, String);                  \
+    for (ArrayIter iter(value.toArray()); iter; ++iter) { \
+      p.insert(iter.second().toString().toCppString());   \
+    }                                                     \
+    return true;                                          \
+  }
+
+INI_TYPES4(N, U, M, S)
+
+#undef S
+#undef M
+#undef U
+#undef N
+
+Variant ini_get(bool& p) { return p ? "1" : ""; }
 bool ini_on_update(const Variant& value, bool& p) {
   INI_ASSERT_STR(value);
   if ((str.size() == 0) ||
@@ -137,278 +224,19 @@ bool ini_on_update(const Variant& value, bool& p) {
   return true;
 }
 
+Variant ini_get(double& p) { return p; }
 bool ini_on_update(const Variant& value, double& p) {
   INI_ASSERT_STR(value);
   p = zend_strtod(str.data(), nullptr);
   return true;
 }
 
-bool ini_on_update(const Variant& value, char& p) {
-  INI_ASSERT_STR(value);
-  auto n = convert_bytes_to_long(str);
-  auto maxValue = 0x7FL;
-  if (n > maxValue || n < (- maxValue - 1)) {
-    return false;
-  }
-  p = n;
-  return true;
-}
 
-bool ini_on_update(const Variant& value, int16_t& p) {
-  INI_ASSERT_STR(value);
-  auto n = convert_bytes_to_long(str);
-  auto maxValue = 0x7FFFL;
-  if (n > maxValue || n < (- maxValue - 1)) {
-    return false;
-  }
-  p = n;
-  return true;
-}
-
-bool ini_on_update(const Variant& value, int32_t& p) {
-  INI_ASSERT_STR(value);
-  auto n = convert_bytes_to_long(str);
-  auto maxValue = 0x7FFFFFFFL;
-  if (n > maxValue || n < (- maxValue - 1)) {
-    return false;
-  }
-  p = n;
-  return true;
-}
-
-bool ini_on_update(const Variant& value, int64_t& p) {
-  INI_ASSERT_STR(value);
-  p = convert_bytes_to_long(str);
-  return true;
-}
-
-bool ini_on_update(const Variant& value, unsigned char& p) {
-  INI_ASSERT_STR(value);
-  auto n = convert_bytes_to_long(str);
-  auto mask = ~0xFFUL;
-  if (((uint64_t)n & mask)) {
-    return false;
-  }
-  p = n;
-  return true;
-}
-
-bool ini_on_update(const Variant& value, uint16_t& p) {
-  INI_ASSERT_STR(value);
-  auto n = convert_bytes_to_long(str);
-  auto mask = ~0xFFFFUL;
-  if (((uint64_t)n & mask)) {
-    return false;
-  }
-  p = n;
-  return true;
-}
-
-bool ini_on_update(const Variant& value, uint32_t& p) {
-  INI_ASSERT_STR(value);
-  auto n = convert_bytes_to_long(str);
-  auto mask = ~0x7FFFFFFFUL;
-  if (((uint64_t)n & mask)) {
-    return false;
-  }
-  p = n;
-  return true;
-}
-
-bool ini_on_update(const Variant& value, uint64_t& p) {
-  INI_ASSERT_STR(value);
-  p = convert_bytes_to_long(str);
-  return true;
-}
-
+Variant ini_get(std::string& p) { return p.data(); }
 bool ini_on_update(const Variant& value, std::string& p) {
   INI_ASSERT_STR(value);
   p = str;
   return true;
-}
-
-bool ini_on_update(const Variant& value, String& p) {
-  INI_ASSERT_STR(value);
-  p = str.data();
-  return true;
-}
-
-bool ini_on_update(const Variant& value, Array& p) {
-  INI_ASSERT_ARR(value);
-  p = value.toArray();
-  return true;
-}
-
-bool ini_on_update(const Variant& value, std::set<std::string>& p) {
-  INI_ASSERT_ARR_INNER(value, String);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p.insert(iter.second().toString().toCppString());
-  }
-  return true;
-}
-
-bool ini_on_update(const Variant& value,
-                   std::set<std::string, stdltistr>& p) {
-  INI_ASSERT_ARR_INNER(value, String);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p.insert(iter.second().toString().toCppString());
-  }
-  return true;
-}
-
-bool ini_on_update(const Variant& value,
-                   boost::container::flat_set<std::string>& p) {
-  INI_ASSERT_ARR_INNER(value, String);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p.insert(iter.second().toString().toCppString());
-  }
-  return true;
-}
-
-bool ini_on_update(const Variant& value, std::vector<uint32_t>& p) {
-  INI_ASSERT_ARR_INNER(value, Integer);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p.push_back(iter.second().toInt64());
-  }
-  return true;
-}
-
-bool ini_on_update(const Variant& value, std::vector<std::string>& p) {
-  INI_ASSERT_ARR_INNER(value, String);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p.push_back(iter.second().toString().toCppString());
-  }
-  return true;
-}
-
-bool ini_on_update(const Variant& value,
-                   std::unordered_map<std::string, int>& p) {
-  INI_ASSERT_ARR_INNER(value, Integer);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p[iter.first().toString().toCppString()] = iter.second().toInt64();
-  }
-  return true;
-}
-
-bool ini_on_update(const Variant& value,
-                   std::map<std::string, std::string>& p) {
-  INI_ASSERT_ARR_INNER(value, String);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p[iter.first().toString().toCppString()] =
-      iter.second().toString().toCppString();
-  }
-  return true;
-}
-
-bool ini_on_update(const Variant& value,
-                   std::map<std::string, std::string, stdltistr>& p) {
-  INI_ASSERT_ARR_INNER(value, String);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p[iter.first().toString().toCppString()] =
-      iter.second().toString().toCppString();
-  }
-  return true;
-}
-
-bool ini_on_update(const Variant& value,
-                   hphp_string_imap<std::string>& p) {
-  INI_ASSERT_ARR_INNER(value, String);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p[iter.first().toString().toCppString()] =
-      iter.second().toString().toCppString();
-  }
-  return true;
-}
-
-bool ini_on_update(const Variant& value,
-                   hphp_fast_string_map<std::string>& p) {
-  INI_ASSERT_ARR_INNER(value, String);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p[iter.first().toString().toCppString()] =
-      iter.second().toString().toCppString();
-  }
-  return true;
-}
-
-bool ini_on_update(const Variant& value,
-                   hphp_fast_string_imap<std::string>& p) {
-  INI_ASSERT_ARR_INNER(value, String);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p[iter.first().toString().toCppString()] =
-      iter.second().toString().toCppString();
-  }
-  return true;
-}
-
-bool ini_on_update(const Variant& value, hphp_fast_string_set& p) {
-  INI_ASSERT_ARR_INNER(value, String);
-  for (ArrayIter iter(value.toArray()); iter; ++iter) {
-    p.insert(iter.second().toString().toCppString());
-  }
-  return true;
-}
-
-Variant ini_get(bool& p) {
-  return p ? "1" : "";
-}
-
-Variant ini_get(double& p) {
-  return p;
-}
-
-Variant ini_get(char& p) {
-  return p;
-}
-
-Variant ini_get(int16_t& p) {
-  return p;
-}
-
-Variant ini_get(int32_t& p) {
-  return p;
-}
-
-Variant ini_get(int64_t& p) {
-  return p;
-}
-
-Variant ini_get(unsigned char& p) {
-  return p;
-}
-
-Variant ini_get(uint16_t& p) {
-  return p;
-}
-
-Variant ini_get(uint32_t& p) {
-  return (uint64_t) p;
-}
-
-Variant ini_get(uint64_t& p) {
-  return p;
-}
-
-Variant ini_get(std::string& p) {
-  return p.data();
-}
-
-Variant ini_get(String& p) {
-  return p.data();
-}
-
-namespace {
-
-template<typename T>
-void set(DictInit& arr, const std::string& key, const T& value) {
-  auto keyStr = String(key);
-  int64_t n;
-  if (keyStr.get()->isStrictlyInteger(n)) {
-    arr.set(n, value);
-    return;
-  }
-  arr.set(keyStr.get(), value);
-}
-
 }
 
 Variant ini_get(std::unordered_map<std::string, int>& p) {
@@ -418,94 +246,39 @@ Variant ini_get(std::unordered_map<std::string, int>& p) {
   }
   return ret.toArray();
 }
-
-Variant ini_get(std::map<std::string, std::string>& p) {
-  DictInit ret(p.size());
-  for (auto& pair : p) {
-    set(ret, pair.first, pair.second);
+bool ini_on_update(const Variant& value,
+                   std::unordered_map<std::string, int>& p) {
+  INI_ASSERT_ARR_INNER(value, Integer);
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p[iter.first().toString().toCppString()] = iter.second().toInt64();
   }
-  return ret.toArray();
+  return true;
 }
 
-Variant ini_get(std::map<std::string, std::string, stdltistr>& p) {
-  DictInit ret(p.size());
-  for (auto& pair : p) {
-    set(ret, pair.first, pair.second);
+Variant ini_get(Array& p) { return p; }
+bool ini_on_update(const Variant& value, Array& p) {
+  INI_ASSERT_ARR(value);
+  p = value.toArray();
+  return true;
+}
+
+Variant ini_get(std::vector<uint32_t>& p) { return ini_get_vec(p); }
+bool ini_on_update(const Variant& value, std::vector<uint32_t>& p) {
+  INI_ASSERT_ARR_INNER(value, Integer);
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p.push_back(iter.second().toInt64());
   }
-  return ret.toArray();
+  return true;
 }
 
-Variant ini_get(hphp_string_imap<std::string>& p) {
-  DictInit ret(p.size());
-  for (auto& pair : p) {
-    set(ret, pair.first, pair.second);
+Variant ini_get(std::vector<std::string>& p) { return ini_get_vec(p); }
+bool ini_on_update(const Variant& value, std::vector<std::string>& p) {
+  INI_ASSERT_ARR_INNER(value, String);
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p.push_back(iter.second().toString().toCppString());
   }
-  return ret.toArray();
+  return true;
 }
-
-Variant ini_get(hphp_fast_string_map<std::string>& p) {
-  DictInit ret(p.size());
-  for (auto& pair : p) {
-    set(ret, pair.first, pair.second);
-  }
-  return ret.toArray();
-}
-
-Variant ini_get(hphp_fast_string_imap<std::string>& p) {
-  DictInit ret(p.size());
-  for (auto& pair : p) {
-    set(ret, pair.first, pair.second);
-  }
-  return ret.toArray();
-}
-
-Variant ini_get(Array& p) {
-  return p;
-}
-
-Variant ini_get(std::set<std::string>& p) {
-  VecInit ret(p.size());
-  for (auto& s : p) {
-    ret.append(s);
-  }
-  return ret.toArray();
-}
-
-Variant ini_get(std::set<std::string, stdltistr>& p) {
-  VecInit ret(p.size());
-  for (auto& s : p) {
-    ret.append(s);
-  }
-  return ret.toArray();
-}
-
-Variant ini_get(boost::container::flat_set<std::string>& p) {
-  VecInit ret(p.size());
-  for (auto& s : p) {
-    ret.append(s);
-  }
-  return ret.toArray();
-}
-
-template<typename T>
-Variant ini_get(std::vector<T>& p) {
-  VecInit ret(p.size());
-  for (auto& s : p) {
-    ret.append(s);
-  }
-  return ret.toArray();
-}
-
-Variant ini_get(hphp_fast_string_set& p) {
-  VecInit ret(p.size());
-  for (auto& s : p) {
-    ret.append(s);
-  }
-  return ret.toArray();
-}
-
-template Variant ini_get<uint32_t>(std::vector<uint32_t>&);
-template Variant ini_get<std::string>(std::vector<std::string>&);
 
 const IniSettingMap ini_iterate(const IniSettingMap &ini,
                                 const std::string &name) {
@@ -890,19 +663,43 @@ IniSettingMap IniSetting::FromStringAsMap(const std::string& ini,
 }
 
 struct IniCallbackData {
-  IniCallbackData() {
-    extension = nullptr;
-    mode = IniSetting::PHP_INI_NONE;
-    updateCallback = nullptr;
-    getCallback = nullptr;
-  }
-  virtual ~IniCallbackData() {}
-public:
-  const Extension* extension;
-  IniSetting::Mode mode;
-  std::function<bool(const Variant& value)> updateCallback;
-  std::function<Variant()> getCallback;
+  const Extension* extension{nullptr};
+  IniSetting::Mode mode{IniSetting::PHP_INI_NONE};
+  IniSetting::OptionData callbacks{nullptr};
 };
+
+Variant doGet(IniSetting::OptionData& data) {
+#define F(Ty) \
+  [] (IniSetting::SetAndGetImpl<Ty>& data) -> Variant { \
+    Ty v;                                               \
+    if (data.getter) v = data.getter();                 \
+    else if (data.val) v = *data.val;                   \
+    return ini_get(v);                                  \
+  },
+  return folly::variant_match<Variant>(
+    data,
+    INI_TYPES(F)
+    [] (std::nullptr_t) { always_assert(false); return Variant(); }
+  );
+#undef F
+}
+
+bool doSet(IniSetting::OptionData& data, const Variant& value) {
+#define F(Ty) \
+  [&] (IniSetting::SetAndGetImpl<Ty>& data) -> bool { \
+    Ty v;                                             \
+    if (!ini_on_update(value, v)) return false;       \
+    if (data.setter && !data.setter(v)) return false; \
+    if (data.val) *data.val = v;                      \
+    return true;                                      \
+  },
+  return folly::variant_match<bool>(
+    data,
+    INI_TYPES(F)
+    [] (std::nullptr_t) { always_assert(false); return false; }
+  );
+#undef F
+}
 
 using CallbackMap = folly::F14FastMap<
   String, IniCallbackData, hphp_string_hash, hphp_string_same>;
@@ -962,8 +759,8 @@ void IniSetting::Bind(
   const Extension* extension,
   const Mode mode,
   const std::string& name,
-  std::function<bool(const Variant&)> updateCallback,
-  std::function<Variant()> getCallback
+  OptionData callbacks,
+  const char* defaultValue
 ) {
   assertx(!name.empty());
 
@@ -1009,8 +806,12 @@ void IniSetting::Bind(
 
   data.extension = extension;
   data.mode = mode;
-  data.updateCallback = updateCallback;
-  data.getCallback = getCallback;
+  data.callbacks = callbacks;
+
+  auto hasSystemDefault = ResetSystemDefault(name);
+  if (!hasSystemDefault && defaultValue) {
+    doSet(callbacks, defaultValue);
+  }
 }
 
 void IniSetting::Unbind(const std::string& name) {
@@ -1067,7 +868,7 @@ bool IniSetting::Get(const String& name, Variant& value) {
   if (!cb) {
     return false;
   }
-  value = cb->getCallback();
+  value = doGet(cb->callbacks);
   return true;
 }
 
@@ -1089,7 +890,7 @@ static bool ini_set(const String& name, const Variant& value,
   if (!cb || !(cb->mode & mode)) {
     return false;
   }
-  return cb->updateCallback(value);
+  return doSet(cb->callbacks, value);
 }
 
 bool IniSetting::FillInConstant(const std::string& name,
@@ -1202,7 +1003,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
       continue;
     }
 
-    auto value = iter.second.getCallback();
+    auto value = doGet(iter.second.callbacks);
     // Cast all non-arrays to strings since that is what everything used to be
     if (!value.isArray()) {
       value = value.toString();

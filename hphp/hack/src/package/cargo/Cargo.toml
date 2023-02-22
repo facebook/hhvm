@@ -10,5 +10,6 @@ path = "../package.rs"
 
 [dependencies]
 anyhow = "1.0.65"
+hash = { version = "0.0.0", path = "../../utils/hash" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 toml = "=0.5.8"

@@ -1,12 +1,11 @@
-// Copyright (c) Facebook, Inc. and its affiliates.
+// Copyright (c) Meta, Inc. and its affiliates.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::HashMap;
-
 use anyhow::Context;
 use anyhow::Result;
+use hash::HashMap;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -17,8 +16,8 @@ struct Config {
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
 pub struct PackageInfo {
-    r#use: Option<Vec<String>>,
-    include: Option<Vec<String>>,
+    uses: Option<Vec<String>>,
+    includes: Option<Vec<String>>,
 }
 
 pub fn parse_config(contents: &str) -> Result<HashMap<String, PackageInfo>> {
@@ -36,15 +35,15 @@ mod test {
         let contents = include_str!("tests/package-1.toml");
         let packages = parse_config(contents).unwrap();
 
-        assert_eq!(packages["foo"].r#use.as_ref().unwrap()[0], "a.*");
-        assert!(packages["foo"].include.is_none());
+        assert_eq!(packages["foo"].uses.as_ref().unwrap()[0], "a.*");
+        assert!(packages["foo"].includes.is_none());
 
-        assert_eq!(packages["bar"].r#use.as_ref().unwrap()[0], "b.*");
-        assert_eq!(packages["bar"].include.as_ref().unwrap()[0], "foo");
+        assert_eq!(packages["bar"].uses.as_ref().unwrap()[0], "b.*");
+        assert_eq!(packages["bar"].includes.as_ref().unwrap()[0], "foo");
 
-        assert_eq!(packages["baz"].r#use.as_ref().unwrap()[0], "x.*");
-        assert_eq!(packages["baz"].r#use.as_ref().unwrap()[1], "y.*");
-        assert_eq!(packages["baz"].include.as_ref().unwrap()[0], "foo");
-        assert_eq!(packages["baz"].include.as_ref().unwrap()[1], "bar");
+        assert_eq!(packages["baz"].uses.as_ref().unwrap()[0], "x.*");
+        assert_eq!(packages["baz"].uses.as_ref().unwrap()[1], "y.*");
+        assert_eq!(packages["baz"].includes.as_ref().unwrap()[0], "foo");
+        assert_eq!(packages["baz"].includes.as_ref().unwrap()[1], "bar");
     }
 }

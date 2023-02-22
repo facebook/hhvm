@@ -122,17 +122,6 @@ let with_enable_enum_classes po b =
 
 let disable_hh_ignore_error po = po.GlobalOptions.po_disable_hh_ignore_error
 
-let disallow_fun_and_cls_meth_pseudo_funcs po =
-  po.GlobalOptions.po_disallow_fun_and_cls_meth_pseudo_funcs
-
-let with_disallow_fun_and_cls_meth_pseudo_funcs po b =
-  { po with GlobalOptions.po_disallow_fun_and_cls_meth_pseudo_funcs = b }
-
-let disallow_inst_meth po = po.GlobalOptions.po_disallow_inst_meth
-
-let with_disallow_inst_meth po b =
-  { po with GlobalOptions.po_disallow_inst_meth = b }
-
 let interpret_soft_types_as_like_types po =
   po.GlobalOptions.po_interpret_soft_types_as_like_types
 
@@ -167,9 +156,7 @@ let make
     ~disable_xhp_children_declarations
     ~enable_enum_classes
     ~disable_hh_ignore_error
-    ~disallow_fun_and_cls_meth_pseudo_funcs
     ~interpret_soft_types_as_like_types
-    ~disallow_inst_meth
     ~is_systemlib =
   GlobalOptions.
     {
@@ -193,18 +180,13 @@ let make
       po_disable_xhp_children_declarations = disable_xhp_children_declarations;
       po_enable_enum_classes = enable_enum_classes;
       po_disable_hh_ignore_error = disable_hh_ignore_error;
-      po_disallow_fun_and_cls_meth_pseudo_funcs =
-        disallow_fun_and_cls_meth_pseudo_funcs;
       po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
-      po_disallow_inst_meth = disallow_inst_meth;
       tco_is_systemlib = is_systemlib;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
-  * bool
-  * bool
   * bool
   * bool
   * bool
@@ -241,8 +223,6 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     enable_enum_classes po,
     const_default_lambda_args po,
     allow_unstable_features po,
-    disallow_fun_and_cls_meth_pseudo_funcs po,
     interpret_soft_types_as_like_types po,
-    disallow_inst_meth po,
     po.GlobalOptions.tco_is_systemlib,
     po.GlobalOptions.po_disallow_static_constants_in_default_func_args )

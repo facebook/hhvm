@@ -107,8 +107,6 @@ struct RepoOptionsFlags {
   H(bool,           EnableXHPClassModifier,           true)           \
   H(bool,           DisableXHPElementMangling,        true)           \
   H(bool,           EnableEnumClasses,                true)           \
-  H(bool,           DisallowFunAndClsMethPseudoFuncs, true)           \
-  H(bool,           DisallowInstMeth,                 true)           \
   /* Allow omission of some `readonly` annotations based on           \
    * nonlocal inference powered by decl directed bytecode             \
    */                                                                 \

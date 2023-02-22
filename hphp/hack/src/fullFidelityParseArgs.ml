@@ -47,8 +47,6 @@ type t = {
   disable_xhp_element_mangling: bool;
   allow_unstable_features: bool;
   enable_xhp_class_modifier: bool;
-  disallow_fun_and_cls_meth_pseudo_funcs: bool;
-  disallow_inst_meth: bool;
   ignore_missing_json: bool;
   disallow_static_constants_in_default_func_args: bool;
 }
@@ -90,8 +88,6 @@ let make
     disable_xhp_element_mangling
     allow_unstable_features
     enable_xhp_class_modifier
-    disallow_fun_and_cls_meth_pseudo_funcs
-    disallow_inst_meth
     ignore_missing_json
     disallow_static_constants_in_default_func_args =
   {
@@ -131,8 +127,6 @@ let make
     disable_xhp_element_mangling;
     allow_unstable_features;
     enable_xhp_class_modifier;
-    disallow_fun_and_cls_meth_pseudo_funcs;
-    disallow_inst_meth;
     ignore_missing_json;
     disallow_static_constants_in_default_func_args;
   }
@@ -193,8 +187,6 @@ let parse_args () =
   let disable_xhp_element_mangling = ref false in
   let allow_unstable_features = ref false in
   let enable_xhp_class_modifier = ref false in
-  let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
-  let disallow_inst_meth = ref false in
   let ignore_missing_json = ref false in
   let disallow_static_constants_in_default_func_arg = ref false in
   let options =
@@ -339,12 +331,6 @@ No errors are filtered out."
       ( "--allow-unstable-features",
         Arg.Set allow_unstable_features,
         "Enables the __EnableUnstableFeatures attribute" );
-      ( "--disallow-fun-and-cls-meth-pseudo-funcs",
-        Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
-        "Disables parsing of fun() and class_meth()" );
-      ( "--disallow-inst-meth",
-        Arg.Set disallow_inst_meth,
-        "Disabled parsing of inst_meth()" );
       ( "--ignore-missing-json",
         Arg.Set ignore_missing_json,
         "Ignore missing nodes in JSON output" );
@@ -407,8 +393,6 @@ No errors are filtered out."
     !disable_xhp_element_mangling
     !allow_unstable_features
     !enable_xhp_class_modifier
-    !disallow_fun_and_cls_meth_pseudo_funcs
-    !disallow_inst_meth
     !ignore_missing_json
     !disallow_static_constants_in_default_func_arg
 
@@ -475,14 +459,6 @@ let to_parser_options args =
       args.enable_xhp_class_modifier
   in
   let popt =
-    ParserOptions.with_disallow_fun_and_cls_meth_pseudo_funcs
-      popt
-      args.disallow_fun_and_cls_meth_pseudo_funcs
-  in
-  let popt =
-    ParserOptions.with_disallow_inst_meth popt args.disallow_inst_meth
-  in
-  let popt =
     ParserOptions.with_disallow_static_constants_in_default_func_args
       popt
       args.disallow_static_constants_in_default_func_args
@@ -496,8 +472,5 @@ let to_parser_env args ~leak_rust_tree ~mode =
     ~allow_new_attribute_syntax:args.allow_new_attribute_syntax
     ~disable_legacy_attribute_syntax:args.disable_legacy_attribute_syntax
     ~leak_rust_tree
-    ~disallow_fun_and_cls_meth_pseudo_funcs:
-      args.disallow_fun_and_cls_meth_pseudo_funcs
-    ~disallow_inst_meth:args.disallow_inst_meth
     ?mode
     ()

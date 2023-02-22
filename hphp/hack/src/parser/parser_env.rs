@@ -13,6 +13,5 @@ pub struct ParserEnv {
     pub enable_xhp_class_modifier: bool,
     pub disable_xhp_element_mangling: bool,
     pub disable_xhp_children_declarations: bool,
-    pub disallow_fun_and_cls_meth_pseudo_funcs: bool,
     pub interpret_soft_types_as_like_types: bool,
 }

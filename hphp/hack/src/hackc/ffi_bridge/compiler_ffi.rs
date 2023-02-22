@@ -87,7 +87,6 @@ pub mod compile_ffi {
         disable_lval_as_an_expression: bool,
         disallow_inst_meth: bool,
         disable_xhp_element_mangling: bool,
-        disallow_fun_and_cls_meth_pseudo_funcs: bool,
         disallow_func_ptrs_in_constants: bool,
         enable_enum_classes: bool,
         enable_xhp_class_modifier: bool,
@@ -254,11 +253,7 @@ impl compile_ffi::NativeEnv {
                     po_disable_lval_as_an_expression: self
                         .parser_flags
                         .disable_lval_as_an_expression,
-                    po_disallow_inst_meth: self.parser_flags.disallow_inst_meth,
                     po_disable_xhp_element_mangling: self.parser_flags.disable_xhp_element_mangling,
-                    po_disallow_fun_and_cls_meth_pseudo_funcs: self
-                        .parser_flags
-                        .disallow_fun_and_cls_meth_pseudo_funcs,
                     po_disallow_func_ptrs_in_constants: self
                         .parser_flags
                         .disallow_func_ptrs_in_constants,

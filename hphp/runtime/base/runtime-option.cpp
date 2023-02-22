@@ -295,7 +295,6 @@ ParserEnv RepoOptionsFlags::getParserEnvironment() const {
     , EnableXHPClassModifier
     , DisableXHPElementMangling
     , false // disable_xhp_children_declarations
-    , DisallowFunAndClsMethPseudoFuncs
     , true  // interpret_soft_types_as_like_types
     };
 }
@@ -332,9 +331,7 @@ void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {
   flags.const_default_func_args = ConstDefaultFuncArgs;
   flags.const_static_props = ConstStaticProps;
   flags.disable_lval_as_an_expression = DisableLvalAsAnExpression;
-  flags.disallow_inst_meth = DisallowInstMeth;
   flags.disable_xhp_element_mangling = DisableXHPElementMangling;
-  flags.disallow_fun_and_cls_meth_pseudo_funcs = DisallowFunAndClsMethPseudoFuncs;
   flags.disallow_func_ptrs_in_constants = DisallowFuncPtrsInConstants;
   flags.enable_enum_classes = EnableEnumClasses;
   flags.enable_xhp_class_modifier = EnableXHPClassModifier;

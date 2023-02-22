@@ -44,12 +44,10 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     let po_enable_enum_classes = bool::from_ocaml(*ocaml_opts.add(13)).unwrap();
     let po_const_default_lambda_args = bool::from_ocaml(*ocaml_opts.add(14)).unwrap();
     let po_allow_unstable_features = bool::from_ocaml(*ocaml_opts.add(15)).unwrap();
-    let po_disallow_fun_and_cls_meth_pseudo_funcs = bool::from_ocaml(*ocaml_opts.add(16)).unwrap();
-    let po_interpret_soft_types_as_like_types = bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
-    let po_disallow_inst_meth = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
-    let tco_is_systemlib = bool::from_ocaml(*ocaml_opts.add(19)).unwrap();
+    let po_interpret_soft_types_as_like_types = bool::from_ocaml(*ocaml_opts.add(16)).unwrap();
+    let tco_is_systemlib = bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
     let po_disallow_static_constants_in_default_func_args =
-        bool::from_ocaml(*ocaml_opts.add(20)).unwrap();
+        bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
 
     parser_options.po_disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.po_disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
@@ -64,10 +62,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     parser_options.po_enable_enum_classes = po_enable_enum_classes;
     parser_options.po_const_default_lambda_args = po_const_default_lambda_args;
     parser_options.po_allow_unstable_features = po_allow_unstable_features;
-    parser_options.po_disallow_fun_and_cls_meth_pseudo_funcs =
-        po_disallow_fun_and_cls_meth_pseudo_funcs;
     parser_options.po_interpret_soft_types_as_like_types = po_interpret_soft_types_as_like_types;
-    parser_options.po_disallow_inst_meth = po_disallow_inst_meth;
     parser_options.tco_is_systemlib = tco_is_systemlib;
     parser_options.po_disallow_static_constants_in_default_func_args =
         po_disallow_static_constants_in_default_func_args;

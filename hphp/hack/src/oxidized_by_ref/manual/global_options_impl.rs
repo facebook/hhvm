@@ -115,8 +115,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_report_pos_from_reason: false,
     tco_typecheck_sample_rate: 1.0,
     tco_enable_sound_dynamic: false,
-    po_disallow_fun_and_cls_meth_pseudo_funcs: true,
-    po_disallow_inst_meth: true,
     tco_ifc_enabled: &[],
     tco_global_access_check_files_enabled: &[],
     tco_global_access_check_functions_enabled: s_set::SSet::empty(),

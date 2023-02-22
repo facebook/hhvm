@@ -259,10 +259,6 @@ type t = {
   tco_typecheck_sample_rate: float;
   (* Experimental implementation of a "sound" dynamic type *)
   tco_enable_sound_dynamic: bool;
-  (* Disable parsing of fun() and class_meth() *)
-  po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
-  (* Disable parsing of inst_meth() *)
-  po_disallow_inst_meth: bool;
   (* Enable ifc on the specified list of path prefixes
      (a list containing the empty string would denote all files,
      an empty list denotes no files) *)
@@ -453,8 +449,6 @@ val make :
   ?tco_report_pos_from_reason:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->
-  ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
-  ?po_disallow_inst_meth:bool ->
   ?tco_ifc_enabled:string list ->
   ?tco_global_access_check_files_enabled:string list ->
   ?tco_global_access_check_functions_enabled:SSet.t ->

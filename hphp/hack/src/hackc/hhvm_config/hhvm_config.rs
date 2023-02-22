@@ -118,22 +118,10 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
 
     // TODO: Kill disable_lval_as_an_expression
 
-    // Only hdf option in use
-    init(
-        &mut flags.po_disallow_inst_meth,
-        "Hack.Lang.DisallowInstMeth",
-    )?;
-
     // Both ini and hdf variants in use
     init(
         &mut flags.po_disable_xhp_element_mangling,
         "Hack.Lang.DisableXHPElementMangling",
-    )?;
-
-    // Both ini and hdf variants in use
-    init(
-        &mut flags.po_disallow_fun_and_cls_meth_pseudo_funcs,
-        "Hack.Lang.DisallowFunAndClsMethPseudoFuncs",
     )?;
 
     // Only hdf option in use

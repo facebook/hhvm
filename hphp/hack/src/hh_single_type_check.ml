@@ -294,8 +294,6 @@ let parse_options () =
   let enable_sound_dynamic = ref false in
   let always_pessimise_return = ref false in
   let consider_type_const_enforceable = ref false in
-  let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
-  let disallow_inst_meth = ref false in
   let disable_enum_classes = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let enable_strict_string_concat_interp = ref false in
@@ -734,12 +732,6 @@ let parse_options () =
       ( "--consider-type-const-enforceable",
         Arg.Set consider_type_const_enforceable,
         " Consider type constants to potentially be enforceable." );
-      ( "--disallow-fun-and-cls-meth-pseudo-funcs",
-        Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
-        " Disable parsing of fun() and class_meth()." );
-      ( "--disallow-inst-meth",
-        Arg.Set disallow_inst_meth,
-        " Disable parsing of inst_meth()." );
       ( "--disable-enum-classes",
         Arg.Set disable_enum_classes,
         " Disable the enum classes extension." );
@@ -1009,9 +1001,6 @@ let parse_options () =
       ~tco_method_call_inference:!method_call_inference
       ~tco_report_pos_from_reason:!report_pos_from_reason
       ~tco_enable_sound_dynamic:!enable_sound_dynamic
-      ~po_disallow_fun_and_cls_meth_pseudo_funcs:
-        !disallow_fun_and_cls_meth_pseudo_funcs
-      ~po_disallow_inst_meth:!disallow_inst_meth
       ~tco_ifc_enabled:
         (if is_ifc_mode then
           ["/"]

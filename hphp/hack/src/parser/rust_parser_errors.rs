@@ -3080,17 +3080,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
                 self.function_call_on_xhp_name_errors(recv);
 
-                let fun_and_clsmeth_disabled = self
-                    .env
-                    .parser_options
-                    .po_disallow_fun_and_cls_meth_pseudo_funcs;
-
                 if strip_ns(self.text(recv)) == strip_ns(sn::readonly::AS_MUT) {
                     self.mark_uses_readonly()
                 }
 
                 if self.text(recv) == strip_hh_ns(sn::autoimported_functions::FUN_)
-                    && fun_and_clsmeth_disabled
+                    && !self.env.codegen
                 {
                     let mut arg_node_list = syntax_to_list_no_separators(arg_list);
                     match arg_node_list.next() {
@@ -3105,14 +3100,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
 
                 if self.text(recv) == strip_hh_ns(sn::autoimported_functions::CLASS_METH)
-                    && fun_and_clsmeth_disabled
+                    && !self.env.codegen
                 {
                     self.errors
                         .push(make_error_from_node(recv, errors::class_meth_disabled))
                 }
 
                 if self.text(recv) == strip_hh_ns(sn::autoimported_functions::INST_METH)
-                    && self.env.parser_options.po_disallow_inst_meth
+                    && !self.env.codegen
                 {
                     self.errors
                         .push(make_error_from_node(recv, errors::inst_meth_disabled))

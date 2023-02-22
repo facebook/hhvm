@@ -2545,8 +2545,6 @@ fn emit_special_function<'a, 'arena, 'decl>(
     use ast::Expr_;
     let alloc = env.arena;
     let nargs = args.len() + uarg.map_or(0, |_| 1);
-    let fun_and_clsmeth_disabled =
-        (e.options().hhvm.parser_options).po_disallow_fun_and_cls_meth_pseudo_funcs;
     match (lower_fq_name, args) {
         (id, _) if id == special_functions::ECHO => Ok(Some(InstrSeq::gather(
             args.iter()
@@ -2622,50 +2620,6 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 .map(error::expect_normal_paramkind)
                 .transpose()?,
         )?)),
-        ("HH\\fun", _) => {
-            if fun_and_clsmeth_disabled {
-                match args {
-                    [(_, ast::Expr(_, _, ast::Expr_::String(func_name)))] => {
-                        Err(Error::fatal_parse(
-                            pos,
-                            format!(
-                                "`fun()` is disabled; switch to first-class references like `{}<>`",
-                                func_name
-                            ),
-                        ))
-                    }
-                    _ => Err(Error::fatal_runtime(
-                        pos,
-                        "Constant string expected in fun()",
-                    )),
-                }
-            } else if nargs != 1 {
-                Err(Error::fatal_runtime(
-                    pos,
-                    format!("fun() expects exactly 1 parameter, {} given", nargs),
-                ))
-            } else {
-                match args {
-                    // `inout` is dropped here, but it should be impossible to have an expression
-                    // like: `foo(inout "literal")`
-                    [(_, ast::Expr(_, _, ast::Expr_::String(func_name)))] => {
-                        Ok(Some(emit_hh_fun(
-                            e,
-                            env,
-                            pos,
-                            &[],
-                            // FIXME: This is not safe--string literals are binary strings.
-                            // There's no guarantee that they're valid UTF-8.
-                            unsafe { std::str::from_utf8_unchecked(func_name.as_slice()) },
-                        )?))
-                    }
-                    _ => Err(Error::fatal_runtime(
-                        pos,
-                        "Constant string expected in fun()",
-                    )),
-                }
-            }
-        }
         ("__SystemLib\\meth_caller", _) => {
             // used by meth_caller() to directly emit func ptr
             if nargs != 1 {
@@ -2734,52 +2688,6 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 instr::cls_cns_l(local),
             ])))
         }
-        ("HH\\inst_meth", _) => match args {
-            [obj_expr, method_name] => Ok(Some(emit_inst_meth(
-                e,
-                env,
-                error::expect_normal_paramkind(obj_expr)?,
-                error::expect_normal_paramkind(method_name)?,
-            )?)),
-            _ => Err(Error::fatal_runtime(
-                pos,
-                format!("inst_meth() expects exactly 2 parameters, {} given", nargs),
-            )),
-        },
-        ("HH\\class_meth", _) if fun_and_clsmeth_disabled => Err(Error::fatal_parse(
-            pos,
-            "`class_meth()` is disabled; switch to first-class references like `C::bar<>`",
-        )),
-        ("HH\\class_meth", &[(ref pk_cls, ref cls), (ref pk_meth, ref meth), ..]) if nargs == 2 => {
-            if meth.2.is_string() {
-                if cls.2.is_string()
-                    || cls
-                        .2
-                        .as_class_const()
-                        .map_or(false, |(_, (_, id))| string_utils::is_class(id))
-                    || cls
-                        .2
-                        .as_id()
-                        .map_or(false, |ast_defs::Id(_, id)| id == pseudo_consts::G__CLASS__)
-                {
-                    error::ensure_normal_paramkind(pk_cls)?;
-                    error::ensure_normal_paramkind(pk_meth)?;
-                    return Ok(Some(emit_class_meth(e, env, cls, meth)?));
-                }
-            }
-            Err(Error::fatal_runtime(
-                pos,
-                concat!(
-                    "class_meth() expects a literal class name or ::class constant, ",
-                    "followed by a constant string that refers to a static method ",
-                    "on that class"
-                ),
-            ))
-        }
-        ("HH\\class_meth", _) => Err(Error::fatal_runtime(
-            pos,
-            format!("class_meth() expects exactly 2 parameters, {} given", nargs),
-        )),
         ("HH\\global_set", _) => match *args {
             [ref gkey, ref gvalue] => Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, error::expect_normal_paramkind(gkey)?)?,
@@ -2921,72 +2829,6 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 },
             },
         ),
-    }
-}
-
-fn emit_inst_meth<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
-    obj_expr: &ast::Expr,
-    method_name: &ast::Expr,
-) -> Result<InstrSeq<'arena>> {
-    let instrs = InstrSeq::gather(vec![
-        emit_expr(e, env, obj_expr)?,
-        emit_expr(e, env, method_name)?,
-        instr::new_vec(2),
-    ]);
-    Ok(instrs)
-}
-
-fn emit_class_meth<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
-    cls: &ast::Expr,
-    meth: &ast::Expr,
-) -> Result<InstrSeq<'arena>> {
-    use ast::Expr_;
-    let alloc = env.arena;
-    if e.options().hhbc.emit_cls_meth_pointers {
-        let method_name = match &meth.2 {
-            Expr_::String(method_name) => {
-                hhbc::MethodName::new(Str::new_str(alloc, method_name.to_string().as_str()))
-            }
-            _ => return Err(Error::unrecoverable("emit_class_meth: unhandled method")),
-        };
-        if let Some((cid, (_, id))) = cls.2.as_class_const() {
-            if string_utils::is_class(id) {
-                return emit_class_meth_native(e, env, &cls.1, cid, method_name, &[]);
-            }
-        }
-        if let Some(ast_defs::Id(_, s)) = cls.2.as_id() {
-            if s == pseudo_consts::G__CLASS__ {
-                return Ok(instr::resolve_cls_method_s(
-                    SpecialClsRef::SelfCls,
-                    method_name,
-                ));
-            }
-        }
-        if let Some(class_name) = cls.2.as_string() {
-            return Ok(instr::resolve_cls_method_d(
-                hhbc::ClassName::new(Str::new_str(
-                    alloc,
-                    string_utils::strip_global_ns(
-                        // FIXME: This is not safe--string literals are binary strings.
-                        // There's no guarantee that they're valid UTF-8.
-                        unsafe { std::str::from_utf8_unchecked(class_name.as_slice()) },
-                    ),
-                )),
-                method_name,
-            ));
-        }
-        Err(Error::unrecoverable("emit_class_meth: unhandled method"))
-    } else {
-        let instrs = InstrSeq::gather(vec![
-            emit_expr(e, env, cls)?,
-            emit_expr(e, env, meth)?,
-            instr::new_vec(2),
-        ]);
-        Ok(instrs)
     }
 }
 

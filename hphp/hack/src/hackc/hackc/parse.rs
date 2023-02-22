@@ -111,7 +111,6 @@ fn parse(path: PathBuf, w: &mut impl Write, pretty: bool) -> Result<()> {
         hhvm_compat_mode: true,
         php5_compat_mode: true,
         allow_new_attribute_syntax: true,
-        disallow_fun_and_cls_meth_pseudo_funcs: true,
         interpret_soft_types_as_like_types: true,
         ..Default::default()
     };

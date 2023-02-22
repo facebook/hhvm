@@ -270,9 +270,6 @@ impl<'src> AastParser {
             disable_xhp_children_declarations: env
                 .parser_options
                 .po_disable_xhp_children_declarations,
-            disallow_fun_and_cls_meth_pseudo_funcs: env
-                .parser_options
-                .po_disallow_fun_and_cls_meth_pseudo_funcs,
             interpret_soft_types_as_like_types: env
                 .parser_options
                 .po_interpret_soft_types_as_like_types,

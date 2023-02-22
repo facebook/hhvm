@@ -111,14 +111,8 @@ impl HhConfig {
                 "disallow_func_ptrs_in_constants" => {
                     go.po_disallow_func_ptrs_in_constants = parse_json(&value);
                 }
-                "disallow_fun_and_cls_meth_pseudo_funcs" => {
-                    go.po_disallow_fun_and_cls_meth_pseudo_funcs = parse_json(&value);
-                }
                 "enable_strict_string_concat_interp" => {
                     go.tco_enable_strict_string_concat_interp = parse_json(&value);
-                }
-                "disallow_inst_meth" => {
-                    go.po_disallow_inst_meth = parse_json(&value);
                 }
                 "allowed_expression_tree_visitors" => {
                     go.tco_allowed_expression_tree_visitors = parse_svec(&value);

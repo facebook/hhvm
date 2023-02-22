@@ -1,6 +1,0 @@
-File "class_meth_disabled.php", line 5, characters 5-14:
-`class_meth()` is disabled; switch to first-class references like `C::bar<>` (Parsing[1002])
-File "class_meth_disabled.php", line 5, characters 5-14:
-Unbound name: `HH\class_meth` (a global function) (Naming[2049])
-File "class_meth_disabled.php", line 5, characters 5-14:
-Unbound name (typing): `HH\class_meth` (Typing[4107])

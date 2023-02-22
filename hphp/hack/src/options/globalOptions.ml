@@ -156,8 +156,6 @@ type t = {
   tco_report_pos_from_reason: bool;
   tco_typecheck_sample_rate: float;
   tco_enable_sound_dynamic: bool;
-  po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
-  po_disallow_inst_meth: bool;
   tco_ifc_enabled: string list;
   tco_global_access_check_files_enabled: string list;
   tco_global_access_check_functions_enabled: SSet.t;
@@ -296,8 +294,6 @@ let default =
     tco_report_pos_from_reason = false;
     tco_typecheck_sample_rate = 1.0;
     tco_enable_sound_dynamic = false;
-    po_disallow_fun_and_cls_meth_pseudo_funcs = true;
-    po_disallow_inst_meth = true;
     tco_ifc_enabled = [];
     tco_global_access_check_files_enabled = [];
     tco_global_access_check_functions_enabled = SSet.empty;
@@ -444,9 +440,6 @@ let make
     ?(tco_report_pos_from_reason = default.tco_report_pos_from_reason)
     ?(tco_typecheck_sample_rate = default.tco_typecheck_sample_rate)
     ?(tco_enable_sound_dynamic = default.tco_enable_sound_dynamic)
-    ?(po_disallow_fun_and_cls_meth_pseudo_funcs =
-      default.po_disallow_fun_and_cls_meth_pseudo_funcs)
-    ?(po_disallow_inst_meth = default.po_disallow_inst_meth)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
     ?(tco_global_access_check_files_enabled =
       default.tco_global_access_check_files_enabled)
@@ -604,8 +597,6 @@ let make
     tco_report_pos_from_reason;
     tco_typecheck_sample_rate;
     tco_enable_sound_dynamic;
-    po_disallow_fun_and_cls_meth_pseudo_funcs;
-    po_disallow_inst_meth;
     tco_ifc_enabled;
     tco_global_access_check_files_enabled;
     tco_global_access_check_functions_enabled;

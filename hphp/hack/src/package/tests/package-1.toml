@@ -1,0 +1,12 @@
+[packages]
+
+[packages.foo]
+use = ["a.*"]
+
+[packages.bar]
+use = ["b.*"]
+include = ["foo"]
+
+[packages.baz]
+use = ["x.*", "y.*"]
+include = ["foo", "bar"]

@@ -113,40 +113,6 @@ class CppRefToUnstructured(unittest.TestCase):
             ),
         )
 
-    def test_namespaces(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                namespace cpp2 apache.thrift
-                namespace py3 thrift.lib.thrift
-                struct Faa {
-                    1: i32 faa1;
-                    2: optional Faa faa2 (cpp.ref);
-                    3: i32 faa3;
-                }
-                """
-            ),
-        )
-
-        binary = pkg_resources.resource_filename(__name__, "codemod")
-        run_binary(binary, "foo.thrift")
-
-        self.assertEqual(
-            read_file("foo.thrift"),
-            textwrap.dedent(
-                """\
-                namespace cpp2 apache.thrift
-                namespace py3 thrift.lib.thrift
-                struct Faa {
-                    1: i32 faa1;
-                    2: optional Faa faa2 (cpp.ref);
-                    3: i32 faa3;
-                }
-                """
-            ),
-        )
-
     def test_cpp_and_cpp2(self):
         write_file(
             "foo.thrift",

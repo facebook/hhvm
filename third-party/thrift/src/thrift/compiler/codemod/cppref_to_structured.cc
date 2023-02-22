@@ -85,13 +85,6 @@ int main(int argc, char** argv) {
 
   auto program = program_bundle->root_program();
 
-  /* Currently other languages except C++ don't support `@cpp.Ref` */
-  for (const auto& n : program->namespaces()) {
-    if (n.first != "cpp" && n.first != "cpp2") {
-      return 0;
-    }
-  }
-
   codemod::file_manager fm(source_mgr, *program);
 
   const_ast_visitor visitor;

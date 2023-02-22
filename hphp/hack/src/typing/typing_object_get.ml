@@ -762,11 +762,11 @@ and obj_get_concrete_class_with_member_info
             env
             ft)
       in
+      let should_wrap =
+        TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+        && get_ce_support_dynamic_type member_info
+      in
       let (ft_ty1, lval_mismatch) =
-        let should_wrap =
-          TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-          && get_ce_support_dynamic_type member_info
-        in
         let lval_mismatch =
           if should_wrap then
             (* If this is supportdyn, suppress the Hole on the receiver *)
@@ -803,7 +803,12 @@ and obj_get_concrete_class_with_member_info
                 env
                 ft)
           in
-          let ft_ty2 = mk (Typing_reason.localize r, Tfun ft2) in
+          let ft_ty2 =
+            Typing_dynamic.maybe_wrap_with_supportdyn
+              ~should_wrap
+              (Typing_reason.localize r)
+              ft2
+          in
           let (env, ty) =
             Inter.intersect_list env (Typing_reason.localize r) [ft_ty1; ft_ty2]
           in

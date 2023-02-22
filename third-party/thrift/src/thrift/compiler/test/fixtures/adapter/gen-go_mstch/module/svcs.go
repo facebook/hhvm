@@ -266,6 +266,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqServiceFunc) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqServiceFunc.Set* methods instead or set the fields directly.
 type reqServiceFuncBuilder struct {
@@ -413,6 +417,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respServiceFunc) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -721,6 +729,10 @@ var _ thrift.Struct = &reqAdapterServiceCount{}
 func newReqAdapterServiceCount() *reqAdapterServiceCount {
     return (&reqAdapterServiceCount{})
 }
+func (x *reqAdapterServiceCount) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqAdapterServiceCount.Set* methods instead or set the fields directly.
 type reqAdapterServiceCountBuilder struct {
@@ -837,6 +849,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respAdapterServiceCount) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -970,6 +986,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqAdapterServiceAdaptedTypes) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqAdapterServiceAdaptedTypes.Set* methods instead or set the fields directly.
 type reqAdapterServiceAdaptedTypesBuilder struct {
@@ -1099,6 +1119,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respAdapterServiceAdaptedTypes) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

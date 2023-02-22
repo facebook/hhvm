@@ -206,6 +206,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqFinderByPlate) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqFinderByPlate.Set* methods instead or set the fields directly.
 type reqFinderByPlateBuilder struct {
@@ -337,6 +341,10 @@ if err != nil {
     return nil
 }
 
+func (x *respFinderByPlate) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respFinderByPlate.Set* methods instead or set the fields directly.
 type respFinderByPlateBuilder struct {
@@ -458,6 +466,10 @@ if err != nil {
 
     x.SetPlate(result)
     return nil
+}
+
+func (x *reqFinderAliasByPlate) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -591,6 +603,10 @@ if err != nil {
     return nil
 }
 
+func (x *respFinderAliasByPlate) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respFinderAliasByPlate.Set* methods instead or set the fields directly.
 type respFinderAliasByPlateBuilder struct {
@@ -714,6 +730,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqFinderPreviousPlate) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqFinderPreviousPlate.Set* methods instead or set the fields directly.
 type reqFinderPreviousPlateBuilder struct {
@@ -835,6 +855,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respFinderPreviousPlate) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

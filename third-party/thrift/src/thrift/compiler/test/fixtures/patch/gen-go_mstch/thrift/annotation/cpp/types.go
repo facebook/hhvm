@@ -195,6 +195,10 @@ result := RefType(enumResult)
     return nil
 }
 
+func (x *Ref) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Ref.Set* methods instead or set the fields directly.
 type RefBuilder struct {
@@ -320,6 +324,10 @@ if err != nil {
     return nil
 }
 
+func (x *Lazy) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Lazy.Set* methods instead or set the fields directly.
 type LazyBuilder struct {
@@ -407,6 +415,10 @@ var _ thrift.Struct = &DisableLazyChecksum{}
 func NewDisableLazyChecksum() *DisableLazyChecksum {
     return (&DisableLazyChecksum{})
 }
+func (x *DisableLazyChecksum) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use DisableLazyChecksum.Set* methods instead or set the fields directly.
 type DisableLazyChecksumBuilder struct {
@@ -666,6 +678,10 @@ if err != nil {
     return nil
 }
 
+func (x *Adapter) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Adapter.Set* methods instead or set the fields directly.
 type AdapterBuilder struct {
@@ -843,6 +859,10 @@ if err != nil {
     return nil
 }
 
+func (x *PackIsset) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use PackIsset.Set* methods instead or set the fields directly.
 type PackIssetBuilder struct {
@@ -930,6 +950,10 @@ var _ thrift.Struct = &MinimizePadding{}
 func NewMinimizePadding() *MinimizePadding {
     return (&MinimizePadding{})
 }
+func (x *MinimizePadding) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MinimizePadding.Set* methods instead or set the fields directly.
 type MinimizePaddingBuilder struct {
@@ -1004,6 +1028,10 @@ var _ thrift.Struct = &TriviallyRelocatable{}
 func NewTriviallyRelocatable() *TriviallyRelocatable {
     return (&TriviallyRelocatable{})
 }
+func (x *TriviallyRelocatable) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use TriviallyRelocatable.Set* methods instead or set the fields directly.
 type TriviallyRelocatableBuilder struct {
@@ -1078,6 +1106,10 @@ var _ thrift.Struct = &ScopedEnumAsUnionType{}
 func NewScopedEnumAsUnionType() *ScopedEnumAsUnionType {
     return (&ScopedEnumAsUnionType{})
 }
+func (x *ScopedEnumAsUnionType) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use ScopedEnumAsUnionType.Set* methods instead or set the fields directly.
 type ScopedEnumAsUnionTypeBuilder struct {
@@ -1152,6 +1184,10 @@ var _ thrift.Struct = &StrongType{}
 func NewStrongType() *StrongType {
     return (&StrongType{})
 }
+func (x *StrongType) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use StrongType.Set* methods instead or set the fields directly.
 type StrongTypeBuilder struct {
@@ -1300,6 +1336,10 @@ if err != nil {
     return nil
 }
 
+func (x *FieldInterceptor) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use FieldInterceptor.Set* methods instead or set the fields directly.
 type FieldInterceptorBuilder struct {
@@ -1400,6 +1440,10 @@ var _ thrift.Struct = &UseOpEncode{}
 func NewUseOpEncode() *UseOpEncode {
     return (&UseOpEncode{})
 }
+func (x *UseOpEncode) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use UseOpEncode.Set* methods instead or set the fields directly.
 type UseOpEncodeBuilder struct {
@@ -1510,6 +1554,10 @@ result := EnumUnderlyingType(enumResult)
 
     x.SetType(result)
     return nil
+}
+
+func (x *EnumType) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

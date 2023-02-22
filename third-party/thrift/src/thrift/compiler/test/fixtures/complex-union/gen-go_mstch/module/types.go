@@ -393,6 +393,10 @@ if err != nil {
     return nil
 }
 
+func (x *ComplexUnion) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 
 func (x *ComplexUnion) Write(p thrift.Protocol) error {
@@ -646,6 +650,10 @@ result := listResult
     return nil
 }
 
+func (x *ListUnion) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 
 func (x *ListUnion) Write(p thrift.Protocol) error {
@@ -807,6 +815,10 @@ if err != nil {
 
     x.SetStringData(result)
     return nil
+}
+
+func (x *DataUnion) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1048,6 +1060,10 @@ result := mapResult
     return nil
 }
 
+func (x *Val) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Val.Set* methods instead or set the fields directly.
 type ValBuilder struct {
@@ -1251,6 +1267,10 @@ if err != nil {
     return nil
 }
 
+func (x *ValUnion) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 
 func (x *ValUnion) Write(p thrift.Protocol) error {
@@ -1414,6 +1434,10 @@ if err != nil {
     return nil
 }
 
+func (x *VirtualComplexUnion) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 
 func (x *VirtualComplexUnion) Write(p thrift.Protocol) error {
@@ -1524,6 +1548,10 @@ if err != nil {
 
     x.SetNum(result)
     return nil
+}
+
+func (x *NonCopyableStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1656,6 +1684,10 @@ if err != nil {
 
     x.SetS(result)
     return nil
+}
+
+func (x *NonCopyableUnion) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

@@ -172,6 +172,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqTestServiceInit) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqTestServiceInit.Set* methods instead or set the fields directly.
 type reqTestServiceInitBuilder struct {
@@ -293,6 +297,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respTestServiceInit) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

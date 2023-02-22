@@ -25,6 +25,10 @@ var _ thrift.Struct = &Beta{}
 func NewBeta() *Beta {
     return (&Beta{})
 }
+func (x *Beta) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Beta.Set* methods instead or set the fields directly.
 type BetaBuilder struct {
@@ -99,6 +103,10 @@ var _ thrift.Struct = &Experimental{}
 func NewExperimental() *Experimental {
     return (&Experimental{})
 }
+func (x *Experimental) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Experimental.Set* methods instead or set the fields directly.
 type ExperimentalBuilder struct {
@@ -173,6 +181,10 @@ var _ thrift.Struct = &Testing{}
 func NewTesting() *Testing {
     return (&Testing{})
 }
+func (x *Testing) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Testing.Set* methods instead or set the fields directly.
 type TestingBuilder struct {
@@ -282,6 +294,10 @@ if err != nil {
 
     x.SetMessage(result)
     return nil
+}
+
+func (x *Deprecated) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -534,6 +550,10 @@ result := mapResult
     return nil
 }
 
+func (x *ReserveIds) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use ReserveIds.Set* methods instead or set the fields directly.
 type ReserveIdsBuilder struct {
@@ -671,6 +691,10 @@ if err != nil {
     return nil
 }
 
+func (x *Legacy) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Legacy.Set* methods instead or set the fields directly.
 type LegacyBuilder struct {
@@ -796,6 +820,10 @@ if err != nil {
     return nil
 }
 
+func (x *RequiresBackwardCompatibility) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use RequiresBackwardCompatibility.Set* methods instead or set the fields directly.
 type RequiresBackwardCompatibilityBuilder struct {
@@ -883,6 +911,10 @@ var _ thrift.Struct = &NoTesting{}
 func NewNoTesting() *NoTesting {
     return (&NoTesting{})
 }
+func (x *NoTesting) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use NoTesting.Set* methods instead or set the fields directly.
 type NoTestingBuilder struct {
@@ -957,6 +989,10 @@ var _ thrift.Struct = &NoExperimental{}
 func NewNoExperimental() *NoExperimental {
     return (&NoExperimental{})
 }
+func (x *NoExperimental) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use NoExperimental.Set* methods instead or set the fields directly.
 type NoExperimentalBuilder struct {
@@ -1031,6 +1067,10 @@ var _ thrift.Struct = &NoBeta{}
 func NewNoBeta() *NoBeta {
     return (&NoBeta{})
 }
+func (x *NoBeta) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use NoBeta.Set* methods instead or set the fields directly.
 type NoBetaBuilder struct {
@@ -1105,6 +1145,10 @@ var _ thrift.Struct = &Released{}
 func NewReleased() *Released {
     return (&Released{})
 }
+func (x *Released) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Released.Set* methods instead or set the fields directly.
 type ReleasedBuilder struct {
@@ -1179,6 +1223,10 @@ var _ thrift.Struct = &NoLegacy{}
 func NewNoLegacy() *NoLegacy {
     return (&NoLegacy{})
 }
+func (x *NoLegacy) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use NoLegacy.Set* methods instead or set the fields directly.
 type NoLegacyBuilder struct {
@@ -1253,6 +1301,10 @@ var _ thrift.Struct = &NoDeprecated{}
 func NewNoDeprecated() *NoDeprecated {
     return (&NoDeprecated{})
 }
+func (x *NoDeprecated) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use NoDeprecated.Set* methods instead or set the fields directly.
 type NoDeprecatedBuilder struct {
@@ -1327,6 +1379,10 @@ var _ thrift.Struct = &TerseWrite{}
 func NewTerseWrite() *TerseWrite {
     return (&TerseWrite{})
 }
+func (x *TerseWrite) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use TerseWrite.Set* methods instead or set the fields directly.
 type TerseWriteBuilder struct {
@@ -1401,6 +1457,10 @@ var _ thrift.Struct = &Box{}
 func NewBox() *Box {
     return (&Box{})
 }
+func (x *Box) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Box.Set* methods instead or set the fields directly.
 type BoxBuilder struct {
@@ -1475,6 +1535,10 @@ var _ thrift.Struct = &Mixin{}
 func NewMixin() *Mixin {
     return (&Mixin{})
 }
+func (x *Mixin) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Mixin.Set* methods instead or set the fields directly.
 type MixinBuilder struct {
@@ -1549,6 +1613,10 @@ var _ thrift.Struct = &Bit{}
 func NewBit() *Bit {
     return (&Bit{})
 }
+func (x *Bit) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Bit.Set* methods instead or set the fields directly.
 type BitBuilder struct {
@@ -1623,6 +1691,10 @@ var _ thrift.Struct = &SerializeInFieldIdOrder{}
 func NewSerializeInFieldIdOrder() *SerializeInFieldIdOrder {
     return (&SerializeInFieldIdOrder{})
 }
+func (x *SerializeInFieldIdOrder) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use SerializeInFieldIdOrder.Set* methods instead or set the fields directly.
 type SerializeInFieldIdOrderBuilder struct {
@@ -1697,6 +1769,10 @@ var _ thrift.Struct = &BitmaskEnum{}
 func NewBitmaskEnum() *BitmaskEnum {
     return (&BitmaskEnum{})
 }
+func (x *BitmaskEnum) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use BitmaskEnum.Set* methods instead or set the fields directly.
 type BitmaskEnumBuilder struct {
@@ -1807,6 +1883,10 @@ if err != nil {
 
     x.SetName(result)
     return nil
+}
+
+func (x *GenDefaultEnumValue) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1933,6 +2013,10 @@ if err != nil {
     return nil
 }
 
+func (x *GenEnumSet) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use GenEnumSet.Set* methods instead or set the fields directly.
 type GenEnumSetBuilder struct {
@@ -2020,6 +2104,10 @@ var _ thrift.Struct = &V1{}
 func NewV1() *V1 {
     return (&V1{})
 }
+func (x *V1) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use V1.Set* methods instead or set the fields directly.
 type V1Builder struct {
@@ -2094,6 +2182,10 @@ var _ thrift.Struct = &V1beta{}
 func NewV1beta() *V1beta {
     return (&V1beta{})
 }
+func (x *V1beta) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use V1beta.Set* methods instead or set the fields directly.
 type V1betaBuilder struct {
@@ -2168,6 +2260,10 @@ var _ thrift.Struct = &V1alpha{}
 func NewV1alpha() *V1alpha {
     return (&V1alpha{})
 }
+func (x *V1alpha) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use V1alpha.Set* methods instead or set the fields directly.
 type V1alphaBuilder struct {
@@ -2242,6 +2338,10 @@ var _ thrift.Struct = &V1test{}
 func NewV1test() *V1test {
     return (&V1test{})
 }
+func (x *V1test) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use V1test.Set* methods instead or set the fields directly.
 type V1testBuilder struct {
@@ -2351,6 +2451,10 @@ if err != nil {
 
     x.SetField(result)
     return nil
+}
+
+func (x *ExceptionMessage) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2477,6 +2581,10 @@ if err != nil {
     return nil
 }
 
+func (x *GenerateRuntimeSchema) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use GenerateRuntimeSchema.Set* methods instead or set the fields directly.
 type GenerateRuntimeSchemaBuilder struct {
@@ -2564,6 +2672,10 @@ var _ thrift.Struct = &InternBox{}
 func NewInternBox() *InternBox {
     return (&InternBox{})
 }
+func (x *InternBox) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use InternBox.Set* methods instead or set the fields directly.
 type InternBoxBuilder struct {

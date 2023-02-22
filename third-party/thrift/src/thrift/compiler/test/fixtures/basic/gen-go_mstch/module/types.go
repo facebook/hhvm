@@ -513,6 +513,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStruct.Set* methods instead or set the fields directly.
 type MyStructBuilder struct {
@@ -704,6 +708,10 @@ var _ thrift.Struct = &MyDataItem{}
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{})
 }
+func (x *MyDataItem) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyDataItem.Set* methods instead or set the fields directly.
 type MyDataItemBuilder struct {
@@ -986,6 +994,10 @@ result := setResult
     return nil
 }
 
+func (x *MyUnion) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 
 func (x *MyUnion) Write(p thrift.Protocol) error {
@@ -1112,6 +1124,10 @@ if err != nil {
 
     x.SetReservedField(result)
     return nil
+}
+
+func (x *ReservedKeyword) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1243,6 +1259,10 @@ if err != nil {
 
     x.SetReservedField(result)
     return nil
+}
+
+func (x *UnionToBeRenamed) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

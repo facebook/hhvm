@@ -64,6 +64,10 @@ if err != nil {
     return nil
 }
 
+func (x *InjectMetadataFields) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use InjectMetadataFields.Set* methods instead or set the fields directly.
 type InjectMetadataFieldsBuilder struct {

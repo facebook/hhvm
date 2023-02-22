@@ -136,6 +136,10 @@ var _ thrift.Struct = &reqFooServiceSimpleRPC{}
 func newReqFooServiceSimpleRPC() *reqFooServiceSimpleRPC {
     return (&reqFooServiceSimpleRPC{})
 }
+func (x *reqFooServiceSimpleRPC) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqFooServiceSimpleRPC.Set* methods instead or set the fields directly.
 type reqFooServiceSimpleRPCBuilder struct {
@@ -209,6 +213,10 @@ var _ thrift.Struct = &respFooServiceSimpleRPC{}
 func newRespFooServiceSimpleRPC() *respFooServiceSimpleRPC {
     return (&respFooServiceSimpleRPC{})
 }
+func (x *respFooServiceSimpleRPC) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respFooServiceSimpleRPC.Set* methods instead or set the fields directly.
 type respFooServiceSimpleRPCBuilder struct {
@@ -520,6 +528,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqFB303ServiceSimpleRPC) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqFB303ServiceSimpleRPC.Set* methods instead or set the fields directly.
 type reqFB303ServiceSimpleRPCBuilder struct {
@@ -649,6 +661,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respFB303ServiceSimpleRPC) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1084,6 +1100,10 @@ var _ thrift.Struct = &reqMyServicePing{}
 func newReqMyServicePing() *reqMyServicePing {
     return (&reqMyServicePing{})
 }
+func (x *reqMyServicePing) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServicePing.Set* methods instead or set the fields directly.
 type reqMyServicePingBuilder struct {
@@ -1157,6 +1177,10 @@ var _ thrift.Struct = &respMyServicePing{}
 func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
 }
+func (x *respMyServicePing) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServicePing.Set* methods instead or set the fields directly.
 type respMyServicePingBuilder struct {
@@ -1230,6 +1254,10 @@ var _ thrift.Struct = &reqMyServiceGetRandomData{}
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{})
 }
+func (x *reqMyServiceGetRandomData) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceGetRandomData.Set* methods instead or set the fields directly.
 type reqMyServiceGetRandomDataBuilder struct {
@@ -1338,6 +1366,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respMyServiceGetRandomData) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1463,6 +1495,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceSink) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceSink.Set* methods instead or set the fields directly.
 type reqMyServiceSinkBuilder struct {
@@ -1549,6 +1585,10 @@ var _ thrift.Struct = &respMyServiceSink{}
 func newRespMyServiceSink() *respMyServiceSink {
     return (&respMyServiceSink{})
 }
+func (x *respMyServiceSink) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServiceSink.Set* methods instead or set the fields directly.
 type respMyServiceSinkBuilder struct {
@@ -1696,6 +1736,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServicePutDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServicePutDataById.Set* methods instead or set the fields directly.
 type reqMyServicePutDataByIdBuilder struct {
@@ -1795,6 +1839,10 @@ var _ thrift.Struct = &respMyServicePutDataById{}
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{})
 }
+func (x *respMyServicePutDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServicePutDataById.Set* methods instead or set the fields directly.
 type respMyServicePutDataByIdBuilder struct {
@@ -1903,6 +1951,10 @@ if err != nil {
 
     x.SetId(result)
     return nil
+}
+
+func (x *reqMyServiceHasDataById) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2028,6 +2080,10 @@ if err != nil {
     return nil
 }
 
+func (x *respMyServiceHasDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServiceHasDataById.Set* methods instead or set the fields directly.
 type respMyServiceHasDataByIdBuilder struct {
@@ -2149,6 +2205,10 @@ if err != nil {
 
     x.SetId(result)
     return nil
+}
+
+func (x *reqMyServiceGetDataById) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2274,6 +2334,10 @@ if err != nil {
     return nil
 }
 
+func (x *respMyServiceGetDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServiceGetDataById.Set* methods instead or set the fields directly.
 type respMyServiceGetDataByIdBuilder struct {
@@ -2397,6 +2461,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceDeleteDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceDeleteDataById.Set* methods instead or set the fields directly.
 type reqMyServiceDeleteDataByIdBuilder struct {
@@ -2483,6 +2551,10 @@ var _ thrift.Struct = &respMyServiceDeleteDataById{}
 func newRespMyServiceDeleteDataById() *respMyServiceDeleteDataById {
     return (&respMyServiceDeleteDataById{})
 }
+func (x *respMyServiceDeleteDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServiceDeleteDataById.Set* methods instead or set the fields directly.
 type respMyServiceDeleteDataByIdBuilder struct {
@@ -2630,6 +2702,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceLobDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceLobDataById.Set* methods instead or set the fields directly.
 type reqMyServiceLobDataByIdBuilder struct {
@@ -2729,6 +2805,10 @@ var _ thrift.Struct = &respMyServiceLobDataById{}
 func newRespMyServiceLobDataById() *respMyServiceLobDataById {
     return (&respMyServiceLobDataById{})
 }
+func (x *respMyServiceLobDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServiceLobDataById.Set* methods instead or set the fields directly.
 type respMyServiceLobDataByIdBuilder struct {
@@ -2802,6 +2882,10 @@ var _ thrift.Struct = &reqMyServiceInvalidReturnForHack{}
 func newReqMyServiceInvalidReturnForHack() *reqMyServiceInvalidReturnForHack {
     return (&reqMyServiceInvalidReturnForHack{})
 }
+func (x *reqMyServiceInvalidReturnForHack) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceInvalidReturnForHack.Set* methods instead or set the fields directly.
 type reqMyServiceInvalidReturnForHackBuilder struct {
@@ -2948,6 +3032,10 @@ result := setResult
     return nil
 }
 
+func (x *respMyServiceInvalidReturnForHack) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServiceInvalidReturnForHack.Set* methods instead or set the fields directly.
 type respMyServiceInvalidReturnForHackBuilder struct {
@@ -3034,6 +3122,10 @@ var _ thrift.Struct = &reqMyServiceRPCSkippedCodegen{}
 func newReqMyServiceRPCSkippedCodegen() *reqMyServiceRPCSkippedCodegen {
     return (&reqMyServiceRPCSkippedCodegen{})
 }
+func (x *reqMyServiceRPCSkippedCodegen) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceRPCSkippedCodegen.Set* methods instead or set the fields directly.
 type reqMyServiceRPCSkippedCodegenBuilder struct {
@@ -3107,6 +3199,10 @@ var _ thrift.Struct = &respMyServiceRPCSkippedCodegen{}
 func newRespMyServiceRPCSkippedCodegen() *respMyServiceRPCSkippedCodegen {
     return (&respMyServiceRPCSkippedCodegen{})
 }
+func (x *respMyServiceRPCSkippedCodegen) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServiceRPCSkippedCodegen.Set* methods instead or set the fields directly.
 type respMyServiceRPCSkippedCodegenBuilder struct {
@@ -3884,6 +3980,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqDbMixedStackArgumentsGetDataByKey0) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqDbMixedStackArgumentsGetDataByKey0.Set* methods instead or set the fields directly.
 type reqDbMixedStackArgumentsGetDataByKey0Builder struct {
@@ -4014,6 +4114,10 @@ if err != nil {
     return nil
 }
 
+func (x *respDbMixedStackArgumentsGetDataByKey0) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respDbMixedStackArgumentsGetDataByKey0.Set* methods instead or set the fields directly.
 type respDbMixedStackArgumentsGetDataByKey0Builder struct {
@@ -4135,6 +4239,10 @@ if err != nil {
 
     x.SetKey(result)
     return nil
+}
+
+func (x *reqDbMixedStackArgumentsGetDataByKey1) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -4265,6 +4373,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

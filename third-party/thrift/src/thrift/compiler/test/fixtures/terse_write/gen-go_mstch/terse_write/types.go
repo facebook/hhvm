@@ -86,6 +86,10 @@ var _ thrift.Struct = &MyStruct{}
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
+func (x *MyStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStruct.Set* methods instead or set the fields directly.
 type MyStructBuilder struct {
@@ -882,6 +886,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyUnion) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 
 func (x *MyUnion) Write(p thrift.Protocol) error {
@@ -1089,6 +1097,10 @@ if err != nil {
 
     x.SetField1(result)
     return nil
+}
+
+func (x *MyStructWithCustomDefault) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1880,6 +1892,10 @@ if err != nil {
 
     x.SetUnionField(result)
     return nil
+}
+
+func (x *StructLevelTerseStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -3559,6 +3575,10 @@ if err != nil {
     return nil
 }
 
+func (x *FieldLevelTerseStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use FieldLevelTerseStruct.Set* methods instead or set the fields directly.
 type FieldLevelTerseStructBuilder struct {
@@ -4709,6 +4729,10 @@ if err != nil {
     return nil
 }
 
+func (x *TerseStructWithCustomDefault) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use TerseStructWithCustomDefault.Set* methods instead or set the fields directly.
 type TerseStructWithCustomDefaultBuilder struct {
@@ -5076,6 +5100,10 @@ if err != nil {
     return nil
 }
 
+func (x *AdaptedFields) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use AdaptedFields.Set* methods instead or set the fields directly.
 type AdaptedFieldsBuilder struct {
@@ -5225,6 +5253,10 @@ if err != nil {
 
     x.SetField1(result)
     return nil
+}
+
+func (x *WrappedFields) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

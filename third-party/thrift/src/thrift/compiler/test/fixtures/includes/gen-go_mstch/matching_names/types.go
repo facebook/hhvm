@@ -70,6 +70,10 @@ if err != nil {
     return nil
 }
 
+func (x *IncludesAlso) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use IncludesAlso.Set* methods instead or set the fields directly.
 type IncludesAlsoBuilder struct {

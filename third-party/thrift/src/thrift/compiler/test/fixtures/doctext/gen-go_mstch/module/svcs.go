@@ -154,6 +154,10 @@ var _ thrift.Struct = &reqCF{}
 func newReqCF() *reqCF {
     return (&reqCF{})
 }
+func (x *reqCF) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqCF.Set* methods instead or set the fields directly.
 type reqCFBuilder struct {
@@ -227,6 +231,10 @@ var _ thrift.Struct = &respCF{}
 func newRespCF() *respCF {
     return (&respCF{})
 }
+func (x *respCF) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respCF.Set* methods instead or set the fields directly.
 type respCFBuilder struct {
@@ -447,6 +455,10 @@ result := setResult
     return nil
 }
 
+func (x *reqCThing) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqCThing.Set* methods instead or set the fields directly.
 type reqCThingBuilder struct {
@@ -594,6 +606,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respCThing) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

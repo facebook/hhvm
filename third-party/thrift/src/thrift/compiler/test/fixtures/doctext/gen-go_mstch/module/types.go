@@ -114,6 +114,10 @@ if err != nil {
     return nil
 }
 
+func (x *A) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use A.Set* methods instead or set the fields directly.
 type ABuilder struct {
@@ -287,6 +291,10 @@ if err != nil {
 
     x.SetS(result)
     return nil
+}
+
+func (x *U) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

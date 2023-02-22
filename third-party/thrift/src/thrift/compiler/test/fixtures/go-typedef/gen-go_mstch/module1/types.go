@@ -440,6 +440,10 @@ result := mapResult
     return nil
 }
 
+func (x *Automobile) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Automobile.Set* methods instead or set the fields directly.
 type AutomobileBuilder struct {
@@ -679,6 +683,10 @@ if err != nil {
     return nil
 }
 
+func (x *MapKey) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MapKey.Set* methods instead or set the fields directly.
 type MapKeyBuilder struct {
@@ -870,6 +878,10 @@ result := mapResult
     return nil
 }
 
+func (x *MapContainer) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MapContainer.Set* methods instead or set the fields directly.
 type MapContainerBuilder struct {
@@ -1045,6 +1057,10 @@ if err != nil {
 
     x.SetCar(result)
     return nil
+}
+
+func (x *Pair) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1293,6 +1309,10 @@ result := listResult
 
     x.SetCars(result)
     return nil
+}
+
+func (x *Collection) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

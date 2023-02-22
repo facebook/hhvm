@@ -182,6 +182,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceQuery) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceQuery.Set* methods instead or set the fields directly.
 type reqMyServiceQueryBuilder struct {
@@ -311,6 +315,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respMyServiceQuery) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

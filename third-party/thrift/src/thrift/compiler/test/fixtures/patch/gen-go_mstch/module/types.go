@@ -153,6 +153,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyData) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyData.Set* methods instead or set the fields directly.
 type MyDataBuilder struct {
@@ -329,6 +333,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyDataWithCustomDefault) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyDataWithCustomDefault.Set* methods instead or set the fields directly.
 type MyDataWithCustomDefaultBuilder struct {
@@ -471,6 +479,10 @@ if err != nil {
 
     x.SetInnerOption(result)
     return nil
+}
+
+func (x *InnerUnion) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -671,6 +683,10 @@ if err != nil {
 
     x.SetOption3(result)
     return nil
+}
+
+func (x *MyUnion) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2424,6 +2440,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStruct.Set* methods instead or set the fields directly.
 type MyStructBuilder struct {
@@ -2927,6 +2947,10 @@ var _ thrift.Struct = &LateDefStruct{}
 func NewLateDefStruct() *LateDefStruct {
     return (&LateDefStruct{})
 }
+func (x *LateDefStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use LateDefStruct.Set* methods instead or set the fields directly.
 type LateDefStructBuilder struct {
@@ -3092,6 +3116,10 @@ result := mapResult
     return nil
 }
 
+func (x *Recursive) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Recursive.Set* methods instead or set the fields directly.
 type RecursiveBuilder struct {
@@ -3224,6 +3252,10 @@ if err != nil {
     return nil
 }
 
+func (x *Bar) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Bar.Set* methods instead or set the fields directly.
 type BarBuilder struct {
@@ -3354,6 +3386,10 @@ if err != nil {
 
     x.SetBar(result)
     return nil
+}
+
+func (x *Loop) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -3529,6 +3565,10 @@ if err != nil {
 
     x.SetData2(result)
     return nil
+}
+
+func (x *MyDataEnsureStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -3719,6 +3759,10 @@ if err != nil {
 
     x.SetData2(result)
     return nil
+}
+
+func (x *MyDataFieldPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -4038,6 +4082,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyDataPatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyDataPatch.Set* methods instead or set the fields directly.
 type MyDataPatchBuilder struct {
@@ -4265,6 +4313,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyDataWithCustomDefaultEnsureStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyDataWithCustomDefaultEnsureStruct.Set* methods instead or set the fields directly.
 type MyDataWithCustomDefaultEnsureStructBuilder struct {
@@ -4453,6 +4505,10 @@ if err != nil {
 
     x.SetData2(result)
     return nil
+}
+
+func (x *MyDataWithCustomDefaultFieldPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -4772,6 +4828,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyDataWithCustomDefaultPatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyDataWithCustomDefaultPatch.Set* methods instead or set the fields directly.
 type MyDataWithCustomDefaultPatchBuilder struct {
@@ -4954,6 +5014,10 @@ if err != nil {
 
     x.SetInnerOption(result)
     return nil
+}
+
+func (x *InnerUnionFieldPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -5260,6 +5324,10 @@ if err != nil {
     return nil
 }
 
+func (x *InnerUnionPatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use InnerUnionPatch.Set* methods instead or set the fields directly.
 type InnerUnionPatchBuilder struct {
@@ -5532,6 +5600,10 @@ if err != nil {
 
     x.SetOption3(result)
     return nil
+}
+
+func (x *MyUnionFieldPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -5862,6 +5934,10 @@ if err != nil {
 
     x.SetPatch(result)
     return nil
+}
+
+func (x *MyUnionPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -7735,6 +7811,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyStructEnsureStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStructEnsureStruct.Set* methods instead or set the fields directly.
 type MyStructEnsureStructBuilder struct {
@@ -8320,6 +8400,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyStructField10Patch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStructField10Patch.Set* methods instead or set the fields directly.
 type MyStructField10PatchBuilder struct {
@@ -8500,6 +8584,10 @@ if err != nil {
 
     x.SetClear(result)
     return nil
+}
+
+func (x *MyStructField23Patch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -9022,6 +9110,10 @@ result := listResult
     return nil
 }
 
+func (x *MyStructField26Patch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStructField26Patch.Set* methods instead or set the fields directly.
 type MyStructField26PatchBuilder struct {
@@ -9428,6 +9520,10 @@ result := setResult
 
     x.SetAdd(result)
     return nil
+}
+
+func (x *MyStructField27Patch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -10116,6 +10212,10 @@ result := mapResult
 
     x.SetPut(result)
     return nil
+}
+
+func (x *MyStructField28Patch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -10887,6 +10987,10 @@ result := listResult
     return nil
 }
 
+func (x *MyStructField29Patch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStructField29Patch.Set* methods instead or set the fields directly.
 type MyStructField29PatchBuilder struct {
@@ -11599,6 +11703,10 @@ result := mapResult
 
     x.SetPut(result)
     return nil
+}
+
+func (x *MyStructField29Patch1) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -12466,6 +12574,10 @@ result := mapResult
     return nil
 }
 
+func (x *MyStructField30Patch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStructField30Patch.Set* methods instead or set the fields directly.
 type MyStructField30PatchBuilder struct {
@@ -13191,6 +13303,10 @@ result := mapResult
 
     x.SetPut(result)
     return nil
+}
+
+func (x *MyStructField30Patch1) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -14843,6 +14959,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyStructFieldPatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStructFieldPatch.Set* methods instead or set the fields directly.
 type MyStructFieldPatchBuilder struct {
@@ -15563,6 +15683,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyStructPatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStructPatch.Set* methods instead or set the fields directly.
 type MyStructPatchBuilder struct {
@@ -15702,6 +15826,10 @@ var _ thrift.Struct = &LateDefStructEnsureStruct{}
 func NewLateDefStructEnsureStruct() *LateDefStructEnsureStruct {
     return (&LateDefStructEnsureStruct{})
 }
+func (x *LateDefStructEnsureStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use LateDefStructEnsureStruct.Set* methods instead or set the fields directly.
 type LateDefStructEnsureStructBuilder struct {
@@ -15776,6 +15904,10 @@ var _ thrift.Struct = &LateDefStructFieldPatch{}
 func NewLateDefStructFieldPatch() *LateDefStructFieldPatch {
     return (&LateDefStructFieldPatch{})
 }
+func (x *LateDefStructFieldPatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use LateDefStructFieldPatch.Set* methods instead or set the fields directly.
 type LateDefStructFieldPatchBuilder struct {
@@ -16067,6 +16199,10 @@ if err != nil {
     return nil
 }
 
+func (x *LateDefStructPatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use LateDefStructPatch.Set* methods instead or set the fields directly.
 type LateDefStructPatchBuilder struct {
@@ -16297,6 +16433,10 @@ result := mapResult
     return nil
 }
 
+func (x *RecursiveEnsureStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use RecursiveEnsureStruct.Set* methods instead or set the fields directly.
 type RecursiveEnsureStructBuilder struct {
@@ -16512,6 +16652,10 @@ if err != nil {
     return nil
 }
 
+func (x *RecursiveField1Patch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use RecursiveField1Patch.Set* methods instead or set the fields directly.
 type RecursiveField1PatchBuilder struct {
@@ -16655,6 +16799,10 @@ if err != nil {
 
     x.SetNodes(result)
     return nil
+}
+
+func (x *RecursiveFieldPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -16961,6 +17109,10 @@ if err != nil {
     return nil
 }
 
+func (x *RecursivePatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use RecursivePatch.Set* methods instead or set the fields directly.
 type RecursivePatchBuilder struct {
@@ -17145,6 +17297,10 @@ if err != nil {
     return nil
 }
 
+func (x *BarEnsureStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use BarEnsureStruct.Set* methods instead or set the fields directly.
 type BarEnsureStructBuilder struct {
@@ -17275,6 +17431,10 @@ if err != nil {
 
     x.SetLoop(result)
     return nil
+}
+
+func (x *BarFieldPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -17581,6 +17741,10 @@ if err != nil {
     return nil
 }
 
+func (x *BarPatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use BarPatch.Set* methods instead or set the fields directly.
 type BarPatchBuilder struct {
@@ -17765,6 +17929,10 @@ if err != nil {
     return nil
 }
 
+func (x *LoopEnsureStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use LoopEnsureStruct.Set* methods instead or set the fields directly.
 type LoopEnsureStructBuilder struct {
@@ -17895,6 +18063,10 @@ if err != nil {
 
     x.SetBar(result)
     return nil
+}
+
+func (x *LoopFieldPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -18064,6 +18236,10 @@ if err != nil {
 
     x.SetClear(result)
     return nil
+}
+
+func (x *LoopPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

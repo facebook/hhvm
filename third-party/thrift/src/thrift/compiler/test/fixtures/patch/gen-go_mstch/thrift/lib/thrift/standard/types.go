@@ -241,6 +241,10 @@ if err != nil {
     return nil
 }
 
+func (x *TypeUri) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 
 func (x *TypeUri) Write(p thrift.Protocol) error {
@@ -1079,6 +1083,10 @@ result := Void(enumResult)
 
     x.SetMapType(result)
     return nil
+}
+
+func (x *TypeName) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

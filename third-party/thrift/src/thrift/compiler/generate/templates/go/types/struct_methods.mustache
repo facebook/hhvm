@@ -17,7 +17,7 @@
 }}{{!
 
   Creates the following methods for Thrift structs:
-  Get*, Set*, IsSet*, writeField, readField
+  Get*, Set*, IsSet*, writeField*, readField*, String
 
 }}{{!
 
@@ -92,12 +92,18 @@ func (x *{{struct:go_name}}) readField{{field:key_str}}(p thrift.Protocol) error
 
 {{/struct:fields}}{{!
 
-Error
-}}{{#struct:exception?}}
+  String methodd.
+
+}}
 func (x *{{struct:go_name}}) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+{{!
+
+  Error method.
+
+}}{{#struct:exception?}}
 func (x *{{struct:go_name}}) Error() string {
     return x.String()
 }

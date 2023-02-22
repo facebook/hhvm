@@ -181,6 +181,10 @@ var _ thrift.Struct = &reqRaiserDoBland{}
 func newReqRaiserDoBland() *reqRaiserDoBland {
     return (&reqRaiserDoBland{})
 }
+func (x *reqRaiserDoBland) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqRaiserDoBland.Set* methods instead or set the fields directly.
 type reqRaiserDoBlandBuilder struct {
@@ -254,6 +258,10 @@ var _ thrift.Struct = &respRaiserDoBland{}
 func newRespRaiserDoBland() *respRaiserDoBland {
     return (&respRaiserDoBland{})
 }
+func (x *respRaiserDoBland) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respRaiserDoBland.Set* methods instead or set the fields directly.
 type respRaiserDoBlandBuilder struct {
@@ -327,6 +335,10 @@ var _ thrift.Struct = &reqRaiserDoRaise{}
 func newReqRaiserDoRaise() *reqRaiserDoRaise {
     return (&reqRaiserDoRaise{})
 }
+func (x *reqRaiserDoRaise) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqRaiserDoRaise.Set* methods instead or set the fields directly.
 type reqRaiserDoRaiseBuilder struct {
@@ -400,6 +412,10 @@ var _ thrift.Struct = &respRaiserDoRaise{}
 func newRespRaiserDoRaise() *respRaiserDoRaise {
     return (&respRaiserDoRaise{})
 }
+func (x *respRaiserDoRaise) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respRaiserDoRaise.Set* methods instead or set the fields directly.
 type respRaiserDoRaiseBuilder struct {
@@ -473,6 +489,10 @@ var _ thrift.Struct = &reqRaiserGet200{}
 func newReqRaiserGet200() *reqRaiserGet200 {
     return (&reqRaiserGet200{})
 }
+func (x *reqRaiserGet200) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqRaiserGet200.Set* methods instead or set the fields directly.
 type reqRaiserGet200Builder struct {
@@ -583,6 +603,10 @@ if err != nil {
     return nil
 }
 
+func (x *respRaiserGet200) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respRaiserGet200.Set* methods instead or set the fields directly.
 type respRaiserGet200Builder struct {
@@ -669,6 +693,10 @@ var _ thrift.Struct = &reqRaiserGet500{}
 func newReqRaiserGet500() *reqRaiserGet500 {
     return (&reqRaiserGet500{})
 }
+func (x *reqRaiserGet500) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqRaiserGet500.Set* methods instead or set the fields directly.
 type reqRaiserGet500Builder struct {
@@ -777,6 +805,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respRaiserGet500) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

@@ -124,6 +124,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyStructNestedAnnotation) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStructNestedAnnotation.Set* methods instead or set the fields directly.
 type MyStructNestedAnnotationBuilder struct {
@@ -211,6 +215,10 @@ var _ thrift.Struct = &MyUnion{}
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
 }
+func (x *MyUnion) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 
 func (x *MyUnion) Write(p thrift.Protocol) error {
@@ -767,6 +775,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStruct.Set* methods instead or set the fields directly.
 type MyStructBuilder struct {
@@ -1043,6 +1055,10 @@ if err != nil {
 
     x.SetPassword(result)
     return nil
+}
+
+func (x *SecretStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

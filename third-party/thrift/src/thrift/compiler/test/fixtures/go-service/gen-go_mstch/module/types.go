@@ -60,6 +60,10 @@ if err != nil {
     return nil
 }
 
+func (x *GetEntityRequest) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use GetEntityRequest.Set* methods instead or set the fields directly.
 type GetEntityRequestBuilder struct {
@@ -182,6 +186,10 @@ if err != nil {
 
     x.SetEntity(result)
     return nil
+}
+
+func (x *GetEntityResponse) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

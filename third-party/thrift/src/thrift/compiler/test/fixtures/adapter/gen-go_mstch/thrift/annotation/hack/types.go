@@ -62,6 +62,10 @@ if err != nil {
     return nil
 }
 
+func (x *FieldWrapper) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use FieldWrapper.Set* methods instead or set the fields directly.
 type FieldWrapperBuilder struct {
@@ -261,6 +265,10 @@ if err != nil {
     return nil
 }
 
+func (x *Wrapper) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Wrapper.Set* methods instead or set the fields directly.
 type WrapperBuilder struct {
@@ -411,6 +419,10 @@ if err != nil {
     return nil
 }
 
+func (x *Adapter) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Adapter.Set* methods instead or set the fields directly.
 type AdapterBuilder struct {
@@ -533,6 +545,10 @@ if err != nil {
 
     x.SetReason(result)
     return nil
+}
+
+func (x *SkipCodegen) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -694,6 +710,10 @@ if err != nil {
 
     x.SetReason(result)
     return nil
+}
+
+func (x *Name) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -869,6 +889,10 @@ result := listResult
     return nil
 }
 
+func (x *UnionEnumAttributes) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use UnionEnumAttributes.Set* methods instead or set the fields directly.
 type UnionEnumAttributesBuilder struct {
@@ -991,6 +1015,10 @@ if err != nil {
 
     x.SetName(result)
     return nil
+}
+
+func (x *StructTrait) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1153,6 +1181,10 @@ result := listResult
     return nil
 }
 
+func (x *Attributes) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Attributes.Set* methods instead or set the fields directly.
 type AttributesBuilder struct {
@@ -1240,6 +1272,10 @@ var _ thrift.Struct = &StructAsTrait{}
 func NewStructAsTrait() *StructAsTrait {
     return (&StructAsTrait{})
 }
+func (x *StructAsTrait) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use StructAsTrait.Set* methods instead or set the fields directly.
 type StructAsTraitBuilder struct {

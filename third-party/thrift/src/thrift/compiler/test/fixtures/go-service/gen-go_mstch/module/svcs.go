@@ -363,6 +363,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqGetEntityGetEntity) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetEntity.Set* methods instead or set the fields directly.
 type reqGetEntityGetEntityBuilder struct {
@@ -494,6 +498,10 @@ if err != nil {
     return nil
 }
 
+func (x *respGetEntityGetEntity) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respGetEntityGetEntity.Set* methods instead or set the fields directly.
 type respGetEntityGetEntityBuilder struct {
@@ -580,6 +588,10 @@ var _ thrift.Struct = &reqGetEntityGetBool{}
 func newReqGetEntityGetBool() *reqGetEntityGetBool {
     return (&reqGetEntityGetBool{})
 }
+func (x *reqGetEntityGetBool) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetBool.Set* methods instead or set the fields directly.
 type reqGetEntityGetBoolBuilder struct {
@@ -690,6 +702,10 @@ if err != nil {
     return nil
 }
 
+func (x *respGetEntityGetBool) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respGetEntityGetBool.Set* methods instead or set the fields directly.
 type respGetEntityGetBoolBuilder struct {
@@ -776,6 +792,10 @@ var _ thrift.Struct = &reqGetEntityGetByte{}
 func newReqGetEntityGetByte() *reqGetEntityGetByte {
     return (&reqGetEntityGetByte{})
 }
+func (x *reqGetEntityGetByte) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetByte.Set* methods instead or set the fields directly.
 type reqGetEntityGetByteBuilder struct {
@@ -886,6 +906,10 @@ if err != nil {
     return nil
 }
 
+func (x *respGetEntityGetByte) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respGetEntityGetByte.Set* methods instead or set the fields directly.
 type respGetEntityGetByteBuilder struct {
@@ -972,6 +996,10 @@ var _ thrift.Struct = &reqGetEntityGetI16{}
 func newReqGetEntityGetI16() *reqGetEntityGetI16 {
     return (&reqGetEntityGetI16{})
 }
+func (x *reqGetEntityGetI16) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetI16.Set* methods instead or set the fields directly.
 type reqGetEntityGetI16Builder struct {
@@ -1082,6 +1110,10 @@ if err != nil {
     return nil
 }
 
+func (x *respGetEntityGetI16) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respGetEntityGetI16.Set* methods instead or set the fields directly.
 type respGetEntityGetI16Builder struct {
@@ -1168,6 +1200,10 @@ var _ thrift.Struct = &reqGetEntityGetI32{}
 func newReqGetEntityGetI32() *reqGetEntityGetI32 {
     return (&reqGetEntityGetI32{})
 }
+func (x *reqGetEntityGetI32) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetI32.Set* methods instead or set the fields directly.
 type reqGetEntityGetI32Builder struct {
@@ -1278,6 +1314,10 @@ if err != nil {
     return nil
 }
 
+func (x *respGetEntityGetI32) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respGetEntityGetI32.Set* methods instead or set the fields directly.
 type respGetEntityGetI32Builder struct {
@@ -1364,6 +1404,10 @@ var _ thrift.Struct = &reqGetEntityGetI64{}
 func newReqGetEntityGetI64() *reqGetEntityGetI64 {
     return (&reqGetEntityGetI64{})
 }
+func (x *reqGetEntityGetI64) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetI64.Set* methods instead or set the fields directly.
 type reqGetEntityGetI64Builder struct {
@@ -1474,6 +1518,10 @@ if err != nil {
     return nil
 }
 
+func (x *respGetEntityGetI64) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respGetEntityGetI64.Set* methods instead or set the fields directly.
 type respGetEntityGetI64Builder struct {
@@ -1560,6 +1608,10 @@ var _ thrift.Struct = &reqGetEntityGetDouble{}
 func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
     return (&reqGetEntityGetDouble{})
 }
+func (x *reqGetEntityGetDouble) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetDouble.Set* methods instead or set the fields directly.
 type reqGetEntityGetDoubleBuilder struct {
@@ -1670,6 +1722,10 @@ if err != nil {
     return nil
 }
 
+func (x *respGetEntityGetDouble) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respGetEntityGetDouble.Set* methods instead or set the fields directly.
 type respGetEntityGetDoubleBuilder struct {
@@ -1756,6 +1812,10 @@ var _ thrift.Struct = &reqGetEntityGetString{}
 func newReqGetEntityGetString() *reqGetEntityGetString {
     return (&reqGetEntityGetString{})
 }
+func (x *reqGetEntityGetString) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetString.Set* methods instead or set the fields directly.
 type reqGetEntityGetStringBuilder struct {
@@ -1866,6 +1926,10 @@ if err != nil {
     return nil
 }
 
+func (x *respGetEntityGetString) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respGetEntityGetString.Set* methods instead or set the fields directly.
 type respGetEntityGetStringBuilder struct {
@@ -1952,6 +2016,10 @@ var _ thrift.Struct = &reqGetEntityGetBinary{}
 func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
     return (&reqGetEntityGetBinary{})
 }
+func (x *reqGetEntityGetBinary) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetBinary.Set* methods instead or set the fields directly.
 type reqGetEntityGetBinaryBuilder struct {
@@ -2069,6 +2137,10 @@ if err != nil {
     return nil
 }
 
+func (x *respGetEntityGetBinary) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respGetEntityGetBinary.Set* methods instead or set the fields directly.
 type respGetEntityGetBinaryBuilder struct {
@@ -2155,6 +2227,10 @@ var _ thrift.Struct = &reqGetEntityGetMap{}
 func newReqGetEntityGetMap() *reqGetEntityGetMap {
     return (&reqGetEntityGetMap{})
 }
+func (x *reqGetEntityGetMap) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetMap.Set* methods instead or set the fields directly.
 type reqGetEntityGetMapBuilder struct {
@@ -2318,6 +2394,10 @@ result := mapResult
     return nil
 }
 
+func (x *respGetEntityGetMap) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respGetEntityGetMap.Set* methods instead or set the fields directly.
 type respGetEntityGetMapBuilder struct {
@@ -2404,6 +2484,10 @@ var _ thrift.Struct = &reqGetEntityGetSet{}
 func newReqGetEntityGetSet() *reqGetEntityGetSet {
     return (&reqGetEntityGetSet{})
 }
+func (x *reqGetEntityGetSet) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetSet.Set* methods instead or set the fields directly.
 type reqGetEntityGetSetBuilder struct {
@@ -2550,6 +2634,10 @@ result := setResult
     return nil
 }
 
+func (x *respGetEntityGetSet) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respGetEntityGetSet.Set* methods instead or set the fields directly.
 type respGetEntityGetSetBuilder struct {
@@ -2636,6 +2724,10 @@ var _ thrift.Struct = &reqGetEntityGetList{}
 func newReqGetEntityGetList() *reqGetEntityGetList {
     return (&reqGetEntityGetList{})
 }
+func (x *reqGetEntityGetList) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetList.Set* methods instead or set the fields directly.
 type reqGetEntityGetListBuilder struct {
@@ -2780,6 +2872,10 @@ result := listResult
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respGetEntityGetList) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2979,6 +3075,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqGetEntityGetLegacyStuff) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqGetEntityGetLegacyStuff.Set* methods instead or set the fields directly.
 type reqGetEntityGetLegacyStuffBuilder struct {
@@ -3126,6 +3226,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respGetEntityGetLegacyStuff) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

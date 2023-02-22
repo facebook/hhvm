@@ -232,6 +232,10 @@ var _ thrift.Struct = &reqMyServicePing{}
 func newReqMyServicePing() *reqMyServicePing {
     return (&reqMyServicePing{})
 }
+func (x *reqMyServicePing) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServicePing.Set* methods instead or set the fields directly.
 type reqMyServicePingBuilder struct {
@@ -305,6 +309,10 @@ var _ thrift.Struct = &respMyServicePing{}
 func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
 }
+func (x *respMyServicePing) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServicePing.Set* methods instead or set the fields directly.
 type respMyServicePingBuilder struct {
@@ -378,6 +386,10 @@ var _ thrift.Struct = &reqMyServiceGetRandomData{}
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{})
 }
+func (x *reqMyServiceGetRandomData) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceGetRandomData.Set* methods instead or set the fields directly.
 type reqMyServiceGetRandomDataBuilder struct {
@@ -486,6 +498,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respMyServiceGetRandomData) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -611,6 +627,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceHasDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceHasDataById.Set* methods instead or set the fields directly.
 type reqMyServiceHasDataByIdBuilder struct {
@@ -732,6 +752,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respMyServiceHasDataById) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -857,6 +881,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceGetDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceGetDataById.Set* methods instead or set the fields directly.
 type reqMyServiceGetDataByIdBuilder struct {
@@ -978,6 +1006,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respMyServiceGetDataById) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1140,6 +1172,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServicePutDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServicePutDataById.Set* methods instead or set the fields directly.
 type reqMyServicePutDataByIdBuilder struct {
@@ -1239,6 +1275,10 @@ var _ thrift.Struct = &respMyServicePutDataById{}
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{})
 }
+func (x *respMyServicePutDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServicePutDataById.Set* methods instead or set the fields directly.
 type respMyServicePutDataByIdBuilder struct {
@@ -1386,6 +1426,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceLobDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceLobDataById.Set* methods instead or set the fields directly.
 type reqMyServiceLobDataByIdBuilder struct {
@@ -1485,6 +1529,10 @@ var _ thrift.Struct = &respMyServiceLobDataById{}
 func newRespMyServiceLobDataById() *respMyServiceLobDataById {
     return (&respMyServiceLobDataById{})
 }
+func (x *respMyServiceLobDataById) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServiceLobDataById.Set* methods instead or set the fields directly.
 type respMyServiceLobDataByIdBuilder struct {
@@ -1558,6 +1606,10 @@ var _ thrift.Struct = &reqMyServiceDoNothing{}
 func newReqMyServiceDoNothing() *reqMyServiceDoNothing {
     return (&reqMyServiceDoNothing{})
 }
+func (x *reqMyServiceDoNothing) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceDoNothing.Set* methods instead or set the fields directly.
 type reqMyServiceDoNothingBuilder struct {
@@ -1631,6 +1683,10 @@ var _ thrift.Struct = &respMyServiceDoNothing{}
 func newRespMyServiceDoNothing() *respMyServiceDoNothing {
     return (&respMyServiceDoNothing{})
 }
+func (x *respMyServiceDoNothing) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServiceDoNothing.Set* methods instead or set the fields directly.
 type respMyServiceDoNothingBuilder struct {
@@ -2220,6 +2276,10 @@ var _ thrift.Struct = &reqMyServicePrioParentPing{}
 func newReqMyServicePrioParentPing() *reqMyServicePrioParentPing {
     return (&reqMyServicePrioParentPing{})
 }
+func (x *reqMyServicePrioParentPing) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServicePrioParentPing.Set* methods instead or set the fields directly.
 type reqMyServicePrioParentPingBuilder struct {
@@ -2293,6 +2353,10 @@ var _ thrift.Struct = &respMyServicePrioParentPing{}
 func newRespMyServicePrioParentPing() *respMyServicePrioParentPing {
     return (&respMyServicePrioParentPing{})
 }
+func (x *respMyServicePrioParentPing) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServicePrioParentPing.Set* methods instead or set the fields directly.
 type respMyServicePrioParentPingBuilder struct {
@@ -2366,6 +2430,10 @@ var _ thrift.Struct = &reqMyServicePrioParentPong{}
 func newReqMyServicePrioParentPong() *reqMyServicePrioParentPong {
     return (&reqMyServicePrioParentPong{})
 }
+func (x *reqMyServicePrioParentPong) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServicePrioParentPong.Set* methods instead or set the fields directly.
 type reqMyServicePrioParentPongBuilder struct {
@@ -2439,6 +2507,10 @@ var _ thrift.Struct = &respMyServicePrioParentPong{}
 func newRespMyServicePrioParentPong() *respMyServicePrioParentPong {
     return (&respMyServicePrioParentPong{})
 }
+func (x *respMyServicePrioParentPong) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServicePrioParentPong.Set* methods instead or set the fields directly.
 type respMyServicePrioParentPongBuilder struct {
@@ -2772,6 +2844,10 @@ var _ thrift.Struct = &reqMyServicePrioChildPang{}
 func newReqMyServicePrioChildPang() *reqMyServicePrioChildPang {
     return (&reqMyServicePrioChildPang{})
 }
+func (x *reqMyServicePrioChildPang) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServicePrioChildPang.Set* methods instead or set the fields directly.
 type reqMyServicePrioChildPangBuilder struct {
@@ -2845,6 +2921,10 @@ var _ thrift.Struct = &respMyServicePrioChildPang{}
 func newRespMyServicePrioChildPang() *respMyServicePrioChildPang {
     return (&respMyServicePrioChildPang{})
 }
+func (x *respMyServicePrioChildPang) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServicePrioChildPang.Set* methods instead or set the fields directly.
 type respMyServicePrioChildPangBuilder struct {
@@ -3108,6 +3188,10 @@ var _ thrift.Struct = &reqBadServiceCreateBadInteraction{}
 func newReqBadServiceCreateBadInteraction() *reqBadServiceCreateBadInteraction {
     return (&reqBadServiceCreateBadInteraction{})
 }
+func (x *reqBadServiceCreateBadInteraction) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqBadServiceCreateBadInteraction.Set* methods instead or set the fields directly.
 type reqBadServiceCreateBadInteractionBuilder struct {
@@ -3211,6 +3295,10 @@ func (x *respBadServiceCreateBadInteraction) readField0(p thrift.Protocol) error
     return nil
 }
 
+func (x *respBadServiceCreateBadInteraction) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respBadServiceCreateBadInteraction.Set* methods instead or set the fields directly.
 type respBadServiceCreateBadInteractionBuilder struct {
@@ -3297,6 +3385,10 @@ var _ thrift.Struct = &reqBadServiceBar{}
 func newReqBadServiceBar() *reqBadServiceBar {
     return (&reqBadServiceBar{})
 }
+func (x *reqBadServiceBar) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqBadServiceBar.Set* methods instead or set the fields directly.
 type reqBadServiceBarBuilder struct {
@@ -3405,6 +3497,10 @@ if err != nil {
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respBadServiceBar) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

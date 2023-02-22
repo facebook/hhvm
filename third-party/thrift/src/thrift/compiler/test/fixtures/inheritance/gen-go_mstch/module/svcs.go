@@ -134,6 +134,10 @@ var _ thrift.Struct = &reqMyRootDoRoot{}
 func newReqMyRootDoRoot() *reqMyRootDoRoot {
     return (&reqMyRootDoRoot{})
 }
+func (x *reqMyRootDoRoot) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyRootDoRoot.Set* methods instead or set the fields directly.
 type reqMyRootDoRootBuilder struct {
@@ -207,6 +211,10 @@ var _ thrift.Struct = &respMyRootDoRoot{}
 func newRespMyRootDoRoot() *respMyRootDoRoot {
     return (&respMyRootDoRoot{})
 }
+func (x *respMyRootDoRoot) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyRootDoRoot.Set* methods instead or set the fields directly.
 type respMyRootDoRootBuilder struct {
@@ -492,6 +500,10 @@ var _ thrift.Struct = &reqMyNodeDoMid{}
 func newReqMyNodeDoMid() *reqMyNodeDoMid {
     return (&reqMyNodeDoMid{})
 }
+func (x *reqMyNodeDoMid) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyNodeDoMid.Set* methods instead or set the fields directly.
 type reqMyNodeDoMidBuilder struct {
@@ -565,6 +577,10 @@ var _ thrift.Struct = &respMyNodeDoMid{}
 func newRespMyNodeDoMid() *respMyNodeDoMid {
     return (&respMyNodeDoMid{})
 }
+func (x *respMyNodeDoMid) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyNodeDoMid.Set* methods instead or set the fields directly.
 type respMyNodeDoMidBuilder struct {
@@ -825,6 +841,10 @@ var _ thrift.Struct = &reqMyLeafDoLeaf{}
 func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
     return (&reqMyLeafDoLeaf{})
 }
+func (x *reqMyLeafDoLeaf) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyLeafDoLeaf.Set* methods instead or set the fields directly.
 type reqMyLeafDoLeafBuilder struct {
@@ -898,6 +918,10 @@ var _ thrift.Struct = &respMyLeafDoLeaf{}
 func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
     return (&respMyLeafDoLeaf{})
 }
+func (x *respMyLeafDoLeaf) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyLeafDoLeaf.Set* methods instead or set the fields directly.
 type respMyLeafDoLeafBuilder struct {

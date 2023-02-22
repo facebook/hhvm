@@ -318,6 +318,10 @@ result := mapResult
     return nil
 }
 
+func (x *reqNestedContainersMapList) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqNestedContainersMapList.Set* methods instead or set the fields directly.
 type reqNestedContainersMapListBuilder struct {
@@ -404,6 +408,10 @@ var _ thrift.Struct = &respNestedContainersMapList{}
 func newRespNestedContainersMapList() *respNestedContainersMapList {
     return (&respNestedContainersMapList{})
 }
+func (x *respNestedContainersMapList) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respNestedContainersMapList.Set* methods instead or set the fields directly.
 type respNestedContainersMapListBuilder struct {
@@ -596,6 +604,10 @@ result := mapResult
     return nil
 }
 
+func (x *reqNestedContainersMapSet) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqNestedContainersMapSet.Set* methods instead or set the fields directly.
 type reqNestedContainersMapSetBuilder struct {
@@ -682,6 +694,10 @@ var _ thrift.Struct = &respNestedContainersMapSet{}
 func newRespNestedContainersMapSet() *respNestedContainersMapSet {
     return (&respNestedContainersMapSet{})
 }
+func (x *respNestedContainersMapSet) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respNestedContainersMapSet.Set* methods instead or set the fields directly.
 type respNestedContainersMapSetBuilder struct {
@@ -874,6 +890,10 @@ result := listResult
     return nil
 }
 
+func (x *reqNestedContainersListMap) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqNestedContainersListMap.Set* methods instead or set the fields directly.
 type reqNestedContainersListMapBuilder struct {
@@ -960,6 +980,10 @@ var _ thrift.Struct = &respNestedContainersListMap{}
 func newRespNestedContainersListMap() *respNestedContainersListMap {
     return (&respNestedContainersListMap{})
 }
+func (x *respNestedContainersListMap) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respNestedContainersListMap.Set* methods instead or set the fields directly.
 type respNestedContainersListMapBuilder struct {
@@ -1135,6 +1159,10 @@ result := listResult
     return nil
 }
 
+func (x *reqNestedContainersListSet) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqNestedContainersListSet.Set* methods instead or set the fields directly.
 type reqNestedContainersListSetBuilder struct {
@@ -1221,6 +1249,10 @@ var _ thrift.Struct = &respNestedContainersListSet{}
 func newRespNestedContainersListSet() *respNestedContainersListSet {
     return (&respNestedContainersListSet{})
 }
+func (x *respNestedContainersListSet) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respNestedContainersListSet.Set* methods instead or set the fields directly.
 type respNestedContainersListSetBuilder struct {
@@ -1517,6 +1549,10 @@ result := listResult
     return nil
 }
 
+func (x *reqNestedContainersTurtles) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqNestedContainersTurtles.Set* methods instead or set the fields directly.
 type reqNestedContainersTurtlesBuilder struct {
@@ -1603,6 +1639,10 @@ var _ thrift.Struct = &respNestedContainersTurtles{}
 func newRespNestedContainersTurtles() *respNestedContainersTurtles {
     return (&respNestedContainersTurtles{})
 }
+func (x *respNestedContainersTurtles) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respNestedContainersTurtles.Set* methods instead or set the fields directly.
 type respNestedContainersTurtlesBuilder struct {

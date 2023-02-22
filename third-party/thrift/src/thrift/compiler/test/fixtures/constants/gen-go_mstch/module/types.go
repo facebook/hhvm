@@ -413,6 +413,10 @@ if err != nil {
     return nil
 }
 
+func (x *Internship) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Internship.Set* methods instead or set the fields directly.
 type InternshipBuilder struct {
@@ -626,6 +630,10 @@ if err != nil {
     return nil
 }
 
+func (x *Range) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Range.Set* methods instead or set the fields directly.
 type RangeBuilder struct {
@@ -800,6 +808,10 @@ if err != nil {
 
     x.SetB(result)
     return nil
+}
+
+func (x *Struct1) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1094,6 +1106,10 @@ result := listResult
     return nil
 }
 
+func (x *Struct2) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Struct2.Set* methods instead or set the fields directly.
 type Struct2Builder struct {
@@ -1339,6 +1355,10 @@ if err != nil {
     return nil
 }
 
+func (x *Struct3) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Struct3.Set* methods instead or set the fields directly.
 type Struct3Builder struct {
@@ -1577,6 +1597,10 @@ if err != nil {
     return nil
 }
 
+func (x *Struct4) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Struct4.Set* methods instead or set the fields directly.
 type Struct4Builder struct {
@@ -1776,6 +1800,10 @@ if err != nil {
 
     x.SetD(result)
     return nil
+}
+
+func (x *Union1) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2029,6 +2057,10 @@ if err != nil {
 
     x.SetU(result)
     return nil
+}
+
+func (x *Union2) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

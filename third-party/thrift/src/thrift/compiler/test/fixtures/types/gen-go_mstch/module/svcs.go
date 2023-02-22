@@ -247,6 +247,10 @@ result := mapResult
     return nil
 }
 
+func (x *reqSomeServiceBounceMap) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqSomeServiceBounceMap.Set* methods instead or set the fields directly.
 type reqSomeServiceBounceMapBuilder struct {
@@ -423,6 +427,10 @@ result := mapResult
     return nil
 }
 
+func (x *respSomeServiceBounceMap) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respSomeServiceBounceMap.Set* methods instead or set the fields directly.
 type respSomeServiceBounceMapBuilder struct {
@@ -580,6 +588,10 @@ result := listResult
 
     x.SetR(result)
     return nil
+}
+
+func (x *reqSomeServiceBinaryKeyedMap) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -756,6 +768,10 @@ result := mapResult
 
     x.SetValue(result)
     return nil
+}
+
+func (x *respSomeServiceBinaryKeyedMap) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

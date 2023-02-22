@@ -285,6 +285,10 @@ result := Color(enumResult)
     return nil
 }
 
+func (x *MyAnnotation) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyAnnotation.Set* methods instead or set the fields directly.
 type MyAnnotationBuilder struct {
@@ -1043,6 +1047,10 @@ if err != nil {
     return nil
 }
 
+func (x *Foo) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Foo.Set* methods instead or set the fields directly.
 type FooBuilder struct {
@@ -1584,6 +1592,10 @@ if err != nil {
     return nil
 }
 
+func (x *Baz) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 
 func (x *Baz) Write(p thrift.Protocol) error {
@@ -2056,6 +2068,10 @@ if err != nil {
     return nil
 }
 
+func (x *Bar) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Bar.Set* methods instead or set the fields directly.
 type BarBuilder struct {
@@ -2258,6 +2274,10 @@ if err != nil {
     return nil
 }
 
+func (x *DirectlyAdapted) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use DirectlyAdapted.Set* methods instead or set the fields directly.
 type DirectlyAdaptedBuilder struct {
@@ -2380,6 +2400,10 @@ if err != nil {
 
     x.SetField(result)
     return nil
+}
+
+func (x *IndependentDirectlyAdapted) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2629,6 +2653,10 @@ if err != nil {
 
     x.SetOptBoxedField(result)
     return nil
+}
+
+func (x *StructWithFieldAdapter) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2904,6 +2932,10 @@ result := setResult
     return nil
 }
 
+func (x *TerseAdaptedFields) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use TerseAdaptedFields.Set* methods instead or set the fields directly.
 type TerseAdaptedFieldsBuilder struct {
@@ -3062,6 +3094,10 @@ if err != nil {
     return nil
 }
 
+func (x *B) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use B.Set* methods instead or set the fields directly.
 type BBuilder struct {
@@ -3149,6 +3185,10 @@ var _ thrift.Struct = &A{}
 func NewA() *A {
     return (&A{})
 }
+func (x *A) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use A.Set* methods instead or set the fields directly.
 type ABuilder struct {
@@ -3258,6 +3298,10 @@ if err != nil {
 
     x.SetPath(result)
     return nil
+}
+
+func (x *Config) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -3455,6 +3499,10 @@ result := setResult
 
     x.SetSetString(result)
     return nil
+}
+
+func (x *MyStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -3939,6 +3987,10 @@ if err != nil {
 
     x.SetBinaryData(result)
     return nil
+}
+
+func (x *AdaptTestStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -5235,6 +5287,10 @@ if err != nil {
     return nil
 }
 
+func (x *AdaptTemplatedTestStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use AdaptTemplatedTestStruct.Set* methods instead or set the fields directly.
 type AdaptTemplatedTestStructBuilder struct {
@@ -5640,6 +5696,10 @@ if err != nil {
     return nil
 }
 
+func (x *AdaptTemplatedNestedTestStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use AdaptTemplatedNestedTestStruct.Set* methods instead or set the fields directly.
 type AdaptTemplatedNestedTestStructBuilder struct {
@@ -5815,6 +5875,10 @@ if err != nil {
     return nil
 }
 
+func (x *AdaptTestUnion) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 
 func (x *AdaptTestUnion) Write(p thrift.Protocol) error {
@@ -5925,6 +5989,10 @@ if err != nil {
 
     x.SetData(result)
     return nil
+}
+
+func (x *AdaptedStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -6049,6 +6117,10 @@ if err != nil {
 
     x.SetData(result)
     return nil
+}
+
+func (x *DirectlyAdaptedStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -6318,6 +6390,10 @@ if err != nil {
     return nil
 }
 
+func (x *StructFieldAdaptedStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use StructFieldAdaptedStruct.Set* methods instead or set the fields directly.
 type StructFieldAdaptedStructBuilder struct {
@@ -6489,6 +6565,10 @@ if err != nil {
     return nil
 }
 
+func (x *CircularAdaptee) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use CircularAdaptee.Set* methods instead or set the fields directly.
 type CircularAdapteeBuilder struct {
@@ -6619,6 +6699,10 @@ if err != nil {
 
     x.SetField(result)
     return nil
+}
+
+func (x *CircularStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -6753,6 +6837,10 @@ if err != nil {
     return nil
 }
 
+func (x *ReorderedStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use ReorderedStruct.Set* methods instead or set the fields directly.
 type ReorderedStructBuilder struct {
@@ -6840,6 +6928,10 @@ var _ thrift.Struct = &DeclaredAfterStruct{}
 func NewDeclaredAfterStruct() *DeclaredAfterStruct {
     return (&DeclaredAfterStruct{})
 }
+func (x *DeclaredAfterStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use DeclaredAfterStruct.Set* methods instead or set the fields directly.
 type DeclaredAfterStructBuilder struct {
@@ -6949,6 +7041,10 @@ if err != nil {
 
     x.SetData(result)
     return nil
+}
+
+func (x *RenamedStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -7075,6 +7171,10 @@ if err != nil {
     return nil
 }
 
+func (x *SameNamespaceStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use SameNamespaceStruct.Set* methods instead or set the fields directly.
 type SameNamespaceStructBuilder struct {
@@ -7162,6 +7262,10 @@ var _ thrift.Struct = &HeapAllocated{}
 func NewHeapAllocated() *HeapAllocated {
     return (&HeapAllocated{})
 }
+func (x *HeapAllocated) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use HeapAllocated.Set* methods instead or set the fields directly.
 type HeapAllocatedBuilder struct {
@@ -7279,6 +7383,10 @@ if err != nil {
 
     x.SetPtr(result)
     return nil
+}
+
+func (x *MoveOnly) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -7405,6 +7513,10 @@ if err != nil {
     return nil
 }
 
+func (x *AlsoMoveOnly) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use AlsoMoveOnly.Set* methods instead or set the fields directly.
 type AlsoMoveOnlyBuilder struct {
@@ -7492,6 +7604,10 @@ var _ thrift.Struct = &ApplyAdapter{}
 func NewApplyAdapter() *ApplyAdapter {
     return (&ApplyAdapter{})
 }
+func (x *ApplyAdapter) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use ApplyAdapter.Set* methods instead or set the fields directly.
 type ApplyAdapterBuilder struct {
@@ -7566,6 +7682,10 @@ var _ thrift.Struct = &TransitiveAdapted{}
 func NewTransitiveAdapted() *TransitiveAdapted {
     return (&TransitiveAdapted{})
 }
+func (x *TransitiveAdapted) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use TransitiveAdapted.Set* methods instead or set the fields directly.
 type TransitiveAdaptedBuilder struct {
@@ -7772,6 +7892,10 @@ if err != nil {
     return nil
 }
 
+func (x *CountingStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use CountingStruct.Set* methods instead or set the fields directly.
 type CountingStructBuilder struct {
@@ -7922,6 +8046,10 @@ if err != nil {
     return nil
 }
 
+func (x *Person) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Person.Set* methods instead or set the fields directly.
 type PersonBuilder struct {
@@ -8044,6 +8172,10 @@ if err != nil {
 
     x.SetName(result)
     return nil
+}
+
+func (x *Person2) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

@@ -115,6 +115,10 @@ if err != nil {
     return nil
 }
 
+func (x *Included) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Included.Set* methods instead or set the fields directly.
 type IncludedBuilder struct {

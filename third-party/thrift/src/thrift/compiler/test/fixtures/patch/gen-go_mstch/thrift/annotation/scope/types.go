@@ -23,6 +23,10 @@ var _ thrift.Struct = &Transitive{}
 func NewTransitive() *Transitive {
     return (&Transitive{})
 }
+func (x *Transitive) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Transitive.Set* methods instead or set the fields directly.
 type TransitiveBuilder struct {
@@ -97,6 +101,10 @@ var _ thrift.Struct = &Schema{}
 func NewSchema() *Schema {
     return (&Schema{})
 }
+func (x *Schema) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Schema.Set* methods instead or set the fields directly.
 type SchemaBuilder struct {
@@ -171,6 +179,10 @@ var _ thrift.Struct = &Program{}
 func NewProgram() *Program {
     return (&Program{})
 }
+func (x *Program) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Program.Set* methods instead or set the fields directly.
 type ProgramBuilder struct {
@@ -245,6 +257,10 @@ var _ thrift.Struct = &Struct{}
 func NewStruct() *Struct {
     return (&Struct{})
 }
+func (x *Struct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Struct.Set* methods instead or set the fields directly.
 type StructBuilder struct {
@@ -319,6 +335,10 @@ var _ thrift.Struct = &Union{}
 func NewUnion() *Union {
     return (&Union{})
 }
+func (x *Union) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Union.Set* methods instead or set the fields directly.
 type UnionBuilder struct {
@@ -393,6 +413,10 @@ var _ thrift.Struct = &Exception{}
 func NewException() *Exception {
     return (&Exception{})
 }
+func (x *Exception) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Exception.Set* methods instead or set the fields directly.
 type ExceptionBuilder struct {
@@ -467,6 +491,10 @@ var _ thrift.Struct = &Field{}
 func NewField() *Field {
     return (&Field{})
 }
+func (x *Field) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Field.Set* methods instead or set the fields directly.
 type FieldBuilder struct {
@@ -541,6 +569,10 @@ var _ thrift.Struct = &Typedef{}
 func NewTypedef() *Typedef {
     return (&Typedef{})
 }
+func (x *Typedef) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Typedef.Set* methods instead or set the fields directly.
 type TypedefBuilder struct {
@@ -615,6 +647,10 @@ var _ thrift.Struct = &Service{}
 func NewService() *Service {
     return (&Service{})
 }
+func (x *Service) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Service.Set* methods instead or set the fields directly.
 type ServiceBuilder struct {
@@ -689,6 +725,10 @@ var _ thrift.Struct = &Interaction{}
 func NewInteraction() *Interaction {
     return (&Interaction{})
 }
+func (x *Interaction) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Interaction.Set* methods instead or set the fields directly.
 type InteractionBuilder struct {
@@ -763,6 +803,10 @@ var _ thrift.Struct = &Function{}
 func NewFunction() *Function {
     return (&Function{})
 }
+func (x *Function) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Function.Set* methods instead or set the fields directly.
 type FunctionBuilder struct {
@@ -837,6 +881,10 @@ var _ thrift.Struct = &EnumValue{}
 func NewEnumValue() *EnumValue {
     return (&EnumValue{})
 }
+func (x *EnumValue) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use EnumValue.Set* methods instead or set the fields directly.
 type EnumValueBuilder struct {
@@ -911,6 +959,10 @@ var _ thrift.Struct = &Const{}
 func NewConst() *Const {
     return (&Const{})
 }
+func (x *Const) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Const.Set* methods instead or set the fields directly.
 type ConstBuilder struct {
@@ -985,6 +1037,10 @@ var _ thrift.Struct = &Enum{}
 func NewEnum() *Enum {
     return (&Enum{})
 }
+func (x *Enum) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Enum.Set* methods instead or set the fields directly.
 type EnumBuilder struct {
@@ -1059,6 +1115,10 @@ var _ thrift.Struct = &Structured{}
 func NewStructured() *Structured {
     return (&Structured{})
 }
+func (x *Structured) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Structured.Set* methods instead or set the fields directly.
 type StructuredBuilder struct {
@@ -1133,6 +1193,10 @@ var _ thrift.Struct = &Interface{}
 func NewInterface() *Interface {
     return (&Interface{})
 }
+func (x *Interface) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Interface.Set* methods instead or set the fields directly.
 type InterfaceBuilder struct {
@@ -1207,6 +1271,10 @@ var _ thrift.Struct = &RootDefinition{}
 func NewRootDefinition() *RootDefinition {
     return (&RootDefinition{})
 }
+func (x *RootDefinition) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use RootDefinition.Set* methods instead or set the fields directly.
 type RootDefinitionBuilder struct {
@@ -1281,6 +1349,10 @@ var _ thrift.Struct = &Definition{}
 func NewDefinition() *Definition {
     return (&Definition{})
 }
+func (x *Definition) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Definition.Set* methods instead or set the fields directly.
 type DefinitionBuilder struct {

@@ -154,6 +154,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStruct.Set* methods instead or set the fields directly.
 type MyStructBuilder struct {
@@ -342,6 +346,10 @@ if err != nil {
 
     x.SetMyDataItem(result)
     return nil
+}
+
+func (x *MyUnion) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

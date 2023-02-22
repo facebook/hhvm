@@ -23,6 +23,10 @@ var _ thrift.Struct = &Empty{}
 func NewEmpty() *Empty {
     return (&Empty{})
 }
+func (x *Empty) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Empty.Set* methods instead or set the fields directly.
 type EmptyBuilder struct {
@@ -97,6 +101,10 @@ var _ thrift.Struct = &Nada{}
 func NewNada() *Nada {
     return (&Nada{})
 }
+func (x *Nada) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 
 func (x *Nada) Write(p thrift.Protocol) error {

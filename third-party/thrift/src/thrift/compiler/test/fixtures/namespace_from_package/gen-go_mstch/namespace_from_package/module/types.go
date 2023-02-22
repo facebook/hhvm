@@ -60,6 +60,10 @@ if err != nil {
     return nil
 }
 
+func (x *Foo) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Foo.Set* methods instead or set the fields directly.
 type FooBuilder struct {

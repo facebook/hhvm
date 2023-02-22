@@ -99,6 +99,10 @@ if err != nil {
     return nil
 }
 
+func (x *Adapter) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Adapter.Set* methods instead or set the fields directly.
 type AdapterBuilder struct {
@@ -271,6 +275,10 @@ if err != nil {
 
     x.SetTypeClassName(result)
     return nil
+}
+
+func (x *Wrapper) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

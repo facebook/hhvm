@@ -150,6 +150,10 @@ if err != nil {
     return nil
 }
 
+func (x *Fields) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Fields.Set* methods instead or set the fields directly.
 type FieldsBuilder struct {

@@ -23,6 +23,10 @@ var _ thrift.Struct = &Also{}
 func NewAlso() *Also {
     return (&Also{})
 }
+func (x *Also) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Also.Set* methods instead or set the fields directly.
 type AlsoBuilder struct {

@@ -705,6 +705,10 @@ result := setResult
     return nil
 }
 
+func (x *SomeStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use SomeStruct.Set* methods instead or set the fields directly.
 type SomeStructBuilder struct {
@@ -993,6 +997,10 @@ result := MyEnum1(enumResult)
 
     x.SetMe1T2(result)
     return nil
+}
+
+func (x *MyStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

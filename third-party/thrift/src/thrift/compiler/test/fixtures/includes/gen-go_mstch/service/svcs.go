@@ -247,6 +247,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceQuery) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceQuery.Set* methods instead or set the fields directly.
 type reqMyServiceQueryBuilder struct {
@@ -346,6 +350,10 @@ var _ thrift.Struct = &respMyServiceQuery{}
 func newRespMyServiceQuery() *respMyServiceQuery {
     return (&respMyServiceQuery{})
 }
+func (x *respMyServiceQuery) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServiceQuery.Set* methods instead or set the fields directly.
 type respMyServiceQueryBuilder struct {
@@ -509,6 +517,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceHasArgDocs) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use reqMyServiceHasArgDocs.Set* methods instead or set the fields directly.
 type reqMyServiceHasArgDocsBuilder struct {
@@ -608,6 +620,10 @@ var _ thrift.Struct = &respMyServiceHasArgDocs{}
 func newRespMyServiceHasArgDocs() *respMyServiceHasArgDocs {
     return (&respMyServiceHasArgDocs{})
 }
+func (x *respMyServiceHasArgDocs) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use respMyServiceHasArgDocs.Set* methods instead or set the fields directly.
 type respMyServiceHasArgDocsBuilder struct {

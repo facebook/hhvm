@@ -233,6 +233,10 @@ if err != nil {
     return nil
 }
 
+func (x *Color) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Color.Set* methods instead or set the fields directly.
 type ColorBuilder struct {
@@ -579,6 +583,10 @@ if err != nil {
 
     x.SetHasAC(result)
     return nil
+}
+
+func (x *Vehicle) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1252,6 +1260,10 @@ result := listResult
 
     x.SetVehicles(result)
     return nil
+}
+
+func (x *Person) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

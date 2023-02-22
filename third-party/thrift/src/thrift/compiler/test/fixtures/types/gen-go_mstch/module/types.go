@@ -215,6 +215,10 @@ var _ thrift.Struct = &EmptyStruct{}
 func NewEmptyStruct() *EmptyStruct {
     return (&EmptyStruct{})
 }
+func (x *EmptyStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use EmptyStruct.Set* methods instead or set the fields directly.
 type EmptyStructBuilder struct {
@@ -324,6 +328,10 @@ if err != nil {
 
     x.SetField(result)
     return nil
+}
+
+func (x *DecoratedStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1031,6 +1039,10 @@ result := mapResult
     return nil
 }
 
+func (x *ContainerStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use ContainerStruct.Set* methods instead or set the fields directly.
 type ContainerStructBuilder struct {
@@ -1282,6 +1294,10 @@ result := listResult
     return nil
 }
 
+func (x *CppTypeStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use CppTypeStruct.Set* methods instead or set the fields directly.
 type CppTypeStructBuilder struct {
@@ -1404,6 +1420,10 @@ if err != nil {
 
     x.SetMyIntField(result)
     return nil
+}
+
+func (x *VirtualStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1573,6 +1593,10 @@ result := MyForwardRefEnum(enumResult)
 
     x.SetB(result)
     return nil
+}
+
+func (x *MyStructWithForwardRefEnum) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1747,6 +1771,10 @@ if err != nil {
 
     x.SetB(result)
     return nil
+}
+
+func (x *TrivialNumeric) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1935,6 +1963,10 @@ if err != nil {
 
     x.SetN(result)
     return nil
+}
+
+func (x *TrivialNestedWithDefault) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2164,6 +2196,10 @@ result := mapResult
     return nil
 }
 
+func (x *ComplexString) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use ComplexString.Set* methods instead or set the fields directly.
 type ComplexStringBuilder struct {
@@ -2354,6 +2390,10 @@ if err != nil {
 
     x.SetN(result)
     return nil
+}
+
+func (x *ComplexNestedWithDefault) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2639,6 +2679,10 @@ if err != nil {
 
     x.SetTiny(result)
     return nil
+}
+
+func (x *MinPadding) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2965,6 +3009,10 @@ if err != nil {
     return nil
 }
 
+func (x *MinPaddingWithCustomType) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MinPaddingWithCustomType.Set* methods instead or set the fields directly.
 type MinPaddingWithCustomTypeBuilder struct {
@@ -3260,6 +3308,10 @@ if err != nil {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyStruct.Set* methods instead or set the fields directly.
 type MyStructBuilder struct {
@@ -3386,6 +3438,10 @@ var _ thrift.Struct = &MyDataItem{}
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{})
 }
+func (x *MyDataItem) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use MyDataItem.Set* methods instead or set the fields directly.
 type MyDataItemBuilder struct {
@@ -3495,6 +3551,10 @@ if err != nil {
 
     x.SetFoo(result)
     return nil
+}
+
+func (x *Renaming) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -3747,6 +3807,10 @@ result := listResult
     return nil
 }
 
+func (x *AnnotatedTypes) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use AnnotatedTypes.Set* methods instead or set the fields directly.
 type AnnotatedTypesBuilder struct {
@@ -3937,6 +4001,10 @@ if err != nil {
     return nil
 }
 
+func (x *ForwardUsageRoot) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use ForwardUsageRoot.Set* methods instead or set the fields directly.
 type ForwardUsageRootBuilder struct {
@@ -4082,6 +4150,10 @@ if err != nil {
     return nil
 }
 
+func (x *ForwardUsageStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use ForwardUsageStruct.Set* methods instead or set the fields directly.
 type ForwardUsageStructBuilder struct {
@@ -4212,6 +4284,10 @@ if err != nil {
 
     x.SetFoo(result)
     return nil
+}
+
+func (x *ForwardUsageByRef) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -4392,6 +4468,10 @@ result := mapResult
     return nil
 }
 
+func (x *IncompleteMap) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use IncompleteMap.Set* methods instead or set the fields directly.
 type IncompleteMapBuilder struct {
@@ -4479,6 +4559,10 @@ var _ thrift.Struct = &IncompleteMapDep{}
 func NewIncompleteMapDep() *IncompleteMapDep {
     return (&IncompleteMapDep{})
 }
+func (x *IncompleteMapDep) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use IncompleteMapDep.Set* methods instead or set the fields directly.
 type IncompleteMapDepBuilder struct {
@@ -4644,6 +4728,10 @@ result := mapResult
     return nil
 }
 
+func (x *CompleteMap) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use CompleteMap.Set* methods instead or set the fields directly.
 type CompleteMapBuilder struct {
@@ -4731,6 +4819,10 @@ var _ thrift.Struct = &CompleteMapDep{}
 func NewCompleteMapDep() *CompleteMapDep {
     return (&CompleteMapDep{})
 }
+func (x *CompleteMapDep) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use CompleteMapDep.Set* methods instead or set the fields directly.
 type CompleteMapDepBuilder struct {
@@ -4879,6 +4971,10 @@ result := listResult
     return nil
 }
 
+func (x *IncompleteList) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use IncompleteList.Set* methods instead or set the fields directly.
 type IncompleteListBuilder struct {
@@ -4966,6 +5062,10 @@ var _ thrift.Struct = &IncompleteListDep{}
 func NewIncompleteListDep() *IncompleteListDep {
     return (&IncompleteListDep{})
 }
+func (x *IncompleteListDep) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use IncompleteListDep.Set* methods instead or set the fields directly.
 type IncompleteListDepBuilder struct {
@@ -5114,6 +5214,10 @@ result := listResult
     return nil
 }
 
+func (x *CompleteList) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use CompleteList.Set* methods instead or set the fields directly.
 type CompleteListBuilder struct {
@@ -5201,6 +5305,10 @@ var _ thrift.Struct = &CompleteListDep{}
 func NewCompleteListDep() *CompleteListDep {
     return (&CompleteListDep{})
 }
+func (x *CompleteListDep) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use CompleteListDep.Set* methods instead or set the fields directly.
 type CompleteListDepBuilder struct {
@@ -5349,6 +5457,10 @@ result := listResult
     return nil
 }
 
+func (x *AdaptedList) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use AdaptedList.Set* methods instead or set the fields directly.
 type AdaptedListBuilder struct {
@@ -5479,6 +5591,10 @@ if err != nil {
 
     x.SetField(result)
     return nil
+}
+
+func (x *AdaptedListDep) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -5642,6 +5758,10 @@ result := listResult
     return nil
 }
 
+func (x *DependentAdaptedList) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use DependentAdaptedList.Set* methods instead or set the fields directly.
 type DependentAdaptedListBuilder struct {
@@ -5771,6 +5891,10 @@ if err != nil {
 
     x.SetField(result)
     return nil
+}
+
+func (x *DependentAdaptedListDep) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -6244,6 +6368,10 @@ if err != nil {
     return nil
 }
 
+func (x *AllocatorAware) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use AllocatorAware.Set* methods instead or set the fields directly.
 type AllocatorAwareBuilder struct {
@@ -6490,6 +6618,10 @@ if err != nil {
     return nil
 }
 
+func (x *AllocatorAware2) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use AllocatorAware2.Set* methods instead or set the fields directly.
 type AllocatorAware2Builder struct {
@@ -6701,6 +6833,10 @@ if err != nil {
     return nil
 }
 
+func (x *TypedefStruct) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use TypedefStruct.Set* methods instead or set the fields directly.
 type TypedefStructBuilder struct {
@@ -6849,6 +6985,10 @@ if err != nil {
 
     x.Set_Field(result)
     return nil
+}
+
+func (x *StructWithDoubleUnderscores) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

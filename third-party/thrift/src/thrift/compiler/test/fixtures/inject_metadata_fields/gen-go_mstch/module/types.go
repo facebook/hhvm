@@ -64,6 +64,10 @@ if err != nil {
     return nil
 }
 
+func (x *Fields) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Fields.Set* methods instead or set the fields directly.
 type FieldsBuilder struct {
@@ -186,6 +190,10 @@ if err != nil {
 
     x.SetInjectedField(result)
     return nil
+}
+
+func (x *FieldsInjectedToEmptyStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -347,6 +355,10 @@ if err != nil {
 
     x.SetInjectedField(result)
     return nil
+}
+
+func (x *FieldsInjectedToStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -609,6 +621,10 @@ if err != nil {
 
     x.SetInjectedUnstructuredAnnotationField(result)
     return nil
+}
+
+func (x *FieldsInjectedWithIncludedStruct) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

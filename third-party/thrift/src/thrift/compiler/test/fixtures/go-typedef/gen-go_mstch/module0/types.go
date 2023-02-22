@@ -97,6 +97,10 @@ if err != nil {
     return nil
 }
 
+func (x *Accessory) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use Accessory.Set* methods instead or set the fields directly.
 type AccessoryBuilder struct {
@@ -269,6 +273,10 @@ if err != nil {
 
     x.SetName(result)
     return nil
+}
+
+func (x *PartName) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

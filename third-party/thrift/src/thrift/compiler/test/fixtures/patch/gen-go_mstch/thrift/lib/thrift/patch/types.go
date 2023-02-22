@@ -126,6 +126,10 @@ var _ thrift.Struct = &GeneratePatch{}
 func NewGeneratePatch() *GeneratePatch {
     return (&GeneratePatch{})
 }
+func (x *GeneratePatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use GeneratePatch.Set* methods instead or set the fields directly.
 type GeneratePatchBuilder struct {
@@ -200,6 +204,10 @@ var _ thrift.Struct = &AssignOnlyPatch{}
 func NewAssignOnlyPatch() *AssignOnlyPatch {
     return (&AssignOnlyPatch{})
 }
+func (x *AssignOnlyPatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use AssignOnlyPatch.Set* methods instead or set the fields directly.
 type AssignOnlyPatchBuilder struct {
@@ -390,6 +398,10 @@ if err != nil {
 
     x.SetInvert(result)
     return nil
+}
+
+func (x *BoolPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -623,6 +635,10 @@ if err != nil {
     return nil
 }
 
+func (x *BytePatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use BytePatch.Set* methods instead or set the fields directly.
 type BytePatchBuilder struct {
@@ -852,6 +868,10 @@ if err != nil {
 
     x.SetAdd(result)
     return nil
+}
+
+func (x *I16Patch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1085,6 +1105,10 @@ if err != nil {
     return nil
 }
 
+func (x *I32Patch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use I32Patch.Set* methods instead or set the fields directly.
 type I32PatchBuilder struct {
@@ -1314,6 +1338,10 @@ if err != nil {
 
     x.SetAdd(result)
     return nil
+}
+
+func (x *I64Patch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -1547,6 +1575,10 @@ if err != nil {
     return nil
 }
 
+func (x *FloatPatch) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
 
 // Deprecated: Use FloatPatch.Set* methods instead or set the fields directly.
 type FloatPatchBuilder struct {
@@ -1776,6 +1808,10 @@ if err != nil {
 
     x.SetAdd(result)
     return nil
+}
+
+func (x *DoublePatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2044,6 +2080,10 @@ if err != nil {
 
     x.SetAppend(result)
     return nil
+}
+
+func (x *StringPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 
@@ -2339,6 +2379,10 @@ if err != nil {
 
     x.SetAppend(result)
     return nil
+}
+
+func (x *BinaryPatch) String() string {
+    return fmt.Sprintf("%+v", x)
 }
 
 

@@ -46,14 +46,12 @@ struct TLSDatum {
 };
 
 /*
- * See code-gen-tls-x64.h for an explanation of this assembly.
+ * Wrapper helper for TLSDatum.
  */
-#define tls_datum(var) ([] {                \
-  long* ret;                                \
-  __asm__("lea %1, %%rax\nmov %%rdi, %0" :  \
-          "=r"(ret) : "m"(var));            \
-  return TLSDatum<decltype(var)>(ret);      \
-}())
+template<typename T>
+TLSDatum<T> tls_datum(const T& var) {
+  return TLSDatum<T>(var);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

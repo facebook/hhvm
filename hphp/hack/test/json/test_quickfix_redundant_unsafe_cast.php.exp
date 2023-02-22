@@ -1,7 +1,7 @@
 {
   "errors":[
     {
-      "descr":"This use of `HH\\FIXME\\UNSAFE_CAST` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast.",
+      "descr":"This use of `HH\\FIXME\\UNSAFE_CAST` is redundant since the type of the expression is a subtype of the type being cast to. Please consider removing this cast.",
       "severity":"error",
       "path":"test_quickfix_redundant_unsafe_cast.php",
       "line":7,

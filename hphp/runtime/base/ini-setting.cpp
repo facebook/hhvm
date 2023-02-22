@@ -47,6 +47,7 @@
 #include <map>
 
 #include <folly/container/F14Map.h>
+#include <folly/Hash.h>
 #include <folly/Overload.h>
 
 namespace HPHP {
@@ -126,6 +127,27 @@ Variant ini_get_vec(std::vector<T>& p) {
   return ret.toArray();
 }
 
+template<class T> struct PreserveOrder { static constexpr bool val = false; };
+
+template<class... Args>
+struct PreserveOrder<std::set<Args...>> { static constexpr bool val = true; };
+
+template<class... Args>
+struct PreserveOrder<std::map<Args...>> { static constexpr bool val = true; };
+
+template<class... Args>
+struct PreserveOrder<boost::container::flat_set<Args...>> {
+  static constexpr bool val = true;
+};
+
+template<class T>
+size_t hash_collection(const T& c) {
+  if constexpr (PreserveOrder<T>::val) {
+    return folly::hash::hash_range(c.begin(), c.end());
+  }
+  return folly::hash::commutative_hash_combine_range(c.begin(), c.end());
+}
+
 }
 
 #define INI_ASSERT_STR(v) \
@@ -160,6 +182,7 @@ Variant ini_get_vec(std::vector<T>& p) {
   static void ini_log(Ty& t, const char* name, StructuredLogEntry& ent) { \
     ent.setInt(name, t);                                                  \
   }                                                                       \
+  static size_t ini_hash(Ty& t) { return std::hash<Ty>{}(t); }            \
   static folly::dynamic ini_dyn(Ty& t) { return t; }                      \
 /**/
 
@@ -176,6 +199,7 @@ Variant ini_get_vec(std::vector<T>& p) {
   static void ini_log(Ty& t, const char* name, StructuredLogEntry& ent) { \
     ent.setInt(name, t);                                                  \
   }                                                                       \
+  static size_t ini_hash(Ty& t) { return std::hash<Ty>{}(t); }            \
   static folly::dynamic ini_dyn(Ty& t) { return t; }                      \
 /**/
 
@@ -203,6 +227,9 @@ Variant ini_get_vec(std::vector<T>& p) {
       tags.emplace(strs.back());                                          \
     }                                                                     \
     ent.setSet(name, tags);                                               \
+  }                                                                       \
+  static size_t ini_hash(Ty& t) {                                         \
+    return hash_collection(t);                                            \
   }                                                                       \
   static folly::dynamic ini_dyn(Ty& t) {                                  \
     folly::dynamic obj = folly::dynamic::object;                          \
@@ -232,6 +259,9 @@ Variant ini_get_vec(std::vector<T>& p) {
     std::set<folly::StringPiece> tags;                                    \
     for (auto& v : t) tags.emplace(v);                                    \
     ent.setSet(name, tags);                                               \
+  }                                                                       \
+  static size_t ini_hash(Ty& t) {                                         \
+    return hash_collection(t);                                            \
   }                                                                       \
   static folly::dynamic ini_dyn(Ty& t) {                                  \
     auto arr = folly::dynamic::array();                                   \
@@ -265,6 +295,7 @@ static void ini_log(bool& t, const char* name, StructuredLogEntry& ent) {
   ent.setInt(name, t ? 1 : 0);
 }
 static folly::dynamic ini_dyn(bool& t) { return t; }
+static size_t ini_hash(bool& t) { return std::hash<bool>{}(t); }
 
 Variant ini_get(double& p) { return p; }
 bool ini_on_update(const Variant& value, double& p) {
@@ -276,6 +307,7 @@ static void ini_log(double& t, const char* name, StructuredLogEntry& ent) {
   ent.setStr(name, folly::to<std::string>(t));
 }
 static folly::dynamic ini_dyn(double& t) { return t; }
+static size_t ini_hash(double& t) { return std::hash<double>{}(t); }
 
 Variant ini_get(std::string& p) { return p.data(); }
 bool ini_on_update(const Variant& value, std::string& p) {
@@ -287,6 +319,7 @@ static void ini_log(std::string& t, const char* name, StructuredLogEntry& ent) {
   ent.setStr(name, t);
 }
 static folly::dynamic ini_dyn(std::string& t) { return t; }
+static size_t ini_hash(std::string& t) { return std::hash<std::string>{}(t); }
 
 Variant ini_get(std::unordered_map<std::string, int>& p) {
   DictInit ret(p.size());
@@ -318,6 +351,9 @@ static folly::dynamic ini_dyn(std::unordered_map<std::string, int>& t) {
   for (auto& [k, v] : t) obj[k] = v;
   return obj;
 }
+static size_t ini_hash(std::unordered_map<std::string, int>& t) {
+  return hash_collection(t);
+}
 
 Variant ini_get(Array& p) { return p; }
 bool ini_on_update(const Variant& value, Array& p) {
@@ -327,6 +363,9 @@ bool ini_on_update(const Variant& value, Array& p) {
 }
 static void ini_log(Array& t, const char* name, StructuredLogEntry& ent) {
   // Do nothing
+}
+static size_t ini_hash(Array&) {
+  return 0; // don't bother hashing arrays as they aren't included in logging
 }
 static folly::dynamic ini_dyn(Array& t) {
   // Ignore
@@ -356,6 +395,9 @@ static folly::dynamic ini_dyn(std::vector<uint32_t>& t) {
   for (auto i : t) arr.push_back(i);
   return arr;
 }
+static size_t ini_hash(std::vector<uint32_t>& t) {
+  return folly::hash::hash_range(t.begin(), t.end());
+}
 
 Variant ini_get(std::vector<std::string>& p) { return ini_get_vec(p); }
 bool ini_on_update(const Variant& value, std::vector<std::string>& p) {
@@ -375,6 +417,9 @@ static folly::dynamic ini_dyn(std::vector<std::string>& t) {
   auto arr = folly::dynamic::array();
   for (auto& s : t) arr.push_back(s);
   return arr;
+}
+static size_t ini_hash(std::vector<std::string>& t) {
+  return folly::hash::hash_range(t.begin(), t.end());
 }
 
 const IniSettingMap ini_iterate(const IniSettingMap &ini,
@@ -831,6 +876,22 @@ folly::dynamic doDyn(IniSetting::OptionData& data) {
 #undef F
 }
 
+size_t doHash(IniSetting::OptionData& data) {
+#define F(Ty) \
+  [] (IniSetting::SetAndGetImpl<Ty>& data) { \
+    Ty v;                                    \
+    if (data.getter) v = data.getter();      \
+    else if (data.val) v = *data.val;        \
+    return ini_hash(v);                      \
+  },
+  return folly::variant_match<size_t>(
+    data,
+    INI_TYPES(F)
+    [] (std::nullptr_t) { always_assert(false); return 0; }
+  );
+#undef F
+}
+
 using CallbackMap = folly::F14FastMap<
   String, IniCallbackData, hphp_string_hash, hphp_string_same>;
 
@@ -1128,6 +1189,25 @@ folly::dynamic IniSetting::GetAllAsDynamic() {
     obj[iter.first.toCppString()] = doDyn(iter.second.callbacks);
   }
   return obj;
+}
+
+size_t IniSetting::HashAll(const hphp_fast_string_set& toLog,
+                           const hphp_fast_string_set& toExclude) {
+  size_t hash = 0;
+  for (auto& iter: boost::join(s_system_ini_callbacks, *s_user_callbacks)) {
+    if (!toLog.empty() && !toLog.count(iter.first.toCppString())) continue;
+    if (toExclude.count(iter.first.toCppString())) continue;
+    if (shouldHideSetting(iter.first)) continue;
+
+    hash = folly::hash::commutative_hash_combine_value_generic(
+      hash,
+      std::hash<size_t>{},
+      folly::hash::hash_combine(
+        iter.first.toCppString(), doHash(iter.second.callbacks)
+      )
+    );
+  }
+  return hash;
 }
 
 Array IniSetting::GetAll(const String& ext_name, bool details) {

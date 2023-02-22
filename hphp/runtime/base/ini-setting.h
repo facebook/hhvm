@@ -204,6 +204,8 @@ public:
   static Array GetAll(const String& extension, bool details);
   static std::string GetAllAsJSON();
   static folly::dynamic GetAllAsDynamic();
+  static size_t HashAll(const hphp_fast_string_set& toLog,
+                        const hphp_fast_string_set& toExclude);
   static void Log(StructuredLogEntry& ent, const hphp_fast_string_set& toLog,
                   const hphp_fast_string_set& toExclude);
 

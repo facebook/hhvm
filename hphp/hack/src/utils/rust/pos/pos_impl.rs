@@ -27,7 +27,6 @@ use crate::pos_span_tiny::PosSpanTiny;
 
 #[derive(
     Clone,
-    Debug,
     Deserialize,
     Hash,
     FromOcamlRep,
@@ -55,7 +54,6 @@ enum PosImpl {
 
 #[derive(
     Clone,
-    Debug,
     Deserialize,
     FromOcamlRep,
     FromOcamlRepIn,
@@ -363,11 +361,20 @@ impl std::fmt::Display for Pos {
                 file, start, end, ..
             } => do_fmt(f, file, &**start, &**end),
             PosImpl::Tiny { file, span } => {
+                if self.is_none() {
+                    return write!(f, "Pos::NONE");
+                }
                 let PosSpanRaw { start, end } = span.to_raw_span();
                 do_fmt(f, file, &start, &end)
             }
             PosImpl::FromReason(_p) => unimplemented!(),
         }
+    }
+}
+
+impl std::fmt::Debug for Pos {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{self}")
     }
 }
 

@@ -111,27 +111,11 @@ Program(
                 file_attributes: [],
                 mode: Mstrict,
                 name: Id(
-                    Pos(
-                        Tiny {
-                            file: RelativePath {
-                                prefix: Dummy,
-                                path: "tuple_hints.php",
-                            },
-                            span: PosSpanTiny { from 12:9 to 12:12 },
-                        },
-                    ),
+                    |tuple_hints.php(12:9-12),
                     "foo",
                 ),
                 fun: Fun_ {
-                    span: Pos(
-                        Tiny {
-                            file: RelativePath {
-                                prefix: Dummy,
-                                path: "tuple_hints.php",
-                            },
-                            span: PosSpanTiny { from 12:0 to 12:36 },
-                        },
-                    ),
+                    span: |tuple_hints.php(12:0-36),
                     readonly_this: None,
                     annotation: (),
                     readonly_ret: None,
@@ -139,15 +123,7 @@ Program(
                         (),
                         Some(
                             Hint(
-                                Pos(
-                                    Tiny {
-                                        file: RelativePath {
-                                            prefix: Dummy,
-                                            path: "tuple_hints.php",
-                                        },
-                                        span: PosSpanTiny { from 12:29 to 12:33 },
-                                    },
-                                ),
+                                |tuple_hints.php(12:29-33),
                                 Hprim(
                                     Tvoid,
                                 ),
@@ -163,39 +139,15 @@ Program(
                                 (),
                                 Some(
                                     Hint(
-                                        Pos(
-                                            Tiny {
-                                                file: RelativePath {
-                                                    prefix: Dummy,
-                                                    path: "tuple_hints.php",
-                                                },
-                                                span: PosSpanTiny { from 12:13 to 12:23 },
-                                            },
-                                        ),
+                                        |tuple_hints.php(12:13-23),
                                         Happly(
                                             Id(
-                                                Pos(
-                                                    Tiny {
-                                                        file: RelativePath {
-                                                            prefix: Dummy,
-                                                            path: "tuple_hints.php",
-                                                        },
-                                                        span: PosSpanTiny { from 12:13 to 12:18 },
-                                                    },
-                                                ),
+                                                |tuple_hints.php(12:13-18),
                                                 "tuple",
                                             ),
                                             [
                                                 Hint(
-                                                    Pos(
-                                                        Tiny {
-                                                            file: RelativePath {
-                                                                prefix: Dummy,
-                                                                path: "tuple_hints.php",
-                                                            },
-                                                            span: PosSpanTiny { from 12:19 to 12:22 },
-                                                        },
-                                                    ),
+                                                    |tuple_hints.php(12:19-22),
                                                     Hprim(
                                                         Tint,
                                                     ),
@@ -206,15 +158,7 @@ Program(
                                 ),
                             ),
                             is_variadic: false,
-                            pos: Pos(
-                                Tiny {
-                                    file: RelativePath {
-                                        prefix: Dummy,
-                                        path: "tuple_hints.php",
-                                    },
-                                    span: PosSpanTiny { from 12:24 to 12:26 },
-                                },
-                            ),
+                            pos: |tuple_hints.php(12:24-26),
                             name: "$x",
                             expr: None,
                             readonly: None,
@@ -231,15 +175,7 @@ Program(
                         fb_ast: Block(
                             [
                                 Stmt(
-                                    Pos(
-                                        Tiny {
-                                            file: RelativePath {
-                                                prefix: Dummy,
-                                                path: "",
-                                            },
-                                            span: PosSpanTiny { from 0:18446744073709551615 to 0:18446744073709551615 },
-                                        },
-                                    ),
+                                    Pos::NONE,
                                     Noop,
                                 ),
                             ],
@@ -252,24 +188,7 @@ Program(
                     external: false,
                     doc_comment: Some(
                         (
-                            Pos(
-                                Small {
-                                    file: RelativePath {
-                                        prefix: Dummy,
-                                        path: "tuple_hints.php",
-                                    },
-                                    start: FilePosSmall {
-                                        bol: 5,
-                                        line: 2,
-                                        column: 0,
-                                    },
-                                    end: FilePosSmall {
-                                        bol: 208,
-                                        line: 10,
-                                        column: 3,
-                                    },
-                                },
-                            ),
+                            |tuple_hints.php(2:0-10:3),
                             "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */",
                         ),
                     ),

@@ -55,7 +55,7 @@ impl Display for Prefix {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Eq, Hash, PartialEq)]
 #[derive(EqModuloPos, FromOcamlRep, ToOcamlRep, NoPosHash)]
 pub struct RelativePath {
     prefix: Prefix,
@@ -95,6 +95,12 @@ impl RelativePath {
 impl Display for RelativePath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}|{}", self.prefix, self.path.display())
+    }
+}
+
+impl std::fmt::Debug for RelativePath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{self}")
     }
 }
 

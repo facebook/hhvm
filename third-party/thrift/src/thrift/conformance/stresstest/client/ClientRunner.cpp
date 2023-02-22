@@ -46,7 +46,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
            connectionIdx < cfg.numConnectionsPerThread;
            connectionIdx++) {
         std::shared_ptr<StressTestAsyncClient> connection =
-            ClientFactory::createClient(evb, cfg.connConfig);
+            createClient(evb, cfg.connConfig);
         for (size_t i = 0; i < cfg.numClientsPerConnection; i++) {
           clients_.emplace_back(
               std::make_unique<StressTestClient>(connection, rpcStats_));

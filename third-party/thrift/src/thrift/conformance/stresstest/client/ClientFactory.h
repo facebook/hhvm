@@ -21,6 +21,7 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/SSLContext.h>
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
+#include <thrift/lib/cpp2/PluggableFunction.h>
 
 namespace apache {
 namespace thrift {
@@ -42,7 +43,7 @@ struct ClientConnectionConfig {
 
 class ClientFactory {
  public:
-  static std::unique_ptr<StressTestAsyncClient> createClient(
+  static std::unique_ptr<StressTestAsyncClient> createRocketClient(
       folly::EventBase* evb, const ClientConnectionConfig& cfg);
 
   static void useCustomSslContext(
@@ -52,6 +53,12 @@ class ClientFactory {
   static void useCustomFizzVerifier(
       std::function<std::shared_ptr<fizz::CertificateVerifier>()> fn);
 };
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    std::unique_ptr<Client<StressTest>>,
+    createClient,
+    folly::EventBase* /* the EVB running the test */,
+    const ClientConnectionConfig&);
 
 } // namespace stress
 } // namespace thrift

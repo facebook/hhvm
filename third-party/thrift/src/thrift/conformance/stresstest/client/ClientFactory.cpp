@@ -119,10 +119,19 @@ folly::AsyncTransport::UniquePtr createSocket(
 
 } // namespace
 
-/* static */ std::unique_ptr<StressTestAsyncClient> ClientFactory::createClient(
+/* static */ std::unique_ptr<StressTestAsyncClient>
+ClientFactory::createRocketClient(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto chan = RocketClientChannel::newChannel(createSocket(evb, cfg));
   return std::make_unique<StressTestAsyncClient>(std::move(chan));
+}
+
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    std::unique_ptr<Client<StressTest>>,
+    createClient,
+    folly::EventBase* evb,
+    const ClientConnectionConfig& cfg) {
+  return ClientFactory::createRocketClient(evb, cfg);
 }
 
 /* static */ void ClientFactory::useCustomSslContext(

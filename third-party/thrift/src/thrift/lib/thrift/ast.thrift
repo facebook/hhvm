@@ -23,8 +23,10 @@ namespace py3 apache.thrift
 // line and column when the schema is produced from an IDL file.
 struct SourceRange {
   1: id.ProgramId programId;
-  2: i32 beginOffset;
-  3: i32 endOffset;
+  2: i32 beginLine;
+  3: i32 beginColumn;
+  4: i32 endLine;
+  5: i32 endColumn;
 }
 
 /**
@@ -36,22 +38,15 @@ struct SourceInfo {
   // directory structure.
   1: string fileName;
 
-  // Line offsets in code units pointing to the beginning of each line.
-  // For example:
-  //   [0, 10, 15]
-  // means that the first line consists of 10 code units including newline and
-  // the second line is 5 code units and doesn't have a newlne.
-  2: list<i32> lineOffsets;
-
   /**
    * Per-language include statements.
    */
-  3: map<string, list<id.ValueId>> languageIncludes;
+  2: map<string, list<id.ValueId>> languageIncludes;
 
   /**
    * Per-language namespace.
    */
-  4: map<string, id.ValueId> namespaces;
+  3: map<string, id.ValueId> namespaces;
 }
 
 // A thrift schema that corresponds to one or more thrift files.

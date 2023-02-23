@@ -99,6 +99,11 @@ class t_ast_generator : public t_generator {
   Id positionToId(size_t pos) {
     return Id{useZigzag_ ? util::zigzagToI64(pos + 1) : int64_t(pos + 1)};
   }
+  template <typename Id>
+  size_t idToPosition(Id id) {
+    return useZigzag_ ? util::i64ToZigzag(folly::to_underlying(id)) - 1
+                      : size_t(id) - 1;
+  }
 
   std::ofstream f_out_;
   ast_protocol protocol_;
@@ -115,6 +120,7 @@ void t_ast_generator::generate_program() {
       program_index;
   std::unordered_map<const t_named*, apache::thrift::type::DefinitionId>
       definition_index;
+
   auto intern_value = [&](std::unique_ptr<t_const_value> val,
                           t_type_ref = {},
                           t_program* = nullptr) {
@@ -124,6 +130,27 @@ void t_ast_generator::generate_program() {
     values.push_back(const_to_value(*val));
     return ret;
   };
+
+  auto populate_defs = [&](t_program* program) {
+    auto& defs = ast.programs()
+                     ->at(idToPosition(program_index.at(program)))
+                     .definitions()
+                     .ensure();
+    for (auto& def : program->definitions()) {
+      defs.push_back(definition_index.at(&def));
+
+      resolved_location begin(def.src_range().begin, source_mgr_);
+      resolved_location end(def.src_range().end, source_mgr_);
+      cpp2::SourceRange range;
+      range.programId() = program_index.at(program);
+      range.beginLine() = begin.line();
+      range.beginColumn() = begin.column();
+      range.endLine() = end.line();
+      range.endColumn() = end.column();
+      ast.sourceRanges()[definition_index.at(&def)] = range;
+    }
+  };
+
   schematizer schema_source(intern_value);
   const_ast_visitor visitor;
   visitor.add_program_visitor([&](const t_program& program) {
@@ -141,13 +168,12 @@ void t_ast_generator::generate_program() {
       // This could invalidate references into `programs`.
       visitor(*include);
       programs.at(pos).includes().ensure().push_back(program_index.at(include));
-      auto& defs = programs.at(pos).definitions().ensure();
-      for (auto& def : include->definitions()) {
-        defs.push_back(definition_index.at(&def));
-      }
+      populate_defs(include);
     }
 
     cpp2::SourceInfo info;
+    info.fileName() = program.path();
+
     for (const auto& [lang, incs] : program.language_includes()) {
       for (const auto& inc : incs) {
         info.languageIncludes()[lang].push_back(static_cast<type::ValueId>(
@@ -160,7 +186,6 @@ void t_ast_generator::generate_program() {
           intern_value(std::make_unique<t_const_value>(langNamespace)));
     }
 
-    // TODO: rest of sourceInfo
     ast.sources()[program_id] = std::move(info);
 
     // Note: have to populate `definitions` after the visitor completes since it
@@ -190,10 +215,7 @@ void t_ast_generator::generate_program() {
   THRIFT_ADD_VISITOR(const);
 #undef THRIFT_ADD_VISITOR
   visitor(*program_);
-  auto& defs = ast.programs()->at(0).definitions().ensure();
-  for (auto& def : program_->definitions()) {
-    defs.push_back(definition_index.at(&def));
-  }
+  populate_defs(program_);
 
   switch (protocol_) {
     case ast_protocol::json:

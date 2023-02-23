@@ -131,7 +131,7 @@ fn elaborate<T: Transform>(
 
         // Replace malformed key / value bindings in as expressions with invalid
         // local var markers
-        // passes::elab_as_expr::ElabAsExprPass::default(),
+        passes::elab_as_expr::ElabAsExprPass::default(),
 
         // Validate hints used in `Cast` expressions
         passes::validate_expr_cast::ValidateExprCastPass::default(),

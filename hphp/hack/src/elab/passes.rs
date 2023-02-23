@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+pub mod elab_as_expr;
 pub mod elab_block;
 pub mod elab_class_id;
 pub mod elab_class_vars;

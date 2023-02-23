@@ -43,7 +43,7 @@ class ProcessBase:
 
     proc = None
 
-    def __init__(self, cmd, base_dir=None, junk_fill=False, pass_fds=()):
+    def __init__(self, cmd, base_dir=None, junk_fill=False, pass_fds=(), stdout=None):
         if base_dir is None:
             base_dir = BaseDirectory('ProcessBase')
         self.base_dir = base_dir
@@ -64,8 +64,8 @@ class ProcessBase:
                     env = {'MALLOC_CONF': 'junk:true'}
                 else:
                     env = None
-                self.proc = MCPopen(cmd, stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE, env=env,
+                self.proc = MCPopen(cmd, stdout=stdout,
+                                    stderr=None, env=env,
                                     pass_fds=pass_fds)
 
             except OSError:
@@ -1069,7 +1069,9 @@ class Mcpiper(ProcessBase):
         if extra_args:
             args.extend(extra_args)
 
-        super().__init__(args, base_dir)
+        # Mcpiper tests need to examine the output, so capture it instead of
+        # writing to stdout
+        super().__init__(args, base_dir, stdout=subprocess.PIPE)
 
     def output(self):
         if not hasattr(self, 'stdout'):

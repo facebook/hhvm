@@ -37,13 +37,6 @@ namespace thrift {
 namespace op {
 namespace detail {
 
-// Helper that creates a leaky singleton.
-template <typename F>
-FOLLY_EXPORT const auto& staticDefault(F&& make) {
-  static const auto& kVal = *make().release();
-  return kVal;
-}
-
 // Gets a (potentally const&) value representing the default.
 //
 // C++'s default for the underlying native type, is the default for all
@@ -146,11 +139,17 @@ struct IsEmpty<void> {
 template <typename Tag>
 struct ThriftClearDefault {
   const auto& operator()() const {
-    return staticDefault([] {
-      auto value = std::make_unique<type::native_type<Tag>>();
-      apache::thrift::clear(*value);
-      return value;
-    });
+    static const auto& obj = *[] {
+      auto* p = new type::native_type<Tag>();
+      try {
+        apache::thrift::clear(*p);
+        return p;
+      } catch (...) {
+        delete p;
+        throw;
+      }
+    }();
+    return obj;
   }
 };
 
@@ -158,9 +157,8 @@ struct ThriftClearDefault {
 template <typename Tag>
 struct CreateDefault {
   const auto& operator()() const {
-    return staticDefault([] {
-      return std::make_unique<type::native_type<Tag>>(op::create<Tag>());
-    });
+    static const auto* p = new type::native_type<Tag>();
+    return *p;
   }
 };
 
@@ -208,24 +206,30 @@ struct GetDefault<
   const adapt_detail::
       if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&
       operator()() const {
-    return staticDefault([] {
+    static const auto& obj = *[] {
       // TODO(afuller): Remove or move this logic to the adapter.
-      auto& obj = *new Struct{};
-      folly::annotate_object_leaked(&obj);
-      return std::make_unique<type::native_type<Tag>>(op::create<Tag>(obj));
-    });
+      auto* s = new Struct{};
+      try {
+        auto* adapted = new type::native_type<Tag>(op::create<Tag>(*s));
+        folly::lsan_ignore_object(s);
+        return adapted;
+      } catch (...) {
+        delete s;
+        throw;
+      }
+    }();
+    return obj;
   }
 };
 template <typename Adapter, typename UTag>
 struct GetIntrinsicDefault<type::adapted<Adapter, UTag>> {
   using Tag = type::adapted<Adapter, UTag>;
   const auto& operator()() const {
-    return staticDefault([] {
-      // TODO(dokwon): Consider adding enforcement to striping reference in
-      // 'Adapter::fromThrift' instead of copying.
-      return std::make_unique<type::native_type<Tag>>(
-          Adapter::fromThrift(folly::copy(GetIntrinsicDefault<UTag>{}())));
-    });
+    // TODO(dokwon): Consider adding enforcement to striping reference in
+    // 'Adapter::fromThrift' instead of copying.
+    static const auto* p = new type::native_type<Tag>(
+        Adapter::fromThrift(folly::copy(GetIntrinsicDefault<UTag>{}())));
+    return *p;
   }
 };
 template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
@@ -242,17 +246,25 @@ struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, FieldId>> {
   const adapt_detail::
       if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&
       operator()() const {
-    return staticDefault([] {
+    static const auto& obj = *[] {
       // TODO(afuller): Remove or move this logic to the adapter.
-      auto& obj = *new Struct{};
-      folly::lsan_ignore_object(&obj);
-      apache::thrift::clear(obj);
-      auto adapted = AdapterT::fromThriftField(
-          folly::copy(GetIntrinsicDefault<UTag>{}()),
-          FieldContext<Struct, FieldId>{obj});
-      adapt_detail::construct<Adapter, FieldId>(adapted, obj);
-      return std::make_unique<type::native_type<Tag>>(std::move(adapted));
-    });
+      auto* s = new Struct{};
+      type::native_type<Tag>* adapted = nullptr;
+      try {
+        apache::thrift::clear(*s);
+        adapted = new type::native_type<Tag>(AdapterT::fromThriftField(
+            folly::copy(GetIntrinsicDefault<UTag>{}()),
+            FieldContext<Struct, FieldId>{*s}));
+        adapt_detail::construct<Adapter, FieldId>(adapted, *s);
+        folly::lsan_ignore_object(s);
+        return adapted;
+      } catch (...) {
+        delete adapted;
+        delete s;
+        throw;
+      }
+    }();
+    return obj;
   }
 };
 

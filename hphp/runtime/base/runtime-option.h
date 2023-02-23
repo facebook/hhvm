@@ -107,6 +107,8 @@ struct RepoOptionsFlags {
   H(bool,           EnableXHPClassModifier,           true)           \
   H(bool,           DisableXHPElementMangling,        true)           \
   H(bool,           EnableEnumClasses,                true)           \
+  H(bool,           StressShallowDeclDeps,            false)          \
+  H(bool,           StressFoldedDeclDeps,             false)          \
   /* Allow omission of some `readonly` annotations based on           \
    * nonlocal inference powered by decl directed bytecode             \
    */                                                                 \
@@ -780,7 +782,10 @@ struct RuntimeOption {
      HHVM process that launches it. */                                  \
   F(bool, HackCompilerInheritConfig,   true)                            \
   /* enable decl-directed bytecode compilation */                       \
-  F(bool, EnableDecl, false)                                     \
+  F(bool, EnableDecl, false)                                            \
+  F(uint32_t, LogDeclDeps, 0)                                           \
+  F(uint32_t, LogDeclErrors, 0)                                         \
+  F(bool, LogAllDeclTearing, false)                                     \
   /* When using embedded data, extract it to the ExtractPath or the
    * ExtractFallback. */                                                \
   F(string, EmbeddedDataExtractPath,   "/var/run/hhvm_%{type}_%{buildid}") \

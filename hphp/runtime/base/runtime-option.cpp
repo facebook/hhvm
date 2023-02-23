@@ -322,6 +322,8 @@ void RepoOptionsFlags::initHhbcFlags(hackc::HhbcFlags& flags) const {
   flags.uvs = UVS;
   flags.readonly_nonlocal_infer = ReadonlyNonlocalInference;
   flags.optimize_reified_param_checks = OptimizeReifiedParamChecks;
+  flags.stress_shallow_decl_deps = StressShallowDeclDeps;
+  flags.stress_folded_decl_deps = StressFoldedDeclDeps;
 }
 
 void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {

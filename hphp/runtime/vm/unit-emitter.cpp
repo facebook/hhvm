@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 
@@ -492,6 +493,44 @@ Id UnitEmitter::addModule(const Module& m) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Logging.
+
+void UnitEmitter::logDeclInfo() const {
+  if ((m_errorSyms.empty() && m_missingSyms.empty()) ||
+      !StructuredLog::coinflip(RO::EvalLogDeclErrors)) return;
+
+  StructuredLogEntry ent;
+  ent.setInt("sample_rate", RO::EvalLogDeclErrors);
+  ent.setInt("num_deps", m_deps.size());
+
+  std::vector<std::string> errors;
+  std::vector<std::string> missing;
+  for (auto sym : m_errorSyms) errors.emplace_back(sym->toCppString());
+  for (auto sym : m_missingSyms) missing.emplace_back(sym->toCppString());
+
+  std::sort(errors.begin(), errors.end());
+  std::sort(missing.begin(), missing.end());
+
+  errors.erase(std::unique(errors.begin(), errors.end()), errors.end());
+  missing.erase(std::unique(missing.begin(), missing.end()), missing.end());
+
+  ent.setInt("num_errors", errors.size());
+  ent.setInt("num_missing", missing.size());
+
+  auto const logVec = [&] (auto name, auto& vec) {
+    std::vector<folly::StringPiece> v;
+    v.reserve(vec.size());
+    for (auto& s : vec) v.emplace_back(s);
+    ent.setVec(name, v);
+  };
+
+  logVec("error_symbols", errors);
+  logVec("missing_symbols", missing);
+
+  StructuredLog::log("hhvm_decl_error_logging", ent);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // EntryPoint calculation.
 
 const StaticString s___EntryPoint("__EntryPoint");
@@ -815,7 +854,9 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
         (m_fatalUnit)
         (m_entryPointId)
         (m_deps)
-        (m_ICE);
+        (m_ICE)
+        (m_missingSyms)
+        (m_errorSyms);
       if (m_fatalUnit) {
         sd(m_fatalLoc)
           (m_fatalOp)

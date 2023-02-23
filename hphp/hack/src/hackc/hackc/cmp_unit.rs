@@ -1014,6 +1014,8 @@ fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
         symbol_refs: a_symbol_refs,
         constants: a_constants,
         fatal: a_fatal,
+        missing_symbols: _,
+        error_symbols: _,
     } = a_unit;
     let Unit {
         adata: b_adata,
@@ -1026,6 +1028,8 @@ fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
         symbol_refs: b_symbol_refs,
         constants: b_constants,
         fatal: b_fatal,
+        missing_symbols: _,
+        error_symbols: _,
     } = b_unit;
 
     cmp_map_t(a_adata, b_adata, cmp_eq).qualified("adata")?;

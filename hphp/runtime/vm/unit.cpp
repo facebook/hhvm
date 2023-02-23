@@ -401,6 +401,24 @@ void Unit::merge() {
 
   mergeImpl(mergeTypes);
 
+  if (RO::EvalLogDeclDeps) {
+    logDeclInfo();
+
+    auto const thisPath = filepath();
+    auto const& options = RepoOptions::forFile(thisPath->data());
+    auto const dir = options.dir();
+    auto const relPath = std::filesystem::relative(
+      std::filesystem::path(thisPath->data()),
+      dir
+    );
+
+    for (auto& [path, sha] : m_deps) {
+      auto hash = SHA1{mangleUnitSha1(sha.toString(), path, options.flags())};
+      auto fpath = makeStaticString(dir / path);
+      g_context->m_loadedRdepMap[fpath].emplace_back(relPath, hash);
+    }
+  }
+
   if (RuntimeOption::RepoAuthoritative || (!SystemLib::s_inited && !RuntimeOption::EvalJitEnableRenameFunction)) {
     m_mergeState.store(MergeState::Merged, std::memory_order_relaxed);
   }
@@ -456,6 +474,75 @@ void Unit::logTearing(int64_t nsecs) {
   FTRACE(2, "Tearing in {} ({} ns)\n", tpath.data(), nsecs);
 
   StructuredLog::log("hhvm_sandbox_file_tearing", ent);
+}
+
+void Unit::logDeclInfo() const {
+  if (!RO::EvalLogAllDeclTearing &&
+      !StructuredLog::coinflip(RO::EvalLogDeclDeps)) return;
+
+  auto const thisPath = filepath();
+  auto const& options = RepoOptions::forFile(thisPath->data());
+  auto const dir = options.dir();
+  auto const& map = g_context->m_evaledFiles;
+  std::vector<std::string> rev_tears;
+  std::vector<std::string> not_loaded;
+  std::vector<std::string> loaded;
+
+  std::vector<std::tuple<std::string, std::string, SHA1>> deps;
+  for (auto const& [path, sha] : m_deps) {
+    auto hash = SHA1{mangleUnitSha1(sha.toString(), path, options.flags())};
+    deps.emplace_back(path, dir / path, std::move(hash));
+  }
+
+  for (auto const& [path, fullpath, sha] : deps) {
+    auto const full = makeStaticString(fullpath);
+    if (auto const info = folly::get_ptr(map, full)) {
+      if (info->unit->sha1() != sha) rev_tears.emplace_back(path);
+      else loaded.emplace_back(path);
+    } else {
+      not_loaded.emplace_back(path);
+    }
+  }
+
+  StructuredLogEntry ent;
+
+  ent.setInt("num_loaded_deps", loaded.size() + rev_tears.size());
+  ent.setInt("num_torn_deps", rev_tears.size());
+  ent.setInt("num_not_loaded_deps", not_loaded.size());
+  ent.setInt("num_deps", deps.size());
+
+  auto const logVec = [&] (auto name, auto& vec) {
+    std::vector<folly::StringPiece> v;
+    v.reserve(vec.size());
+    for (auto& s : vec) v.emplace_back(s);
+    ent.setVec(name, v);
+  };
+
+  logVec("loaded_deps", loaded);
+  logVec("torn_deps", rev_tears);
+  logVec("not_loaded_deps", not_loaded);
+
+  std::vector<std::string> tears;
+  std::vector<std::string> non_tears;
+  for (auto const& [path, sha] : g_context->m_loadedRdepMap[thisPath]) {
+    if (sha != m_sha1) tears.emplace_back(path);
+    else non_tears.emplace_back(path);
+  }
+
+  ent.setInt("num_loaded_rdeps", tears.size() + non_tears.size());
+  ent.setInt("num_torn_rdeps", tears.size());
+
+  logVec("torn_rdeps", tears);
+  logVec("loaded_rdeps", non_tears);
+
+  if ((RO::EvalLogAllDeclTearing && (!rev_tears.empty() || !tears.empty()))) {
+    ent.setInt("sample_rate", 1);
+    StructuredLog::log("hhvm_decl_logging", ent);
+  } else if(!RO::EvalLogAllDeclTearing ||
+            StructuredLog::coinflip(RO::EvalLogDeclDeps)) {
+    ent.setInt("sample_rate", RO::EvalLogDeclDeps);
+    StructuredLog::log("hhvm_decl_logging", ent);
+  }
 }
 
 template <typename T, typename I>

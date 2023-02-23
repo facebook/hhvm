@@ -251,6 +251,11 @@ struct UnitEmitter {
    */
   bool isASystemLib() const;
 
+  /*
+   * Use StructuredLog to record decl related information about this unit.
+   */
+  void logDeclInfo() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // EntryPoint.
 
@@ -293,6 +298,16 @@ public:
   FatalOp m_fatalOp;
   std::string m_fatalMsg;
   const StringData* m_moduleName{nullptr};
+
+  /*
+   * HackC may report a list of referenced symbols which either could not be
+   * looked up or did not exist while compiling the unit.
+   *
+   * These are initialized when either StressShallowDeclDeps or
+   * StressFoldedDeclDeps is true during compilation.
+   */
+  std::vector<const StringData*> m_missingSyms;
+  std::vector<const StringData*> m_errorSyms;
 
 private:
   SHA1 m_sha1;

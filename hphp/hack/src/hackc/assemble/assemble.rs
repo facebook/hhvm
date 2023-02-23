@@ -103,6 +103,8 @@ impl<'a> UnitBuilder<'a> {
             },
             constants: Slice::fill_iter(alloc, self.constants.into_iter()),
             fatal: self.fatal.into(),
+            missing_symbols: Default::default(),
+            error_symbols: Default::default(),
         }
     }
 

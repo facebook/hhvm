@@ -123,6 +123,7 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
   }
 
   assertx(ue);
+  ue->logDeclInfo();
   return ue;
 }
 

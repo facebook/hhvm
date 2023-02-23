@@ -1547,6 +1547,7 @@ dependencies = [
  "ocamlrep",
  "options",
  "oxidized",
+ "oxidized_by_ref",
  "print_expr",
  "regex",
  "scope",

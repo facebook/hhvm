@@ -32,6 +32,8 @@ pub struct Unit<'arena> {
     pub symbol_refs: SymbolRefs<'arena>,
     pub constants: Slice<'arena, Constant<'arena>>,
     pub fatal: Maybe<Fatal<'arena>>,
+    pub missing_symbols: Slice<'arena, Str<'arena>>,
+    pub error_symbols: Slice<'arena, Str<'arena>>,
 }
 
 /// Fields used when a unit had compile-time errors that should be reported

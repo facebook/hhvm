@@ -504,6 +504,20 @@ public:
   void logTearing(int64_t nsecs);
 
   /*
+   * Log information about decls observed during compilation and any potential
+   * tearing that may be occurring.
+   *
+   * For a given unit `U' we say that:
+   *   - rdep tearing has occurred if we previously loaded decls from different
+   *     version of U in the same request. We have `torn' a reverse-dependency
+   *     of U.
+   *   - dep tearing has occurred if for a dependency `D' of U, we had
+   *     previously loaded bytecode from a different version of `D' in the same
+   *     request.
+   */
+  void logDeclInfo() const;
+
+  /*
    * Get parse/runtime failure information if this unit is created as
    * a result of one.
    */

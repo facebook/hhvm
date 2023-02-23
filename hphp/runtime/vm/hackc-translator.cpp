@@ -312,6 +312,16 @@ void translateUserAttributes(Slice<hhbc::Attribute> attributes, UserAttributeMap
   };
 }
 
+void translateSymbolInfo(Slice<Str> missing, Slice<Str> error, UnitEmitter& ue) {
+  Trace::Indent indent;
+  for (auto const& m : range(missing)) {
+    ue.m_missingSyms.emplace_back(toStaticString(m));
+  }
+  for (auto const& e : range(error)) {
+    ue.m_errorSyms.emplace_back(toStaticString(e));
+  }
+}
+
 template<bool isEnum=false>
 std::pair<const StringData*, TypeConstraint> translateTypeInfo(const hhbc::TypeInfo& t) {
   auto const user_type = maybeOrElse(t.user_type,
@@ -1480,6 +1490,7 @@ void translate(TranslationState& ts, const hhbc::Unit& unit) {
   }
 
   translateUserAttributes(unit.file_attributes, ts.ue->m_fileAttributes);
+  translateSymbolInfo(unit.missing_symbols, unit.error_symbols, *ts.ue);
   maybeThen(unit.fatal, [&](Fatal fatal) {
     auto const loc = fatal.loc;
     auto const msg = toString(fatal.message);

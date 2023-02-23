@@ -88,6 +88,8 @@ pub struct HhbcFlags {
     pub fold_lazy_class_keys: bool,
     pub readonly_nonlocal_infer: bool,
     pub optimize_reified_param_checks: bool,
+    pub stress_shallow_decl_deps: bool,
+    pub stress_folded_decl_deps: bool,
 }
 
 impl Default for HhbcFlags {
@@ -105,6 +107,8 @@ impl Default for HhbcFlags {
             fold_lazy_class_keys: true,
             readonly_nonlocal_infer: false,
             optimize_reified_param_checks: false,
+            stress_shallow_decl_deps: false,
+            stress_folded_decl_deps: false,
         }
     }
 }

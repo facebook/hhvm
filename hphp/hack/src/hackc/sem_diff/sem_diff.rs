@@ -56,6 +56,8 @@ pub fn sem_diff_unit<'arena>(a_unit: &Unit<'arena>, b_unit: &Unit<'arena>) -> Re
         symbol_refs: a_symbol_refs,
         constants: a_constants,
         fatal: a_fatal,
+        error_symbols: _,
+        missing_symbols: _,
     } = a_unit;
     let Unit {
         adata: b_adata,
@@ -68,6 +70,8 @@ pub fn sem_diff_unit<'arena>(a_unit: &Unit<'arena>, b_unit: &Unit<'arena>) -> Re
         symbol_refs: b_symbol_refs,
         constants: b_constants,
         fatal: b_fatal,
+        error_symbols: _,
+        missing_symbols: _,
     } = b_unit;
 
     let path = CodePath::name("Unit");

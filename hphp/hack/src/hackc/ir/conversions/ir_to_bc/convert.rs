@@ -106,6 +106,8 @@ impl<'a> UnitBuilder<'a> {
             symbol_refs: Default::default(),
             constants: Default::default(),
             fatal: Default::default(),
+            missing_symbols: Default::default(),
+            error_symbols: Default::default(),
         }
     }
 }

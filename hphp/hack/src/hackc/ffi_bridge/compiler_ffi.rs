@@ -76,6 +76,8 @@ pub mod compile_ffi {
         fold_lazy_class_keys: bool,
         readonly_nonlocal_infer: bool,
         optimize_reified_param_checks: bool,
+        stress_shallow_decl_deps: bool,
+        stress_folded_decl_deps: bool,
     }
 
     struct ParserFlags {
@@ -280,6 +282,8 @@ impl compile_ffi::NativeEnv {
                 fold_lazy_class_keys: self.hhbc_flags.fold_lazy_class_keys,
                 readonly_nonlocal_infer: self.hhbc_flags.readonly_nonlocal_infer,
                 optimize_reified_param_checks: self.hhbc_flags.optimize_reified_param_checks,
+                stress_shallow_decl_deps: self.hhbc_flags.stress_shallow_decl_deps,
+                stress_folded_decl_deps: self.hhbc_flags.stress_folded_decl_deps,
                 ..Default::default()
             },
             flags: EnvFlags {

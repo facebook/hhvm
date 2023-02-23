@@ -28,6 +28,12 @@ mod reified_generics_helpers;
 mod try_finally_rewriter;
 mod xhp_attribute;
 
+use std::borrow::Borrow;
+use std::collections::HashSet;
+use std::collections::VecDeque;
+
+use decl_provider::DeclProvider;
+use decl_provider::TypeDecl;
 use emit_class::emit_classes_from_program;
 use emit_constant::emit_constants_from_program;
 use emit_file_attributes::emit_file_attributes_from_program;
@@ -50,6 +56,8 @@ use ocamlrep::rc::RcOc;
 use oxidized::ast;
 use oxidized::namespace_env;
 use oxidized::pos::Pos;
+use oxidized_by_ref::typing_defs;
+use oxidized_by_ref::typing_defs_core::Exact;
 
 // PUBLIC INTERFACE (ENTRY POINTS)
 
@@ -88,6 +96,58 @@ pub fn emit_unit<'a, 'arena, 'decl>(
     }
 }
 
+fn record_error<'arena>(
+    sym: Str<'arena>,
+    e: decl_provider::Error,
+    missing: &mut Vec<Str<'arena>>,
+    error: &mut Vec<Str<'arena>>,
+) {
+    match e {
+        decl_provider::Error::NotFound => {
+            missing.push(sym);
+        }
+        decl_provider::Error::Bincode(_) => {
+            error.push(sym);
+        }
+    }
+}
+
+fn scan_types<'decl, F>(p: &dyn DeclProvider<'decl>, q: &mut VecDeque<(String, u64)>, mut efunc: F)
+where
+    F: FnMut(&String, decl_provider::Error),
+{
+    use typing_defs::Ty_;
+    let mut seen = HashSet::new();
+    q.iter().for_each(|(s, _i)| {
+        seen.insert(s.clone());
+    });
+    while let Some((name, idx)) = q.pop_front() {
+        match p.type_decl(&name, idx) {
+            Ok(TypeDecl::Class(class_decl)) => {
+                class_decl
+                    .extends
+                    .iter()
+                    .chain(class_decl.implements.iter())
+                    .chain(class_decl.req_class.iter())
+                    .chain(class_decl.req_extends.iter())
+                    .chain(class_decl.req_implements.iter())
+                    .chain(class_decl.uses.iter())
+                    .for_each(|ty| {
+                        if let Ty_::Tclass(((_, cn), Exact::Exact, _ty_args)) = ty.1 {
+                            if seen.insert(cn.to_string()) {
+                                q.push_back((cn.to_string(), idx + 1))
+                            }
+                        }
+                    });
+            }
+            Ok(TypeDecl::Typedef(_)) => {}
+            Err(e) => {
+                efunc(&name, e);
+            }
+        }
+    }
+}
+
 fn emit_unit_<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: RcOc<namespace_env::Env>,
@@ -109,6 +169,49 @@ fn emit_unit_<'a, 'arena, 'decl>(
     let symbol_refs = emitter.finish_symbol_refs();
     let fatal = Nothing;
 
+    let mut missing_syms = Vec::new();
+    let mut error_syms = Vec::new();
+
+    if let Some(p) = &emitter.decl_provider {
+        if emitter.options().hhbc.stress_shallow_decl_deps {
+            for cns in &symbol_refs.constants {
+                if let Err(e) = p.const_decl(cns.unsafe_as_str()) {
+                    record_error(cns.as_ffi_str(), e, &mut missing_syms, &mut error_syms);
+                }
+            }
+            for fun in &symbol_refs.functions {
+                if let Err(e) = p.func_decl(fun.unsafe_as_str()) {
+                    record_error(fun.as_ffi_str(), e, &mut missing_syms, &mut error_syms);
+                }
+            }
+            for cls in &symbol_refs.classes {
+                if let Err(e) = p.type_decl(cls.unsafe_as_str(), 0) {
+                    record_error(cls.as_ffi_str(), e, &mut missing_syms, &mut error_syms);
+                }
+            }
+        }
+        if emitter.options().hhbc.stress_folded_decl_deps {
+            let mut q = VecDeque::new();
+            classes.iter().for_each(|c| {
+                if let Just(b) = c.base {
+                    q.push_back((b.unsafe_into_string(), 0u64));
+                }
+                c.uses
+                    .iter()
+                    .chain(c.implements.iter())
+                    .for_each(|i| q.push_back((i.unsafe_into_string(), 0u64)));
+                c.requirements
+                    .iter()
+                    .for_each(|r| q.push_back((r.name.unsafe_into_string(), 0u64)));
+            });
+            let error_func = |sym: &String, e: decl_provider::Error| {
+                let s = Str::new_str(emitter.alloc, sym.as_str());
+                record_error(s, e, &mut missing_syms, &mut error_syms);
+            };
+            scan_types(p.borrow(), &mut q, error_func);
+        }
+    }
+
     Ok(Unit {
         classes: Slice::fill_iter(emitter.alloc, classes.into_iter()),
         modules: Slice::fill_iter(emitter.alloc, modules.into_iter()),
@@ -120,6 +223,8 @@ fn emit_unit_<'a, 'arena, 'decl>(
         module_use,
         symbol_refs,
         fatal,
+        missing_symbols: Slice::fill_iter(emitter.alloc, missing_syms.into_iter()),
+        error_symbols: Slice::fill_iter(emitter.alloc, error_syms.into_iter()),
     })
 }
 

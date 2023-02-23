@@ -641,6 +641,13 @@ public:
   VMParserFrame* m_parserFrame{nullptr};
 
   Optional<struct timespec> m_requestStartForTearing;
+
+  // When logging request tearing we store a fast map of deps to the paths to
+  // units that depend on them and the SHA-1s that they observed.
+  req::fast_map<
+    const StringData*,
+    req::vector<std::pair<std::string, SHA1>>
+  > m_loadedRdepMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -3256,10 +3256,6 @@ class AdaptedStructWithInternBox final  {
       __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<2>, AdaptedStructWithInternBox>>())),
       __fbthrift_field_field3(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::cpp2::Empty, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<3>, AdaptedStructWithInternBox>>())),
       __fbthrift_field_field4(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<4>, AdaptedStructWithInternBox>>())) {
-    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(*__fbthrift_field_field1, *this);
-    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_field2, *this);
-    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(*__fbthrift_field_field3, *this);
-    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 4>(*__fbthrift_field_field4, *this);
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]

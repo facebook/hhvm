@@ -232,6 +232,7 @@ size_t HTTP1xCodec::onIngressImpl(const IOBuf& buf) {
     // the headers we need to keep accounting of it for total header size
     if (!headersComplete_) {
       headerSize_.uncompressed += bytesParsed;
+      headerSize_.compressed += bytesParsed;
     }
     parserActive_ = false;
     parserError_ = (HTTP_PARSER_ERRNO(&parser_) != HPE_OK) &&
@@ -688,7 +689,7 @@ void HTTP1xCodec::generateHeader(
   }
 
   if (size) {
-    size->compressed = 0;
+    size->compressed = len;
     size->uncompressed = len;
   }
 }

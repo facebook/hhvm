@@ -458,6 +458,8 @@ TEST(HTTP1xCodecTest, TestChunkedHeaders) {
     EXPECT_EQ(callbacks.headersComplete, 1);
     EXPECT_EQ(callbacks.headerSize.uncompressed,
               buffer1->length() + buffer2->length());
+    EXPECT_EQ(callbacks.headerSize.uncompressed,
+              callbacks.headerSize.compressed);
   }
 }
 

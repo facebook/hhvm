@@ -38,41 +38,37 @@ struct FooEnsureStruct {
 }
 
 // All fields are terse. Original qualifier will be ignored.
+@thrift.TerseWrite
 struct FooFieldPatch {
-  @thrift.TerseWrite
   1: Type1Patch field1;
-  @thrift.TerseWrite
   2: Type2Patch field2:
   ...
 }
 
+@thrift.TerseWrite
 struct FooPatch {
   // Replace Foo with another value
-  1: optional MyStruct assign;
+  1: optional Foo assign;
 
   // Clear all fields in Foo
-  @thrift.TerseWrite
   2: bool clear;
 
   // Patch each field in Foo
-  @thrift.TerseWrite
   3: FooFieldPatch patchPrior;
 
   // Ensure each field in Foo
-  @thrift.TerseWrite
   5: FooEnsureStruct ensure;
 
   // Patch each field in Foo
-  @thrift.TerseWrite
   6: FooFieldPatch patch;
 }
 ```
 
-Here `FooPatch` is the Patch for `Foo`.
+Here `FooPatch` is the patch type for `Foo`.
 
 ### PatchOp
 
-PatchOp is defined [here](https://github.com/facebook/fbthrift/blob/v2023.01.16.00/thrift/lib/thrift/patch.thrift#L262). It represents the meaning of field id in the patch. It’s worth noting that Patch needs to work without schema. When we patch a thrift value, we might not know whether it’s a string patch or a struct patch. With `PatchOp`, we know the meaning of each fields in the patch even without schema.
+`PatchOp` is defined [here](https://github.com/facebook/fbthrift/blob/v2023.01.16.00/thrift/lib/thrift/patch.thrift#L262). It represents the meaning of field id in the patch. It’s worth noting that Patch needs to work without schema. When we patch a thrift value, we might not know whether it’s a string patch or a struct patch. With `PatchOp`, we know the meaning of each fields in the patch even without schema.
 For the sake of simplifying, in this doc “`Bar` field” means field whoes field id is `PatchOp::Bar`. e.g., `EnsureStruct` field means field whose field id is `PatchOp::EnsureStruct`, which is 5.
 
 ### Restriction

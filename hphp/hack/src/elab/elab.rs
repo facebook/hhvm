@@ -108,7 +108,7 @@ fn elaborate<T: Transform>(
         passes::elab_hint_retonly::ElabHintRetonlyPass::default(),
 
         // Replace invalid uses of wildcard hints with `Herr`
-        // passes::elab_wildcard_hint::ElabWildcardHintPass::default(),
+        passes::elab_hint_wildcard::ElabHintWildcardPass::default(),
 
         // Replace uses to `self` in shape field names with referenced class
         // passes::elab_shape_field_name::ElabShapeFieldNamePass::default(),

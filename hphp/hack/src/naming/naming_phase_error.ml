@@ -7,6 +7,8 @@
  *)
 open Hh_prelude
 
+exception UnexpectedExpr of Pos.t
+
 type t =
   | Naming of Naming_error.t
   | Nast_check of Nast_check_error.t

@@ -19,6 +19,11 @@ module Env = struct
         { elab_const_expr = Elab_const_expr.{ in_enum_class; _ }; _ } =
     in_enum_class
 
+  let enforce_const_expr
+      Naming_phase_env.
+        { elab_const_expr = Elab_const_expr.{ enforce_const_expr; _ }; _ } =
+    enforce_const_expr
+
   let set_mode t ~in_mode =
     Naming_phase_env.
       {
@@ -33,75 +38,144 @@ module Env = struct
         elab_const_expr =
           Elab_const_expr.{ t.elab_const_expr with in_enum_class };
       }
+
+  let set_enforce_const_expr t ~enforce_const_expr =
+    Naming_phase_env.
+      {
+        t with
+        elab_const_expr =
+          Elab_const_expr.{ t.elab_const_expr with enforce_const_expr };
+      }
 end
 
-let rec const_expr_err in_mode acc (_, pos, expr_) =
-  match expr_ with
-  | Aast.(Id _ | Null | True | False | Int _ | Float _ | String _) -> acc
-  | Aast.(Class_const ((_, _, (CIparent | CIself | CI _)), _)) -> acc
-  | Aast.(Class_const ((_, _, Aast.CIexpr (_, _, (This | Id _))), _)) -> acc
-  | Aast.(FunctionPointer ((FP_id _ | FP_class_const _), _)) -> acc
-  | Aast.Upcast (e, _) -> const_expr_err in_mode acc e
-  | Aast.(As (e, (_, Hlike _), _)) -> const_expr_err in_mode acc e
-  | Aast.(As (e, (_, Happly ((p, cn), [_])), _)) ->
-    if String.equal cn SN.FB.cIncorrectType then
-      const_expr_err in_mode acc e
-    else
-      (Err.naming @@ Naming_error.Illegal_constant p) :: acc
-  | Aast.Unop
-      ((Ast_defs.Uplus | Ast_defs.Uminus | Ast_defs.Utild | Ast_defs.Unot), e)
-    ->
-    const_expr_err in_mode acc e
-  | Aast.Binop (op, e1, e2) -> begin
-    (* Only assignment is invalid *)
-    match op with
-    | Ast_defs.Eq _ -> (Err.naming @@ Naming_error.Illegal_constant pos) :: acc
-    | _ ->
-      let acc = const_expr_err in_mode acc e1 in
-      const_expr_err in_mode acc e2
+(* We can determine that certain expressions are invalid based on one-level
+   pattern matching. We prefer to do this since we can stop the transformation
+   early in these cases. For cases where we need to pattern match on the
+   expression more deeply, we use the bottom-up pass *)
+let on_expr_top_down
+    (on_error : Naming_phase_error.t -> unit)
+    ((_annot, pos, expr_) as expr)
+    ~ctx =
+  if not @@ Env.enforce_const_expr ctx then
+    (ctx, Ok expr)
+  else begin
+    match expr_ with
+    (* -- Always valid ------------------------------------------------------ *)
+    | Aast.(
+        ( Id _ | Null | True | False | Int _ | Float _ | String _
+        | FunctionPointer _ | Eif _ | Darray _ | Varray _ | Tuple _ | Shape _
+        | Upcast _ )) ->
+      (ctx, Ok expr)
+    (* -- Markers ----------------------------------------------------------- *)
+    | Aast.(Invalid _ | Hole _) -> (ctx, Ok expr)
+    (* -- Handled bottom up ------------------------------------------------- *)
+    | Aast.(Class_const _) -> (ctx, Ok expr)
+    (* -- Conditionally valid ----------------------------------------------- *)
+    (* NB we can perform this top-down since the all valid hints are already in
+       canonical *)
+    | Aast.(As (_, (_, hint_), _)) -> begin
+      match hint_ with
+      | Aast.(Hlike _) -> (ctx, Ok expr)
+      | Aast.(Happly ((_, nm), _)) when String.(equal nm SN.FB.cIncorrectType)
+        ->
+        (ctx, Ok expr)
+      | Aast.(Happly ((pos, _), _)) ->
+        on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+        (ctx, Error (Err.invalid_expr expr))
+      | _ ->
+        on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+        (ctx, Error (Err.invalid_expr expr))
+    end
+    | Aast.(Unop (uop, _)) -> begin
+      match uop with
+      | Ast_defs.(Uplus | Uminus | Utild | Unot) -> (ctx, Ok expr)
+      | _ ->
+        on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+        (ctx, Error (Err.invalid_expr expr))
+    end
+    | Aast.(Binop (bop, _, _)) -> begin
+      match bop with
+      | Ast_defs.Eq _ ->
+        on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+        (ctx, Error (Err.invalid_expr expr))
+      | _ -> (ctx, Ok expr)
+    end
+    | Aast.(ValCollection ((_, vc_kind), _, _)) -> begin
+      match vc_kind with
+      | Aast.(Vec | Keyset) -> (ctx, Ok expr)
+      | _ ->
+        on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+        (ctx, Error (Err.invalid_expr expr))
+    end
+    | Aast.(KeyValCollection ((_, kvc_kind), _, _)) -> begin
+      match kvc_kind with
+      | Aast.Dict -> (ctx, Ok expr)
+      | _ ->
+        on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+        (ctx, Error (Err.invalid_expr expr))
+    end
+    | Aast.(Call ((_, _, call_expr_), _, _, _)) -> begin
+      match call_expr_ with
+      | Aast.(Id (_, nm))
+        when String.(
+               nm = SN.StdlibFunctions.array_mark_legacy
+               || nm = SN.PseudoFunctions.unsafe_cast
+               || nm = SN.PseudoFunctions.unsafe_nonnull_cast) ->
+        (ctx, Ok expr)
+      | _ ->
+        on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+        (ctx, Error (Err.invalid_expr expr))
+    end
+    | Aast.Omitted -> begin
+      match Env.in_mode ctx with
+      | FileInfo.Mhhi -> (ctx, Ok expr)
+      | _ ->
+        on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+        (ctx, Error (Err.invalid_expr expr))
+    end
+    (* -- Always invalid ---------------------------------------------------- *)
+    | Aast.(
+        ( This | Lvar _ | Lplaceholder _ | Array_get _ | Await _ | Cast _
+        | Class_get _ | Clone _ | Dollardollar _ | ET_Splice _ | Efun _
+        | EnumClassLabel _ | ExpressionTree _ | Is _ | Lfun _ | List _
+        | Method_caller _ | New _ | Obj_get _ | Pair _ | Pipe _
+        | PrefixedString _ | ReadonlyExpr _ | String2 _ | Yield _ | Xml _ )) ->
+      on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+      (ctx, Error (Err.invalid_expr expr))
+    (* -- Unexpected expressions -------------------------------------------- *)
+    | Aast.(Import _ | Collection _) -> raise (Err.UnexpectedExpr pos)
   end
-  | Aast.Eif (e1, e2_opt, e3) ->
-    let acc = const_expr_err in_mode acc e1 in
-    let acc = const_expr_err in_mode acc e3 in
-    Option.value_map ~default:acc ~f:(const_expr_err in_mode acc) e2_opt
-  | Aast.Darray (_, kvs)
-  | Aast.(KeyValCollection ((_, Dict), _, kvs)) ->
-    List.fold_left kvs ~init:acc ~f:(fun acc (ek, ev) ->
-        let acc = const_expr_err in_mode acc ek in
-        const_expr_err in_mode acc ev)
-  | Aast.Varray (_, exprs)
-  | Aast.(ValCollection ((_, (Vec | Keyset)), _, exprs))
-  | Aast.Tuple exprs ->
-    List.fold_left exprs ~init:acc ~f:(fun acc e ->
-        const_expr_err in_mode acc e)
-  | Aast.Shape flds ->
-    List.fold_left flds ~init:acc ~f:(fun acc (_, e) ->
-        const_expr_err in_mode acc e)
-  | Aast.Call ((_, _, Aast.Id (_, cn)), _, fn_params, _)
-    when String.equal cn SN.StdlibFunctions.array_mark_legacy
-         || String.equal cn SN.PseudoFunctions.unsafe_cast
-         || String.equal cn SN.PseudoFunctions.unsafe_nonnull_cast ->
-    List.fold_left fn_params ~init:acc ~f:(fun acc (_, e) ->
-        const_expr_err in_mode acc e)
-  | Aast.Omitted when FileInfo.is_hhi in_mode ->
-    (* Only allowed in HHI positions where we don't care about the value *)
-    acc
-  | _ -> (Err.naming @@ Naming_error.Illegal_constant pos) :: acc
 
-let const_expr in_mode in_enum_class expr =
-  if in_enum_class then
-    Ok expr
-  else
-    match const_expr_err in_mode [] expr with
-    | [] -> Ok expr
-    | errs -> Error (Err.invalid_expr expr, errs)
+(* Handle non-constant expressions which require pattern matching on some
+   element of the expression which is not yet transformed in the top-down pass *)
+let on_expr_bottom_up on_error ((_annot, pos, expr_) as expr) ~ctx =
+  if not @@ Env.enforce_const_expr ctx then
+    (ctx, Ok expr)
+  else begin
+    match expr_ with
+    | Aast.(Class_const ((_, _, class_id_), _)) -> begin
+      (* We have to handle this case bottom-up since the class identifier
+         will not have been rewritten in the top-down pass *)
+      match class_id_ with
+      | Aast.CIstatic ->
+        on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+        (ctx, Error (Err.invalid_expr expr))
+      | Aast.(CIparent | CIself | CI _) -> (ctx, Ok expr)
+      | Aast.CIexpr (_, _, expr_) -> begin
+        match expr_ with
+        (* NB this relies on `class_id` elaboration having been applied, if
+           it hasn't we would still have `CIstatic` represented as
+           `CIexpr (_,_,Id(_,'static'))` *)
+        | Aast.(This | Id _) -> (ctx, Ok expr)
+        | _ ->
+          on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+          (ctx, Error (Err.invalid_expr expr))
+      end
+    end
+    | _ -> (ctx, Ok expr)
+  end
 
-let on_class_ :
-      'a 'b.
-      ('a, 'b) Aast_defs.class_ ->
-      ctx:Naming_phase_env.t ->
-      Naming_phase_env.t * (('a, 'b) Aast_defs.class_, _) result =
- fun c ~ctx ->
+let on_class_ c ~ctx =
   let in_enum_class =
     match c.Aast.c_kind with
     | Ast_defs.Cenum_class _ -> true
@@ -113,68 +187,29 @@ let on_class_ :
   in
   (ctx, Ok c)
 
-let on_gconst :
-      'a 'b.
-      ('a, 'b) Aast_defs.gconst ->
-      ctx:Naming_phase_env.t ->
-      Naming_phase_env.t * (('a, 'b) Aast_defs.gconst, _) result =
- fun cst ~ctx ->
+let on_gconst cst ~ctx =
   let ctx = Env.set_mode ctx ~in_mode:cst.Aast.cst_mode in
+  let ctx = Env.set_enforce_const_expr ctx ~enforce_const_expr:true in
   (ctx, Ok cst)
 
-let on_typedef :
-      'a 'b.
-      ('a, 'b) Aast_defs.typedef ->
-      ctx:Naming_phase_env.t ->
-      Naming_phase_env.t * (('a, 'b) Aast_defs.typedef, _) result =
- (fun t ~ctx -> (Env.set_mode ctx ~in_mode:t.Aast.t_mode, Ok t))
+let on_typedef t ~ctx = (Env.set_mode ctx ~in_mode:t.Aast.t_mode, Ok t)
 
-let on_fun_def :
-      'a 'b.
-      ('a, 'b) Aast_defs.fun_def ->
-      ctx:Naming_phase_env.t ->
-      Naming_phase_env.t * (('a, 'b) Aast_defs.fun_def, _) result =
- (fun fd ~ctx -> (Env.set_mode ctx ~in_mode:fd.Aast.fd_mode, Ok fd))
+let on_fun_def fd ~ctx = (Env.set_mode ctx ~in_mode:fd.Aast.fd_mode, Ok fd)
 
-let on_module_def :
-      'a 'b.
-      ('a, 'b) Aast_defs.module_def ->
-      ctx:Naming_phase_env.t ->
-      Naming_phase_env.t * (('a, 'b) Aast_defs.module_def, _) result =
- (fun md ~ctx -> (Env.set_mode ctx ~in_mode:md.Aast.md_mode, Ok md))
+let on_module_def md ~ctx = (Env.set_mode ctx ~in_mode:md.Aast.md_mode, Ok md)
 
-let on_class_const_kind on_error =
-  let handler
-        : 'a 'b.
-          ('a, 'b) Aast_defs.class_const_kind ->
-          ctx:Naming_phase_env.t ->
-          Naming_phase_env.t
-          * ( ('a, 'b) Aast_defs.class_const_kind,
-              ('a, 'b) Aast_defs.class_const_kind )
-            result =
-   fun kind ~ctx ->
-    let in_mode = Env.in_mode ctx and in_enum_class = Env.in_enum_class ctx in
+let on_class_const_kind kind ~ctx =
+  let enforce_const_expr =
+    (not (Env.in_enum_class ctx))
+    &&
     match kind with
-    | Aast.CCConcrete expr -> begin
-      match const_expr in_mode in_enum_class expr with
-      | Ok expr -> (ctx, Ok (Aast.CCConcrete expr))
-      | Error (expr, errs) ->
-        List.iter ~f:on_error errs;
-        (ctx, Error (Aast.CCConcrete expr))
-    end
-    | Aast.CCAbstract _ -> (ctx, Ok kind)
+    | Aast.CCConcrete _ -> true
+    | Aast.CCAbstract _ -> false
   in
-  handler
+  let ctx = Env.set_enforce_const_expr ctx ~enforce_const_expr in
+  (ctx, Ok kind)
 
-let on_gconst_cst_value on_error cst_value ~ctx =
-  let in_mode = Env.in_mode ctx and in_enum_class = Env.in_enum_class ctx in
-  match const_expr in_mode in_enum_class cst_value with
-  | Ok expr -> (ctx, Ok expr)
-  | Error (expr, errs) ->
-    List.iter ~f:on_error errs;
-    (ctx, Error expr)
-
-let top_down_pass =
+let top_down_pass on_error =
   let id = Aast.Pass.identity () in
   Naming_phase_pass.top_down
     Aast.Pass.
@@ -185,6 +220,8 @@ let top_down_pass =
         on_ty_typedef = Some on_typedef;
         on_ty_fun_def = Some on_fun_def;
         on_ty_module_def = Some on_module_def;
+        on_ty_class_const_kind = Some on_class_const_kind;
+        on_ty_expr = Some (fun expr ~ctx -> on_expr_top_down on_error expr ~ctx);
       }
 
 let bottom_up_pass on_error =
@@ -193,8 +230,6 @@ let bottom_up_pass on_error =
     Aast.Pass.
       {
         id with
-        on_ty_class_const_kind =
-          Some (fun elem ~ctx -> on_class_const_kind on_error elem ~ctx);
-        on_fld_gconst_cst_value =
-          Some (fun elem ~ctx -> on_gconst_cst_value on_error elem ~ctx);
+        on_ty_expr =
+          Some (fun expr ~ctx -> on_expr_bottom_up on_error expr ~ctx);
       }

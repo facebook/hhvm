@@ -10,6 +10,8 @@ type t
 
 type agg
 
+exception UnexpectedExpr of Pos.t
+
 val naming : Naming_error.t -> t
 
 val nast_check : Nast_check_error.t -> t

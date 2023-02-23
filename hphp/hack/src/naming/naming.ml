@@ -143,7 +143,7 @@ let passes =
        expressions *)
     Naming_elab_dynamic_class_name.pass on_error;
     (* Replace non-constant class or global constant with invalid expression marker *)
-    Naming_elab_const_expr.top_down_pass;
+    Naming_elab_const_expr.top_down_pass on_error;
     Naming_elab_const_expr.bottom_up_pass on_error;
     (* Replace malformed key / value bindings in as expressions with invalid
        local var markers *)

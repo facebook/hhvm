@@ -75,11 +75,17 @@ end
 
 module Elab_const_expr = struct
   type t = {
+    enforce_const_expr: bool;
     in_enum_class: bool;
     in_mode: FileInfo.mode;
   }
 
-  let empty = { in_enum_class = false; in_mode = FileInfo.Mstrict }
+  let empty =
+    {
+      enforce_const_expr = false;
+      in_enum_class = false;
+      in_mode = FileInfo.Mstrict;
+    }
 end
 
 module Elab_everything_sdt = struct

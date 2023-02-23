@@ -32,6 +32,7 @@ TEST_STRUCT = thrift_types.struct_map_string_i32(
     }
 )
 TEST_UNION = thrift_types.union_map_string_string(field_2={"foo": "bar"})
+TEST_EXCEPTION = thrift_types.exception_map_string_i64(field_1={"code": 404})
 TEST_PRIMITIVES = [
     True,
     42,
@@ -85,6 +86,23 @@ class AnyRegistryTest(unittest.TestCase):
                 self.assertEqual(TypeName.Type.unionType, any_obj.type.name.type)
                 loaded = registry.load(any_obj)
                 self.assertEqual(TEST_UNION, loaded)
+
+    def test_exception_round_trip(self) -> None:
+        registry = AnyRegistry()
+        registry.register_module(thrift_types)
+
+        for standard_protocol in [
+            StandardProtocol.Binary,
+            StandardProtocol.Compact,
+            StandardProtocol.SimpleJson,
+        ]:
+            with self.subTest(standard_protocol=standard_protocol):
+                any_obj = registry.store(
+                    TEST_EXCEPTION, protocol=Protocol(standard=standard_protocol)
+                )
+                self.assertEqual(TypeName.Type.exceptionType, any_obj.type.name.type)
+                loaded = registry.load(any_obj)
+                self.assertEqual(TEST_EXCEPTION, loaded)
 
     def test_primitive_round_trip(self) -> None:
         registry = AnyRegistry()

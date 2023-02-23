@@ -35,13 +35,16 @@ from thrift.python.conformance.universal_name import (
     get_universal_hash_prefix,
     UniversalHashAlgorithm,
 )
+from thrift.python.exceptions import GeneratedError
 from thrift.python.types import StructOrUnion, Union
 
 
 if typing.TYPE_CHECKING:
     from thrift.python.any.serializer import PrimitiveType
 
-    SupportedType = typing.Union[StructOrUnion, PrimitiveType]
+    StructOrUnionOrException = typing.Union[GeneratedError, StructOrUnion]
+    SupportedType = typing.Union[StructOrUnionOrException, PrimitiveType]
+    ClassWithUri = typing.Type[StructOrUnionOrException]
 
 
 def _standard_protocol_to_serializer_protocol(
@@ -95,12 +98,12 @@ def _type_name_to_primitive_type(type_name: TypeName) -> typing.Type[PrimitiveTy
 
 class AnyRegistry:
     def __init__(self) -> None:
-        self._uri_to_cls: typing.Dict[str, typing.Type[StructOrUnion]] = {}
+        self._uri_to_cls: typing.Dict[str, ClassWithUri] = {}
         self._alg_to_hash_to_cls: typing.Dict[
-            UniversalHashAlgorithm, typing.Dict[bytes, typing.Type[StructOrUnion]]
+            UniversalHashAlgorithm, typing.Dict[bytes, ClassWithUri]
         ] = {alg: {} for alg in UniversalHashAlgorithm}
 
-    def register_type(self, cls: typing.Type[StructOrUnion]) -> bool:
+    def register_type(self, cls: ClassWithUri) -> bool:
         uri = cls.__get_thrift_uri__()
         if (not uri) or (uri in self._uri_to_cls):
             return False
@@ -126,13 +129,13 @@ class AnyRegistry:
             raise NotImplementedError(
                 f"Unsupported non-standard protocol: {protocol.value}"
             )
-        if isinstance(obj, StructOrUnion):
+        if isinstance(obj, (GeneratedError, StructOrUnion)):
             return self._store_struct(obj, protocol=protocol)
         if isinstance(obj, (bool, int, float, str, bytes, IOBuf)):
             return self._store_primitive(obj, protocol=protocol)
         raise ValueError(f"Unsupported type: f{type(obj)}")
 
-    def _store_struct(self, obj: StructOrUnion, protocol: Protocol) -> Any:
+    def _store_struct(self, obj: StructOrUnionOrException, protocol: Protocol) -> Any:
         uri = obj.__get_thrift_uri__()
         if uri is None:
             raise ValueError("Thrift struct doesn't have URI")
@@ -140,10 +143,13 @@ class AnyRegistry:
             get_universal_hash(UniversalHashAlgorithm.Sha2_256, uri),
             16,
         )
+        type_uri = TypeUri(typeHashPrefixSha2_256=hash_prefix)
         if isinstance(obj, Union):
-            type_name = TypeName(unionType=TypeUri(typeHashPrefixSha2_256=hash_prefix))
+            type_name = TypeName(unionType=type_uri)
+        elif isinstance(obj, GeneratedError):
+            type_name = TypeName(exceptionType=type_uri)
         else:
-            type_name = TypeName(structType=TypeUri(typeHashPrefixSha2_256=hash_prefix))
+            type_name = TypeName(structType=type_uri)
         return Any(
             type=Type(name=type_name),
             protocol=protocol,
@@ -165,7 +171,7 @@ class AnyRegistry:
             ),
         )
 
-    def _type_uri_to_cls(self, uri: TypeUri) -> typing.Type[StructOrUnion]:
+    def _type_uri_to_cls(self, uri: TypeUri) -> ClassWithUri:
         if uri.type == TypeUri.Type.uri:
             return self._uri_to_cls[uri.uri]
         if uri.type == TypeUri.Type.typeHashPrefixSha2_256:
@@ -183,6 +189,7 @@ class AnyRegistry:
         if any_obj.type.name.type in (
             TypeName.Type.structType,
             TypeName.Type.unionType,
+            TypeName.Type.exceptionType,
         ):
             return self._load_struct(any_obj)
         if any_obj.type.name.type in (
@@ -198,7 +205,7 @@ class AnyRegistry:
             return self._load_primitive(any_obj)
         raise NotImplementedError(f"Unsupported type: {any_obj.type.name}")
 
-    def _load_struct(self, any_obj: Any) -> StructOrUnion:
+    def _load_struct(self, any_obj: Any) -> StructOrUnionOrException:
         type_uri = any_obj.type.name.value
         if not isinstance(type_uri, TypeUri):
             raise ValueError("Any object does not contain a struct or union")

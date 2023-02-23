@@ -35,7 +35,7 @@ from thrift.python.conformance.universal_name import (
     get_universal_hash_prefix,
     UniversalHashAlgorithm,
 )
-from thrift.python.types import StructOrUnion
+from thrift.python.types import StructOrUnion, Union
 
 
 if typing.TYPE_CHECKING:
@@ -140,10 +140,12 @@ class AnyRegistry:
             get_universal_hash(UniversalHashAlgorithm.Sha2_256, uri),
             16,
         )
+        if isinstance(obj, Union):
+            type_name = TypeName(unionType=TypeUri(typeHashPrefixSha2_256=hash_prefix))
+        else:
+            type_name = TypeName(structType=TypeUri(typeHashPrefixSha2_256=hash_prefix))
         return Any(
-            type=Type(
-                name=TypeName(structType=TypeUri(typeHashPrefixSha2_256=hash_prefix))
-            ),
+            type=Type(name=type_name),
             protocol=protocol,
             data=serializer.serialize_iobuf(
                 obj,
@@ -178,9 +180,12 @@ class AnyRegistry:
             raise NotImplementedError(
                 f"Unsupported non-standard protocol: {any_obj.protocol.value}"
             )
-        if any_obj.type.name.type is TypeName.Type.structType:
+        if any_obj.type.name.type in (
+            TypeName.Type.structType,
+            TypeName.Type.unionType,
+        ):
             return self._load_struct(any_obj)
-        if any_obj.type.name.type in [
+        if any_obj.type.name.type in (
             TypeName.Type.boolType,
             TypeName.Type.i16Type,
             TypeName.Type.i32Type,
@@ -189,13 +194,16 @@ class AnyRegistry:
             TypeName.Type.doubleType,
             TypeName.Type.stringType,
             TypeName.Type.binaryType,
-        ]:
+        ):
             return self._load_primitive(any_obj)
         raise NotImplementedError(f"Unsupported type: {any_obj.type.name}")
 
     def _load_struct(self, any_obj: Any) -> StructOrUnion:
+        type_uri = any_obj.type.name.value
+        if not isinstance(type_uri, TypeUri):
+            raise ValueError("Any object does not contain a struct or union")
         return serializer.deserialize(
-            self._type_uri_to_cls(any_obj.type.name.structType),
+            self._type_uri_to_cls(type_uri),
             any_obj.data,
             protocol=_standard_protocol_to_serializer_protocol(
                 any_obj.protocol.standard

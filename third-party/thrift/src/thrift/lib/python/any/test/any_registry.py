@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import unittest
 
-from apache.thrift.type.standard.thrift_types import StandardProtocol
+from apache.thrift.type.standard.thrift_types import StandardProtocol, TypeName
 from apache.thrift.type.type.thrift_types import Protocol
 from folly.iobuf import IOBuf
 
@@ -31,7 +31,7 @@ TEST_STRUCT = thrift_types.struct_map_string_i32(
         "Answer to the Ultimate Question of Life, the Universe, and Everything.": 42
     }
 )
-
+TEST_UNION = thrift_types.union_map_string_string(field_2={"foo": "bar"})
 TEST_PRIMITIVES = [
     True,
     42,
@@ -65,8 +65,26 @@ class AnyRegistryTest(unittest.TestCase):
                 any_obj = registry.store(
                     TEST_STRUCT, protocol=Protocol(standard=standard_protocol)
                 )
+                self.assertEqual(TypeName.Type.structType, any_obj.type.name.type)
                 loaded = registry.load(any_obj)
                 self.assertEqual(TEST_STRUCT, loaded)
+
+    def test_union_round_trip(self) -> None:
+        registry = AnyRegistry()
+        registry.register_module(thrift_types)
+
+        for standard_protocol in [
+            StandardProtocol.Binary,
+            StandardProtocol.Compact,
+            StandardProtocol.SimpleJson,
+        ]:
+            with self.subTest(standard_protocol=standard_protocol):
+                any_obj = registry.store(
+                    TEST_UNION, protocol=Protocol(standard=standard_protocol)
+                )
+                self.assertEqual(TypeName.Type.unionType, any_obj.type.name.type)
+                loaded = registry.load(any_obj)
+                self.assertEqual(TEST_UNION, loaded)
 
     def test_primitive_round_trip(self) -> None:
         registry = AnyRegistry()

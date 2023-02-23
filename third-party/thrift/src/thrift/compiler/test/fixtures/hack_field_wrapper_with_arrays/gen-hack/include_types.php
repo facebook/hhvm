@@ -416,8 +416,8 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     $this->annotated_field = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<int, MyNestedStruct>(0, 2, $this);
     $this->adapted__and_wrapped_type = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\MyAdapter1::THackType, MyNestedStruct>(\MyAdapter1::fromThrift(0), 4, $this);
     $this->optional_adapted_and_wrapped_type = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?\MyAdapter1::THackType, MyNestedStruct>(null, 5, $this);
-    $this->wrapped_type_int = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\detail\i64WithWrapper, MyNestedStruct>(\MyTypeIntWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\detail\i64WithWrapper>(0), 7, $this);
-    $this->double_wrapped_struct = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?\thrift_adapted_types\StructWithWrapper, MyNestedStruct>(null, 8, $this);
+    $this->wrapped_type_int = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<i64WithWrapper, MyNestedStruct>(\MyTypeIntWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\detail\i64WithWrapper>(0), 7, $this);
+    $this->double_wrapped_struct = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?StructWithWrapper, MyNestedStruct>(null, 8, $this);
   }
 
   public static function withDefaultValues()[]: this {

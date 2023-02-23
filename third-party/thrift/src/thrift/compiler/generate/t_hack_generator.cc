@@ -1872,7 +1872,9 @@ std::string t_hack_generator::render_const_value_helper(
     auto [wrapper, name, ns] = find_hack_wrapper(ttypedef);
     if (wrapper) {
       out << *wrapper << "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<";
-      out << hack_wrapped_type_name(name, ns) << ">(" << val << ")";
+      out << type_to_typehint(
+                 ttypedef, {{TypeToTypehintVariations::IGNORE_WRAPPER, true}})
+          << ">(" << val << ")";
       return out.str();
     }
     return val;
@@ -3727,7 +3729,8 @@ bool t_hack_generator::
 
     indent_up();
     if (wrapper) {
-      std::string typehint = hack_wrapped_type_name(name, ns);
+      std::string typehint = type_to_typehint(
+          val_type, {{TypeToTypehintVariations::IGNORE_WRAPPER, true}});
       auto wrapper_method = "await " + *wrapper + "::genFromThrift<";
       if (uses_thrift_only_methods) {
         wrapper_method = *wrapper + "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<";
@@ -4558,9 +4561,12 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   if (is_default_assignment) {
     auto [type_wrapper, underlying_name, ns] =
         find_hack_wrapper(field.get_type());
-    if (type_wrapper && !nullable) {
-      dval = *type_wrapper + "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<" +
-          hack_typehint + ">(" + dval + ")";
+    if (type_wrapper) {
+      if (!nullable) {
+        dval = *type_wrapper + "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<" +
+            hack_typehint + ">(" + dval + ")";
+      }
+      hack_typehint = type_to_typehint(field.get_type());
     }
     if (const auto* field_wrapper = find_hack_wrapper(field)) {
       out << indent() << "$this->" << field_name << " = " << *field_wrapper
@@ -5428,12 +5434,11 @@ void t_hack_generator::
       is_async = true;
       val = "await " + *type_wrapper + "::genFromThrift<";
     }
-    if (ns) {
-      val = val + "\\" + *ns + "\\" + *struct_name;
-    } else {
-      val = val + (has_hack_namespace ? "\\" : "") + *struct_name;
-    }
-    val = val + ">(" + source_str + ")";
+    val = val +
+        type_to_typehint(
+              field.get_type(),
+              {{TypeToTypehintVariations::IGNORE_WRAPPER, true}}) +
+        ">(" + source_str + ")";
     source_str = val;
   }
   if (field_wrapper) {

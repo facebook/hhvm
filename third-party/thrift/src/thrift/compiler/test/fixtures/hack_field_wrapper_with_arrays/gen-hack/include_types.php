@@ -751,7 +751,6 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     $annotated_field = await ($this->annotated_field as nonnull)->genUnwrap();
     $adapted__and_wrapped_type = await ($this->adapted__and_wrapped_type as nonnull)->genUnwrap();
     $optional_adapted_and_wrapped_type = await ($this->optional_adapted_and_wrapped_type as nonnull)->genUnwrap();
-    $invalid_key_map = await ($this->invalid_key_map as nonnull)->genUnwrap();
     $wrapped_type_int = await ($this->wrapped_type_int as nonnull)->genUnwrap();
     $wrapped_type_int = await $wrapped_type_int->genUnwrap();
     $double_wrapped_struct = await ($this->double_wrapped_struct as nonnull)->genUnwrap();

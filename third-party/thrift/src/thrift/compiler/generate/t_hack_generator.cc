@@ -3922,6 +3922,9 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
       << "public async function __genToShape(): Awaitable<self::TShape> {\n";
   indent_up();
   for (const auto& field : tstruct->fields()) {
+    if (skip_codegen(&field)) {
+      continue;
+    }
     auto fieldRef = "$this->" + field.name();
     if (find_hack_wrapper(field)) {
       out << indent() << "$" << field.name() << " = await "

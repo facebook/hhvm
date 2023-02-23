@@ -17,6 +17,8 @@
 include "thrift/lib/thrift/schema.thrift"
 include "thrift/lib/thrift/protocol.thrift"
 
+namespace py3 apache.thrift
+
 // A lightweight source range that can be resolved into the file name,
 // line and column when the schema is produced from an IDL file.
 struct SourceRange {

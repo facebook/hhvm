@@ -879,5 +879,47 @@ TEST(StructPatchTest, NestedPatchWithDifferentLocation) {
   }
 }
 
+TEST(StructPatchTest, InternBox) {
+  MyStructPatch patch;
+  // Value comparison match.
+  EXPECT_EQ(
+      std::as_const(patch).toThrift().patch()->toThrift().floatVal().value(),
+      std::as_const(patch)
+          .toThrift()
+          .patchPrior()
+          ->toThrift()
+          .floatVal()
+          .value());
+  // Address comparison match.
+  EXPECT_EQ(
+      &std::as_const(patch).toThrift().patch()->toThrift().floatVal().value(),
+      &std::as_const(patch)
+           .toThrift()
+           .patchPrior()
+           ->toThrift()
+           .floatVal()
+           .value());
+  // mut access.
+  (void)patch.patch<ident::floatVal>();
+  // Value comparison match.
+  EXPECT_EQ(
+      std::as_const(patch).toThrift().patch()->toThrift().floatVal().value(),
+      std::as_const(patch)
+          .toThrift()
+          .patchPrior()
+          ->toThrift()
+          .floatVal()
+          .value());
+  // Address comparison does not match.
+  EXPECT_NE(
+      &std::as_const(patch).toThrift().patch()->toThrift().floatVal().value(),
+      &std::as_const(patch)
+           .toThrift()
+           .patchPrior()
+           ->toThrift()
+           .floatVal()
+           .value());
+}
+
 } // namespace
 } // namespace apache::thrift

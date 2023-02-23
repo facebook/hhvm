@@ -3039,7 +3039,12 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       ],
       'fields' => dict[
         'data1' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -3050,7 +3055,12 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'data2' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -3640,7 +3650,12 @@ class MyDataWithCustomDefaultFieldPatch implements \IThriftSyncStruct, \IThriftS
       ],
       'fields' => dict[
         'data1' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -3651,7 +3666,12 @@ class MyDataWithCustomDefaultFieldPatch implements \IThriftSyncStruct, \IThriftS
           ],
         ),
         'data2' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -4078,7 +4098,12 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
       ],
       'fields' => dict[
         'innerOption' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -4561,7 +4586,12 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       ],
       'fields' => dict[
         'option1' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -4572,7 +4602,12 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'option2' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -4583,7 +4618,12 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'option3' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -10885,7 +10925,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       ],
       'fields' => dict[
         'structWithCustomDefault' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -10897,7 +10942,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'i32WithCustomDefault' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -10908,7 +10958,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'mapMap' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -10920,7 +10975,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'listMap' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -10932,7 +10992,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optMapVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -10944,7 +11009,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optSetVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -10956,7 +11026,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optListVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -10968,7 +11043,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optLateStructVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -10980,7 +11060,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optStructVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -10992,7 +11077,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optEnumVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11004,7 +11094,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optBinaryVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11015,7 +11110,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optStringVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11026,7 +11126,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optDoubleVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11037,7 +11142,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optFloatVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11048,7 +11158,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optI64Val' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11059,7 +11174,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optI32Val' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11070,7 +11190,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optI16Val' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11081,7 +11206,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optByteVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11092,7 +11222,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'optBoolVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11103,7 +11238,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'lateStructVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11115,7 +11255,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'unionVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11127,7 +11272,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'structVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11139,7 +11289,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'enumVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11151,7 +11306,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'binaryVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11162,7 +11322,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'stringVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11173,7 +11338,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'doubleVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11184,7 +11354,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'floatVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11195,7 +11370,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'i64Val' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11206,7 +11386,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'i32Val' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11217,7 +11402,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'i16Val' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11228,7 +11418,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'byteVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11239,7 +11434,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'boolVal' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -11250,7 +11450,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'structWithFieldCustomDefault' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -12649,7 +12854,12 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata 
       ],
       'fields' => dict[
         'nodes' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -13205,7 +13415,12 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       ],
       'fields' => dict[
         'loop' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
@@ -13734,7 +13949,12 @@ class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       ],
       'fields' => dict[
         'bar' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(

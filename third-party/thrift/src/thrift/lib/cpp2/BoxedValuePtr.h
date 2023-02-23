@@ -164,6 +164,7 @@ class boxed_ptr {
     other.ptr_.setTag(static_cast<std::uintptr_t>(Mode::ConstUnowned));
   }
   FOLLY_ERASE constexpr boxed_ptr& operator=(boxed_ptr&& other) noexcept {
+    reset();
     ptr_ = std::move(other.ptr_);
     other.ptr_.setTag(static_cast<std::uintptr_t>(Mode::ConstUnowned));
     return *this;

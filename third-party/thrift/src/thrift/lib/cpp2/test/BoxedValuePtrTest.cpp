@@ -177,10 +177,32 @@ TEST(BoxedPtrTest, MoveConstructor) {
 
 TEST(BoxedPtrTest, MoveAssignment) {
   const TestStruct t{5};
-  boxed_ptr<TestStruct> a = boxed_ptr<TestStruct>::fromStaticConstant(&t);
-  boxed_ptr<TestStruct> b;
-  b = std::move(a);
-  EXPECT_EQ(*b, 5);
+  {
+    boxed_ptr<TestStruct> unowned =
+        boxed_ptr<TestStruct>::fromStaticConstant(&t);
+    boxed_ptr<TestStruct> b;
+    b = std::move(unowned);
+    EXPECT_EQ(*b, 5);
+  }
+  {
+    boxed_ptr<TestStruct> owned{std::make_unique<TestStruct>(6)};
+    boxed_ptr<TestStruct> b;
+    b = std::move(owned);
+    EXPECT_EQ(*b, 6);
+  }
+  {
+    boxed_ptr<TestStruct> unowned =
+        boxed_ptr<TestStruct>::fromStaticConstant(&t);
+    boxed_ptr<TestStruct> b{std::make_unique<TestStruct>(7)};
+    b = std::move(unowned);
+    EXPECT_EQ(*b, 5);
+  }
+  {
+    boxed_ptr<TestStruct> owned{std::make_unique<TestStruct>(6)};
+    boxed_ptr<TestStruct> b{std::make_unique<TestStruct>(7)};
+    b = std::move(owned);
+    EXPECT_EQ(*b, 6);
+  }
 }
 
 TEST(BoxedPtrTest, Reset) {

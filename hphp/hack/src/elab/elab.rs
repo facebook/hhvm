@@ -127,7 +127,7 @@ fn elaborate<T: Transform>(
         // passes::elab_dynamic_class_name::ElabDynamicClassNamePass::default(),
 
         // Replace non-constant class or global constant with invalid expression marker
-        // passes::elab_const_expr::ElabConstExprPass::default(),
+        passes::elab_const_expr::ElabConstExprPass::default(),
 
         // Replace malformed key / value bindings in as expressions with invalid
         // local var markers

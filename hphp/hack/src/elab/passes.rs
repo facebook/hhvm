@@ -7,6 +7,7 @@ pub mod elab_as_expr;
 pub mod elab_block;
 pub mod elab_class_id;
 pub mod elab_class_vars;
+pub mod elab_const_expr;
 pub mod elab_defs;
 pub mod elab_enum_class;
 pub mod elab_expr_call_call_user_func;

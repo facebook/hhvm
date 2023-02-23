@@ -5516,11 +5516,16 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let mut make_param = |fp: &'a FunParamDecl<'a>| -> &'a FunParam<'a> {
             let mut flags = FunParamFlags::empty();
 
-            match fp.kind {
-                ParamMode::FPinout => {
-                    flags |= FunParamFlags::INOUT;
+            let pos = self.get_pos(fp.hint);
+            let mut param_type = self.node_to_ty(fp.hint).unwrap_or(TANY);
+            if let ParamMode::FPinout = fp.kind {
+                flags |= FunParamFlags::INOUT;
+                // Pessimise type for inout
+                param_type = if self.implicit_sdt() {
+                    self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tlike(param_type)))
+                } else {
+                    param_type
                 }
-                ParamMode::FPnormal => {}
             };
 
             if fp.readonly {
@@ -5531,11 +5536,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             }
 
             self.alloc(FunParam {
-                pos: self.get_pos(fp.hint),
+                pos,
                 name: None,
                 type_: self.alloc(PossiblyEnforcedTy {
                     enforced: Enforcement::Unenforced,
-                    type_: self.node_to_ty(fp.hint).unwrap_or(TANY),
+                    type_: param_type,
                 }),
                 flags,
             })

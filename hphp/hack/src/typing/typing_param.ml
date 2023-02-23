@@ -115,13 +115,20 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
       let ty =
         if TypecheckerOptions.everything_sdt Typing_env_types.(env.genv.tcopt)
         then
-          (* For implicit pessimisation, wrap supportdyn around parameters with function types. *)
-          match get_node ty with
-          | Tfun _ ->
-            Typing_utils.make_supportdyn_decl_type
-              (get_pos ty)
-              (get_reason ty)
-              ty
+          let ty =
+            (* For implicit pessimisation, wrap supportdyn around parameters with function types. *)
+            match get_node ty with
+            | Tfun _ ->
+              Typing_utils.make_supportdyn_decl_type
+                (get_pos ty)
+                (get_reason ty)
+                ty
+            | _ -> ty
+          in
+          (* For implicit pessimisation, wrap like around non-enforced inout parameters *)
+          match (et_enforced, param.param_callconv) with
+          | (Unenforced, Ast_defs.Pinout _) ->
+            Typing_make_type.like (get_reason ty) ty
           | _ -> ty
         else
           ty

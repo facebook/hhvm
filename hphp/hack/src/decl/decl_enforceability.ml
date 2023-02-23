@@ -490,6 +490,23 @@ let intersect_enforceable ~fun_kind ret_ty ty_to_wrap =
     Typing_make_type.intersection (get_reason ty_to_wrap) [enf_ty; ty_to_wrap]
   | _ -> ty_to_wrap
 
+(* We do not pessimise parameter types *except* for inout parameters,
+ * which we pessimise regardless of enforcement, because override doesn't
+ * preserve enforcement e.g. `inout int` might beoverridden by `inout C::MyTypeConstant`
+ *)
+let pessimise_param_type fp =
+  match get_fp_mode fp with
+  | FPnormal -> fp
+  | FPinout ->
+    {
+      fp with
+      fp_type =
+        {
+          et_enforced = Unenforced;
+          et_type = make_like_type ~return_from_async:false fp.fp_type.et_type;
+        };
+    }
+
 (*
   How we pessimise a function depends on how the type is enforced, where the
   function is, and the experimental_always_pessimise_return option.
@@ -514,7 +531,11 @@ let pessimise_fun_type ~fun_kind ~this_class ctx p ty =
     let return_from_async = get_ft_async ft in
     let ret_ty = ft.ft_ret.et_type in
     let ft =
-      { ft with ft_tparams = add_supportdyn_constraints p ft.ft_tparams }
+      {
+        ft with
+        ft_tparams = add_supportdyn_constraints p ft.ft_tparams;
+        ft_params = List.map ft.ft_params ~f:pessimise_param_type;
+      }
     in
     (match
        ( fun_kind,

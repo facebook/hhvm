@@ -16,6 +16,7 @@ pub mod elab_expr_import;
 pub mod elab_expr_lvar;
 pub mod elab_expr_tuple;
 pub mod elab_func_body;
+pub mod elab_hint_haccess;
 pub mod elab_hint_happly;
 pub mod elab_hint_hsoft;
 pub mod elab_hint_retonly;

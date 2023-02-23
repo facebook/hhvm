@@ -117,7 +117,7 @@ fn elaborate<T: Transform>(
         passes::elab_hint_this::ElabHintThisPass::default(),
 
         // Replace invalid `Haccess` root hints with `Herr`
-        // passes::elab_haccess_hint::ElabHaccessHintPass::default(),
+        passes::elab_hint_haccess::ElabHintHaccessPass::default(),
 
         // Replace empty `Tuple`s with invalid expression marker
         passes::elab_expr_tuple::ElabExprTuplePass::default(),

@@ -114,7 +114,7 @@ fn elaborate<T: Transform>(
         passes::elab_shape_field_name::ElabShapeFieldNamePass::default(),
 
         // Replace invalid uses of `this` hints with `Herr`
-        // passes::elab_this_hint::ElabThisHintPass::default(),
+        passes::elab_hint_this::ElabHintThisPass::default(),
 
         // Replace invalid `Haccess` root hints with `Herr`
         // passes::elab_haccess_hint::ElabHaccessHintPass::default(),

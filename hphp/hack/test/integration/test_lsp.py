@@ -4764,10 +4764,6 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_formatting(self) -> None:
-        # This test will fail if hackfmt can't be found
-        if not self.test_driver.run_hackfmt_check():
-            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
-
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("messy.php"))
 
@@ -4814,10 +4810,6 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_rangeformatting(self) -> None:
-        # This test will fail if hackfmt can't be found
-        if not self.test_driver.run_hackfmt_check():
-            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
-
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("messy.php"))
 
@@ -4865,10 +4857,6 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_ontypeformatting(self) -> None:
-        # This test will fail if hackfmt can't be found
-        if not self.test_driver.run_hackfmt_check():
-            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
-
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("ontypeformatting.php"))
 

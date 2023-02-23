@@ -59,7 +59,6 @@ class CommonTestDriver(TestDriver):
             **{
                 "HH_TEST_MODE": "1",
                 "HH_TMPDIR": cls.hh_tmp_dir,
-                "HACKFMT_TEST_PATH": hackfmt,
                 "PATH": (
                     "%s:%s:/bin:/usr/bin:/usr/local/bin" % (hh_server_dir, cls.bin_dir)
                 ),
@@ -277,15 +276,6 @@ class CommonTestDriver(TestDriver):
             + list(map(lambda x: x.format(root=root), options)),
             stdin=stdin,
         )
-
-    # Check to see if you can run hackfmt
-    def run_hackfmt_check(self) -> bool:
-        try:
-            (stdout_data, stderr_data, retcode) = self.proc_call([hackfmt, "-help"])
-            return retcode == 0
-        # If the file isn't found you will get this
-        except FileNotFoundError:
-            return False
 
     def run_hackfmt(
         self,

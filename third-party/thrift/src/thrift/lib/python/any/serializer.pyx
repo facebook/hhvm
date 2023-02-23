@@ -29,6 +29,7 @@ from thrift.python.types import (
     typeinfo_float,
     typeinfo_string,
     typeinfo_binary,
+    typeinfo_iobuf
 )
 from cython.operator cimport dereference as deref
 
@@ -38,7 +39,7 @@ import typing
 Buf = cython.fused_type(IOBuf, bytes, bytearray, memoryview)
 
 
-def _thrift_type_to_type_info(thrift_type):
+def _thrift_type_to_type_info(thrift_type, cls):
     if thrift_type.name.type is TypeName.Type.boolType:
         return typeinfo_bool
     if thrift_type.name.type is TypeName.Type.byteType:
@@ -56,6 +57,8 @@ def _thrift_type_to_type_info(thrift_type):
     if thrift_type.name.type is TypeName.Type.stringType:
         return typeinfo_string
     if thrift_type.name.type is TypeName.Type.binaryType:
+        if issubclass(cls, IOBuf):
+            return typeinfo_iobuf
         return typeinfo_binary
     raise NotImplementedError(f"Unsupported type: {thrift_type}")
 
@@ -71,6 +74,8 @@ def _infer_type_info_from_cls(cls):
         return typeinfo_string
     if issubclass(cls, bytes):
         return typeinfo_binary
+    if issubclass(cls, IOBuf):
+        return typeinfo_iobuf
     raise NotImplementedError(f"Can not infer thrift type from: {cls}")
 
 
@@ -78,7 +83,7 @@ def serialize_primitive(obj, Protocol protocol=Protocol.COMPACT, thrift_type=Non
     if thrift_type is None:
         type_info = _infer_type_info_from_cls(type(obj))
     else:
-        type_info = _thrift_type_to_type_info(thrift_type)
+        type_info = _thrift_type_to_type_info(thrift_type, type(obj))
     return folly.iobuf.from_unique_ptr(
         cmove(
             cserialize_type(
@@ -94,7 +99,7 @@ def deserialize_primitive(cls, Buf buf, Protocol protocol=Protocol.COMPACT, thri
     if thrift_type is None:
         type_info = _infer_type_info_from_cls(cls)
     else:
-        type_info = _thrift_type_to_type_info(thrift_type)
+        type_info = _thrift_type_to_type_info(thrift_type, cls)
     cdef IOBuf iobuf = buf if isinstance(buf, IOBuf) else IOBuf(buf)
     return type_info.to_python_value(
         cdeserialize_type(

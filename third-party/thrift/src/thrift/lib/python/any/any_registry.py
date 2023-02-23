@@ -26,6 +26,7 @@ from apache.thrift.type.standard.thrift_types import (
     Void,
 )
 from apache.thrift.type.type.thrift_types import Protocol, Type
+from folly.iobuf import IOBuf
 from thrift.python import serializer
 from thrift.python.any.serializer import deserialize_primitive, serialize_primitive
 from thrift.python.conformance.universal_name import (
@@ -65,6 +66,8 @@ def _infer_type_name_from_value(value: PrimitiveType) -> TypeName:
     if isinstance(value, str):
         return TypeName(stringType=Void.Unused)
     if isinstance(value, bytes):
+        return TypeName(binaryType=Void.Unused)
+    if isinstance(value, IOBuf):
         return TypeName(binaryType=Void.Unused)
     raise ValueError(f"Can not infer thrift type from: {value}")
 
@@ -125,7 +128,7 @@ class AnyRegistry:
             )
         if isinstance(obj, StructOrUnion):
             return self._store_struct(obj, protocol=protocol)
-        if isinstance(obj, (bool, int, float, str, bytes)):
+        if isinstance(obj, (bool, int, float, str, bytes, IOBuf)):
             return self._store_primitive(obj, protocol=protocol)
         raise ValueError(f"Unsupported type: f{type(obj)}")
 

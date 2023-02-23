@@ -19,6 +19,7 @@ import unittest
 
 from apache.thrift.type.standard.thrift_types import StandardProtocol
 from apache.thrift.type.type.thrift_types import Protocol
+from folly.iobuf import IOBuf
 
 from thrift.python.any.any_registry import AnyRegistry
 
@@ -89,6 +90,23 @@ class AnyRegistryTest(unittest.TestCase):
                             )
                         else:
                             self.assertEqual(primitive, loaded)
+
+    def test_iobuf_comes_back_as_bytes(self) -> None:
+        registry = AnyRegistry()
+        registry.register_module(thrift_types)
+
+        for standard_protocol in (
+            StandardProtocol.Binary,
+            StandardProtocol.Compact,
+            StandardProtocol.SimpleJson,
+        ):
+            with self.subTest(standard_protocol=standard_protocol):
+                buf = IOBuf(b"iobuf")
+                any_obj = registry.store(
+                    buf, protocol=Protocol(standard=standard_protocol)
+                )
+                loaded = registry.load(any_obj)
+                self.assertEqual(b"".join(buf), loaded)
 
     def test_unsupported_protocol(self) -> None:
         registry = AnyRegistry()

@@ -25,7 +25,6 @@
 DEFINE_string(server_host, "::1", "Host running the stress test server");
 DEFINE_int32(server_port, 5000, "Port of the stress test server");
 DEFINE_string(test_name, "", "Stress test to run");
-DEFINE_int64(runtime_s, 10, "Runtime of test in seconds");
 DEFINE_int64(client_threads, 1, "Nnumber of client threads");
 DEFINE_int64(connections_per_thread, 1, "Number of clients per client thread");
 DEFINE_int64(clients_per_connection, 1, "Number of clients per connection");
@@ -123,9 +122,8 @@ StressTestStats TestRunner::run(std::unique_ptr<StressTestBase> test) {
   // initialize the client runner
   ClientRunner runner(cfg_);
 
-  // run the test and sleep for the duration
+  // run the test
   runner.run(test.get());
-  std::this_thread::sleep_for(std::chrono::seconds(FLAGS_runtime_s));
   runner.stop();
 
   // collect and print statistics

@@ -25,6 +25,8 @@
 #include <thrift/conformance/stresstest/client/StressTestBase.h>
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
 
+DECLARE_int64(runtime_s);
+
 namespace apache {
 namespace thrift {
 namespace stress {
@@ -62,7 +64,6 @@ class ClientRunner {
  private:
   bool started_{false};
   bool stopped_{false};
-  folly::CancellationSource cancelSource_;
   std::vector<std::unique_ptr<ClientThread>> clientThreads_;
 };
 

@@ -19,6 +19,8 @@
 #include <folly/experimental/coro/BlockingWait.h>
 #include <thrift/conformance/stresstest/util/Util.h>
 
+DEFINE_int64(runtime_s, 10, "Runtime of test in seconds");
+
 namespace apache {
 namespace thrift {
 namespace stress {
@@ -32,11 +34,18 @@ void ClientThreadMemoryStats::combine(const ClientThreadMemoryStats& other) {
   connectionsIdle += other.connectionsIdle;
 }
 
+class TestDoneTimeout : public folly::HHWheelTimer::Callback {
+ public:
+  explicit TestDoneTimeout(bool& testDone) : testDone_(testDone) {}
+  void timeoutExpired() noexcept override { testDone_ = true; }
+  bool& testDone_;
+};
+
 class ClientThread : public folly::HHWheelTimer::Callback {
  public:
-  ClientThread(const ClientConfig& cfg, folly::CancellationSource& cancelSource)
+  explicit ClientThread(const ClientConfig& cfg)
       : memoryHistogram_(50, 0, 1024 * 1024 * 1024 /* 1GB */),
-        cancelSource_(cancelSource) {
+        testDoneTimeout_(testDone_) {
     auto* evb = thread_.getEventBase();
     // create clients in event base thread
     evb->runInEventBaseThreadAndWait([&]() {
@@ -66,10 +75,11 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   }
 
   void run(const StressTestBase* test) {
+    thread_.getEventBase()->timer().scheduleTimeout(
+        &testDoneTimeout_, std::chrono::seconds(FLAGS_runtime_s));
     for (auto& client : clients_) {
-      scope_.add(co_withCancellation(
-          cancelSource_.getToken(),
-          runInternal(client.get(), test).scheduleOn(thread_.getEventBase())));
+      scope_.add(
+          runInternal(client.get(), test).scheduleOn(thread_.getEventBase()));
     }
   }
 
@@ -103,9 +113,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
  private:
   folly::coro::Task<void> runInternal(
       StressTestClient* client, const StressTestBase* test) {
-    while (!(co_await folly::coro::co_current_cancellation_token)
-                .isCancellationRequested() &&
-           client->connectionGood()) {
+    while (!testDone_ && client->connectionGood()) {
       co_await test->runWorkload(client);
     }
   }
@@ -115,14 +123,14 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   folly::Histogram<size_t> memoryHistogram_;
   folly::coro::AsyncScope scope_;
   std::vector<std::unique_ptr<StressTestClient>> clients_;
-  folly::CancellationSource& cancelSource_;
   folly::ScopedEventBaseThread thread_;
+  bool testDone_{false};
+  TestDoneTimeout testDoneTimeout_;
 };
 
 ClientRunner::ClientRunner(const ClientConfig& config) : clientThreads_() {
   for (size_t i = 0; i < config.numClientThreads; i++) {
-    clientThreads_.emplace_back(
-        std::make_unique<ClientThread>(config, cancelSource_));
+    clientThreads_.emplace_back(std::make_unique<ClientThread>(config));
   }
 }
 
@@ -141,7 +149,6 @@ void ClientRunner::run(const StressTestBase* test) {
 void ClientRunner::stop() {
   CHECK(started_ && !stopped_)
       << "ClientRunner was not started or is already stopped";
-  cancelSource_.requestCancellation();
   std::vector<folly::SemiFuture<folly::Unit>> stops;
   for (auto& clientThread : clientThreads_) {
     stops.push_back(clientThread->stop());

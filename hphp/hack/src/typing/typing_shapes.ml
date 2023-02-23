@@ -22,6 +22,12 @@ module Type = Typing_ops
 module MakeType = Typing_make_type
 
 let widen_for_refine_shape ~expr_pos field_name env ty =
+  Typing_log.(
+    log_with_level env "typing" ~level:1 (fun () ->
+        log_types
+          (Pos_or_decl.of_raw_pos expr_pos)
+          env
+          [Log_head ("widen_for_refine_shape", [Log_type ("ty", ty)])]));
   match deref ty with
   | (r, Tshape (shape_kind, fields)) -> begin
     match TShapeMap.find_opt field_name fields with

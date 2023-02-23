@@ -1105,6 +1105,16 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
 
 let rec assign_array_get
     ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2 =
+  Typing_log.(
+    log_with_level env "typing" ~level:1 (fun () ->
+        log_types
+          (Pos_or_decl.of_raw_pos expr_pos)
+          env
+          [
+            Log_head
+              ( "assign_array_get",
+                [Log_type ("ty1", ty1); Log_type ("ty2", ty2)] );
+          ]));
   let ((env, ty_err1), ety1) =
     Typing_solver.expand_type_and_narrow
       ~description_of_expected:"an array or collection"

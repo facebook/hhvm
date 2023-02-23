@@ -295,6 +295,14 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
       ty_equiv env ty1 ty2 ~are_ty_param:false
     | (_, (_, Tdependent (_, ty2))) when Utils.is_class ty2 ->
       ty_equiv env ty2 ty1 ~are_ty_param:false
+    | ((r1, Tnewtype (id1, [tyl1], _)), (r2, Tnewtype (id2, [tyl2], _)))
+      when String.equal id1 id2
+           && String.equal id1 Naming_special_names.Classes.cSupportDyn ->
+      let r = union_reason r1 r2 in
+      let (env, try_union) =
+        simplify_union ~approx_cancel_neg env tyl1 tyl2 r
+      in
+      (env, Option.map ~f:(Typing_make_type.supportdyn r) try_union)
     | ((_, Tnewtype (id1, tyl1, tcstr1)), (_, Tnewtype (id2, tyl2, tcstr2)))
       when String.equal id1 id2
            && not (String.equal id1 Naming_special_names.Classes.cSupportDyn) ->

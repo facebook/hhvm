@@ -143,4 +143,6 @@ bool isIntrinsicDefault(const Object& obj);
 folly::dynamic toDynamic(const Value& value);
 folly::dynamic toDynamic(const Object& obj);
 
+using detail::toAny;
+
 } // namespace apache::thrift::protocol

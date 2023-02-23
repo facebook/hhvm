@@ -24,6 +24,7 @@
 #include <folly/Utility.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/GetStandardProtocol.h>
+#include <thrift/lib/cpp2/type/Any.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 #include <thrift/lib/cpp2/type/Traits.h>
@@ -40,6 +41,9 @@ struct MaskedDecodeResult {
   Object included;
   MaskedProtocolData excluded;
 };
+
+template <class Protocol>
+std::unique_ptr<folly::IOBuf> serializeValue(const Value& val);
 
 namespace detail {
 
@@ -870,6 +874,20 @@ void serializeValue(
       serializeValue(prot, value);
     }
   }
+}
+
+type::Type toType(const protocol::Value& value);
+
+template <class ProtocolWriter>
+type::AnyData toAny(
+    const Value& value,
+    type::Protocol protocol = get_standard_protocol<ProtocolWriter>) {
+  type::SemiAny data;
+  data.type() = toType(value);
+  data.protocol() = protocol;
+  data.data() = std::move(
+      *::apache::thrift::protocol::serializeValue<ProtocolWriter>(value));
+  return type::AnyData{data};
 }
 
 } // namespace detail

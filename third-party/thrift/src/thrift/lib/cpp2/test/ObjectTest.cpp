@@ -39,6 +39,7 @@
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
+#include <thrift/lib/cpp2/type/TypeRegistry.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 #include <thrift/lib/thrift/gen-cpp2/standard_types.h>
 #include <thrift/test/testset/Testset.h>
@@ -1418,5 +1419,78 @@ TEST(Object, ParseObjectWithTwoMasks) {
       ::apache::thrift::conformance::StandardProtocol::Binary>();
 }
 
+TEST(Object, ToType) {
+  using namespace type;
+  Value v;
+  v.emplace_bool() = true;
+  EXPECT_EQ(toType(v), Type::create<bool_t>());
+  v.emplace_byte() = 1;
+  EXPECT_EQ(toType(v), Type::create<byte_t>());
+  v.emplace_i16() = 1;
+  EXPECT_EQ(toType(v), Type::create<i16_t>());
+  v.emplace_i32() = 1;
+  EXPECT_EQ(toType(v), Type::create<i32_t>());
+  v.emplace_i64() = 1;
+  EXPECT_EQ(toType(v), Type::create<i64_t>());
+  v.emplace_float() = 1;
+  EXPECT_EQ(toType(v), Type::create<float_t>());
+  v.emplace_double() = 1;
+  EXPECT_EQ(toType(v), Type::create<double_t>());
+  v.emplace_string() = "1";
+  EXPECT_EQ(toType(v), Type::create<string_t>());
+  v.emplace_binary();
+  EXPECT_EQ(toType(v), Type::create<binary_t>());
+
+  Value elem;
+  elem.emplace_i32() = 20;
+  v.emplace_list() = {elem};
+  EXPECT_EQ(toType(v), Type::create<list_c>(Type::create<i32_t>()));
+  v.emplace_list().clear();
+  EXPECT_EQ(toType(v), Type::create<list_c>(Type{}));
+
+  v.emplace_set() = {elem};
+  EXPECT_EQ(toType(v), Type::create<set_c>(Type::create<i32_t>()));
+  v.emplace_set().clear();
+  EXPECT_EQ(toType(v), Type::create<set_c>(Type{}));
+
+  Value key, value;
+  key.emplace_i32() = 10;
+  value.emplace_string() = "10";
+  v.emplace_map() = {{key, value}};
+  EXPECT_EQ(
+      toType(v),
+      Type::create<map_c>(Type::create<i32_t>(), Type::create<string_t>()));
+  v.emplace_map().clear();
+  EXPECT_EQ(toType(v), Type::create<map_c>(Type{}, Type{}));
+
+  Value obj;
+  obj.emplace_object();
+  obj.as_object().type() = "facebook.com/to/obj";
+  obj.as_object()[FieldId{1}] = elem;
+  EXPECT_EQ(toType(obj), Type::create<struct_c>("facebook.com/to/obj"));
+}
+
+TEST(ToAnyTest, simple) {
+  using facebook::thrift::lib::test::Bar;
+
+  Bar bar;
+  bar.field_3() = {"foo", "bar", "baz"};
+  bar.field_4()->field_1() = 42;
+  bar.field_4()->field_2() = "Everything";
+
+  auto any = type::TypeRegistry::generated().store(
+      bar, type::StandardProtocol::Compact);
+  auto serialized = CompactSerializer::serialize<folly::IOBufQueue>(bar).move();
+  Value value;
+  value.emplace_object() =
+      parseObject<CompactSerializer::ProtocolReader>(*serialized);
+  EXPECT_THROW(
+      toAny<CompactSerializer::ProtocolWriter>(value), std::runtime_error);
+  value.as_object().type() = apache::thrift::uri<Bar>();
+  EXPECT_EQ(
+      toType(value),
+      type::Type::create<type::struct_c>(apache::thrift::uri<Bar>()));
+  EXPECT_EQ(any, toAny<CompactSerializer::ProtocolWriter>(value));
+}
 } // namespace
 } // namespace apache::thrift::protocol

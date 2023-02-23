@@ -89,7 +89,7 @@ fn register_dep_graph_delta_files(all_paths: &[PathBuf], edges: &mut Edges) -> i
             // Memory-map the .hhdg_delta file and tell Linux we're going to need its bytes.
             let mmap = {
                 let file = File::open(path)?;
-                let mmap = unsafe { memmap::Mmap::map(&file)? };
+                let mmap = unsafe { memmap2::Mmap::map(&file)? };
                 unsafe {
                     libc::madvise(
                         mmap.as_ptr() as *mut libc::c_void,

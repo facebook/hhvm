@@ -1279,7 +1279,7 @@ version = "0.0.0"
 dependencies = [
  "bytemuck",
  "dep",
- "memmap",
+ "memmap2",
  "ouroboros",
  "rayon",
  "rpds",
@@ -2309,7 +2309,7 @@ dependencies = [
  "hash",
  "libc",
  "log",
- "memmap",
+ "memmap2",
  "newtype",
  "parking_lot 0.11.2",
  "rayon",
@@ -3021,13 +3021,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
-name = "memmap"
-version = "0.7.0"
+name = "memmap2"
+version = "0.5.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6585fd95e7bb50d6cc31e20d4cf9afb4e2ba16c5846fc76793f11218da9c475b"
+checksum = "83faa42c0a078c393f6b29d5db232d8be22776a891f8f56e5284faee4a20b327"
 dependencies = [
  "libc",
- "winapi",
 ]
 
 [[package]]

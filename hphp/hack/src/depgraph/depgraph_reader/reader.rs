@@ -11,7 +11,7 @@ use std::ops::Deref;
 use std::ops::Range;
 
 pub use dep::Dep;
-use memmap::Mmap;
+use memmap2::Mmap;
 use rayon::iter::Either;
 use rayon::prelude::*;
 use rpds::HashTrieSet;

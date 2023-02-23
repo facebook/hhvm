@@ -346,7 +346,7 @@ fn decompress(in_path: &Path, out_path: &Path) -> std::io::Result<()> {
     let in_file = File::open(in_path)?;
 
     // Safety: we rely on the memmap library to provide safety.
-    let in_mmap = unsafe { memmap::Mmap::map(&in_file) }?;
+    let in_mmap = unsafe { memmap2::Mmap::map(&in_file) }?;
     drop(in_file);
 
     let in_bytes = in_mmap.deref();

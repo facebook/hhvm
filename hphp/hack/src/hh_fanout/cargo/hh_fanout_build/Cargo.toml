@@ -20,7 +20,7 @@ depgraph_writer = { version = "0.0.0", path = "../../../depgraph/cargo/depgraph_
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 libc = "0.2.139"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
-memmap = "0.7"
+memmap2 = "0.5.10"
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }
 rayon = "1.2"

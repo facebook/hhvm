@@ -22,6 +22,7 @@ import unittest
 from apache.thrift.type.standard.thrift_types import TypeName, Void
 from apache.thrift.type.type.thrift_types import Type
 from folly.iobuf import IOBuf
+from testing.thrift_types import Color
 
 from thrift.python.any.serializer import deserialize_primitive, serialize_primitive
 
@@ -36,6 +37,7 @@ class SerializerTests(unittest.TestCase):
     ) -> None:
         iobuf = serialize_primitive(value, thrift_type=thrift_type)
         decoded = deserialize_primitive(type(value), iobuf, thrift_type=thrift_type)
+        self.assertIs(type(value), type(decoded))
         if isinstance(value, float):
             assert isinstance(decoded, float)
             self.assertAlmostEqual(float(value), float(decoded), places=3)
@@ -59,6 +61,9 @@ class SerializerTests(unittest.TestCase):
 
     def test_iobuf_round_trip(self) -> None:
         self._test_round_trip(IOBuf(b"iobuf"))
+
+    def test_enum_round_trip(self) -> None:
+        self._test_round_trip(Color.green)
 
     def _test_round_trip_with_type_names(
         self, value: PrimitiveType, type_names: typing.Sequence[TypeName]

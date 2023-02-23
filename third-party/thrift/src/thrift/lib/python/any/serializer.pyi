@@ -18,8 +18,9 @@ from apache.thrift.type.type.thrift_types import Type
 
 from folly.iobuf import IOBuf
 from thrift.python.serializer import Protocol
+from thrift.python.types import Enum
 
-PrimitiveType = typing.Union[bool, int, float, str, bytes, IOBuf]
+PrimitiveType = typing.Union[bool, int, float, str, bytes, IOBuf, Enum]
 Primitive = typing.TypeVar("Primitive", bound=PrimitiveType)
 
 def serialize_primitive(

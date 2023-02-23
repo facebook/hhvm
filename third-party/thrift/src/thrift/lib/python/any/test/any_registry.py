@@ -15,16 +15,22 @@
 
 from __future__ import annotations
 
+import typing
 import unittest
+
+import testing.thrift_types
 
 from apache.thrift.type.standard.thrift_types import StandardProtocol, TypeName
 from apache.thrift.type.type.thrift_types import Protocol
 from folly.iobuf import IOBuf
-
 from thrift.python.any.any_registry import AnyRegistry
 
 # @manual=//thrift/test/testset:testset-python-types
 from thrift.test.testset import thrift_types
+
+if typing.TYPE_CHECKING:
+    from thrift.python.any.serializer import PrimitiveType
+
 
 TEST_STRUCT = thrift_types.struct_map_string_i32(
     field_1={
@@ -33,12 +39,13 @@ TEST_STRUCT = thrift_types.struct_map_string_i32(
 )
 TEST_UNION = thrift_types.union_map_string_string(field_2={"foo": "bar"})
 TEST_EXCEPTION = thrift_types.exception_map_string_i64(field_1={"code": 404})
-TEST_PRIMITIVES = [
+TEST_PRIMITIVES: typing.List[PrimitiveType] = [
     True,
     42,
     123456.789,
     "thrift-python",
     b"raw bytes",
+    testing.thrift_types.Color.blue,
 ]
 
 
@@ -107,6 +114,7 @@ class AnyRegistryTest(unittest.TestCase):
     def test_primitive_round_trip(self) -> None:
         registry = AnyRegistry()
         registry.register_module(thrift_types)
+        registry.register_module(testing.thrift_types)
 
         for standard_protocol in [
             StandardProtocol.Binary,
@@ -120,10 +128,13 @@ class AnyRegistryTest(unittest.TestCase):
                             primitive, protocol=Protocol(standard=standard_protocol)
                         )
                         loaded = registry.load(any_obj)
-                        if isinstance(loaded, float):
-                            self.assertAlmostEqual(
-                                float(primitive), float(loaded), places=3
-                            )
+                        self.assertIs(type(primitive), type(loaded))
+                        if isinstance(primitive, float):
+                            # pyre-fixme[6]: For 2nd positional argument, expected
+                            #  `SupportsRSub[Variable[_T], SupportsAbs[SupportsRound[object]]]`
+                            #  but got `Union[Enum, IOBuf, bool, bytes, float, int, str,
+                            #  GeneratedError, StructOrUnion]`
+                            self.assertAlmostEqual(primitive, loaded, places=3)
                         else:
                             self.assertEqual(primitive, loaded)
 

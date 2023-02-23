@@ -36,7 +36,7 @@ from thrift.python.conformance.universal_name import (
     UniversalHashAlgorithm,
 )
 from thrift.python.exceptions import GeneratedError
-from thrift.python.types import StructOrUnion, Union
+from thrift.python.types import Enum, StructOrUnion, Union
 
 
 if typing.TYPE_CHECKING:
@@ -44,7 +44,8 @@ if typing.TYPE_CHECKING:
 
     StructOrUnionOrException = typing.Union[GeneratedError, StructOrUnion]
     SupportedType = typing.Union[StructOrUnionOrException, PrimitiveType]
-    ClassWithUri = typing.Type[StructOrUnionOrException]
+    ObjWithUri = typing.Union[StructOrUnionOrException, Enum]
+    ClassWithUri = typing.Type[ObjWithUri]
 
 
 def _standard_protocol_to_serializer_protocol(
@@ -59,7 +60,21 @@ def _standard_protocol_to_serializer_protocol(
     raise NotImplementedError(f"Unsupported standard protocol: {protocol}")
 
 
+def _get_type_hash_prefix(obj: ObjWithUri) -> bytes:
+    uri = obj.__get_thrift_uri__()
+    if uri is None:
+        raise ValueError("Thrift struct doesn't have URI")
+    return get_universal_hash_prefix(
+        get_universal_hash(UniversalHashAlgorithm.Sha2_256, uri),
+        16,
+    )
+
+
 def _infer_type_name_from_value(value: PrimitiveType) -> TypeName:
+    if isinstance(value, Enum):
+        return TypeName(
+            enumType=TypeUri(typeHashPrefixSha2_256=_get_type_hash_prefix(value))
+        )
     if isinstance(value, bool):
         return TypeName(boolType=Void.Unused)
     if isinstance(value, int):
@@ -73,27 +88,6 @@ def _infer_type_name_from_value(value: PrimitiveType) -> TypeName:
     if isinstance(value, IOBuf):
         return TypeName(binaryType=Void.Unused)
     raise ValueError(f"Can not infer thrift type from: {value}")
-
-
-def _type_name_to_primitive_type(type_name: TypeName) -> typing.Type[PrimitiveType]:
-    if type_name.type is TypeName.Type.boolType:
-        return bool
-    if type_name.type in (
-        TypeName.Type.i16Type,
-        TypeName.Type.i32Type,
-        TypeName.Type.i64Type,
-    ):
-        return int
-    if type_name.type in (
-        TypeName.Type.floatType,
-        TypeName.Type.doubleType,
-    ):
-        return float
-    if type_name.type is TypeName.Type.stringType:
-        return str
-    if type_name.type is TypeName.Type.binaryType:
-        return bytes
-    raise ValueError(f"Unsupported primitive type: {type_name}")
 
 
 class AnyRegistry:
@@ -118,6 +112,9 @@ class AnyRegistry:
         for cls in module._fbthrift_all_structs:
             if self.register_type(cls):
                 any_change = True
+        for cls in module._fbthrift_all_enums:
+            if self.register_type(cls):
+                any_change = True
         return any_change
 
     def store(
@@ -131,19 +128,12 @@ class AnyRegistry:
             )
         if isinstance(obj, (GeneratedError, StructOrUnion)):
             return self._store_struct(obj, protocol=protocol)
-        if isinstance(obj, (bool, int, float, str, bytes, IOBuf)):
+        if isinstance(obj, (bool, int, float, str, bytes, IOBuf, Enum)):
             return self._store_primitive(obj, protocol=protocol)
         raise ValueError(f"Unsupported type: f{type(obj)}")
 
     def _store_struct(self, obj: StructOrUnionOrException, protocol: Protocol) -> Any:
-        uri = obj.__get_thrift_uri__()
-        if uri is None:
-            raise ValueError("Thrift struct doesn't have URI")
-        hash_prefix = get_universal_hash_prefix(
-            get_universal_hash(UniversalHashAlgorithm.Sha2_256, uri),
-            16,
-        )
-        type_uri = TypeUri(typeHashPrefixSha2_256=hash_prefix)
+        type_uri = TypeUri(typeHashPrefixSha2_256=_get_type_hash_prefix(obj))
         if isinstance(obj, Union):
             type_name = TypeName(unionType=type_uri)
         elif isinstance(obj, GeneratedError):
@@ -201,6 +191,7 @@ class AnyRegistry:
             TypeName.Type.doubleType,
             TypeName.Type.stringType,
             TypeName.Type.binaryType,
+            TypeName.Type.enumType,
         ):
             return self._load_primitive(any_obj)
         raise NotImplementedError(f"Unsupported type: {any_obj.type.name}")
@@ -209,17 +200,53 @@ class AnyRegistry:
         type_uri = any_obj.type.name.value
         if not isinstance(type_uri, TypeUri):
             raise ValueError("Any object does not contain a struct or union")
+        cls = self._type_uri_to_cls(type_uri)
+        if not issubclass(cls, (GeneratedError, StructOrUnion)):
+            raise ValueError(f"{type_uri} is not a struct")
         return serializer.deserialize(
-            self._type_uri_to_cls(type_uri),
+            # pyre-fixme[6]: For 1st argument expected `Type[Variable[sT (bound to
+            #  Union[GeneratedError, StructOrUnion])]]` but got
+            #  `Union[Type[Union[GeneratedError, StructOrUnion]], Type[Enum]]`.
+            cls,
             any_obj.data,
             protocol=_standard_protocol_to_serializer_protocol(
                 any_obj.protocol.standard
             ),
         )
 
+    def _type_name_to_primitive_type(
+        self, type_name: TypeName
+    ) -> typing.Type[PrimitiveType]:
+        if type_name.type is TypeName.Type.boolType:
+            return bool
+        if type_name.type in (
+            TypeName.Type.i16Type,
+            TypeName.Type.i32Type,
+            TypeName.Type.i64Type,
+        ):
+            return int
+        if type_name.type in (
+            TypeName.Type.floatType,
+            TypeName.Type.doubleType,
+        ):
+            return float
+        if type_name.type is TypeName.Type.stringType:
+            return str
+        if type_name.type is TypeName.Type.binaryType:
+            return bytes
+        if type_name.type is TypeName.Type.enumType:
+            cls = self._type_uri_to_cls(type_name.enumType)
+            if not issubclass(cls, Enum):
+                raise ValueError(f"{type_name.enumType} is not an enum")
+            # pyre-fixme[7]: Expected `Type[Union[Enum, IOBuf, bool, bytes, float,
+            #  int, str]]` but got `Union[Type[Union[GeneratedError, StructOrUnion]],
+            #  Type[Enum]]`.
+            return cls
+        raise ValueError(f"Unsupported primitive type: {type_name}")
+
     def _load_primitive(self, any_obj: Any) -> PrimitiveType:
         return deserialize_primitive(
-            _type_name_to_primitive_type(any_obj.type.name),
+            self._type_name_to_primitive_type(any_obj.type.name),
             any_obj.data,
             protocol=_standard_protocol_to_serializer_protocol(
                 any_obj.protocol.standard

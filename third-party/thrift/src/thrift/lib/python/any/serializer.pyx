@@ -18,8 +18,9 @@ from cython.view cimport memoryview
 from folly.iobuf cimport IOBuf, from_unique_ptr
 from libcpp cimport bool as cbool
 from libcpp.utility cimport move as cmove
-from thrift.python.types cimport Struct, StructOrUnion, Union, getCTypeInfo
+from thrift.python.types cimport EnumTypeInfo, Struct, StructOrUnion, Union, getCTypeInfo
 from thrift.python.types import (
+    Enum,
     typeinfo_bool,
     typeinfo_byte,
     typeinfo_i16,
@@ -60,10 +61,14 @@ def _thrift_type_to_type_info(thrift_type, cls):
         if issubclass(cls, IOBuf):
             return typeinfo_iobuf
         return typeinfo_binary
+    if thrift_type.name.type is TypeName.Type.enumType:
+        return EnumTypeInfo(cls)
     raise NotImplementedError(f"Unsupported type: {thrift_type}")
 
 
 def _infer_type_info_from_cls(cls):
+    if issubclass(cls, Enum):
+        return EnumTypeInfo(cls)
     if issubclass(cls, bool):
         return typeinfo_bool
     if issubclass(cls, int):

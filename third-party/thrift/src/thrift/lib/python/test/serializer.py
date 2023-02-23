@@ -372,3 +372,14 @@ class SerializerTests(unittest.TestCase):
             encoded_obj3 = serialize(obj3, protocol=proto)
             encoded_obj = serialize(obj, protocol=proto)
             self.assertEqual(encoded_obj3, encoded_obj)
+
+    # Test binary field is b64encoded in SimpleJSON protocol.
+    def test_binary_serialization_simplejson(self) -> None:
+        json_bytes = b'{"val_bool":false,"val_i32":0,"val_i64":0,"val_string":"abcdef","val_binary":"YWJjZGU","val_iobuf":"YWJjZGVm","val_enum":0,"val_union":{},"val_list":[],"val_map":{},"val_struct_with_containers":{"color_list":[],"color_set":[],"color_map":{}}}'
+        s = Complex(
+            val_string="abcdef",
+            val_binary=b"abcde",
+            val_iobuf=IOBuf(b"abcdef"),
+        )
+        self.assertEqual(serialize(s, protocol=Protocol.JSON), json_bytes)
+        self.assertEqual(deserialize(Complex, json_bytes, protocol=Protocol.JSON), s)

@@ -219,6 +219,7 @@ extern const detail::TypeInfo& i64TypeInfo;
 extern const detail::TypeInfo& doubleTypeInfo;
 extern const detail::TypeInfo& floatTypeInfo;
 extern const detail::TypeInfo stringTypeInfo;
+extern const detail::TypeInfo binaryTypeInfo;
 extern const detail::TypeInfo iobufTypeInfo;
 
 detail::OptionalThriftValue getStruct(const void* object);

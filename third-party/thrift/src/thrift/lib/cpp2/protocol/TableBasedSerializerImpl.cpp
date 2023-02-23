@@ -108,6 +108,7 @@ void setToIntrinsicDefault(void* value, const FieldInfo& info) {
           static_cast<std::string*>(value)->clear();
           break;
         case StringFieldType::StringView:
+        case StringFieldType::BinaryStringView:
           reinterpret_cast<void (*)(void*, const std::string&)>(typeInfo.set)(
               value, "");
           break;
@@ -245,6 +246,7 @@ bool isTerseFieldSet(const ThriftValue& value, const FieldInfo& info) {
         case StringFieldType::String:
           return !static_cast<const std::string*>(value.object)->empty();
         case StringFieldType::StringView:
+        case StringFieldType::BinaryStringView:
           return !value.stringViewValue.empty();
         case StringFieldType::Binary:
           return !static_cast<const std::string*>(value.object)->empty();

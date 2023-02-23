@@ -214,6 +214,13 @@ void read(
         case StringFieldType::Binary:
           iprot->readBinary(*static_cast<std::string*>(object));
           break;
+        case StringFieldType::BinaryStringView: {
+          std::string temp;
+          iprot->readBinary(temp);
+          reinterpret_cast<void (*)(void*, const std::string&)>(typeInfo.set)(
+              object, temp);
+          break;
+        }
         case StringFieldType::IOBufObj: {
           const OptionalThriftValue value = getValue(typeInfo, object);
           if (value.hasValue()) {
@@ -429,6 +436,9 @@ size_t write(Protocol_* iprot, const TypeInfo& typeInfo, ThriftValue value) {
         case StringFieldType::Binary:
           return iprot->writeBinary(
               *static_cast<const std::string*>(value.object));
+        case StringFieldType::BinaryStringView:
+          return iprot->writeBinary(
+              static_cast<const folly::StringPiece>(value.stringViewValue));
         case StringFieldType::IOBufObj:
           return iprot->writeBinary(
               *static_cast<const folly::IOBuf*>(value.iobuf));

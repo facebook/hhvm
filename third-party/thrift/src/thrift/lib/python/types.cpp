@@ -92,6 +92,7 @@ UniquePyObjectPtr getDefaultValue(
           case detail::StringFieldType::String:
           case detail::StringFieldType::StringView:
           case detail::StringFieldType::Binary:
+          case detail::StringFieldType::BinaryStringView:
             value = UniquePyObjectPtr(PyBytes_FromString(""));
             break;
           case detail::StringFieldType::IOBuf:
@@ -601,6 +602,9 @@ const detail::TypeInfo& floatTypeInfo =
 const detail::StringFieldType stringFieldType =
     detail::StringFieldType::StringView;
 
+const detail::StringFieldType binaryFieldType =
+    detail::StringFieldType::BinaryStringView;
+
 const detail::StringFieldType ioBufFieldType =
     detail::StringFieldType::IOBufObj;
 
@@ -609,6 +613,13 @@ const detail::TypeInfo stringTypeInfo{
     /* .get */ getString,
     /* .set */ reinterpret_cast<detail::VoidFuncPtr>(setString),
     /* .typeExt */ &stringFieldType,
+};
+
+const detail::TypeInfo binaryTypeInfo{
+    /* .type */ protocol::TType::T_STRING,
+    /* .get */ getString,
+    /* .set */ reinterpret_cast<detail::VoidFuncPtr>(setString),
+    /* .typeExt */ &binaryFieldType,
 };
 
 const detail::TypeInfo iobufTypeInfo{

@@ -73,6 +73,7 @@ using maybe_get_element_type_t = typename maybe_get_element_type<T>::type;
 enum class StringFieldType {
   String,
   StringView,
+  BinaryStringView,
   Binary,
   IOBuf,
   IOBufPtr,

@@ -140,7 +140,7 @@ typeinfo_i64 = IntegerTypeInfo.create(i64TypeInfo, -1<<63, (1<<63)-1)
 typeinfo_double = TypeInfo.create(doubleTypeInfo, (pfloat, pint))
 typeinfo_float = TypeInfo.create(floatTypeInfo, (pfloat, pint))
 typeinfo_string = StringTypeInfo.create(stringTypeInfo)
-typeinfo_binary = TypeInfo.create(stringTypeInfo, (bytes,))
+typeinfo_binary = TypeInfo.create(binaryTypeInfo, (bytes,))
 typeinfo_iobuf = IOBufTypeInfo.create(iobufTypeInfo)
 
 

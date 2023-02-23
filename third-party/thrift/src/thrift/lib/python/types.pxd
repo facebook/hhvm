@@ -62,6 +62,7 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     cdef const cTypeInfo& floatTypeInfo
     cdef const cTypeInfo& doubleTypeInfo
     cdef const cTypeInfo  stringTypeInfo
+    cdef const cTypeInfo  binaryTypeInfo
     cdef const cTypeInfo  iobufTypeInfo
 
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3287d466f20e7aaa991f2976560fbfbf>>
+// @generated SignedSource<<ccbaf3220f00bbcfb6a9f7f4fc83b879>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2844,26 +2844,22 @@ pub enum Hint_<'a> {
     Happly(&'a (&'a ClassName<'a>, &'a [&'a Hint<'a>])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hshape(&'a NastShapeInfo<'a>),
-    /// This represents the use of a type const. Type consts are accessed like
-    /// regular consts in Hack, i.e.
+    /// Accessing a type constant. Type constants are accessed like normal
+    /// class constants, but in type positions.
     ///
-    /// [$x | self | static | Class]::TypeConst
+    /// SomeClass::TFoo
+    /// self::TFoo
+    /// this::TFoo
     ///
-    /// Class  => Happly "Class"
-    /// self   => Happly of the class of definition
-    /// static => Habstr ("static",
-    ///           Habstr ("this", (Constraint_as, Happly of class of definition)))
-    /// $x     => Hvar "$x"
+    /// Type constants can be also be chained, hence the list as the second
+    /// argument:
     ///
-    /// Type const access can be chained such as
+    /// SomeClass::TFoo::TBar // Haccess (Happly "SomeClass", ["TFoo", "TBar"])
     ///
-    /// Class::TC1::TC2::TC3
+    /// When using contexts, the receiver may be a variable rather than a
+    /// specific type:
     ///
-    /// We resolve the root of the type access chain as a type as follows.
-    ///
-    /// This will result in the following representation
-    ///
-    /// Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
+    /// function uses_const_ctx(SomeClassWithConstant $t)[$t::C]: void {}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Haccess(&'a (&'a Hint<'a>, &'a [Sid<'a>])),

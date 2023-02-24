@@ -1175,26 +1175,22 @@ and hint_ =
   | Happly of class_name * hint list
   | Hshape of nast_shape_info
   | Haccess of hint * sid list
-      (** This represents the use of a type const. Type consts are accessed like
-       * regular consts in Hack, i.e.
+      (** Accessing a type constant. Type constants are accessed like normal
+       * class constants, but in type positions.
        *
-       * [$x | self | static | Class]::TypeConst
+       * SomeClass::TFoo
+       * self::TFoo
+       * this::TFoo
        *
-       * Class  => Happly "Class"
-       * self   => Happly of the class of definition
-       * static => Habstr ("static",
-       *           Habstr ("this", (Constraint_as, Happly of class of definition)))
-       * $x     => Hvar "$x"
+       * Type constants can be also be chained, hence the list as the second
+       * argument:
        *
-       * Type const access can be chained such as
+       * SomeClass::TFoo::TBar // Haccess (Happly "SomeClass", ["TFoo", "TBar"])
        *
-       * Class::TC1::TC2::TC3
+       * When using contexts, the receiver may be a variable rather than a
+       * specific type:
        *
-       * We resolve the root of the type access chain as a type as follows.
-       *
-       * This will result in the following representation
-       *
-       * Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
+       * function uses_const_ctx(SomeClassWithConstant $t)[$t::C]: void {}
        *)
   | Hsoft of hint
   | Hrefinement of hint * refinement list

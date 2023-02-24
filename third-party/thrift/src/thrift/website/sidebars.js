@@ -542,6 +542,7 @@ module.exports = {
         },
         'contributions/universal-name',
         'contributions/terse-write',
+        'contributions/adapter',
         'contributions/patch',
         {
           type: 'category',

@@ -121,7 +121,7 @@
 (library
  (name naming_elaborate_namespaces_endo)
  (modules naming_elaborate_namespaces_endo)
- (libraries annotated_ast parser)
+ (libraries annotated_ast nast parser)
  (preprocess
   (pps ppx_deriving.std)))
 

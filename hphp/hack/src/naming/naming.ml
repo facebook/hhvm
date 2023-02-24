@@ -28,9 +28,6 @@ let (on_error, reset_errors, get_errors) =
   and on_error err = naming_errs := Naming_phase_error.add !naming_errs err in
   (on_error, reset_errors, get_errors)
 
-let elaborate_namespaces =
-  new Naming_elaborate_namespaces_endo.generic_elaborator
-
 let invalid_expr_ = Naming_phase_error.invalid_expr_
 
 let mk_env filename tcopt =
@@ -220,10 +217,7 @@ let program_filename defs =
 let program ctx program =
   let filename = program_filename program
   and tcopt = Provider_context.get_tcopt ctx
-  and elab_ns =
-    elaborate_namespaces#on_program
-      (Naming_elaborate_namespaces_endo.make_env
-         Namespace_env.empty_with_default)
+  and elab_ns = Naming_elaborate_namespaces_endo.elaborate_program
   and elab_capture = Naming_captures.elab_program
   and elab_core = elab_core_program in
   elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core program
@@ -231,9 +225,7 @@ let program ctx program =
 let fun_def ctx fd =
   let filename = Pos.filename fd.Aast.fd_fun.Aast.f_span
   and tcopt = Provider_context.get_tcopt ctx
-  and elab_ns =
-    elaborate_namespaces#on_fun_def
-      (Naming_elaborate_namespaces_endo.make_env fd.Aast.fd_namespace)
+  and elab_ns = Naming_elaborate_namespaces_endo.elaborate_fun_def
   and elab_capture = Naming_captures.elab_fun_def
   and elab_core = elab_core_fun_def in
   elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core fd
@@ -241,9 +233,7 @@ let fun_def ctx fd =
 let class_ ctx c =
   let filename = Pos.filename c.Aast.c_span
   and tcopt = Provider_context.get_tcopt ctx
-  and elab_ns =
-    elaborate_namespaces#on_class_
-      (Naming_elaborate_namespaces_endo.make_env c.Aast.c_namespace)
+  and elab_ns = Naming_elaborate_namespaces_endo.elaborate_class_
   and elab_capture = Naming_captures.elab_class
   and elab_core = elab_core_class in
   elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core c
@@ -251,10 +241,7 @@ let class_ ctx c =
 let module_ ctx md =
   let filename = Pos.filename md.Aast.md_span
   and tcopt = Provider_context.get_tcopt ctx
-  and elab_ns =
-    elaborate_namespaces#on_module_def
-      (Naming_elaborate_namespaces_endo.make_env
-         Namespace_env.empty_with_default)
+  and elab_ns = Naming_elaborate_namespaces_endo.elaborate_module_def
   and elab_capture = Naming_captures.elab_module_def
   and elab_core = elab_core_module_def in
   elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core md
@@ -262,9 +249,7 @@ let module_ ctx md =
 let global_const ctx cst =
   let filename = Pos.filename cst.Aast.cst_span
   and tcopt = Provider_context.get_tcopt ctx
-  and elab_ns =
-    elaborate_namespaces#on_gconst
-      (Naming_elaborate_namespaces_endo.make_env cst.Aast.cst_namespace)
+  and elab_ns = Naming_elaborate_namespaces_endo.elaborate_gconst
   and elab_capture = Naming_captures.elab_gconst
   and elab_core = elab_core_gconst in
   elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core cst
@@ -272,9 +257,7 @@ let global_const ctx cst =
 let typedef ctx td =
   let filename = Pos.filename @@ td.Aast.t_span
   and tcopt = Provider_context.get_tcopt ctx
-  and elab_ns =
-    elaborate_namespaces#on_typedef
-      (Naming_elaborate_namespaces_endo.make_env td.Aast.t_namespace)
+  and elab_ns = Naming_elaborate_namespaces_endo.elaborate_typedef
   and elab_capture = Naming_captures.elab_typedef
   and elab_core = elab_core_typedef in
   elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core td

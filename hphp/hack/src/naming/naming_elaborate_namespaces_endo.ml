@@ -445,3 +445,27 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let (_, rev_defs) = List.fold p ~f:aux ~init:(env, []) in
       List.rev rev_defs
   end
+
+let elaborate_namespaces = new generic_elaborator
+
+let elaborate_program program =
+  elaborate_namespaces#on_program
+    (make_env Namespace_env.empty_with_default)
+    program
+
+let elaborate_fun_def fd =
+  elaborate_namespaces#on_fun_def (make_env fd.Aast.fd_namespace) fd
+
+let elaborate_class_ c =
+  elaborate_namespaces#on_class_ (make_env c.Aast.c_namespace) c
+
+let elaborate_module_def m =
+  elaborate_namespaces#on_module_def
+    (make_env Namespace_env.empty_with_default)
+    m
+
+let elaborate_gconst cst =
+  elaborate_namespaces#on_gconst (make_env cst.Aast.cst_namespace) cst
+
+let elaborate_typedef td =
+  elaborate_namespaces#on_typedef (make_env td.Aast.t_namespace) td

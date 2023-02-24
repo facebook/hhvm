@@ -186,6 +186,10 @@ impl<R: Reason> Ty<R> {
         Self::prim(r, Prim::Tvoid)
     }
 
+    pub fn mixed(r: R) -> Self {
+        Self::new(r, Ty_::Tmixed)
+    }
+
     pub fn any(r: R) -> Self {
         Self::new(r, Ty_::Tany)
     }

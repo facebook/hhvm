@@ -1173,6 +1173,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "decl_enforceability"
+version = "0.0.0"
+dependencies = [
+ "oxidized",
+ "pos",
+ "special_names",
+ "ty",
+]
+
+[[package]]
 name = "decl_mode_parser"
 version = "0.0.0"
 dependencies = [
@@ -1860,6 +1870,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "datastore",
+ "decl_enforceability",
  "eq_modulo_pos",
  "hash",
  "indexmap",

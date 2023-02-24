@@ -193,6 +193,21 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
     }
 
+    fn maybe_add_supportdyn_bound(&self, p: &R::Pos, kind: &mut Typeconst<R>) {
+        if self.opts.tco_everything_sdt {
+            if let Typeconst::TCAbstract(AbstractTypeconst {
+                as_constraint: as_constraint @ None,
+                ..
+            }) = kind
+            {
+                *as_constraint = Some(decl_enforceability::supportdyn_mixed(
+                    p.clone(),
+                    R::witness_from_decl(p.clone()),
+                ));
+            }
+        }
+    }
+
     fn decl_type_const(
         &self,
         type_consts: &mut IndexMap<TypeConstName, TypeConst<R>>,
@@ -201,31 +216,32 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     ) {
         // note(sf, 2022-02-10): c.f. Decl_folded_class.typeconst_fold
         match self.child.kind {
-            ClassishKind::Cenum => {}
+            ClassishKind::Cenum => return,
             ClassishKind::CenumClass(_)
             | ClassishKind::Ctrait
             | ClassishKind::Cinterface
-            | ClassishKind::Cclass(_) => {
-                let TypeConstName(name) = stc.name.id();
-                let ptc = type_consts.get(stc.name.id_ref());
-                let ptc_enforceable = ptc.and_then(|tc| tc.enforceable.as_ref());
-                let ptc_reifiable = ptc.and_then(|tc| tc.reifiable.as_ref());
-                let type_const = TypeConst {
-                    is_synthesized: false,
-                    name: stc.name.clone(),
-                    kind: stc.kind.clone(),
-                    origin: self.child.name.id(),
-                    enforceable: ty::decl::ty::Enforceable(
-                        stc.enforceable.as_ref().or(ptc_enforceable).cloned(),
-                    ),
-                    reifiable: stc.reifiable.as_ref().or(ptc_reifiable).cloned(),
-                    is_concretized: false,
-                    is_ctx: stc.is_ctx,
-                };
-                type_consts.insert(TypeConstName(name), type_const);
-                class_consts.insert(ClassConstName(name), self.type_const_structure(stc));
-            }
+            | ClassishKind::Cclass(_) => {}
         }
+        let TypeConstName(name) = stc.name.id();
+        let ptc = type_consts.get(stc.name.id_ref());
+        let ptc_enforceable = ptc.and_then(|tc| tc.enforceable.as_ref());
+        let ptc_reifiable = ptc.and_then(|tc| tc.reifiable.as_ref());
+        let mut kind = stc.kind.clone();
+        self.maybe_add_supportdyn_bound(stc.name.pos(), &mut kind);
+        let type_const = TypeConst {
+            is_synthesized: false,
+            name: stc.name.clone(),
+            kind,
+            origin: self.child.name.id(),
+            enforceable: ty::decl::ty::Enforceable(
+                stc.enforceable.as_ref().or(ptc_enforceable).cloned(),
+            ),
+            reifiable: stc.reifiable.as_ref().or(ptc_reifiable).cloned(),
+            is_concretized: false,
+            is_ctx: stc.is_ctx,
+        };
+        type_consts.insert(TypeConstName(name), type_const);
+        class_consts.insert(ClassConstName(name), self.type_const_structure(stc));
     }
 
     fn decl_class_const(
@@ -834,6 +850,14 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
         let deferred_init_members = self.get_deferred_init_members(&constructor.elt);
 
+        let mut tparams = self.child.tparams.clone();
+        decl_enforceability::maybe_add_supportdyn_constraints(
+            self.opts,
+            Some(self.child),
+            self.child.name.pos(),
+            &mut tparams,
+        );
+
         let fc = Arc::new(FoldedClass {
             name: self.child.name.id(),
             pos: self.child.name.pos().clone(),
@@ -848,7 +872,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             enum_type: self.child.enum_type.clone(),
             has_xhp_keyword: self.child.has_xhp_keyword,
             module: self.child.module.clone(),
-            tparams: self.child.tparams.clone(),
+            tparams,
             where_constraints: self.child.where_constraints.clone(),
             substs,
             ancestors,

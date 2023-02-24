@@ -653,6 +653,10 @@ pub mod coeffects {
     pub fn types() -> impl Iterator<Item = TypeName> {
         [*contexts, *unsafe_contexts].into_iter()
     }
+
+    pub fn is_generated_generic(x: impl AsRef<str>) -> bool {
+        x.as_ref().starts_with(generated_generic_prefix.as_str())
+    }
 }
 
 pub mod readonly {

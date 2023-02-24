@@ -242,7 +242,6 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   }
   hqParams.transportSettings.connectUDP = FLAGS_connect_udp;
   hqParams.transportSettings.maxCwndInMss = FLAGS_max_cwnd_mss;
-  hqParams.transportSettings.disableMigration = false;
   if (hqUberParams.mode == HQMode::SERVER && FLAGS_use_inplace_write) {
     hqParams.transportSettings.dataPathType =
         quic::DataPathType::ContinuousMemory;

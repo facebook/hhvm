@@ -326,7 +326,7 @@ struct
       raise (Malformed_build_id "missing newline after version");
     (* Newer clients send version in a json object.
        Older clients sent just a client_version string *)
-    if String_utils.string_starts_with s "{" then
+    if String.is_prefix s ~prefix:"{" then
       try Hh_json.json_of_string s with
       | e -> raise (Malformed_build_id (Exn.to_string e))
     else

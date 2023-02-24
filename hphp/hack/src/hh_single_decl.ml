@@ -267,7 +267,9 @@ let () =
     if
       !skip_if_errors
       && not
-         @@ String_utils.is_substring "No errors" (RealDisk.cat (file ^ ".exp"))
+         @@ String.is_substring
+              ~substring:"No errors"
+              (RealDisk.cat (file ^ ".exp"))
     then begin
       print_endline "Skipping because input file has errors";
       exit 0

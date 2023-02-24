@@ -133,7 +133,7 @@ let create path =
       let drive_letter = Str.matched_group 1 path in
       let rest = Str.matched_group 2 path in
       Printf.sprintf "%s:%s" drive_letter rest
-    else if String_utils.string_starts_with path "/" then
+    else if String.is_prefix path ~prefix:"/" then
       String_utils.lstrip path "/"
     else
       failwith ("Not an absolute filepath - " ^ path)

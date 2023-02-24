@@ -7,6 +7,7 @@
  (name ignore)
  (wrapped false)
  (libraries
+  core_kernel
   hh_json
   str
   string

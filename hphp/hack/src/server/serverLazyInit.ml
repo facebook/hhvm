@@ -29,7 +29,6 @@ open Reordered_argument_collections
 open SearchServiceRunner
 open ServerEnv
 open ServerInitTypes
-open String_utils
 module SLC = ServerLocalConfig
 
 type deptable = CustomDeptable of string
@@ -935,7 +934,9 @@ let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
       | Notifier_synchronous_changes updates
       | Notifier_async_changes updates ->
         let root = Path.to_string root in
-        let filter p = string_starts_with p root && FindUtils.file_filter p in
+        let filter p =
+          String.is_prefix p ~prefix:root && FindUtils.file_filter p
+        in
         SSet.filter updates ~f:filter
         |> Relative_path.relativize_set Relative_path.Root)
   in

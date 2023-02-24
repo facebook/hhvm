@@ -27,8 +27,8 @@ let build_commit_time_string = get_build_commit_time_string ()
 let build_mode = get_build_mode ()
 
 let is_build_optimized =
-  String_utils.string_starts_with build_mode "dbgo"
-  || String_utils.string_starts_with build_mode "opt"
+  String.is_prefix build_mode ~prefix:"dbgo"
+  || String.is_prefix build_mode ~prefix:"opt"
   || String.equal build_mode ""
 
 let is_dev_build =

@@ -240,7 +240,7 @@ let autocomplete_shape_key autocomplete_context env fields id =
             Typing_defs.mk
               (Reason.Rwitness_from_decl pos, Typing_defs.make_tany ()) )
       in
-      if (not have_prefix) || string_starts_with code prefix then
+      if (not have_prefix) || String.is_prefix code ~prefix then
         let ty = Phase.decl ty in
         let pos = get_pos_for env ty in
         let res_name =
@@ -1139,7 +1139,7 @@ let find_global_results
     | None ->
       builtin_type_hints
       |> List.filter ~f:(fun (_, name) ->
-             String_utils.string_starts_with name query_text)
+             String.is_prefix name ~prefix:query_text)
       |> List.iter ~f:(fun (hint, name) ->
              let kind = SI_Typedef in
              let documentation = SymbolOccurrence.built_in_type_hover hint in

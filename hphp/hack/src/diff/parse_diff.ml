@@ -56,7 +56,7 @@ let rec go content =
 (* Skip the text before the first +++ (to make things work with git show) *)
 and start env = function
   | [] -> ()
-  | line :: lines when String_utils.string_starts_with line "+++" ->
+  | line :: lines when String.is_prefix line ~prefix:"+++" ->
     header env line;
     modified env 0 lines
   | _ :: lines -> start env lines

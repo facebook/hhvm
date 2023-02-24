@@ -27,8 +27,8 @@ let _extract_bad_type_indicator ty =
 
 let mk_common_info ~context_id pos =
   let path = Pos.filename pos |> Relative_path.suffix in
-  let is_generated = String_utils.is_substring "generated" path in
-  let is_test = String_utils.is_substring "test" path in
+  let is_generated = String.is_substring ~substring:"generated" path in
+  let is_test = String.is_substring ~substring:"test" path in
   { context_id; is_generated; is_test; pos }
 
 let mk_ret_decl_info_internal ~context_id env ty =

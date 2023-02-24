@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-open String_utils
 module Error_code = Error_codes.Naming
 
 type visibility =
@@ -674,14 +673,14 @@ let unbound_name pos name kind =
 
 let unbound_attribute_name pos attr_name closest_attr_name =
   let reason =
-    if string_starts_with attr_name "__" then
+    if String.is_prefix attr_name ~prefix:"__" then
       "starts with __ but is not a standard attribute"
     else
       "does not have a class. Please declare a class for the attribute."
   in
 
   let quickfixes =
-    if string_starts_with attr_name "__" then
+    if String.is_prefix attr_name ~prefix:"__" then
       match closest_attr_name with
       | None -> []
       | Some close_name ->

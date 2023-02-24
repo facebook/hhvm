@@ -34,7 +34,7 @@ let check_implements
   let is_systemlib =
     TypecheckerOptions.is_systemlib (Typing_env.get_tcopt env)
   in
-  if String_utils.string_starts_with attr_name "__" then
+  if String.is_prefix attr_name ~prefix:"__" then
     (* Check against builtins *)
     let check_attr map =
       match SMap.find_opt attr_name map with

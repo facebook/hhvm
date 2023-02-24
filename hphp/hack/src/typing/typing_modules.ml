@@ -7,7 +7,6 @@
  *)
 
 open Hh_prelude
-open String_utils
 open Typing_defs
 module Env = Typing_env
 module Cls = Decl_provider.Class
@@ -52,7 +51,7 @@ let satisfies_rule test_module_opt rule =
         let prefix_length = String.length rule_module_prefix in
         let test_length = String.length module_ in
         prefix_length = 0
-        || string_starts_with module_ rule_module_prefix
+        || String.is_prefix module_ ~prefix:rule_module_prefix
            && (test_length = prefix_length
               || Char.equal module_.[prefix_length] '.')
     )

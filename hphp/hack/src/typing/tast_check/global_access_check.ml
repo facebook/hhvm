@@ -1158,8 +1158,7 @@ let global_access_check_enabled_on_file tcopt file =
     TypecheckerOptions.global_access_check_files_enabled tcopt
   in
   let path = "/" ^ Relative_path.suffix file in
-  List.exists enabled_paths ~f:(fun prefix ->
-      String_utils.string_starts_with path prefix)
+  List.exists enabled_paths ~f:(fun prefix -> String.is_prefix path ~prefix)
 
 (* Determine if a function is enabled for global access check *)
 let global_access_check_enabled_on_function tcopt function_name =

@@ -13,21 +13,6 @@ let string_before s n = String.sub s 0 n
 
 let string_after s n = String.sub s n (String.length s - n)
 
-let string_starts_with long short =
-  try
-    let long = String.sub long 0 (String.length short) in
-    long = short
-  with
-  | Invalid_argument _ -> false
-
-let string_ends_with long short =
-  try
-    let len = String.length short in
-    let long = String.sub long (String.length long - len) len in
-    long = short
-  with
-  | Invalid_argument _ -> false
-
 (* Returns the index of the first occurrence of string `needle` in string
    `haystack`. If not found, returns -1.
 
@@ -69,24 +54,20 @@ let substring_index needle =
     else
       -1
 
-let is_substring needle =
-  let substring_index_memo = substring_index needle in
-  (fun haystack -> substring_index_memo haystack >= 0)
-
 (* Return a copy of the string with prefixing string removed.
  * The function is a no-op if it s does not start with prefix.
  * Modeled after Python's string.lstrip.
  *)
 let lstrip s prefix =
   let prefix_length = String.length prefix in
-  if string_starts_with s prefix then
+  if Core.String.is_prefix s ~prefix then
     String.sub s prefix_length (String.length s - prefix_length)
   else
     s
 
 let rstrip s suffix =
   let result_length = String.length s - String.length suffix in
-  if string_ends_with s suffix then
+  if Core.String.is_suffix s ~suffix then
     String.sub s 0 result_length
   else
     s
@@ -121,9 +102,6 @@ let index_not_from_opt =
     [str] that is not in [chars] if it exists, or [None] otherwise. *)
 let index_not_opt str chars = index_not_from_opt str 0 chars
 
-(* String provides map and iter but not fold. It also is missing a char_list_of
- * function. Oh well. You can use fold to simulate anything you need, I suppose
- *)
 let fold_left ~f ~acc str =
   let acc = ref acc in
   String.iter (fun c -> acc := f !acc c) str;

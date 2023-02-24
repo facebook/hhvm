@@ -119,8 +119,7 @@ let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
   let deps_mode = Provider_context.get_deps_mode ctx in
   let file_filter (path : string) =
     FindUtils.file_filter path
-    && List.exists prefixes ~f:(fun prefix ->
-           String_utils.string_starts_with path prefix)
+    && List.exists prefixes ~f:(fun prefix -> String.is_prefix path ~prefix)
   in
   let path_filter (path : Relative_path.t) =
     file_filter (Relative_path.to_absolute path)

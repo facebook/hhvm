@@ -17,7 +17,7 @@ type t = {
 let from_file path = { path; fanout = true }
 
 let parse_line s =
-  if String_utils.string_starts_with s "{" then
+  if String.is_prefix s ~prefix:"{" then
     match json_of_string s with
     | JSON_Object [("path", JSON_String p); ("fanout", JSON_Bool f)] ->
       { path = Relative_path.storage_of_string p; fanout = f }
@@ -54,7 +54,7 @@ let from_naming_table naming_table ~failed_parsing ~exclude_hhi ~ignore_paths =
         if
           Relative_path.is_hhi (Relative_path.prefix path)
           && (exclude_hhi
-             || String_utils.string_starts_with path_str "hhi|hsl_generated")
+             || String.is_prefix path_str ~prefix:"hhi|hsl_generated")
           || List.exists ignore_paths ~f:(fun ignore ->
                  String.equal path_str ignore)
         then

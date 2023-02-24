@@ -196,8 +196,7 @@ module Members = struct
   (* Any data- or aria- attribute is always valid, even if it is not declared
    * for a given XHP element *)
   let is_special_xhp_attribute s =
-    String_utils.string_starts_with s ":data-"
-    || String_utils.string_starts_with s ":aria-"
+    String.is_prefix s ~prefix:":data-" || String.is_prefix s ~prefix:":aria-"
 end
 
 module AttributeKinds = struct
@@ -1181,7 +1180,7 @@ module XHP = struct
   let is_reserved name =
     String.equal name pcdata || String.equal name any || String.equal name empty
 
-  let is_xhp_category name = String_utils.string_starts_with name "%"
+  let is_xhp_category name = String.is_prefix name ~prefix:"%"
 end
 
 (* This should be a subset of rust_parser_errors::UnstableFeatures that is relevant

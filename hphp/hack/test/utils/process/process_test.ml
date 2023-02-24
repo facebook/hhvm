@@ -51,7 +51,7 @@ let test_env_variable () =
   | Ok { Process_types.stdout; _ } ->
     let env = String_utils.split_into_lines stdout in
     let name_env =
-      List.filter ~f:(fun s -> String_utils.string_starts_with s "NAME=") env
+      List.filter ~f:(fun s -> String.is_prefix s ~prefix:"NAME=") env
     in
     (match name_env with
     | [] -> false

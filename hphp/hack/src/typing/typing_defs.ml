@@ -501,7 +501,7 @@ module DependentKind = struct
       "<expr#" ^ string_of_int display_id ^ ">"
 
   let is_generic_dep_ty s =
-    String_utils.is_substring "::" s
+    String.is_substring ~substring:"::" s
     || String.equal s Naming_special_names.Typehints.this
 end
 
@@ -534,7 +534,9 @@ let rec is_denotable ty =
            is_denotable fp_type.et_type)
   | Toption ty -> is_denotable ty
   | Tgeneric (nm, _) ->
-    not (DependentKind.is_generic_dep_ty nm || String_utils.is_substring "#" nm)
+    not
+      (DependentKind.is_generic_dep_ty nm
+      || String.is_substring ~substring:"#" nm)
   | Tunion _
   | Tintersection _
   | Tneg _

@@ -198,7 +198,7 @@ let rec collect_paths path_predicate path =
 
 let parse_path_list (paths : string list) : string list =
   List.concat_map paths ~f:(fun path ->
-      if String_utils.string_starts_with path "@" then
+      if String.is_prefix path ~prefix:"@" then
         let path = String_utils.lstrip path "@" in
         cat path |> split_lines
       else
@@ -566,7 +566,7 @@ let lstat path =
      '/' (or a '\', whatever) *)
   Unix.lstat
   @@
-  if Sys.win32 && String_utils.string_ends_with path Filename.dir_sep then
+  if Sys.win32 && String.is_suffix path ~suffix:Filename.dir_sep then
     String.sub path ~pos:0 ~len:(String.length path - 1)
   else
     path

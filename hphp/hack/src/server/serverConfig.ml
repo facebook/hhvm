@@ -190,7 +190,7 @@ let process_untrusted_mode config =
             in
             let prefix_match =
               List.find
-                ~f:(fun blp -> String_utils.string_starts_with ck blp)
+                ~f:(fun blp -> String.is_prefix ck ~prefix:blp)
                 prefix_blacklist
             in
             match (exact_match, prefix_match) with

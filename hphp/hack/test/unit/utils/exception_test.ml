@@ -11,7 +11,7 @@
 open Hh_prelude
 
 let expect file stack =
-  let matches s = String_utils.string_starts_with s file in
+  let matches s = String.is_prefix s ~prefix:file in
   if List.exists ~f:matches (String_utils.split_on_newlines stack) then
     ()
   else

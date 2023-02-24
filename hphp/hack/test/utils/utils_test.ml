@@ -1,3 +1,4 @@
+open Hh_prelude
 open Asserter
 
 let assert_ns_split name assert_left assert_right =
@@ -76,9 +77,9 @@ let assert_throws : 'a 'b. ('b -> 'a) -> 'b -> string -> string -> unit =
       let _ = f arg in
       "[no exception]"
     with
-    | e -> Printexc.to_string e
+    | e -> Caml.Printexc.to_string e
   in
-  if not (String_utils.is_substring exp e) then begin
+  if not (String.is_substring ~substring:exp e) then begin
     Printf.eprintf "%s.\nExpected it to throw '%s' but got '%s'\n" message exp e;
     assert false
   end;
@@ -278,7 +279,9 @@ let test_telemetry_diff () =
       3
       "diff4 o.c should be 3";
     Bool_asserter.assert_equals
-      (Telemetry_test_utils.value_exn diff4 "o__prev" = Hh_json.JSON_Null)
+      (match Telemetry_test_utils.value_exn diff4 "o__prev" with
+      | Hh_json.JSON_Null -> true
+      | _ -> false)
       true
       "diff4 o__prev should be JSON_Null";
     assert_throws
@@ -287,7 +290,9 @@ let test_telemetry_diff () =
       "not found"
       "diff4 o.c__prev should throw";
     Bool_asserter.assert_equals
-      (Telemetry_test_utils.value_exn diff4 "p" = Hh_json.JSON_Null)
+      (match Telemetry_test_utils.value_exn diff4 "p" with
+      | Hh_json.JSON_Null -> true
+      | _ -> false)
       true
       "diff4 p should be JSON_Null";
     Int_asserter.assert_equals

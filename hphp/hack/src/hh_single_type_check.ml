@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open String_utils
 open Sys_utils
 open Typing_env_types
 module Inf = Typing_inference_env
@@ -1430,7 +1429,7 @@ let add_newline contents =
      - no header or shebang (e.g. .hack file): prepend
   *)
   let after_shebang =
-    if string_starts_with contents "#!" then
+    if String.is_prefix contents ~prefix:"#!" then
       String.index_exn contents '\n' + 1
     else
       0

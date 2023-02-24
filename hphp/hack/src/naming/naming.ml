@@ -16,7 +16,6 @@
 
 open Hh_prelude
 open Common
-open String_utils
 module Env = Naming_phase_env
 
 (*****************************************************************************)
@@ -37,7 +36,7 @@ let invalid_expr_ = Naming_phase_error.invalid_expr_
 let mk_env filename tcopt =
   let file_str = Relative_path.suffix filename in
   let dir_str = Filename.dirname file_str in
-  let is_hhi = string_ends_with (Relative_path.suffix filename) ".hhi"
+  let is_hhi = String.is_suffix (Relative_path.suffix filename) ~suffix:".hhi"
   and is_systemlib = TypecheckerOptions.is_systemlib tcopt
   and allow_typeconst_in_enum_class =
     TypecheckerOptions.allow_all_locations_for_type_constant_in_enum_class tcopt
@@ -55,7 +54,7 @@ let mk_env filename tcopt =
                let allowed_dir =
                  String.sub allowed_file ~pos:0 ~len:(len - 1)
                in
-               String_utils.string_starts_with file_str allowed_dir
+               String.is_prefix file_str ~prefix:allowed_dir
              | _ -> String.equal allowed_file file_str
            else
              false)

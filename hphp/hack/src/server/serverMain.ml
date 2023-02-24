@@ -10,7 +10,6 @@
 open Hh_prelude
 open ServerEnv
 open Reordered_argument_collections
-open String_utils
 open Option.Monad_infix
 
 (*****************************************************************************)
@@ -126,7 +125,9 @@ module Program = struct
     let root = Path.to_string @@ ServerArgs.root genv.options in
     (* Because of symlinks, we can have updates from files that aren't in
      * the .hhconfig directory *)
-    let updates = SSet.filter updates ~f:(fun p -> string_starts_with p root) in
+    let updates =
+      SSet.filter updates ~f:(fun p -> String.is_prefix p ~prefix:root)
+    in
     let updates = Relative_path.(relativize_set Root updates) in
     let to_recheck =
       Relative_path.Set.filter updates ~f:(fun update ->

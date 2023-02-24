@@ -19,13 +19,7 @@ val string_before : string -> int -> string
 
 val string_after : string -> int -> string
 
-val string_starts_with : string -> string -> bool
-
-val string_ends_with : string -> string -> bool
-
 val substring_index : string -> string -> int
-
-val is_substring : string -> string -> bool
 
 val lstrip : string -> string -> string
 

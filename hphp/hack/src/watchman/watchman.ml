@@ -692,7 +692,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
           String_utils.(
             match
               SSet.find_first_opt
-                (fun root -> string_starts_with path root)
+                (fun root -> String.is_prefix path ~prefix:root)
                 watch_roots
             with
             | None -> failwith (spf "Cannot deduce watch root for path %s" path)

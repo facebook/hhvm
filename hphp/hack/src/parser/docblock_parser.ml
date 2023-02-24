@@ -69,7 +69,7 @@ let get_param_docs ~(docblock : string) : string String.Map.t =
       match split with
       | Some param_info ->
         let param_name =
-          if String_utils.string_starts_with param_info.param_name "$" then
+          if String.is_prefix param_info.param_name ~prefix:"$" then
             param_info.param_name
           else
             "$" ^ param_info.param_name

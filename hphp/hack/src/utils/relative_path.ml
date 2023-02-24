@@ -10,7 +10,6 @@
 open Hh_prelude
 open Reordered_argument_collections
 open Utils
-open String_utils
 
 type prefix =
   | Root
@@ -61,7 +60,7 @@ let path_of_prefix prefix =
     raise (Invalid_argument message)
 
 let enforce_trailing_slash v =
-  if string_ends_with v Filename.dir_sep then
+  if String.is_suffix v ~suffix:Filename.dir_sep then
     v
   else
     v ^ Filename.dir_sep
@@ -178,7 +177,7 @@ end
 let create prefix s =
   let prefix_s = path_of_prefix prefix in
   let prefix_len = String.length prefix_s in
-  if not (string_starts_with s prefix_s) then (
+  if not (String.is_prefix s ~prefix:prefix_s) then (
     Printf.eprintf "%s is not a prefix of %s" prefix_s s;
     assert_false_log_backtrace None
   );
@@ -188,7 +187,7 @@ let create_detect_prefix s =
   let file_prefix =
     [Root; Hhi; Tmp]
     |> List.find ~f:(fun prefix ->
-           String_utils.string_starts_with s (path_of_prefix prefix))
+           String.is_prefix s ~prefix:(path_of_prefix prefix))
     |> fun x ->
     match x with
     | Some prefix -> prefix
@@ -201,7 +200,7 @@ let create_detect_prefix s =
 let strip_root_if_possible s =
   let prefix_s = path_of_prefix Root in
   let prefix_len = String.length prefix_s in
-  if not (string_starts_with s prefix_s) then
+  if not (String.is_prefix s ~prefix:prefix_s) then
     None
   else
     Some (String.sub s ~pos:prefix_len ~len:(String.length s - prefix_len))

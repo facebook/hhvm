@@ -132,8 +132,7 @@ let handle_fun (ctx : Provider_context.t) (fd : Tast.fun_def) =
 let ifc_enabled_on_file tcopt file =
   let ifc_enabled_paths = TypecheckerOptions.ifc_enabled tcopt in
   let path = "/" ^ Relative_path.suffix file in
-  List.exists ifc_enabled_paths ~f:(fun prefix ->
-      String_utils.string_starts_with path prefix)
+  List.exists ifc_enabled_paths ~f:(fun prefix -> String.is_prefix path ~prefix)
 
 let should_run_ifc tcopt file =
   match

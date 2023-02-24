@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Utils
-open String_utils
 
 (** Slash-escaped path in the system temp directory corresponding
     with this root directory for this extension. *)
@@ -21,7 +20,7 @@ let path_of_root root extension =
 
 let is_of_root root fn =
   let root_part = Path.slash_escaped_string_of_path root in
-  string_starts_with fn (Filename.concat GlobalConfig.tmp_dir root_part)
+  String.is_prefix fn ~prefix:(Filename.concat GlobalConfig.tmp_dir root_part)
 
 (**
  * Lock on this file will be held after the server has finished initializing.

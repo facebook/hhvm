@@ -165,7 +165,7 @@ let member_not_found
   if
     env.Typing_env_types.in_expr_tree
     && is_method
-    && String_utils.string_starts_with member_name "__"
+    && String.is_prefix member_name ~prefix:"__"
   then
     Typing_error.(
       expr_tree

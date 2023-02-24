@@ -212,6 +212,17 @@ std::string parsing_driver::find_include_file(
     if (boost::filesystem::exists(sfilename)) {
       return sfilename.string();
     }
+#ifdef _WIN32
+    // On Windows, handle files found at potentially long paths.
+    sfilename = R"(\\?\)" +
+        boost::filesystem::absolute(sfilename)
+            .make_preferred()
+            .lexically_normal()
+            .string();
+    if (boost::filesystem::exists(sfilename)) {
+      return sfilename.string();
+    }
+#endif
     diags_.report(
         loc, diagnostic_level::debug, "Could not find: {}.", filename);
   }

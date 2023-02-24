@@ -1023,6 +1023,36 @@ TEST_F(HTTPUpstreamSessionTest, 10Requests) {
   httpSession_->destroy();
 }
 
+TEST_F(HTTPUpstreamSessionTest, ResponseWithoutRequest) {
+  folly::DelayedDestruction::DestructorGuard g(httpSession_);
+  readAndLoop(
+      "HTTP/1.1 200 OK\r\n"
+      "Transfer-Encoding: chunked\r\n\r\n"
+      "0\r\n\r\n");
+  EXPECT_EQ(httpSession_->getConnectionCloseReason(),
+            ConnectionCloseReason::TRANSACTION_ABORT);
+}
+
+TEST_F(HTTP2UpstreamSessionTest, ResponseWithoutRequest) {
+  folly::DelayedDestruction::DestructorGuard g(httpSession_);
+  auto egressCodec = makeServerCodec();
+  folly::IOBufQueue output(folly::IOBufQueue::cacheChainLength());
+
+  egressCodec->generateSettings(output);
+
+  HTTPMessage resp;
+  resp.setStatusCode(200);
+  resp.getHeaders().set("header1", "value1");
+  egressCodec->generateHeader(output, 1, resp);
+  auto input = output.move();
+  input->coalesce();
+  readAndLoop(input->data(), input->length());
+  NiceMock<MockHTTPCodecCallback> callbacks;
+  egressCodec->setCallback(&callbacks);
+  EXPECT_CALL(callbacks, onGoaway(_, ErrorCode::PROTOCOL_ERROR, _));
+  parseOutput(*egressCodec);
+}
+
 TEST_F(HTTPUpstreamSessionTest, TestFirstHeaderByteEventTracker) {
   auto byteEventTracker = setMockByteEventTracker();
 

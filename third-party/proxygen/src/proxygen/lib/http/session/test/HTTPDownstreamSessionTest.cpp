@@ -290,6 +290,7 @@ class HTTPDownstreamTest : public testing::Test {
     parseOutput(*clientCodec_);
     clientCodec_ = HTTPCodecFactory::getCodec(expectedProtocol,
                                               TransportDirection::UPSTREAM);
+    clientCodec_->createStream();
     clientCodec_->setCallback(&callbacks_);
   }
   void expectResponse(uint32_t code, bool expectBody, bool stopParsing = true) {
@@ -1512,7 +1513,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestPingWithPreSendSplit) {
  * - [client --> server] EOM on the 1st stream
  */
 TEST_F(HTTP2DownstreamSessionTest, ExheaderFromServer) {
-  auto cStreamId = HTTPCodec::StreamID(1);
+  auto cStreamId = clientCodec_->createStream();
   SetupControlStream(cStreamId);
 
   // Create a dummy request and a dummy response messages
@@ -1591,11 +1592,11 @@ TEST_F(HTTP2DownstreamSessionTest, ExheaderFromServer) {
  * - [server --> client] response on stream 1 (EOM)
  */
 TEST_F(HTTP2DownstreamSessionTest, ExheaderFromClient) {
-  auto cStreamId = HTTPCodec::StreamID(1);
+  auto cStreamId = clientCodec_->createStream();
   SetupControlStream(cStreamId);
 
   // generate an EX_HEADERS
-  auto exStreamId = cStreamId + 2;
+  auto exStreamId = clientCodec_->createStream();
   clientCodec_->generateExHeader(requests_,
                                  exStreamId,
                                  getGetRequest("/pub"),
@@ -1653,7 +1654,7 @@ TEST_F(HTTP2DownstreamSessionTest, ExheaderFromClient) {
  * - [server --> client] response + EOM on the 1st stream
  */
 TEST_F(HTTP2DownstreamSessionTest, UnidirectionalExTransaction) {
-  auto cStreamId = HTTPCodec::StreamID(1);
+  auto cStreamId = clientCodec_->createStream();
   SetupControlStream(cStreamId);
   InSequence handlerSequence;
   auto cHandler = addSimpleStrictHandler();
@@ -1685,12 +1686,13 @@ TEST_F(HTTP2DownstreamSessionTest, UnidirectionalExTransaction) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, PauseResumeControlStream) {
-  auto cStreamId = HTTPCodec::StreamID(1);
+  auto cStreamId = clientCodec_->createStream();
   SetupControlStream(cStreamId);
 
   // generate an EX_HEADERS
+  auto exStreamId = clientCodec_->createStream();
   clientCodec_->generateExHeader(requests_,
-                                 cStreamId + 2,
+                                 exStreamId,
                                  getGetRequest(),
                                  HTTPCodec::ExAttributes(cStreamId, false),
                                  true,
@@ -1723,8 +1725,8 @@ TEST_F(HTTP2DownstreamSessionTest, PauseResumeControlStream) {
 
   EXPECT_CALL(callbacks_, onMessageBegin(cStreamId, _));
   EXPECT_CALL(callbacks_, onHeadersComplete(cStreamId, _));
-  EXPECT_CALL(callbacks_, onHeadersComplete(cStreamId + 2, _));
-  EXPECT_CALL(callbacks_, onMessageComplete(cStreamId + 2, _));
+  EXPECT_CALL(callbacks_, onHeadersComplete(exStreamId, _));
+  EXPECT_CALL(callbacks_, onMessageComplete(exStreamId, _));
   EXPECT_CALL(callbacks_, onMessageComplete(cStreamId, _));
 
   HTTPSession::DestructorGuard g(httpSession_);
@@ -1742,12 +1744,13 @@ TEST_F(HTTP2DownstreamSessionTest, PauseResumeControlStream) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, InvalidControlStream) {
-  auto cStreamId = HTTPCodec::StreamID(1);
+  auto cStreamId = clientCodec_->createStream();
   SetupControlStream(cStreamId);
 
   // generate an EX_HEADERS, but with a non-existing control stream
+  auto exStreamId = clientCodec_->createStream();
   clientCodec_->generateExHeader(requests_,
-                                 cStreamId + 2,
+                                 exStreamId,
                                  getGetRequest(),
                                  HTTPCodec::ExAttributes(cStreamId + 4, false),
                                  true,
@@ -1765,7 +1768,7 @@ TEST_F(HTTP2DownstreamSessionTest, InvalidControlStream) {
 
   EXPECT_CALL(callbacks_, onMessageBegin(cStreamId, _));
   EXPECT_CALL(callbacks_, onHeadersComplete(cStreamId, _));
-  EXPECT_CALL(callbacks_, onAbort(cStreamId + 2, _));
+  EXPECT_CALL(callbacks_, onAbort(exStreamId, _));
 
   HTTPSession::DestructorGuard g(httpSession_);
   transport_->addReadEvent(requests_, milliseconds(0));
@@ -3245,7 +3248,7 @@ TEST_F(HTTP2DownstreamSessionTest, ServerPush) {
   clientCodec_->getEgressSettings()->setSetting(SettingsId::ENABLE_PUSH, 1);
   clientCodec_->generateSettings(requests_);
   // generateHeader() will create a session and a transaction
-  auto assocStreamId = HTTPCodec::StreamID(1);
+  auto assocStreamId = clientCodec_->createStream();
   clientCodec_->generateHeader(
       requests_, assocStreamId, getGetRequest(), false, nullptr);
 

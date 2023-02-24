@@ -523,6 +523,14 @@ ErrorCode HTTP2Codec::parseHeadersImpl(
                                headersCompleteStream,
                                std::move(trailerHeaders));
     } else {
+      if (transportDirection_ == TransportDirection::UPSTREAM &&
+          curHeader_.stream & 0x01 &&
+          curHeader_.stream >= nextEgressStreamID_) {
+        goawayErrorMessage_ = folly::to<std::string>(
+            "HEADERS on idle upstream stream=", curHeader_.stream);
+        LOG(ERROR) << goawayErrorMessage_;
+        return ErrorCode::PROTOCOL_ERROR;
+      }
       deliverCallbackIfAllowed(&HTTPCodec::Callback::onHeadersComplete,
                                "onHeadersComplete",
                                headersCompleteStream,

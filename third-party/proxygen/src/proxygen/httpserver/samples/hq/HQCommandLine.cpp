@@ -115,32 +115,6 @@ DEFINE_string(transport_knobs,
               "",
               "If send_knob_frame is set, this is the default transport knobs"
               " sent to peer");
-DEFINE_bool(d6d_enabled, false, "Enable d6d");
-DEFINE_uint32(d6d_probe_raiser_constant_step_size,
-              10,
-              "Server only. The constant step size used to increase PMTU, only "
-              "meaningful to ConstantStep probe size raiser");
-DEFINE_uint32(d6d_probe_raiser_type,
-              0,
-              "Server only. The type of probe size raiser. 0: ConstantStep, 1: "
-              "BinarySearch");
-DEFINE_uint32(d6d_blackhole_detection_window_secs,
-              5,
-              "Server only. PMTU blackhole detection window in secs");
-DEFINE_uint32(
-    d6d_blackhole_detection_threshold,
-    5,
-    "Server only. PMTU blackhole detection threshold, in # of packets");
-DEFINE_uint32(d6d_base_pmtu,
-              1252,
-              "Client only. The base PMTU advertised to server");
-DEFINE_uint32(d6d_raise_timeout_secs,
-              600,
-              "Client only. The raise timeout advertised to server");
-DEFINE_uint32(d6d_probe_timeout_secs,
-              600,
-              "Client only. The probe timeout advertised to server");
-
 DEFINE_bool(use_ack_receive_timestamps,
             false,
             "Replace the ACK frame with ACK_RECEIVE_TIMESTAMPS frame"
@@ -168,17 +142,6 @@ std::ostream& operator<<(std::ostream& o, const HQMode& m) {
 }
 
 namespace {
-
-quic::ProbeSizeRaiserType parseRaiserType(uint32_t type) {
-  auto maybeRaiserType = static_cast<quic::ProbeSizeRaiserType>(type);
-  switch (maybeRaiserType) {
-    case quic::ProbeSizeRaiserType::ConstantStep:
-    case quic::ProbeSizeRaiserType::BinarySearch:
-      return maybeRaiserType;
-    default:
-      throw std::runtime_error("Invalid raiser type, must be 0 or 1.");
-  }
-}
 
 /*
  * Initiazliation and validation functions.
@@ -306,21 +269,6 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
                                                 kDefaultQuicTransportKnobId,
                                                 FLAGS_transport_knobs});
   }
-  hqParams.transportSettings.d6dConfig.enabled = FLAGS_d6d_enabled;
-  hqParams.transportSettings.d6dConfig.probeRaiserConstantStepSize =
-      FLAGS_d6d_probe_raiser_constant_step_size;
-  hqParams.transportSettings.d6dConfig.raiserType =
-      parseRaiserType(FLAGS_d6d_probe_raiser_type);
-  hqParams.transportSettings.d6dConfig.blackholeDetectionWindow =
-      std::chrono::seconds(FLAGS_d6d_blackhole_detection_window_secs);
-  hqParams.transportSettings.d6dConfig.blackholeDetectionThreshold =
-      FLAGS_d6d_blackhole_detection_threshold;
-  hqParams.transportSettings.d6dConfig.enabled = FLAGS_d6d_enabled;
-  hqParams.transportSettings.d6dConfig.advertisedBasePMTU = FLAGS_d6d_base_pmtu;
-  hqParams.transportSettings.d6dConfig.advertisedRaiseTimeout =
-      std::chrono::seconds(FLAGS_d6d_raise_timeout_secs);
-  hqParams.transportSettings.d6dConfig.advertisedProbeTimeout =
-      std::chrono::seconds(FLAGS_d6d_probe_timeout_secs);
   hqParams.transportSettings.shouldRecvBatch = true;
   hqParams.transportSettings.maxRecvBatchSize = 32;
   hqParams.transportSettings.shouldUseRecvmmsgForBatchRecv = true;

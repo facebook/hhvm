@@ -39,6 +39,9 @@
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 
+#include <boost/preprocessor/punctuation/comma_if.hpp>
+#include <boost/preprocessor/repetition/repeat.hpp>
+
 #if !FOLLY_MOBILE
 #include <folly/SharedMutex.h>
 #else
@@ -275,8 +278,6 @@ class FindOrdinal {
   static_assert(sizeof(T) < 0, "");
 };
 
-// TODO: Optimize the build time by using the technique mentioned here:
-// https://mpark.github.io/programming/2019/01/22/variant-visitation-v2/
 template <class T, class... Args>
 class FindOrdinal<T, folly::tag_t<Args...>> {
  private:
@@ -294,6 +295,113 @@ class FindOrdinal<T, folly::tag_t<Args...>> {
   }
 };
 
+template <class T, class List>
+FOLLY_INLINE_VARIABLE constexpr type::Ordinal FindOrdinalInUniqueTypes =
+    FindOrdinal<T, List>::value;
+
+#ifdef __clang__
+// For now only enable for __clang__ due to bugs in MSVC/GCC
+
+template <int>
+struct IntTag {};
+
+#define FBTHRIFT_LOOKUP_SIZE 63
+#define FBTHRIFT_PARAMS_WITH_DEFAULT(Z, NUM, TEXT) \
+  BOOST_PP_COMMA_IF(NUM) class A##NUM = IntTag<NUM>
+
+//  The struct is defined like this
+//
+//    template<
+//      class A0 = IntTag<0>,
+//      class A1 = IntTag<1>,
+//      ...,
+//      class AN = IntTag<N>>
+//    struct MultiWayLookup {
+//      template <class> static const int value = 0;
+//      template <> static const int value<A0> = 0 + 1;
+//      template <> static const int value<A1> = 1 + 1;
+//      ...;
+//      template <> static const int value<AN> = N + 1;
+//    }
+//
+// So that MultiWayLookup<Args...>::value<T> returns Ordinal of T in [Args...]
+// list with O(1) lookup time (instead of traditionally scanning [Args...])
+template <BOOST_PP_REPEAT(FBTHRIFT_LOOKUP_SIZE, FBTHRIFT_PARAMS_WITH_DEFAULT, )>
+struct MultiWayLookup {
+  template <class>
+  static const int value = 0;
+
+#define FBTHRIFT_DEFINE_VALUE_SPECIALIZATION(Z, NUM, TEXT) \
+  template <>                                              \
+  static const int value<A##NUM> = NUM + 1;
+
+  BOOST_PP_REPEAT(FBTHRIFT_LOOKUP_SIZE, FBTHRIFT_DEFINE_VALUE_SPECIALIZATION, )
+
+#undef FBTHRIFT_DEFINE_VALUE_SPECIALIZATION
+};
+#undef FBTHRIFT_TEMPLATE_PARAMS_WITH_DEFAULT
+
+// Find type T in list [Args...].
+// FindOrdinalInUniqueTypesImpl::value will be the ordinal of T in [Args...]
+// If not found, value will be Ordinal{0}
+//
+// Limitation: [Args...] can not have duplicated type, otherwise build failure.
+template <class T, class... Args>
+struct FindOrdinalInUniqueTypesImpl;
+
+// If Found is not 0, we have found T in Args...
+// In which case value = Found
+template <int Found, class... Args>
+struct FoundOrdinalOrCheckTheRest : field_ordinal<Found> {};
+
+// Otherwise check the rest
+// If found, value = FindOrdinalInUniqueTypesImpl<Args...>::value + SIZE
+// If not found, value = 0
+template <type::Ordinal ord>
+using Rest = field_ordinal<
+    ord == static_cast<type::Ordinal>(0)
+        ? 0
+        : folly::to_underlying(ord) + FBTHRIFT_LOOKUP_SIZE>;
+
+template <class... Args>
+struct FoundOrdinalOrCheckTheRest<0, Args...>
+    : Rest<FindOrdinalInUniqueTypesImpl<Args...>::value> {};
+
+#define FBTHRIFT_TEMPLATE_PARAMS(Z, NUM, TEXT) \
+  BOOST_PP_COMMA_IF(NUM) TEXT A##NUM
+
+// This macro will be expanded to "A0, A1, A2, ..., AN"
+#define FBTHRIFT_PARAMS \
+  BOOST_PP_REPEAT(FBTHRIFT_LOOKUP_SIZE, FBTHRIFT_TEMPLATE_PARAMS, )
+
+// This macro will be expanded to "class A0, class A1, class A2, ..., class AN"
+#define FBTHRIFT_PARAMS_WITH_CLASS \
+  BOOST_PP_REPEAT(FBTHRIFT_LOOKUP_SIZE, FBTHRIFT_TEMPLATE_PARAMS, class)
+
+// If size of (Args...) < FBTHRIFT_LOOKUP_SIZE: just do a multiway lookup
+template <class T, class... Args>
+struct FindOrdinalInUniqueTypesImpl
+    : field_ordinal<MultiWayLookup<Args...>::template value<T>> {};
+
+// If size of (Args...) > FBTHRIFT_LOOKUP_SIZE: used batched multiway lookup
+template <class T, FBTHRIFT_PARAMS_WITH_CLASS, class... Args>
+struct FindOrdinalInUniqueTypesImpl<T, FBTHRIFT_PARAMS, Args...>
+    : FoundOrdinalOrCheckTheRest<
+          MultiWayLookup<FBTHRIFT_PARAMS>::template value<T>,
+          T,
+          Args...> {};
+
+#undef FBTHRIFT_TEMPLATE_PARAMS
+#undef FBTHRIFT_PARAMS
+#undef FBTHRIFT_PARAMS_WITH_CLASS
+#undef FBTHRIFT_LOOKUP_SIZE
+
+template <class T, class... Args>
+FOLLY_INLINE_VARIABLE constexpr type::Ordinal
+    FindOrdinalInUniqueTypes<T, folly::tag_t<Args...>> =
+        FindOrdinalInUniqueTypesImpl<T, Args...>::value;
+#endif
+
 template <class Id, class Idents, class TypeTags, class IdList>
 FOLLY_CONSTEVAL std::enable_if_t<std::is_same<Id, void>::value, FieldOrdinal>
 getFieldOrdinal(IdList&&) {
@@ -309,7 +417,7 @@ getFieldOrdinal(IdList&& ids) {
 template <class Id, class Idents, class TypeTags, class IdList>
 FOLLY_CONSTEVAL std::enable_if_t<type::is_ident_v<Id>, FieldOrdinal>
 getFieldOrdinal(IdList&&) {
-  return FindOrdinal<Id, Idents>::value;
+  return FindOrdinalInUniqueTypes<Id, Idents>;
 }
 
 template <class Id, class Idents, class TypeTags, class IdList>

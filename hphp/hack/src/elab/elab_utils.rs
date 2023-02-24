@@ -11,7 +11,6 @@ pub(crate) mod pos {
 
     /// Construct a "null" position.
     #[inline(always)]
-    #[allow(dead_code)]
     pub(crate) fn null() -> Pos {
         Pos::NONE
     }
@@ -25,14 +24,12 @@ pub(crate) mod expr {
 
     /// Construct a "null" expression.
     #[inline(always)]
-    #[allow(dead_code)]
     pub(crate) fn null<Ex: Default, En>() -> Expr<Ex, En> {
         from_expr_(Expr_::Null)
     }
 
     /// Construct an "invalid" expression.
     #[inline(always)]
-    #[allow(dead_code)]
     pub(crate) fn invalid<Ex: Default, En>(expr: Expr<Ex, En>) -> Expr<Ex, En> {
         let Expr(_, pos, _) = &expr;
         from_expr__with_pos_(pos.clone(), Expr_::Invalid(Box::new(Some(expr))))
@@ -40,14 +37,12 @@ pub(crate) mod expr {
 
     /// Construct an expression (with a null position) from an `Expr_`.
     #[inline(always)]
-    #[allow(dead_code)]
     pub(crate) fn from_expr_<Ex: Default, En>(expr_: Expr_<Ex, En>) -> Expr<Ex, En> {
         from_expr__with_pos_(super::pos::null(), expr_)
     }
 
     /// Construct an expression from a `Pos` and an `Expr_`.
     #[inline(always)]
-    #[allow(dead_code)]
     #[allow(non_snake_case)]
     pub(crate) fn from_expr__with_pos_<Ex: Default, En>(
         pos: Pos,

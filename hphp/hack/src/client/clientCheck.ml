@@ -123,6 +123,7 @@ let connect ?(use_priority_pipe = false) args =
     max_errors = _;
     mode = _;
     output_json = _;
+    prefer_stdout = _;
     sort_results = _;
     stdin_name = _;
     desc = _;
@@ -711,7 +712,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let exit_status =
         ClientCheckStatus.go
           status
-          args.output_json
+          (args.output_json, args.prefer_stdout)
           args.from
           args.error_format
           args.max_errors
@@ -750,7 +751,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let exit_status =
         ClientCheckStatus.go
           status
-          args.output_json
+          (args.output_json, args.prefer_stdout)
           args.from
           args.error_format
           args.max_errors

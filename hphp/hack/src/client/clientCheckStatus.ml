@@ -37,7 +37,7 @@ let warn_unsaved_changes () =
     {|there is an editor connected to the Hack server.
 The errors above may reflect your unsaved changes in the editor.|}
 
-let go status output_json from error_format max_errors =
+let go status (output_json, prefer_stdout) from error_format max_errors =
   let {
     Server_status.liveness;
     has_unsaved_changes;
@@ -53,7 +53,7 @@ let go status output_json from error_format max_errors =
     (* this should really go to stdout but we need to adapt the various
      * IDE plugins first *)
     let oc =
-      if output_json then
+      if output_json && not prefer_stdout then
         stderr
       else
         stdout

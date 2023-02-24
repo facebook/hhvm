@@ -142,6 +142,7 @@ let parse_check_args cmd =
   let lock_file = ref false in
   let no_load = ref false in
   let output_json = ref false in
+  let prefer_stdout = ref false in
   let prechecked = ref None in
   let mini_state : string option ref = ref None in
   let refactor_before = ref "" in
@@ -531,6 +532,10 @@ let parse_check_args cmd =
       ( "--json",
         Arg.Set output_json,
         " output json for machine consumption. (default: false)" );
+      ( "--prefer-stdout",
+        Arg.Set prefer_stdout,
+        " when outputting json, output to stdout. No-op otherwise. (default: false)"
+      );
       ( "--lint",
         Arg.Unit (fun () -> set_mode MODE_LINT),
         " (mode) lint the given list of files" );
@@ -885,6 +890,7 @@ let parse_check_args cmd =
     save_64bit = !save_64bit;
     save_human_readable_64bit_dep_map = !save_human_readable_64bit_dep_map;
     output_json = !output_json;
+    prefer_stdout = !prefer_stdout;
     prechecked = !prechecked;
     mini_state = !mini_state;
     remote = !remote;

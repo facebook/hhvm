@@ -167,7 +167,7 @@ CAMLprim value cgroup_watcher_get(void) {
     }
   }
 
-  list = caml_alloc_float_array(max);
+  list = caml_alloc(max, Double_array_tag);
   for (int i=0; i<max; i++) {
     Store_double_field(list, i, ss[i]);
   }

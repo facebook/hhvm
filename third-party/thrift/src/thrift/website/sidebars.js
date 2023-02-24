@@ -58,7 +58,8 @@ module.exports = {
           },
           items: [
             'fb/howtos/implementing-a-server/cpp',
-            'fb/howtos/implementing-a-server/java'
+            'fb/howtos/implementing-a-server/java',
+            'fb/howtos/implementing-a-server/python',
           ]
         }
       ]

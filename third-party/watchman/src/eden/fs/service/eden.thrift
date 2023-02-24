@@ -1151,9 +1151,13 @@ struct DebugInvalidateRequest {
   // all inodes.
   3: TimeSpec age;
   4: SyncBehavior sync;
+  // Run the invalidation in the background.
+  5: bool background;
 }
 
 struct DebugInvalidateResponse {
+  // Number of files that were successfully invalidated. When a background
+  // invalidation is requested, this will always be 0.
   1: unsigned64 numInvalidated;
 }
 

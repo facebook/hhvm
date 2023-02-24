@@ -5,11 +5,13 @@
 
 use anyhow::Context;
 use anyhow::Result;
-use hash::HashMap;
+use hash::IndexMap;
 use serde::Deserialize;
 use toml::Spanned;
 
-type PackageMap = HashMap<String, Package>;
+// Preserve the order for ease of testing
+// Alternatively, we could use HashMap for performance
+type PackageMap = IndexMap<String, Package>;
 
 #[derive(Debug, Deserialize)]
 struct Config {

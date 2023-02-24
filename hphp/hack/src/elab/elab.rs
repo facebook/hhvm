@@ -137,7 +137,7 @@ fn elaborate<T: Transform>(
         passes::validate_expr_cast::ValidateExprCastPass::default(),
 
         // Check for duplicate function parameter names
-        // passes::validate_fun_params::ValidateFunParamsPass::default(),
+        passes::validate_fun_params::ValidateFunParamsPass::default(),
 
         // Validate use of `require implements`, `require extends` and
         // `require class` declarations for traits, interfaces and classes

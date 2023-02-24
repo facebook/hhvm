@@ -8,6 +8,7 @@
 
 #include "EchoHandler.h"
 
+#include <folly/portability/GFlags.h>
 #include <proxygen/httpserver/RequestHandler.h>
 #include <proxygen/httpserver/ResponseBuilder.h>
 

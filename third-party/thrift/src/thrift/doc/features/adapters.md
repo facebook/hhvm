@@ -110,7 +110,32 @@ struct Foo {
 ```
 More examples can be found [here](https://www.internalfb.com/code/fbsource/fbcode/thrift/test/adapter.thrift).
 
-### Customization for Optimization
+### Optimizations
+
+#### In-place Deserialization
+
+Deserialization for adapted types can be costly, as the deserializer creates temporaries of [standard types](../glossary/#kinds-of-types), deserializes binary into them, and uses `fromThrift` to convert them to adapted values. Thrift Adapter optimizes deserialization when `toThrift` returns mutable reference. This avoids construction of temporary values, and the deserializer directly deserialize binary to the mutable reference returned by `toThrift`. It is recommended to return a mutable reference from `toThrift` if the adapted type has access to an object of the standard type internally. The following adapter utilizes in-place deserialization:
+
+```cpp
+template <typename T>
+struct Wrapper {
+  T value
+};
+
+struct Adapter {
+  template <typename T>
+  static Wrapper<T> fromThrift(T&& value) {
+    return Wrapper{std::forward<T>(value)};
+  }
+
+  template <typename W>
+  static decltype(auto) toThrift(W&& wrapper) {
+    return std::forward<W>(wrapper).value;
+  }
+}
+```
+
+#### Customizations
 
 Thrift Adapter allows further customization points to avoid calling `fromThrift` and `toThrift` for optimization. Assume `obj` has type `AdaptedType`.
 

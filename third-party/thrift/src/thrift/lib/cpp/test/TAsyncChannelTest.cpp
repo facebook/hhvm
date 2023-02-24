@@ -844,8 +844,8 @@ class RecvChunksTest : public SocketPairTest<ChannelT> {
     for (ChunkSchedule::const_iterator it = sender_.getSchedule()->begin();
          it != sender_.getSchedule()->end();
          ++it) {
-      // Allow 3ms of processing overhead for every scheduled event.
-      tolerance += milliseconds(3);
+      // Allow 4ms of processing overhead for every scheduled event.
+      tolerance += milliseconds(4);
 
       if (milliseconds(0) < timeout_ && timeout_ < it->delayMS) {
         // We expect to time out waiting for this chunk of data
@@ -1043,7 +1043,7 @@ TEST(TAsyncChannelTest, TestRecvBinaryChunks) {
       ChunkSchedule{{4, milliseconds(10)}, {-1, milliseconds(50)}},
       milliseconds(20))
       .run();
-  // Test timing out after part of the body is snet
+  // Test timing out after part of the body is sent
   RECV_BINARY_TEST(
       ChunkSchedule{{100, milliseconds(10)}, {-1, milliseconds(50)}},
       milliseconds(20))

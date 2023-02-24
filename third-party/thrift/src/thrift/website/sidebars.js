@@ -29,17 +29,7 @@ module.exports = {
   ghSidebar: [
     'intro',
     ...fbInternalOnly([
-    {
-      type: 'category',
-      label: 'Quick Start',
-      link: {
-        type: 'doc',
-        id: 'fb/quick-start/index',
-      },
-      items: [
-        'fb/quick-start/python'
-      ]
-    },
+    'fb/quick-start',
     {
       type: 'category',
       label: 'How To',
@@ -59,7 +49,7 @@ module.exports = {
           items: [
             'fb/howtos/implementing-a-server/cpp',
             'fb/howtos/implementing-a-server/java',
-            'fb/howtos/implementing-a-server/python',
+            'fb/howtos/implementing-a-server/python'
           ]
         }
       ]

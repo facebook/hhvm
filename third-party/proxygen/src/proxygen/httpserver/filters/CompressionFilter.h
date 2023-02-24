@@ -8,15 +8,9 @@
 
 #pragma once
 
-#include <folly/Memory.h>
-#include <folly/compression/Compression.h>
-
 #include <proxygen/httpserver/Filters.h>
 #include <proxygen/httpserver/RequestHandlerFactory.h>
-#include <proxygen/lib/http/RFC2616.h>
-#include <proxygen/lib/utils/StreamCompressor.h>
-#include <proxygen/lib/utils/ZlibStreamCompressor.h>
-#include <proxygen/lib/utils/ZstdStreamCompressor.h>
+#include <proxygen/lib/utils/CompressionFilterUtils.h>
 
 namespace proxygen {
 
@@ -26,20 +20,9 @@ namespace proxygen {
  */
 class CompressionFilter : public Filter {
  public:
-  using StreamCompressorFactory =
-      std::function<std::unique_ptr<StreamCompressor>()>;
-
-  CompressionFilter(
-      RequestHandler* downstream,
-      uint32_t minimumCompressionSize,
-      StreamCompressorFactory factory,
-      std::string headerEncoding,
-      const std::shared_ptr<std::set<std::string>> compressibleContentTypes)
-      : Filter(downstream),
-        minimumCompressionSize_(minimumCompressionSize),
-        compressorFactory_(std::move(factory)),
-        headerEncoding_(std::move(headerEncoding)),
-        compressibleContentTypes_(compressibleContentTypes) {
+  CompressionFilter(RequestHandler* downstream,
+                    CompressionFilterUtils::FilterParams params)
+      : Filter(downstream), params_(std::move(params)) {
   }
 
   virtual ~CompressionFilter() override {
@@ -50,25 +33,16 @@ class CompressionFilter : public Filter {
     DCHECK(header_ == false);
 
     chunked_ = msg.getIsChunked();
-
-    // Skip if it is already compressed
-    auto alreadyCompressed =
-        !msg.getHeaders()
-             .getSingleOrEmpty(HTTP_HEADER_CONTENT_ENCODING)
-             .empty();
-
-    // Make final determination of whether to compress
-    compress_ = !alreadyCompressed && isCompressibleContentType(msg) &&
-                (chunked_ || isMinimumCompressibleSize(msg));
+    compress_ = CompressionFilterUtils::shouldCompress(msg, params_);
 
     // Add the header
     if (compress_) {
       auto& headers = msg.getHeaders();
-      headers.set(HTTP_HEADER_CONTENT_ENCODING, headerEncoding_);
+      headers.set(HTTP_HEADER_CONTENT_ENCODING, params_.headerEncoding);
     }
 
     // Initialize compressor
-    compressor_ = compressorFactory_();
+    compressor_ = params_.compressorFactory();
     if (!compressor_ || compressor_->hasError()) {
       return fail();
     }
@@ -161,81 +135,19 @@ class CompressionFilter : public Filter {
     Filter::sendAbort();
   }
 
-  // Verify the response is large enough to compress
-  bool isMinimumCompressibleSize(const HTTPMessage& msg) const noexcept {
-    auto contentLengthHeader =
-        msg.getHeaders().getSingleOrEmpty(HTTP_HEADER_CONTENT_LENGTH);
-
-    uint32_t contentLength = 0;
-    if (!contentLengthHeader.empty()) {
-      contentLength = folly::to<uint32_t>(contentLengthHeader);
-    }
-
-    return contentLength >= minimumCompressionSize_;
-  }
-
-  // Check the response's content type against a list of compressible types
-  bool isCompressibleContentType(const HTTPMessage& msg) const noexcept {
-
-    auto responseContentType =
-        msg.getHeaders().getSingleOrEmpty(HTTP_HEADER_CONTENT_TYPE);
-    folly::toLowerAscii(responseContentType);
-
-    // Handle  text/html; encoding=utf-8 case
-    auto parameter_idx = responseContentType.find(';');
-    if (parameter_idx != std::string::npos) {
-      responseContentType = responseContentType.substr(0, parameter_idx);
-    }
-
-    auto idx = compressibleContentTypes_->find(responseContentType);
-
-    if (idx != compressibleContentTypes_->end()) {
-      return true;
-    }
-
-    return false;
-  }
-
   std::unique_ptr<HTTPMessage> responseMessage_;
   std::unique_ptr<StreamCompressor> compressor_{nullptr};
-  const uint32_t minimumCompressionSize_{1000};
-  StreamCompressorFactory compressorFactory_{};
-  const std::string headerEncoding_{};
-  const std::shared_ptr<std::set<std::string>> compressibleContentTypes_;
+  CompressionFilterUtils::FilterParams params_;
   bool header_{false};
   bool chunked_{false};
   bool compress_{false};
 };
 
 class CompressionFilterFactory : public RequestHandlerFactory {
- private:
-  enum class CodecType : uint8_t {
-    NO_COMPRESSION = 0,
-    ZLIB = 1,
-    ZSTD = 2,
-  };
-
  public:
-  struct Options {
-    Options() = default;
-    uint32_t minimumCompressionSize = 1000;
-    std::set<std::string> compressibleContentTypes = {};
-    int32_t zlibCompressionLevel = 4;
-    int32_t zstdCompressionLevel = 8;
-    bool enableZstd = false;
-    bool independentChunks = false;
-    bool enableGzip = true;
-  };
+  using Options = CompressionFilterUtils::FactoryOptions;
 
-  CompressionFilterFactory(const Options& opts)
-      : minimumCompressionSize_(opts.minimumCompressionSize),
-        zlibCompressionLevel_(opts.zlibCompressionLevel),
-        zstdCompressionLevel_(opts.zstdCompressionLevel),
-        compressibleContentTypes_(std::make_shared<std::set<std::string>>(
-            opts.compressibleContentTypes)),
-        enableZstd_(opts.enableZstd),
-        independentChunks_(opts.independentChunks),
-        enableGzip_(opts.enableGzip) {
+  CompressionFilterFactory(const Options& opts) : options_(opts) {
   }
 
   virtual ~CompressionFilterFactory() {
@@ -249,78 +161,14 @@ class CompressionFilterFactory : public RequestHandlerFactory {
 
   RequestHandler* onRequest(RequestHandler* h,
                             HTTPMessage* msg) noexcept override {
-    switch (determineCompressionType(msg)) {
-      case CodecType::ZLIB:
-        return new CompressionFilter{
-            h,
-            minimumCompressionSize_,
-            [level =
-                 zlibCompressionLevel_]() -> std::unique_ptr<StreamCompressor> {
-              return std::make_unique<ZlibStreamCompressor>(
-                  proxygen::CompressionType::GZIP, level);
-            },
-            "gzip",
-            compressibleContentTypes_};
-      case CodecType::ZSTD:
-        return new CompressionFilter{
-            h,
-            minimumCompressionSize_,
-            [level = zstdCompressionLevel_, independent = independentChunks_]()
-                -> std::unique_ptr<StreamCompressor> {
-              return std::make_unique<ZstdStreamCompressor>(level, independent);
-            },
-            "zstd",
-            compressibleContentTypes_};
-      case CodecType::NO_COMPRESSION:
-        return h;
-    };
-    return h;
+    auto filterParams = CompressionFilterUtils::getFilterParams(*msg, options_);
+    if (!filterParams) {
+      return h;
+    }
+    return new CompressionFilter(h, std::move(*filterParams));
   }
 
  private:
-  // Check whether the client supports a compression type we support
-  CodecType determineCompressionType(HTTPMessage* msg) noexcept {
-
-    RFC2616::TokenPairVec output;
-
-    // Accept encoding header could have qvalues (gzip; q=5.0)
-    auto acceptEncodingHeader =
-        msg->getHeaders().getSingleOrEmpty(HTTP_HEADER_ACCEPT_ENCODING);
-
-    if (!RFC2616::parseQvalues(acceptEncodingHeader, output)) {
-      return CodecType::NO_COMPRESSION;
-    }
-
-    auto it = std::find_if(
-        output.begin(),
-        output.end(),
-        [enableZstd = enableZstd_,
-         enableGzip = enableGzip_](RFC2616::TokenQPair elem) {
-          return (enableGzip &&
-                  elem.first.compare(folly::StringPiece("gzip")) == 0) ||
-                 (enableZstd &&
-                  elem.first.compare(folly::StringPiece("zstd")) == 0);
-        });
-
-    if (it == output.end()) {
-      return CodecType::NO_COMPRESSION;
-    }
-    if (it->first == "zstd") {
-      return CodecType::ZSTD;
-    } else if (it->first == "gzip") {
-      return CodecType::ZLIB;
-    } else {
-      DCHECK(false) << "found unexpected content-coding selection";
-      return CodecType::NO_COMPRESSION;
-    }
-  }
-
-  const uint32_t minimumCompressionSize_;
-  const int32_t zlibCompressionLevel_;
-  const int32_t zstdCompressionLevel_;
-  const std::shared_ptr<std::set<std::string>> compressibleContentTypes_;
-  const bool enableZstd_;
-  const bool independentChunks_;
-  const bool enableGzip_;
+  const Options options_;
 };
 } // namespace proxygen

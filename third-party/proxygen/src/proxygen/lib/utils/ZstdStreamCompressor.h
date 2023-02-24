@@ -10,6 +10,7 @@
 
 #include <memory>
 
+#include <folly/compression/Compression.h>
 #include <proxygen/lib/utils/StreamCompressor.h>
 
 namespace folly {

@@ -22,10 +22,18 @@ type args = {
   verbose: bool;
 }
 
+type serverless_ide =
+  | Serverless_not  (** all IDE requests are handled by RPC to hh_server *)
+  | Serverless_with_rpc
+      (** most IDE requests handled by clientIdeDaemon, some by RPC to hh_server *)
+  | Serverless_with_shell
+      (** most IDE requests handled by clientIdeDaemon, some by shelling-out to hh_server *)
+[@@deriving eq, show { with_path = false }]
+
 type env = {
   args: args;
   init_id: string;
-  use_serverless_ide: bool;
+  serverless_ide: serverless_ide;
 }
 
 (** This gets initialized to env.from, but maybe modified in the light of the initialize request *)
@@ -1237,7 +1245,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       save_human_readable_64bit_dep_map = None;
       (* priority_pipe delivers good experience for hh_server, but has a bug,
          and doesn't provide benefits in serverless-ide. *)
-      use_priority_pipe = not env.use_serverless_ide;
+      use_priority_pipe = equal_serverless_ide env.serverless_ide Serverless_not;
       prechecked = None;
       config = env.args.config;
       custom_hhi_path = None;
@@ -3660,7 +3668,7 @@ let log_response_if_necessary
       ~start_hh_server_state:
         (get_older_hh_server_state timestamp |> hh_server_state_to_string)
       ~start_handle_time:unblocked_time
-      ~serverless_ide_flag:env.use_serverless_ide
+      ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
   | _ -> ()
 
 type error_source =
@@ -3713,7 +3721,7 @@ let hack_log_error
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state
       ~start_handle_time:unblocked_time
-      ~serverless_ide_flag:env.use_serverless_ide
+      ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
       ~message:e.Error.message
       ~data_opt:e.Error.data
       ~source
@@ -4038,6 +4046,11 @@ let handle_client_message
       let root = get_root_exn () in
       Relative_path.set_path_prefix Relative_path.Root root;
       set_up_hh_logger_for_client_lsp root;
+      Hh_logger.log "cmd: %s" (String.concat ~sep:" " (Array.to_list Sys.argv));
+      Hh_logger.log "LSP Init id: %s" env.init_id;
+      Hh_logger.log
+        "Serverless IDE: %s"
+        (show_serverless_ide env.serverless_ide);
 
       (* Following is a hack. Atom incorrectly passes '--from vscode', rendering us
          unable to distinguish Atom from VSCode. But Atom is now frozen at vscode client
@@ -4902,14 +4915,16 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
       ~current_rolled_out_flag_idx:Int.min_value
       (Config_file.of_list args.config)
   in
-  let env =
-    {
-      args;
-      init_id;
-      use_serverless_ide =
-        versionless_local_config.ServerLocalConfig.ide_serverless;
-    }
+  let serverless_ide =
+    match
+      ( versionless_local_config.ServerLocalConfig.ide_standalone,
+        versionless_local_config.ServerLocalConfig.ide_serverless )
+    with
+    | (true, _) -> Serverless_with_shell
+    | (false, true) -> Serverless_with_rpc
+    | (false, false) -> Serverless_not
   in
+  let env = { args; init_id; serverless_ide } in
 
   if env.args.verbose then begin
     Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug;
@@ -4922,9 +4937,14 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
      to stderr. Meanwhile, verbosity-to-file can be altered dynamically by the user.
      Why are they different? because we should write to stderr under a test harness,
      but we should never write to stderr when invoked by VSCode - it's not even guaranteed
-     to drain the stderr pipe. *)
+     to drain the stderr pipe.
+     WARNING: we can't log yet, since until we've received "initialize" request,
+     we don't yet know which path to log to. *)
   let ide_service =
-    if env.use_serverless_ide then
+    match env.serverless_ide with
+    | Serverless_not -> None
+    | Serverless_with_rpc
+    | Serverless_with_shell ->
       Some
         (ref
            (ClientIdeService.make
@@ -4933,8 +4953,6 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
                 verbose_to_stderr = env.args.verbose;
                 verbose_to_file = env.args.verbose;
               }))
-    else
-      None
   in
 
   let client = Jsonrpc.make_t () in

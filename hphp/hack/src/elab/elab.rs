@@ -124,7 +124,7 @@ fn elaborate<T: Transform>(
 
         // Validate / replace invalid uses of dynamic classes in `New` and `Class_get`
         // expressions
-        // passes::elab_dynamic_class_name::ElabDynamicClassNamePass::default(),
+        passes::elab_dynamic_class_name::ElabDynamicClassNamePass::default(),
 
         // Replace non-constant class or global constant with invalid expression marker
         passes::elab_const_expr::ElabConstExprPass::default(),

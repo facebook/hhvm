@@ -679,6 +679,75 @@ let autocomplete_enum_class_label_call env f args =
       ty_args
   | _ -> ()
 
+(* Best-effort to find a class associated with this type constant. *)
+let typeconst_class_name (typeconst : typeconst_type) : string option =
+  let decl_ty =
+    match typeconst.ttc_kind with
+    | TCAbstract { atc_as_constraint; _ } -> atc_as_constraint
+    | TCConcrete { tc_type } -> Some tc_type
+  in
+  match decl_ty with
+  | Some decl_ty ->
+    let (_, ty_) = Typing_defs_core.deref decl_ty in
+    (match ty_ with
+    | Tapply ((_, name), _) -> Some name
+    | _ -> None)
+  | None -> None
+
+(* Given a typeconstant `Foo::TBar::TBaz`, if TBaz is a classish,
+   return its decl. *)
+let rec typeconst_decl env (ids : sid list) (cls_name : string) : Cls.t option =
+  let open Option in
+  match Tast_env.get_class env cls_name with
+  | Some cls_decl ->
+    (match ids with
+    | [] -> Some cls_decl
+    | (_, id) :: ids ->
+      Cls.get_typeconst cls_decl id
+      >>= typeconst_class_name
+      >>= typeconst_decl env ids)
+  | None -> None
+
+(* Autocomplete type constants, which look like `MyClass::AUTO332`. *)
+let autocomplete_class_type_const env ((_, h) : Aast.hint) (ids : sid list) :
+    unit =
+  match List.last ids with
+  | Some ((_, id) as sid) when is_auto_complete id ->
+    let prefix = strip_suffix id in
+    let class_name =
+      match h with
+      | Happly ((_, name), _) -> Some name
+      | Hthis -> Tast_env.get_self_id env
+      | _ -> None
+    in
+    let class_decl =
+      match class_name with
+      | Some class_name ->
+        typeconst_decl env (List.drop_last_exn ids) class_name
+      | None -> None
+    in
+    (match class_decl with
+    | Some class_decl ->
+      let consts = Cls.consts class_decl in
+      List.iter consts ~f:(fun (name, cc) ->
+          if String.is_prefix ~prefix name then
+            let complete =
+              {
+                res_pos = Pos.to_absolute Pos.none;
+                res_replace_pos = replace_pos_of_id sid;
+                res_base_class = Some cc.cc_origin;
+                res_ty = "const type";
+                res_name = name;
+                res_fullname = name;
+                res_kind = SI_ClassConstant;
+                func_details = None;
+                res_documentation = None;
+              }
+            in
+            add_res complete)
+    | None -> ())
+  | _ -> ()
+
 (* Get the names of string literal keys in this shape type. *)
 let shape_string_keys (sm : 'a TShapeMap.t) : string list =
   let fields = TShapeMap.keys sm in
@@ -1314,6 +1383,10 @@ let visitor
     method! on_Happly env sid hl =
       self#complete_global sid Actype;
       super#on_Happly env sid hl
+
+    method! on_Haccess env h ids =
+      autocomplete_class_type_const env h ids;
+      super#on_Haccess env h ids
 
     method! on_Lvar env ((_, name) as lid) =
       if is_auto_complete (Local_id.get_name name) then

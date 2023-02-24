@@ -41,6 +41,7 @@ function my_option_map(): OptionInfoMap {
 'no-defaults'     => Pair { '',
                             'Do not use the default wrapper runtime options'},
 'perf:'           => Pair { '', 'Run perf record'},
+'record:'         => Pair { '', 'Directory in which to record executions for later replay'},
   };
 }
 
@@ -170,6 +171,12 @@ function determine_flags(OptionMap $opts): string {
         '-v Eval.JitRegionSelector='.((string)$opts['region-mode']).' '.
         '';
     }
+  }
+
+  if ($opts->containsKey('record')) {
+    $flags .= '-v Eval.RecordReplay=true ';
+    $flags .= '-v Eval.RecordSampleRate=1 ';
+    $flags .= '-v Eval.RecordDir='.$opts['record'].' ';
   }
 
   $simple_args = Map {

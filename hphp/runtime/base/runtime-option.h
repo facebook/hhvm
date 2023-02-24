@@ -1457,6 +1457,9 @@ struct RuntimeOption {
   F(uint64_t, StartOptionLogWindow, 86400)                              \
   F(hphp_fast_string_set, StartOptionLogOptions, {})                    \
   F(hphp_fast_string_set, StartOptionLogExcludeOptions, {})             \
+  F(bool, RecordReplay, false)                                          \
+  F(uint64_t, RecordSampleRate, 0)                                      \
+  F(string, RecordDir, std::string(""))                                 \
   /* */
 
 private:

@@ -799,7 +799,6 @@ struct RuntimeOption {
      systemlib has around 200 units, so use a larger default to avoid
      logging for unit tests. */                                         \
   F(uint32_t, HHBBCMinUnitsToLog,      1000)                            \
-  F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
   F(bool, LogHackcMemStats,            false)                           \
   F(uint32_t, IsameCollisionSampleRate, 1)                              \

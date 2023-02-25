@@ -342,8 +342,6 @@ void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {
 const RepoOptions& RepoOptions::forFile(const char* path) {
   tracing::BlockNoTrace _{"repo-options"};
 
-  if (!RuntimeOption::EvalEnablePerRepoOptions) return defaults();
-
   std::string fpath{path};
   if (boost::starts_with(fpath, "/:")) return defaults();
 

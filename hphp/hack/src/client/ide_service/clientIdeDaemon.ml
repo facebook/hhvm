@@ -591,9 +591,12 @@ only ever answer IDE requests on open files, so we know we'll eventually
 reveive a DidClose even for them and be able to clear their TAST cache
 at that time. But for now, to paper over the bug, we'll call this
 function to log the event and we'll assume that we just missed a DidOpen. *)
-let log_missing_open_file_BUG (path : Relative_path.t) : unit =
+let log_missing_open_file_BUG (reason : string) (path : Relative_path.t) : unit
+    =
   let path = Relative_path.to_absolute path in
-  let message = Printf.sprintf "Error: action on non-open file %s" path in
+  let message =
+    Printf.sprintf "Error: action on non-open file [%s] %s" reason path
+  in
   ClientIdeUtils.log_bug message ~telemetry:true
 
 (** Opens a file, in response to DidOpen event, by putting in a new
@@ -623,7 +626,7 @@ let change_file (files : open_files_state) (path : Relative_path.t) :
     (* We'll now mark the file as opened. We'll provide empty contents for now;
        this doesn't matter since every actual future request for the file will provide
        actual contents. *)
-    let () = log_missing_open_file_BUG path in
+    let () = log_missing_open_file_BUG "change-without-open" path in
     open_file files path ""
 
 (** Closes a file, in response to DidClose event, by removing the
@@ -631,6 +634,8 @@ entry in open_files. If the LSP client sents us multile DidCloses,
 or DidClose for an unopen file, we won't complain. *)
 let close_file (files : open_files_state) (path : Relative_path.t) :
     open_files_state =
+  if not (Relative_path.Map.mem files.open_files path) then
+    log_missing_open_file_BUG "close-without-open" path;
   let open_files = Relative_path.Map.remove files.open_files path in
   { files with open_files }
 
@@ -653,13 +658,13 @@ let update_file
         Relative_path.Map.find_opt files.open_files path )
     with
     | (Some contents, None) ->
-      log_missing_open_file_BUG path;
+      log_missing_open_file_BUG "update-without-entry" path;
       (* TODO(ljw): failwith "Attempted LSP operation on a non-open file" *)
       Provider_context.make_entry
         ~path
         ~contents:(Provider_context.Provided_contents contents)
     | (None, None) ->
-      log_missing_open_file_BUG path;
+      log_missing_open_file_BUG "update-without-content-or-entry" path;
       failwith "Attempted LSP operation on a non-open file"
     | (Some contents, Some entry)
       when Option.equal
@@ -667,7 +672,9 @@ let update_file
              (Some contents)
              (Provider_context.get_file_contents_if_present entry) ->
       entry
-    | (None, Some entry) -> entry
+    | (None, Some entry) ->
+      log_missing_open_file_BUG "update-without-content" path;
+      entry
     | (Some contents, _) ->
       Provider_context.make_entry
         ~path

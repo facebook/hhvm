@@ -144,7 +144,7 @@ fn elaborate<T: Transform>(
         passes::validate_class_req::ValidateClassReqPass::default(),
 
         // Validation dealing with common xhp naming errors
-        // passes::validate_xhp_name::ValidateXhpNamePass::default(),
+        passes::validate_xhp_name::ValidateXhpNamePass::default(),
 
         // -- Elaboration & validation under typechecker options --------------
 

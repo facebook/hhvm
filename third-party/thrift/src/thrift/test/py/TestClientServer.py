@@ -22,7 +22,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import errno
-import os.path
 import socket
 import ssl as SSL
 import string
@@ -41,6 +40,7 @@ from thrift.transport import TSocket, TSSLSocket, TTransport
 from thrift.transport.THeaderTransport import CLIENT_TYPE, THeaderTransport, TRANSFORM
 from ThriftTest import SecondService, ThriftTest
 from ThriftTest.ttypes import *
+from libfb.py import parutil
 
 
 _servers = []
@@ -53,9 +53,7 @@ except ImportError:
 
 
 def start_server(server_type, ssl, server_header, server_context, multiple, port):
-    server_path = os.path.dirname(sys.argv[0])
-
-    server_bin = os.path.join(server_path, "python_test_server.par")
+    server_bin = parutil.get_file_path("python_test_server")
 
     args = [server_bin, "--port", str(port)]
     if ssl:

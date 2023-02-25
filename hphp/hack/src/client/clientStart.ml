@@ -9,20 +9,42 @@
 
 open Hh_prelude
 
-let get_hhserver () =
-  let exe_name =
-    if Sys.win32 then
-      "hh_server.exe"
-    else
-      "hh_server"
-  in
-  let server_next_to_client =
-    Path.(to_string @@ concat (dirname executable_name) exe_name)
-  in
-  if Sys.file_exists server_next_to_client then
-    server_next_to_client
-  else
-    exe_name
+(** What is the path to the hh_server binary?
+1. If HH_SERVER_PATH environment variable is defined, use this (even if it doesn't exist on disk!)
+2. Otherwise, if "dirname(realpath(executable_name))/hh_server[.exe]" exists then use this
+3. Otherwise, use unqualified "hh_server[.exe]" (hence search on PATH).
+The third case is currently what happens for "hh switch buck2" *)
+let get_hhserver_path () =
+  match Sys.getenv_opt "HH_SERVER_PATH" with
+  | Some p ->
+    Hh_logger.log "For hh_server path, using HH_SERVER_PATH=%s" p;
+    p
+  | None ->
+    let exe_name =
+      if Sys.win32 then
+        "hh_server.exe"
+      else
+        "hh_server"
+    in
+    (* Path.executable_name is an alias for Sys.executable_name. Its documentation is quite vague:
+       "This name may be absolute or relative to the current directory, depending on the platform
+       and whether the program was compiled to bytecode or a native executable." In my testing
+       on native ocaml binaries on CentOS, it produces the fully-qualified realpath of the executable,
+       i.e. it digs through symlinks. *)
+    let server_next_to_client =
+      Path.concat (Path.dirname Path.executable_name) exe_name |> Path.to_string
+    in
+    if Sys.file_exists server_next_to_client then begin
+      Hh_logger.log
+        "For hh_server path, found it adjacent to %s"
+        (Path.executable_name |> Path.to_string);
+      server_next_to_client
+    end else begin
+      Hh_logger.log
+        "For hh_server path, will do unqualified search for %s"
+        exe_name;
+      exe_name
+    end
 
 type env = {
   root: Path.t;
@@ -109,7 +131,7 @@ let start_server (env : env) =
            [| option; Printf.sprintf "%s=%s" key value |])
     |> Array.concat
   in
-  let hh_server = get_hhserver () in
+  let hh_server = get_hhserver_path () in
   let hh_server_args =
     Array.concat
       [

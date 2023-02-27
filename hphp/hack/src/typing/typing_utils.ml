@@ -295,6 +295,12 @@ let is_tyvar env ty =
   | Tvar _ -> true
   | _ -> false
 
+let is_opt_tyvar env ty =
+  let (env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Toption ty -> is_tyvar env ty
+  | _ -> false
+
 let is_tyvar_error env ty =
   let (_env, ty) = Env.expand_type env ty in
   let rec is_tyvar_error_reason r =

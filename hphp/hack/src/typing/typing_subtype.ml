@@ -1738,6 +1738,7 @@ and simplify_subtype_i
             if
               List.exists tyl_super ~f:(fun t ->
                   Typing_utils.is_tintersection env t
+                  || Typing_utils.is_opt_tyvar env t
                   || Typing_utils.is_tyvar env t)
             then
               simplify_sub_union env ety_sub tyl_super

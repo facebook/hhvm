@@ -22,6 +22,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
 
     quote! {
         #![allow(unused_variables)]
+        #![allow(unused_braces)]
         #![allow(clippy::match_single_binding)]
 
         use std::ops::ControlFlow::Break;

@@ -29,8 +29,14 @@ $vec = Vector {
   $baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar,
 };
 
-$vec = Vector {$foo /* foo */};
-$vec = Vector {$foo /* foo */};
+$vec = Vector {
+  $foo,
+  /* foo */
+};
+$vec = Vector {
+  $foo,
+  /* foo */
+};
 
 $vec = Vector {
   $foo, // foo
@@ -43,10 +49,14 @@ $vec = Vector {
   ,
 };
 
-$vec =
-  Vector {/* leading comment */ $fooooooooooooooooo /* trailing comment */};
-$vec =
-  Vector {/* leading comment */ $fooooooooooooooooo /* trailing comment */};
+$vec = Vector {
+  /* leading comment */ $fooooooooooooooooo,
+  /* trailing comment */
+};
+$vec = Vector {
+  /* leading comment */ $fooooooooooooooooo,
+  /* trailing comment */
+};
 
 $vec = Vector {
   /* leading comment */

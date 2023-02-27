@@ -5,6 +5,7 @@
     "elements":[
       {
         "kind":"markup_section",
+        "markup_hashbang":{"kind":"missing"},
         "markup_suffix":{
           "kind":"markup_suffix",
           "markup_suffix_less_than_question":{
@@ -29,13 +30,9 @@
               "offset":2,
               "leading_width":0,
               "width":2,
-              "trailing_width":20,
+              "trailing_width":1,
               "leading":[],
-              "trailing":[
-                {"kind":"whitespace","text":" ","offset":4,"width":1},
-                {"kind":"delimited_comment","text":"/* stric strict */","offset":5,"width":18},
-                {"kind":"end_of_line","text":"\n","offset":23,"width":1}
-              ],
+              "trailing":[{"kind":"whitespace","text":" ","offset":4,"width":1}],
               "line_number":1
             }
           }
@@ -48,11 +45,14 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":24,
-            "leading_width":0,
+            "offset":5,
+            "leading_width":19,
             "width":0,
             "trailing_width":0,
-            "leading":[],
+            "leading":[
+              {"kind":"delimited_comment","text":"/* stric strict */","offset":5,"width":18},
+              {"kind":"end_of_line","text":"\n","offset":23,"width":1}
+            ],
             "trailing":[],
             "line_number":2
           }

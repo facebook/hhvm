@@ -19,7 +19,7 @@ set -e # terminate upon non-zero-exit-codes (in case of pipe, only checks at end
 trap 'echo "exit code $? at line $LINENO" >&2' ERR
 
 function summary {
-    echo -e "$BOLD$CYAN==>$WHITE ${1}$RESET"
+    echo -e "\n$BOLD$CYAN==>$WHITE ${1}$RESET"
 }
 
 # Try to get the path of this script relative to fbcode/.

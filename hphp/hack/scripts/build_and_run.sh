@@ -6,7 +6,6 @@
 # LICENSE file in the "hack" directory of this source tree.
 
 set -e
-set -x
 
 SCRIPT_DIR="$(dirname "$0")"
 FBCODE_ROOT="$(realpath "${SCRIPT_DIR}/../../../")"
@@ -25,7 +24,7 @@ function dune_build() {
   if [ -e "${HACK_ROOT}/${HACK_SUBDIR}/${TARGET}.ml" ]; then
     (
       cd "${HACK_ROOT}"
-      "${DUNE}" build "${HACK_SUBDIR}/${TARGET}.exe"
+      "${DUNE}" build --no-print-directory "${HACK_SUBDIR}/${TARGET}.exe"
     )
     exec "${DUNE_BUILD_DIR}/default/hack/$HACK_SUBDIR/${TARGET}.exe" "${ARGS[@]}"
   fi

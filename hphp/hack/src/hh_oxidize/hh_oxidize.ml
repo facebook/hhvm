@@ -64,7 +64,6 @@ let write filename contents =
   Out_channel.close oc
 
 let write_format_and_sign env filename contents =
-  log "Writing %s" filename;
   write filename contents;
   if Sys.command (sprintf "%S %S" env.rustfmt filename) <> 0 then
     failwith ("Could not format Rust output in " ^ filename);

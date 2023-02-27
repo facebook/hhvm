@@ -43,7 +43,6 @@ pub fn run(args: &Args) -> Result<Vec<(PathBuf, String)>> {
     for input in inputs {
         let (file, uses) = parse_input_arg(input);
         eprintln!("Process: {}", file);
-        eprintln!("Uses: {:?}", uses);
         let mut output_filename = Path::new(file)
             .file_stem()
             .ok_or_else(|| anyhow!("Unable to get file stem"))?

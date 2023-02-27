@@ -37,10 +37,18 @@ type t = {
   backend: Provider_backend.t;
   deps_mode: Typing_deps_mode.t;
   entries: entries;
+  get_package_for_module: (string -> string option) option;
 }
 
 let empty_for_tool ~popt ~tcopt ~backend ~deps_mode =
-  { popt; tcopt; backend; deps_mode; entries = Relative_path.Map.empty }
+  {
+    popt;
+    tcopt;
+    backend;
+    deps_mode;
+    entries = Relative_path.Map.empty;
+    get_package_for_module = None;
+  }
 
 let empty_for_worker ~popt ~tcopt ~deps_mode =
   {
@@ -49,6 +57,7 @@ let empty_for_worker ~popt ~tcopt ~deps_mode =
     backend = Provider_backend.Shared_memory;
     deps_mode;
     entries = Relative_path.Map.empty;
+    get_package_for_module = None;
   }
 
 let empty_for_test ~popt ~tcopt ~deps_mode =
@@ -58,6 +67,7 @@ let empty_for_test ~popt ~tcopt ~deps_mode =
     backend = Provider_backend.Shared_memory;
     deps_mode;
     entries = Relative_path.Map.empty;
+    get_package_for_module = None;
   }
 
 let empty_for_debugging ~popt ~tcopt ~deps_mode =
@@ -67,6 +77,7 @@ let empty_for_debugging ~popt ~tcopt ~deps_mode =
     backend = Provider_backend.Shared_memory;
     deps_mode;
     entries = Relative_path.Map.empty;
+    get_package_for_module = None;
   }
 
 let make_entry ~(path : Relative_path.t) ~(contents : entry_contents) : entry =
@@ -103,6 +114,13 @@ let add_entry_if_missing ~(ctx : t) ~(path : Relative_path.t) : t * entry =
 let get_popt (t : t) : ParserOptions.t = t.popt
 
 let get_tcopt (t : t) : TypecheckerOptions.t = t.tcopt
+
+let get_package_for_module (t : t) : (string -> string option) option =
+  t.get_package_for_module
+
+let ctx_with_get_package_for_module
+    (t : t) (get_package_for_module : (string -> string option) option) : t =
+  { t with get_package_for_module }
 
 let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
   { t with tcopt = f t.tcopt }

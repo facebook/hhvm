@@ -65,7 +65,8 @@ let init
 
   (* Load and parse __PACKAGES__.php if it exists.
      TODO(milliechen): restart the server if __PACKAGES__.php changes. *)
-  PackageConfig.load_and_parse env;
+  let get_package_for_module = PackageConfig.load_and_parse env in
+  let env = { env with get_package_for_module = Some get_package_for_module } in
 
   (* We don't support a saved state for eager init. *)
   let (get_next, t) =

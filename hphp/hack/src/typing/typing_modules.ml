@@ -99,6 +99,26 @@ let satisfies_export_rules env current target =
     else
       Some (target_module_name, target_module_symbol.mdt_pos)
 
+(* TODO(milliechen): handle includes *)
+let in_same_package env current target =
+  let current_pkg = Env.get_package_for_module env current in
+  let target_pkg = Option.bind target ~f:(Env.get_package_for_module env) in
+  match (current_pkg, target_pkg) with
+  | (None, None) -> true
+  | (Some pkg1, Some pkg2) -> String.equal pkg1 pkg2
+  | _ -> false
+
+let satisfies_pkg_rules env current target =
+  match find_module_symbol env current with
+  | None
+  | Some (_, None) ->
+    None
+  | Some (current_module_name, Some current_module_symbol) ->
+    if in_same_package env current_module_name target then
+      None
+    else
+      Some (current_module_name, current_module_symbol.mdt_pos)
+
 let can_access_public
     ~(env : Typing_env_types.env)
     ~(current : string option)
@@ -111,7 +131,10 @@ let can_access_public
     | None ->
       (match satisfies_export_rules env current target with
       | Some target_module -> `ExportsNotSatisfied target_module
-      | None -> `Yes)
+      | None ->
+        (match satisfies_pkg_rules env current target with
+        | Some current_module -> `PackageNotSatisfied current_module
+        | None -> `Yes))
 
 let is_class_visible (env : Typing_env_types.env) (cls : Cls.t) =
   if Cls.internal cls then

@@ -329,6 +329,7 @@ let parse_options () =
   let global_access_check_on_read = ref true in
   let refactor_mode = ref "" in
   let refactor_analysis_mode = ref "" in
+  let packages_config_path = ref None in
   let set_enable_global_access_check_functions s =
     let json_obj = Hh_json.json_of_file s in
     let add_function f =
@@ -867,6 +868,9 @@ let parse_options () =
             batch_mode := true;
             set_mode (SDT_analysis command) ()),
         " Analyses to support Sound Dynamic rollout" );
+      ( "--packages-config-path",
+        Arg.String (fun s -> packages_config_path := Some s),
+        " Config file for a list of package definitions" );
     ]
   in
 
@@ -1120,7 +1124,7 @@ let parse_options () =
     },
     root,
     !naming_table,
-    if !rust_provider_backend then
+    (if !rust_provider_backend then
       SharedMem.
         {
           !sharedmem_config with
@@ -1129,7 +1133,8 @@ let parse_options () =
             max !sharedmem_config.shm_cache_size (2 * 1024 * 1024 * 1024);
         }
     else
-      !sharedmem_config )
+      !sharedmem_config),
+    !packages_config_path )
 
 (* Make readable test output *)
 let replace_color input =
@@ -2705,7 +2710,8 @@ let decl_and_run_mode
     }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
-    (naming_table_path : string option) : unit =
+    (naming_table_path : string option)
+    (packages_config_path : string option) : unit =
   Ident.track_names := true;
   let builtins =
     if no_builtins then
@@ -2845,6 +2851,46 @@ let decl_and_run_mode
         ~tcopt
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
+  let get_package_for_module =
+    let module_to_package =
+      match packages_config_path with
+      | None -> SMap.empty
+      | Some path ->
+        let (_, pkg_ast) =
+          Relative_path.create_detect_prefix path
+          |> Ast_provider.get_ast_with_error ctx
+        in
+        List.fold pkg_ast ~init:SMap.empty ~f:(fun acc def ->
+            let open Aast in
+            match def with
+            | Package { pkg_uses = Some mds; pkg_name; _ } ->
+              let pkg = Ast_defs.get_id pkg_name in
+              List.fold mds ~init:acc ~f:(fun acc md ->
+                  SMap.add (module_name_kind_to_string md) pkg acc)
+            | _ -> acc)
+    in
+    fun md_name ->
+      let matching_pkgs =
+        SMap.filter
+          (fun md_prefix _ -> Str.string_match (Str.regexp md_prefix) md_name 0)
+          module_to_package
+      in
+      let sorted_pkgs =
+        List.sort
+          (SMap.elements matching_pkgs)
+          ~compare:(fun (md1, _) (md2, _) -> String.compare md1 md2)
+        |> List.rev
+      in
+      match sorted_pkgs with
+      | [] -> None
+      | (_, pkg) :: _ -> Some pkg
+  in
+  let ctx =
+    Provider_context.ctx_with_get_package_for_module
+      ctx
+      (Some get_package_for_module)
+  in
+
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
      so it will look in the sqlite database for names it doesn't know.
      This function returns the forward naming table. *)
@@ -2895,7 +2941,8 @@ let main_hack
     ({ tcopt; _ } as opts)
     (root : Path.t)
     (naming_table : string option)
-    (sharedmem_config : SharedMem.config) : unit =
+    (sharedmem_config : SharedMem.config)
+    (packages_config_path : string option) : unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
@@ -2916,7 +2963,7 @@ let main_hack
     Relative_path.set_path_prefix Relative_path.Root root;
     Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
     Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-    decl_and_run_mode opts tcopt hhi_root naming_table;
+    decl_and_run_mode opts tcopt hhi_root naming_table packages_config_path;
     TypingLogger.flush_buffers ()
   in
   match opts.custom_hhi_path with
@@ -2933,5 +2980,13 @@ let () =
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true;
-  let (options, root, naming_table, sharedmem_config) = parse_options () in
-  Unix.handle_unix_error main_hack options root naming_table sharedmem_config
+  let (options, root, naming_table, sharedmem_config, packages_config_path) =
+    parse_options ()
+  in
+  Unix.handle_unix_error
+    main_hack
+    options
+    root
+    naming_table
+    sharedmem_config
+    packages_config_path

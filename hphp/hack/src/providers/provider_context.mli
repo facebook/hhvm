@@ -228,3 +228,7 @@ val ctx_with_pessimisation_info_exn :
 val implicit_sdt_for_class : t -> Shallow_decl_defs.shallow_class option -> bool
 
 val implicit_sdt_for_fun : t -> Shallow_decl_defs.fun_decl -> bool
+
+val ctx_with_get_package_for_module : t -> (string -> string option) option -> t
+
+val get_package_for_module : t -> (string -> string option) option

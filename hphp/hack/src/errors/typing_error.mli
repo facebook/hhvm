@@ -374,6 +374,15 @@ module Primary : sig
           current_module_opt: string option;
           target_module: string;
         }
+      | Module_cross_pkg_access of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module_opt: string option;
+          current_package_opt: string option;
+          target_module_opt: string option;
+          target_package_opt: string option;
+        }
   end
 
   module Xhp : sig

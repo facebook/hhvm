@@ -24,7 +24,22 @@ let glob_to_package_ref : package_info SMap.t ref = ref SMap.empty
 let log_debug (msg : ('a, unit, string, string, string, unit) format6) : 'a =
   Hh_logger.debug ~category:"packages" ?exn:None msg
 
-let load_and_parse (env : ServerEnv.env) =
+let get_package_for_module md_name =
+  let matching_pkgs =
+    SMap.filter
+      (fun md_prefix _ -> Str.string_match (Str.regexp md_prefix) md_name 0)
+      !glob_to_package_ref
+  in
+  let sorted_pkgs =
+    List.sort (SMap.elements matching_pkgs) ~compare:(fun (md1, _) (md2, _) ->
+        String.compare md1 md2)
+    |> List.rev
+  in
+  match sorted_pkgs with
+  | [] -> None
+  | (_, pkg) :: _ -> Some (Ast_defs.get_id pkg.pkg_name)
+
+let load_and_parse (env : ServerEnv.env) : string -> string option =
   let ctx = Provider_utils.ctx_from_server_env env in
   let repo_pkgs_config_path =
     Relative_path.from_root ~suffix:pkgs_config_path_relative_to_repo_root
@@ -56,19 +71,5 @@ let load_and_parse (env : ServerEnv.env) =
     SMap.iter
       (fun k v -> log_debug "Module %s belongs to %s" k (show_package_info v))
       !glob_to_package_ref
-  )
-
-let get_package_for_module md_name =
-  let matching_pkgs =
-    SMap.filter
-      (fun md_prefix _ -> Str.string_match (Str.regexp md_prefix) md_name 0)
-      !glob_to_package_ref
-  in
-  let sorted_pkgs =
-    List.sort (SMap.elements matching_pkgs) ~compare:(fun (md1, _) (md2, _) ->
-        String.compare md1 md2)
-    |> List.rev
-  in
-  match sorted_pkgs with
-  | [] -> None
-  | (_, pkg) :: _ -> Some pkg
+  );
+  get_package_for_module

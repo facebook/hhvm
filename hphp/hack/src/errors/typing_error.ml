@@ -1511,6 +1511,15 @@ module Primary = struct
           current_module_opt: string option;
           target_module: string;
         }
+      | Module_cross_pkg_access of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module_opt: string option;
+          current_package_opt: string option;
+          target_module_opt: string option;
+          target_package_opt: string option;
+        }
 
     let module_hint pos decl_pos =
       let claim = lazy (pos, "You cannot use this type in a public declaration.")
@@ -1600,6 +1609,44 @@ module Primary = struct
       in
       (Error_code.ModuleError, claim, reason, [])
 
+    let module_cross_pkg_access
+        pos
+        decl_pos
+        module_pos
+        current_module_opt
+        current_package_opt
+        target_module_opt
+        target_package_opt =
+      let current_module = Option.value current_module_opt ~default:"global" in
+      let target_module = Option.value target_module_opt ~default:"global" in
+      let current_package =
+        Option.value current_package_opt ~default:"default"
+      in
+      let target_package = Option.value target_package_opt ~default:"default" in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot access a public element from package '%s' in package '%s'"
+              target_package
+              current_package )
+      and reason =
+        lazy
+          [
+            ( decl_pos,
+              Printf.sprintf
+                "This is from module `%s`, which is in package `%s`"
+                target_module
+                target_package );
+            ( module_pos,
+              Printf.sprintf
+                "Module '%s' belongs to package '%s'"
+                current_module
+                current_package );
+          ]
+      in
+      (Error_code.ModuleError, claim, reason, [])
+
     let to_error : t -> error = function
       | Module_hint { pos; decl_pos } -> module_hint pos decl_pos
       | Module_mismatch { pos; current_module_opt; decl_pos; target_module } ->
@@ -1622,6 +1669,24 @@ module Primary = struct
           module_pos
           current_module_opt
           target_module
+      | Module_cross_pkg_access
+          {
+            pos;
+            decl_pos;
+            module_pos;
+            current_module_opt;
+            current_package_opt;
+            target_module_opt;
+            target_package_opt;
+          } ->
+        module_cross_pkg_access
+          pos
+          decl_pos
+          module_pos
+          current_module_opt
+          current_package_opt
+          target_module_opt
+          target_package_opt
   end
 
   module Xhp = struct

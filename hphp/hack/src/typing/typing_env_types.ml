@@ -82,6 +82,7 @@ and genv = {
   current_module: Ast_defs.id option;
   this_internal: bool;
   this_support_dynamic_type: bool;
+  get_package_for_module: (string -> string option) option;
 }
 
 let initial_local tpenv =
@@ -130,6 +131,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         current_module = None;
         this_internal = false;
         this_support_dynamic_type = false;
+        get_package_for_module = Provider_context.get_package_for_module ctx;
       };
     tpenv = Type_parameter_env.empty;
     log_levels = TypecheckerOptions.log_levels (Provider_context.get_tcopt ctx);

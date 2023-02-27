@@ -13,6 +13,6 @@ type package_info = {
 }
 [@@deriving show]
 
-val load_and_parse : ServerEnv.env -> unit
+val load_and_parse : ServerEnv.env -> string -> string option
 
-val get_package_for_module : string -> package_info option
+val get_package_for_module : string -> string option

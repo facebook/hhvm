@@ -8,10 +8,9 @@
 
 open Sdt_analysis_types
 
-let decorated_constraint
-    ~verbosity { origin; hack_pos; decorated_data = constraint_ } =
+let decorated ~verbosity ~show { origin; hack_pos; decorated_data } =
   let line = Pos.line hack_pos in
-  let constraint_ = Constraint.show constraint_ in
+  let constraint_ = show decorated_data in
   if verbosity > 0 then
     Format.asprintf "%4d: %4d: %s" line origin constraint_
   else

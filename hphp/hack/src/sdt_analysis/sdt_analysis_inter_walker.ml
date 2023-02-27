@@ -12,7 +12,8 @@ module A = Aast
 
 let reduce_walk_result =
   object
-    inherit [H.inter_constraint_ WalkResult.t] Tast_visitor.reduce as super
+    inherit
+      [H.inter_constraint_ decorated WalkResult.t] Tast_visitor.reduce as super
 
     method zero = WalkResult.empty
 
@@ -23,10 +24,13 @@ let reduce_walk_result =
 
       let at_extends acc (_, hint_) =
         match hint_ with
-        | A.Happly ((_, parent_sid), _hints) ->
+        | A.Happly ((hack_pos, parent_sid), _hints) ->
           let parent_id = H.Class parent_sid in
           let constraint_ = H.ClassExtends parent_id in
-          WalkResult.add_constraint acc id constraint_
+          let decorated =
+            { origin = __LINE__; hack_pos; decorated_data = constraint_ }
+          in
+          WalkResult.add_constraint acc id decorated
         | _ -> acc
       in
       WalkResult.(
@@ -40,7 +44,7 @@ let reduce_walk_result =
   end
 
 let program (ctx : Provider_context.t) (tast : Tast.program) :
-    H.inter_constraint_ WalkResult.t =
+    H.inter_constraint_ decorated WalkResult.t =
   let def acc def =
     let tast_env = Tast_env.def_env ctx def in
     WalkResult.(acc @ reduce_walk_result#on_def tast_env def)

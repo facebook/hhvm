@@ -12,15 +12,19 @@ module InterWalker = Sdt_analysis_inter_walker
 
 let should_visit = Fn.non Tast_env.is_hhi
 
+let strip_constraints { decorated_data; _ } = decorated_data
+
 let handler ctx writer =
-  let write_ids_and_inters id (cs : H.inter_constraint_ list) =
+  let write_ids_and_inters id (cs : H.inter_constraint_ decorated list) =
     H.Write.add_id writer id;
-    List.iter cs ~f:(H.Write.add_inter writer id)
+    cs
+    |> List.map ~f:strip_constraints
+    |> List.iter ~f:(H.Write.add_inter writer id)
   in
 
   let write_intras id decorated_intras =
     decorated_intras
-    |> List.map ~f:(fun { decorated_data; _ } -> decorated_data)
+    |> List.map ~f:strip_constraints
     |> List.iter ~f:(H.Write.add_intra writer id)
   in
 

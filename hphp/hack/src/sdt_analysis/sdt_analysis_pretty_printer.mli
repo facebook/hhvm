@@ -8,4 +8,4 @@
 
 open Sdt_analysis_types
 
-val decorated_constraint : verbosity:int -> Constraint.t decorated -> string
+val decorated : verbosity:int -> show:('a -> string) -> 'a decorated -> string

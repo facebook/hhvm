@@ -9,4 +9,6 @@
 open Sdt_analysis_types
 
 val program :
-  Provider_context.t -> Tast.program -> H.inter_constraint_ WalkResult.t
+  Provider_context.t ->
+  Tast.program ->
+  H.inter_constraint_ decorated WalkResult.t

@@ -46,3 +46,8 @@ let do_ (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
     |> List.iter ~f:(fun id ->
            print_intra_constraints id @@ H.Read.get_intras reader id;
            print_inter_constraints id @@ H.Read.get_inters reader id)
+  | Options.SolveConstraints ->
+    let reader = H.Write.solve writer in
+    H.Read.get_keys reader
+    |> Sequence.iter ~f:(fun id ->
+           print_intra_constraints id @@ H.Read.get_intras reader id)

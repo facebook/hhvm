@@ -10,6 +10,7 @@ open Sdt_analysis_types
 
 let parse_command = function
   | "dump" -> Some Options.DumpConstraints
+  | "solve" -> Some Options.SolveConstraints
   | _ -> None
 
 let mk ~command ~verbosity = Options.{ command; verbosity }

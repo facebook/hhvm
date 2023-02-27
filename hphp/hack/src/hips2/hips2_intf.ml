@@ -48,6 +48,8 @@ module type T = sig
 
     val add_intra : t -> id -> intra_constraint_ -> unit
 
+    val solve : t -> Read.t
+
     (** dump the constraints provided with `add_inter` and `add_intra`, without modification *)
     val debug_dump : t -> Read.t
   end

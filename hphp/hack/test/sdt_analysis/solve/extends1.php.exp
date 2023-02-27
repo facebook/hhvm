@@ -1,0 +1,4 @@
+=== SDT analysis results for extends1.php
+Intraprocedural Constraints for \SdMe1:
+  14: NeedsSDT
+

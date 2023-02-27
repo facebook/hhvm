@@ -81,6 +81,8 @@ module Make (Intra : Intra) = struct
       HashSet.add set c
 
     let debug_dump t = t
+
+    let solve t = t
   end
 
   module Read = struct

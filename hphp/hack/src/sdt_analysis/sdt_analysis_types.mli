@@ -7,7 +7,9 @@
  *)
 
 module Options : sig
-  type command = DumpConstraints
+  type command =
+    | DumpConstraints
+    | SolveConstraints
 
   type t = {
     command: command;

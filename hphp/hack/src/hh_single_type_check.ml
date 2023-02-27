@@ -2863,9 +2863,11 @@ let decl_and_run_mode
         List.fold pkg_ast ~init:SMap.empty ~f:(fun acc def ->
             let open Aast in
             match def with
-            | Package { pkg_uses = Some mds; pkg_name; _ } ->
-              let pkg = Ast_defs.get_id pkg_name in
+            | Package { pkg_uses = Some mds; pkg_name; pkg_includes; _ } ->
               List.fold mds ~init:acc ~f:(fun acc md ->
+                  let pkg =
+                    Packages.{ pkg_name; pkg_includes; pkg_uses = mds }
+                  in
                   SMap.add (module_name_kind_to_string md) pkg acc)
             | _ -> acc)
     in

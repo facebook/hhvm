@@ -6,13 +6,4 @@
  *
  *)
 
-type package_info = {
-  pkg_name: Aast_defs.sid;
-  pkg_includes: Aast_defs.sid list option;
-  pkg_uses: Aast_defs.md_name_kind list;
-}
-[@@deriving show]
-
-val load_and_parse : ServerEnv.env -> string -> string option
-
-val get_package_for_module : string -> string option
+val load_and_parse : ServerEnv.env -> string -> Packages.package_info option

@@ -179,9 +179,13 @@ let check_public_access env use_pos def_pos target =
               current_module_opt = current_module;
               target_module_opt = target;
               current_package_opt =
-                Option.bind current_module ~f:(Env.get_package_for_module env);
+                Option.bind current_module ~f:(fun md ->
+                    Env.get_package_for_module env md
+                    |> Option.map ~f:Packages.get_package_name);
               target_package_opt =
-                Option.bind target ~f:(Env.get_package_for_module env);
+                Option.bind target ~f:(fun md ->
+                    Env.get_package_for_module env md
+                    |> Option.map ~f:Packages.get_package_name);
             }))
 
 let is_visible_for_obj ~is_method env vis =

@@ -26,6 +26,7 @@
   ast
   collections
   nast
+  packages
   parser
   provider_backend
   server_command_types

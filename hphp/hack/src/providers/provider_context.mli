@@ -229,6 +229,8 @@ val implicit_sdt_for_class : t -> Shallow_decl_defs.shallow_class option -> bool
 
 val implicit_sdt_for_fun : t -> Shallow_decl_defs.fun_decl -> bool
 
-val ctx_with_get_package_for_module : t -> (string -> string option) option -> t
+val ctx_with_get_package_for_module :
+  t -> (string -> Packages.package_info option) option -> t
 
-val get_package_for_module : t -> (string -> string option) option
+val get_package_for_module :
+  t -> (string -> Packages.package_info option) option

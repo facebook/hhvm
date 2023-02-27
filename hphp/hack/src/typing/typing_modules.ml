@@ -99,13 +99,16 @@ let satisfies_export_rules env current target =
     else
       Some (target_module_name, target_module_symbol.mdt_pos)
 
-(* TODO(milliechen): handle includes *)
 let in_same_package env current target =
   let current_pkg = Env.get_package_for_module env current in
   let target_pkg = Option.bind target ~f:(Env.get_package_for_module env) in
   match (current_pkg, target_pkg) with
   | (None, None) -> true
-  | (Some pkg1, Some pkg2) -> String.equal pkg1 pkg2
+  | (Some pkg1, Some pkg2) ->
+    String.equal
+      (Packages.get_package_name pkg1)
+      (Packages.get_package_name pkg2)
+    || Packages.includes pkg1 pkg2
   | _ -> false
 
 let satisfies_pkg_rules env current target =

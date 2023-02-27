@@ -23,8 +23,9 @@ type kind =
   | Param
   | Typedef
   | Module
+[@@deriving ord, show]
 
-and modifier =
+type modifier =
   | Final
   | Static
   | Abstract
@@ -33,8 +34,10 @@ and modifier =
   | Protected
   | Async
   | Inout
+  | Internal
+[@@deriving ord, show]
 
-and 'a t = {
+type 'a t = {
   kind: kind;
   name: string;
   full_name: string;

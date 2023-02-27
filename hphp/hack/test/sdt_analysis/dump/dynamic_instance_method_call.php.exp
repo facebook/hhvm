@@ -2,7 +2,5 @@
 Intraprocedural Constraints for \C:
    8: NeedsSDT
 
-Interprocedural Constraints for \C:
-  ClassInterConstraintProofOfConcept
 
 

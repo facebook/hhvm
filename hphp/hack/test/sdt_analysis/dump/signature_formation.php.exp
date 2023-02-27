@@ -1,6 +1,4 @@
 === SDT analysis results for signature_formation.php
-Interprocedural Constraints for \C:
-  ClassInterConstraintProofOfConcept
 
 Intraprocedural Constraints for \f:
    5: NeedsSDT

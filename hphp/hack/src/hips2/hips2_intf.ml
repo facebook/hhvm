@@ -24,7 +24,7 @@ module type T = sig
 
   type id = id_kind * string [@@deriving ord, show { with_path = false }]
 
-  type inter_constraint_ = ClassInterConstraintProofOfConcept
+  type inter_constraint_ = ClassExtends of id
   [@@deriving show { with_path = false }]
 
   module Read : sig

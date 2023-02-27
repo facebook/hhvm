@@ -130,8 +130,16 @@ let tast_handler writer =
       |> List.iter ~f:(fun (id, constraint_) ->
              H.Write.add_intra writer id constraint_)
 
-    method! at_class_ _ A.{ c_name = (_, sid); _ } =
+    method! at_class_ _ A.{ c_name = (_, sid); c_extends; _ } =
       let id = (H.Class, sid) in
       H.Write.add_id writer id;
-      H.Write.add_inter writer id H.ClassInterConstraintProofOfConcept
+
+      let at_extends (_, hint_) =
+        match hint_ with
+        | A.Happly ((_, parent_sid), _hints) ->
+          let parent_id = (H.Class, parent_sid) in
+          H.Write.add_inter writer id (H.ClassExtends parent_id)
+        | _ -> ()
+      in
+      c_extends |> List.iter ~f:at_extends
   end

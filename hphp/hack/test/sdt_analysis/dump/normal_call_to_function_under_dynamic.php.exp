@@ -1,6 +1,4 @@
 === SDT analysis results for normal_call_to_function_under_dynamic.php
-Interprocedural Constraints for \C:
-  ClassInterConstraintProofOfConcept
 
 Intraprocedural Constraints for \f:
    8: NeedsSDT

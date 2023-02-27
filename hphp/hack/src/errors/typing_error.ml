@@ -2182,7 +2182,8 @@ module Primary = struct
     | Unnecessary_attribute of {
         pos: Pos.t;
         attr: string;
-        reason: Pos.t Message.t Lazy.t;
+        class_pos: Pos.t;
+        class_name: string;
         suggestion: string option;
       }
     | Inherited_class_member_with_different_case of {
@@ -4179,7 +4180,11 @@ module Primary = struct
       lazy [(decl_pos, "Declaration is here")],
       [] )
 
-  let unnecessary_attribute pos ~attr ~reason ~suggestion =
+  let unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion =
+    let class_name = Utils.strip_ns class_name in
+    let reason =
+      lazy (class_pos, sprintf "the class `%s` is final" class_name)
+    in
     let reason =
       Lazy.map reason ~f:(fun (reason_pos, reason_msg) ->
           let suggestion =
@@ -5916,8 +5921,8 @@ module Primary = struct
         const_name
     | Abstract_function_pointer { pos; class_name; meth_name; decl_pos } ->
       abstract_function_pointer class_name meth_name pos decl_pos
-    | Unnecessary_attribute { pos; attr; reason; suggestion } ->
-      unnecessary_attribute pos ~attr ~reason ~suggestion
+    | Unnecessary_attribute { pos; attr; class_pos; class_name; suggestion } ->
+      unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion
     | Inherited_class_member_with_different_case
         {
           pos;

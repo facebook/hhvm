@@ -910,7 +910,8 @@ module Primary : sig
     | Unnecessary_attribute of {
         pos: Pos.t;
         attr: string;
-        reason: Pos.t Message.t Lazy.t;
+        class_pos: Pos.t;
+        class_name: string;
         suggestion: string option;
       }
     | Inherited_class_member_with_different_case of {

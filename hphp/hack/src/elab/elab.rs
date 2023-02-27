@@ -181,6 +181,11 @@ fn elaborate<T: Transform>(
         // Validate use of the `__Const` attribute on classes - depends on
         // `const_attribute` typechecker option
         passes::validate_class_user_attribute_const::ValidateClassUserAttributeConstPass::default(),
+
+        // Validate use of the `__Const` attribute on static class vars - depends
+        // on the `const_static_props` typechecker option
+        passes::validate_class_var_user_attribute_const::ValidateClassVarUserAttributeConstPass::default(),
+        passes::validate_class_var_user_attribute_lsb::ValidateClassVarUserAttributeLsbPass::default(),
     ];
     let mut errs = Vec::default();
     let cfg = config::Config::new(tco, is_hhi);

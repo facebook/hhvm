@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3dc3cf543af2e1fa77683fb1aebc7a36>>
+// @generated SignedSource<<d16a7c4e4f6df8b59a4b92e3a77e9538>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,8 +39,12 @@ pub enum ExperimentalFeature {
     #[rust_to_ocaml(name = "Like_type")]
     LikeType(pos::Pos),
     Supportdyn(pos::Pos),
+    #[rust_to_ocaml(attr = r#"warning "-37""#)]
     #[rust_to_ocaml(name = "Const_attr")]
     ConstAttr(pos::Pos),
+    #[rust_to_ocaml(attr = r#"warning "-37""#)]
+    #[rust_to_ocaml(name = "Const_static_prop")]
+    ConstStaticProp(pos::Pos),
 }
 
 #[derive(

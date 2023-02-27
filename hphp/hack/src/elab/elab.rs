@@ -5,6 +5,7 @@
 
 #![feature(box_patterns)]
 #![feature(is_some_and)]
+#![feature(let_chains)]
 
 /// Used to combine multiple types implementing `Pass` into nested `Passes` types
 /// without requiring them to hand write it so :
@@ -186,6 +187,10 @@ fn elaborate<T: Transform>(
         // on the `const_static_props` typechecker option
         passes::validate_class_var_user_attribute_const::ValidateClassVarUserAttributeConstPass::default(),
         passes::validate_class_var_user_attribute_lsb::ValidateClassVarUserAttributeLsbPass::default(),
+
+        // Validate `inout` `FunParam`s ensuring they are not used in functions with
+        // special semantics or in memoized functions
+        passes::validate_fun_param_inout::ValidateFunParamInoutPass::default(),
     ];
     let mut errs = Vec::default();
     let cfg = config::Config::new(tco, is_hhi);

@@ -167,7 +167,7 @@ let check_public_access env use_pos def_pos target =
               current_module_opt = Env.get_current_module env;
               target_module = module_name;
             }))
-  | `PackageNotSatisfied (_module_name, module_pos) ->
+  | `PackageNotSatisfied (package_pos, module_pos) ->
     let current_module = Env.get_current_module env in
     Some
       (Typing_error.modules
@@ -176,6 +176,7 @@ let check_public_access env use_pos def_pos target =
               pos = use_pos;
               decl_pos = def_pos;
               module_pos;
+              package_pos;
               current_module_opt = current_module;
               target_module_opt = target;
               current_package_opt =

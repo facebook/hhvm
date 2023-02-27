@@ -11,9 +11,11 @@ type package_info = {
   pkg_includes: Aast_defs.sid list option;
   pkg_uses: Aast_defs.md_name_kind list;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 val get_package_name : package_info -> string
+
+val get_package_pos : package_info -> Pos.t
 
 val get_package_for_module : string -> package_info option
 

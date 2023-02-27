@@ -13,7 +13,7 @@ type package_info = {
   pkg_includes: Aast_defs.sid list option;
   pkg_uses: Aast_defs.md_name_kind list;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 (* TODO(milliechen): Consider switching to Hashtbl.t if we decide to continue
    with this data structure as opposed to, say, a trie. *)
@@ -38,6 +38,8 @@ let get_package_for_module md_name =
 
 let get_package_name (pkg : package_info) : string =
   Ast_defs.get_id pkg.pkg_name
+
+let get_package_pos (pkg : package_info) : Pos.t = Ast_defs.get_pos pkg.pkg_name
 
 let includes (pkg1 : package_info) (pkg2 : package_info) : bool =
   match pkg1.pkg_includes with

@@ -378,6 +378,7 @@ module Primary : sig
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;
           module_pos: Pos_or_decl.t;
+          package_pos: Pos.t;
           current_module_opt: string option;
           current_package_opt: string option;
           target_module_opt: string option;

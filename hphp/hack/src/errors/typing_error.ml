@@ -1515,6 +1515,7 @@ module Primary = struct
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;
           module_pos: Pos_or_decl.t;
+          package_pos: Pos.t;
           current_module_opt: string option;
           current_package_opt: string option;
           target_module_opt: string option;
@@ -1610,13 +1611,14 @@ module Primary = struct
       (Error_code.ModuleError, claim, reason, [])
 
     let module_cross_pkg_access
-        pos
-        decl_pos
-        module_pos
-        current_module_opt
-        current_package_opt
-        target_module_opt
-        target_package_opt =
+        (pos : Pos.t)
+        (decl_pos : Pos_or_decl.t)
+        (module_pos : Pos_or_decl.t)
+        (package_pos : Pos.t)
+        (current_module_opt : string option)
+        (current_package_opt : string option)
+        (target_module_opt : string option)
+        (target_package_opt : string option) =
       let current_module = Option.value current_module_opt ~default:"global" in
       let target_module = Option.value target_module_opt ~default:"global" in
       let current_package =
@@ -1643,6 +1645,11 @@ module Primary = struct
                 "Module '%s' belongs to package '%s'"
                 current_module
                 current_package );
+            ( Pos_or_decl.of_raw_pos package_pos,
+              Printf.sprintf
+                "And package '%s' does not include package '%s"
+                current_package
+                target_package );
           ]
       in
       (Error_code.ModuleError, claim, reason, [])
@@ -1674,6 +1681,7 @@ module Primary = struct
             pos;
             decl_pos;
             module_pos;
+            package_pos;
             current_module_opt;
             current_package_opt;
             target_module_opt;
@@ -1683,6 +1691,7 @@ module Primary = struct
           pos
           decl_pos
           module_pos
+          package_pos
           current_module_opt
           current_package_opt
           target_module_opt

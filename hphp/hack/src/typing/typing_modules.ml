@@ -99,17 +99,22 @@ let satisfies_export_rules env current target =
     else
       Some (target_module_name, target_module_symbol.mdt_pos)
 
-let in_same_package env current target =
+let satisfies_package_deps env current target =
   let current_pkg = Env.get_package_for_module env current in
   let target_pkg = Option.bind target ~f:(Env.get_package_for_module env) in
   match (current_pkg, target_pkg) with
-  | (None, None) -> true
-  | (Some pkg1, Some pkg2) ->
-    String.equal
-      (Packages.get_package_name pkg1)
-      (Packages.get_package_name pkg2)
-    || Packages.includes pkg1 pkg2
-  | _ -> false
+  | (None, None) -> None
+  | (None, Some _) -> Some Pos.none
+  | (Some current_pkg_info, None) ->
+    Some (Packages.get_package_pos current_pkg_info)
+  | (Some current_pkg_info, Some target_pkg_info) ->
+    if
+      Packages.equal_package_info current_pkg_info target_pkg_info
+      || Packages.includes current_pkg_info target_pkg_info
+    then
+      None
+    else
+      Some (Packages.get_package_pos current_pkg_info)
 
 let satisfies_pkg_rules env current target =
   match find_module_symbol env current with
@@ -117,10 +122,10 @@ let satisfies_pkg_rules env current target =
   | Some (_, None) ->
     None
   | Some (current_module_name, Some current_module_symbol) ->
-    if in_same_package env current_module_name target then
-      None
-    else
-      Some (current_module_name, current_module_symbol.mdt_pos)
+    (match satisfies_package_deps env current_module_name target with
+    | None -> None
+    | Some current_package_pos ->
+      Some (current_package_pos, current_module_symbol.mdt_pos))
 
 let can_access_public
     ~(env : Typing_env_types.env)

@@ -26,6 +26,6 @@ module DecoratedConstraint : sig
     constraint_: Constraint.t;
   }
   [@@deriving ord]
-
-  module Set : Caml.Set.S with type elt = t
 end
+
+module H : Hips2.T with type intra_constraint_ = DecoratedConstraint.t

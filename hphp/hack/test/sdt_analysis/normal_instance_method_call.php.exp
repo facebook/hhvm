@@ -1,1 +1,5 @@
 === SDT analysis results for normal_instance_method_call.php
+Interprocedural Constraints for \C:
+  ClassInterConstraintProofOfConcept
+
+

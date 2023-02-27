@@ -6,8 +6,6 @@
  *
  *)
 
-open Hh_prelude
-
 module Options = struct
   type command = DumpConstraints
 
@@ -27,11 +25,11 @@ module DecoratedConstraint = struct
     origin: int;
     constraint_: Constraint.t;
   }
-  [@@deriving ord]
-
-  module Set = Caml.Set.Make (struct
-    type nonrec t = t
-
-    let compare = compare
-  end)
+  [@@deriving ord, show { with_path = false }]
 end
+
+module H = Hips2.Make (struct
+  type constraint_ = DecoratedConstraint.t
+
+  let debug_show_constraint_ = DecoratedConstraint.show
+end)

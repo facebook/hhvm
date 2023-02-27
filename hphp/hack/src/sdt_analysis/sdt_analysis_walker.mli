@@ -8,5 +8,4 @@
 
 open Sdt_analysis_types
 
-val program :
-  unit -> Provider_context.t -> Tast.program -> DecoratedConstraint.Set.t SMap.t
+val tast_handler : H.Write.t -> Tast_visitor.handler

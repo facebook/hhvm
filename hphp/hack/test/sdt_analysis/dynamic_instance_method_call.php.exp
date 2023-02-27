@@ -1,4 +1,8 @@
 === SDT analysis results for dynamic_instance_method_call.php
-Constraints for \C:
+Intraprocedural Constraints for \C:
    8: NeedsSDT
+
+Interprocedural Constraints for \C:
+  ClassInterConstraintProofOfConcept
+
 

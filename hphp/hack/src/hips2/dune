@@ -1,0 +1,10 @@
+(library
+ (name hips2)
+ (wrapped true) ; only hips2.mli is visible
+ (flags
+  (:standard -linkall))
+ (libraries
+  core_kernel
+  utils_core)
+  (preprocess
+  (pps visitors.ppx ppx_deriving.std)))

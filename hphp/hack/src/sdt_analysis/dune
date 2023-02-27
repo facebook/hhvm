@@ -17,6 +17,7 @@
   tast_env
   typing_ast
   typing_defs
-  typing_env_types)
+  typing_env_types
+  hips2)
  (preprocess
   (pps visitors.ppx ppx_deriving.std)))

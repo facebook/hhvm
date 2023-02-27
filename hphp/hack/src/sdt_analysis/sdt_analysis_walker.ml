@@ -37,26 +37,23 @@ let remove_supportdyn_from_ty ty =
   | T.Tnewtype (c, [ty], _) when String.equal c SN.Classes.cSupportDyn -> ty
   | _ -> ty
 
-let collect_sdts =
+let tast_handler writer =
   object
-    inherit [_] Tast_visitor.reduce as super
+    inherit Tast_visitor.handler_base
 
-    method zero = []
-
-    method plus = ( @ )
-
-    method! on_expr env ((_, e_pos, e_) as e) =
+    method! at_expr env (_, e_pos, e_) =
       let decorated_constraint ~origin =
         DecoratedConstraint.
           { origin; hack_pos = e_pos; constraint_ = Constraint.NeedsSDT }
       in
-      let ids =
+      let id_constraint_pairs =
         match e_ with
         | A.Call ((base_ty, _, base_exp), _tel, el, _unpacked_el) ->
           let doesnt_subtype (fp, (_, (arg_ty, _, _))) =
             not @@ Tast_env.is_sub_type env arg_ty fp.T.fp_type.T.et_type
           in
-          let constraints_of_id id =
+          let constraints_of_class_sid sid =
+            let id = (H.Class, sid) in
             let ty = remove_supportdyn_from_ty base_ty in
             match T.get_node ty with
             | T.Tfun ft ->
@@ -68,34 +65,39 @@ let collect_sdts =
               in
               if List.exists ~f:doesnt_subtype param_arg_pairs then
                 let constraint_ = decorated_constraint ~origin:__LINE__ in
-                [(id, DecoratedConstraint.Set.singleton constraint_)]
+                [(id, constraint_)]
               else
                 []
             | _ -> []
           in
           begin
             match base_exp with
-            | A.Id (_, id) -> constraints_of_id id
+            | A.Id (_, sid) -> constraints_of_class_sid sid
             | A.Obj_get ((receiver_ty, _, _), _, _, _) -> begin
               match T.get_node receiver_ty with
-              | T.Tclass ((_, id), _, _) -> constraints_of_id id
+              | T.Tclass ((_, sid), _, _) -> constraints_of_class_sid sid
               | _ -> []
             end
-            | A.Class_const ((_, _, A.CI (_, id)), _) -> constraints_of_id id
+            | A.Class_const ((_, _, A.CI (_, sid)), _) ->
+              constraints_of_class_sid sid
             | _ -> []
           end
         | _ -> []
       in
-      ids @ super#on_expr env e
+      id_constraint_pairs
+      |> List.iter ~f:(fun (id, constraint_) ->
+             H.Write.add_intra writer id constraint_)
 
-    method! on_fun_def env (A.{ fd_name = (_, id); fd_fun; _ } as fd) =
+    method! at_fun_def env A.{ fd_name = (_, sid); fd_fun; _ } : unit =
+      let id = (H.Function, sid) in
+      H.Write.add_id writer id;
       let env = remove_supportdyn_of_mixed_upper_bound_from_tparams env in
       let decorated_constraint ~origin =
         let hack_pos = fd_fun.A.f_span in
         DecoratedConstraint.
           { origin; hack_pos; constraint_ = Constraint.NeedsSDT }
       in
-      let ids_through_dynamically_callable =
+      let from_dynamically_callable =
         let is_dynamically_callable =
           List.exists ~f:(fun attr ->
               String.equal
@@ -104,11 +106,11 @@ let collect_sdts =
         in
         if is_dynamically_callable fd_fun.A.f_user_attributes then
           let constraint_ = decorated_constraint ~origin:__LINE__ in
-          [(id, DecoratedConstraint.Set.singleton constraint_)]
+          [(id, constraint_)]
         else
           []
       in
-      let ids_through_signature_check =
+      let from_signature_check =
         let is_supportdyn_of_mixed ty =
           Tast_env.is_sub_type env ty supportdyn_of_mixed
         in
@@ -119,18 +121,17 @@ let collect_sdts =
         in
         if fails_formation then
           let constraint_ = decorated_constraint ~origin:__LINE__ in
-          [(id, DecoratedConstraint.Set.singleton constraint_)]
+          [(id, constraint_)]
         else
           []
       in
-      ids_through_dynamically_callable
-      @ ids_through_signature_check
-      @ super#on_fun_def env fd
-  end
 
-let program () (ctx : Provider_context.t) (tast : Tast.program) =
-  let def def =
-    let tast_env = Tast_env.def_env ctx def in
-    collect_sdts#on_def tast_env def
-  in
-  List.concat_map ~f:def tast |> SMap.of_list
+      from_dynamically_callable @ from_signature_check
+      |> List.iter ~f:(fun (id, constraint_) ->
+             H.Write.add_intra writer id constraint_)
+
+    method! at_class_ _ A.{ c_name = (_, sid); _ } =
+      let id = (H.Class, sid) in
+      H.Write.add_id writer id;
+      H.Write.add_inter writer id H.ClassInterConstraintProofOfConcept
+  end

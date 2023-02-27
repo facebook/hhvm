@@ -3,19 +3,27 @@
 
 <<file:__EnableUnstableFeatures('packages')>>
 
-package a {
+package pkg1 {
   use {
-    x,
-    y.*,
-    global
+    a,
+    b.*
   }
 }
 
-package b {
+package pkg2 {
   include {
-    a
+    pkg1
   }
   use {
-    y.z
+    b.b1
+  }
+}
+
+package pkg3 {
+  include {
+    pkg2
+  }
+  use {
+    c
   }
 }

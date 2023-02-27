@@ -11,9 +11,14 @@ open Hh_prelude
 module Walker = Sdt_analysis_walker
 module PP = Sdt_analysis_pretty_printer
 
+let sid_of_id = function
+  | H.Class sid -> sid
+  | H.Function sid -> sid
+
 let do_ (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
   let Options.{ command; verbosity } = options in
-  let print_intra_constraints (_id_kind, sid) intra_constraints =
+  let print_intra_constraints id intra_constraints =
+    let sid = sid_of_id id in
     if not @@ HashSet.is_empty intra_constraints then (
       let open DecoratedConstraint in
       Format.printf "Intraprocedural Constraints for %s:\n" sid;
@@ -25,7 +30,8 @@ let do_ (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
       Format.printf "\n%!"
     )
   in
-  let print_inter_constraints (_id_kind, sid) inter_constraints =
+  let print_inter_constraints id inter_constraints =
+    let sid = sid_of_id id in
     if not @@ HashSet.is_empty inter_constraints then
       Format.printf "Interprocedural Constraints for %s:\n" sid;
     inter_constraints

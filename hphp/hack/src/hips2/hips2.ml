@@ -12,20 +12,15 @@ module Make (Intra : Intra) :
   T with type intra_constraint_ = Intra.constraint_ = struct
   type intra_constraint_ = Intra.constraint_
 
-  type 'a lookup = {
-    by_class: (string, 'a HashSet.t) Hashtbl.t;
-    by_function: (string, 'a HashSet.t) Hashtbl.t;
-  }
-
-  type id_kind =
-    | Class
-    | Function
-  [@@deriving ord, show { with_path = false }]
-
-  type id = id_kind * string [@@deriving ord, show { with_path = false }]
+  type id =
+    | Class of string
+    | Function of string
+  [@@deriving hash, ord, sexp, show { with_path = false }]
 
   type inter_constraint_ = ClassExtends of id
   [@@deriving show { with_path = false }]
+
+  type 'a lookup = (id, 'a HashSet.t) Hashtbl.t
 
   type t = {
     intras: Intra.constraint_ lookup;
@@ -36,21 +31,11 @@ module Make (Intra : Intra) :
     | Intra : Intra.constraint_ constraint_kind
     | Inter : inter_constraint_ constraint_kind
 
-  let id_of_class_sid sid = (Class, sid)
-
-  let id_of_function_sid sid = (Function, sid)
-
-  let find_tbl { by_class; by_function } id_kind =
-    match id_kind with
-    | Class -> by_class
-    | Function -> by_function
-
   (** preserves invariant that `intra` and `inter` have the same set of keys *)
   let find_set : type a. t -> a constraint_kind -> id -> a HashSet.t =
-   fun { inters; intras } lookup_kind (id_kind, sid) ->
-    let find' lookup =
-      let tbl = find_tbl lookup id_kind in
-      Hashtbl.find_or_add tbl sid ~default:(fun _ -> HashSet.create ())
+   fun { inters; intras } lookup_kind id ->
+    let find' tbl =
+      Hashtbl.find_or_add tbl id ~default:(fun _ -> HashSet.create ())
     in
     let inter_set = find' inters in
     let intra_set = find' intras in
@@ -59,23 +44,22 @@ module Make (Intra : Intra) :
     | Intra -> intra_set
 
   let create_lookup () : 'a lookup =
-    {
-      by_class = Hashtbl.create ~size:1000 (module Base.String);
-      by_function = Hashtbl.create ~size:1000 (module Base.String);
-    }
+    Hashtbl.create
+      ~size:1000
+      (module struct
+        type t = id [@@deriving hash, ord, sexp]
+
+        (* Hack for bug in buck2 integration: T92019055 *)
+        let hash : t -> int = Obj.magic hash
+      end)
 
   let get_inters t id = find_set t Inter id
 
   let get_intras t id = find_set t Intra id
 
-  let get_keys { intras = { by_function; by_class }; _ } : id Sequence.t =
+  let get_keys { intras; _ } : id Sequence.t =
     (* OK to only read `intras` due to invariant of `find_set` *)
-    let keys_of_tbl id_of_sid tbl : id Sequence.t =
-      tbl |> Hashtbl.keys |> Sequence.of_list |> Sequence.map ~f:id_of_sid
-    in
-    Sequence.append
-      (keys_of_tbl id_of_function_sid by_function)
-      (keys_of_tbl id_of_class_sid by_class)
+    intras |> Hashtbl.keys |> Sequence.of_list
 
   let all_inter_constraints t =
     get_keys t

@@ -7,4 +7,4 @@
   core_kernel
   utils_core)
   (preprocess
-  (pps visitors.ppx ppx_deriving.std)))
+  (pps visitors.ppx ppx_deriving.std ppx_hash ppx_sexp_conv)))

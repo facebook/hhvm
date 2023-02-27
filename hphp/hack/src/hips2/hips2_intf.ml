@@ -17,12 +17,10 @@ end
 module type T = sig
   type intra_constraint_
 
-  type id_kind =
-    | Class
-    | Function
+  type id =
+    | Class of string
+    | Function of string
   [@@deriving ord, show { with_path = false }]
-
-  type id = id_kind * string [@@deriving ord, show { with_path = false }]
 
   type inter_constraint_ = ClassExtends of id
   [@@deriving show { with_path = false }]

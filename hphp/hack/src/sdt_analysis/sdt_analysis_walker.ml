@@ -53,7 +53,7 @@ let tast_handler writer =
             not @@ Tast_env.is_sub_type env arg_ty fp.T.fp_type.T.et_type
           in
           let constraints_of_class_sid sid =
-            let id = (H.Class, sid) in
+            let id = H.Class sid in
             let ty = remove_supportdyn_from_ty base_ty in
             match T.get_node ty with
             | T.Tfun ft ->
@@ -89,7 +89,7 @@ let tast_handler writer =
              H.Write.add_intra writer id constraint_)
 
     method! at_fun_def env A.{ fd_name = (_, sid); fd_fun; _ } : unit =
-      let id = (H.Function, sid) in
+      let id = H.Function sid in
       H.Write.add_id writer id;
       let env = remove_supportdyn_of_mixed_upper_bound_from_tparams env in
       let decorated_constraint ~origin =
@@ -131,13 +131,13 @@ let tast_handler writer =
              H.Write.add_intra writer id constraint_)
 
     method! at_class_ _ A.{ c_name = (_, sid); c_extends; _ } =
-      let id = (H.Class, sid) in
+      let id = H.Class sid in
       H.Write.add_id writer id;
 
       let at_extends (_, hint_) =
         match hint_ with
         | A.Happly ((_, parent_sid), _hints) ->
-          let parent_id = (H.Class, parent_sid) in
+          let parent_id = H.Class parent_sid in
           H.Write.add_inter writer id (H.ClassExtends parent_id)
         | _ -> ()
       in

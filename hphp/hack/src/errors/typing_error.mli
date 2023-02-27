@@ -907,13 +907,6 @@ module Primary : sig
         meth_name: string;
         decl_pos: Pos_or_decl.t;
       }
-    | Unnecessary_attribute of {
-        pos: Pos.t;
-        attr: string;
-        class_pos: Pos.t;
-        class_name: string;
-        suggestion: string option;
-      }
     | Inherited_class_member_with_different_case of {
         pos: Pos.t;
         member_type: string;

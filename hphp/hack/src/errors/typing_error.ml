@@ -2179,13 +2179,6 @@ module Primary = struct
         meth_name: string;
         decl_pos: Pos_or_decl.t;
       }
-    | Unnecessary_attribute of {
-        pos: Pos.t;
-        attr: string;
-        class_pos: Pos.t;
-        class_name: string;
-        suggestion: string option;
-      }
     | Inherited_class_member_with_different_case of {
         pos: Pos.t;
         member_type: string;
@@ -4180,31 +4173,6 @@ module Primary = struct
       lazy [(decl_pos, "Declaration is here")],
       [] )
 
-  let unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion =
-    let class_name = Utils.strip_ns class_name in
-    let reason =
-      lazy (class_pos, sprintf "the class `%s` is final" class_name)
-    in
-    let reason =
-      Lazy.map reason ~f:(fun (reason_pos, reason_msg) ->
-          let suggestion =
-            match suggestion with
-            | None -> "Try deleting this attribute"
-            | Some s -> s
-          in
-          [
-            ( Pos_or_decl.of_raw_pos reason_pos,
-              "It is unnecessary because " ^ reason_msg );
-            (Pos_or_decl.of_raw_pos pos, suggestion);
-          ])
-    in
-    ( Error_code.UnnecessaryAttribute,
-      lazy
-        ( pos,
-          sprintf "The attribute `%s` is unnecessary" @@ Render.strip_ns attr ),
-      reason,
-      [] )
-
   let inherited_class_member_with_different_case
       member_type name name_prev p child_class prev_class prev_class_pos =
     let name = Render.strip_ns name in
@@ -5921,8 +5889,6 @@ module Primary = struct
         const_name
     | Abstract_function_pointer { pos; class_name; meth_name; decl_pos } ->
       abstract_function_pointer class_name meth_name pos decl_pos
-    | Unnecessary_attribute { pos; attr; class_pos; class_name; suggestion } ->
-      unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion
     | Inherited_class_member_with_different_case
         {
           pos;

@@ -37,11 +37,9 @@ let unnecessary_lsb c cv =
   | Some pos ->
     let (class_pos, class_name) = c.c_name in
     let suggestion = None in
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Unnecessary_attribute
-             { pos; attr; class_pos; class_name; suggestion })
+    Errors.add_naming_error
+      (Naming_error.Unnecessary_attribute
+         { pos; attr; class_pos; class_name; suggestion })
 
 let handler =
   object

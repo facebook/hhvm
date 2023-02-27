@@ -272,6 +272,13 @@ type t =
       pos: Pos.t;
       fn_name: string;
     }
+  | Unnecessary_attribute of {
+      pos: Pos.t;
+      attr: string;
+      class_pos: Pos.t;
+      class_name: string;
+      suggestion: string option;
+    }
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -1178,6 +1185,28 @@ let deprecated_use pos fn_name =
   in
   User_error.make Error_codes.Typing.(to_enum DeprecatedUse) (pos, msg) []
 
+let unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion =
+  let class_name = Utils.strip_ns class_name in
+  let (reason_pos, reason_msg) =
+    (class_pos, sprintf "the class `%s` is final" class_name)
+  in
+  let reason =
+    let suggestion =
+      match suggestion with
+      | None -> "Try deleting this attribute"
+      | Some s -> s
+    in
+    [
+      ( Pos_or_decl.of_raw_pos reason_pos,
+        "It is unnecessary because " ^ reason_msg );
+      (Pos_or_decl.of_raw_pos pos, suggestion);
+    ]
+  in
+  User_error.make
+    Error_codes.Typing.(to_enum UnnecessaryAttribute)
+    (pos, sprintf "The attribute `%s` is unnecessary" @@ Render.strip_ns attr)
+    reason
+
 let to_user_error = function
   | Unsupported_trait_use_as pos -> unsupported_trait_use_as pos
   | Unsupported_instead_of pos -> unsupported_instead_of pos
@@ -1314,3 +1343,5 @@ let to_user_error = function
   | Type_constant_in_enum_class_outside_allowed_locations pos ->
     type_constant_in_enum_class_outside_allowed_locations pos
   | Deprecated_use { pos; fn_name } -> deprecated_use pos fn_name
+  | Unnecessary_attribute { pos; attr; class_pos; class_name; suggestion } ->
+    unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion

@@ -263,6 +263,13 @@ type t =
       pos: Pos.t;
       fn_name: string;
     }
+  | Unnecessary_attribute of {
+      pos: Pos.t;
+      attr: string;
+      class_pos: Pos.t;
+      class_name: string;
+      suggestion: string option;
+    }
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.Naming

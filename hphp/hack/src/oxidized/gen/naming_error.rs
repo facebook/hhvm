@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<504e15e244a5d8981ff9a9c246a69b7f>>
+// @generated SignedSource<<56408caba4bcef922e41d8c4061e533e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -386,4 +386,12 @@ pub enum NamingError {
     TypeConstantInEnumClassOutsideAllowedLocations(pos::Pos),
     #[rust_to_ocaml(name = "Deprecated_use")]
     DeprecatedUse { pos: pos::Pos, fn_name: String },
+    #[rust_to_ocaml(name = "Unnecessary_attribute")]
+    UnnecessaryAttribute {
+        pos: pos::Pos,
+        attr: String,
+        class_pos: pos::Pos,
+        class_name: String,
+        suggestion: Option<String>,
+    },
 }

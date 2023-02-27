@@ -40,12 +40,6 @@ module Make (Intra : Intra) :
 
   let id_of_function_sid sid = (Function, sid)
 
-  let create_lookup () : 'a lookup =
-    {
-      by_class = Hashtbl.Poly.create ~size:1000 ();
-      by_function = Hashtbl.Poly.create ~size:1000 ();
-    }
-
   let find_tbl { by_class; by_function } id_kind =
     match id_kind with
     | Class -> by_class
@@ -63,6 +57,12 @@ module Make (Intra : Intra) :
     match lookup_kind with
     | Inter -> inter_set
     | Intra -> intra_set
+
+  let create_lookup () : 'a lookup =
+    {
+      by_class = Hashtbl.create ~size:1000 (module Base.String);
+      by_function = Hashtbl.create ~size:1000 (module Base.String);
+    }
 
   let get_inters t id = find_set t Inter id
 

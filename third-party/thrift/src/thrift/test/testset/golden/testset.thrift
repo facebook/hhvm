@@ -2,6 +2,7 @@
 # @generated
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/hack.thrift"
 include "thrift/annotation/java.thrift"
 include "thrift/annotation/python.thrift"
 include "thrift/annotation/thrift.thrift"
@@ -2056,252 +2057,294 @@ struct struct_adapted_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_bool'}
   1: bool field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_bool")
 struct struct_adapted_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_byte'}
   1: byte field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_byte")
 struct struct_adapted_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i16'}
   1: i16 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_i16")
 struct struct_adapted_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i32'}
   1: i32 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_i32")
 struct struct_adapted_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i64'}
   1: i64 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_i64")
 struct struct_adapted_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_float'}
   1: float field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_float")
 struct struct_adapted_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_double'}
   1: double field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_double")
 struct struct_adapted_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_binary'}
   1: binary field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_binary")
 struct struct_adapted_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_string'}
   1: string field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_string")
 struct struct_adapted_list_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_bool'}
   1: list<bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_bool")
 struct struct_adapted_list_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_byte'}
   1: list<byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_byte")
 struct struct_adapted_list_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i16'}
   1: list<i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_i16")
 struct struct_adapted_list_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i32'}
   1: list<i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_i32")
 struct struct_adapted_list_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i64'}
   1: list<i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_i64")
 struct struct_adapted_list_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_float'}
   1: list<float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_float")
 struct struct_adapted_list_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_double'}
   1: list<double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_double")
 struct struct_adapted_list_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_binary'}
   1: list<binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_binary")
 struct struct_adapted_list_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_string'}
   1: list<string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_string")
 struct struct_adapted_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
   1: set<string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_set_string")
 struct struct_adapted_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i64'}
   1: set<i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_set_i64")
 struct struct_adapted_map_string_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_bool'}
   1: map<string, bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_bool")
 struct struct_adapted_map_string_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_byte'}
   1: map<string, byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_byte")
 struct struct_adapted_map_string_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i16'}
   1: map<string, i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_i16")
 struct struct_adapted_map_string_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i32'}
   1: map<string, i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_i32")
 struct struct_adapted_map_string_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i64'}
   1: map<string, i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_i64")
 struct struct_adapted_map_string_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_float'}
   1: map<string, float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_float")
 struct struct_adapted_map_string_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_double'}
   1: map<string, double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_double")
 struct struct_adapted_map_string_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_binary'}
   1: map<string, binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_binary")
 struct struct_adapted_map_string_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_string'}
   1: map<string, string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_string")
 struct struct_adapted_map_i64_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_bool'}
   1: map<i64, bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_bool")
 struct struct_adapted_map_i64_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_byte'}
   1: map<i64, byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_byte")
 struct struct_adapted_map_i64_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i16'}
   1: map<i64, i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_i16")
 struct struct_adapted_map_i64_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i32'}
   1: map<i64, i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_i32")
 struct struct_adapted_map_i64_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i64'}
   1: map<i64, i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_i64")
 struct struct_adapted_map_i64_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_float'}
   1: map<i64, float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_float")
 struct struct_adapted_map_i64_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_double'}
   1: map<i64, double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_double")
 struct struct_adapted_map_i64_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_binary'}
   1: map<i64, binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_binary")
 struct struct_adapted_map_i64_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_string'}
   1: map<i64, string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_string")
 struct struct_adapted_map_string_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
   1: map<string, set<string>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_set_string")
 struct struct_adapted_map_string_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i64'}
   1: map<string, set<i64>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_set_i64")
 struct struct_adapted_map_i64_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
   1: map<i64, set<string>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_set_string")
 struct struct_adapted_map_i64_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i64'}
   1: map<i64, set<i64>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_set_i64")
 struct struct_list_bool_lazy {
@@ -5019,6 +5062,7 @@ struct struct_adapted_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_bool'}
   1: bool field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_bool_op_encoded")
 @cpp.UseOpEncode
@@ -5026,6 +5070,7 @@ struct struct_adapted_byte_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_byte'}
   1: byte field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_byte_op_encoded")
 @cpp.UseOpEncode
@@ -5033,6 +5078,7 @@ struct struct_adapted_i16_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i16'}
   1: i16 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_i16_op_encoded")
 @cpp.UseOpEncode
@@ -5040,6 +5086,7 @@ struct struct_adapted_i32_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i32'}
   1: i32 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_i32_op_encoded")
 @cpp.UseOpEncode
@@ -5047,6 +5094,7 @@ struct struct_adapted_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i64'}
   1: i64 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_i64_op_encoded")
 @cpp.UseOpEncode
@@ -5054,6 +5102,7 @@ struct struct_adapted_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_float'}
   1: float field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_float_op_encoded")
 @cpp.UseOpEncode
@@ -5061,6 +5110,7 @@ struct struct_adapted_double_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_double'}
   1: double field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_double_op_encoded")
 @cpp.UseOpEncode
@@ -5068,6 +5118,7 @@ struct struct_adapted_binary_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_binary'}
   1: binary field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_binary_op_encoded")
 @cpp.UseOpEncode
@@ -5075,6 +5126,7 @@ struct struct_adapted_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_string'}
   1: string field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_string_op_encoded")
 @cpp.UseOpEncode
@@ -5082,6 +5134,7 @@ struct struct_adapted_list_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_bool'}
   1: list<bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_bool_op_encoded")
 @cpp.UseOpEncode
@@ -5089,6 +5142,7 @@ struct struct_adapted_list_byte_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_byte'}
   1: list<byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_byte_op_encoded")
 @cpp.UseOpEncode
@@ -5096,6 +5150,7 @@ struct struct_adapted_list_i16_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i16'}
   1: list<i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_i16_op_encoded")
 @cpp.UseOpEncode
@@ -5103,6 +5158,7 @@ struct struct_adapted_list_i32_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i32'}
   1: list<i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_i32_op_encoded")
 @cpp.UseOpEncode
@@ -5110,6 +5166,7 @@ struct struct_adapted_list_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i64'}
   1: list<i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_i64_op_encoded")
 @cpp.UseOpEncode
@@ -5117,6 +5174,7 @@ struct struct_adapted_list_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_float'}
   1: list<float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_float_op_encoded")
 @cpp.UseOpEncode
@@ -5124,6 +5182,7 @@ struct struct_adapted_list_double_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_double'}
   1: list<double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_double_op_encoded")
 @cpp.UseOpEncode
@@ -5131,6 +5190,7 @@ struct struct_adapted_list_binary_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_binary'}
   1: list<binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_binary_op_encoded")
 @cpp.UseOpEncode
@@ -5138,6 +5198,7 @@ struct struct_adapted_list_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_string'}
   1: list<string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_list_string_op_encoded")
 @cpp.UseOpEncode
@@ -5145,6 +5206,7 @@ struct struct_adapted_set_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
   1: set<string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_set_string_op_encoded")
 @cpp.UseOpEncode
@@ -5152,6 +5214,7 @@ struct struct_adapted_set_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i64'}
   1: set<i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_set_i64_op_encoded")
 @cpp.UseOpEncode
@@ -5159,6 +5222,7 @@ struct struct_adapted_map_string_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_bool'}
   1: map<string, bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_bool_op_encoded")
 @cpp.UseOpEncode
@@ -5166,6 +5230,7 @@ struct struct_adapted_map_string_byte_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_byte'}
   1: map<string, byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_byte_op_encoded")
 @cpp.UseOpEncode
@@ -5173,6 +5238,7 @@ struct struct_adapted_map_string_i16_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i16'}
   1: map<string, i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_i16_op_encoded")
 @cpp.UseOpEncode
@@ -5180,6 +5246,7 @@ struct struct_adapted_map_string_i32_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i32'}
   1: map<string, i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_i32_op_encoded")
 @cpp.UseOpEncode
@@ -5187,6 +5254,7 @@ struct struct_adapted_map_string_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i64'}
   1: map<string, i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_i64_op_encoded")
 @cpp.UseOpEncode
@@ -5194,6 +5262,7 @@ struct struct_adapted_map_string_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_float'}
   1: map<string, float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_float_op_encoded")
 @cpp.UseOpEncode
@@ -5201,6 +5270,7 @@ struct struct_adapted_map_string_double_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_double'}
   1: map<string, double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_double_op_encoded")
 @cpp.UseOpEncode
@@ -5208,6 +5278,7 @@ struct struct_adapted_map_string_binary_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_binary'}
   1: map<string, binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_binary_op_encoded")
 @cpp.UseOpEncode
@@ -5215,6 +5286,7 @@ struct struct_adapted_map_string_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_string'}
   1: map<string, string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_string_op_encoded")
 @cpp.UseOpEncode
@@ -5222,6 +5294,7 @@ struct struct_adapted_map_i64_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_bool'}
   1: map<i64, bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_bool_op_encoded")
 @cpp.UseOpEncode
@@ -5229,6 +5302,7 @@ struct struct_adapted_map_i64_byte_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_byte'}
   1: map<i64, byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_byte_op_encoded")
 @cpp.UseOpEncode
@@ -5236,6 +5310,7 @@ struct struct_adapted_map_i64_i16_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i16'}
   1: map<i64, i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_i16_op_encoded")
 @cpp.UseOpEncode
@@ -5243,6 +5318,7 @@ struct struct_adapted_map_i64_i32_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i32'}
   1: map<i64, i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_i32_op_encoded")
 @cpp.UseOpEncode
@@ -5250,6 +5326,7 @@ struct struct_adapted_map_i64_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i64'}
   1: map<i64, i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_i64_op_encoded")
 @cpp.UseOpEncode
@@ -5257,6 +5334,7 @@ struct struct_adapted_map_i64_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_float'}
   1: map<i64, float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_float_op_encoded")
 @cpp.UseOpEncode
@@ -5264,6 +5342,7 @@ struct struct_adapted_map_i64_double_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_double'}
   1: map<i64, double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_double_op_encoded")
 @cpp.UseOpEncode
@@ -5271,6 +5350,7 @@ struct struct_adapted_map_i64_binary_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_binary'}
   1: map<i64, binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_binary_op_encoded")
 @cpp.UseOpEncode
@@ -5278,6 +5358,7 @@ struct struct_adapted_map_i64_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_string'}
   1: map<i64, string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_string_op_encoded")
 @cpp.UseOpEncode
@@ -5285,6 +5366,7 @@ struct struct_adapted_map_string_set_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
   1: map<string, set<string>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_set_string_op_encoded")
 @cpp.UseOpEncode
@@ -5292,6 +5374,7 @@ struct struct_adapted_map_string_set_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i64'}
   1: map<string, set<i64>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_string_set_i64_op_encoded")
 @cpp.UseOpEncode
@@ -5299,6 +5382,7 @@ struct struct_adapted_map_i64_set_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
   1: map<i64, set<string>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_set_string_op_encoded")
 @cpp.UseOpEncode
@@ -5306,6 +5390,7 @@ struct struct_adapted_map_i64_set_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i64'}
   1: map<i64, set<i64>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_adapted_map_i64_set_i64_op_encoded")
 @cpp.UseOpEncode
@@ -7518,252 +7603,294 @@ exception exception_adapted_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_bool'}
   1: bool field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_bool")
 exception exception_adapted_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_byte'}
   1: byte field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_byte")
 exception exception_adapted_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i16'}
   1: i16 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_i16")
 exception exception_adapted_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i32'}
   1: i32 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_i32")
 exception exception_adapted_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i64'}
   1: i64 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_i64")
 exception exception_adapted_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_float'}
   1: float field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_float")
 exception exception_adapted_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_double'}
   1: double field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_double")
 exception exception_adapted_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_binary'}
   1: binary field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_binary")
 exception exception_adapted_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_string'}
   1: string field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_string")
 exception exception_adapted_list_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_bool'}
   1: list<bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_bool")
 exception exception_adapted_list_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_byte'}
   1: list<byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_byte")
 exception exception_adapted_list_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i16'}
   1: list<i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_i16")
 exception exception_adapted_list_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i32'}
   1: list<i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_i32")
 exception exception_adapted_list_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i64'}
   1: list<i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_i64")
 exception exception_adapted_list_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_float'}
   1: list<float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_float")
 exception exception_adapted_list_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_double'}
   1: list<double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_double")
 exception exception_adapted_list_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_binary'}
   1: list<binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_binary")
 exception exception_adapted_list_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_string'}
   1: list<string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_string")
 exception exception_adapted_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
   1: set<string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_set_string")
 exception exception_adapted_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i64'}
   1: set<i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_set_i64")
 exception exception_adapted_map_string_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_bool'}
   1: map<string, bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_bool")
 exception exception_adapted_map_string_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_byte'}
   1: map<string, byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_byte")
 exception exception_adapted_map_string_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i16'}
   1: map<string, i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_i16")
 exception exception_adapted_map_string_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i32'}
   1: map<string, i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_i32")
 exception exception_adapted_map_string_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i64'}
   1: map<string, i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_i64")
 exception exception_adapted_map_string_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_float'}
   1: map<string, float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_float")
 exception exception_adapted_map_string_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_double'}
   1: map<string, double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_double")
 exception exception_adapted_map_string_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_binary'}
   1: map<string, binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_binary")
 exception exception_adapted_map_string_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_string'}
   1: map<string, string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_string")
 exception exception_adapted_map_i64_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_bool'}
   1: map<i64, bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_bool")
 exception exception_adapted_map_i64_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_byte'}
   1: map<i64, byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_byte")
 exception exception_adapted_map_i64_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i16'}
   1: map<i64, i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_i16")
 exception exception_adapted_map_i64_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i32'}
   1: map<i64, i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_i32")
 exception exception_adapted_map_i64_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i64'}
   1: map<i64, i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_i64")
 exception exception_adapted_map_i64_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_float'}
   1: map<i64, float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_float")
 exception exception_adapted_map_i64_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_double'}
   1: map<i64, double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_double")
 exception exception_adapted_map_i64_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_binary'}
   1: map<i64, binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_binary")
 exception exception_adapted_map_i64_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_string'}
   1: map<i64, string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_string")
 exception exception_adapted_map_string_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
   1: map<string, set<string>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_set_string")
 exception exception_adapted_map_string_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i64'}
   1: map<string, set<i64>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_set_i64")
 exception exception_adapted_map_i64_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
   1: map<i64, set<string>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_set_string")
 exception exception_adapted_map_i64_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i64'}
   1: map<i64, set<i64>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_set_i64")
 exception exception_list_bool_lazy {
@@ -10481,6 +10608,7 @@ exception exception_adapted_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_bool'}
   1: bool field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_bool_op_encoded")
 @cpp.UseOpEncode
@@ -10488,6 +10616,7 @@ exception exception_adapted_byte_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_byte'}
   1: byte field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_byte_op_encoded")
 @cpp.UseOpEncode
@@ -10495,6 +10624,7 @@ exception exception_adapted_i16_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i16'}
   1: i16 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_i16_op_encoded")
 @cpp.UseOpEncode
@@ -10502,6 +10632,7 @@ exception exception_adapted_i32_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i32'}
   1: i32 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_i32_op_encoded")
 @cpp.UseOpEncode
@@ -10509,6 +10640,7 @@ exception exception_adapted_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_i64'}
   1: i64 field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_i64_op_encoded")
 @cpp.UseOpEncode
@@ -10516,6 +10648,7 @@ exception exception_adapted_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_float'}
   1: float field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_float_op_encoded")
 @cpp.UseOpEncode
@@ -10523,6 +10656,7 @@ exception exception_adapted_double_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_double'}
   1: double field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_double_op_encoded")
 @cpp.UseOpEncode
@@ -10530,6 +10664,7 @@ exception exception_adapted_binary_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_binary'}
   1: binary field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_binary_op_encoded")
 @cpp.UseOpEncode
@@ -10537,6 +10672,7 @@ exception exception_adapted_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_string'}
   1: string field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_string_op_encoded")
 @cpp.UseOpEncode
@@ -10544,6 +10680,7 @@ exception exception_adapted_list_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_bool'}
   1: list<bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_bool_op_encoded")
 @cpp.UseOpEncode
@@ -10551,6 +10688,7 @@ exception exception_adapted_list_byte_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_byte'}
   1: list<byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_byte_op_encoded")
 @cpp.UseOpEncode
@@ -10558,6 +10696,7 @@ exception exception_adapted_list_i16_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i16'}
   1: list<i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_i16_op_encoded")
 @cpp.UseOpEncode
@@ -10565,6 +10704,7 @@ exception exception_adapted_list_i32_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i32'}
   1: list<i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_i32_op_encoded")
 @cpp.UseOpEncode
@@ -10572,6 +10712,7 @@ exception exception_adapted_list_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_i64'}
   1: list<i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_i64_op_encoded")
 @cpp.UseOpEncode
@@ -10579,6 +10720,7 @@ exception exception_adapted_list_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_float'}
   1: list<float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_float_op_encoded")
 @cpp.UseOpEncode
@@ -10586,6 +10728,7 @@ exception exception_adapted_list_double_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_double'}
   1: list<double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_double_op_encoded")
 @cpp.UseOpEncode
@@ -10593,6 +10736,7 @@ exception exception_adapted_list_binary_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_binary'}
   1: list<binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_binary_op_encoded")
 @cpp.UseOpEncode
@@ -10600,6 +10744,7 @@ exception exception_adapted_list_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_list_string'}
   1: list<string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_list_string_op_encoded")
 @cpp.UseOpEncode
@@ -10607,6 +10752,7 @@ exception exception_adapted_set_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
   1: set<string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_set_string_op_encoded")
 @cpp.UseOpEncode
@@ -10614,6 +10760,7 @@ exception exception_adapted_set_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_set_i64'}
   1: set<i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_set_i64_op_encoded")
 @cpp.UseOpEncode
@@ -10621,6 +10768,7 @@ exception exception_adapted_map_string_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_bool'}
   1: map<string, bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_bool_op_encoded")
 @cpp.UseOpEncode
@@ -10628,6 +10776,7 @@ exception exception_adapted_map_string_byte_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_byte'}
   1: map<string, byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_byte_op_encoded")
 @cpp.UseOpEncode
@@ -10635,6 +10784,7 @@ exception exception_adapted_map_string_i16_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i16'}
   1: map<string, i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_i16_op_encoded")
 @cpp.UseOpEncode
@@ -10642,6 +10792,7 @@ exception exception_adapted_map_string_i32_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i32'}
   1: map<string, i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_i32_op_encoded")
 @cpp.UseOpEncode
@@ -10649,6 +10800,7 @@ exception exception_adapted_map_string_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i64'}
   1: map<string, i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_i64_op_encoded")
 @cpp.UseOpEncode
@@ -10656,6 +10808,7 @@ exception exception_adapted_map_string_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_float'}
   1: map<string, float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_float_op_encoded")
 @cpp.UseOpEncode
@@ -10663,6 +10816,7 @@ exception exception_adapted_map_string_double_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_double'}
   1: map<string, double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_double_op_encoded")
 @cpp.UseOpEncode
@@ -10670,6 +10824,7 @@ exception exception_adapted_map_string_binary_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_binary'}
   1: map<string, binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_binary_op_encoded")
 @cpp.UseOpEncode
@@ -10677,6 +10832,7 @@ exception exception_adapted_map_string_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_string'}
   1: map<string, string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_string_op_encoded")
 @cpp.UseOpEncode
@@ -10684,6 +10840,7 @@ exception exception_adapted_map_i64_bool_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_bool'}
   1: map<i64, bool> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_bool_op_encoded")
 @cpp.UseOpEncode
@@ -10691,6 +10848,7 @@ exception exception_adapted_map_i64_byte_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_byte'}
   1: map<i64, byte> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_byte_op_encoded")
 @cpp.UseOpEncode
@@ -10698,6 +10856,7 @@ exception exception_adapted_map_i64_i16_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i16'}
   1: map<i64, i16> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_i16_op_encoded")
 @cpp.UseOpEncode
@@ -10705,6 +10864,7 @@ exception exception_adapted_map_i64_i32_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i32'}
   1: map<i64, i32> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_i32_op_encoded")
 @cpp.UseOpEncode
@@ -10712,6 +10872,7 @@ exception exception_adapted_map_i64_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i64'}
   1: map<i64, i64> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_i64_op_encoded")
 @cpp.UseOpEncode
@@ -10719,6 +10880,7 @@ exception exception_adapted_map_i64_float_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_float'}
   1: map<i64, float> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_float_op_encoded")
 @cpp.UseOpEncode
@@ -10726,6 +10888,7 @@ exception exception_adapted_map_i64_double_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_double'}
   1: map<i64, double> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_double_op_encoded")
 @cpp.UseOpEncode
@@ -10733,6 +10896,7 @@ exception exception_adapted_map_i64_binary_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_binary'}
   1: map<i64, binary> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_binary_op_encoded")
 @cpp.UseOpEncode
@@ -10740,6 +10904,7 @@ exception exception_adapted_map_i64_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_string'}
   1: map<i64, string> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_string_op_encoded")
 @cpp.UseOpEncode
@@ -10747,6 +10912,7 @@ exception exception_adapted_map_string_set_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
   1: map<string, set<string>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_set_string_op_encoded")
 @cpp.UseOpEncode
@@ -10754,6 +10920,7 @@ exception exception_adapted_map_string_set_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i64'}
   1: map<string, set<i64>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_string_set_i64_op_encoded")
 @cpp.UseOpEncode
@@ -10761,6 +10928,7 @@ exception exception_adapted_map_i64_set_string_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
   1: map<i64, set<string>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_set_string_op_encoded")
 @cpp.UseOpEncode
@@ -10768,6 +10936,7 @@ exception exception_adapted_map_i64_set_i64_op_encoded {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}
   @python.Adapter{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}
+  @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i64'}
   1: map<i64, set<i64>> field_1;
 } (thrift.uri="facebook.com/thrift/test/testset/exception_adapted_map_i64_set_i64_op_encoded")
 @cpp.UseOpEncode

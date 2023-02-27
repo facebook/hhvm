@@ -83,3 +83,19 @@ function check_shape(): void {
 function check_closure(int $x): void {
   $impl = () ==> { return $x; };
 }
+
+// TEST-CHECK-BAL: define $root.add_elem
+// CHECK: define $root.add_elem($this: *void, $s1: *HackString, $s2: *HackString) : *void {
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hhbc_new_dict()
+// CHECK:   n1: *HackMixed = load &$s1
+// CHECK:   n2 = $builtins.hhbc_add_elem_c(n0, n1, $builtins.hack_int(0))
+// CHECK:   n3: *HackMixed = load &$s2
+// CHECK:   n4 = $builtins.hhbc_add_elem_c(n2, n3, $builtins.hack_int(1))
+// CHECK:   store &$c <- n4: *HackMixed
+// CHECK: }
+function add_elem(string $s1, string $s2) : void {
+  $c = dict [ $s1 => 0, $s2 => 1 ];
+}
+
+// CHECK: declare $builtins.hhbc_add_elem_c(*HackMixed, *HackMixed, *HackMixed): *HackMixed

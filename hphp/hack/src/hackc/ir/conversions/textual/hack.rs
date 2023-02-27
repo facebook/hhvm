@@ -40,7 +40,7 @@ pub(crate) enum Hhbc {
     Add,
     #[decl(fn hhbc_add_elem_c(*HackMixed, *HackMixed, *HackMixed) -> *HackMixed)]
     AddElemC,
-    #[decl(fn hhbc_add_elem_c(*HackMixed, *HackMixed) -> *HackMixed)]
+    #[decl(fn hhbc_add_new_elem_c(*HackMixed, *HackMixed) -> *HackMixed)]
     AddNewElemC,
     #[decl(fn hhbc_cast_vec(*HackMixed) -> void)]
     CastVec,

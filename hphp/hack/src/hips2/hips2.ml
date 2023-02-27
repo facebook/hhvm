@@ -18,7 +18,7 @@ module Make (Intra : Intra) :
   [@@deriving hash, ord, sexp, show { with_path = false }]
 
   type inter_constraint_ = ClassExtends of id
-  [@@deriving show { with_path = false }]
+  [@@deriving ord, show { with_path = false }]
 
   type 'a lookup = (id, 'a HashSet.t) Hashtbl.t
 

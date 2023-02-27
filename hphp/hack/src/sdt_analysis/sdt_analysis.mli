@@ -14,4 +14,4 @@ val do_ :
   Tast.program ->
   unit
 
-val tast_handler : unit -> Tast_visitor.handler
+val tast_handler : Provider_context.t -> Tast_visitor.handler

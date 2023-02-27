@@ -9,7 +9,7 @@
 open Sdt_analysis_types
 
 let decorated_constraint
-    ~verbosity DecoratedConstraint.{ origin; hack_pos; constraint_ } =
+    ~verbosity { origin; hack_pos; decorated_data = constraint_ } =
   let line = Pos.line hack_pos in
   let constraint_ = Constraint.show constraint_ in
   if verbosity > 0 then

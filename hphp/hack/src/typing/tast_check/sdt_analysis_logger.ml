@@ -6,4 +6,4 @@
  *
  *)
 
-let handler = Sdt_analysis.tast_handler ()
+let handler = Sdt_analysis.tast_handler

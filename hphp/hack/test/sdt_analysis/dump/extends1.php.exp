@@ -1,4 +1,6 @@
 === SDT analysis results for extends1.php
+Intraprocedural Constraints for \SdMe1:
+  14: NeedsSDT
 
 Interprocedural Constraints for \NadMe2:
   (ClassExtends (Class "\\NadMe1"))
@@ -6,14 +8,9 @@ Interprocedural Constraints for \NadMe2:
 Interprocedural Constraints for \NadMe3:
   (ClassExtends (Class "\\NadMe2"))
 
-Intraprocedural Constraints for \SdMe1:
-  14: NeedsSDT
-
-
 Interprocedural Constraints for \SdMe2:
   (ClassExtends (Class "\\SdMe1"))
 
 Interprocedural Constraints for \SdMe3:
   (ClassExtends (Class "\\SdMe2"))
-
 

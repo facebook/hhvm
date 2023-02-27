@@ -5,7 +5,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 open Sdt_analysis_types
 
-val tast_handler : H.Write.t -> Tast_visitor.handler
+val handler : Provider_context.t -> H.Write.t -> Tast_visitor.handler

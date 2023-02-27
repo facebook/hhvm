@@ -23,7 +23,7 @@ module type T = sig
   [@@deriving ord, show { with_path = false }]
 
   type inter_constraint_ = ClassExtends of id
-  [@@deriving show { with_path = false }]
+  [@@deriving ord, show { with_path = false }]
 
   module Read : sig
     type t

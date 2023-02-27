@@ -8,4 +8,5 @@
 
 open Sdt_analysis_types
 
-val decorated_constraint : verbosity:int -> Constraint.t decorated -> string
+val program :
+  Provider_context.t -> Tast.program -> H.inter_constraint_ WalkResult.t

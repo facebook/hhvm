@@ -1,4 +1,4 @@
 === SDT analysis results for dynamic_call_to_function.php
 Intraprocedural Constraints for \f:
-   6: NeedsSDT
+NeedsSDT
 

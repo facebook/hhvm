@@ -21,17 +21,45 @@ module Constraint = struct
   type t = NeedsSDT [@@deriving ord, show { with_path = false }]
 end
 
-module DecoratedConstraint = struct
-  type t = {
-    hack_pos: Pos.t;
-    origin: int;
-    constraint_: Constraint.t;
-  }
-  [@@deriving ord, show { with_path = false }]
-end
+type 'a decorated = {
+  hack_pos: Pos.t;
+  origin: int;
+  decorated_data: 'a;
+}
+[@@deriving ord]
 
 module H = Hips2.Make (struct
-  type constraint_ = DecoratedConstraint.t
+  type constraint_ = Constraint.t
 
-  let debug_show_constraint_ = DecoratedConstraint.show
+  let debug_show_constraint_ = Constraint.show
 end)
+
+module IdMap = Map.Make (struct
+  type t = H.id
+
+  let compare = H.compare_id
+end)
+
+module WalkResult = struct
+  type 'a t = 'a list IdMap.t
+
+  let ( @ ) t1 t2 = IdMap.union (fun _k v1 v2 -> Some (v1 @ v2)) t1 t2
+
+  let empty = IdMap.empty
+
+  let add_constraint t id constraint_ =
+    let merge = function
+      | None -> Some [constraint_]
+      | Some constraints -> Some (constraint_ :: constraints)
+    in
+    IdMap.update id merge t
+
+  let add_id t id =
+    let merge = function
+      | None -> Some []
+      | Some _ as some -> some
+    in
+    IdMap.update id merge t
+
+  let singleton id constraint_ = add_constraint empty id constraint_
+end

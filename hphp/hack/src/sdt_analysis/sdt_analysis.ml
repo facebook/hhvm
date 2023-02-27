@@ -8,15 +8,18 @@
 
 open Sdt_analysis_types
 open Hh_prelude
-module Walker = Sdt_analysis_walker
+module IntraWalker = Sdt_analysis_intra_walker
+module InterWalker = Sdt_analysis_inter_walker
+module TastHandler = Sdt_analysis_tast_handler
 module PP = Sdt_analysis_pretty_printer
 
 let sid_of_id = function
   | H.Class sid -> sid
   | H.Function sid -> sid
 
-let tast_handler () : Tast_visitor.handler =
-  Walker.tast_handler @@ H.Write.create ()
+let tast_handler ctx : Tast_visitor.handler =
+  let writer = H.Write.create () in
+  TastHandler.handler ctx writer
 
 let parse_command ~command ~verbosity ~on_bad_command =
   let command =
@@ -31,42 +34,45 @@ let parse_command ~command ~verbosity ~on_bad_command =
 let do_tast
     (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
   let Options.{ command; verbosity } = options in
-  let print_intra_constraints id intra_constraints =
+  let print_decorated_intra_constraints id decorated_constraints =
+    let sid = sid_of_id id in
+    Format.printf "Intraprocedural Constraints for %s:\n" sid;
+    decorated_constraints
+    |> List.sort ~compare:(fun c1 c2 -> Pos.compare c1.hack_pos c2.hack_pos)
+    |> List.iter ~f:(fun constr ->
+           Format.printf "%s\n" (PP.decorated_constraint ~verbosity constr));
+    Format.printf "\n%!"
+  in
+  let print_intra_constraints id (intra_constraints : Constraint.t HashSet.t) =
     let sid = sid_of_id id in
     if not @@ HashSet.is_empty intra_constraints then (
-      let open DecoratedConstraint in
       Format.printf "Intraprocedural Constraints for %s:\n" sid;
       intra_constraints
       |> HashSet.to_list
-      |> List.sort ~compare:(fun c1 c2 -> Pos.compare c1.hack_pos c2.hack_pos)
+      |> List.sort ~compare:Constraint.compare
       |> List.iter ~f:(fun constr ->
-             Format.printf "%s\n" (PP.decorated_constraint ~verbosity constr));
+             Format.printf "%s\n" (Constraint.show constr));
       Format.printf "\n%!"
     )
   in
   let print_inter_constraints id inter_constraints =
     let sid = sid_of_id id in
-    if not @@ HashSet.is_empty inter_constraints then
+    if not @@ List.is_empty inter_constraints then begin
       Format.printf "Interprocedural Constraints for %s:\n" sid;
-    inter_constraints
-    |> HashSet.to_list
-    |> List.iter ~f:(fun constr ->
-           Format.printf "  %s\n" (H.show_inter_constraint_ constr));
-    Format.printf "\n%!"
+      inter_constraints
+      |> List.iter ~f:(fun constr ->
+             Format.printf "  %s\n" (H.show_inter_constraint_ constr));
+      Format.printf "\n%!"
+    end
   in
-  let writer = H.Write.create () in
-  let tast_handler = Walker.tast_handler writer in
-  (Tast_visitor.iter_with [tast_handler])#go ctx tast;
   match command with
   | Options.DumpConstraints ->
-    let reader = H.Write.debug_dump writer in
-    H.Read.get_keys reader
-    |> Sequence.to_list
-    |> List.sort ~compare:H.compare_id
-    |> List.iter ~f:(fun id ->
-           print_intra_constraints id @@ H.Read.get_intras reader id;
-           print_inter_constraints id @@ H.Read.get_inters reader id)
+    IntraWalker.program ctx tast |> IdMap.iter print_decorated_intra_constraints;
+    InterWalker.program ctx tast |> IdMap.iter print_inter_constraints
   | Options.SolveConstraints ->
+    let writer = H.Write.create () in
+    let tast_handler = TastHandler.handler ctx writer in
+    (Tast_visitor.iter_with [tast_handler])#go ctx tast;
     let reader = H.Write.solve writer in
     H.Read.get_keys reader
     |> Sequence.iter ~f:(fun id ->

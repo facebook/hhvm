@@ -341,6 +341,21 @@ impl TransformInstr for LowerInstrs<'_> {
                 let const_id = builder.emit_constant(Constant::String(const_id.id));
                 builder.hhbc_builtin(builtin, &[cls, const_id], loc)
             }
+            Instr::Hhbc(Hhbc::ColFromArray(vid, col_type, loc)) => {
+                use ir::CollectionType;
+                let builtin = match col_type {
+                    CollectionType::ImmMap => hack::Hhbc::ColFromArrayImmMap,
+                    CollectionType::ImmSet => hack::Hhbc::ColFromArrayImmSet,
+                    CollectionType::ImmVector => hack::Hhbc::ColFromArrayImmVector,
+                    CollectionType::Map => hack::Hhbc::ColFromArrayMap,
+                    CollectionType::Pair => hack::Hhbc::ColFromArrayPair,
+                    CollectionType::Set => hack::Hhbc::ColFromArraySet,
+                    CollectionType::Vector => hack::Hhbc::ColFromArrayVector,
+                    other => panic!("Unknown collection type: {:?}", other),
+                };
+
+                builder.hhbc_builtin(builtin, &[vid], loc)
+            }
             Instr::Hhbc(Hhbc::InstanceOfD(vid, cid, loc)) => {
                 let cid = builder.emit_constant(Constant::String(cid.id));
                 builder.hack_builtin(Builtin::IsType, &[vid, cid], loc)

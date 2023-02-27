@@ -70,6 +70,22 @@ pub(crate) enum Hhbc {
     CmpNeq,
     #[decl(fn hhbc_cmp_same(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpSame,
+    // ColFromArray variations for different collection types
+    #[decl(fn hhbc_col_from_array_imm_map(*HackMixed) -> *HackMixed)]
+    ColFromArrayImmMap,
+    #[decl(fn hhbc_col_from_array_imm_set(*HackMixed) -> *HackMixed)]
+    ColFromArrayImmSet,
+    #[decl(fn hhbc_col_from_array_imm_vector(*HackMixed) -> *HackMixed)]
+    ColFromArrayImmVector,
+    #[decl(fn hhbc_col_from_array_map(*HackMixed) -> *HackMixed)]
+    ColFromArrayMap,
+    #[decl(fn hhbc_col_from_array_pair(*HackMixed) -> *HackMixed)]
+    ColFromArrayPair,
+    #[decl(fn hhbc_col_from_array_set(*HackMixed) -> *HackMixed)]
+    ColFromArraySet,
+    #[decl(fn hhbc_col_from_array_vector(*HackMixed) -> *HackMixed)]
+    ColFromArrayVector,
+    // ColFromArray end
     #[decl(fn hhbc_combine_and_resolve_type_struct(...) -> *HackMixed)]
     CombineAndResolveTypeStruct,
     #[decl(fn hhbc_concat(*HackMixed, *HackMixed) -> *HackMixed)]

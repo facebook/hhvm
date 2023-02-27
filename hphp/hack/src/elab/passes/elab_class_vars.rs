@@ -20,6 +20,7 @@ use oxidized::ast_defs::ClassishKind;
 use oxidized::ast_defs::Id;
 use oxidized::ast_defs::Tprim;
 use oxidized::naming_error::NamingError;
+use oxidized::naming_phase_error::ExperimentalFeature;
 use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
@@ -167,7 +168,9 @@ fn class_var_of_xhp_attr<Ex, En>(
             .zip(hint_opt.as_ref())
         {
             if matches!(hint_ as &Hint_, Hint_::Hlike(_)) {
-                errs.push(NamingPhaseError::LikeType(pos.clone()))
+                errs.push(NamingPhaseError::ExperimentalFeature(
+                    ExperimentalFeature::LikeType(pos.clone()),
+                ))
             }
         }
     }

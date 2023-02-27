@@ -13,6 +13,7 @@ bitflags! {
         const IS_HHI = 1 << 2;
         const IS_SYSTEMLIB = 1 << 3;
         const LIKE_TYPE_HINTS_ENABLED = 1 << 4;
+        const CONST_ATTRIBUTE = 1 << 5;
     }
 }
 
@@ -28,7 +29,7 @@ impl Flags {
         flags.set(Self::HKT_ENABLED, tco.tco_higher_kinded_types);
         flags.set(Self::IS_SYSTEMLIB, tco.tco_is_systemlib);
         flags.set(Self::LIKE_TYPE_HINTS_ENABLED, tco.tco_like_type_hints);
-
+        flags.set(Self::CONST_ATTRIBUTE, tco.tco_const_attribute);
         flags
     }
 }
@@ -71,5 +72,9 @@ impl Config {
 
     pub fn is_hhi(&self) -> bool {
         self.flags.contains(Flags::IS_HHI)
+    }
+
+    pub fn const_attribute(&self) -> bool {
+        self.flags.contains(Flags::CONST_ATTRIBUTE)
     }
 }

@@ -175,6 +175,12 @@ fn elaborate<T: Transform>(
         // - `allowed_files_for_module_declarations`
         // typechecker options
         // passes::validate_module::ValidateModulePass::default(),
+
+        // -- Old 'NAST checks' ------------------------------------------------
+
+        // Validate use of the `__Const` attribute on classes - depends on
+        // `const_attribute` typechecker option
+        passes::validate_class_user_attribute_const::ValidateClassUserAttributeConstPass::default(),
     ];
     let mut errs = Vec::default();
     let cfg = config::Config::new(tco, is_hhi);

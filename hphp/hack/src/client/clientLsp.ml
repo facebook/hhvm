@@ -103,7 +103,6 @@ type server_conn = {
 module Main_env = struct
   type t = {
     conn: server_conn;
-    most_recent_file: documentUri option;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_diagnostics: UriSet.t;
     uris_with_unsaved_changes: UriSet.t;
@@ -122,7 +121,6 @@ module In_init_env = struct
     conn: server_conn;
     first_start_time: float;  (** our first attempt to connect *)
     most_recent_start_time: float;  (** for subsequent retries *)
-    most_recent_file: documentUri option;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
@@ -134,7 +132,6 @@ end
 module Lost_env = struct
   type t = {
     p: params;
-    most_recent_file: documentUri option;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
@@ -317,20 +314,6 @@ let get_editor_open_files (state : state) :
   | Main_loop menv -> Some menv.Main_env.editor_open_files
   | In_init ienv -> Some ienv.In_init_env.editor_open_files
   | Lost_server lenv -> Some lenv.Lost_env.editor_open_files
-
-(** This is the most recent file that was subject of an LSP request
-from the client. There's no guarantee that the file is still open.
-CARE! VSCode might send requests from files that aren't even
-active, e.g. codeAction requests in response to publishDiagnostics.
-CARE! We probably shouldn't even use this at all. *)
-let get_most_recent_file (state : state) : documentUri option =
-  match state with
-  | Pre_init
-  | Post_shutdown ->
-    None
-  | Main_loop menv -> menv.Main_env.most_recent_file
-  | In_init ienv -> ienv.In_init_env.most_recent_file
-  | Lost_server lenv -> lenv.Lost_env.most_recent_file
 
 type event =
   | Server_hello
@@ -1304,7 +1287,6 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
              In_init_env.conn;
              first_start_time = Unix.time ();
              most_recent_start_time = Unix.time ();
-             most_recent_file = get_most_recent_file state;
              editor_open_files =
                Option.value (get_editor_open_files state) ~default:UriMap.empty;
              (* uris_with_unsaved_changes should always be empty here: *)
@@ -1440,7 +1422,6 @@ and do_lost_server
 
     let state = dismiss_diagnostics state in
     let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
-    let most_recent_file = get_most_recent_file state in
     let editor_open_files =
       Option.value (get_editor_open_files state) ~default:UriMap.empty
     in
@@ -1455,7 +1436,6 @@ and do_lost_server
         Lost_server
           {
             Lost_env.p;
-            most_recent_file;
             editor_open_files;
             uris_with_unsaved_changes;
             lock_file;
@@ -1474,7 +1454,6 @@ and do_lost_server
         (Lost_server
            {
              Lost_env.p;
-             most_recent_file;
              editor_open_files;
              uris_with_unsaved_changes;
              lock_file;
@@ -1489,7 +1468,6 @@ let report_connect_end (ienv : In_init_env.t) : state =
     let menv =
       {
         Main_env.conn = ienv.In_init_env.conn;
-        most_recent_file = ienv.most_recent_file;
         editor_open_files = ienv.editor_open_files;
         uris_with_diagnostics = UriSet.empty;
         uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
@@ -3568,23 +3546,10 @@ let track_open_and_recent_files (state : state) (event : event) : state =
     | _ -> prev_opened_files
   in
   (* We'll track which was the most recent file to have an event *)
-  let most_recent_file =
-    match event with
-    | Client_message (_metadata, message) ->
-      let uri = Lsp_fmt.get_uri_opt message in
-      if Option.is_some uri then
-        uri
-      else
-        get_most_recent_file state
-    | _ -> get_most_recent_file state
-  in
   match state with
-  | Main_loop menv ->
-    Main_loop { menv with Main_env.editor_open_files; most_recent_file }
-  | In_init ienv ->
-    In_init { ienv with In_init_env.editor_open_files; most_recent_file }
-  | Lost_server lenv ->
-    Lost_server { lenv with Lost_env.editor_open_files; most_recent_file }
+  | Main_loop menv -> Main_loop { menv with Main_env.editor_open_files }
+  | In_init ienv -> In_init { ienv with In_init_env.editor_open_files }
+  | Lost_server lenv -> Lost_server { lenv with Lost_env.editor_open_files }
   | _ -> state
 
 let track_edits_if_necessary (state : state) (event : event) : state =

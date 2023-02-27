@@ -15,7 +15,21 @@ let sid_of_id = function
   | H.Class sid -> sid
   | H.Function sid -> sid
 
-let do_ (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
+let tast_handler () : Tast_visitor.handler =
+  Walker.tast_handler @@ H.Write.create ()
+
+let parse_command ~command ~verbosity ~on_bad_command =
+  let command =
+    match Sdt_analysis_options.parse_command command with
+    | Some command -> command
+    | None ->
+      on_bad_command "invalid SDT analysis mode";
+      failwith "unreachable"
+  in
+  Sdt_analysis_options.mk ~verbosity ~command
+
+let do_tast
+    (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
   let Options.{ command; verbosity } = options in
   let print_intra_constraints id intra_constraints =
     let sid = sid_of_id id in
@@ -57,3 +71,7 @@ let do_ (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
     H.Read.get_keys reader
     |> Sequence.iter ~f:(fun id ->
            print_intra_constraints id @@ H.Read.get_intras reader id)
+
+let do_ ~command ~verbosity ~on_bad_command =
+  let opts = parse_command ~command ~on_bad_command ~verbosity in
+  (fun () -> do_tast opts)

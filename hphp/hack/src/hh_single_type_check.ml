@@ -1916,18 +1916,10 @@ let handle_mode
       ~profile_type_check_multi
       ~memtrace
   | SDT_analysis command ->
-    let opts =
-      let command =
-        match Sdt_analysis_options.parse_command command with
-        | Some command -> command
-        | None -> die "invalid SDT analysis mode"
-      in
-      Sdt_analysis_options.mk ~verbosity ~command
-    in
     handle_constraint_mode
-      ~do_:Sdt_analysis.do_
+      ~do_:(Sdt_analysis.do_ ~command ~on_bad_command:die ~verbosity)
       "SDT"
-      opts
+      ()
       ctx
       error_format
       ~iter_over_files

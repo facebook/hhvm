@@ -27,6 +27,7 @@ let logger_handlers ctx =
       ("tany", Tany_logger.handler);
       ("like_type", Like_type_logger.handler);
       ("shape_analysis", Shape_analysis_logger.handler);
+      ("sdt_analysis", Sdt_analysis_logger.handler);
     ]
   in
   List.fold ~init:[] ~f:add_handler key_handler_pairs

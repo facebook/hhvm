@@ -5,13 +5,5 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-val do_ :
-  command:string ->
-  verbosity:int ->
-  on_bad_command:(string -> 'a) ->
-  unit ->
-  Provider_context.t ->
-  Tast.program ->
-  unit
 
-val tast_handler : unit -> Tast_visitor.handler
+let handler = Sdt_analysis.tast_handler ()

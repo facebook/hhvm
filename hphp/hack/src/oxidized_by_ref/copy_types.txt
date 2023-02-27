@@ -141,6 +141,7 @@ tast::Reactivity
 tast::TypeParamMutability
 tast::ValKind
 t_shape_map::TShapeMap
+tast::CheckStatus
 typing_cont_key::TypingContKey
 typing_defs_core::Capability
 typing_defs_core::CeVisibility

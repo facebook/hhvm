@@ -349,7 +349,8 @@ let rec array_get
 
       let nullable_container_get env ty_actual ty =
         if
-          lhs_of_null_coalesce || env.Typing_env_types.under_dynamic_assumptions
+          lhs_of_null_coalesce
+          || Tast.is_under_dynamic_assumptions env.Typing_env_types.checked
           (* Normally, we would not allow indexing into a nullable container,
              however, because the pattern shows up so frequently, we are allowing
              indexing into a nullable container as long as it is on the lhs of a
@@ -736,7 +737,7 @@ let rec array_get
         in
         (env, (ty, err_res_arr, err_res_idx))
       | Tprim Tnull ->
-        if env.Typing_env_types.under_dynamic_assumptions then
+        if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked then
           got_dynamic ()
         else
           let ty = MakeType.nothing Reason.Rnone in
@@ -913,7 +914,9 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       (* In dynamic mode strip off nullable because we can always upcast to dynamic *)
       let ty1 =
         match get_node ty1 with
-        | Toption ty when env.Typing_env_types.under_dynamic_assumptions -> ty
+        | Toption ty
+          when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
+          ty
         | _ -> ty1
       in
       let dflt_arr_res = Ok ty1 in
@@ -1043,7 +1046,8 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       | (_, Tdynamic) -> (env, (ty1, Ok ty1, Ok ty2))
       | (_, Tunapplied_alias _) ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-      | (_, Tprim Tnull) when env.Typing_env_types.under_dynamic_assumptions ->
+      | (_, Tprim Tnull)
+        when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
         got_dynamic ()
       | (r, Tnewtype (cid, _, bound))
         when String.equal cid SN.Classes.cSupportDyn ->
@@ -1355,7 +1359,8 @@ let rec assign_array_get
         (env, (ety1, Error (ety1, ty_expect), Ok tkey, Ok ty2))
       | Tclass ((_, cn), _, _)
         when String.equal cn SN.Collections.cAnyArray
-             && env.Typing_env_types.under_dynamic_assumptions ->
+             && Tast.is_under_dynamic_assumptions env.Typing_env_types.checked
+        ->
         got_dynamic ()
       | Tclass ((_, cn), _, _)
         when String.equal cn SN.Collections.cKeyedContainer
@@ -1402,7 +1407,8 @@ let rec assign_array_get
         got_dynamic ()
       | Tdynamic -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
       | Tany _ -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
-      | Tprim Tnull when env.Typing_env_types.under_dynamic_assumptions ->
+      | Tprim Tnull
+        when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
         got_dynamic ()
       | Tprim Tstring ->
         let (_, p, _) = key in

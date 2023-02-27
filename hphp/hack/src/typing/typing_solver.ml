@@ -661,7 +661,7 @@ let expand_type_and_solve
   let default =
     if Option.is_some default then
       default
-    else if env.Typing_env_types.under_dynamic_assumptions then
+    else if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked then
       Some (MakeType.dynamic (Reason.Rwitness p))
     else
       None
@@ -817,7 +817,7 @@ let expand_type_and_narrow
   let default =
     if Option.is_some default then
       default
-    else if env.Typing_env_types.under_dynamic_assumptions then
+    else if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked then
       Some (MakeType.dynamic (Reason.Rwitness p))
     else
       None

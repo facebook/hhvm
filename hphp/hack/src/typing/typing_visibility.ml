@@ -324,7 +324,7 @@ let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
     ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
 
 let check_deprecated ~use_pos ~def_pos env deprecated =
-  if Typing_env_types.(env.under_dynamic_assumptions) then
+  if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked then
     None
   else
     Option.map deprecated ~f:(fun s ->

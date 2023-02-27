@@ -266,7 +266,7 @@ let expr_error env p (e : Nast.expr) =
   (env, with_type ty Tast.dummy_saved_env e, ty)
 
 let unbound_name env (pos, name) e =
-  if env.under_dynamic_assumptions then
+  if Tast.is_under_dynamic_assumptions env.checked then
     expr_error env pos e
   else
     let class_exists =
@@ -306,7 +306,7 @@ let get_value_collection_inst env p vc_kind ty =
    * is a set-like one. *)
   | Tnonnull -> arraykey_on (MakeType.mixed (get_reason ty))
   | Tany _ -> Some (env, ty)
-  | Tdynamic when env.under_dynamic_assumptions ->
+  | Tdynamic when Tast.is_under_dynamic_assumptions env.checked ->
     (* interpret dynamic as Traversable<dynamic> or keyset<arraykey> *)
     arraykey_on ty
   | _ -> None
@@ -331,7 +331,7 @@ let get_key_value_collection_inst env p ty =
     let mixed = MakeType.mixed (Reason.Rwitness p) in
     Some (env, arraykey, mixed)
   | Tany _ -> Some (env, ty, ty)
-  | Tdynamic when env.under_dynamic_assumptions ->
+  | Tdynamic when Tast.is_under_dynamic_assumptions env.checked ->
     (* interpret dynamic as KeyedTraversable<arraykey, dynamic> *)
     let arraykey = MakeType.arraykey (Reason.Rkey_value_collection_key p) in
     Some (env, arraykey, ty)
@@ -4494,7 +4494,8 @@ and expr_
     let send =
       match get_node expected_return.et_type with
       | Tclass (_, _, _ :: _ :: send :: _) -> send
-      | Tdynamic when env.under_dynamic_assumptions -> expected_return.et_type
+      | Tdynamic when Tast.is_under_dynamic_assumptions env.checked ->
+        expected_return.et_type
       | _ ->
         Errors.internal_error p "Return type is not a generator";
         MakeType.union (Reason.Ryield_send p) []
@@ -4910,7 +4911,7 @@ and class_const ?(incl_tc = false) env p (cid, mid) =
  *)
 and check_function_dynamically_callable
     ~this_class:_ env f_name f params_decl_ty ret_locl_ty =
-  let env = { env with under_dynamic_assumptions = true } in
+  let env = { env with checked = CUnderDynamicAssumptions } in
   Typing_log.log_sd_pass env f.f_span;
   let make_dynamic pos =
     Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
@@ -5049,7 +5050,8 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
    * Exception: we're checking an expression tree. Even in the dynamic pass,
    * maketree_with_type_param needs the lambda to be typed precisely.
    *)
-    when env.under_dynamic_assumptions && not (Env.is_in_expr_tree env) ->
+    when Tast.is_under_dynamic_assumptions env.checked
+         && not (Env.is_in_expr_tree env) ->
     make_result env p Aast.Omitted (MakeType.dynamic (Reason.Rwitness p))
   | Some (_pos, _ur, supportdyn, ty, Tfun expected_ft) ->
     (* First check that arities match up *)
@@ -8209,7 +8211,7 @@ and class_expr
       | (_, Tunapplied_alias _) ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       (* We allow a call through a string in dynamic check mode, as string <:D dynamic *)
-      | (r, Tprim Tstring) when env.under_dynamic_assumptions ->
+      | (r, Tprim Tstring) when Tast.is_under_dynamic_assumptions env.checked ->
         ((env, None), (MakeType.dynamic r, Ok (MakeType.dynamic r)))
       | ( _,
           ( Tany _ | Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _

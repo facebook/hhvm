@@ -517,7 +517,7 @@ let liken ~super_like env ty =
  * as t <:D dynamic iff t <: supportdyn<mixed>.
  *)
 let transform_dynamic_upper_bound ~coerce env ty =
-  if env.under_dynamic_assumptions then
+  if Tast.is_under_dynamic_assumptions env.checked then
     ty
   else
     match (coerce, get_node ty) with
@@ -2096,8 +2096,8 @@ and simplify_subtype_i
         | _ -> default_subtype env))
     | (r_dynamic, Tdynamic)
       when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-           && (coercing_to_dynamic subtype_env || env.under_dynamic_assumptions)
-      ->
+           && (coercing_to_dynamic subtype_env
+              || Tast.is_under_dynamic_assumptions env.checked) ->
       let open Ast_defs in
       (match ety_sub with
       | ConstraintType _cty ->

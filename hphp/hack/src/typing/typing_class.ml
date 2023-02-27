@@ -45,7 +45,7 @@ let is_literal_with_trivially_inferable_type (_, _, e) =
   Option.is_some @@ Decl_utils.infer_const e
 
 let method_dynamically_callable env cls m params_decl_ty return =
-  let env = { env with under_dynamic_assumptions = true } in
+  let env = { env with checked = Tast.CUnderDynamicAssumptions } in
   let ret_locl_ty = return.Typing_env_return_info.return_type.et_type in
   (* Here the body of the method is typechecked again to ensure it is safe
    * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
@@ -343,7 +343,7 @@ let method_def ~is_disposable env cls m =
          params_decl_ty
          return.Typing_env_return_info.return_type.et_type
   in
-  let method_defs =
+  let (env, method_defs) =
     let method_def_of_dynamic
         (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
       let open Aast in
@@ -355,9 +355,11 @@ let method_def ~is_disposable env cls m =
         m_ret = (dynamic_return_ty, return_hint);
       }
     in
-    method_def
-    ::
-    (if sdt_dynamic_check_required then
+    if sdt_dynamic_check_required then
+      let env = { env with checked = Tast.CUnderNormalAssumptions } in
+      let method_def =
+        Aast.{ method_def with m_annotation = Env.save local_tpenv env }
+      in
       let dynamic_components =
         method_dynamically_callable
           sound_dynamic_check_saved_env
@@ -366,12 +368,15 @@ let method_def ~is_disposable env cls m =
           params_decl_ty
           return
       in
-      if TypecheckerOptions.tast_under_dynamic tcopt then
-        [method_def_of_dynamic dynamic_components]
-      else
-        []
+      let method_defs =
+        if TypecheckerOptions.tast_under_dynamic tcopt then
+          [method_def_of_dynamic dynamic_components]
+        else
+          []
+      in
+      (env, method_def :: method_defs)
     else
-      [])
+      (env, [method_def])
   in
   let (env, global_inference_env) = Env.extract_global_inference_env env in
   let _env = Env.log_env_change "method_def" initial_env env in

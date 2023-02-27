@@ -20,7 +20,7 @@ let check_local_capability (mk_required : env -> env * locl_ty) mk_err_opt env =
     TypecheckerOptions.local_coeffects tcopt
     && not
          (TypecheckerOptions.enable_sound_dynamic tcopt
-         && env.under_dynamic_assumptions)
+         && Tast.is_under_dynamic_assumptions env.checked)
   then (
     let available = Env.get_local env Typing_coeffects.local_capability_id in
     let (env, required) = mk_required env in

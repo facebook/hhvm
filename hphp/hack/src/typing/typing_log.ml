@@ -559,6 +559,8 @@ let fun_tast_info_as_map = function
         ("has_readonly", bool_as_value has_readonly);
       ]
 
+let checked_as_value check_status = Atom (Tast.show_check_status check_status)
+
 let env_as_value env =
   let {
     fresh_typarams;
@@ -570,7 +572,7 @@ let env_as_value env =
     in_try;
     in_expr_tree;
     inside_constructor;
-    under_dynamic_assumptions;
+    checked;
     tpenv;
     log_levels = _;
     allow_wildcards;
@@ -589,7 +591,7 @@ let env_as_value env =
       ("in_try", bool_as_value in_try);
       ("in_expr_tree", bool_as_value in_expr_tree);
       ("inside_constructor", bool_as_value inside_constructor);
-      ("under_dynamic_assumptions", bool_as_value under_dynamic_assumptions);
+      ("checked", checked_as_value checked);
       ("tpenv", tpenv_as_value env tpenv);
       ("allow_wildcards", bool_as_value allow_wildcards);
       ( "inference_env",

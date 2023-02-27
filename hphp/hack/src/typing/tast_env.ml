@@ -241,7 +241,7 @@ let restore_saved_env env saved_env =
         saved_env.Tast.inference_env;
     Env.tpenv = saved_env.Tast.tpenv;
     Env.fun_tast_info = saved_env.Tast.fun_tast_info;
-    Env.under_dynamic_assumptions = saved_env.Tast.under_dynamic_assumptions;
+    Env.checked = saved_env.Tast.checked;
   }
 
 module EnvFromDef = Typing_env_from_def

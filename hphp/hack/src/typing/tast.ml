@@ -48,13 +48,34 @@ type fun_tast_info = {
 }
 [@@deriving show]
 
+type check_status =
+  | COnce  (** The definition is checked only once. *)
+  | CUnderNormalAssumptions
+      (** The definition is checked twice and this is the check under normal
+          assumptions that is using the parameter and return types that are
+          written in the source code (but potentially implicitly pessimised).
+          *)
+  | CUnderDynamicAssumptions
+      (** The definition is checked twice and this is the check under dynamic
+          assumptions that is using the dynamic type for parameters and return.
+          *)
+[@@deriving show]
+
+let is_under_dynamic_assumptions = function
+  | COnce
+  | CUnderNormalAssumptions ->
+    false
+  | CUnderDynamicAssumptions -> true
+
 type saved_env = {
   tcopt: TypecheckerOptions.t; [@opaque]
   inference_env: Typing_inference_env.t;
   tpenv: Type_parameter_env.t;
   condition_types: decl_ty SMap.t;
   fun_tast_info: fun_tast_info option;
-  under_dynamic_assumptions: bool;
+  checked: check_status;
+      (** Indicates how many types the callable was checked and under what
+          assumptions. *)
 }
 [@@deriving show]
 
@@ -121,7 +142,7 @@ let empty_saved_env tcopt : saved_env =
     tpenv = Type_parameter_env.empty;
     condition_types = SMap.empty;
     fun_tast_info = None;
-    under_dynamic_assumptions = false;
+    checked = COnce;
   }
 
 (* Used when an env is needed in codegen.

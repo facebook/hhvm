@@ -3,14 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b1ed251b388e54a6e5a9f4d338fc4ac6>>
+// @generated SignedSource<<ca74eeb23d9ade29cbfbd2bbe6ad3bd5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 pub use aast_defs::*;
+use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
 use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
@@ -48,6 +50,38 @@ pub struct FunTastInfo {
 
 #[derive(
     Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[repr(u8)]
+pub enum CheckStatus {
+    /// The definition is checked only once.
+    COnce,
+    /// The definition is checked twice and this is the check under normal
+    /// assumptions that is using the parameter and return types that are
+    /// written in the source code (but potentially implicitly pessimised).
+    CUnderNormalAssumptions,
+    /// The definition is checked twice and this is the check under dynamic
+    /// assumptions that is using the dynamic type for parameters and return.
+    CUnderDynamicAssumptions,
+}
+impl TrivialDrop for CheckStatus {}
+arena_deserializer::impl_deserialize_in_arena!(CheckStatus);
+
+#[derive(
+    Clone,
     Debug,
     Deserialize,
     FromOcamlRep,
@@ -65,7 +99,9 @@ pub struct SavedEnv {
     pub tpenv: type_parameter_env::TypeParameterEnv,
     pub condition_types: s_map::SMap<Ty>,
     pub fun_tast_info: Option<FunTastInfo>,
-    pub under_dynamic_assumptions: bool,
+    /// Indicates how many types the callable was checked and under what
+    /// assumptions.
+    pub checked: CheckStatus,
 }
 
 #[rust_to_ocaml(attr = "deriving show")]

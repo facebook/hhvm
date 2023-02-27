@@ -93,10 +93,11 @@ let base_visitor ~human_friendly ~under_dynamic line char =
     inherit [Pos.t * _ * _] Visitors_runtime.option_monoid
 
     method private correct_assumptions env =
-      Bool.equal
-        (Tast_env.tast_env_as_typing_env env)
-          .Typing_env_types.under_dynamic_assumptions
-        under_dynamic
+      let is_under_dynamic_assumptions =
+        (Tast_env.tast_env_as_typing_env env).Typing_env_types.checked
+        |> Tast.is_under_dynamic_assumptions
+      in
+      Bool.equal is_under_dynamic_assumptions under_dynamic
 
     method private merge lhs rhs =
       (* A node with position P is not always a parent of every other node with
@@ -246,8 +247,11 @@ let type_at_pos
 (* Return the expanded type of smallest expression at this
    position. Skips string literals in shape indexing expressions so
    hover results are more relevant.
-   If [under_dynamic] is true, look for type produced when env.under_dynamic_assumptions = true
-   Otherwise look for type produced in normal checking when env.under_dyhnamic_assumptions = false
+
+   If [under_dynamic] is true, look for type produced
+     when env.checked = CUnderDynamicAssumptions
+   Otherwise, look for type produced in normal checking
+     when env.checked = COnce or env.checked = CUnderNormalAssumptions.
 *)
 let human_friendly_type_at_pos
     ~under_dynamic

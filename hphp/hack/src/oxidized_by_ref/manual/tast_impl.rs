@@ -40,7 +40,7 @@ impl Default for SavedEnv<'_> {
             tpenv: &TPENV,
             condition_types: Default::default(),
             fun_tast_info: Default::default(),
-            under_dynamic_assumptions: false,
+            checked: tast::CheckStatus::COnce,
         }
     }
 }

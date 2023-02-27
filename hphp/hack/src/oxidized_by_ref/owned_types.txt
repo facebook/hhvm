@@ -13,6 +13,7 @@ saved_state_rollouts::FlagName
 saved_state_rollouts::SavedStateRollouts
 shallow_decl_defs::Visibility
 tany_sentinel::TanySentinel
+tast::CheckStatus
 tast::FunTastInfo
 typing_cont_key::TypingContKey
 typing_defs_core::CollectionStyle

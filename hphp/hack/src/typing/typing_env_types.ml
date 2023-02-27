@@ -54,7 +54,7 @@ type env = {
   in_try: bool;
   in_expr_tree: bool;
   inside_constructor: bool;
-  under_dynamic_assumptions: bool;
+  checked: Tast.check_status;
   tracing_info: Decl_counters.tracing_info option;
   tpenv: Type_parameter_env.t;
   log_levels: int SMap.t;
@@ -99,7 +99,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     in_try = false;
     in_expr_tree = false;
     inside_constructor = false;
-    under_dynamic_assumptions = false;
+    checked = Tast.COnce;
     decl_env = { Decl_env.mode; droot; droot_member = None; ctx };
     tracing_info =
       Option.map origin ~f:(fun origin -> { Decl_counters.origin; file });

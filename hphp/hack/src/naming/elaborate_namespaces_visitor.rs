@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+#![feature(box_patterns)]
+
 use core_utils_rust as core_utils;
 use hash::HashSet;
 use namespaces_rust as namespaces;
@@ -74,41 +76,18 @@ impl Env {
     }
 
     fn handle_special_calls(&self, call: &mut Expr_) {
-        match call {
-            Expr_::Call(c) => {
-                let (func, args) = (&c.0, &mut c.2);
-                match func {
-                    Expr(_, _, Expr_::Id(id))
-                        if id.1 == sn::autoimported_functions::FUN_ && args.len() == 1 =>
-                    {
-                        match &args[0].1 {
-                            Expr(_, p, Expr_::String(fn_name)) => {
-                                let fn_name = core_utils::add_ns_bstr(fn_name);
-                                args[0].1 =
-                                    Expr((), p.clone(), Expr_::String(fn_name.into_owned().into()));
-                            }
-                            _ => {}
-                        }
-                    }
-                    Expr(_, _, Expr_::Id(id))
-                        if (id.1 == sn::autoimported_functions::METH_CALLER
-                            || id.1 == sn::autoimported_functions::CLASS_METH)
-                            && args.len() == 2
-                            && !self.in_codegen() =>
-                    {
-                        match &args[0].1 {
-                            Expr(_, p, Expr_::String(cl_name)) => {
-                                let cl_name = core_utils::add_ns_bstr(cl_name);
-                                args[0].1 =
-                                    Expr((), p.clone(), Expr_::String(cl_name.into_owned().into()));
-                            }
-                            _ => {}
-                        }
-                    }
-                    _ => {}
+        if let Expr_::Call(box (Expr(_, _, Expr_::Id(id)), _, args, _)) = call {
+            if (args.len() == 1 && id.1 == sn::autoimported_functions::FUN_)
+                || (!self.in_codegen()
+                    && args.len() == 2
+                    && (id.1 == sn::autoimported_functions::METH_CALLER
+                        || id.1 == sn::autoimported_functions::CLASS_METH))
+            {
+                if let Expr(_, p, Expr_::String(fn_name)) = &args[0].1 {
+                    let fn_name = core_utils::add_ns_bstr(fn_name);
+                    args[0].1 = Expr((), p.clone(), Expr_::String(fn_name.into_owned().into()));
                 }
             }
-            _ => {}
         }
     }
 }
@@ -192,9 +171,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     fn visit_expr_(&mut self, env: &mut Env, e: &mut Expr_) -> Result<(), ()> {
         // Sets env for lambdas
         match e {
-            Expr_::Call(c) => {
-                let (func, targs, args, uargs) = (&mut c.0, &mut c.1, &mut c.2, &mut c.3);
-
+            Expr_::Call(box (func, targs, args, uargs)) => {
                 // Recurse first due to borrow order
                 targs.accept(env, self.object())?;
                 args.accept(env, self.object())?;
@@ -214,8 +191,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                     func.accept(env, self.object())?;
                 }
             }
-            Expr_::FunctionPointer(fp) => {
-                let (fpid, targs) = (&mut fp.0, &mut fp.1);
+            Expr_::FunctionPointer(box (fpid, targs)) => {
                 if let Some(sid) = fpid.as_fpid_mut() {
                     sid.1 = namespaces::elaborate_id(
                         &env.namespace,
@@ -237,8 +213,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 }
                 targs.accept(env, self.object())?;
             }
-            Expr_::ObjGet(og) => {
-                let (obj, expr, nullsafe) = (&mut og.0, &mut og.1, &mut og.2);
+            Expr_::ObjGet(box (obj, expr, nullsafe, _)) => {
                 if let Expr_::Id(..) = expr.2 {
                 } else {
                     expr.accept(env, self.object())?;
@@ -252,8 +227,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                     namespaces::elaborate_id(&env.namespace, namespaces::ElaborateKind::Const, sid)
                         .1;
             }
-            Expr_::New(n) => {
-                let (class_id, targs, args, unpacked_el) = (&mut n.0, &mut n.1, &mut n.2, &mut n.3);
+            Expr_::New(box (class_id, targs, args, unpacked_el, _)) => {
                 if let Some(e) = class_id.2.as_ciexpr_mut() {
                     if let Some(sid) = e.2.as_id_mut() {
                         env.elaborate_type_name(sid);
@@ -267,8 +241,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 args.accept(env, self.object())?;
                 unpacked_el.accept(env, self.object())?;
             }
-            Expr_::ClassConst(cc) => {
-                let type_ = &mut cc.0;
+            Expr_::ClassConst(box (type_, _)) => {
                 if let Some(e) = type_.2.as_ciexpr_mut() {
                     if let Some(sid) = e.2.as_id_mut() {
                         env.elaborate_type_name(sid);
@@ -279,8 +252,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                     type_.accept(env, self.object())?;
                 }
             }
-            Expr_::ClassGet(cg) => {
-                let (class_id, class_get_expr) = (&mut cg.0, &mut cg.1);
+            Expr_::ClassGet(box (class_id, class_get_expr, _)) => {
                 if let Some(e) = class_id.2.as_ciexpr_mut() {
                     if let Some(sid) = e.2.as_id_mut() {
                         env.elaborate_type_name(sid);
@@ -292,8 +264,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 }
                 class_get_expr.accept(env, self.object())?;
             }
-            Expr_::Xml(x) => {
-                let (xml_id, attributes, el) = (&mut x.0, &mut x.1, &mut x.2);
+            Expr_::Xml(box (xml_id, attributes, el)) => {
                 /* if XHP element mangling is disabled, namespaces are supported */
                 if !env.in_codegen() || env.namespace.disable_xhp_element_mangling {
                     env.elaborate_type_name(xml_id);

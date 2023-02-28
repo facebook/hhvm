@@ -213,7 +213,7 @@ func (x *reqMyServiceQueryBuilder) Emit() *reqMyServiceQuery {
 }
 
 func (x *reqMyServiceQuery) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_MyService_query"); err != nil {
+    if err := p.WriteStructBegin("reqMyServiceQuery"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -352,7 +352,7 @@ func (x *respMyServiceQueryBuilder) Emit() *respMyServiceQuery {
 }
 
 func (x *respMyServiceQuery) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_MyService_query"); err != nil {
+    if err := p.WriteStructBegin("respMyServiceQuery"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 

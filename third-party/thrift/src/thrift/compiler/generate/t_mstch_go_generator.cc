@@ -471,8 +471,11 @@ class mstch_go_service : public mstch_service {
       if (!go::is_func_go_supported(func)) {
         continue;
       }
+      auto svcGoName = go::munge_ident(service_->name());
+      auto funcGoName = go::munge_ident(func->name());
+
       auto req_struct_name =
-          fmt::format("req_{}_{}", service_->name(), func->name());
+          go::munge_ident("req" + svcGoName + funcGoName, false);
       auto req_struct = new t_struct(service_->program(), req_struct_name);
       for (auto member : func->params().get_members()) {
         req_struct->append_field(std::unique_ptr<t_field>(member));
@@ -481,7 +484,7 @@ class mstch_go_service : public mstch_service {
       data_.req_resp_struct_names.insert(req_struct_name);
 
       auto resp_struct_name =
-          fmt::format("resp_{}_{}", service_->name(), func->name());
+          go::munge_ident("resp" + svcGoName + funcGoName, false);
       auto resp_struct = new t_struct(service_->program(), resp_struct_name);
       if (!func->get_return_type()->is_void()) {
         auto resp_field =

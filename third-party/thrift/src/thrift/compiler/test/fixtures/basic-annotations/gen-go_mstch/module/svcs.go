@@ -255,7 +255,7 @@ func (x *reqMyServicePingBuilder) Emit() *reqMyServicePing {
 }
 
 func (x *reqMyServicePing) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_MyService_ping"); err != nil {
+    if err := p.WriteStructBegin("reqMyServicePing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -333,7 +333,7 @@ func (x *respMyServicePingBuilder) Emit() *respMyServicePing {
 }
 
 func (x *respMyServicePing) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_MyService_ping"); err != nil {
+    if err := p.WriteStructBegin("respMyServicePing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -411,7 +411,7 @@ func (x *reqMyServiceGetRandomDataBuilder) Emit() *reqMyServiceGetRandomData {
 }
 
 func (x *reqMyServiceGetRandomData) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_MyService_getRandomData"); err != nil {
+    if err := p.WriteStructBegin("reqMyServiceGetRandomData"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -531,7 +531,7 @@ func (x *respMyServiceGetRandomDataBuilder) Emit() *respMyServiceGetRandomData {
 }
 
 func (x *respMyServiceGetRandomData) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_MyService_getRandomData"); err != nil {
+    if err := p.WriteStructBegin("respMyServiceGetRandomData"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -659,7 +659,7 @@ func (x *reqMyServiceHasDataByIdBuilder) Emit() *reqMyServiceHasDataById {
 }
 
 func (x *reqMyServiceHasDataById) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_MyService_hasDataById"); err != nil {
+    if err := p.WriteStructBegin("reqMyServiceHasDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -787,7 +787,7 @@ func (x *respMyServiceHasDataByIdBuilder) Emit() *respMyServiceHasDataById {
 }
 
 func (x *respMyServiceHasDataById) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_MyService_hasDataById"); err != nil {
+    if err := p.WriteStructBegin("respMyServiceHasDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -915,7 +915,7 @@ func (x *reqMyServiceGetDataByIdBuilder) Emit() *reqMyServiceGetDataById {
 }
 
 func (x *reqMyServiceGetDataById) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_MyService_getDataById"); err != nil {
+    if err := p.WriteStructBegin("reqMyServiceGetDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1043,7 +1043,7 @@ func (x *respMyServiceGetDataByIdBuilder) Emit() *respMyServiceGetDataById {
 }
 
 func (x *respMyServiceGetDataById) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_MyService_getDataById"); err != nil {
+    if err := p.WriteStructBegin("respMyServiceGetDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1213,7 +1213,7 @@ func (x *reqMyServicePutDataByIdBuilder) Emit() *reqMyServicePutDataById {
 }
 
 func (x *reqMyServicePutDataById) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_MyService_putDataById"); err != nil {
+    if err := p.WriteStructBegin("reqMyServicePutDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1307,7 +1307,7 @@ func (x *respMyServicePutDataByIdBuilder) Emit() *respMyServicePutDataById {
 }
 
 func (x *respMyServicePutDataById) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_MyService_putDataById"); err != nil {
+    if err := p.WriteStructBegin("respMyServicePutDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1469,7 +1469,7 @@ func (x *reqMyServiceLobDataByIdBuilder) Emit() *reqMyServiceLobDataById {
 }
 
 func (x *reqMyServiceLobDataById) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_MyService_lobDataById"); err != nil {
+    if err := p.WriteStructBegin("reqMyServiceLobDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1563,7 +1563,7 @@ func (x *respMyServiceLobDataByIdBuilder) Emit() *respMyServiceLobDataById {
 }
 
 func (x *respMyServiceLobDataById) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_MyService_lobDataById"); err != nil {
+    if err := p.WriteStructBegin("respMyServiceLobDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1641,7 +1641,7 @@ func (x *reqMyServiceDoNothingBuilder) Emit() *reqMyServiceDoNothing {
 }
 
 func (x *reqMyServiceDoNothing) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_MyService_doNothing"); err != nil {
+    if err := p.WriteStructBegin("reqMyServiceDoNothing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1719,7 +1719,7 @@ func (x *respMyServiceDoNothingBuilder) Emit() *respMyServiceDoNothing {
 }
 
 func (x *respMyServiceDoNothing) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_MyService_doNothing"); err != nil {
+    if err := p.WriteStructBegin("respMyServiceDoNothing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2313,7 +2313,7 @@ func (x *reqMyServicePrioParentPingBuilder) Emit() *reqMyServicePrioParentPing {
 }
 
 func (x *reqMyServicePrioParentPing) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_MyServicePrioParent_ping"); err != nil {
+    if err := p.WriteStructBegin("reqMyServicePrioParentPing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2391,7 +2391,7 @@ func (x *respMyServicePrioParentPingBuilder) Emit() *respMyServicePrioParentPing
 }
 
 func (x *respMyServicePrioParentPing) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_MyServicePrioParent_ping"); err != nil {
+    if err := p.WriteStructBegin("respMyServicePrioParentPing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2469,7 +2469,7 @@ func (x *reqMyServicePrioParentPongBuilder) Emit() *reqMyServicePrioParentPong {
 }
 
 func (x *reqMyServicePrioParentPong) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_MyServicePrioParent_pong"); err != nil {
+    if err := p.WriteStructBegin("reqMyServicePrioParentPong"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2547,7 +2547,7 @@ func (x *respMyServicePrioParentPongBuilder) Emit() *respMyServicePrioParentPong
 }
 
 func (x *respMyServicePrioParentPong) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_MyServicePrioParent_pong"); err != nil {
+    if err := p.WriteStructBegin("respMyServicePrioParentPong"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2885,7 +2885,7 @@ func (x *reqMyServicePrioChildPangBuilder) Emit() *reqMyServicePrioChildPang {
 }
 
 func (x *reqMyServicePrioChildPang) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_MyServicePrioChild_pang"); err != nil {
+    if err := p.WriteStructBegin("reqMyServicePrioChildPang"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2963,7 +2963,7 @@ func (x *respMyServicePrioChildPangBuilder) Emit() *respMyServicePrioChildPang {
 }
 
 func (x *respMyServicePrioChildPang) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_MyServicePrioChild_pang"); err != nil {
+    if err := p.WriteStructBegin("respMyServicePrioChildPang"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -3231,7 +3231,7 @@ func (x *reqBadServiceCreateBadInteractionBuilder) Emit() *reqBadServiceCreateBa
 }
 
 func (x *reqBadServiceCreateBadInteraction) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_BadService_createBadInteraction"); err != nil {
+    if err := p.WriteStructBegin("reqBadServiceCreateBadInteraction"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -3344,7 +3344,7 @@ func (x *respBadServiceCreateBadInteractionBuilder) Emit() *respBadServiceCreate
 }
 
 func (x *respBadServiceCreateBadInteraction) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_BadService_createBadInteraction"); err != nil {
+    if err := p.WriteStructBegin("respBadServiceCreateBadInteraction"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -3430,7 +3430,7 @@ func (x *reqBadServiceBarBuilder) Emit() *reqBadServiceBar {
 }
 
 func (x *reqBadServiceBar) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_BadService_bar"); err != nil {
+    if err := p.WriteStructBegin("reqBadServiceBar"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -3550,7 +3550,7 @@ func (x *respBadServiceBarBuilder) Emit() *respBadServiceBar {
 }
 
 func (x *respBadServiceBar) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_BadService_bar"); err != nil {
+    if err := p.WriteStructBegin("respBadServiceBar"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 

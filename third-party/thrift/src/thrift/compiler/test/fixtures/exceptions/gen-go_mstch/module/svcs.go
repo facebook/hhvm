@@ -204,7 +204,7 @@ func (x *reqRaiserDoBlandBuilder) Emit() *reqRaiserDoBland {
 }
 
 func (x *reqRaiserDoBland) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_Raiser_doBland"); err != nil {
+    if err := p.WriteStructBegin("reqRaiserDoBland"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -282,7 +282,7 @@ func (x *respRaiserDoBlandBuilder) Emit() *respRaiserDoBland {
 }
 
 func (x *respRaiserDoBland) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_Raiser_doBland"); err != nil {
+    if err := p.WriteStructBegin("respRaiserDoBland"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -360,7 +360,7 @@ func (x *reqRaiserDoRaiseBuilder) Emit() *reqRaiserDoRaise {
 }
 
 func (x *reqRaiserDoRaise) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_Raiser_doRaise"); err != nil {
+    if err := p.WriteStructBegin("reqRaiserDoRaise"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -438,7 +438,7 @@ func (x *respRaiserDoRaiseBuilder) Emit() *respRaiserDoRaise {
 }
 
 func (x *respRaiserDoRaise) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_Raiser_doRaise"); err != nil {
+    if err := p.WriteStructBegin("respRaiserDoRaise"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -516,7 +516,7 @@ func (x *reqRaiserGet200Builder) Emit() *reqRaiserGet200 {
 }
 
 func (x *reqRaiserGet200) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_Raiser_get200"); err != nil {
+    if err := p.WriteStructBegin("reqRaiserGet200"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -636,7 +636,7 @@ func (x *respRaiserGet200Builder) Emit() *respRaiserGet200 {
 }
 
 func (x *respRaiserGet200) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_Raiser_get200"); err != nil {
+    if err := p.WriteStructBegin("respRaiserGet200"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -722,7 +722,7 @@ func (x *reqRaiserGet500Builder) Emit() *reqRaiserGet500 {
 }
 
 func (x *reqRaiserGet500) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_Raiser_get500"); err != nil {
+    if err := p.WriteStructBegin("reqRaiserGet500"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -842,7 +842,7 @@ func (x *respRaiserGet500Builder) Emit() *respRaiserGet500 {
 }
 
 func (x *respRaiserGet500) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_Raiser_get500"); err != nil {
+    if err := p.WriteStructBegin("respRaiserGet500"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 

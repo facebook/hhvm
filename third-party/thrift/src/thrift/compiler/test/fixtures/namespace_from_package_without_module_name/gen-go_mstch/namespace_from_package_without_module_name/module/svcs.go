@@ -200,7 +200,7 @@ func (x *reqTestServiceInitBuilder) Emit() *reqTestServiceInit {
 }
 
 func (x *reqTestServiceInit) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_TestService_init"); err != nil {
+    if err := p.WriteStructBegin("reqTestServiceInit"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -328,7 +328,7 @@ func (x *respTestServiceInitBuilder) Emit() *respTestServiceInit {
 }
 
 func (x *respTestServiceInit) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_TestService_init"); err != nil {
+    if err := p.WriteStructBegin("respTestServiceInit"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 

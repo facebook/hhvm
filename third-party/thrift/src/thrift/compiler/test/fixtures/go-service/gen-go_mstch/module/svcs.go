@@ -394,7 +394,7 @@ func (x *reqGetEntityGetEntityBuilder) Emit() *reqGetEntityGetEntity {
 }
 
 func (x *reqGetEntityGetEntity) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getEntity"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetEntity"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -533,7 +533,7 @@ func (x *respGetEntityGetEntityBuilder) Emit() *respGetEntityGetEntity {
 }
 
 func (x *respGetEntityGetEntity) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getEntity"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetEntity"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -619,7 +619,7 @@ func (x *reqGetEntityGetBoolBuilder) Emit() *reqGetEntityGetBool {
 }
 
 func (x *reqGetEntityGetBool) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getBool"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetBool"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -739,7 +739,7 @@ func (x *respGetEntityGetBoolBuilder) Emit() *respGetEntityGetBool {
 }
 
 func (x *respGetEntityGetBool) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getBool"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetBool"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -825,7 +825,7 @@ func (x *reqGetEntityGetByteBuilder) Emit() *reqGetEntityGetByte {
 }
 
 func (x *reqGetEntityGetByte) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getByte"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetByte"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -945,7 +945,7 @@ func (x *respGetEntityGetByteBuilder) Emit() *respGetEntityGetByte {
 }
 
 func (x *respGetEntityGetByte) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getByte"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetByte"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1031,7 +1031,7 @@ func (x *reqGetEntityGetI16Builder) Emit() *reqGetEntityGetI16 {
 }
 
 func (x *reqGetEntityGetI16) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getI16"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetI16"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1151,7 +1151,7 @@ func (x *respGetEntityGetI16Builder) Emit() *respGetEntityGetI16 {
 }
 
 func (x *respGetEntityGetI16) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getI16"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetI16"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1237,7 +1237,7 @@ func (x *reqGetEntityGetI32Builder) Emit() *reqGetEntityGetI32 {
 }
 
 func (x *reqGetEntityGetI32) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getI32"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetI32"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1357,7 +1357,7 @@ func (x *respGetEntityGetI32Builder) Emit() *respGetEntityGetI32 {
 }
 
 func (x *respGetEntityGetI32) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getI32"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetI32"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1443,7 +1443,7 @@ func (x *reqGetEntityGetI64Builder) Emit() *reqGetEntityGetI64 {
 }
 
 func (x *reqGetEntityGetI64) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getI64"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetI64"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1563,7 +1563,7 @@ func (x *respGetEntityGetI64Builder) Emit() *respGetEntityGetI64 {
 }
 
 func (x *respGetEntityGetI64) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getI64"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetI64"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1649,7 +1649,7 @@ func (x *reqGetEntityGetDoubleBuilder) Emit() *reqGetEntityGetDouble {
 }
 
 func (x *reqGetEntityGetDouble) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getDouble"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetDouble"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1769,7 +1769,7 @@ func (x *respGetEntityGetDoubleBuilder) Emit() *respGetEntityGetDouble {
 }
 
 func (x *respGetEntityGetDouble) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getDouble"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetDouble"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1855,7 +1855,7 @@ func (x *reqGetEntityGetStringBuilder) Emit() *reqGetEntityGetString {
 }
 
 func (x *reqGetEntityGetString) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getString"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetString"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1975,7 +1975,7 @@ func (x *respGetEntityGetStringBuilder) Emit() *respGetEntityGetString {
 }
 
 func (x *respGetEntityGetString) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getString"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetString"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2061,7 +2061,7 @@ func (x *reqGetEntityGetBinaryBuilder) Emit() *reqGetEntityGetBinary {
 }
 
 func (x *reqGetEntityGetBinary) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getBinary"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetBinary"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2188,7 +2188,7 @@ func (x *respGetEntityGetBinaryBuilder) Emit() *respGetEntityGetBinary {
 }
 
 func (x *respGetEntityGetBinary) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getBinary"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetBinary"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2274,7 +2274,7 @@ func (x *reqGetEntityGetMapBuilder) Emit() *reqGetEntityGetMap {
 }
 
 func (x *reqGetEntityGetMap) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getMap"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2447,7 +2447,7 @@ func (x *respGetEntityGetMapBuilder) Emit() *respGetEntityGetMap {
 }
 
 func (x *respGetEntityGetMap) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getMap"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2533,7 +2533,7 @@ func (x *reqGetEntityGetSetBuilder) Emit() *reqGetEntityGetSet {
 }
 
 func (x *reqGetEntityGetSet) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getSet"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2689,7 +2689,7 @@ func (x *respGetEntityGetSetBuilder) Emit() *respGetEntityGetSet {
 }
 
 func (x *respGetEntityGetSet) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getSet"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2775,7 +2775,7 @@ func (x *reqGetEntityGetListBuilder) Emit() *reqGetEntityGetList {
 }
 
 func (x *reqGetEntityGetList) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getList"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -2931,7 +2931,7 @@ func (x *respGetEntityGetListBuilder) Emit() *respGetEntityGetList {
 }
 
 func (x *respGetEntityGetList) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getList"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -3143,7 +3143,7 @@ func (x *reqGetEntityGetLegacyStuffBuilder) Emit() *reqGetEntityGetLegacyStuff {
 }
 
 func (x *reqGetEntityGetLegacyStuff) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_GetEntity_getLegacyStuff"); err != nil {
+    if err := p.WriteStructBegin("reqGetEntityGetLegacyStuff"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -3287,7 +3287,7 @@ func (x *respGetEntityGetLegacyStuffBuilder) Emit() *respGetEntityGetLegacyStuff
 }
 
 func (x *respGetEntityGetLegacyStuff) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_GetEntity_getLegacyStuff"); err != nil {
+    if err := p.WriteStructBegin("respGetEntityGetLegacyStuff"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 

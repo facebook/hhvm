@@ -275,7 +275,7 @@ func (x *reqSomeServiceBounceMapBuilder) Emit() *reqSomeServiceBounceMap {
 }
 
 func (x *reqSomeServiceBounceMap) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_SomeService_bounce_map"); err != nil {
+    if err := p.WriteStructBegin("reqSomeServiceBounceMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -456,7 +456,7 @@ func (x *respSomeServiceBounceMapBuilder) Emit() *respSomeServiceBounceMap {
 }
 
 func (x *respSomeServiceBounceMap) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_SomeService_bounce_map"); err != nil {
+    if err := p.WriteStructBegin("respSomeServiceBounceMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -620,7 +620,7 @@ func (x *reqSomeServiceBinaryKeyedMapBuilder) Emit() *reqSomeServiceBinaryKeyedM
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_SomeService_binary_keyed_map"); err != nil {
+    if err := p.WriteStructBegin("reqSomeServiceBinaryKeyedMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -801,7 +801,7 @@ func (x *respSomeServiceBinaryKeyedMapBuilder) Emit() *respSomeServiceBinaryKeye
 }
 
 func (x *respSomeServiceBinaryKeyedMap) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_SomeService_binary_keyed_map"); err != nil {
+    if err := p.WriteStructBegin("respSomeServiceBinaryKeyedMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 

@@ -307,7 +307,7 @@ func (x *reqServiceFuncBuilder) Emit() *reqServiceFunc {
 }
 
 func (x *reqServiceFunc) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_Service_func"); err != nil {
+    if err := p.WriteStructBegin("reqServiceFunc"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -451,7 +451,7 @@ func (x *respServiceFuncBuilder) Emit() *respServiceFunc {
 }
 
 func (x *respServiceFunc) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_Service_func"); err != nil {
+    if err := p.WriteStructBegin("respServiceFunc"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -757,7 +757,7 @@ func (x *reqAdapterServiceCountBuilder) Emit() *reqAdapterServiceCount {
 }
 
 func (x *reqAdapterServiceCount) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_AdapterService_count"); err != nil {
+    if err := p.WriteStructBegin("reqAdapterServiceCount"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -888,7 +888,7 @@ func (x *respAdapterServiceCountBuilder) Emit() *respAdapterServiceCount {
 }
 
 func (x *respAdapterServiceCount) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_AdapterService_count"); err != nil {
+    if err := p.WriteStructBegin("respAdapterServiceCount"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1027,7 +1027,7 @@ func (x *reqAdapterServiceAdaptedTypesBuilder) Emit() *reqAdapterServiceAdaptedT
 }
 
 func (x *reqAdapterServiceAdaptedTypes) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_AdapterService_adaptedTypes"); err != nil {
+    if err := p.WriteStructBegin("reqAdapterServiceAdaptedTypes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1166,7 +1166,7 @@ func (x *respAdapterServiceAdaptedTypesBuilder) Emit() *respAdapterServiceAdapte
 }
 
 func (x *respAdapterServiceAdaptedTypes) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_AdapterService_adaptedTypes"); err != nil {
+    if err := p.WriteStructBegin("respAdapterServiceAdaptedTypes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 

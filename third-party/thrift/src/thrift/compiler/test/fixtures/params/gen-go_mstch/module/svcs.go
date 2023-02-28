@@ -346,7 +346,7 @@ func (x *reqNestedContainersMapListBuilder) Emit() *reqNestedContainersMapList {
 }
 
 func (x *reqNestedContainersMapList) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_NestedContainers_mapList"); err != nil {
+    if err := p.WriteStructBegin("reqNestedContainersMapList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -432,7 +432,7 @@ func (x *respNestedContainersMapListBuilder) Emit() *respNestedContainersMapList
 }
 
 func (x *respNestedContainersMapList) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_NestedContainers_mapList"); err != nil {
+    if err := p.WriteStructBegin("respNestedContainersMapList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -634,7 +634,7 @@ func (x *reqNestedContainersMapSetBuilder) Emit() *reqNestedContainersMapSet {
 }
 
 func (x *reqNestedContainersMapSet) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_NestedContainers_mapSet"); err != nil {
+    if err := p.WriteStructBegin("reqNestedContainersMapSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -720,7 +720,7 @@ func (x *respNestedContainersMapSetBuilder) Emit() *respNestedContainersMapSet {
 }
 
 func (x *respNestedContainersMapSet) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_NestedContainers_mapSet"); err != nil {
+    if err := p.WriteStructBegin("respNestedContainersMapSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -922,7 +922,7 @@ func (x *reqNestedContainersListMapBuilder) Emit() *reqNestedContainersListMap {
 }
 
 func (x *reqNestedContainersListMap) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_NestedContainers_listMap"); err != nil {
+    if err := p.WriteStructBegin("reqNestedContainersListMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1008,7 +1008,7 @@ func (x *respNestedContainersListMapBuilder) Emit() *respNestedContainersListMap
 }
 
 func (x *respNestedContainersListMap) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_NestedContainers_listMap"); err != nil {
+    if err := p.WriteStructBegin("respNestedContainersListMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1193,7 +1193,7 @@ func (x *reqNestedContainersListSetBuilder) Emit() *reqNestedContainersListSet {
 }
 
 func (x *reqNestedContainersListSet) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_NestedContainers_listSet"); err != nil {
+    if err := p.WriteStructBegin("reqNestedContainersListSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1279,7 +1279,7 @@ func (x *respNestedContainersListSetBuilder) Emit() *respNestedContainersListSet
 }
 
 func (x *respNestedContainersListSet) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_NestedContainers_listSet"); err != nil {
+    if err := p.WriteStructBegin("respNestedContainersListSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1585,7 +1585,7 @@ func (x *reqNestedContainersTurtlesBuilder) Emit() *reqNestedContainersTurtles {
 }
 
 func (x *reqNestedContainersTurtles) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("req_NestedContainers_turtles"); err != nil {
+    if err := p.WriteStructBegin("reqNestedContainersTurtles"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1671,7 +1671,7 @@ func (x *respNestedContainersTurtlesBuilder) Emit() *respNestedContainersTurtles
 }
 
 func (x *respNestedContainersTurtles) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("resp_NestedContainers_turtles"); err != nil {
+    if err := p.WriteStructBegin("respNestedContainersTurtles"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 

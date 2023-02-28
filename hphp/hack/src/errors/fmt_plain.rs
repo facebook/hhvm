@@ -35,7 +35,7 @@ impl<'a> std::fmt::Display for FmtPlain<'a> {
     }
 }
 
-struct FmtErrorCode(ErrorCode);
+pub struct FmtErrorCode(pub ErrorCode);
 
 impl std::fmt::Display for FmtErrorCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

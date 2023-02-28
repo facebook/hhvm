@@ -10,6 +10,7 @@ path = "../../errors.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
+ansi_term = "0.12"
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 rc_pos = { version = "0.0.0", path = "../../../utils/rust/pos" }
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }

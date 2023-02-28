@@ -181,6 +181,7 @@ NOTE: Includes are more like Python imports rather than a textual copy as in C/C
 ---
 
 ## **Package Declaration**
+
 A package declaration defines the default [Universal Name](spec/definition/universal-name.md) prefix and optional annotations, under which all definitions in the program are declared:
 
 ```
@@ -198,6 +199,15 @@ package "test.dev/testing"
 typedef int MyInt
 ```
 
+Annotations on a package declaration apply to the whole file. For example:
+
+```
+@cpp.TerseWrite
+package "foo.bar/baz"
+```
+
+This turns all fields in the current file into terse-write fields when possible.
+
 ---
 
 ## **Namespace Directives**
@@ -209,6 +219,7 @@ NamespaceDirective ::=
 Name ::=
   Identifier ( "." Identifier )*
 ```
+
 Namespace directives instruct the compiler on top level structure of the generated code.  The details are compiler specific (*we need link to compiler doc*).  Namespace directives do not affect the Thrift file semantics.
 
 ```
@@ -219,6 +230,53 @@ namespace cpp2 facebook.peoplesearch
 namespace java com.facebook.peoplesearch
 ```
 ---
+
+## Default Namespace
+
+Package name contains "domain/paths". It implies following namespace
+
+* C++: {reverse(domain)[1:]}.{paths}
+* py3: {reverse(domain)[1:]}.{paths[:-2] if paths[-1] == filename else paths}
+* hack: {paths}
+* java: {reverse(domain)}.{paths}
+
+:::note
+User can override default namespace explicitly by using `namespace` keyword for each languages.
+:::
+
+Here is an example
+
+```
+package "domain.com/path/to/file"
+```
+
+This package generates following namespace
+
+```
+namespace cpp2 domain.path.to.file
+namespace py3 domain.path.to
+namespace hack path.to.file
+namespace php path.to.file
+namespace java2 com.domain.path.to.file
+namespace java.swift com.domain.path.to.file
+```
+
+If package name doesn't contain filename, it generates different namespace for `py3`
+
+```
+package "domain.com/path/to"
+```
+
+This package generates following namespace
+
+```
+namespace cpp2 domain.path.to
+namespace py3 domain.path.to
+namespace hack path.to
+namespace php path.to
+namespace java2 com.domain.path.to
+namespace java.swift com.domain.path.to
+```
 
 ## **Basic Thrift Types**
 
@@ -238,6 +296,18 @@ PrimitiveType ::=
 * `binary`: byte arrays
 * `string`: UTF-8 strings
 
+:::note
+Thrift does not support unsigned integers because they have no direct translation to native (primitive) types in many of Thrift’s target languages.
+:::
+
+:::note
+Some target languages enforce that `string` values are UTF-8 encoded and others do not. For example, Java and Python require valid UTF-8, while C++ does not. This can appear as cross-language incompatibility.
+:::
+
+:::note
+`binary` and `string` are encoded identically for RPC (Binary and Compact protocols) and are interchangeable. However, they are encoded differently in JSON protocols: `binary` is base64-encoded while `string` only has special characters escaped.
+:::
+
 ### **Container Types**
 
 ```
@@ -255,15 +325,20 @@ SetType ::=
 MapType ::=
   "map" "<" TypeSpecification "," TypeSpecification ">"
 ```
-Thrift has strongly typed Java-style containers:
+
+Thrift has strongly-typed containers that map to commonly used containers in target programming languages. There are three container types available:
 
 * `list<T>`: A list of elements of type `T`. May contain duplicates.
 * `set<T>`: An unordered set of unique elements of type `T`.
 * `map<K,V>`: An unordered map of unique keys of type `K` to values of type `V`.
 
-NOTE: In some languages default mode is to use ordered sets and maps. This could be changed to use unordered and customized containers - see [Thrift Annotations](/spec/definition/annotation.md#unstructured-annotations-deprecated).
+:::note
+In some languages default mode is to use ordered sets and maps. This could be changed to use unordered and customized containers - see [Thrift Annotations](/spec/definition/annotation.md#unstructured-annotations-deprecated).
+:::
 
-WARNING: Although not enforced, it is strongly encouraged to only use set and map when key is either a string or an integer type for the highest compatibility between languages.
+:::caution
+Although not enforced, it is strongly encouraged to only use set and map when key is either a string or an integer type for the highest compatibility between languages.
+:::
 
 The element, key, and value types can be any Thrift type, including nested containers.
 
@@ -288,6 +363,7 @@ EnumerationType ::=
 Enumerator ::=
   Identifier "=" IntegerLiteral
 ```
+
 Thrift supports C++ style enumeration types.  The enumerators (the named constants) must be explicitly bound to an integer value.  The identifier after the reserved word `enum` may be used to denote the enumeration type.
 
 ```
@@ -298,9 +374,18 @@ enum SearchKind {
   GROUPS = 5,
 }
 ```
-NOTE: Because the default value for every enum is 0 (even if you do not define an enumerator for 0), it is recommended to include an enum at 0 and use that value to indicate that the client or server didn't provide the value. The default constructor will initialize that value to `UNKNOWN` instead of some meaningful value.
 
-WARNING: Enums are treated like integer by Thrift, if you send a value which is not in the valid range, the receiver will not check or convert the value to the default, it will just have an out of range value. This can happen when a new client is talking to an old server.
+:::note
+Because the default value for every enum is 0 (even if you do not define an enumerator for 0), it is recommended to include an enum at 0 and use that value to indicate that the client or server didn't provide the value. The default constructor will initialize that value to `UNKNOWN` instead of some meaningful value.
+:::
+
+:::caution
+Enums are treated like integer by Thrift, if you send a value which is not in the valid range, the receiver will not check or convert the value to the default, it will just have an out of range value. This can happen when a new client is talking to an old server.
+:::
+
+:::caution
+Removing and adding enum values can be dangerous - see [Schema Compatibility](schema-evolution.md).
+:::
 
 ### **Typedefs**
 
@@ -574,7 +659,13 @@ struct Bar {
 }
 ```
 
-WARNING: Do not change default values after setting them. It is hard to know what code may be relying on the previous default values.
+:::caution
+Avoid using default values on optional fields. It is not possible to tell if the server sent the value, or if it is just the default value.
+:::
+
+:::caution
+Do not change default values after setting them. It is hard to know what code may be relying on the previous default values.
+:::
 
 ---
 
@@ -665,9 +756,9 @@ ParameterSpecification ::= FieldId ":" TypeSpecification Identifier [ DefaultVal
 
 An interface for RPC is defined in a Thrift file as a service.
 
-Each service has a set of functions.  Each function has a unique name and takes a list of arguments.  It can return normally with a result if the result type is not `void` or it can return by throwing one of the listed application exceptions.  In addition, the function can return by throwing a Thrift system exception if there was some underlying problem with the RPC itself.
+Each service has a set of functions. Each function has a unique name and takes a list of arguments.  It can return normally with a result if the result type is not `void` or it can return by throwing one of the listed application exceptions. In addition, the function can return by throwing a Thrift system exception if there was some underlying problem with the RPC itself.
 
-The types of the field specifications after `throws` must be exception types.
+The types of the field specifications after `throws` must be exception types. If a functions throws one of the exceptions given in the `throws` clause, then all of the members of this exception will be serialized and sent over the wire. For other undeclared exceptions only the message will be serialized and they will appear on the client side as `TApplicationException`.
 
 The list of arguments to the function follow similar rules as Thrift struct types with the exception of qualifiers, meaning that **arguments cannot be optional**. The proper way to achieve this is to use a struct type argument, which itself then may contain an `optional` field.
 

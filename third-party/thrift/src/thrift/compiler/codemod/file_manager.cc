@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <fmt/core.h>
 #include <folly/FileUtil.h>
 
 #include <thrift/compiler/codemod/file_manager.h>
@@ -26,6 +27,11 @@ namespace codemod {
 void file_manager::apply_replacements() {
   size_t prev_end = 0;
   std::string new_content;
+
+  if (replacements_.empty()) {
+    fmt::print("No replacements\n");
+    return;
+  }
 
   // Perform the replacements.
   for (const auto& r : replacements_) {
@@ -43,6 +49,8 @@ void file_manager::apply_replacements() {
   // No need for catching nor throwing here since if file doesn't exist
   // the constructor itself will throw an exception.
   folly::writeFile(new_content, program_->path().c_str());
+
+  fmt::print("{} replacements\n", replacements_.size());
 }
 
 // NOTE: Rely on automated formatting to fix formatting issues.

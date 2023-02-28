@@ -432,6 +432,9 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 attributes.recurse(env, self.object())?;
                 el.recurse(env, self.object())?;
             }
+            Expr_::EnumClassLabel(box (Some(sid), _)) if !env.in_codegen() => {
+                env.elaborate_type_name(sid);
+            }
             _ => e.recurse(env, self.object())?,
         }
         Ok(())

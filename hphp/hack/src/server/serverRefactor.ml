@@ -450,6 +450,24 @@ let upcast_visitor =
       self#plus acc (super#on_expr env expr)
   end
 
+let method_might_support_dynamic ctx ~class_name ~method_name =
+  let open Option.Monad_infix in
+  let module Class = Decl_provider.Class in
+  let sd_enabled =
+    TypecheckerOptions.enable_sound_dynamic @@ Provider_context.get_tcopt ctx
+  in
+  (not sd_enabled)
+  || Decl_provider.get_class ctx @@ Utils.add_ns class_name
+     >>= (fun class_ ->
+           Option.first_some
+             (Class.get_smethod class_ method_name)
+             (Class.get_method class_ method_name))
+     >>| (fun elt ->
+           let flags = elt.Typing_defs.ce_flags in
+           Typing_defs_flags.ClassElt.(
+             is_dynamicallycallable flags || supports_dynamic_type flags))
+     |> Option.value ~default:true
+
 let get_upcast_locations ctx files element_name =
   let element_name = ServerFindRefs.add_ns element_name in
   (* [files] can legitimately refer to non-existent files, e.g.
@@ -572,9 +590,18 @@ let go ctx action genv env =
          in
          let deprecated_wrapper_patch =
            match action with
-           | FunctionRename { filename; definition; _ }
-           | MethodRename { filename; definition; _ } ->
+           | FunctionRename { filename; definition; _ } ->
              get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name
+           | MethodRename { filename; definition; class_name; old_name; _ } ->
+             if
+               method_might_support_dynamic
+                 ctx
+                 ~class_name
+                 ~method_name:old_name
+             then
+               get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name
+             else
+               None
            | ClassRename _
            | ClassConstRename _
            | LocalVarRename _ ->

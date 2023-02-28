@@ -725,6 +725,7 @@ pub mod typehints {
                 DARRAY,
                 VARRAY,
                 VARRAY_OR_DARRAY,
+                VEC_OR_DICT,
                 CALLABLE,
                 WILDCARD,
             ]

@@ -18,7 +18,21 @@ from cython.view cimport memoryview
 from folly.iobuf cimport IOBuf, from_unique_ptr
 from libcpp cimport bool as cbool
 from libcpp.utility cimport move as cmove
-from thrift.python.types cimport EnumTypeInfo, Struct, StructOrUnion, Union, getCTypeInfo
+from thrift.python.exceptions cimport GeneratedError
+from thrift.python.types cimport (
+    EnumTypeInfo,
+    getCTypeInfo,
+    List,
+    ListTypeInfo,
+    Map,
+    MapTypeInfo,
+    Set,
+    SetTypeInfo,
+    Struct,
+    StructOrUnion,
+    StructTypeInfo,
+    Union,
+)
 from thrift.python.types import (
     Enum,
     typeinfo_bool,
@@ -40,7 +54,7 @@ import typing
 Buf = cython.fused_type(IOBuf, bytes, bytearray, memoryview)
 
 
-def _thrift_type_to_type_info(thrift_type, cls):
+cdef _thrift_type_to_type_info(thrift_type, cls):
     if thrift_type.name.type is TypeName.Type.boolType:
         return typeinfo_bool
     if thrift_type.name.type is TypeName.Type.byteType:
@@ -63,12 +77,20 @@ def _thrift_type_to_type_info(thrift_type, cls):
         return typeinfo_binary
     if thrift_type.name.type is TypeName.Type.enumType:
         return EnumTypeInfo(cls)
+    if thrift_type.name.type in (
+        TypeName.Type.structType,
+        TypeName.Type.unionType,
+        TypeName.Type.exceptionType,
+    ):
+        return StructTypeInfo(cls)
     raise NotImplementedError(f"Unsupported type: {thrift_type}")
 
 
-def _infer_type_info_from_cls(cls):
+cdef _infer_type_info_from_cls(cls):
     if issubclass(cls, Enum):
         return EnumTypeInfo(cls)
+    if issubclass(cls, (StructOrUnion, GeneratedError)):
+        return StructTypeInfo(cls)
     if issubclass(cls, bool):
         return typeinfo_bool
     if issubclass(cls, int):
@@ -84,11 +106,7 @@ def _infer_type_info_from_cls(cls):
     raise NotImplementedError(f"Can not infer thrift type from: {cls}")
 
 
-def serialize_primitive(obj, Protocol protocol=Protocol.COMPACT, thrift_type=None):
-    if thrift_type is None:
-        type_info = _infer_type_info_from_cls(type(obj))
-    else:
-        type_info = _thrift_type_to_type_info(thrift_type, type(obj))
+cdef _serialize_with_type_info(obj, protocol, type_info):
     return folly.iobuf.from_unique_ptr(
         cmove(
             cserialize_type(
@@ -100,11 +118,7 @@ def serialize_primitive(obj, Protocol protocol=Protocol.COMPACT, thrift_type=Non
     )
 
 
-def deserialize_primitive(cls, Buf buf, Protocol protocol=Protocol.COMPACT, thrift_type=None):
-    if thrift_type is None:
-        type_info = _infer_type_info_from_cls(cls)
-    else:
-        type_info = _thrift_type_to_type_info(thrift_type, cls)
+cdef _deserialize_with_type_info(buf, protocol, type_info):
     cdef IOBuf iobuf = buf if isinstance(buf, IOBuf) else IOBuf(buf)
     return type_info.to_python_value(
         cdeserialize_type(
@@ -113,3 +127,74 @@ def deserialize_primitive(cls, Buf buf, Protocol protocol=Protocol.COMPACT, thri
             protocol,
         )
     )
+
+
+def serialize_primitive(obj, Protocol protocol=Protocol.COMPACT, thrift_type=None):
+    if thrift_type is None:
+        type_info = _infer_type_info_from_cls(type(obj))
+    else:
+        type_info = _thrift_type_to_type_info(thrift_type, type(obj))
+    return _serialize_with_type_info(obj, protocol, type_info)
+
+
+def deserialize_primitive(cls, Buf buf, Protocol protocol=Protocol.COMPACT, thrift_type=None):
+    if thrift_type is None:
+        type_info = _infer_type_info_from_cls(cls)
+    else:
+        type_info = _thrift_type_to_type_info(thrift_type, cls)
+    return _deserialize_with_type_info(buf, protocol, type_info)
+
+
+def serialize_list(obj, Protocol protocol=Protocol.COMPACT):
+    if not isinstance(obj, (list, List)):
+        raise ValueError("Not a list")
+    if obj:
+        type_info = ListTypeInfo(_infer_type_info_from_cls(type(obj[0])))
+    else:
+        # Empty list, element type info doesn't matter
+        type_info = ListTypeInfo(typeinfo_bool)
+    return _serialize_with_type_info(obj, protocol, type_info)
+
+
+def deserialize_list(elem_cls, Buf buf, Protocol protocol=Protocol.COMPACT):
+    type_info = ListTypeInfo(_infer_type_info_from_cls(elem_cls))
+    return _deserialize_with_type_info(buf, protocol, type_info)
+
+
+def serialize_set(obj, Protocol protocol=Protocol.COMPACT):
+    if not isinstance(obj, (set, Set)):
+        raise ValueError("Not a set")
+    if obj:
+        type_info = SetTypeInfo(_infer_type_info_from_cls(type(next(iter(obj)))))
+    else:
+        # Empty set, element type info doesn't matter
+        type_info = SetTypeInfo(typeinfo_bool)
+    return _serialize_with_type_info(obj, protocol, type_info)
+
+
+def deserialize_set(elem_cls, Buf buf, Protocol protocol=Protocol.COMPACT):
+    type_info = SetTypeInfo(_infer_type_info_from_cls(elem_cls))
+    return _deserialize_with_type_info(buf, protocol, type_info)
+
+
+def serialize_map(obj, Protocol protocol=Protocol.COMPACT):
+    if not isinstance(obj, (dict, Map)):
+        raise ValueError("Not a map")
+    if obj:
+        k, v = next(iter(obj.items()))
+        type_info = MapTypeInfo(
+            _infer_type_info_from_cls(type(k)),
+            _infer_type_info_from_cls(type(v)),
+        )
+    else:
+        # Empty dict, key/value type info doesn't matter
+        type_info = MapTypeInfo(typeinfo_bool, typeinfo_bool)
+    return _serialize_with_type_info(obj, protocol, type_info)
+
+
+def deserialize_map(key_cls, value_cls, Buf buf, Protocol protocol=Protocol.COMPACT):
+    type_info = MapTypeInfo(
+        _infer_type_info_from_cls(key_cls),
+        _infer_type_info_from_cls(value_cls),
+    )
+    return _deserialize_with_type_info(buf, protocol, type_info)

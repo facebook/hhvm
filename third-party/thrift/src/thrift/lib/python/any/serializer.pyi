@@ -17,20 +17,56 @@ import typing
 from apache.thrift.type.type.thrift_types import Type
 
 from folly.iobuf import IOBuf
+from thrift.python.exceptions import GeneratedError
 from thrift.python.serializer import Protocol
-from thrift.python.types import Enum
+from thrift.python.types import Enum, StructOrUnion
 
 PrimitiveType = typing.Union[bool, int, float, str, bytes, IOBuf, Enum]
-Primitive = typing.TypeVar("Primitive", bound=PrimitiveType)
+TPrimitive = typing.TypeVar("TPrimitive", bound=PrimitiveType)
 
 def serialize_primitive(
-    obj: Primitive,
+    obj: TPrimitive,
     protocol: Protocol = ...,
     thrift_type: typing.Optional[Type] = ...,
 ) -> IOBuf: ...
 def deserialize_primitive(
-    cls: typing.Type[Primitive],
+    cls: typing.Type[TPrimitive],
     buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = ...,
     thrift_type: typing.Optional[Type] = ...,
-) -> Primitive: ...
+) -> TPrimitive: ...
+
+StructOrUnionOrException = typing.Union[GeneratedError, StructOrUnion]
+SerializableType = typing.Union[StructOrUnionOrException, PrimitiveType]
+TSerializable = typing.TypeVar("TSerializable", bound=SerializableType)
+TKey = typing.TypeVar("TKey", bound=SerializableType)
+TValue = typing.TypeVar("TValue", bound=SerializableType)
+
+def serialize_list(
+    obj: typing.Sequence[SerializableType],
+    protocol: Protocol = ...,
+) -> IOBuf: ...
+def deserialize_list(
+    elem_cls: typing.Type[TSerializable],
+    buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
+    protocol: Protocol = ...,
+) -> typing.Sequence[TSerializable]: ...
+def serialize_set(
+    obj: typing.AbstractSet[SerializableType],
+    protocol: Protocol = ...,
+) -> IOBuf: ...
+def deserialize_set(
+    elem_cls: typing.Type[TSerializable],
+    buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
+    protocol: Protocol = ...,
+) -> typing.AbstractSet[TSerializable]: ...
+def serialize_map(
+    obj: typing.Mapping[TKey, TValue],
+    protocol: Protocol = ...,
+) -> IOBuf: ...
+def deserialize_map(
+    key_cls: typing.Type[TKey],
+    value_cls: typing.Type[TValue],
+    buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
+    protocol: Protocol = ...,
+) -> typing.Mapping[TKey, TValue]: ...

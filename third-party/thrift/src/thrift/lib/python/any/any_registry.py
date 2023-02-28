@@ -40,10 +40,12 @@ from thrift.python.types import Enum, StructOrUnion, Union
 
 
 if typing.TYPE_CHECKING:
-    from thrift.python.any.serializer import PrimitiveType
+    from thrift.python.any.serializer import (
+        PrimitiveType,
+        SerializableType,
+        StructOrUnionOrException,
+    )
 
-    StructOrUnionOrException = typing.Union[GeneratedError, StructOrUnion]
-    SupportedType = typing.Union[StructOrUnionOrException, PrimitiveType]
     ObjWithUri = typing.Union[StructOrUnionOrException, Enum]
     ClassWithUri = typing.Type[ObjWithUri]
 
@@ -118,7 +120,7 @@ class AnyRegistry:
         return any_change
 
     def store(
-        self, obj: SupportedType, protocol: typing.Optional[Protocol] = None
+        self, obj: SerializableType, protocol: typing.Optional[Protocol] = None
     ) -> Any:
         if protocol is None:
             protocol = Protocol(standard=StandardProtocol.Compact)
@@ -171,7 +173,7 @@ class AnyRegistry:
             )
         raise ValueError("No type information found")
 
-    def load(self, any_obj: Any) -> SupportedType:
+    def load(self, any_obj: Any) -> SerializableType:
         if any_obj.protocol.type != Protocol.Type.standard:
             raise NotImplementedError(
                 f"Unsupported non-standard protocol: {any_obj.protocol.value}"

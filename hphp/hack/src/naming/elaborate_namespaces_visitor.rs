@@ -169,6 +169,11 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     fn visit_expr_(&mut self, env: &mut Env, e: &mut Expr_) -> Result<(), ()> {
         // Sets env for lambdas
         match e {
+            Expr_::Collection(box (id, c_targ_opt, flds)) if !env.in_codegen() => {
+                namespaces::elaborate_id(&env.namespace, namespaces::ElaborateKind::Class, id);
+                c_targ_opt.accept(env, self.object())?;
+                flds.accept(env, self.object())?;
+            }
             Expr_::Call(box (func, targs, args, uargs)) => {
                 // Recurse first due to borrow order
                 targs.accept(env, self.object())?;

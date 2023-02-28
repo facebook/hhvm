@@ -23,6 +23,7 @@
 #include <fizz/server/SlidingBloomReplayCache.h>
 #include <fizz/server/TicketTypes.h>
 #include <fizz/tool/FizzCommandCommon.h>
+#include <fizz/util/FizzUtil.h>
 #include <fizz/util/KeyLogWriter.h>
 #include <fizz/util/Parse.h>
 #ifdef FIZZ_TOOL_ENABLE_OQS
@@ -31,7 +32,6 @@
 #include <folly/Format.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncServerSocket.h>
-
 #include <fstream>
 #include <string>
 #include <vector>
@@ -596,7 +596,8 @@ std::shared_ptr<ech::Decrypter> setupDecrypterFromInputs(
       getKEMId((*echConfigsJson)["echconfigs"][0]["kem_id"].asString());
 
   // Create a key exchange and set the private key
-  auto kexWithPrivateKey = createKeyExchange(kemId, echPrivateKeyFile);
+  auto kexWithPrivateKey =
+      fizz::FizzUtil::createKeyExchange(kemId, echPrivateKeyFile);
   if (!kexWithPrivateKey) {
     LOG(ERROR)
         << "Unable to create a key exchange and set a private key for it.";

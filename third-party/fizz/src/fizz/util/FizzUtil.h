@@ -43,6 +43,10 @@ class FizzUtil {
       const std::string& data,
       folly::PasswordInFile* pf);
 
+  static std::unique_ptr<KeyExchange> createKeyExchange(
+      hpke::KEMId kemId,
+      const std::string& echPrivateKeyFile);
+
   // Creates a TicketCipherT with given params
   template <class TicketCipherT>
   static std::unique_ptr<TicketCipherT> createTicketCipher(

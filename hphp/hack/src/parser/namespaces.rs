@@ -148,7 +148,7 @@ fn elaborate_raw_id<'a>(
     kind: ElaborateKind,
     id: &'a str,
     elaborate_xhp_namespaces_for_facts: bool,
-) -> Cow<'a, str> {
+) -> Option<String> {
     let id = if kind == ElaborateKind::Class && nsenv.disable_xhp_element_mangling() {
         let qualified = elaborate_xhp_namespace(id);
         match qualified {
@@ -165,7 +165,10 @@ fn elaborate_raw_id<'a>(
     };
     // It is already qualified
     if id.starts_with('\\') {
-        return id;
+        return match id {
+            Cow::Borrowed(..) => None,
+            Cow::Owned(s) => Some(s),
+        };
     }
     let id = id.as_ref();
 
@@ -174,20 +177,20 @@ fn elaborate_raw_id<'a>(
     match kind {
         ElaborateKind::Const => {
             if sn::pseudo_consts::is_pseudo_const(&fqid) {
-                return Cow::Owned(fqid);
+                return Some(fqid);
             }
         }
         ElaborateKind::Fun if sn::pseudo_functions::is_pseudo_function(&fqid) => {
-            return Cow::Owned(fqid);
+            return Some(fqid);
         }
         ElaborateKind::Class if sn::typehints::is_reserved_global_name(id) => {
-            return Cow::Owned(fqid);
+            return Some(fqid);
         }
         ElaborateKind::Class if sn::typehints::is_reserved_hh_name(id) && nsenv.is_codegen() => {
-            return Cow::Owned(elaborate_into_ns(Some("HH"), id));
+            return Some(elaborate_into_ns(Some("HH"), id));
         }
         ElaborateKind::Class if sn::typehints::is_reserved_hh_name(id) => {
-            return Cow::Owned(fqid);
+            return Some(fqid);
         }
         _ => {}
     }
@@ -198,7 +201,7 @@ fn elaborate_raw_id<'a>(
     };
 
     if has_bslash && prefix == "namespace" {
-        return Cow::Owned(elaborate_into_current_ns(
+        return Some(elaborate_into_current_ns(
             nsenv,
             id.trim_start_matches("namespace\\"),
         ));
@@ -210,16 +213,15 @@ fn elaborate_raw_id<'a>(
             let mut s = String::with_capacity(used.len() + without_prefix.len());
             s.push_str(used);
             s.push_str(without_prefix);
-            Cow::Owned(core_utils_rust::add_ns(&s).into_owned())
+            Some(core_utils_rust::add_ns(&s).into_owned())
         }
-        None => Cow::Owned(elaborate_into_current_ns(nsenv, id)),
+        None => Some(elaborate_into_current_ns(nsenv, id)),
     }
 }
 
 pub fn elaborate_id(nsenv: &namespace_env::Env, kind: ElaborateKind, id: &mut Id) {
-    match elaborate_raw_id(nsenv, kind, &id.1, false) {
-        Cow::Borrowed(elaborated) => debug_assert_eq!(elaborated, id.1),
-        Cow::Owned(s) => id.1 = s,
+    if let Some(s) = elaborate_raw_id(nsenv, kind, &id.1, false) {
+        id.1 = s;
     }
 }
 
@@ -231,8 +233,8 @@ pub fn elaborate_raw_id_in<'a>(
     elaborate_xhp_namespaces_for_facts: bool,
 ) -> &'a str {
     match elaborate_raw_id(nsenv, kind, id, elaborate_xhp_namespaces_for_facts) {
-        Cow::Owned(s) => arena.alloc_str(&s),
-        Cow::Borrowed(s) => s,
+        Some(s) => arena.alloc_str(&s),
+        None => id,
     }
 }
 

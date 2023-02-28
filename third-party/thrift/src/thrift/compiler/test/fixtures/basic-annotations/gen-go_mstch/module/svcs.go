@@ -2728,9 +2728,6 @@ type MyServicePrioChild interface {
 // Deprecated: Use MyServicePrioChild instead.
 type MyServicePrioChildClientInterface interface {
   thrift.ClientInterface
-  // Inherited/extended service
-  MyServicePrioParentClientInterface
-
   Pang() error
 }
 

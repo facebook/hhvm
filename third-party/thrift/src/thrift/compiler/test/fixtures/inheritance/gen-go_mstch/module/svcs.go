@@ -384,9 +384,6 @@ type MyNode interface {
 // Deprecated: Use MyNode instead.
 type MyNodeClientInterface interface {
   thrift.ClientInterface
-  // Inherited/extended service
-  MyRootClientInterface
-
   DoMid() error
 }
 
@@ -725,9 +722,6 @@ type MyLeaf interface {
 // Deprecated: Use MyLeaf instead.
 type MyLeafClientInterface interface {
   thrift.ClientInterface
-  // Inherited/extended service
-  MyNodeClientInterface
-
   DoLeaf() error
 }
 

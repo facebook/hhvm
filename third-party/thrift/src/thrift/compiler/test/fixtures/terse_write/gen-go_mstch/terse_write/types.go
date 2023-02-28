@@ -4064,7 +4064,7 @@ func NewTerseStructWithCustomDefault() *TerseStructWithCustomDefault {
         SetFloatField(5).
         SetDoubleField(6).
         SetStringField("7").
-        SetBinaryField().
+        SetBinaryField([]byte("8")).
         SetEnumField(
             MyEnum_ME1,
         ).

@@ -26,6 +26,7 @@
   }}{{#type:i32?}}{{value:integer_value}}{{/type:i32?}}{{!
   }}{{#type:i64?}}{{value:integer_value}}{{/type:i64?}}{{!
   }}{{#type:string?}}{{value:go_quoted_value}}{{/type:string?}}{{!
+  }}{{#type:binary?}}[]byte({{value:go_quoted_value}}){{/type:binary?}}{{!
   }}{{#type:bool?}}{{!
     }}{{#value:nonzero?}}true{{/value:nonzero?}}{{!
     }}{{^value:nonzero?}}false{{/value:nonzero?}}{{!

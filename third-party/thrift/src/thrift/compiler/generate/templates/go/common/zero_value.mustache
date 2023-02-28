@@ -25,7 +25,7 @@ This template define the default value for a given type.
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!
   }}{{#type:string?}}""{{/type:string?}}{{!
-  }}{{#type:binary?}}nil{{/type:binary?}}{{!
+  }}{{#type:binary?}}[]byte(""){{/type:binary?}}{{!
   }}{{#type:bool?}}false{{/type:bool?}}{{!
   }}{{#type:byte?}}0{{/type:byte?}}{{!
   }}{{#type:i16?}}0{{/type:i16?}}{{!

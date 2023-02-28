@@ -260,7 +260,7 @@ std::string snakecase(const std::string& name) {
 }
 
 std::string make_unique_name(
-    std::map<std::string, int32_t>& name_collisions, std::string name) {
+    std::map<std::string, int32_t>& name_collisions, const std::string& name) {
   // Uses name_collisions map provided by the caller to keep track of name
   // collisions in order to uniquify names. When a collision is detected,
   // i.e. package or program with the same name - an incrementing numeric
@@ -272,11 +272,11 @@ std::string make_unique_name(
   }
   auto iter = name_collisions.find(name);
   if (iter == name_collisions.end()) {
-    name_collisions.emplace(name, 0);
+    name_collisions[name] = 0;
   } else {
     auto numSuffix = iter->second;
     unique_name = name + std::to_string(numSuffix);
-    name_collisions.emplace(name, numSuffix + 1);
+    name_collisions[name] = numSuffix + 1;
   }
   return unique_name;
 }

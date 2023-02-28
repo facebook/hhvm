@@ -181,7 +181,7 @@ NOTE: Includes are more like Python imports rather than a textual copy as in C/C
 ---
 
 ## **Package Declaration**
-A package declaration defines the default [Universal Name](../definition/universal-name.md) prefix and optional annotations, under which all definitions in the program are declared:
+A package declaration defines the default [Universal Name](spec/definition/universal-name.md) prefix and optional annotations, under which all definitions in the program are declared:
 
 ```
 PackageDeclaration:

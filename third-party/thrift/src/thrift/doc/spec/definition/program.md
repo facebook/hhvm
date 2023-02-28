@@ -81,7 +81,7 @@ namespace java.swift com.domain.path.to.file
 
 ## Definitions
 
-Definitions can be sequence of [constant definitions](../idl/idl-reference#constant-definitions), [type definitions](../idl/idl-reference#type-definitions), and [service definitions](../idl/idl-reference#services).
+Definitions can be sequence of [constant definitions](../../idl/idl-reference#constant-definitions), [type definitions](../../idl/idl-reference#type-definitions), and [service definitions](../../idl/idl-reference#services).
 
 
 ## Abstract Syntax Tree (AST)

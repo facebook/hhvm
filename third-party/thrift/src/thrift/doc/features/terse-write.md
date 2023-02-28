@@ -2,15 +2,15 @@
 
 ## Overview
 
-A [terse](../spec/idl/field-qualifiers#fields-annotated-with-thrifttersewrite) field is a field annotated with `@thrift.TerseWrite`. The annotation has similar semantics to a field qualifier where it changes the field semantic to be terse. It is designed to achieve the followings:
+A [terse](../idl/field-qualifiers#fields-annotated-with-thrifttersewrite) field is a field annotated with `@thrift.TerseWrite`. The annotation has similar semantics to a field qualifier where it changes the field semantic to be terse. It is designed to achieve the followings:
 
 * save network bandwidth
 * reduce memory usage by eliminating needs of isset bit
-* reduce the need for `optional` keyword that does not need to distinguish unset and [intrinsic default value](../spec/idl/#intrinsic-default-values)
+* reduce the need for `optional` keyword that does not need to distinguish unset and [intrinsic default value](../idl/#intrinsic-default-values)
 * replace nuanced backfill semantic from the custom default of `unqualified` fields
 * replace ill-formed deprecated `terse_write` compiler option version
 
-If a terse field equals to the [intrinsic default value](../spec/idl/#intrinsic-default-values), it will be skipped during serialization. This differs from `optional` field that is serialized if it is explicitly set or `unqualified` field that is always serialized. A terse field will be cleared to the intrinsic default value, ignoring the [custom default value](../spec/idl/#pre-defined-value) if exist. Please refer to the rest of the guide for more detail.
+If a terse field equals to the [intrinsic default value](../idl/#intrinsic-default-values), it will be skipped during serialization. This differs from `optional` field that is serialized if it is explicitly set or `unqualified` field that is always serialized. A terse field will be cleared to the intrinsic default value, ignoring the [custom default value](../idl/#pre-defined-value) if exist. Please refer to the rest of the guide for more detail.
 
 :::note
 
@@ -186,4 +186,4 @@ The compiler option version `terse_writes` is effectively deprecated.
 
 :::
 
-Thrift C++ had a compiler flag [terse_writes](../spec/idl/field-qualifiers#terse-writes-compiler-option) that had a similar semantic to a terse field. However, the difference is that the compiler option version only support primitive and container types, and it skips serialization when a field is equal to the [custom default value](../spec/idl/#pre-defined-value) instead of intrinsic default value. This makes it inconsistent and bug-prone, as the custom default can be changed and differ from binary to binary.
+Thrift C++ had a compiler flag [terse_writes](../idl/field-qualifiers#terse-writes-compiler-option) that had a similar semantic to a terse field. However, the difference is that the compiler option version only support primitive and container types, and it skips serialization when a field is equal to the [custom default value](../idl/#pre-defined-value) instead of intrinsic default value. This makes it inconsistent and bug-prone, as the custom default can be changed and differ from binary to binary.

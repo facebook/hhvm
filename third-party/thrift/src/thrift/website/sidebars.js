@@ -56,6 +56,22 @@ module.exports = {
     }]),
     {
       type: 'category',
+      label: 'Interface Definition Language',
+      link: {
+        type: 'doc',
+        id: 'idl/index',
+      },
+      items: [
+        "idl/idl-reference",
+        "idl/field-qualifiers",
+        "idl/structured-annotations",
+        "idl/standard-thrift-annotation-library",
+        "idl/mixins",
+        "idl/schema-evolution"
+      ]
+    },
+    {
+      type: 'category',
       label: 'Specification',
       link: {
         type: 'doc',
@@ -63,22 +79,6 @@ module.exports = {
       },
       items: [
         "spec/about",
-        {
-          type: 'category',
-          label: 'Interface Definition Language',
-          link: {
-            type: 'doc',
-            id: 'spec/idl/index',
-          },
-          items: [
-            "spec/idl/idl-reference",
-            "spec/idl/field-qualifiers",
-            "spec/idl/structured-annotations",
-            "spec/idl/standard-thrift-annotation-library",
-            "spec/idl/mixins",
-            "spec/idl/schema-evolution"
-          ]
-        },
         {
           type: 'category',
           label: 'Definitions',

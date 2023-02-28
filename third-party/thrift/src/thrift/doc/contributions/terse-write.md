@@ -2,15 +2,15 @@
 
 ## Background
 
-`@thrift.TerseWrite` is a new structured [annotation](../spec/idl/standard-thrift-annotation-library#thrifttersewrite) that will mark a field as `terse`.  Please refer to the [user guide](../features/terse-write) for the motivation.
+`@thrift.TerseWrite` is a new structured [annotation](../idl/standard-thrift-annotation-library#thrifttersewrite) that will mark a field as `terse`.  Please refer to the [user guide](../features/terse-write) for the motivation.
 
 ## Semantic
 
-Please refer to the [spec](../spec/idl/field-qualifiers#fields-annotated-with-thrifttersewrite) for more information.
+Please refer to the [spec](../idl/field-qualifiers#fields-annotated-with-thrifttersewrite) for more information.
 
 ### Serialization
 
-If a terse field equals to the [intrinsic default value,](../spec/idl/#intrinsic-default-values) it will be skipped during the serialization.  A terse struct field is skipped serialization, if all of the nested fields are empty.
+If a terse field equals to the [intrinsic default value,](../idl/#intrinsic-default-values) it will be skipped during the serialization.  A terse struct field is skipped serialization, if all of the nested fields are empty.
 
 
 :::note

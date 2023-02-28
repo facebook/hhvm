@@ -59,10 +59,9 @@ module.exports = {
       label: 'Interface Definition Language',
       link: {
         type: 'doc',
-        id: 'idl/index',
+        id: 'idl/idl-reference',
       },
       items: [
-        "idl/idl-reference",
         "idl/field-qualifiers",
         "idl/structured-annotations",
         "idl/standard-thrift-annotation-library",

@@ -1,4 +1,4 @@
-# IDL Reference
+# Interface Definition Language
 
 <!-- https://www.internalfb.com/intern/wiki/Thrift/Thrift_Guide/IDL/IDL-Reference/?noredirect -->
 

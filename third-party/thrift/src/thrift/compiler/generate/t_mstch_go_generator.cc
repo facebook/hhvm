@@ -45,7 +45,7 @@ struct go_codegen_data {
   bool compat = true;
 
   // Key: package name according to Thrift.
-  // Value: rust_crate_name to use in generated code.
+  // Value: package name to use in generated code.
   std::map<std::string, std::string> go_package_map;
   std::map<std::string, int32_t> go_package_name_collisions = {
       {"thrift", 0},
@@ -83,7 +83,11 @@ std::string get_go_package_alias(
   }
 
   auto package = go::get_go_package_name(program, options.package_override);
-  return options.go_package_map.find(package)->second;
+  auto iter = options.go_package_map.find(package);
+  if (iter != options.go_package_map.end()) {
+    return iter->second;
+  }
+  throw std::runtime_error("unable to determine Go package alias");
 }
 
 std::string go_package_alias_prefix(

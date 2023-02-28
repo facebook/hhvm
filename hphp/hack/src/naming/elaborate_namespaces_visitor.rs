@@ -270,18 +270,18 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     }
 
     fn visit_def(&mut self, env: &mut Env, def: &mut Def) -> Result<(), ()> {
-        match &def {
-            // need to handle it ourselves, because in visit_fun_ is
-            // called both for toplevel functions and lambdas
-            Def::Fun(f) => {
-                let env = &mut env.clone();
-                env.namespace = RcOc::clone(&f.namespace);
-                env.extend_tparams(&f.fun.tparams);
-                def.recurse(env, self.object())
-            }
-            Def::SetNamespaceEnv(nsenv) => Ok(env.namespace = (**nsenv).clone()),
-            _ => def.recurse(env, self.object()),
+        if let Def::SetNamespaceEnv(nsenv) = def {
+            env.namespace = RcOc::clone(nsenv);
         }
+        def.recurse(env, self.object())
+    }
+
+    // Difference between FunDef and Fun_ is that Fun_ is also lambdas
+    fn visit_fun_def(&mut self, env: &mut Env, fd: &mut FunDef) -> Result<(), ()> {
+        let env = &mut env.clone();
+        env.namespace = RcOc::clone(&fd.namespace);
+        env.extend_tparams(&fd.fun.tparams);
+        fd.recurse(env, self.object())
     }
 
     fn visit_fun_(&mut self, env: &mut Env, f: &mut Fun_) -> Result<(), ()> {

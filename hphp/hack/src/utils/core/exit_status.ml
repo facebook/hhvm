@@ -52,6 +52,7 @@ type t =
   | File_provider_stale
   | Hhconfig_deleted
   | Hhconfig_changed
+  | Package_config_changed
   | Server_shutting_down_due_to_sigusr2
   | IDE_malformed_request
   | IDE_no_server
@@ -100,6 +101,7 @@ let exit_code = function
   | Type_error -> 2 (* used in clientCheck *)
   | Uncaught_exception -> 221
   | Hhconfig_changed -> 4
+  | Package_config_changed -> 4
   | Unused_server -> 5
   | No_server_running_should_retry ->
     6 (* gen by clientConnect, read by find_hh.sh *)

@@ -10,20 +10,18 @@ open Hh_prelude
 
 let pkgs_config_path_relative_to_repo_root = "__PACKAGES__.php"
 
+let repo_config_path =
+  Relative_path.from_root ~suffix:pkgs_config_path_relative_to_repo_root
+
 let log_debug (msg : ('a, unit, string, string, string, unit) format6) : 'a =
   Hh_logger.debug ~category:"packages" ?exn:None msg
 
 let load_and_parse (env : ServerEnv.env) :
     string -> Packages.package_info option =
   let ctx = Provider_utils.ctx_from_server_env env in
-  let repo_pkgs_config_path =
-    Relative_path.from_root ~suffix:pkgs_config_path_relative_to_repo_root
-  in
-  let pkgs_config_abs_path = Relative_path.to_absolute repo_pkgs_config_path in
+  let pkgs_config_abs_path = Relative_path.to_absolute repo_config_path in
   if Sys.file_exists pkgs_config_abs_path then (
-    let (errors, ast) =
-      Ast_provider.get_ast_with_error ctx repo_pkgs_config_path
-    in
+    let (errors, ast) = Ast_provider.get_ast_with_error ctx repo_config_path in
     (* TODO(milliechen): make hh report errors *)
     if not (Errors.is_empty errors) then
       log_debug

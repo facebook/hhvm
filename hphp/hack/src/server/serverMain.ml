@@ -133,10 +133,10 @@ module Program = struct
       Relative_path.Set.filter updates ~f:(fun update ->
           FindUtils.file_filter (Relative_path.to_absolute update))
     in
-    let config_in_updates =
+    let hhconfig_in_updates =
       Relative_path.Set.mem updates ServerConfig.repo_config_path
     in
-    (if config_in_updates then
+    (if hhconfig_in_updates then
       let (new_config, _) = ServerConfig.load ~silent:false genv.options in
       if not (ServerConfig.is_compatible genv.config new_config) then (
         Hh_logger.log
@@ -147,6 +147,16 @@ module Program = struct
         (* TODO: Notify the server monitor directly about this. *)
         Exit.exit Exit_status.Hhconfig_changed
       ));
+    let package_config_in_updates =
+      Relative_path.Set.mem updates PackageConfig.repo_config_path
+    in
+    if package_config_in_updates then (
+      Hh_logger.log
+        "%s changed; please restart %s.\n"
+        (Relative_path.suffix PackageConfig.repo_config_path)
+        GlobalConfig.program_name;
+      Exit.exit Exit_status.Package_config_changed
+    );
     to_recheck
 end
 

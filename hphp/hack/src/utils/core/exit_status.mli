@@ -50,6 +50,7 @@ type t =
   | File_provider_stale
   | Hhconfig_deleted
   | Hhconfig_changed
+  | Package_config_changed
   | Server_shutting_down_due_to_sigusr2
   | IDE_malformed_request
   | IDE_no_server

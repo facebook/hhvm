@@ -306,6 +306,12 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
         m.recurse(env, self.object())
     }
 
+    fn visit_tparam(&mut self, env: &mut Env, tparam: &mut Tparam) -> Result<(), ()> {
+        let env = &mut env.clone();
+        env.extend_tparams(&tparam.parameters);
+        tparam.recurse(env, self.object())
+    }
+
     fn visit_gconst(&mut self, env: &mut Env, gc: &mut Gconst) -> Result<(), ()> {
         let env = &mut env.clone();
         env.namespace = RcOc::clone(&gc.namespace);

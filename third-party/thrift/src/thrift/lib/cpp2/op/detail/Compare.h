@@ -337,32 +337,36 @@ FOLLY_MAYBE_UNUSED bool sortAndLexicographicalCompare(
       l.begin(), l.end(), r.begin(), r.end(), less);
 }
 
-template <class T, class E>
+template <class T, class E, template <class...> class LessThanImpl = LessThan>
 struct ListLessThan {
   bool operator()(const T& l, const T& r) const {
     return std::lexicographical_compare(
-        l.begin(), l.end(), r.begin(), r.end(), LessThan<E>{});
+        l.begin(), l.end(), r.begin(), r.end(), LessThanImpl<E>{});
   }
 };
 
-template <class T, class E>
+template <class T, class E, template <class...> class LessThanImpl = LessThan>
 struct SetLessThan {
   bool operator()(const T& lhs, const T& rhs) const {
-    return sortAndLexicographicalCompare(lhs, rhs, LessThan<E>{});
+    return sortAndLexicographicalCompare(lhs, rhs, LessThanImpl<E>{});
   }
 };
 
-template <class T, class K, class V>
+template <
+    class T,
+    class K,
+    class V,
+    template <class...> class LessThanImpl = LessThan>
 struct MapLessThan {
   bool operator()(const T& lhs, const T& rhs) const {
     auto less = [](const auto& l, const auto& r) {
-      if (LessThan<K>{}(l.first, r.first)) {
+      if (LessThanImpl<K>{}(l.first, r.first)) {
         return true;
       }
-      if (LessThan<K>{}(r.first, l.first)) {
+      if (LessThanImpl<K>{}(r.first, l.first)) {
         return false;
       }
-      return LessThan<V>{}(l.second, r.second);
+      return LessThanImpl<V>{}(l.second, r.second);
     };
     return sortAndLexicographicalCompare(lhs, rhs, less);
   }
@@ -539,6 +543,7 @@ struct LessThan<type::adapted<Adapter, Tag>> {
   }
 };
 
+template <template <class...> class LessThanImpl = LessThan>
 struct StructLessThan {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
@@ -567,7 +572,7 @@ struct StructLessThan {
         return;
       }
 
-      LessThan<Tag> less;
+      LessThanImpl<Tag> less;
       if (less(*lhsValue, *rhsValue)) {
         result = true;
         return;

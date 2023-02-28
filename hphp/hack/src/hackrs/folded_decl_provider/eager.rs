@@ -9,16 +9,13 @@ use datastore::Store;
 use oxidized::naming_types::KindOfType;
 use pos::ConstName;
 use pos::FunName;
-use pos::MethodName;
 use pos::ModuleName;
-use pos::PropName;
 use pos::TypeName;
 use shallow_decl_provider::ShallowDeclProvider;
 use ty::decl::ConstDecl;
 use ty::decl::FoldedClass;
 use ty::decl::FunDecl;
 use ty::decl::ModuleDecl;
-use ty::decl::Ty;
 use ty::reason::Reason;
 
 use super::Error;
@@ -72,51 +69,5 @@ impl<R: Reason> super::FoldedDeclProvider<R> for EagerFoldedDeclProvider<R> {
                 None => Ok(None),
             },
         }
-    }
-
-    fn get_shallow_property_type(
-        &self,
-        class_name: TypeName,
-        property_name: PropName,
-    ) -> Result<Option<Ty<R>>> {
-        Ok(self
-            .shallow_decl_provider
-            .get_property_type(class_name, property_name)?)
-    }
-
-    fn get_shallow_static_property_type(
-        &self,
-        class_name: TypeName,
-        property_name: PropName,
-    ) -> Result<Option<Ty<R>>> {
-        Ok(self
-            .shallow_decl_provider
-            .get_static_property_type(class_name, property_name)?)
-    }
-
-    fn get_shallow_method_type(
-        &self,
-        class_name: TypeName,
-        method_name: MethodName,
-    ) -> Result<Option<Ty<R>>> {
-        Ok(self
-            .shallow_decl_provider
-            .get_method_type(class_name, method_name)?)
-    }
-
-    fn get_shallow_static_method_type(
-        &self,
-        class_name: TypeName,
-        method_name: MethodName,
-    ) -> Result<Option<Ty<R>>> {
-        Ok(self
-            .shallow_decl_provider
-            .get_static_method_type(class_name, method_name)?)
-    }
-
-    fn get_shallow_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>> {
-        Ok(self
-            .shallow_decl_provider
-            .get_constructor_type(class_name)?)
     }
 }

@@ -357,14 +357,14 @@ ocaml_ffi! {
         let name = <(pos::TypeName, pos::PropName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
             BackendWrapper::Positioned(backend) => {
-                let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
-                    .get_shallow_property_type(name.0, name.1)
+                let res: Option<decl::Ty<BReason>> = backend.shallow_decl_provider()
+                    .get_property_type(name.0, name.1)
                     .unwrap();
                 to_ocaml(&res)
             }
             BackendWrapper::PositionFree(backend) => {
-                let res: Option<decl::Ty<NReason>> = backend.folded_decl_provider()
-                    .get_shallow_property_type(name.0, name.1)
+                let res: Option<decl::Ty<NReason>> = backend.shallow_decl_provider()
+                    .get_property_type(name.0, name.1)
                     .unwrap();
                 to_ocaml(&res)
             }
@@ -382,14 +382,14 @@ ocaml_ffi! {
         let name = <(pos::TypeName, pos::PropName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
             BackendWrapper::Positioned(backend) => {
-                let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
-                    .get_shallow_static_property_type(name.0, name.1)
+                let res: Option<decl::Ty<BReason>> = backend.shallow_decl_provider()
+                    .get_static_property_type(name.0, name.1)
                     .unwrap();
                 to_ocaml(&res)
             }
             BackendWrapper::PositionFree(backend) => {
-                let res: Option<decl::Ty<NReason>> = backend.folded_decl_provider()
-                    .get_shallow_static_property_type(name.0, name.1)
+                let res: Option<decl::Ty<NReason>> = backend.shallow_decl_provider()
+                    .get_static_property_type(name.0, name.1)
                     .unwrap();
                 to_ocaml(&res)
             }
@@ -407,14 +407,14 @@ ocaml_ffi! {
         let name = <(pos::TypeName, pos::MethodName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
             BackendWrapper::Positioned(backend) => {
-                let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
-                    .get_shallow_method_type(name.0, name.1)
+                let res: Option<decl::Ty<BReason>> = backend.shallow_decl_provider()
+                    .get_method_type(name.0, name.1)
                     .unwrap();
                 to_ocaml(&res)
             }
             BackendWrapper::PositionFree(backend) => {
-                let res: Option<decl::Ty<NReason>> = backend.folded_decl_provider()
-                    .get_shallow_method_type(name.0, name.1)
+                let res: Option<decl::Ty<NReason>> = backend.shallow_decl_provider()
+                    .get_method_type(name.0, name.1)
                     .unwrap();
                 to_ocaml(&res)
             }
@@ -432,14 +432,14 @@ ocaml_ffi! {
         let name = <(pos::TypeName, pos::MethodName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
             BackendWrapper::Positioned(backend) => {
-                let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
-                    .get_shallow_static_method_type(name.0, name.1)
+                let res: Option<decl::Ty<BReason>> = backend.shallow_decl_provider()
+                    .get_static_method_type(name.0, name.1)
                     .unwrap();
                 to_ocaml(&res)
             }
             BackendWrapper::PositionFree(backend) => {
-                let res: Option<decl::Ty<NReason>> = backend.folded_decl_provider()
-                    .get_shallow_static_method_type(name.0, name.1)
+                let res: Option<decl::Ty<NReason>> = backend.shallow_decl_provider()
+                    .get_static_method_type(name.0, name.1)
                     .unwrap();
                 to_ocaml(&res)
             }
@@ -457,14 +457,14 @@ ocaml_ffi! {
         let name = pos::TypeName::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
             BackendWrapper::Positioned(backend) => {
-                let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
-                    .get_shallow_constructor_type(name)
+                let res: Option<decl::Ty<BReason>> = backend.shallow_decl_provider()
+                    .get_constructor_type(name)
                     .unwrap();
                 to_ocaml(&res)
             }
             BackendWrapper::PositionFree(backend) => {
-                let res: Option<decl::Ty<NReason>> = backend.folded_decl_provider()
-                    .get_shallow_constructor_type(name)
+                let res: Option<decl::Ty<NReason>> = backend.shallow_decl_provider()
+                    .get_constructor_type(name)
                     .unwrap();
                 to_ocaml(&res)
             }

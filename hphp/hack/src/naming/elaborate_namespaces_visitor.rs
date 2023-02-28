@@ -9,6 +9,7 @@ use core_utils_rust as core_utils;
 use hash::HashSet;
 use namespaces_rust as namespaces;
 use naming_special_names_rust as sn;
+use ocamlrep::rc::RcOc;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
@@ -88,6 +89,40 @@ impl Env {
             }
         }
     }
+
+    fn with_ns(&self, namespace: RcOc<namespace_env::Env>) -> Self {
+        Self {
+            namespace,
+            type_params: self.type_params.clone(),
+        }
+    }
+}
+
+fn contexts_ns() -> RcOc<namespace_env::Env> {
+    RcOc::new(namespace_env::Env {
+        name: Some(sn::coeffects::CONTEXTS.to_owned()),
+        ..namespace_env::Env::empty(
+            vec![],
+            // These default values seem obviously wrong, but they're what's
+            // used in the OCaml visitor at the moment. Since we don't elaborate
+            // context names in codegen, perhaps these settings don't end up
+            // being relevant.
+            oxidized::global_options::GlobalOptions::default().po_codegen,
+            oxidized::global_options::GlobalOptions::default().po_disable_xhp_element_mangling,
+        )
+    })
+}
+
+fn unsafe_contexts_ns() -> RcOc<namespace_env::Env> {
+    RcOc::new(namespace_env::Env {
+        name: Some(sn::coeffects::UNSAFE_CONTEXTS.to_owned()),
+        ..namespace_env::Env::empty(
+            vec![],
+            // As above, these look wrong, but may be irrelevant.
+            oxidized::global_options::GlobalOptions::default().po_codegen,
+            oxidized::global_options::GlobalOptions::default().po_disable_xhp_element_mangling,
+        )
+    })
 }
 
 fn is_reserved_type_hint(name: &str) -> bool {
@@ -96,6 +131,80 @@ fn is_reserved_type_hint(name: &str) -> bool {
 }
 
 struct ElaborateNamespacesVisitor {}
+
+impl ElaborateNamespacesVisitor {
+    fn on_class_ctx_const(&mut self, env: &mut Env, kind: &mut ClassTypeconst) -> Result<(), ()> {
+        match kind {
+            ClassTypeconst::TCConcrete(ClassConcreteTypeconst { c_tc_type }) => {
+                self.on_ctx_hint_ns(&contexts_ns(), env, c_tc_type)
+            }
+            ClassTypeconst::TCAbstract(ClassAbstractTypeconst {
+                as_constraint,
+                super_constraint,
+                default,
+            }) => {
+                let ctx_ns = contexts_ns();
+                if let Some(as_constraint) = as_constraint {
+                    self.on_ctx_hint_ns(&ctx_ns, env, as_constraint)?;
+                }
+                if let Some(super_constraint) = super_constraint {
+                    self.on_ctx_hint_ns(&ctx_ns, env, super_constraint)?;
+                }
+                if let Some(default) = default {
+                    self.on_ctx_hint_ns(&ctx_ns, env, default)?;
+                }
+                Ok(())
+            }
+        }
+    }
+
+    fn on_contexts_ns(
+        &mut self,
+        ctx_ns: &RcOc<namespace_env::Env>,
+        env: &mut Env,
+        ctxs: &mut Contexts,
+    ) -> Result<(), ()> {
+        for ctx in &mut ctxs.1 {
+            self.on_ctx_hint_ns(ctx_ns, env, ctx)?;
+        }
+        Ok(())
+    }
+
+    fn on_ctx_hint_ns(
+        &mut self,
+        ctx_ns: &RcOc<namespace_env::Env>,
+        env: &mut Env,
+        h: &mut Context,
+    ) -> Result<(), ()> {
+        let ctx_env = &mut env.with_ns(RcOc::clone(ctx_ns));
+        fn is_ctx_user_defined(ctx: &str) -> bool {
+            match ctx.rsplit('\\').next() {
+                Some(ctx_name) if !ctx_name.is_empty() => {
+                    ctx_name.chars().next().unwrap().is_uppercase()
+                }
+                _ => false,
+            }
+        }
+        match h {
+            Hint(_, box Hint_::Happly(ctx, hl)) if !is_reserved_type_hint(&ctx.1) => {
+                if is_ctx_user_defined(&ctx.1) {
+                    env.elaborate_type_name(ctx)
+                } else {
+                    ctx_env.elaborate_type_name(ctx)
+                };
+                hl.recurse(env, self.object())?;
+            }
+            Hint(_, box Hint_::Hintersection(ctxs)) => {
+                for ctx in ctxs {
+                    self.on_ctx_hint_ns(ctx_ns, env, ctx)?;
+                }
+            }
+            Hint(_, box Hint_::Haccess(root, _)) => root.recurse(env, self.object())?,
+            _ => h.recurse(ctx_env, self.object())?,
+        }
+        Ok(())
+    }
+}
 
 impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     type Params = AstParams<Env, ()>;
@@ -107,17 +216,57 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     // Namespaces were already precomputed by ElaborateDefs
     // The following functions just set the namespace env correctly
     fn visit_class_(&mut self, env: &mut Env, cd: &mut Class_) -> Result<(), ()> {
-        let mut env = env.clone();
-        env.namespace = cd.namespace.clone();
+        let env = &mut env.clone();
+        env.namespace = RcOc::clone(&cd.namespace);
         env.extend_tparams(&cd.tparams);
-        cd.recurse(&mut env, self.object())
+        cd.recurse(env, self.object())
+    }
+
+    fn visit_ctx_refinement(&mut self, env: &mut Env, cr: &mut CtxRefinement) -> Result<(), ()> {
+        if env.in_codegen() {
+            return cr.recurse(env, self.object());
+        }
+        match cr {
+            CtxRefinement::CRexact(h) => self.on_ctx_hint_ns(&contexts_ns(), env, h),
+            CtxRefinement::CRloose(CtxRefinementBounds { lower, upper }) => {
+                let ctx_ns = contexts_ns();
+                if let Some(lower) = lower {
+                    self.on_ctx_hint_ns(&ctx_ns, env, lower)?;
+                }
+                if let Some(upper) = upper {
+                    self.on_ctx_hint_ns(&ctx_ns, env, upper)?;
+                }
+                Ok(())
+            }
+        }
+    }
+
+    fn visit_class_typeconst_def(
+        &mut self,
+        env: &mut Env,
+        tc: &mut ClassTypeconstDef,
+    ) -> Result<(), ()> {
+        if !env.in_codegen() && tc.is_ctx {
+            self.on_class_ctx_const(env, &mut tc.kind)?;
+        }
+        tc.recurse(env, self.object())
     }
 
     fn visit_typedef(&mut self, env: &mut Env, td: &mut Typedef) -> Result<(), ()> {
-        let mut env = env.clone();
-        env.namespace = td.namespace.clone();
+        let env = &mut env.clone();
+        env.namespace = RcOc::clone(&td.namespace);
         env.extend_tparams(&td.tparams);
-        td.recurse(&mut env, self.object())
+        if !env.in_codegen() && td.is_ctx {
+            let ctx_ns = &contexts_ns();
+            if let Some(as_constraint) = &mut td.as_constraint {
+                self.on_ctx_hint_ns(ctx_ns, env, as_constraint)?;
+            }
+            if let Some(super_constraint) = &mut td.super_constraint {
+                self.on_ctx_hint_ns(ctx_ns, env, super_constraint)?;
+            }
+            self.on_ctx_hint_ns(ctx_ns, env, &mut td.kind)?;
+        }
+        td.recurse(env, self.object())
     }
 
     fn visit_def(&mut self, env: &mut Env, def: &mut Def) -> Result<(), ()> {
@@ -125,32 +274,48 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             // need to handle it ourselves, because in visit_fun_ is
             // called both for toplevel functions and lambdas
             Def::Fun(f) => {
-                let mut env = env.clone();
-                env.namespace = f.namespace.clone();
+                let env = &mut env.clone();
+                env.namespace = RcOc::clone(&f.namespace);
                 env.extend_tparams(&f.fun.tparams);
-                def.recurse(&mut env, self.object())
+                def.recurse(env, self.object())
             }
             Def::SetNamespaceEnv(nsenv) => Ok(env.namespace = (**nsenv).clone()),
             _ => def.recurse(env, self.object()),
         }
     }
 
+    fn visit_fun_(&mut self, env: &mut Env, f: &mut Fun_) -> Result<(), ()> {
+        if let Some(ctxs) = &mut f.ctxs {
+            self.on_contexts_ns(&contexts_ns(), env, ctxs)?;
+        }
+        if let Some(ctxs) = &mut f.unsafe_ctxs {
+            self.on_contexts_ns(&unsafe_contexts_ns(), env, ctxs)?;
+        }
+        f.recurse(env, self.object())
+    }
+
     fn visit_method_(&mut self, env: &mut Env, m: &mut Method_) -> Result<(), ()> {
-        let mut env = env.clone();
+        let env = &mut env.clone();
         env.extend_tparams(&m.tparams);
-        m.recurse(&mut env, self.object())
+        if let Some(ctxs) = &mut m.ctxs {
+            self.on_contexts_ns(&contexts_ns(), env, ctxs)?;
+        }
+        if let Some(ctxs) = &mut m.unsafe_ctxs {
+            self.on_contexts_ns(&unsafe_contexts_ns(), env, ctxs)?;
+        }
+        m.recurse(env, self.object())
     }
 
     fn visit_gconst(&mut self, env: &mut Env, gc: &mut Gconst) -> Result<(), ()> {
-        let mut env = env.clone();
-        env.namespace = gc.namespace.clone();
-        gc.recurse(&mut env, self.object())
+        let env = &mut env.clone();
+        env.namespace = RcOc::clone(&gc.namespace);
+        gc.recurse(env, self.object())
     }
 
     fn visit_file_attribute(&mut self, env: &mut Env, fa: &mut FileAttribute) -> Result<(), ()> {
-        let mut env = env.clone();
-        env.namespace = fa.namespace.clone();
-        fa.recurse(&mut env, self.object())
+        let env = &mut env.clone();
+        env.namespace = RcOc::clone(&fa.namespace);
+        fa.recurse(env, self.object())
     }
 
     // I don't think we need to visit blocks because we got rid of let bindings :)
@@ -285,6 +450,13 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             _ => {}
         }
         hint.recurse(env, self.object())
+    }
+
+    fn visit_hint_fun(&mut self, env: &mut Env, hf: &mut HintFun) -> Result<(), ()> {
+        if let Some(ctxs) = &mut hf.ctxs {
+            self.on_contexts_ns(&contexts_ns(), env, ctxs)?;
+        }
+        hf.recurse(env, self.object())
     }
 
     fn visit_shape_field_name(

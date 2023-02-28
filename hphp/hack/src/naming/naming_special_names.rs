@@ -920,6 +920,8 @@ pub mod coeffects {
 
     pub const CONTEXTS: &str = "HH\\Contexts";
 
+    pub const UNSAFE_CONTEXTS: &str = "HH\\Contexts\\Unsafe";
+
     pub const CAPABILITIES: &str = "HH\\Capabilities";
 
     pub fn is_any_zoned(x: &str) -> bool {

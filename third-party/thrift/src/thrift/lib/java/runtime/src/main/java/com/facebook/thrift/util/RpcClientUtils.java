@@ -76,7 +76,6 @@ import org.apache.thrift.transport.TTransportException;
 import reactor.core.Exceptions;
 
 public final class RpcClientUtils {
-
   private RpcClientUtils() {}
 
   /**

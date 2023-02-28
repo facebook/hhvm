@@ -298,6 +298,10 @@ function(build_cxx_bridge NAME)
 endfunction()
 
 build_cxx_bridge(
+  package_ffi
+  DIR "src/package/ffi_bridge"
+)
+build_cxx_bridge(
   parser_ffi
   DIR "src/parser/ffi_bridge"
 )

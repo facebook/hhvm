@@ -3510,6 +3510,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "package"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "hash",
+ "serde",
+ "toml",
+]
+
+[[package]]
+name = "package_ffi"
+version = "0.0.0"
+dependencies = [
+ "cxx",
+ "cxx-build",
+ "package",
+ "toml",
+]
+
+[[package]]
 name = "packedvec"
 version = "1.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"

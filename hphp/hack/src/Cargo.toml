@@ -46,6 +46,8 @@ members = [
     "ocamlrep_marshal/cargo/ocamlrep_marshal_ffi_bindings",
     "oxidized",
     "oxidized_by_ref",
+    "package/cargo",
+    "package/ffi_bridge",
     "parser/api/cargo/cst_and_decl_parser",
     "parser/api/cargo/decl_mode_parser",
     "parser/api/cargo/direct_decl_parser",

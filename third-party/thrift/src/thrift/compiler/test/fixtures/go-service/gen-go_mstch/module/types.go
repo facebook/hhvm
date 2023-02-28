@@ -86,7 +86,6 @@ func (x *GetEntityRequestBuilder) Emit() *GetEntityRequest {
     var objCopy GetEntityRequest = *x.obj
     return &objCopy
 }
-
 func (x *GetEntityRequest) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("GetEntityRequest"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -215,7 +214,6 @@ func (x *GetEntityResponseBuilder) Emit() *GetEntityResponse {
     var objCopy GetEntityResponse = *x.obj
     return &objCopy
 }
-
 func (x *GetEntityResponse) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("GetEntityResponse"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

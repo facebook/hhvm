@@ -175,7 +175,6 @@ func (x *reqCFBuilder) Emit() *reqCF {
     var objCopy reqCF = *x.obj
     return &objCopy
 }
-
 func (x *reqCF) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqCF"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -253,7 +252,6 @@ func (x *respCFBuilder) Emit() *respCF {
     var objCopy respCF = *x.obj
     return &objCopy
 }
-
 func (x *respCF) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respCF"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -493,7 +491,6 @@ func (x *reqCThingBuilder) Emit() *reqCThing {
     var objCopy reqCThing = *x.obj
     return &objCopy
 }
-
 func (x *reqCThing) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqCThing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -637,7 +634,6 @@ func (x *respCThingBuilder) Emit() *respCThing {
     var objCopy respCThing = *x.obj
     return &objCopy
 }
-
 func (x *respCThing) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respCThing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

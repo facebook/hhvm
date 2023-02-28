@@ -582,7 +582,6 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
 }
-
 func (x *MyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -733,7 +732,6 @@ func (x *MyDataItemBuilder) Emit() *MyDataItem {
     var objCopy MyDataItem = *x.obj
     return &objCopy
 }
-
 func (x *MyDataItem) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyDataItem"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1014,7 +1012,41 @@ func (x *MyUnion) String() string {
 }
 
 
+// Deprecated: Use MyUnion.Set* methods instead or set the fields directly.
+type MyUnionBuilder struct {
+    obj *MyUnion
+}
 
+func NewMyUnionBuilder() *MyUnionBuilder {
+    return &MyUnionBuilder{
+        obj: NewMyUnion(),
+    }
+}
+
+func (x *MyUnionBuilder) MyEnum(value *MyEnum) *MyUnionBuilder {
+    x.obj.MyEnum = value
+    return x
+}
+
+func (x *MyUnionBuilder) MyStruct(value *MyStruct) *MyUnionBuilder {
+    x.obj.MyStruct = value
+    return x
+}
+
+func (x *MyUnionBuilder) MyDataItem(value *MyDataItem) *MyUnionBuilder {
+    x.obj.MyDataItem = value
+    return x
+}
+
+func (x *MyUnionBuilder) FloatSet(value []float32) *MyUnionBuilder {
+    x.obj.FloatSet = value
+    return x
+}
+
+func (x *MyUnionBuilder) Emit() *MyUnion {
+    var objCopy MyUnion = *x.obj
+    return &objCopy
+}
 func (x *MyUnion) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1167,7 +1199,6 @@ func (x *ReservedKeywordBuilder) Emit() *ReservedKeyword {
     var objCopy ReservedKeyword = *x.obj
     return &objCopy
 }
-
 func (x *ReservedKeyword) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ReservedKeyword"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1286,7 +1317,26 @@ func (x *UnionToBeRenamed) String() string {
 }
 
 
+// Deprecated: Use UnionToBeRenamed.Set* methods instead or set the fields directly.
+type UnionToBeRenamedBuilder struct {
+    obj *UnionToBeRenamed
+}
 
+func NewUnionToBeRenamedBuilder() *UnionToBeRenamedBuilder {
+    return &UnionToBeRenamedBuilder{
+        obj: NewUnionToBeRenamed(),
+    }
+}
+
+func (x *UnionToBeRenamedBuilder) ReservedField(value *int32) *UnionToBeRenamedBuilder {
+    x.obj.ReservedField = value
+    return x
+}
+
+func (x *UnionToBeRenamedBuilder) Emit() *UnionToBeRenamed {
+    var objCopy UnionToBeRenamed = *x.obj
+    return &objCopy
+}
 func (x *UnionToBeRenamed) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("UnionToBeRenamed"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

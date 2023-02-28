@@ -107,7 +107,6 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
 }
-
 func (x *MyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -923,7 +922,91 @@ func (x *MyUnion) String() string {
 }
 
 
+// Deprecated: Use MyUnion.Set* methods instead or set the fields directly.
+type MyUnionBuilder struct {
+    obj *MyUnion
+}
 
+func NewMyUnionBuilder() *MyUnionBuilder {
+    return &MyUnionBuilder{
+        obj: NewMyUnion(),
+    }
+}
+
+func (x *MyUnionBuilder) BoolField(value *bool) *MyUnionBuilder {
+    x.obj.BoolField = value
+    return x
+}
+
+func (x *MyUnionBuilder) ByteField(value *byte) *MyUnionBuilder {
+    x.obj.ByteField = value
+    return x
+}
+
+func (x *MyUnionBuilder) ShortField(value *int16) *MyUnionBuilder {
+    x.obj.ShortField = value
+    return x
+}
+
+func (x *MyUnionBuilder) IntField(value *int32) *MyUnionBuilder {
+    x.obj.IntField = value
+    return x
+}
+
+func (x *MyUnionBuilder) LongField(value *int64) *MyUnionBuilder {
+    x.obj.LongField = value
+    return x
+}
+
+func (x *MyUnionBuilder) FloatField(value *float32) *MyUnionBuilder {
+    x.obj.FloatField = value
+    return x
+}
+
+func (x *MyUnionBuilder) DoubleField(value *float64) *MyUnionBuilder {
+    x.obj.DoubleField = value
+    return x
+}
+
+func (x *MyUnionBuilder) StringField(value *string) *MyUnionBuilder {
+    x.obj.StringField = value
+    return x
+}
+
+func (x *MyUnionBuilder) BinaryField(value []byte) *MyUnionBuilder {
+    x.obj.BinaryField = value
+    return x
+}
+
+func (x *MyUnionBuilder) EnumField(value *MyEnum) *MyUnionBuilder {
+    x.obj.EnumField = value
+    return x
+}
+
+func (x *MyUnionBuilder) ListField(value []int16) *MyUnionBuilder {
+    x.obj.ListField = value
+    return x
+}
+
+func (x *MyUnionBuilder) SetField(value []int16) *MyUnionBuilder {
+    x.obj.SetField = value
+    return x
+}
+
+func (x *MyUnionBuilder) MapField(value map[int16]int16) *MyUnionBuilder {
+    x.obj.MapField = value
+    return x
+}
+
+func (x *MyUnionBuilder) StructField(value *MyStruct) *MyUnionBuilder {
+    x.obj.StructField = value
+    return x
+}
+
+func (x *MyUnionBuilder) Emit() *MyUnion {
+    var objCopy MyUnion = *x.obj
+    return &objCopy
+}
 func (x *MyUnion) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1157,7 +1240,6 @@ func (x *MyStructWithCustomDefaultBuilder) Emit() *MyStructWithCustomDefault {
     var objCopy MyStructWithCustomDefault = *x.obj
     return &objCopy
 }
-
 func (x *MyStructWithCustomDefault) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructWithCustomDefault"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2029,7 +2111,6 @@ func (x *StructLevelTerseStructBuilder) Emit() *StructLevelTerseStruct {
     var objCopy StructLevelTerseStruct = *x.obj
     return &objCopy
 }
-
 func (x *StructLevelTerseStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("StructLevelTerseStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3798,7 +3879,6 @@ func (x *FieldLevelTerseStructBuilder) Emit() *FieldLevelTerseStruct {
     var objCopy FieldLevelTerseStruct = *x.obj
     return &objCopy
 }
-
 func (x *FieldLevelTerseStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("FieldLevelTerseStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4876,7 +4956,6 @@ func (x *TerseStructWithCustomDefaultBuilder) Emit() *TerseStructWithCustomDefau
     var objCopy TerseStructWithCustomDefault = *x.obj
     return &objCopy
 }
-
 func (x *TerseStructWithCustomDefault) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("TerseStructWithCustomDefault"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5193,7 +5272,6 @@ func (x *AdaptedFieldsBuilder) Emit() *AdaptedFields {
     var objCopy AdaptedFields = *x.obj
     return &objCopy
 }
-
 func (x *AdaptedFields) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("AdaptedFields"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5339,7 +5417,6 @@ func (x *WrappedFieldsBuilder) Emit() *WrappedFields {
     var objCopy WrappedFields = *x.obj
     return &objCopy
 }
-
 func (x *WrappedFields) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("WrappedFields"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5472,7 +5549,6 @@ func (x *TerseExceptionBuilder) Emit() *TerseException {
     var objCopy TerseException = *x.obj
     return &objCopy
 }
-
 func (x *TerseException) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("TerseException"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

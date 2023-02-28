@@ -502,7 +502,6 @@ func (x *AutomobileBuilder) Emit() *Automobile {
     var objCopy Automobile = *x.obj
     return &objCopy
 }
-
 func (x *Automobile) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Automobile"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -721,7 +720,6 @@ func (x *MapKeyBuilder) Emit() *MapKey {
     var objCopy MapKey = *x.obj
     return &objCopy
 }
-
 func (x *MapKey) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MapKey"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -912,7 +910,6 @@ func (x *MapContainerBuilder) Emit() *MapContainer {
     var objCopy MapContainer = *x.obj
     return &objCopy
 }
-
 func (x *MapContainer) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MapContainer"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1105,7 +1102,6 @@ func (x *PairBuilder) Emit() *Pair {
     var objCopy Pair = *x.obj
     return &objCopy
 }
-
 func (x *Pair) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Pair"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1358,7 +1354,6 @@ func (x *CollectionBuilder) Emit() *Collection {
     var objCopy Collection = *x.obj
     return &objCopy
 }
-
 func (x *Collection) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Collection"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

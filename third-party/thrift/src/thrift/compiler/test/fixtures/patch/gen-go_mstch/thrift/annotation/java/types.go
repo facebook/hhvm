@@ -130,7 +130,6 @@ func (x *AdapterBuilder) Emit() *Adapter {
     var objCopy Adapter = *x.obj
     return &objCopy
 }
-
 func (x *Adapter) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Adapter"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -309,7 +308,6 @@ func (x *WrapperBuilder) Emit() *Wrapper {
     var objCopy Wrapper = *x.obj
     return &objCopy
 }
-
 func (x *Wrapper) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Wrapper"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

@@ -19,7 +19,6 @@
   This template creates a builder type for thrift structs.
 
 }}
-{{^struct:union?}}
 // Deprecated: Use {{struct:go_name}}.Set* methods instead or set the fields directly.
 type {{struct:go_name}}Builder struct {
     obj *{{struct:go_name}}
@@ -43,4 +42,3 @@ func (x *{{struct:go_name}}Builder) Emit() *{{struct:go_name}} {
     var objCopy {{struct:go_name}} = *x.obj
     return &objCopy
 }
-{{/struct:union?}}

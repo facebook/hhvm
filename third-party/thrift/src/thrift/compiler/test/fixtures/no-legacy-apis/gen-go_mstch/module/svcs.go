@@ -211,7 +211,6 @@ func (x *reqMyServiceQueryBuilder) Emit() *reqMyServiceQuery {
     var objCopy reqMyServiceQuery = *x.obj
     return &objCopy
 }
-
 func (x *reqMyServiceQuery) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqMyServiceQuery"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -350,7 +349,6 @@ func (x *respMyServiceQueryBuilder) Emit() *respMyServiceQuery {
     var objCopy respMyServiceQuery = *x.obj
     return &objCopy
 }
-
 func (x *respMyServiceQuery) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyServiceQuery"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

@@ -192,7 +192,6 @@ func (x *FieldsBuilder) Emit() *Fields {
     var objCopy Fields = *x.obj
     return &objCopy
 }
-
 func (x *Fields) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Fields"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

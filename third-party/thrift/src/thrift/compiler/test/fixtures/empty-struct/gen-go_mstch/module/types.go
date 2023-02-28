@@ -44,7 +44,6 @@ func (x *EmptyBuilder) Emit() *Empty {
     var objCopy Empty = *x.obj
     return &objCopy
 }
-
 func (x *Empty) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Empty"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -108,7 +107,21 @@ func (x *Nada) String() string {
 }
 
 
+// Deprecated: Use Nada.Set* methods instead or set the fields directly.
+type NadaBuilder struct {
+    obj *Nada
+}
 
+func NewNadaBuilder() *NadaBuilder {
+    return &NadaBuilder{
+        obj: NewNada(),
+    }
+}
+
+func (x *NadaBuilder) Emit() *Nada {
+    var objCopy Nada = *x.obj
+    return &objCopy
+}
 func (x *Nada) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Nada"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

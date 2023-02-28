@@ -150,7 +150,6 @@ func (x *MyStructNestedAnnotationBuilder) Emit() *MyStructNestedAnnotation {
     var objCopy MyStructNestedAnnotation = *x.obj
     return &objCopy
 }
-
 func (x *MyStructNestedAnnotation) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructNestedAnnotation"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -222,7 +221,21 @@ func (x *MyUnion) String() string {
 }
 
 
+// Deprecated: Use MyUnion.Set* methods instead or set the fields directly.
+type MyUnionBuilder struct {
+    obj *MyUnion
+}
 
+func NewMyUnionBuilder() *MyUnionBuilder {
+    return &MyUnionBuilder{
+        obj: NewMyUnion(),
+    }
+}
+
+func (x *MyUnionBuilder) Emit() *MyUnion {
+    var objCopy MyUnion = *x.obj
+    return &objCopy
+}
 func (x *MyUnion) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -305,7 +318,6 @@ func (x *MyExceptionBuilder) Emit() *MyException {
     var objCopy MyException = *x.obj
     return &objCopy
 }
-
 func (x *MyException) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyException"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -852,7 +864,6 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
 }
-
 func (x *MyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1095,7 +1106,6 @@ func (x *SecretStructBuilder) Emit() *SecretStruct {
     var objCopy SecretStruct = *x.obj
     return &objCopy
 }
-
 func (x *SecretStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("SecretStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

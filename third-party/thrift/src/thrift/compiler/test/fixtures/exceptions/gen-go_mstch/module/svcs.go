@@ -202,7 +202,6 @@ func (x *reqRaiserDoBlandBuilder) Emit() *reqRaiserDoBland {
     var objCopy reqRaiserDoBland = *x.obj
     return &objCopy
 }
-
 func (x *reqRaiserDoBland) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqRaiserDoBland"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -280,7 +279,6 @@ func (x *respRaiserDoBlandBuilder) Emit() *respRaiserDoBland {
     var objCopy respRaiserDoBland = *x.obj
     return &objCopy
 }
-
 func (x *respRaiserDoBland) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respRaiserDoBland"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -358,7 +356,6 @@ func (x *reqRaiserDoRaiseBuilder) Emit() *reqRaiserDoRaise {
     var objCopy reqRaiserDoRaise = *x.obj
     return &objCopy
 }
-
 func (x *reqRaiserDoRaise) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqRaiserDoRaise"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -436,7 +433,6 @@ func (x *respRaiserDoRaiseBuilder) Emit() *respRaiserDoRaise {
     var objCopy respRaiserDoRaise = *x.obj
     return &objCopy
 }
-
 func (x *respRaiserDoRaise) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respRaiserDoRaise"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -514,7 +510,6 @@ func (x *reqRaiserGet200Builder) Emit() *reqRaiserGet200 {
     var objCopy reqRaiserGet200 = *x.obj
     return &objCopy
 }
-
 func (x *reqRaiserGet200) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqRaiserGet200"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -634,7 +629,6 @@ func (x *respRaiserGet200Builder) Emit() *respRaiserGet200 {
     var objCopy respRaiserGet200 = *x.obj
     return &objCopy
 }
-
 func (x *respRaiserGet200) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respRaiserGet200"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -720,7 +714,6 @@ func (x *reqRaiserGet500Builder) Emit() *reqRaiserGet500 {
     var objCopy reqRaiserGet500 = *x.obj
     return &objCopy
 }
-
 func (x *reqRaiserGet500) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqRaiserGet500"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -840,7 +833,6 @@ func (x *respRaiserGet500Builder) Emit() *respRaiserGet500 {
     var objCopy respRaiserGet500 = *x.obj
     return &objCopy
 }
-
 func (x *respRaiserGet500) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respRaiserGet500"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

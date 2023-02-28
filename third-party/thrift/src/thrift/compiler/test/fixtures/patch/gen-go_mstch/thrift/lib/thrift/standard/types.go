@@ -250,7 +250,31 @@ func (x *TypeUri) String() string {
 }
 
 
+// Deprecated: Use TypeUri.Set* methods instead or set the fields directly.
+type TypeUriBuilder struct {
+    obj *TypeUri
+}
 
+func NewTypeUriBuilder() *TypeUriBuilder {
+    return &TypeUriBuilder{
+        obj: NewTypeUri(),
+    }
+}
+
+func (x *TypeUriBuilder) Uri(value *Uri) *TypeUriBuilder {
+    x.obj.Uri = value
+    return x
+}
+
+func (x *TypeUriBuilder) TypeHashPrefixSha2256(value ByteString) *TypeUriBuilder {
+    x.obj.TypeHashPrefixSha2256 = value
+    return x
+}
+
+func (x *TypeUriBuilder) Emit() *TypeUri {
+    var objCopy TypeUri = *x.obj
+    return &objCopy
+}
 func (x *TypeUri) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("TypeUri"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1146,7 +1170,106 @@ func (x *TypeName) String() string {
 }
 
 
+// Deprecated: Use TypeName.Set* methods instead or set the fields directly.
+type TypeNameBuilder struct {
+    obj *TypeName
+}
 
+func NewTypeNameBuilder() *TypeNameBuilder {
+    return &TypeNameBuilder{
+        obj: NewTypeName(),
+    }
+}
+
+func (x *TypeNameBuilder) BoolType(value *Void) *TypeNameBuilder {
+    x.obj.BoolType = value
+    return x
+}
+
+func (x *TypeNameBuilder) ByteType(value *Void) *TypeNameBuilder {
+    x.obj.ByteType = value
+    return x
+}
+
+func (x *TypeNameBuilder) I16Type(value *Void) *TypeNameBuilder {
+    x.obj.I16Type = value
+    return x
+}
+
+func (x *TypeNameBuilder) I32Type(value *Void) *TypeNameBuilder {
+    x.obj.I32Type = value
+    return x
+}
+
+func (x *TypeNameBuilder) I64Type(value *Void) *TypeNameBuilder {
+    x.obj.I64Type = value
+    return x
+}
+
+func (x *TypeNameBuilder) FloatType(value *Void) *TypeNameBuilder {
+    x.obj.FloatType = value
+    return x
+}
+
+func (x *TypeNameBuilder) DoubleType(value *Void) *TypeNameBuilder {
+    x.obj.DoubleType = value
+    return x
+}
+
+func (x *TypeNameBuilder) StringType(value *Void) *TypeNameBuilder {
+    x.obj.StringType = value
+    return x
+}
+
+func (x *TypeNameBuilder) BinaryType(value *Void) *TypeNameBuilder {
+    x.obj.BinaryType = value
+    return x
+}
+
+func (x *TypeNameBuilder) EnumType(value *TypeUri) *TypeNameBuilder {
+    x.obj.EnumType = value
+    return x
+}
+
+func (x *TypeNameBuilder) TypedefType(value *TypeUri) *TypeNameBuilder {
+    x.obj.TypedefType = value
+    return x
+}
+
+func (x *TypeNameBuilder) StructType(value *TypeUri) *TypeNameBuilder {
+    x.obj.StructType = value
+    return x
+}
+
+func (x *TypeNameBuilder) UnionType(value *TypeUri) *TypeNameBuilder {
+    x.obj.UnionType = value
+    return x
+}
+
+func (x *TypeNameBuilder) ExceptionType(value *TypeUri) *TypeNameBuilder {
+    x.obj.ExceptionType = value
+    return x
+}
+
+func (x *TypeNameBuilder) ListType(value *Void) *TypeNameBuilder {
+    x.obj.ListType = value
+    return x
+}
+
+func (x *TypeNameBuilder) SetType(value *Void) *TypeNameBuilder {
+    x.obj.SetType = value
+    return x
+}
+
+func (x *TypeNameBuilder) MapType(value *Void) *TypeNameBuilder {
+    x.obj.MapType = value
+    return x
+}
+
+func (x *TypeNameBuilder) Emit() *TypeName {
+    var objCopy TypeName = *x.obj
+    return &objCopy
+}
 func (x *TypeName) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("TypeName"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

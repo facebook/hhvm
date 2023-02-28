@@ -184,7 +184,6 @@ func (x *MyDataBuilder) Emit() *MyData {
     var objCopy MyData = *x.obj
     return &objCopy
 }
-
 func (x *MyData) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyData"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -365,7 +364,6 @@ func (x *MyDataWithCustomDefaultBuilder) Emit() *MyDataWithCustomDefault {
     var objCopy MyDataWithCustomDefault = *x.obj
     return &objCopy
 }
-
 func (x *MyDataWithCustomDefault) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyDataWithCustomDefault"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -489,7 +487,26 @@ func (x *InnerUnion) String() string {
 }
 
 
+// Deprecated: Use InnerUnion.Set* methods instead or set the fields directly.
+type InnerUnionBuilder struct {
+    obj *InnerUnion
+}
 
+func NewInnerUnionBuilder() *InnerUnionBuilder {
+    return &InnerUnionBuilder{
+        obj: NewInnerUnion(),
+    }
+}
+
+func (x *InnerUnionBuilder) InnerOption(value []byte) *InnerUnionBuilder {
+    x.obj.InnerOption = value
+    return x
+}
+
+func (x *InnerUnionBuilder) Emit() *InnerUnion {
+    var objCopy InnerUnion = *x.obj
+    return &objCopy
+}
 func (x *InnerUnion) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("InnerUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -703,7 +720,36 @@ func (x *MyUnion) String() string {
 }
 
 
+// Deprecated: Use MyUnion.Set* methods instead or set the fields directly.
+type MyUnionBuilder struct {
+    obj *MyUnion
+}
 
+func NewMyUnionBuilder() *MyUnionBuilder {
+    return &MyUnionBuilder{
+        obj: NewMyUnion(),
+    }
+}
+
+func (x *MyUnionBuilder) Option1(value *string) *MyUnionBuilder {
+    x.obj.Option1 = value
+    return x
+}
+
+func (x *MyUnionBuilder) Option2(value *int32) *MyUnionBuilder {
+    x.obj.Option2 = value
+    return x
+}
+
+func (x *MyUnionBuilder) Option3(value *InnerUnion) *MyUnionBuilder {
+    x.obj.Option3 = value
+    return x
+}
+
+func (x *MyUnionBuilder) Emit() *MyUnion {
+    var objCopy MyUnion = *x.obj
+    return &objCopy
+}
 func (x *MyUnion) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2687,7 +2733,6 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
 }
-
 func (x *MyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3030,7 +3075,6 @@ func (x *LateDefStructBuilder) Emit() *LateDefStruct {
     var objCopy LateDefStruct = *x.obj
     return &objCopy
 }
-
 func (x *LateDefStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("LateDefStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3205,7 +3249,6 @@ func (x *RecursiveBuilder) Emit() *Recursive {
     var objCopy Recursive = *x.obj
     return &objCopy
 }
-
 func (x *Recursive) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Recursive"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3345,7 +3388,6 @@ func (x *BarBuilder) Emit() *Bar {
     var objCopy Bar = *x.obj
     return &objCopy
 }
-
 func (x *Bar) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Bar"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3485,7 +3527,6 @@ func (x *LoopBuilder) Emit() *Loop {
     var objCopy Loop = *x.obj
     return &objCopy
 }
-
 func (x *Loop) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Loop"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3676,7 +3717,6 @@ func (x *MyDataEnsureStructBuilder) Emit() *MyDataEnsureStruct {
     var objCopy MyDataEnsureStruct = *x.obj
     return &objCopy
 }
-
 func (x *MyDataEnsureStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyDataEnsureStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3877,7 +3917,6 @@ func (x *MyDataFieldPatchBuilder) Emit() *MyDataFieldPatch {
     var objCopy MyDataFieldPatch = *x.obj
     return &objCopy
 }
-
 func (x *MyDataFieldPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyDataFieldPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4226,7 +4265,6 @@ func (x *MyDataPatchBuilder) Emit() *MyDataPatch {
     var objCopy MyDataPatch = *x.obj
     return &objCopy
 }
-
 func (x *MyDataPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyDataPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4449,7 +4487,6 @@ func (x *MyDataWithCustomDefaultEnsureStructBuilder) Emit() *MyDataWithCustomDef
     var objCopy MyDataWithCustomDefaultEnsureStruct = *x.obj
     return &objCopy
 }
-
 func (x *MyDataWithCustomDefaultEnsureStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyDataWithCustomDefaultEnsureStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4650,7 +4687,6 @@ func (x *MyDataWithCustomDefaultFieldPatchBuilder) Emit() *MyDataWithCustomDefau
     var objCopy MyDataWithCustomDefaultFieldPatch = *x.obj
     return &objCopy
 }
-
 func (x *MyDataWithCustomDefaultFieldPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyDataWithCustomDefaultFieldPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4999,7 +5035,6 @@ func (x *MyDataWithCustomDefaultPatchBuilder) Emit() *MyDataWithCustomDefaultPat
     var objCopy MyDataWithCustomDefaultPatch = *x.obj
     return &objCopy
 }
-
 func (x *MyDataWithCustomDefaultPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyDataWithCustomDefaultPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5171,7 +5206,6 @@ func (x *InnerUnionFieldPatchBuilder) Emit() *InnerUnionFieldPatch {
     var objCopy InnerUnionFieldPatch = *x.obj
     return &objCopy
 }
-
 func (x *InnerUnionFieldPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("InnerUnionFieldPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5512,7 +5546,6 @@ func (x *InnerUnionPatchBuilder) Emit() *InnerUnionPatch {
     var objCopy InnerUnionPatch = *x.obj
     return &objCopy
 }
-
 func (x *InnerUnionPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("InnerUnionPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5790,7 +5823,6 @@ func (x *MyUnionFieldPatchBuilder) Emit() *MyUnionFieldPatch {
     var objCopy MyUnionFieldPatch = *x.obj
     return &objCopy
 }
-
 func (x *MyUnionFieldPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyUnionFieldPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -6147,7 +6179,6 @@ func (x *MyUnionPatchBuilder) Emit() *MyUnionPatch {
     var objCopy MyUnionPatch = *x.obj
     return &objCopy
 }
-
 func (x *MyUnionPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyUnionPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -8241,7 +8272,6 @@ func (x *MyStructEnsureStructBuilder) Emit() *MyStructEnsureStruct {
     var objCopy MyStructEnsureStruct = *x.obj
     return &objCopy
 }
-
 func (x *MyStructEnsureStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructEnsureStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -8679,7 +8709,6 @@ func (x *MyStructField10PatchBuilder) Emit() *MyStructField10Patch {
     var objCopy MyStructField10Patch = *x.obj
     return &objCopy
 }
-
 func (x *MyStructField10Patch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructField10Patch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -8869,7 +8898,6 @@ func (x *MyStructField23PatchBuilder) Emit() *MyStructField23Patch {
     var objCopy MyStructField23Patch = *x.obj
     return &objCopy
 }
-
 func (x *MyStructField23Patch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructField23Patch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -9414,7 +9442,6 @@ func (x *MyStructField26PatchBuilder) Emit() *MyStructField26Patch {
     var objCopy MyStructField26Patch = *x.obj
     return &objCopy
 }
-
 func (x *MyStructField26Patch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructField26Patch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -9817,7 +9844,6 @@ func (x *MyStructField27PatchBuilder) Emit() *MyStructField27Patch {
     var objCopy MyStructField27Patch = *x.obj
     return &objCopy
 }
-
 func (x *MyStructField27Patch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructField27Patch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -10525,7 +10551,6 @@ func (x *MyStructField28PatchBuilder) Emit() *MyStructField28Patch {
     var objCopy MyStructField28Patch = *x.obj
     return &objCopy
 }
-
 func (x *MyStructField28Patch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructField28Patch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -11294,7 +11319,6 @@ func (x *MyStructField29PatchBuilder) Emit() *MyStructField29Patch {
     var objCopy MyStructField29Patch = *x.obj
     return &objCopy
 }
-
 func (x *MyStructField29Patch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructField29Patch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -12018,7 +12042,6 @@ func (x *MyStructField29Patch1Builder) Emit() *MyStructField29Patch1 {
     var objCopy MyStructField29Patch1 = *x.obj
     return &objCopy
 }
-
 func (x *MyStructField29Patch1) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructField29Patch1"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -12888,7 +12911,6 @@ func (x *MyStructField30PatchBuilder) Emit() *MyStructField30Patch {
     var objCopy MyStructField30Patch = *x.obj
     return &objCopy
 }
-
 func (x *MyStructField30Patch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructField30Patch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -13620,7 +13642,6 @@ func (x *MyStructField30Patch1Builder) Emit() *MyStructField30Patch1 {
     var objCopy MyStructField30Patch1 = *x.obj
     return &objCopy
 }
-
 func (x *MyStructField30Patch1) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructField30Patch1"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -15504,7 +15525,6 @@ func (x *MyStructFieldPatchBuilder) Emit() *MyStructFieldPatch {
     var objCopy MyStructFieldPatch = *x.obj
     return &objCopy
 }
-
 func (x *MyStructFieldPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructFieldPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -16101,7 +16121,6 @@ func (x *MyStructPatchBuilder) Emit() *MyStructPatch {
     var objCopy MyStructPatch = *x.obj
     return &objCopy
 }
-
 func (x *MyStructPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -16220,7 +16239,6 @@ func (x *LateDefStructEnsureStructBuilder) Emit() *LateDefStructEnsureStruct {
     var objCopy LateDefStructEnsureStruct = *x.obj
     return &objCopy
 }
-
 func (x *LateDefStructEnsureStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("LateDefStructEnsureStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -16299,7 +16317,6 @@ func (x *LateDefStructFieldPatchBuilder) Emit() *LateDefStructFieldPatch {
     var objCopy LateDefStructFieldPatch = *x.obj
     return &objCopy
 }
-
 func (x *LateDefStructFieldPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("LateDefStructFieldPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -16632,7 +16649,6 @@ func (x *LateDefStructPatchBuilder) Emit() *LateDefStructPatch {
     var objCopy LateDefStructPatch = *x.obj
     return &objCopy
 }
-
 func (x *LateDefStructPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("LateDefStructPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -16847,7 +16863,6 @@ func (x *RecursiveEnsureStructBuilder) Emit() *RecursiveEnsureStruct {
     var objCopy RecursiveEnsureStruct = *x.obj
     return &objCopy
 }
-
 func (x *RecursiveEnsureStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("RecursiveEnsureStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -17072,7 +17087,6 @@ func (x *RecursiveField1PatchBuilder) Emit() *RecursiveField1Patch {
     var objCopy RecursiveField1Patch = *x.obj
     return &objCopy
 }
-
 func (x *RecursiveField1Patch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("RecursiveField1Patch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -17220,7 +17234,6 @@ func (x *RecursiveFieldPatchBuilder) Emit() *RecursiveFieldPatch {
     var objCopy RecursiveFieldPatch = *x.obj
     return &objCopy
 }
-
 func (x *RecursiveFieldPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("RecursiveFieldPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -17561,7 +17574,6 @@ func (x *RecursivePatchBuilder) Emit() *RecursivePatch {
     var objCopy RecursivePatch = *x.obj
     return &objCopy
 }
-
 func (x *RecursivePatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("RecursivePatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -17733,7 +17745,6 @@ func (x *BarEnsureStructBuilder) Emit() *BarEnsureStruct {
     var objCopy BarEnsureStruct = *x.obj
     return &objCopy
 }
-
 func (x *BarEnsureStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("BarEnsureStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -17873,7 +17884,6 @@ func (x *BarFieldPatchBuilder) Emit() *BarFieldPatch {
     var objCopy BarFieldPatch = *x.obj
     return &objCopy
 }
-
 func (x *BarFieldPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("BarFieldPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -18214,7 +18224,6 @@ func (x *BarPatchBuilder) Emit() *BarPatch {
     var objCopy BarPatch = *x.obj
     return &objCopy
 }
-
 func (x *BarPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("BarPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -18386,7 +18395,6 @@ func (x *LoopEnsureStructBuilder) Emit() *LoopEnsureStruct {
     var objCopy LoopEnsureStruct = *x.obj
     return &objCopy
 }
-
 func (x *LoopEnsureStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("LoopEnsureStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -18526,7 +18534,6 @@ func (x *LoopFieldPatchBuilder) Emit() *LoopFieldPatch {
     var objCopy LoopFieldPatch = *x.obj
     return &objCopy
 }
-
 func (x *LoopFieldPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("LoopFieldPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -18708,7 +18715,6 @@ func (x *LoopPatchBuilder) Emit() *LoopPatch {
     var objCopy LoopPatch = *x.obj
     return &objCopy
 }
-
 func (x *LoopPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("LoopPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

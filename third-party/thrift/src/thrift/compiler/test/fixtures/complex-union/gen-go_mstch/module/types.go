@@ -408,7 +408,51 @@ func (x *ComplexUnion) String() string {
 }
 
 
+// Deprecated: Use ComplexUnion.Set* methods instead or set the fields directly.
+type ComplexUnionBuilder struct {
+    obj *ComplexUnion
+}
 
+func NewComplexUnionBuilder() *ComplexUnionBuilder {
+    return &ComplexUnionBuilder{
+        obj: NewComplexUnion(),
+    }
+}
+
+func (x *ComplexUnionBuilder) IntValue(value *int64) *ComplexUnionBuilder {
+    x.obj.IntValue = value
+    return x
+}
+
+func (x *ComplexUnionBuilder) StringValue(value *string) *ComplexUnionBuilder {
+    x.obj.StringValue = value
+    return x
+}
+
+func (x *ComplexUnionBuilder) IntListValue(value []int64) *ComplexUnionBuilder {
+    x.obj.IntListValue = value
+    return x
+}
+
+func (x *ComplexUnionBuilder) StringListValue(value []string) *ComplexUnionBuilder {
+    x.obj.StringListValue = value
+    return x
+}
+
+func (x *ComplexUnionBuilder) TypedefValue(value ContainerTypedef) *ComplexUnionBuilder {
+    x.obj.TypedefValue = value
+    return x
+}
+
+func (x *ComplexUnionBuilder) StringRef(value *string) *ComplexUnionBuilder {
+    x.obj.StringRef = value
+    return x
+}
+
+func (x *ComplexUnionBuilder) Emit() *ComplexUnion {
+    var objCopy ComplexUnion = *x.obj
+    return &objCopy
+}
 func (x *ComplexUnion) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ComplexUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -666,7 +710,31 @@ func (x *ListUnion) String() string {
 }
 
 
+// Deprecated: Use ListUnion.Set* methods instead or set the fields directly.
+type ListUnionBuilder struct {
+    obj *ListUnion
+}
 
+func NewListUnionBuilder() *ListUnionBuilder {
+    return &ListUnionBuilder{
+        obj: NewListUnion(),
+    }
+}
+
+func (x *ListUnionBuilder) IntListValue(value []int64) *ListUnionBuilder {
+    x.obj.IntListValue = value
+    return x
+}
+
+func (x *ListUnionBuilder) StringListValue(value []string) *ListUnionBuilder {
+    x.obj.StringListValue = value
+    return x
+}
+
+func (x *ListUnionBuilder) Emit() *ListUnion {
+    var objCopy ListUnion = *x.obj
+    return &objCopy
+}
 func (x *ListUnion) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ListUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -837,7 +905,31 @@ func (x *DataUnion) String() string {
 }
 
 
+// Deprecated: Use DataUnion.Set* methods instead or set the fields directly.
+type DataUnionBuilder struct {
+    obj *DataUnion
+}
 
+func NewDataUnionBuilder() *DataUnionBuilder {
+    return &DataUnionBuilder{
+        obj: NewDataUnion(),
+    }
+}
+
+func (x *DataUnionBuilder) BinaryData(value []byte) *DataUnionBuilder {
+    x.obj.BinaryData = value
+    return x
+}
+
+func (x *DataUnionBuilder) StringData(value *string) *DataUnionBuilder {
+    x.obj.StringData = value
+    return x
+}
+
+func (x *DataUnionBuilder) Emit() *DataUnion {
+    var objCopy DataUnion = *x.obj
+    return &objCopy
+}
 func (x *DataUnion) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("DataUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1111,7 +1203,6 @@ func (x *ValBuilder) Emit() *Val {
     var objCopy Val = *x.obj
     return &objCopy
 }
-
 func (x *Val) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Val"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1295,7 +1386,31 @@ func (x *ValUnion) String() string {
 }
 
 
+// Deprecated: Use ValUnion.Set* methods instead or set the fields directly.
+type ValUnionBuilder struct {
+    obj *ValUnion
+}
 
+func NewValUnionBuilder() *ValUnionBuilder {
+    return &ValUnionBuilder{
+        obj: NewValUnion(),
+    }
+}
+
+func (x *ValUnionBuilder) V1(value *Val) *ValUnionBuilder {
+    x.obj.V1 = value
+    return x
+}
+
+func (x *ValUnionBuilder) V2(value *Val) *ValUnionBuilder {
+    x.obj.V2 = value
+    return x
+}
+
+func (x *ValUnionBuilder) Emit() *ValUnion {
+    var objCopy ValUnion = *x.obj
+    return &objCopy
+}
 func (x *ValUnion) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ValUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1469,7 +1584,31 @@ func (x *VirtualComplexUnion) String() string {
 }
 
 
+// Deprecated: Use VirtualComplexUnion.Set* methods instead or set the fields directly.
+type VirtualComplexUnionBuilder struct {
+    obj *VirtualComplexUnion
+}
 
+func NewVirtualComplexUnionBuilder() *VirtualComplexUnionBuilder {
+    return &VirtualComplexUnionBuilder{
+        obj: NewVirtualComplexUnion(),
+    }
+}
+
+func (x *VirtualComplexUnionBuilder) ThingOne(value *string) *VirtualComplexUnionBuilder {
+    x.obj.ThingOne = value
+    return x
+}
+
+func (x *VirtualComplexUnionBuilder) ThingTwo(value *string) *VirtualComplexUnionBuilder {
+    x.obj.ThingTwo = value
+    return x
+}
+
+func (x *VirtualComplexUnionBuilder) Emit() *VirtualComplexUnion {
+    var objCopy VirtualComplexUnion = *x.obj
+    return &objCopy
+}
 func (x *VirtualComplexUnion) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("VirtualComplexUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1606,7 +1745,6 @@ func (x *NonCopyableStructBuilder) Emit() *NonCopyableStruct {
     var objCopy NonCopyableStruct = *x.obj
     return &objCopy
 }
-
 func (x *NonCopyableStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("NonCopyableStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1726,7 +1864,26 @@ func (x *NonCopyableUnion) String() string {
 }
 
 
+// Deprecated: Use NonCopyableUnion.Set* methods instead or set the fields directly.
+type NonCopyableUnionBuilder struct {
+    obj *NonCopyableUnion
+}
 
+func NewNonCopyableUnionBuilder() *NonCopyableUnionBuilder {
+    return &NonCopyableUnionBuilder{
+        obj: NewNonCopyableUnion(),
+    }
+}
+
+func (x *NonCopyableUnionBuilder) S(value *NonCopyableStruct) *NonCopyableUnionBuilder {
+    x.obj.S = value
+    return x
+}
+
+func (x *NonCopyableUnionBuilder) Emit() *NonCopyableUnion {
+    var objCopy NonCopyableUnion = *x.obj
+    return &objCopy
+}
 func (x *NonCopyableUnion) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("NonCopyableUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

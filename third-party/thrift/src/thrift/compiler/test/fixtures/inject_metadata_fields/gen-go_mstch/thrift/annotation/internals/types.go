@@ -90,7 +90,6 @@ func (x *InjectMetadataFieldsBuilder) Emit() *InjectMetadataFields {
     var objCopy InjectMetadataFields = *x.obj
     return &objCopy
 }
-
 func (x *InjectMetadataFields) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("InjectMetadataFields"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

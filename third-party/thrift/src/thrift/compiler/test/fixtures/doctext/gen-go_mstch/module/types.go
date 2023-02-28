@@ -140,7 +140,6 @@ func (x *ABuilder) Emit() *A {
     var objCopy A = *x.obj
     return &objCopy
 }
-
 func (x *A) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("A"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -306,7 +305,31 @@ func (x *U) String() string {
 }
 
 
+// Deprecated: Use U.Set* methods instead or set the fields directly.
+type UBuilder struct {
+    obj *U
+}
 
+func NewUBuilder() *UBuilder {
+    return &UBuilder{
+        obj: NewU(),
+    }
+}
+
+func (x *UBuilder) I(value *int32) *UBuilder {
+    x.obj.I = value
+    return x
+}
+
+func (x *UBuilder) S(value *string) *UBuilder {
+    x.obj.S = value
+    return x
+}
+
+func (x *UBuilder) Emit() *U {
+    var objCopy U = *x.obj
+    return &objCopy
+}
 func (x *U) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("U"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -447,7 +470,6 @@ func (x *BangBuilder) Emit() *Bang {
     var objCopy Bang = *x.obj
     return &objCopy
 }
-
 func (x *Bang) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Bang"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

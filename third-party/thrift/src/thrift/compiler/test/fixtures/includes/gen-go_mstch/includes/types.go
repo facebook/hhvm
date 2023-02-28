@@ -149,7 +149,6 @@ func (x *IncludedBuilder) Emit() *Included {
     var objCopy Included = *x.obj
     return &objCopy
 }
-
 func (x *Included) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Included"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

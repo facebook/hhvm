@@ -232,7 +232,6 @@ func (x *reqFinderByPlateBuilder) Emit() *reqFinderByPlate {
     var objCopy reqFinderByPlate = *x.obj
     return &objCopy
 }
-
 func (x *reqFinderByPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqFinderByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -371,7 +370,6 @@ func (x *respFinderByPlateBuilder) Emit() *respFinderByPlate {
     var objCopy respFinderByPlate = *x.obj
     return &objCopy
 }
-
 func (x *respFinderByPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respFinderByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -499,7 +497,6 @@ func (x *reqFinderAliasByPlateBuilder) Emit() *reqFinderAliasByPlate {
     var objCopy reqFinderAliasByPlate = *x.obj
     return &objCopy
 }
-
 func (x *reqFinderAliasByPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqFinderAliasByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -638,7 +635,6 @@ func (x *respFinderAliasByPlateBuilder) Emit() *respFinderAliasByPlate {
     var objCopy respFinderAliasByPlate = *x.obj
     return &objCopy
 }
-
 func (x *respFinderAliasByPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respFinderAliasByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -766,7 +762,6 @@ func (x *reqFinderPreviousPlateBuilder) Emit() *reqFinderPreviousPlate {
     var objCopy reqFinderPreviousPlate = *x.obj
     return &objCopy
 }
-
 func (x *reqFinderPreviousPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqFinderPreviousPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -894,7 +889,6 @@ func (x *respFinderPreviousPlateBuilder) Emit() *respFinderPreviousPlate {
     var objCopy respFinderPreviousPlate = *x.obj
     return &objCopy
 }
-
 func (x *respFinderPreviousPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respFinderPreviousPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

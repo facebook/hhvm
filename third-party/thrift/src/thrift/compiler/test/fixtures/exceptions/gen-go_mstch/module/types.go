@@ -92,7 +92,6 @@ func (x *FieryBuilder) Emit() *Fiery {
     var objCopy Fiery = *x.obj
     return &objCopy
 }
-
 func (x *Fiery) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Fiery"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -235,7 +234,6 @@ func (x *SeriousBuilder) Emit() *Serious {
     var objCopy Serious = *x.obj
     return &objCopy
 }
-
 func (x *Serious) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Serious"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -410,7 +408,6 @@ func (x *ComplexFieldNamesBuilder) Emit() *ComplexFieldNames {
     var objCopy ComplexFieldNames = *x.obj
     return &objCopy
 }
-
 func (x *ComplexFieldNames) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ComplexFieldNames"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -593,7 +590,6 @@ func (x *CustomFieldNamesBuilder) Emit() *CustomFieldNames {
     var objCopy CustomFieldNames = *x.obj
     return &objCopy
 }
-
 func (x *CustomFieldNames) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("CustomFieldNames"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -776,7 +772,6 @@ func (x *ExceptionWithPrimitiveFieldBuilder) Emit() *ExceptionWithPrimitiveField
     var objCopy ExceptionWithPrimitiveField = *x.obj
     return &objCopy
 }
-
 func (x *ExceptionWithPrimitiveField) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ExceptionWithPrimitiveField"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -959,7 +954,6 @@ func (x *ExceptionWithStructuredAnnotationBuilder) Emit() *ExceptionWithStructur
     var objCopy ExceptionWithStructuredAnnotation = *x.obj
     return &objCopy
 }
-
 func (x *ExceptionWithStructuredAnnotation) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ExceptionWithStructuredAnnotation"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1058,7 +1052,6 @@ func (x *BanalBuilder) Emit() *Banal {
     var objCopy Banal = *x.obj
     return &objCopy
 }
-
 func (x *Banal) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Banal"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

@@ -88,7 +88,6 @@ func (x *FieldWrapperBuilder) Emit() *FieldWrapper {
     var objCopy FieldWrapper = *x.obj
     return &objCopy
 }
-
 func (x *FieldWrapper) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("FieldWrapper"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -302,7 +301,6 @@ func (x *WrapperBuilder) Emit() *Wrapper {
     var objCopy Wrapper = *x.obj
     return &objCopy
 }
-
 func (x *Wrapper) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Wrapper"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -447,7 +445,6 @@ func (x *AdapterBuilder) Emit() *Adapter {
     var objCopy Adapter = *x.obj
     return &objCopy
 }
-
 func (x *Adapter) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Adapter"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -576,7 +573,6 @@ func (x *SkipCodegenBuilder) Emit() *SkipCodegen {
     var objCopy SkipCodegen = *x.obj
     return &objCopy
 }
-
 func (x *SkipCodegen) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("SkipCodegen"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -747,7 +743,6 @@ func (x *NameBuilder) Emit() *Name {
     var objCopy Name = *x.obj
     return &objCopy
 }
-
 func (x *Name) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Name"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -920,7 +915,6 @@ func (x *UnionEnumAttributesBuilder) Emit() *UnionEnumAttributes {
     var objCopy UnionEnumAttributes = *x.obj
     return &objCopy
 }
-
 func (x *UnionEnumAttributes) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("UnionEnumAttributes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1049,7 +1043,6 @@ func (x *StructTraitBuilder) Emit() *StructTrait {
     var objCopy StructTrait = *x.obj
     return &objCopy
 }
-
 func (x *StructTrait) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("StructTrait"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1214,7 +1207,6 @@ func (x *AttributesBuilder) Emit() *Attributes {
     var objCopy Attributes = *x.obj
     return &objCopy
 }
-
 func (x *Attributes) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Attributes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1301,7 +1293,6 @@ func (x *StructAsTraitBuilder) Emit() *StructAsTrait {
     var objCopy StructAsTrait = *x.obj
     return &objCopy
 }
-
 func (x *StructAsTrait) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("StructAsTrait"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

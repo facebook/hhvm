@@ -273,7 +273,6 @@ func (x *reqSomeServiceBounceMapBuilder) Emit() *reqSomeServiceBounceMap {
     var objCopy reqSomeServiceBounceMap = *x.obj
     return &objCopy
 }
-
 func (x *reqSomeServiceBounceMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqSomeServiceBounceMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -454,7 +453,6 @@ func (x *respSomeServiceBounceMapBuilder) Emit() *respSomeServiceBounceMap {
     var objCopy respSomeServiceBounceMap = *x.obj
     return &objCopy
 }
-
 func (x *respSomeServiceBounceMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respSomeServiceBounceMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -618,7 +616,6 @@ func (x *reqSomeServiceBinaryKeyedMapBuilder) Emit() *reqSomeServiceBinaryKeyedM
     var objCopy reqSomeServiceBinaryKeyedMap = *x.obj
     return &objCopy
 }
-
 func (x *reqSomeServiceBinaryKeyedMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqSomeServiceBinaryKeyedMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -799,7 +796,6 @@ func (x *respSomeServiceBinaryKeyedMapBuilder) Emit() *respSomeServiceBinaryKeye
     var objCopy respSomeServiceBinaryKeyedMap = *x.obj
     return &objCopy
 }
-
 func (x *respSomeServiceBinaryKeyedMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respSomeServiceBinaryKeyedMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

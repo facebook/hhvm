@@ -274,7 +274,6 @@ func (x *ColorBuilder) Emit() *Color {
     var objCopy Color = *x.obj
     return &objCopy
 }
-
 func (x *Color) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Color"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -647,7 +646,6 @@ func (x *VehicleBuilder) Emit() *Vehicle {
     var objCopy Vehicle = *x.obj
     return &objCopy
 }
-
 func (x *Vehicle) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Vehicle"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1365,7 +1363,6 @@ func (x *PersonBuilder) Emit() *Person {
     var objCopy Person = *x.obj
     return &objCopy
 }
-
 func (x *Person) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Person"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

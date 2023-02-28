@@ -172,7 +172,6 @@ func (x *FooBuilder) Emit() *Foo {
     var objCopy Foo = *x.obj
     return &objCopy
 }
-
 func (x *Foo) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Foo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -401,7 +400,6 @@ func (x *Foo2Builder) Emit() *Foo2 {
     var objCopy Foo2 = *x.obj
     return &objCopy
 }
-
 func (x *Foo2) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Foo2"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

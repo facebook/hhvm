@@ -236,7 +236,6 @@ func (x *EmptyStructBuilder) Emit() *EmptyStruct {
     var objCopy EmptyStruct = *x.obj
     return &objCopy
 }
-
 func (x *EmptyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("empty_struct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -357,7 +356,6 @@ func (x *DecoratedStructBuilder) Emit() *DecoratedStruct {
     var objCopy DecoratedStruct = *x.obj
     return &objCopy
 }
-
 func (x *DecoratedStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("decorated_struct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1102,7 +1100,6 @@ func (x *ContainerStructBuilder) Emit() *ContainerStruct {
     var objCopy ContainerStruct = *x.obj
     return &objCopy
 }
-
 func (x *ContainerStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ContainerStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1323,7 +1320,6 @@ func (x *CppTypeStructBuilder) Emit() *CppTypeStruct {
     var objCopy CppTypeStruct = *x.obj
     return &objCopy
 }
-
 func (x *CppTypeStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("CppTypeStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1452,7 +1448,6 @@ func (x *VirtualStructBuilder) Emit() *VirtualStruct {
     var objCopy VirtualStruct = *x.obj
     return &objCopy
 }
-
 func (x *VirtualStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("VirtualStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1631,7 +1626,6 @@ func (x *MyStructWithForwardRefEnumBuilder) Emit() *MyStructWithForwardRefEnum {
     var objCopy MyStructWithForwardRefEnum = *x.obj
     return &objCopy
 }
-
 func (x *MyStructWithForwardRefEnum) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructWithForwardRefEnum"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1810,7 +1804,6 @@ func (x *TrivialNumericBuilder) Emit() *TrivialNumeric {
     var objCopy TrivialNumeric = *x.obj
     return &objCopy
 }
-
 func (x *TrivialNumeric) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("TrivialNumeric"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2006,7 +1999,6 @@ func (x *TrivialNestedWithDefaultBuilder) Emit() *TrivialNestedWithDefault {
     var objCopy TrivialNestedWithDefault = *x.obj
     return &objCopy
 }
-
 func (x *TrivialNestedWithDefault) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("TrivialNestedWithDefault"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2238,7 +2230,6 @@ func (x *ComplexStringBuilder) Emit() *ComplexString {
     var objCopy ComplexString = *x.obj
     return &objCopy
 }
-
 func (x *ComplexString) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ComplexString"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2438,7 +2429,6 @@ func (x *ComplexNestedWithDefaultBuilder) Emit() *ComplexNestedWithDefault {
     var objCopy ComplexNestedWithDefault = *x.obj
     return &objCopy
 }
-
 func (x *ComplexNestedWithDefault) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ComplexNestedWithDefault"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2743,7 +2733,6 @@ func (x *MinPaddingBuilder) Emit() *MinPadding {
     var objCopy MinPadding = *x.obj
     return &objCopy
 }
-
 func (x *MinPadding) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MinPadding"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3072,7 +3061,6 @@ func (x *MinPaddingWithCustomTypeBuilder) Emit() *MinPaddingWithCustomType {
     var objCopy MinPaddingWithCustomType = *x.obj
     return &objCopy
 }
-
 func (x *MinPaddingWithCustomType) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MinPaddingWithCustomType"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3370,7 +3358,6 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
 }
-
 func (x *MyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3481,7 +3468,6 @@ func (x *MyDataItemBuilder) Emit() *MyDataItem {
     var objCopy MyDataItem = *x.obj
     return &objCopy
 }
-
 func (x *MyDataItem) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyDataItem"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3602,7 +3588,6 @@ func (x *RenamingBuilder) Emit() *Renaming {
     var objCopy Renaming = *x.obj
     return &objCopy
 }
-
 func (x *Renaming) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Renaming"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3862,7 +3847,6 @@ func (x *AnnotatedTypesBuilder) Emit() *AnnotatedTypes {
     var objCopy AnnotatedTypes = *x.obj
     return &objCopy
 }
-
 func (x *AnnotatedTypes) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("AnnotatedTypes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4063,7 +4047,6 @@ func (x *ForwardUsageRootBuilder) Emit() *ForwardUsageRoot {
     var objCopy ForwardUsageRoot = *x.obj
     return &objCopy
 }
-
 func (x *ForwardUsageRoot) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ForwardUsageRoot"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4211,7 +4194,6 @@ func (x *ForwardUsageStructBuilder) Emit() *ForwardUsageStruct {
     var objCopy ForwardUsageStruct = *x.obj
     return &objCopy
 }
-
 func (x *ForwardUsageStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ForwardUsageStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4351,7 +4333,6 @@ func (x *ForwardUsageByRefBuilder) Emit() *ForwardUsageByRef {
     var objCopy ForwardUsageByRef = *x.obj
     return &objCopy
 }
-
 func (x *ForwardUsageByRef) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ForwardUsageByRef"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4534,7 +4515,6 @@ func (x *IncompleteMapBuilder) Emit() *IncompleteMap {
     var objCopy IncompleteMap = *x.obj
     return &objCopy
 }
-
 func (x *IncompleteMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("IncompleteMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4621,7 +4601,6 @@ func (x *IncompleteMapDepBuilder) Emit() *IncompleteMapDep {
     var objCopy IncompleteMapDep = *x.obj
     return &objCopy
 }
-
 func (x *IncompleteMapDep) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("IncompleteMapDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4796,7 +4775,6 @@ func (x *CompleteMapBuilder) Emit() *CompleteMap {
     var objCopy CompleteMap = *x.obj
     return &objCopy
 }
-
 func (x *CompleteMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("CompleteMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4883,7 +4861,6 @@ func (x *CompleteMapDepBuilder) Emit() *CompleteMapDep {
     var objCopy CompleteMapDep = *x.obj
     return &objCopy
 }
-
 func (x *CompleteMapDep) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("CompleteMapDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5041,7 +5018,6 @@ func (x *IncompleteListBuilder) Emit() *IncompleteList {
     var objCopy IncompleteList = *x.obj
     return &objCopy
 }
-
 func (x *IncompleteList) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("IncompleteList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5128,7 +5104,6 @@ func (x *IncompleteListDepBuilder) Emit() *IncompleteListDep {
     var objCopy IncompleteListDep = *x.obj
     return &objCopy
 }
-
 func (x *IncompleteListDep) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("IncompleteListDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5286,7 +5261,6 @@ func (x *CompleteListBuilder) Emit() *CompleteList {
     var objCopy CompleteList = *x.obj
     return &objCopy
 }
-
 func (x *CompleteList) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("CompleteList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5373,7 +5347,6 @@ func (x *CompleteListDepBuilder) Emit() *CompleteListDep {
     var objCopy CompleteListDep = *x.obj
     return &objCopy
 }
-
 func (x *CompleteListDep) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("CompleteListDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5531,7 +5504,6 @@ func (x *AdaptedListBuilder) Emit() *AdaptedList {
     var objCopy AdaptedList = *x.obj
     return &objCopy
 }
-
 func (x *AdaptedList) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("AdaptedList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5671,7 +5643,6 @@ func (x *AdaptedListDepBuilder) Emit() *AdaptedListDep {
     var objCopy AdaptedListDep = *x.obj
     return &objCopy
 }
-
 func (x *AdaptedListDep) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("AdaptedListDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5837,7 +5808,6 @@ func (x *DependentAdaptedListBuilder) Emit() *DependentAdaptedList {
     var objCopy DependentAdaptedList = *x.obj
     return &objCopy
 }
-
 func (x *DependentAdaptedList) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("DependentAdaptedList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5976,7 +5946,6 @@ func (x *DependentAdaptedListDepBuilder) Emit() *DependentAdaptedListDep {
     var objCopy DependentAdaptedListDep = *x.obj
     return &objCopy
 }
-
 func (x *DependentAdaptedListDep) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("DependentAdaptedListDep"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -6482,7 +6451,6 @@ func (x *AllocatorAwareBuilder) Emit() *AllocatorAware {
     var objCopy AllocatorAware = *x.obj
     return &objCopy
 }
-
 func (x *AllocatorAware) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("AllocatorAware"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -6711,7 +6679,6 @@ func (x *AllocatorAware2Builder) Emit() *AllocatorAware2 {
     var objCopy AllocatorAware2 = *x.obj
     return &objCopy
 }
-
 func (x *AllocatorAware2) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("AllocatorAware2"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -6932,7 +6899,6 @@ func (x *TypedefStructBuilder) Emit() *TypedefStruct {
     var objCopy TypedefStruct = *x.obj
     return &objCopy
 }
-
 func (x *TypedefStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("TypedefStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -7077,7 +7043,6 @@ func (x *StructWithDoubleUnderscoresBuilder) Emit() *StructWithDoubleUnderscores
     var objCopy StructWithDoubleUnderscores = *x.obj
     return &objCopy
 }
-
 func (x *StructWithDoubleUnderscores) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("StructWithDoubleUnderscores"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

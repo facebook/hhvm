@@ -305,7 +305,6 @@ func (x *reqServiceFuncBuilder) Emit() *reqServiceFunc {
     var objCopy reqServiceFunc = *x.obj
     return &objCopy
 }
-
 func (x *reqServiceFunc) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqServiceFunc"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -449,7 +448,6 @@ func (x *respServiceFuncBuilder) Emit() *respServiceFunc {
     var objCopy respServiceFunc = *x.obj
     return &objCopy
 }
-
 func (x *respServiceFunc) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respServiceFunc"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -755,7 +753,6 @@ func (x *reqAdapterServiceCountBuilder) Emit() *reqAdapterServiceCount {
     var objCopy reqAdapterServiceCount = *x.obj
     return &objCopy
 }
-
 func (x *reqAdapterServiceCount) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqAdapterServiceCount"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -886,7 +883,6 @@ func (x *respAdapterServiceCountBuilder) Emit() *respAdapterServiceCount {
     var objCopy respAdapterServiceCount = *x.obj
     return &objCopy
 }
-
 func (x *respAdapterServiceCount) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respAdapterServiceCount"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1025,7 +1021,6 @@ func (x *reqAdapterServiceAdaptedTypesBuilder) Emit() *reqAdapterServiceAdaptedT
     var objCopy reqAdapterServiceAdaptedTypes = *x.obj
     return &objCopy
 }
-
 func (x *reqAdapterServiceAdaptedTypes) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqAdapterServiceAdaptedTypes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1164,7 +1159,6 @@ func (x *respAdapterServiceAdaptedTypesBuilder) Emit() *respAdapterServiceAdapte
     var objCopy respAdapterServiceAdaptedTypes = *x.obj
     return &objCopy
 }
-
 func (x *respAdapterServiceAdaptedTypes) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respAdapterServiceAdaptedTypes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

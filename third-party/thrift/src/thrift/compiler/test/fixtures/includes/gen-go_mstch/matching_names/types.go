@@ -99,7 +99,6 @@ func (x *IncludesAlsoBuilder) Emit() *IncludesAlso {
     var objCopy IncludesAlso = *x.obj
     return &objCopy
 }
-
 func (x *IncludesAlso) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("IncludesAlso"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

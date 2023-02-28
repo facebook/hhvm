@@ -468,7 +468,6 @@ func (x *InternshipBuilder) Emit() *Internship {
     var objCopy Internship = *x.obj
     return &objCopy
 }
-
 func (x *Internship) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Internship"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -671,7 +670,6 @@ func (x *RangeBuilder) Emit() *Range {
     var objCopy Range = *x.obj
     return &objCopy
 }
-
 func (x *Range) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Range"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -852,7 +850,6 @@ func (x *Struct1Builder) Emit() *Struct1 {
     var objCopy Struct1 = *x.obj
     return &objCopy
 }
-
 func (x *Struct1) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("struct1"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1162,7 +1159,6 @@ func (x *Struct2Builder) Emit() *Struct2 {
     var objCopy Struct2 = *x.obj
     return &objCopy
 }
-
 func (x *Struct2) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("struct2"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1410,7 +1406,6 @@ func (x *Struct3Builder) Emit() *Struct3 {
     var objCopy Struct3 = *x.obj
     return &objCopy
 }
-
 func (x *Struct3) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("struct3"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1659,7 +1654,6 @@ func (x *Struct4Builder) Emit() *Struct4 {
     var objCopy Struct4 = *x.obj
     return &objCopy
 }
-
 func (x *Struct4) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("struct4"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1841,7 +1835,31 @@ func (x *Union1) String() string {
 }
 
 
+// Deprecated: Use Union1.Set* methods instead or set the fields directly.
+type Union1Builder struct {
+    obj *Union1
+}
 
+func NewUnion1Builder() *Union1Builder {
+    return &Union1Builder{
+        obj: NewUnion1(),
+    }
+}
+
+func (x *Union1Builder) I(value *int32) *Union1Builder {
+    x.obj.I = value
+    return x
+}
+
+func (x *Union1Builder) D(value *float64) *Union1Builder {
+    x.obj.D = value
+    return x
+}
+
+func (x *Union1Builder) Emit() *Union1 {
+    var objCopy Union1 = *x.obj
+    return &objCopy
+}
 func (x *Union1) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("union1"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2111,7 +2129,41 @@ func (x *Union2) String() string {
 }
 
 
+// Deprecated: Use Union2.Set* methods instead or set the fields directly.
+type Union2Builder struct {
+    obj *Union2
+}
 
+func NewUnion2Builder() *Union2Builder {
+    return &Union2Builder{
+        obj: NewUnion2(),
+    }
+}
+
+func (x *Union2Builder) I(value *int32) *Union2Builder {
+    x.obj.I = value
+    return x
+}
+
+func (x *Union2Builder) D(value *float64) *Union2Builder {
+    x.obj.D = value
+    return x
+}
+
+func (x *Union2Builder) S(value *Struct1) *Union2Builder {
+    x.obj.S = value
+    return x
+}
+
+func (x *Union2Builder) U(value *Union1) *Union2Builder {
+    x.obj.U = value
+    return x
+}
+
+func (x *Union2Builder) Emit() *Union2 {
+    var objCopy Union2 = *x.obj
+    return &objCopy
+}
 func (x *Union2) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("union2"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

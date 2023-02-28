@@ -155,7 +155,6 @@ func (x *reqMyRootDoRootBuilder) Emit() *reqMyRootDoRoot {
     var objCopy reqMyRootDoRoot = *x.obj
     return &objCopy
 }
-
 func (x *reqMyRootDoRoot) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqMyRootDoRoot"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -233,7 +232,6 @@ func (x *respMyRootDoRootBuilder) Emit() *respMyRootDoRoot {
     var objCopy respMyRootDoRoot = *x.obj
     return &objCopy
 }
-
 func (x *respMyRootDoRoot) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyRootDoRoot"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -523,7 +521,6 @@ func (x *reqMyNodeDoMidBuilder) Emit() *reqMyNodeDoMid {
     var objCopy reqMyNodeDoMid = *x.obj
     return &objCopy
 }
-
 func (x *reqMyNodeDoMid) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqMyNodeDoMid"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -601,7 +598,6 @@ func (x *respMyNodeDoMidBuilder) Emit() *respMyNodeDoMid {
     var objCopy respMyNodeDoMid = *x.obj
     return &objCopy
 }
-
 func (x *respMyNodeDoMid) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyNodeDoMid"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -866,7 +862,6 @@ func (x *reqMyLeafDoLeafBuilder) Emit() *reqMyLeafDoLeaf {
     var objCopy reqMyLeafDoLeaf = *x.obj
     return &objCopy
 }
-
 func (x *reqMyLeafDoLeaf) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqMyLeafDoLeaf"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -944,7 +939,6 @@ func (x *respMyLeafDoLeafBuilder) Emit() *respMyLeafDoLeaf {
     var objCopy respMyLeafDoLeaf = *x.obj
     return &objCopy
 }
-
 func (x *respMyLeafDoLeaf) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyLeafDoLeaf"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

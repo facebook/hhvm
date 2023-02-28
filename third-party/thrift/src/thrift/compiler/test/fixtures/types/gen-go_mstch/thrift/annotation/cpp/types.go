@@ -221,7 +221,6 @@ func (x *RefBuilder) Emit() *Ref {
     var objCopy Ref = *x.obj
     return &objCopy
 }
-
 func (x *Ref) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Ref"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -351,7 +350,6 @@ func (x *LazyBuilder) Emit() *Lazy {
     var objCopy Lazy = *x.obj
     return &objCopy
 }
-
 func (x *Lazy) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Lazy"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -438,7 +436,6 @@ func (x *DisableLazyChecksumBuilder) Emit() *DisableLazyChecksum {
     var objCopy DisableLazyChecksum = *x.obj
     return &objCopy
 }
-
 func (x *DisableLazyChecksum) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("DisableLazyChecksum"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -727,7 +724,6 @@ func (x *AdapterBuilder) Emit() *Adapter {
     var objCopy Adapter = *x.obj
     return &objCopy
 }
-
 func (x *Adapter) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Adapter"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -889,7 +885,6 @@ func (x *PackIssetBuilder) Emit() *PackIsset {
     var objCopy PackIsset = *x.obj
     return &objCopy
 }
-
 func (x *PackIsset) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("PackIsset"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -976,7 +971,6 @@ func (x *MinimizePaddingBuilder) Emit() *MinimizePadding {
     var objCopy MinimizePadding = *x.obj
     return &objCopy
 }
-
 func (x *MinimizePadding) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MinimizePadding"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1055,7 +1049,6 @@ func (x *TriviallyRelocatableBuilder) Emit() *TriviallyRelocatable {
     var objCopy TriviallyRelocatable = *x.obj
     return &objCopy
 }
-
 func (x *TriviallyRelocatable) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("TriviallyRelocatable"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1134,7 +1127,6 @@ func (x *ScopedEnumAsUnionTypeBuilder) Emit() *ScopedEnumAsUnionType {
     var objCopy ScopedEnumAsUnionType = *x.obj
     return &objCopy
 }
-
 func (x *ScopedEnumAsUnionType) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ScopedEnumAsUnionType"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1213,7 +1205,6 @@ func (x *StrongTypeBuilder) Emit() *StrongType {
     var objCopy StrongType = *x.obj
     return &objCopy
 }
-
 func (x *StrongType) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("StrongType"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1376,7 +1367,6 @@ func (x *FieldInterceptorBuilder) Emit() *FieldInterceptor {
     var objCopy FieldInterceptor = *x.obj
     return &objCopy
 }
-
 func (x *FieldInterceptor) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("FieldInterceptor"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1471,7 +1461,6 @@ func (x *UseOpEncodeBuilder) Emit() *UseOpEncode {
     var objCopy UseOpEncode = *x.obj
     return &objCopy
 }
-
 func (x *UseOpEncode) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("UseOpEncode"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1593,7 +1582,6 @@ func (x *EnumTypeBuilder) Emit() *EnumType {
     var objCopy EnumType = *x.obj
     return &objCopy
 }
-
 func (x *EnumType) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("EnumType"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

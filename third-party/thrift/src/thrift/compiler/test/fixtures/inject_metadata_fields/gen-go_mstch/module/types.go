@@ -90,7 +90,6 @@ func (x *FieldsBuilder) Emit() *Fields {
     var objCopy Fields = *x.obj
     return &objCopy
 }
-
 func (x *Fields) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Fields"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -219,7 +218,6 @@ func (x *FieldsInjectedToEmptyStructBuilder) Emit() *FieldsInjectedToEmptyStruct
     var objCopy FieldsInjectedToEmptyStruct = *x.obj
     return &objCopy
 }
-
 func (x *FieldsInjectedToEmptyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("FieldsInjectedToEmptyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -390,7 +388,6 @@ func (x *FieldsInjectedToStructBuilder) Emit() *FieldsInjectedToStruct {
     var objCopy FieldsInjectedToStruct = *x.obj
     return &objCopy
 }
-
 func (x *FieldsInjectedToStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("FieldsInjectedToStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -673,7 +670,6 @@ func (x *FieldsInjectedWithIncludedStructBuilder) Emit() *FieldsInjectedWithIncl
     var objCopy FieldsInjectedWithIncludedStruct = *x.obj
     return &objCopy
 }
-
 func (x *FieldsInjectedWithIncludedStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("FieldsInjectedWithIncludedStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

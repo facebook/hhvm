@@ -147,7 +147,6 @@ func (x *GeneratePatchBuilder) Emit() *GeneratePatch {
     var objCopy GeneratePatch = *x.obj
     return &objCopy
 }
-
 func (x *GeneratePatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("GeneratePatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -226,7 +225,6 @@ func (x *AssignOnlyPatchBuilder) Emit() *AssignOnlyPatch {
     var objCopy AssignOnlyPatch = *x.obj
     return &objCopy
 }
-
 func (x *AssignOnlyPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("AssignOnlyPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -441,7 +439,6 @@ func (x *BoolPatchBuilder) Emit() *BoolPatch {
     var objCopy BoolPatch = *x.obj
     return &objCopy
 }
-
 func (x *BoolPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("BoolPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -680,7 +677,6 @@ func (x *BytePatchBuilder) Emit() *BytePatch {
     var objCopy BytePatch = *x.obj
     return &objCopy
 }
-
 func (x *BytePatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("BytePatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -919,7 +915,6 @@ func (x *I16PatchBuilder) Emit() *I16Patch {
     var objCopy I16Patch = *x.obj
     return &objCopy
 }
-
 func (x *I16Patch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("I16Patch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1158,7 +1153,6 @@ func (x *I32PatchBuilder) Emit() *I32Patch {
     var objCopy I32Patch = *x.obj
     return &objCopy
 }
-
 func (x *I32Patch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("I32Patch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1397,7 +1391,6 @@ func (x *I64PatchBuilder) Emit() *I64Patch {
     var objCopy I64Patch = *x.obj
     return &objCopy
 }
-
 func (x *I64Patch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("I64Patch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1636,7 +1629,6 @@ func (x *FloatPatchBuilder) Emit() *FloatPatch {
     var objCopy FloatPatch = *x.obj
     return &objCopy
 }
-
 func (x *FloatPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("FloatPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1875,7 +1867,6 @@ func (x *DoublePatchBuilder) Emit() *DoublePatch {
     var objCopy DoublePatch = *x.obj
     return &objCopy
 }
-
 func (x *DoublePatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("DoublePatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2156,7 +2147,6 @@ func (x *StringPatchBuilder) Emit() *StringPatch {
     var objCopy StringPatch = *x.obj
     return &objCopy
 }
-
 func (x *StringPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("StringPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2456,7 +2446,6 @@ func (x *BinaryPatchBuilder) Emit() *BinaryPatch {
     var objCopy BinaryPatch = *x.obj
     return &objCopy
 }
-
 func (x *BinaryPatch) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("BinaryPatch"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)

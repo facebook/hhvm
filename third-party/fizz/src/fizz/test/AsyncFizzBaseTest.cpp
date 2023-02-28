@@ -99,6 +99,8 @@ class AsyncFizzBaseTest : public testing::Test, public AsyncFizzBase {
 
   MOCK_METHOD(folly::Optional<Random>, getClientRandom, (), (const));
   MOCK_METHOD(void, tlsShutdown, ());
+  MOCK_METHOD(void, shutdownWrite, ());
+  MOCK_METHOD(void, shutdownWriteNow, ());
   MOCK_METHOD(void, initiateKeyUpdate, (KeyUpdateRequest), (override));
 
  protected:

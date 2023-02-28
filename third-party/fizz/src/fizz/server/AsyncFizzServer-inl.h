@@ -115,6 +115,26 @@ void AsyncFizzServerT<SM>::tlsShutdown() {
 }
 
 template <typename SM>
+void AsyncFizzServerT<SM>::shutdownWrite() {
+  DelayedDestruction::DestructorGuard dg(this);
+  // Attempt to send a close_notify, then perform a half-shutdown of the write
+  // side of the underlying socket. If previously submitted writes, and the
+  // close_notify itself, are queued up in the Fizz layer, they won't make it
+  // out before the socket shuts down.
+  tlsShutdown();
+  transport_->shutdownWrite();
+}
+
+template <typename SM>
+void AsyncFizzServerT<SM>::shutdownWriteNow() {
+  DelayedDestruction::DestructorGuard dg(this);
+  // Similar to shutdownWrite(), attempt to write out the close_notify, but it
+  // might not make it out to the transport layer before the socket is closed.
+  tlsShutdown();
+  transport_->shutdownWriteNow();
+}
+
+template <typename SM>
 void AsyncFizzServerT<SM>::closeWithReset() {
   DelayedDestruction::DestructorGuard dg(this);
   if (transport_->good()) {

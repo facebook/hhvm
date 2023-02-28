@@ -111,6 +111,8 @@ class AsyncFizzClientT : public AsyncFizzBase,
   std::string getApplicationProtocol() const noexcept override;
 
   void tlsShutdown() override;
+  void shutdownWrite() override;
+  void shutdownWriteNow() override;
   void close() override;
   void closeWithReset() override;
   void closeNow() override;

@@ -429,6 +429,20 @@ TEST_F(AsyncFizzClientTest, TestTLSShutdown) {
   client_->tlsShutdown();
 }
 
+TEST_F(AsyncFizzClientTest, TestShutdownWrite) {
+  connect();
+  expectAppClose();
+  EXPECT_CALL(*socket_, shutdownWrite()).Times(1);
+  client_->shutdownWrite();
+}
+
+TEST_F(AsyncFizzClientTest, TestShutdownWriteNow) {
+  connect();
+  expectAppClose();
+  EXPECT_CALL(*socket_, shutdownWriteNow()).Times(1);
+  client_->shutdownWriteNow();
+}
+
 TEST_F(AsyncFizzClientTest, TestConnecting) {
   ON_CALL(*socket_, connecting()).WillByDefault(Return(true));
   EXPECT_TRUE(client_->connecting());

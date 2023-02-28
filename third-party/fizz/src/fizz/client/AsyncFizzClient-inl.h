@@ -224,6 +224,25 @@ void AsyncFizzClientT<SM>::tlsShutdown() {
 }
 
 template <typename SM>
+void AsyncFizzClientT<SM>::shutdownWrite() {
+  DelayedDestruction::DestructorGuard dg(this);
+  // allow any previous writes as well as the close_notify to be written out
+  // before closing the socket
+  tlsShutdown();
+  transport_->shutdownWrite();
+}
+
+template <typename SM>
+void AsyncFizzClientT<SM>::shutdownWriteNow() {
+  DelayedDestruction::DestructorGuard dg(this);
+  // try to write out a close_notify although the ensuing shutdownWriteNow call
+  // on the underlying socket might prevent these bytes (and any other previous
+  // writes) from making it through
+  tlsShutdown();
+  transport_->shutdownWriteNow();
+}
+
+template <typename SM>
 void AsyncFizzClientT<SM>::closeWithReset() {
   DelayedDestruction::DestructorGuard dg(this);
   if (transport_->good()) {

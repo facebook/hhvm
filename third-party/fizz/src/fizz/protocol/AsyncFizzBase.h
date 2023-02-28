@@ -315,9 +315,21 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
 
   /*
    * Used to shut down the tls session, without shutting down the underlying
-   * transport. Note you will still need to set setCloseTransportOnCloseNotify.
+   * transport.
    */
   virtual void tlsShutdown() = 0;
+
+  /*
+   * Redeclared from AsyncTransport. Attempts to perform a full TLS shutdown,
+   * then shuts down the underlying transport.
+   */
+  virtual void shutdownWrite() override = 0;
+
+  /*
+   * Redeclared from AsyncTransport. Attempts to perform a full TLS shutdown,
+   * then shuts down the underlying transport.
+   */
+  virtual void shutdownWriteNow() override = 0;
 
   /*
    * Sets whether or not to force in-place decryption of records. This is

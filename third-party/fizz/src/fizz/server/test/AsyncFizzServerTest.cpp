@@ -343,6 +343,20 @@ TEST_F(AsyncFizzServerTest, TestTLSShutdown) {
   server_->tlsShutdown();
 }
 
+TEST_F(AsyncFizzServerTest, TestShutdownWrite) {
+  accept();
+  expectAppClose();
+  EXPECT_CALL(*socket_, shutdownWrite()).Times(1);
+  server_->shutdownWrite();
+}
+
+TEST_F(AsyncFizzServerTest, TestShutdownWriteNow) {
+  accept();
+  expectAppClose();
+  EXPECT_CALL(*socket_, shutdownWriteNow()).Times(1);
+  server_->shutdownWriteNow();
+}
+
 TEST_F(AsyncFizzServerTest, TestCloseNowInFlightAction) {
   completeHandshake();
   server_->setReadCB(&readCallback_);

@@ -265,7 +265,8 @@ const detail::UnionExtN<1> unionExt = {
     /* .initMember */ {nullptr},
 };
 
-detail::OptionalThriftValue getString(const void* object) {
+detail::OptionalThriftValue getString(
+    const void* object, const detail::TypeInfo& /* typeInfo */) {
   PyObject* pyObj = *toPyObjectPtr(object);
   Py_ssize_t len = 0;
   char* buf = nullptr;
@@ -285,7 +286,8 @@ void setString(void* object, const std::string& value) {
   setPyObject(object, std::move(bytesObj));
 }
 
-detail::OptionalThriftValue getIOBuf(const void* object) {
+detail::OptionalThriftValue getIOBuf(
+    const void* object, const detail::TypeInfo& /* typeInfo */) {
   FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
   PyObject* pyObj = *toPyObjectPtr(object);
   folly::IOBuf* buf = pyObj != nullptr ? get_cIOBuf(pyObj) : nullptr;
@@ -304,7 +306,8 @@ void setIOBuf(void* object, const std::unique_ptr<folly::IOBuf> value) {
   setPyObject(object, std::move(iobufObj));
 }
 
-detail::OptionalThriftValue getStruct(const void* object) {
+detail::OptionalThriftValue getStruct(
+    const void* object, const detail::TypeInfo& /* typeInfo */) {
   PyObject* pyObj = *toPyObjectPtr(object);
   return folly::make_optional<detail::ThriftValue>(pyObj);
 }

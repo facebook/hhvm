@@ -39,7 +39,7 @@ struct TypeInfo {
 
   // Returns the value of a Thrift object, dereferencing smart pointers and
   // converting user-defined (via cpp.type) to native Thrift types if necessary.
-  OptionalThriftValue (*get)(const void* object);
+  OptionalThriftValue (*get)(const void* object, const TypeInfo& typeInfo);
 
   // Sets the value of a Thrift object.
   // This functions takes a pointer to the Thrift object and optionally the

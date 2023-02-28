@@ -190,7 +190,8 @@ inline detail::ThriftValue primitivePythonToCpp<float>(PyObject* object) {
 
 template <typename PrimitiveType, protocol::TType Type>
 struct PrimitiveTypeInfo {
-  static detail::OptionalThriftValue get(const void* object) {
+  static detail::OptionalThriftValue get(
+      const void* object, const detail::TypeInfo& /* typeInfo */) {
     PyObject* pyObj = *toPyObjectPtr(object);
     return folly::make_optional<detail::ThriftValue>(
         primitivePythonToCpp<PrimitiveType>(pyObj));
@@ -222,7 +223,8 @@ extern const detail::TypeInfo stringTypeInfo;
 extern const detail::TypeInfo binaryTypeInfo;
 extern const detail::TypeInfo iobufTypeInfo;
 
-detail::OptionalThriftValue getStruct(const void* object);
+detail::OptionalThriftValue getStruct(
+    const void* object, const detail::TypeInfo& /* typeInfo */);
 inline void* setContainer(void* object) {
   if (!setPyObject(object, UniquePyObjectPtr{PyTuple_New(0)})) {
     THRIFT_PY3_CHECK_ERROR();

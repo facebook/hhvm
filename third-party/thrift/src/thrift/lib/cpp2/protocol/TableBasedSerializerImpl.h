@@ -52,7 +52,7 @@ inline void* getMember(const FieldInfo& fieldInfo, void* object) {
 inline OptionalThriftValue getValue(
     const TypeInfo& typeInfo, const void* object) {
   if (typeInfo.get) {
-    return typeInfo.get(object);
+    return typeInfo.get(object, typeInfo);
   }
   return object ? folly::make_optional<ThriftValue>(object) : folly::none;
 }

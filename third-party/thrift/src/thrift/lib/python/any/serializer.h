@@ -36,7 +36,7 @@ std::unique_ptr<folly::IOBuf> serialize_type(
   auto queue = folly::IOBufQueue{folly::IOBufQueue::cacheChainLength()};
   Writer writer(SHARE_EXTERNAL_BUFFER);
   writer.setOutput(&queue);
-  auto value = typeInfo.get(&object);
+  auto value = typeInfo.get(&object, typeInfo);
   if (value.hasValue()) {
     detail::write(&writer, typeInfo, value.value());
   }

@@ -257,13 +257,14 @@ using OptionalThriftValue = folly::Optional<ThriftValue>;
 
 template <typename PrimitiveType, typename ObjectType>
 enable_if_not_smart_ptr_t<ObjectType, OptionalThriftValue> get(
-    const void* object) {
+    const void* object, const TypeInfo& /* typeInfo */) {
   return folly::make_optional<ThriftValue>(
       static_cast<PrimitiveType>(*static_cast<const ObjectType*>(object)));
 }
 
 template <typename PrimitiveType, typename PtrType>
-enable_if_smart_ptr_t<PtrType, OptionalThriftValue> get(const void* object) {
+enable_if_smart_ptr_t<PtrType, OptionalThriftValue> get(
+    const void* object, const TypeInfo& /* typeInfo */) {
   if (const auto* ptr = static_cast<const PtrType*>(object)->get()) {
     return folly::make_optional<ThriftValue>(static_cast<PrimitiveType>(*ptr));
   }
@@ -271,7 +272,8 @@ enable_if_smart_ptr_t<PtrType, OptionalThriftValue> get(const void* object) {
 }
 
 template <typename PtrType>
-enable_if_smart_ptr_t<PtrType, OptionalThriftValue> get(const void* object) {
+enable_if_smart_ptr_t<PtrType, OptionalThriftValue> get(
+    const void* object, const TypeInfo& /* typeInfo */) {
   if (const void* ptr = static_cast<const PtrType*>(object)->get()) {
     return folly::make_optional<ThriftValue>(ptr);
   }

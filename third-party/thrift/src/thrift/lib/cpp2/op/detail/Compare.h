@@ -318,8 +318,6 @@ struct CompareWith<
     type::cpp_type<std::unique_ptr<folly::IOBuf>, RUTag>>
     : CheckIOBufOp<LUTag, RUTag>, folly::IOBufCompare {};
 
-namespace {
-
 template <class T, class Comp>
 FOLLY_MAYBE_UNUSED bool sortAndLexicographicalCompare(
     const T& lhs, const T& rhs, Comp&& comp) {
@@ -338,8 +336,6 @@ FOLLY_MAYBE_UNUSED bool sortAndLexicographicalCompare(
   return std::lexicographical_compare(
       l.begin(), l.end(), r.begin(), r.end(), less);
 }
-
-} // namespace
 
 template <class T, class E>
 struct ListLessThan {

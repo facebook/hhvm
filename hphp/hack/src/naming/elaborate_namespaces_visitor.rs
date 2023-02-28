@@ -70,8 +70,7 @@ impl Env {
             && !is_special_identifier(name)
             && !name.starts_with('$')
         {
-            id.1 =
-                namespaces::elaborate_id(&self.namespace, namespaces::ElaborateKind::Class, id).1;
+            namespaces::elaborate_id(&self.namespace, namespaces::ElaborateKind::Class, id);
         }
     }
 
@@ -179,12 +178,11 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
 
                 if let Some(sid) = func.2.as_id_mut() {
                     if !sn::special_functions::is_special_function(&sid.1) {
-                        sid.1 = namespaces::elaborate_id(
+                        namespaces::elaborate_id(
                             &env.namespace,
                             namespaces::ElaborateKind::Fun,
                             sid,
-                        )
-                        .1;
+                        );
                         env.handle_special_calls(e);
                     }
                 } else {
@@ -193,12 +191,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             }
             Expr_::FunctionPointer(box (fpid, targs)) => {
                 if let Some(sid) = fpid.as_fpid_mut() {
-                    sid.1 = namespaces::elaborate_id(
-                        &env.namespace,
-                        namespaces::ElaborateKind::Fun,
-                        sid,
-                    )
-                    .1;
+                    namespaces::elaborate_id(&env.namespace, namespaces::ElaborateKind::Fun, sid);
                 } else if let Some(cc) = fpid.as_fpclass_const_mut() {
                     let type_ = cc.0;
                     if let Some(e) = type_.2.as_ciexpr_mut() {
@@ -223,9 +216,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 nullsafe.accept(env, self.object())?;
             }
             Expr_::Id(sid) if !((sid.1 == "NAN" || sid.1 == "INF") && env.in_codegen()) => {
-                sid.1 =
-                    namespaces::elaborate_id(&env.namespace, namespaces::ElaborateKind::Const, sid)
-                        .1;
+                namespaces::elaborate_id(&env.namespace, namespaces::ElaborateKind::Const, sid);
             }
             Expr_::New(box (class_id, targs, args, unpacked_el, _)) => {
                 if let Some(e) = class_id.2.as_ciexpr_mut() {

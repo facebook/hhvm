@@ -216,11 +216,11 @@ fn elaborate_raw_id<'a>(
     }
 }
 
-pub fn elaborate_id(nsenv: &namespace_env::Env, kind: ElaborateKind, Id(p, id): &Id) -> Id {
-    Id(
-        p.clone(),
-        elaborate_raw_id(nsenv, kind, id, false).into_owned(),
-    )
+pub fn elaborate_id(nsenv: &namespace_env::Env, kind: ElaborateKind, id: &mut Id) {
+    match elaborate_raw_id(nsenv, kind, &id.1, false) {
+        Cow::Borrowed(elaborated) => debug_assert_eq!(elaborated, id.1),
+        Cow::Owned(s) => id.1 = s,
+    }
 }
 
 pub fn elaborate_raw_id_in<'a>(
@@ -285,8 +285,8 @@ pub mod toplevel_elaborator {
     }
 
     fn on_hint(nsenv: &namespace_env::Env, hint: &mut Hint) {
-        if let Hint_::Happly(ref mut id, _) = hint.1.as_mut() {
-            *id = super::elaborate_id(nsenv, super::ElaborateKind::Class, id);
+        if let Hint_::Happly(id, _) = hint.1.as_mut() {
+            super::elaborate_id(nsenv, super::ElaborateKind::Class, id);
         }
     }
 

@@ -28,6 +28,7 @@ var _ thrift.Struct = &Fields{}
 func NewFields() *Fields {
     return (&Fields{})
 }
+
 func (x *Fields) GetInjectedField() string {
     return x.InjectedField
 }
@@ -156,6 +157,7 @@ var _ thrift.Struct = &FieldsInjectedToEmptyStruct{}
 func NewFieldsInjectedToEmptyStruct() *FieldsInjectedToEmptyStruct {
     return (&FieldsInjectedToEmptyStruct{})
 }
+
 func (x *FieldsInjectedToEmptyStruct) GetInjectedField() string {
     return x.InjectedField
 }
@@ -285,6 +287,7 @@ var _ thrift.Struct = &FieldsInjectedToStruct{}
 func NewFieldsInjectedToStruct() *FieldsInjectedToStruct {
     return (&FieldsInjectedToStruct{})
 }
+
 func (x *FieldsInjectedToStruct) GetStringField() string {
     return x.StringField
 }
@@ -465,6 +468,13 @@ var _ thrift.Struct = &FieldsInjectedWithIncludedStruct{}
 func NewFieldsInjectedWithIncludedStruct() *FieldsInjectedWithIncludedStruct {
     return (&FieldsInjectedWithIncludedStruct{})
 }
+
+// Deprecated: Use NewFieldsInjectedWithIncludedStruct().InjectedStructuredAnnotationField instead.
+var FieldsInjectedWithIncludedStruct_InjectedStructuredAnnotationField_DEFAULT = NewFieldsInjectedWithIncludedStruct().InjectedStructuredAnnotationField
+
+// Deprecated: Use NewFieldsInjectedWithIncludedStruct().InjectedUnstructuredAnnotationField instead.
+var FieldsInjectedWithIncludedStruct_InjectedUnstructuredAnnotationField_DEFAULT = NewFieldsInjectedWithIncludedStruct().InjectedUnstructuredAnnotationField
+
 func (x *FieldsInjectedWithIncludedStruct) GetStringField() string {
     return x.StringField
 }

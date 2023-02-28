@@ -23,6 +23,7 @@ var _ thrift.Struct = &Empty{}
 func NewEmpty() *Empty {
     return (&Empty{})
 }
+
 func (x *Empty) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -101,6 +102,7 @@ var _ thrift.Struct = &Nada{}
 func NewNada() *Nada {
     return (&Nada{})
 }
+
 func (x *Nada) String() string {
     return fmt.Sprintf("%+v", x)
 }

@@ -158,6 +158,7 @@ var _ thrift.Struct = &Ref{}
 func NewRef() *Ref {
     return (&Ref{})
 }
+
 func (x *Ref) GetType() RefType {
     return x.Type
 }
@@ -288,6 +289,7 @@ func NewLazy() *Lazy {
     return (&Lazy{}).
         SetRef(false)
 }
+
 func (x *Lazy) GetRef() bool {
     return x.Ref
 }
@@ -415,6 +417,7 @@ var _ thrift.Struct = &DisableLazyChecksum{}
 func NewDisableLazyChecksum() *DisableLazyChecksum {
     return (&DisableLazyChecksum{})
 }
+
 func (x *DisableLazyChecksum) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -498,6 +501,7 @@ var _ thrift.Struct = &Adapter{}
 func NewAdapter() *Adapter {
     return (&Adapter{})
 }
+
 func (x *Adapter) GetName() string {
     return x.Name
 }
@@ -823,6 +827,7 @@ func NewPackIsset() *PackIsset {
     return (&PackIsset{}).
         SetAtomic(true)
 }
+
 func (x *PackIsset) GetAtomic() bool {
     return x.Atomic
 }
@@ -950,6 +955,7 @@ var _ thrift.Struct = &MinimizePadding{}
 func NewMinimizePadding() *MinimizePadding {
     return (&MinimizePadding{})
 }
+
 func (x *MinimizePadding) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1028,6 +1034,7 @@ var _ thrift.Struct = &TriviallyRelocatable{}
 func NewTriviallyRelocatable() *TriviallyRelocatable {
     return (&TriviallyRelocatable{})
 }
+
 func (x *TriviallyRelocatable) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1106,6 +1113,7 @@ var _ thrift.Struct = &ScopedEnumAsUnionType{}
 func NewScopedEnumAsUnionType() *ScopedEnumAsUnionType {
     return (&ScopedEnumAsUnionType{})
 }
+
 func (x *ScopedEnumAsUnionType) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1184,6 +1192,7 @@ var _ thrift.Struct = &StrongType{}
 func NewStrongType() *StrongType {
     return (&StrongType{})
 }
+
 func (x *StrongType) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1264,6 +1273,7 @@ var _ thrift.Struct = &FieldInterceptor{}
 func NewFieldInterceptor() *FieldInterceptor {
     return (&FieldInterceptor{})
 }
+
 func (x *FieldInterceptor) GetName() string {
     return x.Name
 }
@@ -1440,6 +1450,7 @@ var _ thrift.Struct = &UseOpEncode{}
 func NewUseOpEncode() *UseOpEncode {
     return (&UseOpEncode{})
 }
+
 func (x *UseOpEncode) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1519,6 +1530,7 @@ var _ thrift.Struct = &EnumType{}
 func NewEnumType() *EnumType {
     return (&EnumType{})
 }
+
 func (x *EnumType) GetType() EnumUnderlyingType {
     return x.Type
 }

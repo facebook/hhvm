@@ -25,6 +25,7 @@ var _ thrift.Struct = &Accessory{}
 func NewAccessory() *Accessory {
     return (&Accessory{})
 }
+
 func (x *Accessory) GetInventoryId() int32 {
     return x.InventoryId
 }
@@ -203,6 +204,7 @@ var _ thrift.Struct = &PartName{}
 func NewPartName() *PartName {
     return (&PartName{})
 }
+
 func (x *PartName) GetInventoryId() int32 {
     return x.InventoryId
 }

@@ -158,6 +158,7 @@ var _ thrift.Struct = &reqSomeServiceBounceMap{}
 func newReqSomeServiceBounceMap() *reqSomeServiceBounceMap {
     return (&reqSomeServiceBounceMap{})
 }
+
 func (x *reqSomeServiceBounceMap) GetM() included.SomeMap {
     return x.M
 }
@@ -338,6 +339,7 @@ var _ thrift.Struct = &respSomeServiceBounceMap{}
 func newRespSomeServiceBounceMap() *respSomeServiceBounceMap {
     return (&respSomeServiceBounceMap{})
 }
+
 func (x *respSomeServiceBounceMap) GetValue() included.SomeMap {
     return x.Value
 }
@@ -518,6 +520,7 @@ var _ thrift.Struct = &reqSomeServiceBinaryKeyedMap{}
 func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
     return (&reqSomeServiceBinaryKeyedMap{})
 }
+
 func (x *reqSomeServiceBinaryKeyedMap) GetR() []int64 {
     return x.R
 }
@@ -681,6 +684,7 @@ var _ thrift.Struct = &respSomeServiceBinaryKeyedMap{}
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
     return (&respSomeServiceBinaryKeyedMap{})
 }
+
 func (x *respSomeServiceBinaryKeyedMap) GetValue() map[TBinary]int64 {
     return x.Value
 }

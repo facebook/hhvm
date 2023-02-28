@@ -24,6 +24,7 @@ var _ thrift.Struct = &GetEntityRequest{}
 func NewGetEntityRequest() *GetEntityRequest {
     return (&GetEntityRequest{})
 }
+
 func (x *GetEntityRequest) GetId() string {
     return x.Id
 }
@@ -152,6 +153,7 @@ var _ thrift.Struct = &GetEntityResponse{}
 func NewGetEntityResponse() *GetEntityResponse {
     return (&GetEntityResponse{})
 }
+
 func (x *GetEntityResponse) GetEntity() string {
     return x.Entity
 }

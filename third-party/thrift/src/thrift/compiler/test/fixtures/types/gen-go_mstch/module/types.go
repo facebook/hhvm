@@ -215,6 +215,7 @@ var _ thrift.Struct = &EmptyStruct{}
 func NewEmptyStruct() *EmptyStruct {
     return (&EmptyStruct{})
 }
+
 func (x *EmptyStruct) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -294,6 +295,7 @@ var _ thrift.Struct = &DecoratedStruct{}
 func NewDecoratedStruct() *DecoratedStruct {
     return (&DecoratedStruct{})
 }
+
 func (x *DecoratedStruct) GetField() string {
     return x.Field
 }
@@ -429,6 +431,7 @@ var _ thrift.Struct = &ContainerStruct{}
 func NewContainerStruct() *ContainerStruct {
     return (&ContainerStruct{})
 }
+
 func (x *ContainerStruct) GetFieldA() []int32 {
     return x.FieldA
 }
@@ -1222,6 +1225,7 @@ var _ thrift.Struct = &CppTypeStruct{}
 func NewCppTypeStruct() *CppTypeStruct {
     return (&CppTypeStruct{})
 }
+
 func (x *CppTypeStruct) GetFieldA() []int32 {
     return x.FieldA
 }
@@ -1386,6 +1390,7 @@ var _ thrift.Struct = &VirtualStruct{}
 func NewVirtualStruct() *VirtualStruct {
     return (&VirtualStruct{})
 }
+
 func (x *VirtualStruct) GetMyIntField() int64 {
     return x.MyIntField
 }
@@ -1521,6 +1526,7 @@ func NewMyStructWithForwardRefEnum() *MyStructWithForwardRefEnum {
             MyForwardRefEnum_NONZERO,
         )
 }
+
 func (x *MyStructWithForwardRefEnum) GetA() MyForwardRefEnum {
     return x.A
 }
@@ -1701,6 +1707,7 @@ var _ thrift.Struct = &TrivialNumeric{}
 func NewTrivialNumeric() *TrivialNumeric {
     return (&TrivialNumeric{})
 }
+
 func (x *TrivialNumeric) GetA() int32 {
     return x.A
 }
@@ -1885,6 +1892,10 @@ func NewTrivialNestedWithDefault() *TrivialNestedWithDefault {
     SetB(true),
         )
 }
+
+// Deprecated: Use NewTrivialNestedWithDefault().N instead.
+var TrivialNestedWithDefault_N_DEFAULT = NewTrivialNestedWithDefault().N
+
 func (x *TrivialNestedWithDefault) GetZ() int32 {
     return x.Z
 }
@@ -2071,6 +2082,7 @@ var _ thrift.Struct = &ComplexString{}
 func NewComplexString() *ComplexString {
     return (&ComplexString{})
 }
+
 func (x *ComplexString) GetA() string {
     return x.A
 }
@@ -2312,6 +2324,10 @@ func NewComplexNestedWithDefault() *ComplexNestedWithDefault {
     ),
         )
 }
+
+// Deprecated: Use NewComplexNestedWithDefault().N instead.
+var ComplexNestedWithDefault_N_DEFAULT = NewComplexNestedWithDefault().N
+
 func (x *ComplexNestedWithDefault) GetZ() string {
     return x.Z
 }
@@ -2501,6 +2517,7 @@ var _ thrift.Struct = &MinPadding{}
 func NewMinPadding() *MinPadding {
     return (&MinPadding{})
 }
+
 func (x *MinPadding) GetSmall() byte {
     return x.Small
 }
@@ -2829,6 +2846,7 @@ var _ thrift.Struct = &MinPaddingWithCustomType{}
 func NewMinPaddingWithCustomType() *MinPaddingWithCustomType {
     return (&MinPaddingWithCustomType{})
 }
+
 func (x *MinPaddingWithCustomType) GetSmall() byte {
     return x.Small
 }
@@ -3156,6 +3174,10 @@ var _ thrift.Struct = &MyStruct{}
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
+
+// Deprecated: Use NewMyStruct().Data instead.
+var MyStruct_Data_DEFAULT = NewMyStruct().Data
+
 func (x *MyStruct) GetMyIntField() int64 {
     return x.MyIntField
 }
@@ -3438,6 +3460,7 @@ var _ thrift.Struct = &MyDataItem{}
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{})
 }
+
 func (x *MyDataItem) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -3517,6 +3540,7 @@ var _ thrift.Struct = &Renaming{}
 func NewRenaming() *Renaming {
     return (&Renaming{})
 }
+
 func (x *Renaming) GetFoo() int64 {
     return x.Foo
 }
@@ -3646,6 +3670,7 @@ var _ thrift.Struct = &AnnotatedTypes{}
 func NewAnnotatedTypes() *AnnotatedTypes {
     return (&AnnotatedTypes{})
 }
+
 func (x *AnnotatedTypes) GetBinaryField() TBinary {
     return x.BinaryField
 }
@@ -3913,6 +3938,13 @@ var _ thrift.Struct = &ForwardUsageRoot{}
 func NewForwardUsageRoot() *ForwardUsageRoot {
     return (&ForwardUsageRoot{})
 }
+
+// Deprecated: Use NewForwardUsageRoot().ForwardUsageStruct instead.
+var ForwardUsageRoot_ForwardUsageStruct_DEFAULT = NewForwardUsageRoot().ForwardUsageStruct
+
+// Deprecated: Use NewForwardUsageRoot().ForwardUsageByRef instead.
+var ForwardUsageRoot_ForwardUsageByRef_DEFAULT = NewForwardUsageRoot().ForwardUsageByRef
+
 func (x *ForwardUsageRoot) GetForwardUsageStruct() *ForwardUsageStruct {
     return x.ForwardUsageStruct
 }
@@ -4106,6 +4138,10 @@ var _ thrift.Struct = &ForwardUsageStruct{}
 func NewForwardUsageStruct() *ForwardUsageStruct {
     return (&ForwardUsageStruct{})
 }
+
+// Deprecated: Use NewForwardUsageStruct().Foo instead.
+var ForwardUsageStruct_Foo_DEFAULT = NewForwardUsageStruct().Foo
+
 func (x *ForwardUsageStruct) GetFoo() *ForwardUsageRoot {
     return x.Foo
 }
@@ -4242,6 +4278,10 @@ var _ thrift.Struct = &ForwardUsageByRef{}
 func NewForwardUsageByRef() *ForwardUsageByRef {
     return (&ForwardUsageByRef{})
 }
+
+// Deprecated: Use NewForwardUsageByRef().Foo instead.
+var ForwardUsageByRef_Foo_DEFAULT = NewForwardUsageByRef().Foo
+
 func (x *ForwardUsageByRef) GetFoo() *ForwardUsageRoot {
     return x.Foo
 }
@@ -4378,6 +4418,7 @@ var _ thrift.Struct = &IncompleteMap{}
 func NewIncompleteMap() *IncompleteMap {
     return (&IncompleteMap{})
 }
+
 func (x *IncompleteMap) GetField() map[int32]*IncompleteMapDep {
     return x.Field
 }
@@ -4559,6 +4600,7 @@ var _ thrift.Struct = &IncompleteMapDep{}
 func NewIncompleteMapDep() *IncompleteMapDep {
     return (&IncompleteMapDep{})
 }
+
 func (x *IncompleteMapDep) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -4638,6 +4680,7 @@ var _ thrift.Struct = &CompleteMap{}
 func NewCompleteMap() *CompleteMap {
     return (&CompleteMap{})
 }
+
 func (x *CompleteMap) GetField() map[int32]*CompleteMapDep {
     return x.Field
 }
@@ -4819,6 +4862,7 @@ var _ thrift.Struct = &CompleteMapDep{}
 func NewCompleteMapDep() *CompleteMapDep {
     return (&CompleteMapDep{})
 }
+
 func (x *CompleteMapDep) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -4898,6 +4942,7 @@ var _ thrift.Struct = &IncompleteList{}
 func NewIncompleteList() *IncompleteList {
     return (&IncompleteList{})
 }
+
 func (x *IncompleteList) GetField() []*IncompleteListDep {
     return x.Field
 }
@@ -5062,6 +5107,7 @@ var _ thrift.Struct = &IncompleteListDep{}
 func NewIncompleteListDep() *IncompleteListDep {
     return (&IncompleteListDep{})
 }
+
 func (x *IncompleteListDep) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -5141,6 +5187,7 @@ var _ thrift.Struct = &CompleteList{}
 func NewCompleteList() *CompleteList {
     return (&CompleteList{})
 }
+
 func (x *CompleteList) GetField() []*CompleteListDep {
     return x.Field
 }
@@ -5305,6 +5352,7 @@ var _ thrift.Struct = &CompleteListDep{}
 func NewCompleteListDep() *CompleteListDep {
     return (&CompleteListDep{})
 }
+
 func (x *CompleteListDep) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -5384,6 +5432,7 @@ var _ thrift.Struct = &AdaptedList{}
 func NewAdaptedList() *AdaptedList {
     return (&AdaptedList{})
 }
+
 func (x *AdaptedList) GetField() []*AdaptedListDep {
     return x.Field
 }
@@ -5549,6 +5598,10 @@ var _ thrift.Struct = &AdaptedListDep{}
 func NewAdaptedListDep() *AdaptedListDep {
     return (&AdaptedListDep{})
 }
+
+// Deprecated: Use NewAdaptedListDep().Field instead.
+var AdaptedListDep_Field_DEFAULT = NewAdaptedListDep().Field
+
 func (x *AdaptedListDep) GetField() *AdaptedList {
     return x.Field
 }
@@ -5685,6 +5738,7 @@ var _ thrift.Struct = &DependentAdaptedList{}
 func NewDependentAdaptedList() *DependentAdaptedList {
     return (&DependentAdaptedList{})
 }
+
 func (x *DependentAdaptedList) GetField() []*DependentAdaptedListDep {
     return x.Field
 }
@@ -5850,6 +5904,10 @@ var _ thrift.Struct = &DependentAdaptedListDep{}
 func NewDependentAdaptedListDep() *DependentAdaptedListDep {
     return (&DependentAdaptedListDep{})
 }
+
+// Deprecated: Use NewDependentAdaptedListDep().Field instead.
+var DependentAdaptedListDep_Field_DEFAULT = NewDependentAdaptedListDep().Field
+
 func (x *DependentAdaptedListDep) GetField() *int16 {
     return x.Field
 }
@@ -5991,6 +6049,7 @@ var _ thrift.Struct = &AllocatorAware{}
 func NewAllocatorAware() *AllocatorAware {
     return (&AllocatorAware{})
 }
+
 func (x *AllocatorAware) GetAaList() []int32 {
     return x.AaList
 }
@@ -6539,6 +6598,10 @@ var _ thrift.Struct = &AllocatorAware2{}
 func NewAllocatorAware2() *AllocatorAware2 {
     return (&AllocatorAware2{})
 }
+
+// Deprecated: Use NewAllocatorAware2().BoxField instead.
+var AllocatorAware2_BoxField_DEFAULT = NewAllocatorAware2().BoxField
+
 func (x *AllocatorAware2) GetNotAContainer() int32 {
     return x.NotAContainer
 }
@@ -6725,6 +6788,7 @@ var _ thrift.Struct = &TypedefStruct{}
 func NewTypedefStruct() *TypedefStruct {
     return (&TypedefStruct{})
 }
+
 func (x *TypedefStruct) GetI32Field() int32 {
     return x.I32Field
 }
@@ -6951,6 +7015,7 @@ var _ thrift.Struct = &StructWithDoubleUnderscores{}
 func NewStructWithDoubleUnderscores() *StructWithDoubleUnderscores {
     return (&StructWithDoubleUnderscores{})
 }
+
 func (x *StructWithDoubleUnderscores) Get_Field() int32 {
     return x._Field
 }

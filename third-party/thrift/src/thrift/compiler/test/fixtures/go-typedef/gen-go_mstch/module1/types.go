@@ -47,6 +47,13 @@ func NewAutomobile() *Automobile {
     return (&Automobile{}).
         SetFirstPlate("0000")
 }
+
+// Deprecated: Use NewAutomobile().PreviousPlate instead.
+var Automobile_PreviousPlate_DEFAULT = NewAutomobile().PreviousPlate
+
+// Deprecated: Use NewAutomobile().FirstPlate instead.
+var Automobile_FirstPlate_DEFAULT = NewAutomobile().FirstPlate
+
 func (x *Automobile) GetPlate() Plate {
     return x.Plate
 }
@@ -611,6 +618,7 @@ var _ thrift.Struct = &MapKey{}
 func NewMapKey() *MapKey {
     return (&MapKey{})
 }
+
 func (x *MapKey) GetNum() int64 {
     return x.Num
 }
@@ -788,6 +796,7 @@ var _ thrift.Struct = &MapContainer{}
 func NewMapContainer() *MapContainer {
     return (&MapContainer{})
 }
+
 func (x *MapContainer) GetMapval() map[*MapKey]string {
     return x.Mapval
 }
@@ -971,6 +980,13 @@ var _ thrift.Struct = &Pair{}
 func NewPair() *Pair {
     return (&Pair{})
 }
+
+// Deprecated: Use NewPair().Automobile instead.
+var Pair_Automobile_DEFAULT = NewPair().Automobile
+
+// Deprecated: Use NewPair().Car instead.
+var Pair_Car_DEFAULT = NewPair().Car
+
 func (x *Pair) GetAutomobile() *Automobile {
     return x.Automobile
 }
@@ -1165,6 +1181,7 @@ var _ thrift.Struct = &Collection{}
 func NewCollection() *Collection {
     return (&Collection{})
 }
+
 func (x *Collection) GetAutomobiles() []*Automobile {
     return x.Automobiles
 }

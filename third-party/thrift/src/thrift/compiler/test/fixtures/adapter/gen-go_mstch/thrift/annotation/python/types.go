@@ -27,6 +27,7 @@ var _ thrift.Struct = &Adapter{}
 func NewAdapter() *Adapter {
     return (&Adapter{})
 }
+
 func (x *Adapter) GetName() string {
     return x.Name
 }

@@ -150,6 +150,10 @@ var _ thrift.Struct = &reqServiceFunc{}
 func newReqServiceFunc() *reqServiceFunc {
     return (&reqServiceFunc{})
 }
+
+// Deprecated: Use newReqServiceFunc().Arg3 instead.
+var reqServiceFunc_Arg3_DEFAULT = newReqServiceFunc().Arg3
+
 func (x *reqServiceFunc) GetArg1() StringWithAdapter {
     return x.Arg1
 }
@@ -383,6 +387,7 @@ var _ thrift.Struct = &respServiceFunc{}
 func newRespServiceFunc() *respServiceFunc {
     return (&respServiceFunc{})
 }
+
 func (x *respServiceFunc) GetValue() MyI32 {
     return x.Value
 }
@@ -729,6 +734,7 @@ var _ thrift.Struct = &reqAdapterServiceCount{}
 func newReqAdapterServiceCount() *reqAdapterServiceCount {
     return (&reqAdapterServiceCount{})
 }
+
 func (x *reqAdapterServiceCount) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -807,6 +813,10 @@ var _ thrift.Struct = &respAdapterServiceCount{}
 func newRespAdapterServiceCount() *respAdapterServiceCount {
     return (&respAdapterServiceCount{})
 }
+
+// Deprecated: Use newRespAdapterServiceCount().Value instead.
+var respAdapterServiceCount_Value_DEFAULT = newRespAdapterServiceCount().Value
+
 func (x *respAdapterServiceCount) GetValue() *CountingStruct {
     return x.Value
 }
@@ -942,6 +952,10 @@ var _ thrift.Struct = &reqAdapterServiceAdaptedTypes{}
 func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
     return (&reqAdapterServiceAdaptedTypes{})
 }
+
+// Deprecated: Use newReqAdapterServiceAdaptedTypes().Arg_ instead.
+var reqAdapterServiceAdaptedTypes_Arg__DEFAULT = newReqAdapterServiceAdaptedTypes().Arg_
+
 func (x *reqAdapterServiceAdaptedTypes) GetArg_() *HeapAllocated {
     return x.Arg_
 }
@@ -1077,6 +1091,10 @@ var _ thrift.Struct = &respAdapterServiceAdaptedTypes{}
 func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
     return (&respAdapterServiceAdaptedTypes{})
 }
+
+// Deprecated: Use newRespAdapterServiceAdaptedTypes().Value instead.
+var respAdapterServiceAdaptedTypes_Value_DEFAULT = newRespAdapterServiceAdaptedTypes().Value
+
 func (x *respAdapterServiceAdaptedTypes) GetValue() *HeapAllocated {
     return x.Value
 }

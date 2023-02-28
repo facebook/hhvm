@@ -31,6 +31,16 @@ var _ thrift.Struct = &ComplexUnion{}
 func NewComplexUnion() *ComplexUnion {
     return (&ComplexUnion{})
 }
+
+// Deprecated: Use NewComplexUnion().IntValue instead.
+var ComplexUnion_IntValue_DEFAULT = NewComplexUnion().IntValue
+
+// Deprecated: Use NewComplexUnion().StringValue instead.
+var ComplexUnion_StringValue_DEFAULT = NewComplexUnion().StringValue
+
+// Deprecated: Use NewComplexUnion().StringRef instead.
+var ComplexUnion_StringRef_DEFAULT = NewComplexUnion().StringRef
+
 func (x *ComplexUnion) GetIntValue() *int64 {
     return x.IntValue
 }
@@ -506,6 +516,7 @@ var _ thrift.Struct = &ListUnion{}
 func NewListUnion() *ListUnion {
     return (&ListUnion{})
 }
+
 func (x *ListUnion) GetIntListValue() []int64 {
     return x.IntListValue
 }
@@ -731,6 +742,10 @@ var _ thrift.Struct = &DataUnion{}
 func NewDataUnion() *DataUnion {
     return (&DataUnion{})
 }
+
+// Deprecated: Use NewDataUnion().StringData instead.
+var DataUnion_StringData_DEFAULT = NewDataUnion().StringData
+
 func (x *DataUnion) GetBinaryData() []byte {
     return x.BinaryData
 }
@@ -899,6 +914,7 @@ var _ thrift.Struct = &Val{}
 func NewVal() *Val {
     return (&Val{})
 }
+
 func (x *Val) GetStrVal() string {
     return x.StrVal
 }
@@ -1179,6 +1195,13 @@ var _ thrift.Struct = &ValUnion{}
 func NewValUnion() *ValUnion {
     return (&ValUnion{})
 }
+
+// Deprecated: Use NewValUnion().V1 instead.
+var ValUnion_V1_DEFAULT = NewValUnion().V1
+
+// Deprecated: Use NewValUnion().V2 instead.
+var ValUnion_V2_DEFAULT = NewValUnion().V2
+
 func (x *ValUnion) GetV1() *Val {
     return x.V1
 }
@@ -1348,6 +1371,13 @@ var _ thrift.Struct = &VirtualComplexUnion{}
 func NewVirtualComplexUnion() *VirtualComplexUnion {
     return (&VirtualComplexUnion{})
 }
+
+// Deprecated: Use NewVirtualComplexUnion().ThingOne instead.
+var VirtualComplexUnion_ThingOne_DEFAULT = NewVirtualComplexUnion().ThingOne
+
+// Deprecated: Use NewVirtualComplexUnion().ThingTwo instead.
+var VirtualComplexUnion_ThingTwo_DEFAULT = NewVirtualComplexUnion().ThingTwo
+
 func (x *VirtualComplexUnion) GetThingOne() *string {
     return x.ThingOne
 }
@@ -1514,6 +1544,7 @@ var _ thrift.Struct = &NonCopyableStruct{}
 func NewNonCopyableStruct() *NonCopyableStruct {
     return (&NonCopyableStruct{})
 }
+
 func (x *NonCopyableStruct) GetNum() int64 {
     return x.Num
 }
@@ -1642,6 +1673,10 @@ var _ thrift.Struct = &NonCopyableUnion{}
 func NewNonCopyableUnion() *NonCopyableUnion {
     return (&NonCopyableUnion{})
 }
+
+// Deprecated: Use NewNonCopyableUnion().S instead.
+var NonCopyableUnion_S_DEFAULT = NewNonCopyableUnion().S
+
 func (x *NonCopyableUnion) GetS() *NonCopyableStruct {
     return x.S
 }

@@ -25,6 +25,7 @@ var _ thrift.Struct = &Beta{}
 func NewBeta() *Beta {
     return (&Beta{})
 }
+
 func (x *Beta) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -103,6 +104,7 @@ var _ thrift.Struct = &Experimental{}
 func NewExperimental() *Experimental {
     return (&Experimental{})
 }
+
 func (x *Experimental) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -181,6 +183,7 @@ var _ thrift.Struct = &Testing{}
 func NewTesting() *Testing {
     return (&Testing{})
 }
+
 func (x *Testing) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -260,6 +263,7 @@ var _ thrift.Struct = &Deprecated{}
 func NewDeprecated() *Deprecated {
     return (&Deprecated{})
 }
+
 func (x *Deprecated) GetMessage() string {
     return x.Message
 }
@@ -389,6 +393,7 @@ var _ thrift.Struct = &ReserveIds{}
 func NewReserveIds() *ReserveIds {
     return (&ReserveIds{})
 }
+
 func (x *ReserveIds) GetIds() []int32 {
     return x.Ids
 }
@@ -655,6 +660,7 @@ var _ thrift.Struct = &Legacy{}
 func NewLegacy() *Legacy {
     return (&Legacy{})
 }
+
 func (x *Legacy) GetMessage() string {
     return x.Message
 }
@@ -784,6 +790,7 @@ func NewRequiresBackwardCompatibility() *RequiresBackwardCompatibility {
     return (&RequiresBackwardCompatibility{}).
         SetFieldName(false)
 }
+
 func (x *RequiresBackwardCompatibility) GetFieldName() bool {
     return x.FieldName
 }
@@ -911,6 +918,7 @@ var _ thrift.Struct = &NoTesting{}
 func NewNoTesting() *NoTesting {
     return (&NoTesting{})
 }
+
 func (x *NoTesting) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -989,6 +997,7 @@ var _ thrift.Struct = &NoExperimental{}
 func NewNoExperimental() *NoExperimental {
     return (&NoExperimental{})
 }
+
 func (x *NoExperimental) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1067,6 +1076,7 @@ var _ thrift.Struct = &NoBeta{}
 func NewNoBeta() *NoBeta {
     return (&NoBeta{})
 }
+
 func (x *NoBeta) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1145,6 +1155,7 @@ var _ thrift.Struct = &Released{}
 func NewReleased() *Released {
     return (&Released{})
 }
+
 func (x *Released) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1223,6 +1234,7 @@ var _ thrift.Struct = &NoLegacy{}
 func NewNoLegacy() *NoLegacy {
     return (&NoLegacy{})
 }
+
 func (x *NoLegacy) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1301,6 +1313,7 @@ var _ thrift.Struct = &NoDeprecated{}
 func NewNoDeprecated() *NoDeprecated {
     return (&NoDeprecated{})
 }
+
 func (x *NoDeprecated) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1379,6 +1392,7 @@ var _ thrift.Struct = &TerseWrite{}
 func NewTerseWrite() *TerseWrite {
     return (&TerseWrite{})
 }
+
 func (x *TerseWrite) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1457,6 +1471,7 @@ var _ thrift.Struct = &Box{}
 func NewBox() *Box {
     return (&Box{})
 }
+
 func (x *Box) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1535,6 +1550,7 @@ var _ thrift.Struct = &Mixin{}
 func NewMixin() *Mixin {
     return (&Mixin{})
 }
+
 func (x *Mixin) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1613,6 +1629,7 @@ var _ thrift.Struct = &Bit{}
 func NewBit() *Bit {
     return (&Bit{})
 }
+
 func (x *Bit) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1691,6 +1708,7 @@ var _ thrift.Struct = &SerializeInFieldIdOrder{}
 func NewSerializeInFieldIdOrder() *SerializeInFieldIdOrder {
     return (&SerializeInFieldIdOrder{})
 }
+
 func (x *SerializeInFieldIdOrder) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1769,6 +1787,7 @@ var _ thrift.Struct = &BitmaskEnum{}
 func NewBitmaskEnum() *BitmaskEnum {
     return (&BitmaskEnum{})
 }
+
 func (x *BitmaskEnum) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1849,6 +1868,7 @@ func NewGenDefaultEnumValue() *GenDefaultEnumValue {
     return (&GenDefaultEnumValue{}).
         SetName("Unspecified")
 }
+
 func (x *GenDefaultEnumValue) GetName() string {
     return x.Name
 }
@@ -1977,6 +1997,7 @@ var _ thrift.Struct = &GenEnumSet{}
 func NewGenEnumSet() *GenEnumSet {
     return (&GenEnumSet{})
 }
+
 func (x *GenEnumSet) GetName() string {
     return x.Name
 }
@@ -2104,6 +2125,7 @@ var _ thrift.Struct = &V1{}
 func NewV1() *V1 {
     return (&V1{})
 }
+
 func (x *V1) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2182,6 +2204,7 @@ var _ thrift.Struct = &V1beta{}
 func NewV1beta() *V1beta {
     return (&V1beta{})
 }
+
 func (x *V1beta) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2260,6 +2283,7 @@ var _ thrift.Struct = &V1alpha{}
 func NewV1alpha() *V1alpha {
     return (&V1alpha{})
 }
+
 func (x *V1alpha) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2338,6 +2362,7 @@ var _ thrift.Struct = &V1test{}
 func NewV1test() *V1test {
     return (&V1test{})
 }
+
 func (x *V1test) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2417,6 +2442,7 @@ var _ thrift.Struct = &ExceptionMessage{}
 func NewExceptionMessage() *ExceptionMessage {
     return (&ExceptionMessage{})
 }
+
 func (x *ExceptionMessage) GetField() string {
     return x.Field
 }
@@ -2545,6 +2571,7 @@ var _ thrift.Struct = &GenerateRuntimeSchema{}
 func NewGenerateRuntimeSchema() *GenerateRuntimeSchema {
     return (&GenerateRuntimeSchema{})
 }
+
 func (x *GenerateRuntimeSchema) GetName() string {
     return x.Name
 }
@@ -2672,6 +2699,7 @@ var _ thrift.Struct = &InternBox{}
 func NewInternBox() *InternBox {
     return (&InternBox{})
 }
+
 func (x *InternBox) String() string {
     return fmt.Sprintf("%+v", x)
 }

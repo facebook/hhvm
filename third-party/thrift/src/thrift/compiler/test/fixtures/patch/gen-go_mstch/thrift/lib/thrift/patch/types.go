@@ -126,6 +126,7 @@ var _ thrift.Struct = &GeneratePatch{}
 func NewGeneratePatch() *GeneratePatch {
     return (&GeneratePatch{})
 }
+
 func (x *GeneratePatch) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -204,6 +205,7 @@ var _ thrift.Struct = &AssignOnlyPatch{}
 func NewAssignOnlyPatch() *AssignOnlyPatch {
     return (&AssignOnlyPatch{})
 }
+
 func (x *AssignOnlyPatch) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -285,6 +287,10 @@ var _ thrift.Struct = &BoolPatch{}
 func NewBoolPatch() *BoolPatch {
     return (&BoolPatch{})
 }
+
+// Deprecated: Use NewBoolPatch().Assign instead.
+var BoolPatch_Assign_DEFAULT = NewBoolPatch().Assign
+
 func (x *BoolPatch) GetAssign() *bool {
     return x.Assign
 }
@@ -520,6 +526,10 @@ var _ thrift.Struct = &BytePatch{}
 func NewBytePatch() *BytePatch {
     return (&BytePatch{})
 }
+
+// Deprecated: Use NewBytePatch().Assign instead.
+var BytePatch_Assign_DEFAULT = NewBytePatch().Assign
+
 func (x *BytePatch) GetAssign() *byte {
     return x.Assign
 }
@@ -755,6 +765,10 @@ var _ thrift.Struct = &I16Patch{}
 func NewI16Patch() *I16Patch {
     return (&I16Patch{})
 }
+
+// Deprecated: Use NewI16Patch().Assign instead.
+var I16Patch_Assign_DEFAULT = NewI16Patch().Assign
+
 func (x *I16Patch) GetAssign() *int16 {
     return x.Assign
 }
@@ -990,6 +1004,10 @@ var _ thrift.Struct = &I32Patch{}
 func NewI32Patch() *I32Patch {
     return (&I32Patch{})
 }
+
+// Deprecated: Use NewI32Patch().Assign instead.
+var I32Patch_Assign_DEFAULT = NewI32Patch().Assign
+
 func (x *I32Patch) GetAssign() *int32 {
     return x.Assign
 }
@@ -1225,6 +1243,10 @@ var _ thrift.Struct = &I64Patch{}
 func NewI64Patch() *I64Patch {
     return (&I64Patch{})
 }
+
+// Deprecated: Use NewI64Patch().Assign instead.
+var I64Patch_Assign_DEFAULT = NewI64Patch().Assign
+
 func (x *I64Patch) GetAssign() *int64 {
     return x.Assign
 }
@@ -1460,6 +1482,10 @@ var _ thrift.Struct = &FloatPatch{}
 func NewFloatPatch() *FloatPatch {
     return (&FloatPatch{})
 }
+
+// Deprecated: Use NewFloatPatch().Assign instead.
+var FloatPatch_Assign_DEFAULT = NewFloatPatch().Assign
+
 func (x *FloatPatch) GetAssign() *float32 {
     return x.Assign
 }
@@ -1695,6 +1721,10 @@ var _ thrift.Struct = &DoublePatch{}
 func NewDoublePatch() *DoublePatch {
     return (&DoublePatch{})
 }
+
+// Deprecated: Use NewDoublePatch().Assign instead.
+var DoublePatch_Assign_DEFAULT = NewDoublePatch().Assign
+
 func (x *DoublePatch) GetAssign() *float64 {
     return x.Assign
 }
@@ -1931,6 +1961,10 @@ var _ thrift.Struct = &StringPatch{}
 func NewStringPatch() *StringPatch {
     return (&StringPatch{})
 }
+
+// Deprecated: Use NewStringPatch().Assign instead.
+var StringPatch_Assign_DEFAULT = NewStringPatch().Assign
+
 func (x *StringPatch) GetAssign() *string {
     return x.Assign
 }
@@ -2216,6 +2250,7 @@ var _ thrift.Struct = &BinaryPatch{}
 func NewBinaryPatch() *BinaryPatch {
     return (&BinaryPatch{})
 }
+
 func (x *BinaryPatch) GetAssign() standard.ByteBuffer {
     return x.Assign
 }

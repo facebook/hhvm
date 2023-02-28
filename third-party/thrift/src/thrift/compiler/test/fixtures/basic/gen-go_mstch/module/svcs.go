@@ -136,6 +136,7 @@ var _ thrift.Struct = &reqFooServiceSimpleRPC{}
 func newReqFooServiceSimpleRPC() *reqFooServiceSimpleRPC {
     return (&reqFooServiceSimpleRPC{})
 }
+
 func (x *reqFooServiceSimpleRPC) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -213,6 +214,7 @@ var _ thrift.Struct = &respFooServiceSimpleRPC{}
 func newRespFooServiceSimpleRPC() *respFooServiceSimpleRPC {
     return (&respFooServiceSimpleRPC{})
 }
+
 func (x *respFooServiceSimpleRPC) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -492,6 +494,7 @@ var _ thrift.Struct = &reqFB303ServiceSimpleRPC{}
 func newReqFB303ServiceSimpleRPC() *reqFB303ServiceSimpleRPC {
     return (&reqFB303ServiceSimpleRPC{})
 }
+
 func (x *reqFB303ServiceSimpleRPC) GetIntParameter() int32 {
     return x.IntParameter
 }
@@ -619,6 +622,10 @@ var _ thrift.Struct = &respFB303ServiceSimpleRPC{}
 func newRespFB303ServiceSimpleRPC() *respFB303ServiceSimpleRPC {
     return (&respFB303ServiceSimpleRPC{})
 }
+
+// Deprecated: Use newRespFB303ServiceSimpleRPC().Value instead.
+var respFB303ServiceSimpleRPC_Value_DEFAULT = newRespFB303ServiceSimpleRPC().Value
+
 func (x *respFB303ServiceSimpleRPC) GetValue() *ReservedKeyword {
     return x.Value
 }
@@ -1100,6 +1107,7 @@ var _ thrift.Struct = &reqMyServicePing{}
 func newReqMyServicePing() *reqMyServicePing {
     return (&reqMyServicePing{})
 }
+
 func (x *reqMyServicePing) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1177,6 +1185,7 @@ var _ thrift.Struct = &respMyServicePing{}
 func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
 }
+
 func (x *respMyServicePing) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1254,6 +1263,7 @@ var _ thrift.Struct = &reqMyServiceGetRandomData{}
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{})
 }
+
 func (x *reqMyServiceGetRandomData) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1332,6 +1342,7 @@ var _ thrift.Struct = &respMyServiceGetRandomData{}
 func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
     return (&respMyServiceGetRandomData{})
 }
+
 func (x *respMyServiceGetRandomData) GetValue() string {
     return x.Value
 }
@@ -1459,6 +1470,7 @@ var _ thrift.Struct = &reqMyServiceSink{}
 func newReqMyServiceSink() *reqMyServiceSink {
     return (&reqMyServiceSink{})
 }
+
 func (x *reqMyServiceSink) GetSink() int64 {
     return x.Sink
 }
@@ -1585,6 +1597,7 @@ var _ thrift.Struct = &respMyServiceSink{}
 func newRespMyServiceSink() *respMyServiceSink {
     return (&respMyServiceSink{})
 }
+
 func (x *respMyServiceSink) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1664,6 +1677,7 @@ var _ thrift.Struct = &reqMyServicePutDataById{}
 func newReqMyServicePutDataById() *reqMyServicePutDataById {
     return (&reqMyServicePutDataById{})
 }
+
 func (x *reqMyServicePutDataById) GetId() int64 {
     return x.Id
 }
@@ -1839,6 +1853,7 @@ var _ thrift.Struct = &respMyServicePutDataById{}
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{})
 }
+
 func (x *respMyServicePutDataById) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1917,6 +1932,7 @@ var _ thrift.Struct = &reqMyServiceHasDataById{}
 func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
     return (&reqMyServiceHasDataById{})
 }
+
 func (x *reqMyServiceHasDataById) GetId() int64 {
     return x.Id
 }
@@ -2044,6 +2060,7 @@ var _ thrift.Struct = &respMyServiceHasDataById{}
 func newRespMyServiceHasDataById() *respMyServiceHasDataById {
     return (&respMyServiceHasDataById{})
 }
+
 func (x *respMyServiceHasDataById) GetValue() bool {
     return x.Value
 }
@@ -2171,6 +2188,7 @@ var _ thrift.Struct = &reqMyServiceGetDataById{}
 func newReqMyServiceGetDataById() *reqMyServiceGetDataById {
     return (&reqMyServiceGetDataById{})
 }
+
 func (x *reqMyServiceGetDataById) GetId() int64 {
     return x.Id
 }
@@ -2298,6 +2316,7 @@ var _ thrift.Struct = &respMyServiceGetDataById{}
 func newRespMyServiceGetDataById() *respMyServiceGetDataById {
     return (&respMyServiceGetDataById{})
 }
+
 func (x *respMyServiceGetDataById) GetValue() string {
     return x.Value
 }
@@ -2425,6 +2444,7 @@ var _ thrift.Struct = &reqMyServiceDeleteDataById{}
 func newReqMyServiceDeleteDataById() *reqMyServiceDeleteDataById {
     return (&reqMyServiceDeleteDataById{})
 }
+
 func (x *reqMyServiceDeleteDataById) GetId() int64 {
     return x.Id
 }
@@ -2551,6 +2571,7 @@ var _ thrift.Struct = &respMyServiceDeleteDataById{}
 func newRespMyServiceDeleteDataById() *respMyServiceDeleteDataById {
     return (&respMyServiceDeleteDataById{})
 }
+
 func (x *respMyServiceDeleteDataById) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2630,6 +2651,7 @@ var _ thrift.Struct = &reqMyServiceLobDataById{}
 func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
     return (&reqMyServiceLobDataById{})
 }
+
 func (x *reqMyServiceLobDataById) GetId() int64 {
     return x.Id
 }
@@ -2805,6 +2827,7 @@ var _ thrift.Struct = &respMyServiceLobDataById{}
 func newRespMyServiceLobDataById() *respMyServiceLobDataById {
     return (&respMyServiceLobDataById{})
 }
+
 func (x *respMyServiceLobDataById) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2882,6 +2905,7 @@ var _ thrift.Struct = &reqMyServiceInvalidReturnForHack{}
 func newReqMyServiceInvalidReturnForHack() *reqMyServiceInvalidReturnForHack {
     return (&reqMyServiceInvalidReturnForHack{})
 }
+
 func (x *reqMyServiceInvalidReturnForHack) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2960,6 +2984,7 @@ var _ thrift.Struct = &respMyServiceInvalidReturnForHack{}
 func newRespMyServiceInvalidReturnForHack() *respMyServiceInvalidReturnForHack {
     return (&respMyServiceInvalidReturnForHack{})
 }
+
 func (x *respMyServiceInvalidReturnForHack) GetValue() []float32 {
     return x.Value
 }
@@ -3122,6 +3147,7 @@ var _ thrift.Struct = &reqMyServiceRPCSkippedCodegen{}
 func newReqMyServiceRPCSkippedCodegen() *reqMyServiceRPCSkippedCodegen {
     return (&reqMyServiceRPCSkippedCodegen{})
 }
+
 func (x *reqMyServiceRPCSkippedCodegen) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -3199,6 +3225,7 @@ var _ thrift.Struct = &respMyServiceRPCSkippedCodegen{}
 func newRespMyServiceRPCSkippedCodegen() *respMyServiceRPCSkippedCodegen {
     return (&respMyServiceRPCSkippedCodegen{})
 }
+
 func (x *respMyServiceRPCSkippedCodegen) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -3944,6 +3971,7 @@ var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey0{}
 func newReqDbMixedStackArgumentsGetDataByKey0() *reqDbMixedStackArgumentsGetDataByKey0 {
     return (&reqDbMixedStackArgumentsGetDataByKey0{})
 }
+
 func (x *reqDbMixedStackArgumentsGetDataByKey0) GetKey() string {
     return x.Key
 }
@@ -4071,6 +4099,7 @@ var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey0{}
 func newRespDbMixedStackArgumentsGetDataByKey0() *respDbMixedStackArgumentsGetDataByKey0 {
     return (&respDbMixedStackArgumentsGetDataByKey0{})
 }
+
 func (x *respDbMixedStackArgumentsGetDataByKey0) GetValue() []byte {
     return x.Value
 }
@@ -4205,6 +4234,7 @@ var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey1{}
 func newReqDbMixedStackArgumentsGetDataByKey1() *reqDbMixedStackArgumentsGetDataByKey1 {
     return (&reqDbMixedStackArgumentsGetDataByKey1{})
 }
+
 func (x *reqDbMixedStackArgumentsGetDataByKey1) GetKey() string {
     return x.Key
 }
@@ -4332,6 +4362,7 @@ var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey1{}
 func newRespDbMixedStackArgumentsGetDataByKey1() *respDbMixedStackArgumentsGetDataByKey1 {
     return (&respDbMixedStackArgumentsGetDataByKey1{})
 }
+
 func (x *respDbMixedStackArgumentsGetDataByKey1) GetValue() []byte {
     return x.Value
 }

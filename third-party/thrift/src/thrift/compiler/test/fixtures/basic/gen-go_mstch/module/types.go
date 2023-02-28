@@ -144,6 +144,10 @@ var _ thrift.Struct = &MyStruct{}
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
+
+// Deprecated: Use NewMyStruct().MyDataField instead.
+var MyStruct_MyDataField_DEFAULT = NewMyStruct().MyDataField
+
 func (x *MyStruct) GetMyIntField() int64 {
     return x.MyIntField
 }
@@ -708,6 +712,7 @@ var _ thrift.Struct = &MyDataItem{}
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{})
 }
+
 func (x *MyDataItem) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -790,6 +795,16 @@ var _ thrift.Struct = &MyUnion{}
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
 }
+
+// Deprecated: Use NewMyUnion().MyEnum instead.
+var MyUnion_MyEnum_DEFAULT = NewMyUnion().MyEnum
+
+// Deprecated: Use NewMyUnion().MyStruct instead.
+var MyUnion_MyStruct_DEFAULT = NewMyUnion().MyStruct
+
+// Deprecated: Use NewMyUnion().MyDataItem instead.
+var MyUnion_MyDataItem_DEFAULT = NewMyUnion().MyDataItem
+
 func (x *MyUnion) GetMyEnum() *MyEnum {
     return x.MyEnum
 }
@@ -1090,6 +1105,7 @@ var _ thrift.Struct = &ReservedKeyword{}
 func NewReservedKeyword() *ReservedKeyword {
     return (&ReservedKeyword{})
 }
+
 func (x *ReservedKeyword) GetReservedField() int32 {
     return x.ReservedField
 }
@@ -1218,6 +1234,10 @@ var _ thrift.Struct = &UnionToBeRenamed{}
 func NewUnionToBeRenamed() *UnionToBeRenamed {
     return (&UnionToBeRenamed{})
 }
+
+// Deprecated: Use NewUnionToBeRenamed().ReservedField instead.
+var UnionToBeRenamed_ReservedField_DEFAULT = NewUnionToBeRenamed().ReservedField
+
 func (x *UnionToBeRenamed) GetReservedField() *int32 {
     return x.ReservedField
 }

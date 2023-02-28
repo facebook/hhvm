@@ -212,6 +212,7 @@ func NewMyAnnotation() *MyAnnotation {
             Color_RED,
         )
 }
+
 func (x *MyAnnotation) GetSignature() string {
     return x.Signature
 }
@@ -401,6 +402,10 @@ func NewFoo() *Foo {
     return (&Foo{}).
         SetIntFieldWithDefault(13)
 }
+
+// Deprecated: Use NewFoo().OptionalIntField instead.
+var Foo_OptionalIntField_DEFAULT = NewFoo().OptionalIntField
+
 func (x *Foo) GetIntField() int32 {
     return x.IntField
 }
@@ -1273,6 +1278,13 @@ var _ thrift.Struct = &Baz{}
 func NewBaz() *Baz {
     return (&Baz{})
 }
+
+// Deprecated: Use NewBaz().IntField instead.
+var Baz_IntField_DEFAULT = NewBaz().IntField
+
+// Deprecated: Use NewBaz().LongField instead.
+var Baz_LongField_DEFAULT = NewBaz().LongField
+
 func (x *Baz) GetIntField() *int32 {
     return x.IntField
 }
@@ -1702,6 +1714,22 @@ var _ thrift.Struct = &Bar{}
 func NewBar() *Bar {
     return (&Bar{})
 }
+
+// Deprecated: Use NewBar().StructField instead.
+var Bar_StructField_DEFAULT = NewBar().StructField
+
+// Deprecated: Use NewBar().OptionalStructField instead.
+var Bar_OptionalStructField_DEFAULT = NewBar().OptionalStructField
+
+// Deprecated: Use NewBar().UnionField instead.
+var Bar_UnionField_DEFAULT = NewBar().UnionField
+
+// Deprecated: Use NewBar().OptionalUnionField instead.
+var Bar_OptionalUnionField_DEFAULT = NewBar().OptionalUnionField
+
+// Deprecated: Use NewBar().AdaptedStructField instead.
+var Bar_AdaptedStructField_DEFAULT = NewBar().AdaptedStructField
+
 func (x *Bar) GetStructField() *Foo {
     return x.StructField
 }
@@ -2238,6 +2266,7 @@ var _ thrift.Struct = &DirectlyAdapted{}
 func NewDirectlyAdapted() *DirectlyAdapted {
     return (&DirectlyAdapted{})
 }
+
 func (x *DirectlyAdapted) GetField() int32 {
     return x.Field
 }
@@ -2366,6 +2395,7 @@ var _ thrift.Struct = &IndependentDirectlyAdapted{}
 func NewIndependentDirectlyAdapted() *IndependentDirectlyAdapted {
     return (&IndependentDirectlyAdapted{})
 }
+
 func (x *IndependentDirectlyAdapted) GetField() int32 {
     return x.Field
 }
@@ -2497,6 +2527,13 @@ var _ thrift.Struct = &StructWithFieldAdapter{}
 func NewStructWithFieldAdapter() *StructWithFieldAdapter {
     return (&StructWithFieldAdapter{})
 }
+
+// Deprecated: Use NewStructWithFieldAdapter().OptSharedField instead.
+var StructWithFieldAdapter_OptSharedField_DEFAULT = NewStructWithFieldAdapter().OptSharedField
+
+// Deprecated: Use NewStructWithFieldAdapter().OptBoxedField instead.
+var StructWithFieldAdapter_OptBoxedField_DEFAULT = NewStructWithFieldAdapter().OptBoxedField
+
 func (x *StructWithFieldAdapter) GetField() int32 {
     return x.Field
 }
@@ -2788,6 +2825,7 @@ var _ thrift.Struct = &TerseAdaptedFields{}
 func NewTerseAdaptedFields() *TerseAdaptedFields {
     return (&TerseAdaptedFields{})
 }
+
 func (x *TerseAdaptedFields) GetIntField() int32 {
     return x.IntField
 }
@@ -3050,6 +3088,10 @@ var _ thrift.Struct = &B{}
 func NewB() *B {
     return (&B{})
 }
+
+// Deprecated: Use NewB().A instead.
+var B_A_DEFAULT = NewB().A
+
 func (x *B) GetA() *AdaptedA {
     return x.A
 }
@@ -3185,6 +3227,7 @@ var _ thrift.Struct = &A{}
 func NewA() *A {
     return (&A{})
 }
+
 func (x *A) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -3264,6 +3307,7 @@ var _ thrift.Struct = &Config{}
 func NewConfig() *Config {
     return (&Config{})
 }
+
 func (x *Config) GetPath() string {
     return x.Path
 }
@@ -3393,6 +3437,7 @@ var _ thrift.Struct = &MyStruct{}
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
+
 func (x *MyStruct) GetField() int32 {
     return x.Field
 }
@@ -3615,6 +3660,7 @@ var _ thrift.Struct = &AdaptTestStruct{}
 func NewAdaptTestStruct() *AdaptTestStruct {
     return (&AdaptTestStruct{})
 }
+
 func (x *AdaptTestStruct) GetDelay() DurationMs {
     return x.Delay
 }
@@ -4244,6 +4290,7 @@ func NewAdaptTemplatedTestStruct() *AdaptTemplatedTestStruct {
   },
         )
 }
+
 func (x *AdaptTemplatedTestStruct) GetAdaptedBool() AdaptedBool {
     return x.AdaptedBool
 }
@@ -5652,6 +5699,10 @@ var _ thrift.Struct = &AdaptTemplatedNestedTestStruct{}
 func NewAdaptTemplatedNestedTestStruct() *AdaptTemplatedNestedTestStruct {
     return (&AdaptTemplatedNestedTestStruct{})
 }
+
+// Deprecated: Use NewAdaptTemplatedNestedTestStruct().AdaptedStruct instead.
+var AdaptTemplatedNestedTestStruct_AdaptedStruct_DEFAULT = NewAdaptTemplatedNestedTestStruct().AdaptedStruct
+
 func (x *AdaptTemplatedNestedTestStruct) GetAdaptedStruct() *AdaptTemplatedTestStruct {
     return x.AdaptedStruct
 }
@@ -5789,6 +5840,10 @@ var _ thrift.Struct = &AdaptTestUnion{}
 func NewAdaptTestUnion() *AdaptTestUnion {
     return (&AdaptTestUnion{})
 }
+
+// Deprecated: Use NewAdaptTestUnion().Delay instead.
+var AdaptTestUnion_Delay_DEFAULT = NewAdaptTestUnion().Delay
+
 func (x *AdaptTestUnion) GetDelay() *DurationMs {
     return x.Delay
 }
@@ -5955,6 +6010,7 @@ var _ thrift.Struct = &AdaptedStruct{}
 func NewAdaptedStruct() *AdaptedStruct {
     return (&AdaptedStruct{})
 }
+
 func (x *AdaptedStruct) GetData() int64 {
     return x.Data
 }
@@ -6083,6 +6139,7 @@ var _ thrift.Struct = &DirectlyAdaptedStruct{}
 func NewDirectlyAdaptedStruct() *DirectlyAdaptedStruct {
     return (&DirectlyAdaptedStruct{})
 }
+
 func (x *DirectlyAdaptedStruct) GetData() int64 {
     return x.Data
 }
@@ -6214,6 +6271,19 @@ var _ thrift.Struct = &StructFieldAdaptedStruct{}
 func NewStructFieldAdaptedStruct() *StructFieldAdaptedStruct {
     return (&StructFieldAdaptedStruct{})
 }
+
+// Deprecated: Use NewStructFieldAdaptedStruct().AdaptedStruct instead.
+var StructFieldAdaptedStruct_AdaptedStruct_DEFAULT = NewStructFieldAdaptedStruct().AdaptedStruct
+
+// Deprecated: Use NewStructFieldAdaptedStruct().AdaptedTypedef instead.
+var StructFieldAdaptedStruct_AdaptedTypedef_DEFAULT = NewStructFieldAdaptedStruct().AdaptedTypedef
+
+// Deprecated: Use NewStructFieldAdaptedStruct().DirectlyAdapted instead.
+var StructFieldAdaptedStruct_DirectlyAdapted_DEFAULT = NewStructFieldAdaptedStruct().DirectlyAdapted
+
+// Deprecated: Use NewStructFieldAdaptedStruct().TypedefOfAdapted instead.
+var StructFieldAdaptedStruct_TypedefOfAdapted_DEFAULT = NewStructFieldAdaptedStruct().TypedefOfAdapted
+
 func (x *StructFieldAdaptedStruct) GetAdaptedStruct() *AdaptedStruct {
     return x.AdaptedStruct
 }
@@ -6521,6 +6591,10 @@ var _ thrift.Struct = &CircularAdaptee{}
 func NewCircularAdaptee() *CircularAdaptee {
     return (&CircularAdaptee{})
 }
+
+// Deprecated: Use NewCircularAdaptee().Field instead.
+var CircularAdaptee_Field_DEFAULT = NewCircularAdaptee().Field
+
 func (x *CircularAdaptee) GetField() *CircularStruct {
     return x.Field
 }
@@ -6657,6 +6731,10 @@ var _ thrift.Struct = &CircularStruct{}
 func NewCircularStruct() *CircularStruct {
     return (&CircularStruct{})
 }
+
+// Deprecated: Use NewCircularStruct().Field instead.
+var CircularStruct_Field_DEFAULT = NewCircularStruct().Field
+
 func (x *CircularStruct) GetField() *AdaptedCircularAdaptee {
     return x.Field
 }
@@ -6793,6 +6871,10 @@ var _ thrift.Struct = &ReorderedStruct{}
 func NewReorderedStruct() *ReorderedStruct {
     return (&ReorderedStruct{})
 }
+
+// Deprecated: Use NewReorderedStruct().ReorderedDependentAdapted instead.
+var ReorderedStruct_ReorderedDependentAdapted_DEFAULT = NewReorderedStruct().ReorderedDependentAdapted
+
 func (x *ReorderedStruct) GetReorderedDependentAdapted() *DeclaredAfterStruct {
     return x.ReorderedDependentAdapted
 }
@@ -6928,6 +7010,7 @@ var _ thrift.Struct = &DeclaredAfterStruct{}
 func NewDeclaredAfterStruct() *DeclaredAfterStruct {
     return (&DeclaredAfterStruct{})
 }
+
 func (x *DeclaredAfterStruct) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -7007,6 +7090,7 @@ var _ thrift.Struct = &RenamedStruct{}
 func NewRenamedStruct() *RenamedStruct {
     return (&RenamedStruct{})
 }
+
 func (x *RenamedStruct) GetData() int64 {
     return x.Data
 }
@@ -7135,6 +7219,7 @@ var _ thrift.Struct = &SameNamespaceStruct{}
 func NewSameNamespaceStruct() *SameNamespaceStruct {
     return (&SameNamespaceStruct{})
 }
+
 func (x *SameNamespaceStruct) GetData() int64 {
     return x.Data
 }
@@ -7262,6 +7347,7 @@ var _ thrift.Struct = &HeapAllocated{}
 func NewHeapAllocated() *HeapAllocated {
     return (&HeapAllocated{})
 }
+
 func (x *HeapAllocated) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -7341,6 +7427,10 @@ var _ thrift.Struct = &MoveOnly{}
 func NewMoveOnly() *MoveOnly {
     return (&MoveOnly{})
 }
+
+// Deprecated: Use NewMoveOnly().Ptr instead.
+var MoveOnly_Ptr_DEFAULT = NewMoveOnly().Ptr
+
 func (x *MoveOnly) GetPtr() *HeapAllocated {
     return x.Ptr
 }
@@ -7477,6 +7567,7 @@ var _ thrift.Struct = &AlsoMoveOnly{}
 func NewAlsoMoveOnly() *AlsoMoveOnly {
     return (&AlsoMoveOnly{})
 }
+
 func (x *AlsoMoveOnly) GetPtr() int64 {
     return x.Ptr
 }
@@ -7604,6 +7695,7 @@ var _ thrift.Struct = &ApplyAdapter{}
 func NewApplyAdapter() *ApplyAdapter {
     return (&ApplyAdapter{})
 }
+
 func (x *ApplyAdapter) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -7682,6 +7774,7 @@ var _ thrift.Struct = &TransitiveAdapted{}
 func NewTransitiveAdapted() *TransitiveAdapted {
     return (&TransitiveAdapted{})
 }
+
 func (x *TransitiveAdapted) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -7763,6 +7856,16 @@ var _ thrift.Struct = &CountingStruct{}
 func NewCountingStruct() *CountingStruct {
     return (&CountingStruct{})
 }
+
+// Deprecated: Use NewCountingStruct().RegularInt instead.
+var CountingStruct_RegularInt_DEFAULT = NewCountingStruct().RegularInt
+
+// Deprecated: Use NewCountingStruct().CountingInt instead.
+var CountingStruct_CountingInt_DEFAULT = NewCountingStruct().CountingInt
+
+// Deprecated: Use NewCountingStruct().RegularString instead.
+var CountingStruct_RegularString_DEFAULT = NewCountingStruct().RegularString
+
 func (x *CountingStruct) GetRegularInt() *int64 {
     return x.RegularInt
 }
@@ -8010,6 +8113,7 @@ var _ thrift.Struct = &Person{}
 func NewPerson() *Person {
     return (&Person{})
 }
+
 func (x *Person) GetName() string {
     return x.Name
 }
@@ -8138,6 +8242,7 @@ var _ thrift.Struct = &Person2{}
 func NewPerson2() *Person2 {
     return (&Person2{})
 }
+
 func (x *Person2) GetName() string {
     return x.Name
 }

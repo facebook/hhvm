@@ -25,6 +25,7 @@ func NewFoo() *Foo {
     return (&Foo{}).
         SetA(2)
 }
+
 func (x *Foo) GetA() int64 {
     return x.A
 }

@@ -155,6 +155,10 @@ var _ thrift.Struct = &TypeUri{}
 func NewTypeUri() *TypeUri {
     return (&TypeUri{})
 }
+
+// Deprecated: Use NewTypeUri().Uri instead.
+var TypeUri_Uri_DEFAULT = NewTypeUri().Uri
+
 func (x *TypeUri) GetUri() *Uri {
     return x.Uri
 }
@@ -337,6 +341,58 @@ var _ thrift.Struct = &TypeName{}
 func NewTypeName() *TypeName {
     return (&TypeName{})
 }
+
+// Deprecated: Use NewTypeName().BoolType instead.
+var TypeName_BoolType_DEFAULT = NewTypeName().BoolType
+
+// Deprecated: Use NewTypeName().ByteType instead.
+var TypeName_ByteType_DEFAULT = NewTypeName().ByteType
+
+// Deprecated: Use NewTypeName().I16Type instead.
+var TypeName_I16Type_DEFAULT = NewTypeName().I16Type
+
+// Deprecated: Use NewTypeName().I32Type instead.
+var TypeName_I32Type_DEFAULT = NewTypeName().I32Type
+
+// Deprecated: Use NewTypeName().I64Type instead.
+var TypeName_I64Type_DEFAULT = NewTypeName().I64Type
+
+// Deprecated: Use NewTypeName().FloatType instead.
+var TypeName_FloatType_DEFAULT = NewTypeName().FloatType
+
+// Deprecated: Use NewTypeName().DoubleType instead.
+var TypeName_DoubleType_DEFAULT = NewTypeName().DoubleType
+
+// Deprecated: Use NewTypeName().StringType instead.
+var TypeName_StringType_DEFAULT = NewTypeName().StringType
+
+// Deprecated: Use NewTypeName().BinaryType instead.
+var TypeName_BinaryType_DEFAULT = NewTypeName().BinaryType
+
+// Deprecated: Use NewTypeName().EnumType instead.
+var TypeName_EnumType_DEFAULT = NewTypeName().EnumType
+
+// Deprecated: Use NewTypeName().TypedefType instead.
+var TypeName_TypedefType_DEFAULT = NewTypeName().TypedefType
+
+// Deprecated: Use NewTypeName().StructType instead.
+var TypeName_StructType_DEFAULT = NewTypeName().StructType
+
+// Deprecated: Use NewTypeName().UnionType instead.
+var TypeName_UnionType_DEFAULT = NewTypeName().UnionType
+
+// Deprecated: Use NewTypeName().ExceptionType instead.
+var TypeName_ExceptionType_DEFAULT = NewTypeName().ExceptionType
+
+// Deprecated: Use NewTypeName().ListType instead.
+var TypeName_ListType_DEFAULT = NewTypeName().ListType
+
+// Deprecated: Use NewTypeName().SetType instead.
+var TypeName_SetType_DEFAULT = NewTypeName().SetType
+
+// Deprecated: Use NewTypeName().MapType instead.
+var TypeName_MapType_DEFAULT = NewTypeName().MapType
+
 func (x *TypeName) GetBoolType() *Void {
     return x.BoolType
 }

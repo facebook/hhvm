@@ -28,6 +28,7 @@ var _ thrift.Struct = &InjectMetadataFields{}
 func NewInjectMetadataFields() *InjectMetadataFields {
     return (&InjectMetadataFields{})
 }
+
 func (x *InjectMetadataFields) GetType() string {
     return x.Type
 }

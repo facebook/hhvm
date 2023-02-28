@@ -86,6 +86,7 @@ var _ thrift.Struct = &MyStruct{}
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
+
 func (x *MyStruct) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -178,6 +179,37 @@ var _ thrift.Struct = &MyUnion{}
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
 }
+
+// Deprecated: Use NewMyUnion().BoolField instead.
+var MyUnion_BoolField_DEFAULT = NewMyUnion().BoolField
+
+// Deprecated: Use NewMyUnion().ByteField instead.
+var MyUnion_ByteField_DEFAULT = NewMyUnion().ByteField
+
+// Deprecated: Use NewMyUnion().ShortField instead.
+var MyUnion_ShortField_DEFAULT = NewMyUnion().ShortField
+
+// Deprecated: Use NewMyUnion().IntField instead.
+var MyUnion_IntField_DEFAULT = NewMyUnion().IntField
+
+// Deprecated: Use NewMyUnion().LongField instead.
+var MyUnion_LongField_DEFAULT = NewMyUnion().LongField
+
+// Deprecated: Use NewMyUnion().FloatField instead.
+var MyUnion_FloatField_DEFAULT = NewMyUnion().FloatField
+
+// Deprecated: Use NewMyUnion().DoubleField instead.
+var MyUnion_DoubleField_DEFAULT = NewMyUnion().DoubleField
+
+// Deprecated: Use NewMyUnion().StringField instead.
+var MyUnion_StringField_DEFAULT = NewMyUnion().StringField
+
+// Deprecated: Use NewMyUnion().EnumField instead.
+var MyUnion_EnumField_DEFAULT = NewMyUnion().EnumField
+
+// Deprecated: Use NewMyUnion().StructField instead.
+var MyUnion_StructField_DEFAULT = NewMyUnion().StructField
+
 func (x *MyUnion) GetBoolField() *bool {
     return x.BoolField
 }
@@ -1063,6 +1095,7 @@ func NewMyStructWithCustomDefault() *MyStructWithCustomDefault {
     return (&MyStructWithCustomDefault{}).
         SetField1(1)
 }
+
 func (x *MyStructWithCustomDefault) GetField1() int64 {
     return x.Field1
 }
@@ -1205,6 +1238,13 @@ var _ thrift.Struct = &StructLevelTerseStruct{}
 func NewStructLevelTerseStruct() *StructLevelTerseStruct {
     return (&StructLevelTerseStruct{})
 }
+
+// Deprecated: Use NewStructLevelTerseStruct().StructField instead.
+var StructLevelTerseStruct_StructField_DEFAULT = NewStructLevelTerseStruct().StructField
+
+// Deprecated: Use NewStructLevelTerseStruct().UnionField instead.
+var StructLevelTerseStruct_UnionField_DEFAULT = NewStructLevelTerseStruct().UnionField
+
 func (x *StructLevelTerseStruct) GetBoolField() bool {
     return x.BoolField
 }
@@ -2197,6 +2237,19 @@ var _ thrift.Struct = &FieldLevelTerseStruct{}
 func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
     return (&FieldLevelTerseStruct{})
 }
+
+// Deprecated: Use NewFieldLevelTerseStruct().TerseStructField instead.
+var FieldLevelTerseStruct_TerseStructField_DEFAULT = NewFieldLevelTerseStruct().TerseStructField
+
+// Deprecated: Use NewFieldLevelTerseStruct().TerseUnionField instead.
+var FieldLevelTerseStruct_TerseUnionField_DEFAULT = NewFieldLevelTerseStruct().TerseUnionField
+
+// Deprecated: Use NewFieldLevelTerseStruct().StructField instead.
+var FieldLevelTerseStruct_StructField_DEFAULT = NewFieldLevelTerseStruct().StructField
+
+// Deprecated: Use NewFieldLevelTerseStruct().UnionField instead.
+var FieldLevelTerseStruct_UnionField_DEFAULT = NewFieldLevelTerseStruct().UnionField
+
 func (x *FieldLevelTerseStruct) GetTerseBoolField() bool {
     return x.TerseBoolField
 }
@@ -4084,6 +4137,10 @@ func NewTerseStructWithCustomDefault() *TerseStructWithCustomDefault {
   },
         )
 }
+
+// Deprecated: Use NewTerseStructWithCustomDefault().StructField instead.
+var TerseStructWithCustomDefault_StructField_DEFAULT = NewTerseStructWithCustomDefault().StructField
+
 func (x *TerseStructWithCustomDefault) GetBoolField() bool {
     return x.BoolField
 }
@@ -4992,6 +5049,7 @@ var _ thrift.Struct = &AdaptedFields{}
 func NewAdaptedFields() *AdaptedFields {
     return (&AdaptedFields{})
 }
+
 func (x *AdaptedFields) GetField1() MyInteger {
     return x.Field1
 }
@@ -5219,6 +5277,7 @@ func NewWrappedFields() *WrappedFields {
     return (&WrappedFields{}).
         SetField1(7)
 }
+
 func (x *WrappedFields) GetField1() int32 {
     return x.Field1
 }
@@ -5347,6 +5406,7 @@ var _ thrift.Struct = &TerseException{}
 func NewTerseException() *TerseException {
     return (&TerseException{})
 }
+
 func (x *TerseException) GetMsg() string {
     return x.Msg
 }

@@ -211,6 +211,16 @@ var _ thrift.Struct = &Internship{}
 func NewInternship() *Internship {
     return (&Internship{})
 }
+
+// Deprecated: Use NewInternship().Employer instead.
+var Internship_Employer_DEFAULT = NewInternship().Employer
+
+// Deprecated: Use NewInternship().Compensation instead.
+var Internship_Compensation_DEFAULT = NewInternship().Compensation
+
+// Deprecated: Use NewInternship().School instead.
+var Internship_School_DEFAULT = NewInternship().School
+
 func (x *Internship) GetWeeks() int32 {
     return x.Weeks
 }
@@ -558,6 +568,7 @@ var _ thrift.Struct = &Range{}
 func NewRange() *Range {
     return (&Range{})
 }
+
 func (x *Range) GetMin() int32 {
     return x.Min
 }
@@ -738,6 +749,7 @@ func NewStruct1() *Struct1 {
         SetA(1234567).
         SetB("<uninitialized>")
 }
+
 func (x *Struct1) GetA() int32 {
     return x.A
 }
@@ -918,6 +930,10 @@ var _ thrift.Struct = &Struct2{}
 func NewStruct2() *Struct2 {
     return (&Struct2{})
 }
+
+// Deprecated: Use NewStruct2().C instead.
+var Struct2_C_DEFAULT = NewStruct2().C
+
 func (x *Struct2) GetA() int32 {
     return x.A
 }
@@ -1239,6 +1255,10 @@ var _ thrift.Struct = &Struct3{}
 func NewStruct3() *Struct3 {
     return (&Struct3{})
 }
+
+// Deprecated: Use NewStruct3().C instead.
+var Struct3_C_DEFAULT = NewStruct3().C
+
 func (x *Struct3) GetA() string {
     return x.A
 }
@@ -1475,6 +1495,13 @@ var _ thrift.Struct = &Struct4{}
 func NewStruct4() *Struct4 {
     return (&Struct4{})
 }
+
+// Deprecated: Use NewStruct4().B instead.
+var Struct4_B_DEFAULT = NewStruct4().B
+
+// Deprecated: Use NewStruct4().C instead.
+var Struct4_C_DEFAULT = NewStruct4().C
+
 func (x *Struct4) GetA() int32 {
     return x.A
 }
@@ -1716,6 +1743,13 @@ var _ thrift.Struct = &Union1{}
 func NewUnion1() *Union1 {
     return (&Union1{})
 }
+
+// Deprecated: Use NewUnion1().I instead.
+var Union1_I_DEFAULT = NewUnion1().I
+
+// Deprecated: Use NewUnion1().D instead.
+var Union1_D_DEFAULT = NewUnion1().D
+
 func (x *Union1) GetI() *int32 {
     return x.I
 }
@@ -1885,6 +1919,19 @@ var _ thrift.Struct = &Union2{}
 func NewUnion2() *Union2 {
     return (&Union2{})
 }
+
+// Deprecated: Use NewUnion2().I instead.
+var Union2_I_DEFAULT = NewUnion2().I
+
+// Deprecated: Use NewUnion2().D instead.
+var Union2_D_DEFAULT = NewUnion2().D
+
+// Deprecated: Use NewUnion2().S instead.
+var Union2_S_DEFAULT = NewUnion2().S
+
+// Deprecated: Use NewUnion2().U instead.
+var Union2_U_DEFAULT = NewUnion2().U
+
 func (x *Union2) GetI() *int32 {
     return x.I
 }

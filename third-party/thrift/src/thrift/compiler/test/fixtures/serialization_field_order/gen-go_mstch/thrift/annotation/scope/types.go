@@ -23,6 +23,7 @@ var _ thrift.Struct = &Transitive{}
 func NewTransitive() *Transitive {
     return (&Transitive{})
 }
+
 func (x *Transitive) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -101,6 +102,7 @@ var _ thrift.Struct = &Schema{}
 func NewSchema() *Schema {
     return (&Schema{})
 }
+
 func (x *Schema) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -179,6 +181,7 @@ var _ thrift.Struct = &Program{}
 func NewProgram() *Program {
     return (&Program{})
 }
+
 func (x *Program) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -257,6 +260,7 @@ var _ thrift.Struct = &Struct{}
 func NewStruct() *Struct {
     return (&Struct{})
 }
+
 func (x *Struct) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -335,6 +339,7 @@ var _ thrift.Struct = &Union{}
 func NewUnion() *Union {
     return (&Union{})
 }
+
 func (x *Union) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -413,6 +418,7 @@ var _ thrift.Struct = &Exception{}
 func NewException() *Exception {
     return (&Exception{})
 }
+
 func (x *Exception) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -491,6 +497,7 @@ var _ thrift.Struct = &Field{}
 func NewField() *Field {
     return (&Field{})
 }
+
 func (x *Field) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -569,6 +576,7 @@ var _ thrift.Struct = &Typedef{}
 func NewTypedef() *Typedef {
     return (&Typedef{})
 }
+
 func (x *Typedef) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -647,6 +655,7 @@ var _ thrift.Struct = &Service{}
 func NewService() *Service {
     return (&Service{})
 }
+
 func (x *Service) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -725,6 +734,7 @@ var _ thrift.Struct = &Interaction{}
 func NewInteraction() *Interaction {
     return (&Interaction{})
 }
+
 func (x *Interaction) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -803,6 +813,7 @@ var _ thrift.Struct = &Function{}
 func NewFunction() *Function {
     return (&Function{})
 }
+
 func (x *Function) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -881,6 +892,7 @@ var _ thrift.Struct = &EnumValue{}
 func NewEnumValue() *EnumValue {
     return (&EnumValue{})
 }
+
 func (x *EnumValue) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -959,6 +971,7 @@ var _ thrift.Struct = &Const{}
 func NewConst() *Const {
     return (&Const{})
 }
+
 func (x *Const) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1037,6 +1050,7 @@ var _ thrift.Struct = &Enum{}
 func NewEnum() *Enum {
     return (&Enum{})
 }
+
 func (x *Enum) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1115,6 +1129,7 @@ var _ thrift.Struct = &Structured{}
 func NewStructured() *Structured {
     return (&Structured{})
 }
+
 func (x *Structured) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1193,6 +1208,7 @@ var _ thrift.Struct = &Interface{}
 func NewInterface() *Interface {
     return (&Interface{})
 }
+
 func (x *Interface) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1271,6 +1287,7 @@ var _ thrift.Struct = &RootDefinition{}
 func NewRootDefinition() *RootDefinition {
     return (&RootDefinition{})
 }
+
 func (x *RootDefinition) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1349,6 +1366,7 @@ var _ thrift.Struct = &Definition{}
 func NewDefinition() *Definition {
     return (&Definition{})
 }
+
 func (x *Definition) String() string {
     return fmt.Sprintf("%+v", x)
 }

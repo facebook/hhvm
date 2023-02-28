@@ -159,6 +159,13 @@ var _ thrift.Struct = &reqMyServiceQuery{}
 func newReqMyServiceQuery() *reqMyServiceQuery {
     return (&reqMyServiceQuery{})
 }
+
+// Deprecated: Use newReqMyServiceQuery().S instead.
+var reqMyServiceQuery_S_DEFAULT = newReqMyServiceQuery().S
+
+// Deprecated: Use newReqMyServiceQuery().I instead.
+var reqMyServiceQuery_I_DEFAULT = newReqMyServiceQuery().I
+
 func (x *reqMyServiceQuery) GetS() *module.MyStruct {
     return x.S
 }
@@ -350,6 +357,7 @@ var _ thrift.Struct = &respMyServiceQuery{}
 func newRespMyServiceQuery() *respMyServiceQuery {
     return (&respMyServiceQuery{})
 }
+
 func (x *respMyServiceQuery) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -429,6 +437,13 @@ var _ thrift.Struct = &reqMyServiceHasArgDocs{}
 func newReqMyServiceHasArgDocs() *reqMyServiceHasArgDocs {
     return (&reqMyServiceHasArgDocs{})
 }
+
+// Deprecated: Use newReqMyServiceHasArgDocs().S instead.
+var reqMyServiceHasArgDocs_S_DEFAULT = newReqMyServiceHasArgDocs().S
+
+// Deprecated: Use newReqMyServiceHasArgDocs().I instead.
+var reqMyServiceHasArgDocs_I_DEFAULT = newReqMyServiceHasArgDocs().I
+
 func (x *reqMyServiceHasArgDocs) GetS() *module.MyStruct {
     return x.S
 }
@@ -620,6 +635,7 @@ var _ thrift.Struct = &respMyServiceHasArgDocs{}
 func newRespMyServiceHasArgDocs() *respMyServiceHasArgDocs {
     return (&respMyServiceHasArgDocs{})
 }
+
 func (x *respMyServiceHasArgDocs) String() string {
     return fmt.Sprintf("%+v", x)
 }

@@ -319,6 +319,10 @@ var _ thrift.Struct = &reqGetEntityGetEntity{}
 func newReqGetEntityGetEntity() *reqGetEntityGetEntity {
     return (&reqGetEntityGetEntity{})
 }
+
+// Deprecated: Use newReqGetEntityGetEntity().R instead.
+var reqGetEntityGetEntity_R_DEFAULT = newReqGetEntityGetEntity().R
+
 func (x *reqGetEntityGetEntity) GetR() *GetEntityRequest {
     return x.R
 }
@@ -454,6 +458,10 @@ var _ thrift.Struct = &respGetEntityGetEntity{}
 func newRespGetEntityGetEntity() *respGetEntityGetEntity {
     return (&respGetEntityGetEntity{})
 }
+
+// Deprecated: Use newRespGetEntityGetEntity().Value instead.
+var respGetEntityGetEntity_Value_DEFAULT = newRespGetEntityGetEntity().Value
+
 func (x *respGetEntityGetEntity) GetValue() *GetEntityResponse {
     return x.Value
 }
@@ -588,6 +596,7 @@ var _ thrift.Struct = &reqGetEntityGetBool{}
 func newReqGetEntityGetBool() *reqGetEntityGetBool {
     return (&reqGetEntityGetBool{})
 }
+
 func (x *reqGetEntityGetBool) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -666,6 +675,7 @@ var _ thrift.Struct = &respGetEntityGetBool{}
 func newRespGetEntityGetBool() *respGetEntityGetBool {
     return (&respGetEntityGetBool{})
 }
+
 func (x *respGetEntityGetBool) GetValue() bool {
     return x.Value
 }
@@ -792,6 +802,7 @@ var _ thrift.Struct = &reqGetEntityGetByte{}
 func newReqGetEntityGetByte() *reqGetEntityGetByte {
     return (&reqGetEntityGetByte{})
 }
+
 func (x *reqGetEntityGetByte) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -870,6 +881,7 @@ var _ thrift.Struct = &respGetEntityGetByte{}
 func newRespGetEntityGetByte() *respGetEntityGetByte {
     return (&respGetEntityGetByte{})
 }
+
 func (x *respGetEntityGetByte) GetValue() byte {
     return x.Value
 }
@@ -996,6 +1008,7 @@ var _ thrift.Struct = &reqGetEntityGetI16{}
 func newReqGetEntityGetI16() *reqGetEntityGetI16 {
     return (&reqGetEntityGetI16{})
 }
+
 func (x *reqGetEntityGetI16) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1074,6 +1087,7 @@ var _ thrift.Struct = &respGetEntityGetI16{}
 func newRespGetEntityGetI16() *respGetEntityGetI16 {
     return (&respGetEntityGetI16{})
 }
+
 func (x *respGetEntityGetI16) GetValue() int16 {
     return x.Value
 }
@@ -1200,6 +1214,7 @@ var _ thrift.Struct = &reqGetEntityGetI32{}
 func newReqGetEntityGetI32() *reqGetEntityGetI32 {
     return (&reqGetEntityGetI32{})
 }
+
 func (x *reqGetEntityGetI32) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1278,6 +1293,7 @@ var _ thrift.Struct = &respGetEntityGetI32{}
 func newRespGetEntityGetI32() *respGetEntityGetI32 {
     return (&respGetEntityGetI32{})
 }
+
 func (x *respGetEntityGetI32) GetValue() int32 {
     return x.Value
 }
@@ -1404,6 +1420,7 @@ var _ thrift.Struct = &reqGetEntityGetI64{}
 func newReqGetEntityGetI64() *reqGetEntityGetI64 {
     return (&reqGetEntityGetI64{})
 }
+
 func (x *reqGetEntityGetI64) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1482,6 +1499,7 @@ var _ thrift.Struct = &respGetEntityGetI64{}
 func newRespGetEntityGetI64() *respGetEntityGetI64 {
     return (&respGetEntityGetI64{})
 }
+
 func (x *respGetEntityGetI64) GetValue() int64 {
     return x.Value
 }
@@ -1608,6 +1626,7 @@ var _ thrift.Struct = &reqGetEntityGetDouble{}
 func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
     return (&reqGetEntityGetDouble{})
 }
+
 func (x *reqGetEntityGetDouble) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1686,6 +1705,7 @@ var _ thrift.Struct = &respGetEntityGetDouble{}
 func newRespGetEntityGetDouble() *respGetEntityGetDouble {
     return (&respGetEntityGetDouble{})
 }
+
 func (x *respGetEntityGetDouble) GetValue() float64 {
     return x.Value
 }
@@ -1812,6 +1832,7 @@ var _ thrift.Struct = &reqGetEntityGetString{}
 func newReqGetEntityGetString() *reqGetEntityGetString {
     return (&reqGetEntityGetString{})
 }
+
 func (x *reqGetEntityGetString) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1890,6 +1911,7 @@ var _ thrift.Struct = &respGetEntityGetString{}
 func newRespGetEntityGetString() *respGetEntityGetString {
     return (&respGetEntityGetString{})
 }
+
 func (x *respGetEntityGetString) GetValue() string {
     return x.Value
 }
@@ -2016,6 +2038,7 @@ var _ thrift.Struct = &reqGetEntityGetBinary{}
 func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
     return (&reqGetEntityGetBinary{})
 }
+
 func (x *reqGetEntityGetBinary) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2094,6 +2117,7 @@ var _ thrift.Struct = &respGetEntityGetBinary{}
 func newRespGetEntityGetBinary() *respGetEntityGetBinary {
     return (&respGetEntityGetBinary{})
 }
+
 func (x *respGetEntityGetBinary) GetValue() []byte {
     return x.Value
 }
@@ -2227,6 +2251,7 @@ var _ thrift.Struct = &reqGetEntityGetMap{}
 func newReqGetEntityGetMap() *reqGetEntityGetMap {
     return (&reqGetEntityGetMap{})
 }
+
 func (x *reqGetEntityGetMap) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2305,6 +2330,7 @@ var _ thrift.Struct = &respGetEntityGetMap{}
 func newRespGetEntityGetMap() *respGetEntityGetMap {
     return (&respGetEntityGetMap{})
 }
+
 func (x *respGetEntityGetMap) GetValue() map[string]string {
     return x.Value
 }
@@ -2484,6 +2510,7 @@ var _ thrift.Struct = &reqGetEntityGetSet{}
 func newReqGetEntityGetSet() *reqGetEntityGetSet {
     return (&reqGetEntityGetSet{})
 }
+
 func (x *reqGetEntityGetSet) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2562,6 +2589,7 @@ var _ thrift.Struct = &respGetEntityGetSet{}
 func newRespGetEntityGetSet() *respGetEntityGetSet {
     return (&respGetEntityGetSet{})
 }
+
 func (x *respGetEntityGetSet) GetValue() []string {
     return x.Value
 }
@@ -2724,6 +2752,7 @@ var _ thrift.Struct = &reqGetEntityGetList{}
 func newReqGetEntityGetList() *reqGetEntityGetList {
     return (&reqGetEntityGetList{})
 }
+
 func (x *reqGetEntityGetList) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2802,6 +2831,7 @@ var _ thrift.Struct = &respGetEntityGetList{}
 func newRespGetEntityGetList() *respGetEntityGetList {
     return (&respGetEntityGetList{})
 }
+
 func (x *respGetEntityGetList) GetValue() []string {
     return x.Value
 }
@@ -2967,6 +2997,7 @@ var _ thrift.Struct = &reqGetEntityGetLegacyStuff{}
 func newReqGetEntityGetLegacyStuff() *reqGetEntityGetLegacyStuff {
     return (&reqGetEntityGetLegacyStuff{})
 }
+
 func (x *reqGetEntityGetLegacyStuff) GetNumPos() int64 {
     return x.NumPos
 }
@@ -3192,6 +3223,7 @@ var _ thrift.Struct = &respGetEntityGetLegacyStuff{}
 func newRespGetEntityGetLegacyStuff() *respGetEntityGetLegacyStuff {
     return (&respGetEntityGetLegacyStuff{})
 }
+
 func (x *respGetEntityGetLegacyStuff) GetValue() int32 {
     return x.Value
 }

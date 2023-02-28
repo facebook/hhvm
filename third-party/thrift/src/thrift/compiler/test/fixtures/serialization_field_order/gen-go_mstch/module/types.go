@@ -28,6 +28,7 @@ var _ thrift.Struct = &Foo{}
 func NewFoo() *Foo {
     return (&Foo{})
 }
+
 func (x *Foo) GetField1() int32 {
     return x.Field1
 }
@@ -256,6 +257,7 @@ var _ thrift.Struct = &Foo2{}
 func NewFoo2() *Foo2 {
     return (&Foo2{})
 }
+
 func (x *Foo2) GetField1() int32 {
     return x.Field1
 }

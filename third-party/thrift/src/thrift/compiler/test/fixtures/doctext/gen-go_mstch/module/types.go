@@ -78,6 +78,7 @@ var _ thrift.Struct = &A{}
 func NewA() *A {
     return (&A{})
 }
+
 func (x *A) GetUselessField() int32 {
     return x.UselessField
 }
@@ -207,6 +208,13 @@ var _ thrift.Struct = &U{}
 func NewU() *U {
     return (&U{})
 }
+
+// Deprecated: Use NewU().I instead.
+var U_I_DEFAULT = NewU().I
+
+// Deprecated: Use NewU().S instead.
+var U_S_DEFAULT = NewU().S
+
 func (x *U) GetI() *int32 {
     return x.I
 }
@@ -373,6 +381,7 @@ var _ thrift.Struct = &Bang{}
 func NewBang() *Bang {
     return (&Bang{})
 }
+
 func (x *Bang) GetMessage() string {
     return x.Message
 }

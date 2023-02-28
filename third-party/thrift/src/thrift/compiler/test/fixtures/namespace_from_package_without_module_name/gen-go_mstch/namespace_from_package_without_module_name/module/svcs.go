@@ -136,6 +136,7 @@ var _ thrift.Struct = &reqTestServiceInit{}
 func newReqTestServiceInit() *reqTestServiceInit {
     return (&reqTestServiceInit{})
 }
+
 func (x *reqTestServiceInit) GetInt1() int64 {
     return x.Int1
 }
@@ -263,6 +264,7 @@ var _ thrift.Struct = &respTestServiceInit{}
 func newRespTestServiceInit() *respTestServiceInit {
     return (&respTestServiceInit{})
 }
+
 func (x *respTestServiceInit) GetValue() int64 {
     return x.Value
 }

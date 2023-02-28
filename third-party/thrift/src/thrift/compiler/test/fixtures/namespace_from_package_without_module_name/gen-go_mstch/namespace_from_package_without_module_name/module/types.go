@@ -24,6 +24,7 @@ var _ thrift.Struct = &Foo{}
 func NewFoo() *Foo {
     return (&Foo{})
 }
+
 func (x *Foo) GetMyInt() int64 {
     return x.MyInt
 }

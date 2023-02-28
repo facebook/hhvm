@@ -522,6 +522,7 @@ func NewSomeStruct() *SomeStruct {
 },
         )
 }
+
 func (x *SomeStruct) GetReasonable() Metasyntactic {
     return x.Reasonable
 }
@@ -851,6 +852,7 @@ func NewMyStruct() *MyStruct {
             MyEnum1_ME1_1,
         )
 }
+
 func (x *MyStruct) GetMe23() MyEnum2 {
     return x.Me23
 }

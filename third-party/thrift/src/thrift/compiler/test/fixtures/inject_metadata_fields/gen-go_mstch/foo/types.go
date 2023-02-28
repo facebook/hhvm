@@ -28,6 +28,13 @@ var _ thrift.Struct = &Fields{}
 func NewFields() *Fields {
     return (&Fields{})
 }
+
+// Deprecated: Use NewFields().InjectedStructuredAnnotationField instead.
+var Fields_InjectedStructuredAnnotationField_DEFAULT = NewFields().InjectedStructuredAnnotationField
+
+// Deprecated: Use NewFields().InjectedUnstructuredAnnotationField instead.
+var Fields_InjectedUnstructuredAnnotationField_DEFAULT = NewFields().InjectedUnstructuredAnnotationField
+
 func (x *Fields) GetInjectedField() string {
     return x.InjectedField
 }

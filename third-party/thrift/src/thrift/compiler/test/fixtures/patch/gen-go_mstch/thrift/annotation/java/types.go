@@ -27,6 +27,7 @@ var _ thrift.Struct = &Adapter{}
 func NewAdapter() *Adapter {
     return (&Adapter{})
 }
+
 func (x *Adapter) GetAdapterClassName() string {
     return x.AdapterClassName
 }
@@ -205,6 +206,7 @@ var _ thrift.Struct = &Wrapper{}
 func NewWrapper() *Wrapper {
     return (&Wrapper{})
 }
+
 func (x *Wrapper) GetWrapperClassName() string {
     return x.WrapperClassName
 }

@@ -26,6 +26,7 @@ var _ thrift.Struct = &FieldWrapper{}
 func NewFieldWrapper() *FieldWrapper {
     return (&FieldWrapper{})
 }
+
 func (x *FieldWrapper) GetName() string {
     return x.Name
 }
@@ -157,6 +158,7 @@ func NewWrapper() *Wrapper {
     return (&Wrapper{}).
         SetExtraNamespace("thrift_adapted_types")
 }
+
 func (x *Wrapper) GetName() string {
     return x.Name
 }
@@ -383,6 +385,7 @@ var _ thrift.Struct = &Adapter{}
 func NewAdapter() *Adapter {
     return (&Adapter{})
 }
+
 func (x *Adapter) GetName() string {
     return x.Name
 }
@@ -511,6 +514,7 @@ var _ thrift.Struct = &SkipCodegen{}
 func NewSkipCodegen() *SkipCodegen {
     return (&SkipCodegen{})
 }
+
 func (x *SkipCodegen) GetReason() string {
     return x.Reason
 }
@@ -640,6 +644,7 @@ var _ thrift.Struct = &Name{}
 func NewName() *Name {
     return (&Name{})
 }
+
 func (x *Name) GetName() string {
     return x.Name
 }
@@ -817,6 +822,7 @@ var _ thrift.Struct = &UnionEnumAttributes{}
 func NewUnionEnumAttributes() *UnionEnumAttributes {
     return (&UnionEnumAttributes{})
 }
+
 func (x *UnionEnumAttributes) GetAttributes() []string {
     return x.Attributes
 }
@@ -981,6 +987,7 @@ var _ thrift.Struct = &StructTrait{}
 func NewStructTrait() *StructTrait {
     return (&StructTrait{})
 }
+
 func (x *StructTrait) GetName() string {
     return x.Name
 }
@@ -1109,6 +1116,7 @@ var _ thrift.Struct = &Attributes{}
 func NewAttributes() *Attributes {
     return (&Attributes{})
 }
+
 func (x *Attributes) GetAttributes() []string {
     return x.Attributes
 }
@@ -1272,6 +1280,7 @@ var _ thrift.Struct = &StructAsTrait{}
 func NewStructAsTrait() *StructAsTrait {
     return (&StructAsTrait{})
 }
+
 func (x *StructAsTrait) String() string {
     return fmt.Sprintf("%+v", x)
 }

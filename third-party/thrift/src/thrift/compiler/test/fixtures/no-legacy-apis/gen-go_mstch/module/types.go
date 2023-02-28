@@ -82,6 +82,7 @@ var _ thrift.Struct = &MyStruct{}
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
+
 func (x *MyStruct) GetMyIntField() int64 {
     return x.MyIntField
 }
@@ -260,6 +261,13 @@ var _ thrift.Struct = &MyUnion{}
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
 }
+
+// Deprecated: Use NewMyUnion().MyEnum instead.
+var MyUnion_MyEnum_DEFAULT = NewMyUnion().MyEnum
+
+// Deprecated: Use NewMyUnion().MyDataItem instead.
+var MyUnion_MyDataItem_DEFAULT = NewMyUnion().MyDataItem
+
 func (x *MyUnion) GetMyEnum() *MyEnum {
     return x.MyEnum
 }

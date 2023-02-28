@@ -232,6 +232,7 @@ var _ thrift.Struct = &reqMyServicePing{}
 func newReqMyServicePing() *reqMyServicePing {
     return (&reqMyServicePing{})
 }
+
 func (x *reqMyServicePing) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -309,6 +310,7 @@ var _ thrift.Struct = &respMyServicePing{}
 func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
 }
+
 func (x *respMyServicePing) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -386,6 +388,7 @@ var _ thrift.Struct = &reqMyServiceGetRandomData{}
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{})
 }
+
 func (x *reqMyServiceGetRandomData) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -464,6 +467,7 @@ var _ thrift.Struct = &respMyServiceGetRandomData{}
 func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
     return (&respMyServiceGetRandomData{})
 }
+
 func (x *respMyServiceGetRandomData) GetValue() string {
     return x.Value
 }
@@ -591,6 +595,7 @@ var _ thrift.Struct = &reqMyServiceHasDataById{}
 func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
     return (&reqMyServiceHasDataById{})
 }
+
 func (x *reqMyServiceHasDataById) GetId() int64 {
     return x.Id
 }
@@ -718,6 +723,7 @@ var _ thrift.Struct = &respMyServiceHasDataById{}
 func newRespMyServiceHasDataById() *respMyServiceHasDataById {
     return (&respMyServiceHasDataById{})
 }
+
 func (x *respMyServiceHasDataById) GetValue() bool {
     return x.Value
 }
@@ -845,6 +851,7 @@ var _ thrift.Struct = &reqMyServiceGetDataById{}
 func newReqMyServiceGetDataById() *reqMyServiceGetDataById {
     return (&reqMyServiceGetDataById{})
 }
+
 func (x *reqMyServiceGetDataById) GetId() int64 {
     return x.Id
 }
@@ -972,6 +979,7 @@ var _ thrift.Struct = &respMyServiceGetDataById{}
 func newRespMyServiceGetDataById() *respMyServiceGetDataById {
     return (&respMyServiceGetDataById{})
 }
+
 func (x *respMyServiceGetDataById) GetValue() string {
     return x.Value
 }
@@ -1100,6 +1108,7 @@ var _ thrift.Struct = &reqMyServicePutDataById{}
 func newReqMyServicePutDataById() *reqMyServicePutDataById {
     return (&reqMyServicePutDataById{})
 }
+
 func (x *reqMyServicePutDataById) GetId() int64 {
     return x.Id
 }
@@ -1275,6 +1284,7 @@ var _ thrift.Struct = &respMyServicePutDataById{}
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{})
 }
+
 func (x *respMyServicePutDataById) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1354,6 +1364,7 @@ var _ thrift.Struct = &reqMyServiceLobDataById{}
 func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
     return (&reqMyServiceLobDataById{})
 }
+
 func (x *reqMyServiceLobDataById) GetId() int64 {
     return x.Id
 }
@@ -1529,6 +1540,7 @@ var _ thrift.Struct = &respMyServiceLobDataById{}
 func newRespMyServiceLobDataById() *respMyServiceLobDataById {
     return (&respMyServiceLobDataById{})
 }
+
 func (x *respMyServiceLobDataById) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1606,6 +1618,7 @@ var _ thrift.Struct = &reqMyServiceDoNothing{}
 func newReqMyServiceDoNothing() *reqMyServiceDoNothing {
     return (&reqMyServiceDoNothing{})
 }
+
 func (x *reqMyServiceDoNothing) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1683,6 +1696,7 @@ var _ thrift.Struct = &respMyServiceDoNothing{}
 func newRespMyServiceDoNothing() *respMyServiceDoNothing {
     return (&respMyServiceDoNothing{})
 }
+
 func (x *respMyServiceDoNothing) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2276,6 +2290,7 @@ var _ thrift.Struct = &reqMyServicePrioParentPing{}
 func newReqMyServicePrioParentPing() *reqMyServicePrioParentPing {
     return (&reqMyServicePrioParentPing{})
 }
+
 func (x *reqMyServicePrioParentPing) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2353,6 +2368,7 @@ var _ thrift.Struct = &respMyServicePrioParentPing{}
 func newRespMyServicePrioParentPing() *respMyServicePrioParentPing {
     return (&respMyServicePrioParentPing{})
 }
+
 func (x *respMyServicePrioParentPing) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2430,6 +2446,7 @@ var _ thrift.Struct = &reqMyServicePrioParentPong{}
 func newReqMyServicePrioParentPong() *reqMyServicePrioParentPong {
     return (&reqMyServicePrioParentPong{})
 }
+
 func (x *reqMyServicePrioParentPong) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2507,6 +2524,7 @@ var _ thrift.Struct = &respMyServicePrioParentPong{}
 func newRespMyServicePrioParentPong() *respMyServicePrioParentPong {
     return (&respMyServicePrioParentPong{})
 }
+
 func (x *respMyServicePrioParentPong) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2844,6 +2862,7 @@ var _ thrift.Struct = &reqMyServicePrioChildPang{}
 func newReqMyServicePrioChildPang() *reqMyServicePrioChildPang {
     return (&reqMyServicePrioChildPang{})
 }
+
 func (x *reqMyServicePrioChildPang) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -2921,6 +2940,7 @@ var _ thrift.Struct = &respMyServicePrioChildPang{}
 func newRespMyServicePrioChildPang() *respMyServicePrioChildPang {
     return (&respMyServicePrioChildPang{})
 }
+
 func (x *respMyServicePrioChildPang) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -3188,6 +3208,7 @@ var _ thrift.Struct = &reqBadServiceCreateBadInteraction{}
 func newReqBadServiceCreateBadInteraction() *reqBadServiceCreateBadInteraction {
     return (&reqBadServiceCreateBadInteraction{})
 }
+
 func (x *reqBadServiceCreateBadInteraction) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -3266,6 +3287,7 @@ var _ thrift.Struct = &respBadServiceCreateBadInteraction{}
 func newRespBadServiceCreateBadInteraction() *respBadServiceCreateBadInteraction {
     return (&respBadServiceCreateBadInteraction{})
 }
+
 func (x *respBadServiceCreateBadInteraction) GetValue()  {
     return x.Value
 }
@@ -3385,6 +3407,7 @@ var _ thrift.Struct = &reqBadServiceBar{}
 func newReqBadServiceBar() *reqBadServiceBar {
     return (&reqBadServiceBar{})
 }
+
 func (x *reqBadServiceBar) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -3463,6 +3486,7 @@ var _ thrift.Struct = &respBadServiceBar{}
 func newRespBadServiceBar() *respBadServiceBar {
     return (&respBadServiceBar{})
 }
+
 func (x *respBadServiceBar) GetValue() int32 {
     return x.Value
 }

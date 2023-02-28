@@ -88,6 +88,7 @@ var _ thrift.Struct = &MyStructNestedAnnotation{}
 func NewMyStructNestedAnnotation() *MyStructNestedAnnotation {
     return (&MyStructNestedAnnotation{})
 }
+
 func (x *MyStructNestedAnnotation) GetName() string {
     return x.Name
 }
@@ -215,6 +216,7 @@ var _ thrift.Struct = &MyUnion{}
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
 }
+
 func (x *MyUnion) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -278,6 +280,7 @@ var _ thrift.Struct = &MyException{}
 func NewMyException() *MyException {
     return (&MyException{})
 }
+
 func (x *MyException) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -370,6 +373,10 @@ var _ thrift.Struct = &MyStruct{}
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
+
+// Deprecated: Use NewMyStruct().MyUnion instead.
+var MyStruct_MyUnion_DEFAULT = NewMyStruct().MyUnion
+
 func (x *MyStruct) GetMajor() int64 {
     return x.Major
 }
@@ -985,6 +992,7 @@ var _ thrift.Struct = &SecretStruct{}
 func NewSecretStruct() *SecretStruct {
     return (&SecretStruct{})
 }
+
 func (x *SecretStruct) GetId() int64 {
     return x.Id
 }

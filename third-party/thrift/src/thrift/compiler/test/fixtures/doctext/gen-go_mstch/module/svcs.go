@@ -154,6 +154,7 @@ var _ thrift.Struct = &reqCF{}
 func newReqCF() *reqCF {
     return (&reqCF{})
 }
+
 func (x *reqCF) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -231,6 +232,7 @@ var _ thrift.Struct = &respCF{}
 func newRespCF() *respCF {
     return (&respCF{})
 }
+
 func (x *respCF) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -311,6 +313,7 @@ var _ thrift.Struct = &reqCThing{}
 func newReqCThing() *reqCThing {
     return (&reqCThing{})
 }
+
 func (x *reqCThing) GetA() int32 {
     return x.A
 }
@@ -572,6 +575,7 @@ var _ thrift.Struct = &respCThing{}
 func newRespCThing() *respCThing {
     return (&respCThing{})
 }
+
 func (x *respCThing) GetValue() string {
     return x.Value
 }

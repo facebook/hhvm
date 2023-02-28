@@ -181,6 +181,7 @@ var _ thrift.Struct = &reqRaiserDoBland{}
 func newReqRaiserDoBland() *reqRaiserDoBland {
     return (&reqRaiserDoBland{})
 }
+
 func (x *reqRaiserDoBland) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -258,6 +259,7 @@ var _ thrift.Struct = &respRaiserDoBland{}
 func newRespRaiserDoBland() *respRaiserDoBland {
     return (&respRaiserDoBland{})
 }
+
 func (x *respRaiserDoBland) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -335,6 +337,7 @@ var _ thrift.Struct = &reqRaiserDoRaise{}
 func newReqRaiserDoRaise() *reqRaiserDoRaise {
     return (&reqRaiserDoRaise{})
 }
+
 func (x *reqRaiserDoRaise) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -412,6 +415,7 @@ var _ thrift.Struct = &respRaiserDoRaise{}
 func newRespRaiserDoRaise() *respRaiserDoRaise {
     return (&respRaiserDoRaise{})
 }
+
 func (x *respRaiserDoRaise) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -489,6 +493,7 @@ var _ thrift.Struct = &reqRaiserGet200{}
 func newReqRaiserGet200() *reqRaiserGet200 {
     return (&reqRaiserGet200{})
 }
+
 func (x *reqRaiserGet200) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -567,6 +572,7 @@ var _ thrift.Struct = &respRaiserGet200{}
 func newRespRaiserGet200() *respRaiserGet200 {
     return (&respRaiserGet200{})
 }
+
 func (x *respRaiserGet200) GetValue() string {
     return x.Value
 }
@@ -693,6 +699,7 @@ var _ thrift.Struct = &reqRaiserGet500{}
 func newReqRaiserGet500() *reqRaiserGet500 {
     return (&reqRaiserGet500{})
 }
+
 func (x *reqRaiserGet500) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -771,6 +778,7 @@ var _ thrift.Struct = &respRaiserGet500{}
 func newRespRaiserGet500() *respRaiserGet500 {
     return (&respRaiserGet500{})
 }
+
 func (x *respRaiserGet500) GetValue() string {
     return x.Value
 }

@@ -134,6 +134,7 @@ var _ thrift.Struct = &reqMyRootDoRoot{}
 func newReqMyRootDoRoot() *reqMyRootDoRoot {
     return (&reqMyRootDoRoot{})
 }
+
 func (x *reqMyRootDoRoot) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -211,6 +212,7 @@ var _ thrift.Struct = &respMyRootDoRoot{}
 func newRespMyRootDoRoot() *respMyRootDoRoot {
     return (&respMyRootDoRoot{})
 }
+
 func (x *respMyRootDoRoot) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -500,6 +502,7 @@ var _ thrift.Struct = &reqMyNodeDoMid{}
 func newReqMyNodeDoMid() *reqMyNodeDoMid {
     return (&reqMyNodeDoMid{})
 }
+
 func (x *reqMyNodeDoMid) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -577,6 +580,7 @@ var _ thrift.Struct = &respMyNodeDoMid{}
 func newRespMyNodeDoMid() *respMyNodeDoMid {
     return (&respMyNodeDoMid{})
 }
+
 func (x *respMyNodeDoMid) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -841,6 +845,7 @@ var _ thrift.Struct = &reqMyLeafDoLeaf{}
 func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
     return (&reqMyLeafDoLeaf{})
 }
+
 func (x *reqMyLeafDoLeaf) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -918,6 +923,7 @@ var _ thrift.Struct = &respMyLeafDoLeaf{}
 func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
     return (&respMyLeafDoLeaf{})
 }
+
 func (x *respMyLeafDoLeaf) String() string {
     return fmt.Sprintf("%+v", x)
 }

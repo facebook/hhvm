@@ -26,6 +26,7 @@ var _ thrift.Struct = &Fiery{}
 func NewFiery() *Fiery {
     return (&Fiery{})
 }
+
 func (x *Fiery) GetMessage() string {
     return x.Message
 }
@@ -158,6 +159,10 @@ var _ thrift.Struct = &Serious{}
 func NewSerious() *Serious {
     return (&Serious{})
 }
+
+// Deprecated: Use NewSerious().Sonnet instead.
+var Serious_Sonnet_DEFAULT = NewSerious().Sonnet
+
 func (x *Serious) GetSonnet() *string {
     return x.Sonnet
 }
@@ -298,6 +303,7 @@ var _ thrift.Struct = &ComplexFieldNames{}
 func NewComplexFieldNames() *ComplexFieldNames {
     return (&ComplexFieldNames{})
 }
+
 func (x *ComplexFieldNames) GetErrorMessage() string {
     return x.ErrorMessage
 }
@@ -480,6 +486,7 @@ var _ thrift.Struct = &CustomFieldNames{}
 func NewCustomFieldNames() *CustomFieldNames {
     return (&CustomFieldNames{})
 }
+
 func (x *CustomFieldNames) GetErrorMessage() string {
     return x.ErrorMessage
 }
@@ -662,6 +669,7 @@ var _ thrift.Struct = &ExceptionWithPrimitiveField{}
 func NewExceptionWithPrimitiveField() *ExceptionWithPrimitiveField {
     return (&ExceptionWithPrimitiveField{})
 }
+
 func (x *ExceptionWithPrimitiveField) GetMessage() string {
     return x.Message
 }
@@ -844,6 +852,7 @@ var _ thrift.Struct = &ExceptionWithStructuredAnnotation{}
 func NewExceptionWithStructuredAnnotation() *ExceptionWithStructuredAnnotation {
     return (&ExceptionWithStructuredAnnotation{})
 }
+
 func (x *ExceptionWithStructuredAnnotation) GetMessageField() string {
     return x.MessageField
 }
@@ -1024,6 +1033,7 @@ var _ thrift.Struct = &Banal{}
 func NewBanal() *Banal {
     return (&Banal{})
 }
+
 func (x *Banal) String() string {
     return fmt.Sprintf("%+v", x)
 }

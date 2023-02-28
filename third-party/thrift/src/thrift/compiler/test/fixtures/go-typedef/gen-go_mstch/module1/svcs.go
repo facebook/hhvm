@@ -170,6 +170,7 @@ var _ thrift.Struct = &reqFinderByPlate{}
 func newReqFinderByPlate() *reqFinderByPlate {
     return (&reqFinderByPlate{})
 }
+
 func (x *reqFinderByPlate) GetPlate() Plate {
     return x.Plate
 }
@@ -297,6 +298,10 @@ var _ thrift.Struct = &respFinderByPlate{}
 func newRespFinderByPlate() *respFinderByPlate {
     return (&respFinderByPlate{})
 }
+
+// Deprecated: Use newRespFinderByPlate().Value instead.
+var respFinderByPlate_Value_DEFAULT = newRespFinderByPlate().Value
+
 func (x *respFinderByPlate) GetValue() *Automobile {
     return x.Value
 }
@@ -432,6 +437,7 @@ var _ thrift.Struct = &reqFinderAliasByPlate{}
 func newReqFinderAliasByPlate() *reqFinderAliasByPlate {
     return (&reqFinderAliasByPlate{})
 }
+
 func (x *reqFinderAliasByPlate) GetPlate() Plate {
     return x.Plate
 }
@@ -559,6 +565,10 @@ var _ thrift.Struct = &respFinderAliasByPlate{}
 func newRespFinderAliasByPlate() *respFinderAliasByPlate {
     return (&respFinderAliasByPlate{})
 }
+
+// Deprecated: Use newRespFinderAliasByPlate().Value instead.
+var respFinderAliasByPlate_Value_DEFAULT = newRespFinderAliasByPlate().Value
+
 func (x *respFinderAliasByPlate) GetValue() *Car {
     return x.Value
 }
@@ -694,6 +704,7 @@ var _ thrift.Struct = &reqFinderPreviousPlate{}
 func newReqFinderPreviousPlate() *reqFinderPreviousPlate {
     return (&reqFinderPreviousPlate{})
 }
+
 func (x *reqFinderPreviousPlate) GetPlate() Plate {
     return x.Plate
 }
@@ -821,6 +832,7 @@ var _ thrift.Struct = &respFinderPreviousPlate{}
 func newRespFinderPreviousPlate() *respFinderPreviousPlate {
     return (&respFinderPreviousPlate{})
 }
+
 func (x *respFinderPreviousPlate) GetValue() Plate {
     return x.Value
 }

@@ -35,6 +35,10 @@ func NewIncluded() *Included {
             *transitive.NewFoo(),
         )
 }
+
+// Deprecated: Use NewIncluded().MyTransitiveField instead.
+var Included_MyTransitiveField_DEFAULT = NewIncluded().MyTransitiveField
+
 func (x *Included) GetMyIntField() int64 {
     return x.MyIntField
 }

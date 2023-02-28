@@ -89,6 +89,7 @@ var _ thrift.Struct = &Color{}
 func NewColor() *Color {
     return (&Color{})
 }
+
 func (x *Color) GetRed() float64 {
     return x.Red
 }
@@ -369,6 +370,22 @@ func NewVehicle() *Vehicle {
     return (&Vehicle{}).
         SetHasAC(false)
 }
+
+// Deprecated: Use NewVehicle().Color instead.
+var Vehicle_Color_DEFAULT = NewVehicle().Color
+
+// Deprecated: Use NewVehicle().LicensePlate instead.
+var Vehicle_LicensePlate_DEFAULT = NewVehicle().LicensePlate
+
+// Deprecated: Use NewVehicle().Description instead.
+var Vehicle_Description_DEFAULT = NewVehicle().Description
+
+// Deprecated: Use NewVehicle().Name instead.
+var Vehicle_Name_DEFAULT = NewVehicle().Name
+
+// Deprecated: Use NewVehicle().HasAC instead.
+var Vehicle_HasAC_DEFAULT = NewVehicle().HasAC
+
 func (x *Vehicle) GetColor() *Color {
     return x.Color
 }
@@ -738,6 +755,22 @@ var _ thrift.Struct = &Person{}
 func NewPerson() *Person {
     return (&Person{})
 }
+
+// Deprecated: Use NewPerson().Age instead.
+var Person_Age_DEFAULT = NewPerson().Age
+
+// Deprecated: Use NewPerson().Address instead.
+var Person_Address_DEFAULT = NewPerson().Address
+
+// Deprecated: Use NewPerson().FavoriteColor instead.
+var Person_FavoriteColor_DEFAULT = NewPerson().FavoriteColor
+
+// Deprecated: Use NewPerson().BestFriend instead.
+var Person_BestFriend_DEFAULT = NewPerson().BestFriend
+
+// Deprecated: Use NewPerson().AfraidOfAnimal instead.
+var Person_AfraidOfAnimal_DEFAULT = NewPerson().AfraidOfAnimal
+
 func (x *Person) GetId() PersonID {
     return x.Id
 }

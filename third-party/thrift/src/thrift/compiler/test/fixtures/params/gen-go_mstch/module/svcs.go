@@ -200,6 +200,7 @@ var _ thrift.Struct = &reqNestedContainersMapList{}
 func newReqNestedContainersMapList() *reqNestedContainersMapList {
     return (&reqNestedContainersMapList{})
 }
+
 func (x *reqNestedContainersMapList) GetFoo() map[int32][]int32 {
     return x.Foo
 }
@@ -408,6 +409,7 @@ var _ thrift.Struct = &respNestedContainersMapList{}
 func newRespNestedContainersMapList() *respNestedContainersMapList {
     return (&respNestedContainersMapList{})
 }
+
 func (x *respNestedContainersMapList) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -486,6 +488,7 @@ var _ thrift.Struct = &reqNestedContainersMapSet{}
 func newReqNestedContainersMapSet() *reqNestedContainersMapSet {
     return (&reqNestedContainersMapSet{})
 }
+
 func (x *reqNestedContainersMapSet) GetFoo() map[int32][]int32 {
     return x.Foo
 }
@@ -694,6 +697,7 @@ var _ thrift.Struct = &respNestedContainersMapSet{}
 func newRespNestedContainersMapSet() *respNestedContainersMapSet {
     return (&respNestedContainersMapSet{})
 }
+
 func (x *respNestedContainersMapSet) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -772,6 +776,7 @@ var _ thrift.Struct = &reqNestedContainersListMap{}
 func newReqNestedContainersListMap() *reqNestedContainersListMap {
     return (&reqNestedContainersListMap{})
 }
+
 func (x *reqNestedContainersListMap) GetFoo() []map[int32]int32 {
     return x.Foo
 }
@@ -980,6 +985,7 @@ var _ thrift.Struct = &respNestedContainersListMap{}
 func newRespNestedContainersListMap() *respNestedContainersListMap {
     return (&respNestedContainersListMap{})
 }
+
 func (x *respNestedContainersListMap) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1058,6 +1064,7 @@ var _ thrift.Struct = &reqNestedContainersListSet{}
 func newReqNestedContainersListSet() *reqNestedContainersListSet {
     return (&reqNestedContainersListSet{})
 }
+
 func (x *reqNestedContainersListSet) GetFoo() [][]int32 {
     return x.Foo
 }
@@ -1249,6 +1256,7 @@ var _ thrift.Struct = &respNestedContainersListSet{}
 func newRespNestedContainersListSet() *respNestedContainersListSet {
     return (&respNestedContainersListSet{})
 }
+
 func (x *respNestedContainersListSet) String() string {
     return fmt.Sprintf("%+v", x)
 }
@@ -1327,6 +1335,7 @@ var _ thrift.Struct = &reqNestedContainersTurtles{}
 func newReqNestedContainersTurtles() *reqNestedContainersTurtles {
     return (&reqNestedContainersTurtles{})
 }
+
 func (x *reqNestedContainersTurtles) GetFoo() [][]map[int32]map[int32][]int32 {
     return x.Foo
 }
@@ -1639,6 +1648,7 @@ var _ thrift.Struct = &respNestedContainersTurtles{}
 func newRespNestedContainersTurtles() *respNestedContainersTurtles {
     return (&respNestedContainersTurtles{})
 }
+
 func (x *respNestedContainersTurtles) String() string {
     return fmt.Sprintf("%+v", x)
 }

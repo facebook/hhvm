@@ -138,6 +138,10 @@ var _ thrift.Struct = &reqMyServiceQuery{}
 func newReqMyServiceQuery() *reqMyServiceQuery {
     return (&reqMyServiceQuery{})
 }
+
+// Deprecated: Use newReqMyServiceQuery().U instead.
+var reqMyServiceQuery_U_DEFAULT = newReqMyServiceQuery().U
+
 func (x *reqMyServiceQuery) GetU() *MyUnion {
     return x.U
 }
@@ -273,6 +277,10 @@ var _ thrift.Struct = &respMyServiceQuery{}
 func newRespMyServiceQuery() *respMyServiceQuery {
     return (&respMyServiceQuery{})
 }
+
+// Deprecated: Use newRespMyServiceQuery().Value instead.
+var respMyServiceQuery_Value_DEFAULT = newRespMyServiceQuery().Value
+
 func (x *respMyServiceQuery) GetValue() *MyStruct {
     return x.Value
 }

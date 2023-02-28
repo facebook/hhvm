@@ -23,6 +23,7 @@ var _ thrift.Struct = &Also{}
 func NewAlso() *Also {
     return (&Also{})
 }
+
 func (x *Also) String() string {
     return fmt.Sprintf("%+v", x)
 }

@@ -170,14 +170,28 @@ struct NativeTypes<exception_t<T>> : ConcreteType<T> {};
 template <typename VTag>
 struct NativeTypes<type::list<VTag>> : parameterized_type<std::vector, VTag> {};
 
+template <typename T>
+struct InferTag<std::vector<T>> {
+  using type = type::list<typename InferTag<T>::type>;
+};
+
 // Traits for sets.
 template <typename KTag>
 struct NativeTypes<set<KTag>> : parameterized_type<std::set, KTag> {};
+template <typename T>
+struct InferTag<std::set<T>> {
+  using type = type::set<typename InferTag<T>::type>;
+};
 
 // Traits for maps.
 template <typename KTag, typename VTag>
 struct NativeTypes<map<KTag, VTag>>
     : parameterized_kv_type<std::map, KTag, VTag> {};
+template <typename K, typename V>
+struct InferTag<std::map<K, V>> {
+  using type =
+      type::map<typename InferTag<K>::type, typename InferTag<V>::type>;
+};
 
 // Traits for adapted types.
 //

@@ -95,5 +95,14 @@ TEST(InferTagTest, Strings) {
   // string value and literals/views to be inferred as binary_t.
 }
 
+TEST(InferTagTest, Containers) {
+  test::same_tag<native_type<list<i32_t>>, std::vector<std::int32_t>>;
+  test::same_tag<list<i32_t>, infer_tag<std::vector<std::int32_t>>>;
+  test::same_tag<native_type<set<i32_t>>, std::set<std::int32_t>>;
+  test::same_tag<set<i32_t>, infer_tag<std::set<std::int32_t>>>;
+  test::same_tag<native_type<map<i32_t, bool_t>>, std::map<std::int32_t, bool>>;
+  test::same_tag<map<i32_t, bool_t>, infer_tag<std::map<std::int32_t, bool>>>;
+}
+
 } // namespace
 } // namespace apache::thrift::type

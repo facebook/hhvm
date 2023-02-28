@@ -11,9 +11,7 @@ use naming_provider::NamingProvider;
 use oxidized::naming_types::KindOfType;
 use pos::ConstName;
 use pos::FunName;
-use pos::MethodName;
 use pos::ModuleName;
-use pos::PropName;
 use pos::RelativePath;
 use pos::TypeName;
 use ty::decl::shallow::NamedDecl;
@@ -21,7 +19,6 @@ use ty::decl::ConstDecl;
 use ty::decl::FunDecl;
 use ty::decl::ModuleDecl;
 use ty::decl::ShallowClass;
-use ty::decl::Ty;
 use ty::decl::TypedefDecl;
 use ty::reason::Reason;
 
@@ -187,82 +184,6 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         }
         Ok(None)
     }
-
-    fn get_property_type(
-        &self,
-        class_name: TypeName,
-        property_name: PropName,
-    ) -> Result<Option<Ty<R>>> {
-        if let res @ Some(..) = self.store.get_property_type(class_name, property_name)? {
-            return Ok(res);
-        }
-        if let Some(path) = self.naming_provider.get_type_path(class_name)? {
-            self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_property_type(class_name, property_name)?);
-        }
-        Ok(None)
-    }
-
-    fn get_static_property_type(
-        &self,
-        class_name: TypeName,
-        property_name: PropName,
-    ) -> Result<Option<Ty<R>>> {
-        if let res @ Some(..) = self
-            .store
-            .get_static_property_type(class_name, property_name)?
-        {
-            return Ok(res);
-        }
-        if let Some(path) = self.naming_provider.get_type_path(class_name)? {
-            self.parse_and_cache_decls_in(path)?;
-            return Ok(self
-                .store
-                .get_static_property_type(class_name, property_name)?);
-        }
-        Ok(None)
-    }
-
-    fn get_method_type(
-        &self,
-        class_name: TypeName,
-        method_name: MethodName,
-    ) -> Result<Option<Ty<R>>> {
-        if let res @ Some(..) = self.store.get_method_type(class_name, method_name)? {
-            return Ok(res);
-        }
-        if let Some(path) = self.naming_provider.get_type_path(class_name)? {
-            self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_method_type(class_name, method_name)?);
-        }
-        Ok(None)
-    }
-
-    fn get_static_method_type(
-        &self,
-        class_name: TypeName,
-        method_name: MethodName,
-    ) -> Result<Option<Ty<R>>> {
-        if let res @ Some(..) = self.store.get_static_method_type(class_name, method_name)? {
-            return Ok(res);
-        }
-        if let Some(path) = self.naming_provider.get_type_path(class_name)? {
-            self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_static_method_type(class_name, method_name)?);
-        }
-        Ok(None)
-    }
-
-    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>> {
-        if let res @ Some(..) = self.store.get_constructor_type(class_name)? {
-            return Ok(res);
-        }
-        if let Some(path) = self.naming_provider.get_type_path(class_name)? {
-            self.parse_and_cache_decls_in(path)?;
-            return Ok(self.store.get_constructor_type(class_name)?);
-        }
-        Ok(None)
-    }
 }
 
 /// A `ShallowDeclProvider` which assumes its store never evicts values and is
@@ -316,43 +237,5 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
 
     fn get_class(&self, name: TypeName) -> Result<Option<Arc<ShallowClass<R>>>> {
         Ok(self.store.get_class(name)?)
-    }
-
-    fn get_property_type(
-        &self,
-        class_name: TypeName,
-        property_name: PropName,
-    ) -> Result<Option<Ty<R>>> {
-        Ok(self.store.get_property_type(class_name, property_name)?)
-    }
-
-    fn get_static_property_type(
-        &self,
-        class_name: TypeName,
-        property_name: PropName,
-    ) -> Result<Option<Ty<R>>> {
-        Ok(self
-            .store
-            .get_static_property_type(class_name, property_name)?)
-    }
-
-    fn get_method_type(
-        &self,
-        class_name: TypeName,
-        method_name: MethodName,
-    ) -> Result<Option<Ty<R>>> {
-        Ok(self.store.get_method_type(class_name, method_name)?)
-    }
-
-    fn get_static_method_type(
-        &self,
-        class_name: TypeName,
-        method_name: MethodName,
-    ) -> Result<Option<Ty<R>>> {
-        Ok(self.store.get_static_method_type(class_name, method_name)?)
-    }
-
-    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>> {
-        Ok(self.store.get_constructor_type(class_name)?)
     }
 }

@@ -244,103 +244,6 @@ module Decl = struct
           = "hh_rust_provider_backend_get_module"
       end)
 
-  module ClassEltKey = struct
-    type t = string * string
-
-    let compare (cls1, elt1) (cls2, elt2) =
-      let r = String.compare cls1 cls2 in
-      if not (Core.Int.equal r 0) then
-        r
-      else
-        String.compare elt1 elt2
-
-    let to_string (cls, elt) = cls ^ "::" ^ elt
-  end
-
-  module Props =
-    StoreWithLocalCache
-      (ClassEltKey)
-      (struct
-        type t = Typing_defs.decl_ty
-
-        let description = "Decl_Property"
-      end)
-      (struct
-        external get : t -> string * string -> Typing_defs.decl_ty option
-          = "hh_rust_provider_backend_get_prop"
-      end)
-
-  module StaticProps =
-    StoreWithLocalCache
-      (ClassEltKey)
-      (struct
-        type t = Typing_defs.decl_ty
-
-        let description = "Decl_StaticProperty"
-      end)
-      (struct
-        external get : t -> string * string -> Typing_defs.decl_ty option
-          = "hh_rust_provider_backend_get_static_prop"
-      end)
-
-  let build_fun_elt fe_type =
-    Typing_defs.
-      {
-        fe_module = None;
-        fe_pos = Typing_defs.get_pos fe_type;
-        fe_internal = false;
-        fe_deprecated = None;
-        fe_type;
-        fe_php_std_lib = false;
-        fe_support_dynamic_type = false;
-        fe_no_auto_dynamic = false;
-      }
-
-  module Methods =
-    StoreWithLocalCache
-      (ClassEltKey)
-      (struct
-        type t = Typing_defs.fun_elt
-
-        let description = "Decl_Method"
-      end)
-      (struct
-        external get_ffi : t -> string * string -> Typing_defs.decl_ty option
-          = "hh_rust_provider_backend_get_method"
-
-        let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
-      end)
-
-  module StaticMethods =
-    StoreWithLocalCache
-      (ClassEltKey)
-      (struct
-        type t = Typing_defs.fun_elt
-
-        let description = "Decl_StaticMethod"
-      end)
-      (struct
-        external get_ffi : t -> string * string -> Typing_defs.decl_ty option
-          = "hh_rust_provider_backend_get_static_method"
-
-        let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
-      end)
-
-  module Constructors =
-    StoreWithLocalCache
-      (StringKey)
-      (struct
-        type t = Typing_defs.fun_elt
-
-        let description = "Decl_Constructor"
-      end)
-      (struct
-        external get_ffi : t -> string -> Typing_defs.decl_ty option
-          = "hh_rust_provider_backend_get_constructor"
-
-        let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
-      end)
-
   module FoldedClasses =
     StoreWithLocalCache
       (StringKey)
@@ -357,18 +260,20 @@ module Decl = struct
   let decl_store t =
     let noop_add _ _ = () in
     let noop () = () in
+    (* Rely on lazy member lookup. *)
+    let get_none _ = None in
     Decl_store.
       {
         add_prop = noop_add;
-        get_prop = Props.get t;
+        get_prop = get_none;
         add_static_prop = noop_add;
-        get_static_prop = StaticProps.get t;
+        get_static_prop = get_none;
         add_method = noop_add;
-        get_method = Methods.get t;
+        get_method = get_none;
         add_static_method = noop_add;
-        get_static_method = StaticMethods.get t;
+        get_static_method = get_none;
         add_constructor = noop_add;
-        get_constructor = Constructors.get t;
+        get_constructor = get_none;
         add_class = noop_add;
         get_class = FoldedClasses.get t;
         add_fun = noop_add;
@@ -457,11 +362,6 @@ module Decl = struct
     Typedefs.clear_cache ();
     GConsts.clear_cache ();
     Modules.clear_cache ();
-    Constructors.clear_cache ();
-    Props.clear_cache ();
-    StaticProps.clear_cache ();
-    Methods.clear_cache ();
-    StaticMethods.clear_cache ();
     ()
 
   let oldify_defs t names =

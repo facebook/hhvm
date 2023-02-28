@@ -9,9 +9,7 @@ use std::sync::Arc;
 use oxidized::naming_types::KindOfType;
 use pos::ConstName;
 use pos::FunName;
-use pos::MethodName;
 use pos::ModuleName;
-use pos::PropName;
 use pos::RelativePath;
 use pos::TypeName;
 use ty::decl::shallow::ConstDecl;
@@ -19,7 +17,6 @@ use ty::decl::shallow::FunDecl;
 use ty::decl::shallow::ModuleDecl;
 use ty::decl::shallow::TypedefDecl;
 use ty::decl::ShallowClass;
-use ty::decl::Ty;
 use ty::reason::Reason;
 
 mod provider;
@@ -92,73 +89,4 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
     /// Fetch the declaration of the class with the given name. If the given
     /// name is bound to a typedef rather than a class, return `None`.
     fn get_class(&self, name: TypeName) -> Result<Option<Arc<ShallowClass<R>>>>;
-
-    /// Fetch the type of the property with the given name from the given
-    /// shallow class. When multiple properties are declared with the same name,
-    /// return the one that appears last in the source text.
-    ///
-    /// Expected to be no slower than O(recursive_size_of_return_value) in the
-    /// case of a Store hit. In other words, if the provider's Store backend
-    /// stores data in a serialized format, implementations of this method
-    /// should only deserialize the one property type, not the entire containing
-    /// `ShallowClass`.
-    fn get_property_type(
-        &self,
-        class_name: TypeName,
-        property_name: PropName,
-    ) -> Result<Option<Ty<R>>>;
-
-    /// Fetch the type of the property with the given name from the given
-    /// shallow class. When multiple properties are declared with the same name,
-    /// return the one that appears last in the source text.
-    ///
-    /// Expected to be no slower than O(recursive_size_of_return_value) in the
-    /// case of a Store hit. In other words, if the provider's Store backend
-    /// stores data in a serialized format, implementations of this method
-    /// should only deserialize the one property type, not the entire containing
-    /// `ShallowClass`.
-    fn get_static_property_type(
-        &self,
-        class_name: TypeName,
-        property_name: PropName,
-    ) -> Result<Option<Ty<R>>>;
-
-    /// Fetch the type of the method with the given name from the given shallow
-    /// class. When multiple methods are declared with the same name, return the
-    /// one that appears last in the source text.
-    ///
-    /// Expected to be no slower than O(recursive_size_of_return_value) in the
-    /// case of a Store hit. In other words, if the provider's Store backend
-    /// stores data in a serialized format, implementations of this method
-    /// should only deserialize the one method type, not the entire containing
-    /// `ShallowClass`.
-    fn get_method_type(
-        &self,
-        class_name: TypeName,
-        method_name: MethodName,
-    ) -> Result<Option<Ty<R>>>;
-
-    /// Fetch the type of the method with the given name from the given shallow
-    /// class. When multiple methods are declared with the same name, return the
-    /// one that appears last in the source text.
-    ///
-    /// Expected to be no slower than O(recursive_size_of_return_value) in the
-    /// case of a Store hit. In other words, if the provider's Store backend
-    /// stores data in a serialized format, implementations of this method
-    /// should only deserialize the one method type, not the entire containing
-    /// `ShallowClass`.
-    fn get_static_method_type(
-        &self,
-        class_name: TypeName,
-        method_name: MethodName,
-    ) -> Result<Option<Ty<R>>>;
-
-    /// Fetch the type of the constructor declared in the given shallow class.
-    ///
-    /// Expected to be no slower than O(recursive_size_of_return_value) in the
-    /// case of a Store hit. In other words, if the provider's Store backend
-    /// stores data in a serialized format, implementations of this method
-    /// should only deserialize the one constructor type, not the entire
-    /// containing `ShallowClass`.
-    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<Ty<R>>>;
 }

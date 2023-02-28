@@ -7,15 +7,9 @@ use std::sync::Arc;
 
 use datastore::Store;
 use oxidized::naming_types::KindOfType;
-use pos::ConstName;
-use pos::FunName;
-use pos::ModuleName;
 use pos::TypeName;
 use shallow_decl_provider::ShallowDeclProvider;
-use ty::decl::ConstDecl;
 use ty::decl::FoldedClass;
-use ty::decl::FunDecl;
-use ty::decl::ModuleDecl;
 use ty::reason::Reason;
 
 use super::Error;
@@ -44,18 +38,6 @@ impl<R: Reason> EagerFoldedDeclProvider<R> {
 }
 
 impl<R: Reason> super::FoldedDeclProvider<R> for EagerFoldedDeclProvider<R> {
-    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
-        Ok(self.shallow_decl_provider.get_fun(name)?)
-    }
-
-    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
-        Ok(self.shallow_decl_provider.get_const(name)?)
-    }
-
-    fn get_module(&self, name: ModuleName) -> Result<Option<Arc<ModuleDecl<R>>>> {
-        Ok(self.shallow_decl_provider.get_module(name)?)
-    }
-
     fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
         match self.shallow_decl_provider.get_type_kind(name)? {
             None => Ok(None),

@@ -7,14 +7,8 @@ use std::fmt::Debug;
 use std::sync::Arc;
 
 use itertools::Itertools;
-use pos::ConstName;
-use pos::FunName;
-use pos::ModuleName;
 use pos::TypeName;
-use ty::decl::ConstDecl;
 use ty::decl::FoldedClass;
-use ty::decl::FunDecl;
-use ty::decl::ModuleDecl;
 use ty::decl::TypedefDecl;
 use ty::reason::Reason;
 
@@ -64,15 +58,6 @@ pub enum TypeDecl<R: Reason> {
 /// members (including inherited members), but omits the types of all methods
 /// and properties.
 pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
-    /// Fetch the declaration of the toplevel function with the given name.
-    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>>;
-
-    /// Fetch the declaration of the global constant with the given name.
-    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>>;
-
-    /// Fetch the declaration of the module with the given name.
-    fn get_module(&self, name: ModuleName) -> Result<Option<Arc<ModuleDecl<R>>>>;
-
     /// Fetch the declaration of the class or typedef with the given name.
     fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>>;
 

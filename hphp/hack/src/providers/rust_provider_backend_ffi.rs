@@ -210,13 +210,13 @@ ocaml_ffi! {
         let name = pos::FunName::from(std::str::from_utf8(name).unwrap());
         match &*backend {
             BackendWrapper::Positioned(backend) => {
-                let res: Option<Arc<decl::FunDecl<BReason>>> = backend.folded_decl_provider()
+                let res: Option<Arc<decl::FunDecl<BReason>>> = backend.shallow_decl_provider()
                     .get_fun(name)
                     .unwrap();
                 to_ocaml(&res)
             }
             BackendWrapper::PositionFree(backend) => {
-                let res: Option<Arc<decl::FunDecl<NReason>>> = backend.folded_decl_provider()
+                let res: Option<Arc<decl::FunDecl<NReason>>> = backend.shallow_decl_provider()
                     .get_fun(name)
                     .unwrap();
                 to_ocaml(&res)
@@ -297,13 +297,13 @@ ocaml_ffi! {
         let name = pos::ConstName::from(std::str::from_utf8(name).unwrap());
         match &*backend {
             BackendWrapper::Positioned(backend) => {
-                let res: Option<Arc<decl::ConstDecl<BReason>>> = backend.folded_decl_provider()
+                let res: Option<Arc<decl::ConstDecl<BReason>>> = backend.shallow_decl_provider()
                     .get_const(name)
                     .unwrap();
                 to_ocaml(&res)
             }
             BackendWrapper::PositionFree(backend) => {
-                let res: Option<Arc<decl::ConstDecl<NReason>>> = backend.folded_decl_provider()
+                let res: Option<Arc<decl::ConstDecl<NReason>>> = backend.shallow_decl_provider()
                     .get_const(name)
                     .unwrap();
                 to_ocaml(&res)
@@ -326,13 +326,13 @@ ocaml_ffi! {
         let name = pos::ModuleName::from(std::str::from_utf8(name).unwrap());
         match &*backend {
             BackendWrapper::Positioned(backend) => {
-                let res: Option<Arc<decl::ModuleDecl<BReason>>> = backend.folded_decl_provider()
+                let res: Option<Arc<decl::ModuleDecl<BReason>>> = backend.shallow_decl_provider()
                     .get_module(name)
                     .unwrap();
                 to_ocaml(&res)
             }
             BackendWrapper::PositionFree(backend) => {
-                let res: Option<Arc<decl::ModuleDecl<NReason>>> = backend.folded_decl_provider()
+                let res: Option<Arc<decl::ModuleDecl<NReason>>> = backend.shallow_decl_provider()
                     .get_module(name)
                     .unwrap();
                 to_ocaml(&res)

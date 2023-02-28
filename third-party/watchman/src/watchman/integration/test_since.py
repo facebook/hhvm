@@ -82,10 +82,16 @@ class TestSince(WatchmanTestCase.WatchmanTestCase):
         self.touchRelative(os.path.join(root, "subdir"), "foo")
         self.assertFileList(root, files=["a", "subdir", "subdir/foo"])
 
+        _c, start_time, pid, root_number, ticks = clock.split(":")
+        # Move the clock back to avoid flakiness when mkdir/touch are fast enough to make the
+        # query have the same time as `clock`
+        before_clock = "c:{}:{}:{}:{}".format(
+            str(int(start_time) - 1), pid, root_number, ticks
+        )
         res = self.watchmanCommand(
             "query",
             root,
-            {"since": clock, "relative_root": "subdir", "fields": ["name"]},
+            {"since": before_clock, "relative_root": "subdir", "fields": ["name"]},
         )
         self.assertFileListsEqual(res["files"], ["foo"])
 

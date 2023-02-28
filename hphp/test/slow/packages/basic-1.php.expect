@@ -1,0 +1,36 @@
+dict(3) {
+  ["baz"]=>
+  dict(2) {
+    ["uses"]=>
+    vec(2) {
+      string(3) "x.*"
+      string(3) "y.*"
+    }
+    ["includes"]=>
+    vec(2) {
+      string(3) "foo"
+      string(3) "bar"
+    }
+  }
+  ["bar"]=>
+  dict(2) {
+    ["uses"]=>
+    vec(1) {
+      string(3) "b.*"
+    }
+    ["includes"]=>
+    vec(1) {
+      string(3) "foo"
+    }
+  }
+  ["foo"]=>
+  dict(2) {
+    ["uses"]=>
+    vec(1) {
+      string(3) "a.*"
+    }
+    ["includes"]=>
+    vec(0) {
+    }
+  }
+}

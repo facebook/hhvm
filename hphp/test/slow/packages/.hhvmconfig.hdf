@@ -1,0 +1,3 @@
+Parser {
+  Hack.Lang.AllowUnstableFeatures = true
+}

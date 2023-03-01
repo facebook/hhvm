@@ -224,29 +224,42 @@ cdef class GeneratedError(Error):
         return f"{type(self).__name__}({fields})"
 
     def __copy__(GeneratedError self):
-        # deep copy the instance
-        return self._fbthrift_create(copy.deepcopy(self._fbthrift_data))
+        return self
+
+    def __deepcopy__(GeneratedError self, _memo):
+        return self
 
     def __lt__(self, other):
         if type(self) != type(other):
             return NotImplemented
-        ret = (<GeneratedError>self)._fbthrift_data[1:] < (<GeneratedError>other)._fbthrift_data[1:]
-        return ret
+        for name, value in self:
+            other_value = getattr(other, name)
+            if value == other_value:
+                continue
+            return value < other_value
+        return False
 
     def __le__(self, other):
-        return self < other or self == other
+        if type(self) != type(other):
+            return NotImplemented
+        for name, value in self:
+            other_value = getattr(other, name)
+            if value == other_value:
+                continue
+            return value < other_value
+        return True
 
     def __eq__(GeneratedError self, other):
         if type(other) != type(self):
             return False
-        cdef StructInfo info = self._fbthrift_struct_info
-        for name in info.name_to_index:
-            if getattr(self, name) != getattr(other, name):
+        for name, value in self:
+            if value != getattr(other, name):
                 return False
         return True
 
     def __hash__(GeneratedError self):
-        return hash(self._fbthrift_data)
+        value_tuple = tuple(v for _, v in self)
+        return hash(value_tuple) if value_tuple else type(self)
 
     @classmethod
     def _fbthrift_create(cls, data):

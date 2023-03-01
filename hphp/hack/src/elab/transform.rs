@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1e27a4e81037dfbc2a2e7d08bde4797c>>
+// @generated SignedSource<<a112d7501697b3b7bf0cf4f18fcff13d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -510,6 +510,38 @@ const _: () = {
         ) {
             match self {
                 Block(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
+            }
+        }
+    }
+};
+const _: () = {
+    impl<Ex, En> Transform for FinallyBlock<Ex, En>
+    where
+        Ex: Default,
+        Ex: Transform,
+        En: Transform,
+    {
+        fn transform(
+            &mut self,
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
+        ) {
+            let mut in_pass = pass.clone();
+            if let Break(..) = pass.on_ty_finally_block_top_down(self, cfg, errs) {
+                return;
+            }
+            self.traverse(cfg, errs, pass);
+            in_pass.on_ty_finally_block_bottom_up(self, cfg, errs);
+        }
+        fn traverse(
+            &mut self,
+            cfg: &Config,
+            errs: &mut Vec<NamingPhaseError>,
+            pass: &mut (impl Pass + Clone),
+        ) {
+            match self {
+                FinallyBlock(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
             }
         }
     }

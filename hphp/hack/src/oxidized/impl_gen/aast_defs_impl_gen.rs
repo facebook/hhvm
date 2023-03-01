@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<09af416864ae06bd7cb8ccb7ce56df20>>
+// @generated SignedSource<<db6672a2a27da2c6c02f61a87edf7e8d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -66,7 +66,7 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn mk_foreach(p0: Expr<Ex, En>, p1: AsExpr<Ex, En>, p2: Block<Ex, En>) -> Self {
         Stmt_::Foreach(Box::new((p0, p1, p2)))
     }
-    pub fn mk_try(p0: Block<Ex, En>, p1: Vec<Catch<Ex, En>>, p2: Block<Ex, En>) -> Self {
+    pub fn mk_try(p0: Block<Ex, En>, p1: Vec<Catch<Ex, En>>, p2: FinallyBlock<Ex, En>) -> Self {
         Stmt_::Try(Box::new((p0, p1, p2)))
     }
     pub fn mk_noop() -> Self {
@@ -280,7 +280,7 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_try(&self) -> Option<(&Block<Ex, En>, &Vec<Catch<Ex, En>>, &Block<Ex, En>)> {
+    pub fn as_try(&self) -> Option<(&Block<Ex, En>, &Vec<Catch<Ex, En>>, &FinallyBlock<Ex, En>)> {
         match self {
             Stmt_::Try(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
@@ -394,7 +394,7 @@ impl<Ex, En> Stmt_<Ex, En> {
     ) -> Option<(
         &mut Block<Ex, En>,
         &mut Vec<Catch<Ex, En>>,
-        &mut Block<Ex, En>,
+        &mut FinallyBlock<Ex, En>,
     )> {
         match self {
             Stmt_::Try(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
@@ -494,7 +494,7 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_try_into(self) -> Option<(Block<Ex, En>, Vec<Catch<Ex, En>>, Block<Ex, En>)> {
+    pub fn as_try_into(self) -> Option<(Block<Ex, En>, Vec<Catch<Ex, En>>, FinallyBlock<Ex, En>)> {
         match self {
             Stmt_::Try(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,

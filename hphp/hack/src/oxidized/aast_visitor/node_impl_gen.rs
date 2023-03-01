@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<36ba3b28819fb91374b5e5f1aa3061ec>>
+// @generated SignedSource<<1f416444498b51d55636dc35e2bf321b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1124,6 +1124,22 @@ impl<P: Params> Node<P> for FileAttribute<P::Ex, P::En> {
         self.namespace.accept(c, v)
     }
 }
+impl<P: Params> Node<P> for FinallyBlock<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_finally_block(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)
+    }
+}
 impl<P: Params> Node<P> for FunDef<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
@@ -1928,7 +1944,7 @@ impl<P: Params> Node<P> for Stmt_<P::Ex, P::En> {
         }
         #[inline]
         fn helper7<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node Box<(Block<Ex, En>, Vec<Catch<Ex, En>>, Block<Ex, En>)>,
+            a: &'node Box<(Block<Ex, En>, Vec<Catch<Ex, En>>, FinallyBlock<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
         ) -> Result<(), P::Error> {

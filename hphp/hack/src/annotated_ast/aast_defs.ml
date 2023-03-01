@@ -194,7 +194,7 @@ and ('ex, 'en) stmt_ =
        *     foreach ($items as $key => value) { ... }
        *     foreach ($items await as $item) { ... } // AsyncIterator<_>
        *     foreach ($items await as $key => value) { ... } // AsyncKeyedIterator<_> *)
-  | Try of ('ex, 'en) block * ('ex, 'en) catch list * ('ex, 'en) block
+  | Try of ('ex, 'en) block * ('ex, 'en) catch list * ('ex, 'en) finally_block
       (** Try statement, with catch blocks and a finally block.
        *
        *     try {
@@ -244,6 +244,8 @@ and ('ex, 'en) as_expr =
   | Await_as_kv of (pos[@transform.opaque]) * ('ex, 'en) expr * ('ex, 'en) expr
 
 and ('ex, 'en) block = ('ex, 'en) stmt list
+
+and ('ex, 'en) finally_block = ('ex, 'en) stmt list
 
 and ('ex, 'en) class_id = 'ex * (pos[@transform.opaque]) * ('ex, 'en) class_id_
 

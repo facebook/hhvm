@@ -203,7 +203,7 @@ fn emit_yieldbreak<'a, 'arena, 'decl>(
 fn emit_try<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    x: &(ast::Block, Vec<ast::Catch>, ast::Block),
+    x: &(ast::Block, Vec<ast::Catch>, ast::FinallyBlock),
     pos: &Pos,
 ) -> Result<InstrSeq<'arena>> {
     let (try_block, catch_list, finally_block) = x;

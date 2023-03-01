@@ -1055,6 +1055,12 @@ mod emit {
         }
     }
 
+    impl EmitTokens for ast::FinallyBlock {
+        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
+            emit_wrapper(quote!(FinallyBlock), &self.0, e)
+        }
+    }
+
     impl EmitTokens for ast::Stmt {
         fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
             emit_wrapper2(quote!(Stmt), &self.0, &self.1, e)

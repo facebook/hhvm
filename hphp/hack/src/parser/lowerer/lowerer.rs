@@ -2990,7 +2990,7 @@ fn p_try_stmt<'a>(
                 _ => missing_syntax("catch clause", n, e),
             })?,
             match &c.finally_clause.children {
-                FinallyClause(c) => p_block(false, &c.body, env)?,
+                FinallyClause(c) => p_finally_block(false, &c.body, env)?,
                 _ => Default::default(),
             },
         ),
@@ -4241,6 +4241,22 @@ fn p_block<'a>(remove_noop: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast:
         Ok(blk)
     } else {
         Ok(ast::Block(vec![ast::Stmt(p, stmt_)]))
+    }
+}
+
+fn p_finally_block<'a>(
+    remove_noop: bool,
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<ast::FinallyBlock> {
+    let ast::Stmt(p, stmt_) = p_stmt(node, env)?;
+    if let ast::Stmt_::Block(blk) = stmt_ {
+        if remove_noop && blk.len() == 1 && blk[0].1.is_noop() {
+            return Ok(Default::default());
+        }
+        Ok(ast::FinallyBlock(blk.0))
+    } else {
+        Ok(ast::FinallyBlock(vec![ast::Stmt(p, stmt_)]))
     }
 }
 

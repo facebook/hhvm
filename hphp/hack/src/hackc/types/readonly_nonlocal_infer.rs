@@ -466,9 +466,9 @@ impl<'decl> Infer<'decl> {
                     self.infer_expr(&et.virtualized_expr, ctx, next_where);
                 let (runtime_expr, _runtime_ty, ctx) =
                     self.infer_expr(&et.runtime_expr, ctx, next_where);
-                let (splices, ctx) = self.infer_stmts(&et.splices, ctx, next_where);
+                let (splices, ctx) = self.infer_stmts_block(&et.splices, ctx, next_where);
                 let (function_pointers, ctx) =
-                    self.infer_stmts(&et.function_pointers, ctx, next_where);
+                    self.infer_stmts_block(&et.function_pointers, ctx, next_where);
                 let splices = splices.0; // we want Vec<Stmt> rather than Block
                 let function_pointers = function_pointers.0; // we want Vec<Stmt> rather than Block
                 let et = ExpressionTree(Box::new(ast::ExpressionTree {
@@ -575,7 +575,7 @@ impl<'decl> Infer<'decl> {
                     assigns.iter().map(|(_, assign)| assign).cloned().collect();
                 let (assigns_exprs, _assigns_tys, ctx) =
                     self.infer_exprs(&assigns_exprs, ctx, next_where);
-                let (block, ctx) = self.infer_stmts(block, ctx, next_where);
+                let (block, ctx) = self.infer_stmts_block(block, ctx, next_where);
                 let assigns: Vec<_> = lid_opts
                     .into_iter()
                     .zip(assigns_exprs.into_iter())
@@ -585,21 +585,21 @@ impl<'decl> Infer<'decl> {
             }
             If(box (expr, stmts1, stmts2)) => {
                 let (e, _e_ty, ctx) = self.infer_expr(expr, ctx, next_where);
-                let (stmts1, child_ctx_1) = self.infer_stmts(stmts1, ctx.clone(), next_where);
-                let (stmts2, child_ctx_2) = self.infer_stmts(stmts2, ctx.clone(), next_where);
+                let (stmts1, child_ctx_1) = self.infer_stmts_block(stmts1, ctx.clone(), next_where);
+                let (stmts2, child_ctx_2) = self.infer_stmts_block(stmts2, ctx.clone(), next_where);
                 let ctx = merge_ctxs(ctx, vec![child_ctx_1, child_ctx_2]);
                 let if_ = If(box_tup!(e, stmts1, stmts2));
                 (if_, ctx)
             }
             Do(box (stmts, e)) => {
-                let (stmts, child_ctx) = self.infer_stmts(stmts, ctx.clone(), next_where);
+                let (stmts, child_ctx) = self.infer_stmts_block(stmts, ctx.clone(), next_where);
                 let ctx = merge_ctxs(ctx, vec![child_ctx]);
                 let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
                 (Do(box_tup!(stmts, e)), ctx)
             }
             While(box (cond, block)) => {
                 let (cond, _cond_ty, ctx) = self.infer_expr(cond, ctx, next_where);
-                let (block, child_ctx) = self.infer_stmts(block, ctx.clone(), next_where);
+                let (block, child_ctx) = self.infer_stmts_block(block, ctx.clone(), next_where);
                 let ctx = merge_ctxs(ctx, vec![child_ctx]);
                 (While(box_tup!(cond, block)), ctx)
             }
@@ -611,7 +611,7 @@ impl<'decl> Infer<'decl> {
             }) => {
                 let (pos, es) = exprs;
                 let (es, _es_tys, ctx) = self.infer_exprs(es, ctx, next_where);
-                let (block, ctx) = self.infer_stmts(block, ctx, next_where);
+                let (block, ctx) = self.infer_stmts_block(block, ctx, next_where);
                 let using = Using(Box::new(ast::UsingStmt {
                     is_block_scoped: *is_block_scoped,
                     has_await: *has_await,
@@ -625,7 +625,7 @@ impl<'decl> Infer<'decl> {
                 let (e2_opt, _e2_ty_opt, ctx) =
                     self.infer_expr_opt(e2_opt.as_ref(), ctx, next_where);
                 let (e3s, _e3s_tys, e3s_ctx) = self.infer_exprs(e3s, ctx.clone(), next_where);
-                let (stmts, stmt_ctx) = self.infer_stmts(stmts, ctx.clone(), next_where);
+                let (stmts, stmt_ctx) = self.infer_stmts_block(stmts, ctx.clone(), next_where);
                 let ctx = merge_ctxs(ctx, vec![e3s_ctx, stmt_ctx]);
                 let for_ = For(box_tup!(e1s, e2_opt, e3s, stmts));
                 (for_, ctx)
@@ -636,12 +636,12 @@ impl<'decl> Infer<'decl> {
                 let mut child_ctxs = Vec::with_capacity(cases.len());
                 for ast::Case(e, block) in cases {
                     let (e, _e_ty, e_ctx) = self.infer_expr(e, ctx.clone(), next_where);
-                    let (block, child_ctx) = self.infer_stmts(block, e_ctx, next_where);
+                    let (block, child_ctx) = self.infer_stmts_block(block, e_ctx, next_where);
                     cases_out.push(ast::Case(e, block));
                     child_ctxs.push(child_ctx);
                 }
                 let default_opt = default_opt.as_ref().map(|ast::DefaultCase(pos, block)| {
-                    let (block, ctx) = self.infer_stmts(block, ctx.clone(), next_where);
+                    let (block, ctx) = self.infer_stmts_block(block, ctx.clone(), next_where);
                     child_ctxs.push(ctx);
                     ast::DefaultCase(pos.clone(), block)
                 });
@@ -652,12 +652,12 @@ impl<'decl> Infer<'decl> {
             Foreach(box (e, as_, stmts)) => {
                 let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
                 let (as_, _as_ty, ctx) = self.infer_as_expr(as_, ctx, next_where);
-                let (stmts, child_ctx) = self.infer_stmts(stmts, ctx.clone(), next_where);
+                let (stmts, child_ctx) = self.infer_stmts_block(stmts, ctx.clone(), next_where);
                 let ctx = merge_ctxs(ctx, vec![child_ctx]);
                 (Foreach(box_tup!(e, as_, stmts)), ctx)
             }
             Try(box (stmts, catches, finally)) => {
-                let (stmts, ctx) = self.infer_stmts(
+                let (stmts, ctx) = self.infer_stmts_block(
                     stmts,
                     ctx,
                     Where {
@@ -668,19 +668,20 @@ impl<'decl> Infer<'decl> {
                 let mut catches_out = Vec::with_capacity(catches.len());
                 let mut child_ctxs = Vec::with_capacity(catches.len());
                 for ast::Catch(name, lid, block) in catches.iter() {
-                    let (block, catch_ctx) = self.infer_stmts(block, ctx.clone(), next_where);
+                    let (block, catch_ctx) = self.infer_stmts_block(block, ctx.clone(), next_where);
                     let catch = ast::Catch(name.clone(), lid.clone(), block);
                     catches_out.push(catch);
                     child_ctxs.push(catch_ctx);
                 }
-                let (finally, finally_ctx) = self.infer_stmts(finally, ctx.clone(), next_where);
+                let (finally, finally_ctx) =
+                    self.infer_stmts_finally_block(finally, ctx.clone(), next_where);
                 child_ctxs.push(finally_ctx);
                 let ctx = merge_ctxs(ctx, child_ctxs);
                 (Try(box_tup!(stmts, catches_out, finally)), ctx)
             }
             Noop => (Noop, ctx),
             Block(stmts) => {
-                let (stmts, ctx) = self.infer_stmts(stmts, ctx, next_where);
+                let (stmts, ctx) = self.infer_stmts_block(stmts, ctx, next_where);
                 (Block(stmts), ctx)
             }
             Markup(_) => (st.clone(), ctx),
@@ -689,7 +690,7 @@ impl<'decl> Infer<'decl> {
         (ast::Stmt(pos.clone(), new_stmt), ctx)
     }
 
-    fn infer_stmts(
+    fn infer_stmts_block(
         &mut self,
         stmts: &[ast::Stmt],
         mut ctx: Ctx,
@@ -702,6 +703,21 @@ impl<'decl> Infer<'decl> {
             ctx = s_ctx;
         }
         (ast::Block(out), ctx)
+    }
+
+    fn infer_stmts_finally_block(
+        &mut self,
+        stmts: &[ast::Stmt],
+        mut ctx: Ctx,
+        where_: Where<'_>,
+    ) -> (ast::FinallyBlock, Ctx) {
+        let mut out = Vec::with_capacity(stmts.len());
+        for stmt in stmts.iter() {
+            let (s, s_ctx) = self.infer_stmt(stmt, ctx, where_);
+            out.push(s);
+            ctx = s_ctx;
+        }
+        (ast::FinallyBlock(out), ctx)
     }
 
     fn infer_a_field(
@@ -756,7 +772,7 @@ impl<'decl> Infer<'decl> {
 
     fn infer_fun(&mut self, fun: &ast::Fun_, ctx: Ctx, where_: Where<'_>) -> (ast::Fun_, Tyx, Ctx) {
         // it's safe to ignore any `use` clause, since we treat undefined variables as of unknown type
-        let (fb_ast, _) = self.infer_stmts(&fun.body.fb_ast, ctx.clone(), where_);
+        let (fb_ast, _) = self.infer_stmts_block(&fun.body.fb_ast, ctx.clone(), where_);
         let fun = ast::Fun_ {
             body: ast::FuncBody { fb_ast },
             ..fun.clone()
@@ -808,7 +824,7 @@ impl<'decl> Infer<'decl> {
             .iter()
             .map(|meth| {
                 let (fb_ast, _ctx) =
-                    self.infer_stmts(&meth.body.fb_ast, Default::default(), where_);
+                    self.infer_stmts_block(&meth.body.fb_ast, Default::default(), where_);
                 let body = ast::FuncBody { fb_ast };
                 ast::Method_ {
                     body,

@@ -38,6 +38,7 @@ pub type Expr_ = aast::Expr_<Ex, En>;
 pub type ExpressionTree = aast::ExpressionTree<Ex, En>;
 pub type Field = aast::Field<Ex, En>;
 pub type FileAttribute = aast::FileAttribute<Ex, En>;
+pub type FinallyBlock = aast::FinallyBlock<Ex, En>;
 pub type Fun_ = aast::Fun_<Ex, En>;
 pub type FuncBody = aast::FuncBody<Ex, En>;
 pub type FunctionPtrId = aast::FunctionPtrId<Ex, En>;

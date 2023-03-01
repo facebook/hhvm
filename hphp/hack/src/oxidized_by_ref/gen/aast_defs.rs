@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ccbaf3220f00bbcfb6a9f7f4fc83b879>>
+// @generated SignedSource<<2efce3422a7d6c569870a62f8ae4ea56>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -291,7 +291,7 @@ pub enum Stmt_<'a, Ex, En> {
         &'a (
             &'a Block<'a, Ex, En>,
             &'a [&'a Catch<'a, Ex, En>],
-            &'a Block<'a, Ex, En>,
+            &'a FinallyBlock<'a, Ex, En>,
         ),
     ),
     /// No-op, the empty statement.
@@ -425,6 +425,32 @@ pub struct Block<'a, Ex, En>(
 );
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Block<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Block<'arena, Ex, En>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct FinallyBlock<'a, Ex, En>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub  &'a [&'a Stmt<'a, Ex, En>],
+);
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for FinallyBlock<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(FinallyBlock<'arena, Ex, En>);
 
 #[derive(
     Clone,

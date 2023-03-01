@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2c2e096b49ce0d556633bf9b30e2781a>>
+// @generated SignedSource<<6cb9192f1e2287036e52d665e2bd7325>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -228,7 +228,7 @@ pub enum Stmt_<Ex, En> {
     ///       baz();
     ///     }
     #[rust_to_ocaml(inline_tuple)]
-    Try(Box<(Block<Ex, En>, Vec<Catch<Ex, En>>, Block<Ex, En>)>),
+    Try(Box<(Block<Ex, En>, Vec<Catch<Ex, En>>, FinallyBlock<Ex, En>)>),
     /// No-op, the empty statement.
     ///
     ///     {}
@@ -346,6 +346,24 @@ pub enum AsExpr<Ex, En> {
 #[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Block<Ex, En>(pub Vec<Stmt<Ex, En>>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct FinallyBlock<Ex, En>(pub Vec<Stmt<Ex, En>>);
 
 #[derive(
     Clone,

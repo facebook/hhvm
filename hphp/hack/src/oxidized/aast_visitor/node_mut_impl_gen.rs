@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1883e5853fe17c16fb58d1aef712a2d3>>
+// @generated SignedSource<<1f982b103dc17473276252e91b1530e3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1124,6 +1124,22 @@ impl<P: Params> NodeMut<P> for FileAttribute<P::Ex, P::En> {
         self.namespace.accept(c, v)
     }
 }
+impl<P: Params> NodeMut<P> for FinallyBlock<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_finally_block(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)
+    }
+}
 impl<P: Params> NodeMut<P> for FunDef<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -1928,7 +1944,7 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
         }
         #[inline]
         fn helper7<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(Block<Ex, En>, Vec<Catch<Ex, En>>, Block<Ex, En>)>,
+            a: &'node mut Box<(Block<Ex, En>, Vec<Catch<Ex, En>>, FinallyBlock<Ex, En>)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
         ) -> Result<(), P::Error> {

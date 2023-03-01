@@ -232,6 +232,7 @@ let tuple_aliases =
 let newtypes =
   [
     ("aast_defs", "Block");
+    ("aast_defs", "FinallyBlock");
     ("aast_defs", "Program");
     ("aast_defs", "UserAttributes");
   ]

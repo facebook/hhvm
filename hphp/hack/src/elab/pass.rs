@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1e26de0aaa141b14df9c0fa28bfcb5da>>
+// @generated SignedSource<<54046ea0d4787190fcfce867ea316efc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -154,6 +154,30 @@ pub trait Pass {
     fn on_ty_block_bottom_up<Ex, En>(
         &mut self,
         elem: &mut Block<Ex, En>,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_finally_block_top_down<Ex, En>(
+        &mut self,
+        elem: &mut FinallyBlock<Ex, En>,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_finally_block_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FinallyBlock<Ex, En>,
         cfg: &Config,
         errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
@@ -1933,6 +1957,32 @@ where
     {
         self.fst.on_ty_block_bottom_up(elem, cfg, errs)?;
         self.snd.on_ty_block_bottom_up(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_finally_block_top_down<Ex, En>(
+        &mut self,
+        elem: &mut FinallyBlock<Ex, En>,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_finally_block_top_down(elem, cfg, errs)?;
+        self.snd.on_ty_finally_block_top_down(elem, cfg, errs)
+    }
+    #[inline(always)]
+    fn on_ty_finally_block_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FinallyBlock<Ex, En>,
+        cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
+        self.fst.on_ty_finally_block_bottom_up(elem, cfg, errs)?;
+        self.snd.on_ty_finally_block_bottom_up(elem, cfg, errs)
     }
     #[inline(always)]
     fn on_ty_class_id_top_down<Ex, En>(

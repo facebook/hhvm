@@ -16,6 +16,7 @@
 
 #include <cassert>
 #include <cctype>
+#include <filesystem>
 #include <fstream>
 #include <set>
 #include <stdexcept>
@@ -1586,7 +1587,20 @@ void t_mstch_rust_generator::load_crate_map(const std::string& path) {
   //     (this is the name by which the dependency is referred to in thrift)
   //   - crate_name: demo_api
   //     (the Rust code will refer to demo_api::types::WhateverType)
-  auto in = std::ifstream(path);
+#ifdef _WIN32
+  // Relative path appended to current working directory can easily exceed
+  // MAX_PATH which is 260 chars. Computing absolute path allows to shorten it.
+  auto crate_map_path =
+      std::filesystem::absolute(std::filesystem::u8path(path));
+#else
+  auto crate_map_path = path;
+#endif
+  auto in = std::ifstream(crate_map_path);
+  if (!in.is_open()) {
+    std::ostringstream error_message;
+    error_message << "Can't open crate map: " << path;
+    throw std::runtime_error(error_message.str());
+  }
 
   // Map from crate_name to list of thrift_names. Most Thrift crates consist of
   // a single *.thrift file but some may have multiple.

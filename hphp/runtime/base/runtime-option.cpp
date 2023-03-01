@@ -477,37 +477,6 @@ AUTOLOADFLAGS()
   m_flags.m_sha1 = SHA1{string_sha1(raw)};
 }
 
-std::string RepoOptions::toJSON() const {
-  return folly::toJson(toDynamic());
-}
-
-void RepoOptions::calcDynamic() {
-  m_cachedDynamic = folly::dynamic::object();
-#define OUT(key, var)                                \
-  {                                                  \
-    auto const ini_name = Config::IniName(key);      \
-    auto const ini_value = toIniValue(var);          \
-    folly::dynamic entry = folly::dynamic::object(); \
-    entry["global_value"] = ini_value;               \
-    entry["local_value"] = ini_value;                \
-    entry["access"] = 4;                             \
-    m_cachedDynamic[ini_name] = entry;               \
-  }
-
-#define N(_, n, ...) OUT(#n, m_flags.n)
-#define P(_, n, ...) OUT("PHP7." #n, m_flags.n)
-#define H(_, n, ...) OUT("Hack.Lang." #n, m_flags.n)
-#define E(_, n, ...) OUT("Eval." #n, m_flags.n)
-PARSERFLAGS()
-AUTOLOADFLAGS();
-#undef N
-#undef P
-#undef H
-#undef E
-
-#undef OUT
-}
-
 const RepoOptions& RepoOptions::defaults() {
   always_assert(s_init);
   return s_defaults;
@@ -561,7 +530,6 @@ AUTOLOADFLAGS();
 
   filterNamespaces();
   calcCacheKey();
-  calcDynamic();
   if (!m_path.empty()) m_repo = std::filesystem::path(m_path).parent_path();
 }
 

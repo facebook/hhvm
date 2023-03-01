@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <folly/dynamic.h>
-
 #include <unordered_map>
 #include <algorithm>
 #include <vector>
@@ -198,8 +196,6 @@ struct RepoOptions {
 
   const RepoOptionsFlags& flags() const { return m_flags; }
   const std::string& path() const { return m_path; }
-  std::string toJSON() const;
-  const folly::dynamic& toDynamic() const { return m_cachedDynamic; }
   const struct stat& stat() const { return m_stat; }
 
   const std::filesystem::path& dir() const { return m_repo; }
@@ -230,8 +226,6 @@ private:
   struct stat m_stat;
 
   std::filesystem::path m_repo;
-
-  folly::dynamic m_cachedDynamic;
 
   static bool s_init;
   static RepoOptions s_defaults;

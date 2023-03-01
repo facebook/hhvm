@@ -111,6 +111,8 @@ module RemoteTypeCheck = struct
     prefetch_deferred_files: bool;
     worker_min_log_level: Hh_logger.Level.t;
     remote_type_check_recheck_threshold: int;
+    (* Whether the local typechecker steals workloads from remote jobs *)
+    work_stealing_enabled: bool;
   }
 
   let default =
@@ -124,6 +126,7 @@ module RemoteTypeCheck = struct
       prefetch_deferred_files = false;
       worker_min_log_level = Hh_logger.Level.Info;
       remote_type_check_recheck_threshold = 1_000_000;
+      work_stealing_enabled = false;
     }
 
   let load ~current_version ~default config =
@@ -200,6 +203,13 @@ module RemoteTypeCheck = struct
       | Some level -> level
       | None -> Hh_logger.Level.Debug
     in
+    let work_stealing_enabled =
+      bool_if_min_version
+        "remote_type_check_work_stealing_enabled"
+        ~default:default.work_stealing_enabled
+        ~current_version
+        config
+    in
     {
       declaration_threshold;
       disabled_on_errors;
@@ -210,6 +220,7 @@ module RemoteTypeCheck = struct
       remote_type_check_recheck_threshold;
       worker_min_log_level;
       remote_worker_sandcastle_tenant;
+      work_stealing_enabled;
     }
 end
 

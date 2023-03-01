@@ -13,7 +13,11 @@ module type Delegate_sig = sig
 
   val default : state
 
-  val make : job_runner:(module JobRunner_sig.S) -> tenant:string -> state
+  val make :
+    job_runner:(module JobRunner_sig.S) ->
+    tenant:string ->
+    work_stealing_enabled:bool ->
+    state
 
   val start :
     delegate_env ->

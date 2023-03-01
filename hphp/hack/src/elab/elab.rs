@@ -207,6 +207,8 @@ fn elaborate<T: Transform>(
 
         passes::validate_control_context::ValidateControlContextPass::default(),
 
+        passes::validate_class_tparams::ValidateClassTparamsPass::default(),
+
     ];
     let mut errs = Vec::default();
     let cfg = config::Config::new(tco, is_hhi);

@@ -6,27 +6,6 @@ function autoload_miss($str1, $str2) {
 
 <<__EntryPoint>>
 function entrypoint_type_annotation_autoloader(): void {
-
-  HH\autoload_set_paths(
-    Map {
-      'class' => Map {
-        'testautoloadedclass1' => 'type_annotation_autoloader-1.inc',
-        'testautoloadedclass2' => 'type_annotation_autoloader-1.inc',
-        'testfoo' => 'type_annotation_autoloader-3.inc',
-      },
-      'type' => Map {
-        'testautoloadedtype1' => 'type_annotation_autoloader-2.inc',
-        'testautoloadedtype2' => 'type_annotation_autoloader-2.inc',
-        'testreflectiontypealias' => 'type_annotation_autoloader-3.inc',
-        'testtypestructuretypealias' => 'type_annotation_autoloader-4.inc',
-      },
-      'failure' => autoload_miss<>,
-    },
-    __DIR__.'/'
-  );
-
-  require_once(__DIR__.'/type_annotation_autoloader-main.inc');
-
   var_dump(type_structure(C::class, 'T'));
   var_dump(type_structure(BuiltinClass::class));
   var_dump(type_structure(LoadedClass::class));

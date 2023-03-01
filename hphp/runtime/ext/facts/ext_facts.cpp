@@ -55,6 +55,7 @@
 #include "hphp/runtime/ext/facts/logging.h"
 #include "hphp/runtime/ext/facts/sqlite-autoload-db.h"
 #include "hphp/runtime/ext/facts/sqlite-key.h"
+#include "hphp/runtime/ext/facts/static-watcher.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/watchman-watcher.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -176,6 +177,11 @@ fs::path getDBPath(const RepoOptions& repoOptions) {
   }
 }
 
+bool hasWatchedFileExtension(const std::filesystem::path& path) {
+  auto ext = path.extension();
+  return ext == ".php" || ext == ".hck" || ext == ".inc";
+}
+
 SQLiteKey getDBKey(
     const fs::path& root,
     const folly::dynamic& queryExpr,
@@ -283,17 +289,6 @@ struct WatchmanAutoloadMapKey {
         folly::hash::hash_range(
             m_indexedMethodAttrs.begin(), m_indexedMethodAttrs.end()),
         m_dbKey.hash());
-  }
-
-  /**
-   * A repo is autoloadable if we can either:
-   *
-   * 1. Use Watchman to track the files and create our own database
-   * 2. Read an existing database file somewhere
-   */
-  bool isAutoloadableRepo() const {
-    return m_queryExpr.isObject() ||
-        m_dbKey.m_writable == SQLite::OpenMode::ReadOnly;
   }
 
   fs::path m_root;
@@ -573,14 +568,40 @@ struct Facts final : Extension {
   Optional<FactsData> m_data;
 } s_ext;
 
+std::shared_ptr<Watcher> make_watcher(const WatchmanAutoloadMapKey& mapKey) {
+  if (mapKey.m_queryExpr.isObject()) {
+    // Pass the query expression to Watchman to watch the directory
+    return make_watchman_watcher(
+        mapKey.m_queryExpr,
+        get_watchman_client(mapKey.m_root),
+        s_ext.getWatchmanWatcherOpts());
+  } else {
+    XLOG(INFO) << "Crawling " << mapKey.m_root << " ...";
+    // Crawl the filesystem now to build a list of files for the static watcher.
+    // We won't refresh this list of files.
+    std::vector<std::filesystem::path> staticFiles;
+    for (auto const& entry :
+         std::filesystem::recursive_directory_iterator{mapKey.m_root}) {
+      if (entry.is_regular_file() && hasWatchedFileExtension(entry)) {
+        staticFiles.push_back(
+            std::filesystem::relative(entry.path(), mapKey.m_root));
+      }
+    }
+    if (staticFiles.size() > 100'000) {
+      XLOG(WARN)
+          << "Found " << staticFiles.size() << " files in " << mapKey.m_root
+          << " . Consider installing Watchman and setting Autoload.Query in "
+             "your repo's .hhvmconfig.hdf file.";
+    }
+    return make_static_watcher(staticFiles);
+  }
+}
+
 FactsStore* WatchmanAutoloadMapFactory::getForOptions(
     const RepoOptions& options) {
   auto mapKey = [&]() -> Optional<WatchmanAutoloadMapKey> {
     try {
       auto mk = WatchmanAutoloadMapKey::get(options);
-      if (!mk.isAutoloadableRepo()) {
-        return std::nullopt;
-      }
       return {std::move(mk)};
     } catch (const RepoOptionsParseExc& e) {
       XLOG(ERR) << e.what();
@@ -625,8 +646,6 @@ FactsStore* WatchmanAutoloadMapFactory::getForOptions(
         .first->second.get();
   }
 
-  assertx(mapKey->m_queryExpr.isObject());
-
   Optional<std::filesystem::path> updateSuppressionPath;
   if (!RuntimeOption::AutoloadUpdateSuppressionPath.empty()) {
     updateSuppressionPath = {
@@ -638,10 +657,7 @@ FactsStore* WatchmanAutoloadMapFactory::getForOptions(
            make_watcher_facts(
                mapKey->m_root,
                std::move(dbHandle),
-               make_watchman_watcher(
-                   mapKey->m_queryExpr,
-                   get_watchman_client(mapKey->m_root),
-                   s_ext.getWatchmanWatcherOpts()),
+               make_watcher(*mapKey),
                RuntimeOption::ServerExecutionMode(),
                std::move(updateSuppressionPath),
                mapKey->m_indexedMethodAttrs)})

@@ -276,7 +276,7 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
                 return *std::move(facts);
               } else {
                 XLOGF(
-                    CRITICAL,
+                    WARN,
                     "Error extracting {}: {}",
                     absPathAndHash.m_path.native().c_str(),
                     facts.exception().what().c_str());

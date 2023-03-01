@@ -1262,7 +1262,9 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
   assertx(rpath->isStatic());
 
   auto const& options = RepoOptions::forFile(rpath->data());
-  g_context->onLoadWithOptions(requestedPath->data(), options);
+  if (UNLIKELY(!RO::EvalLoadFilepathFromUnitCache)) {
+    g_context->onLoadWithOptions(requestedPath->data(), options);
+  }
 
   if (RuntimeOption::EvalEnableDecl) {
     // Initialize AutoloadHandler before we parse the file so HhvmDeclProvider
@@ -1300,6 +1302,13 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
       options, flags, forPrefetch
     );
   }();
+
+  if (UNLIKELY(RO::EvalLoadFilepathFromUnitCache && cu.unit)) {
+    auto const origFileoptions = RepoOptions::forFile(
+      cu.unit->origFilepath()->data()
+    );
+    g_context->onLoadWithOptions(requestedPath->data(), origFileoptions);
+  }
 
   if (cu.unit) {
     if (RuntimeOption::EvalIdleUnitTimeoutSecs > 0 &&

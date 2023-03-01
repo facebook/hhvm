@@ -121,7 +121,13 @@ inline bool validate_bool(uint8_t value) {
     (!defined(__clang_major__) || __clang_major__ >= 9)
   // An optimized version that avoid extra load/store.
   asm volatile goto(
-      "cmpb $1, %0\n"
+#if !defined(__clang_major__) || __clang_major__ >= 14
+      // Provide AT&T and Intel syntax when included in an -masm=intel context.
+      // See also https://reviews.llvm.org/D113707
+      "cmp{b $1, %b0| %b0, $1}\n"
+#else
+      "cmpb $1, %b0\n"
+#endif
       "ja %l1"
       : // no outputs.
       : "r"(value)

@@ -14,12 +14,9 @@ struct Adapter {
   static DefaultType toThrift(const AdaptedType&);
 };
 ```
-This completely replaces the underlying type of a thrift from default type to adapted type and uses the specified adapter to convert to and from the underlying Thrift type during (de)serialization.
+This completely replaces the underlying type of a thrift from [default type](../glossary/#kinds-of-types) to [adapted type](../glossary/#kinds-of-types) and uses the specified adapter to convert to and from the underlying Thrift type during (de)serialization.
 
 ## Terminologies
-
-* **Default type** - A language specific type that has built-in support in the Thrift runtime without customization. For example, in C++ for `list<i32>` the default type is `std::vector<std::int32_t>>`.
-* **Adapted type** - A custom type that is convertible to/from a default type when used with the Thrift runtime.
 * **Type adapter** — Allows the user to change any default type to custom type.
    * Applying a type adapter to a typedef allows using custom types inside containers (e.g. `list<MyCustomType>`).
 * **Field adapter** — Allows the user to change the type of a Thrift field to a custom type. It passes additional field context, including the field id and parent struct.

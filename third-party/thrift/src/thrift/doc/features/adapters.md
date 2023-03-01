@@ -20,10 +20,10 @@ This completely replaces the underlying type of a thrift from default type to ad
 
 * **Default type** - A language specific type that has built-in support in the Thrift runtime without customization. For example, in C++ for `list<i32>` the default type is `std::vector<std::int32_t>>`.
 * **Adapted type** - A custom type that is convertible to/from a default type when used with the Thrift runtime.
-* **Type adapter** — allows user to change any default type to custom type.
-   * If you want to change the type inside a container (e.g. `list<MyCustomType>`), you should use type adapter.
-* **Field adapter** — allows user to change type of thrift field to custom type
-   * If your adapter needs to access field id, you should use field adapter (or field wrapper in Hack and Java).
+* **Type adapter** — Allows the user to change any default type to custom type.
+   * Applying a type adapter to a typedef allows using custom types inside containers (e.g. `list<MyCustomType>`).
+* **Field adapter** — Allows the user to change the type of a Thrift field to a custom type. It passes additional field context, including the field id and parent struct.
+   * Field id can be accessed by field adapters (or field wrappers in Hack and Java).
 
 ## C++
 
@@ -94,9 +94,13 @@ Both type adapter and field adapter use `cpp.Adapter` API to enable. We will try
 
 ### Compose
 
-You cannot apply multiple field adapters, nor type adapters on the same type, but you can use both field adapter and type adapter together,. e.g.
+Type Adapter can be applied to a typedef, struct, or field. Field Adpater can be only applied to a field. For each typedef, field, or struct, you can only apply a single adapter. You cannot compose multiple type adapters on nested typedefs. You can only compose adapters on a field, where the type of the field is to be a typedef or struct with type adapter and either type adapter or field adapter is directly applied to the field. You cannot compose multiple field adapters.
 
 ```
+// This would result in an error if uncommented.
+// @cpp.Adapter{name="CustomTypeAdapter"}
+// typedef CustomInt DoubleCustomInt
+
 @cpp.Adapter{name = "CustomTypeAdapter"}
 typedef i32 CustomInt
 
@@ -106,6 +110,11 @@ struct Foo {
 
   @cpp.Adapter{name = "CustomTypeAdapter"}
   2: CustomInt field2;
+
+  // This would result in an error if uncommented.
+  // @cpp.Adapter{name = "CustomTypeAdapter"}
+  // @cpp.Adapter{name = "CustomFieldAdapter"}
+  // 3: i32 field3;
 }
 ```
 More examples can be found [here](https://www.internalfb.com/code/fbsource/fbcode/thrift/test/adapter.thrift).

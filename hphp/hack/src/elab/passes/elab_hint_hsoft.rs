@@ -71,7 +71,7 @@ mod tests {
         let tco = TypecheckerOptions {
             ..Default::default()
         };
-        let cfg = Config::new(&tco, false);
+        let cfg = Config::new(&tco, false, false);
         elem1.transform(&cfg, &mut errs, &mut pass);
         assert!(matches!(*elem1.1, Hint_::Hdynamic));
 
@@ -81,7 +81,7 @@ mod tests {
             po_interpret_soft_types_as_like_types: true,
             ..Default::default()
         };
-        let cfg = Config::new(&tco, false);
+        let cfg = Config::new(&tco, false, false);
         elem2.transform(&cfg, &mut errs, &mut pass);
         assert!(matches!(&*elem2.1, Hint_::Hlike(_)));
         assert!(match &*elem2.1 {

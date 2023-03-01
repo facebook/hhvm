@@ -15,11 +15,16 @@ bitflags! {
         const LIKE_TYPE_HINTS_ENABLED = 1 << 4;
         const CONST_ATTRIBUTE = 1 << 5;
         const CONST_STATIC_PROPS = 1 << 6;
+        const ALLOW_TYPE_CONSTANT_IN_ENUM_CLASS = 1 << 7;
     }
 }
 
 impl Flags {
-    pub fn new(tco: &TypecheckerOptions, is_hhi: bool) -> Self {
+    pub fn new(
+        tco: &TypecheckerOptions,
+        is_hhi: bool,
+        allow_type_constant_in_enum_class: bool,
+    ) -> Self {
         let mut flags: Self = Flags::empty();
 
         flags.set(Self::IS_HHI, is_hhi);
@@ -32,6 +37,11 @@ impl Flags {
         flags.set(Self::LIKE_TYPE_HINTS_ENABLED, tco.tco_like_type_hints);
         flags.set(Self::CONST_ATTRIBUTE, tco.tco_const_attribute);
         flags.set(Self::CONST_STATIC_PROPS, tco.tco_const_static_props);
+        flags.set(
+            Self::ALLOW_TYPE_CONSTANT_IN_ENUM_CLASS,
+            allow_type_constant_in_enum_class,
+        );
+
         flags
     }
 }
@@ -44,20 +54,29 @@ pub struct Config {
 
 impl Default for Config {
     fn default() -> Self {
-        Self::new(&TypecheckerOptions::default(), false)
+        Self::new(&TypecheckerOptions::default(), false, false)
     }
 }
 
 impl Config {
-    pub fn new(tco: &TypecheckerOptions, is_hhi: bool) -> Self {
+    pub fn new(
+        tco: &TypecheckerOptions,
+        is_hhi: bool,
+        allow_type_constant_in_enum_class: bool,
+    ) -> Self {
         Self {
-            flags: Flags::new(tco, is_hhi),
+            flags: Flags::new(tco, is_hhi, allow_type_constant_in_enum_class),
             consistent_ctor_level: tco.tco_explicit_consistent_constructors,
         }
     }
 
     pub fn soft_as_like(&self) -> bool {
         self.flags.contains(Flags::SOFT_AS_LIKE)
+    }
+
+    pub fn allow_type_constant_in_enum_class(&self) -> bool {
+        self.flags
+            .contains(Flags::ALLOW_TYPE_CONSTANT_IN_ENUM_CLASS)
     }
 
     pub fn hkt_enabled(&self) -> bool {

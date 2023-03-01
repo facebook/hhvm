@@ -80,12 +80,14 @@ mod tests {
                 ..Default::default()
             },
             false,
+            false,
         );
         let cfg_hkt_enabled = Config::new(
             &TypecheckerOptions {
                 tco_higher_kinded_types: true,
                 ..Default::default()
             },
+            false,
             false,
         );
 
@@ -123,12 +125,14 @@ mod tests {
                 ..Default::default()
             },
             false,
+            false,
         );
         let cfg_hkt_enabled = Config::new(
             &TypecheckerOptions {
                 tco_higher_kinded_types: true,
                 ..Default::default()
             },
+            false,
             false,
         );
 

@@ -35,16 +35,29 @@ pub fn elaborate_program(
     program: &mut ast::Program,
     tco: &TypecheckerOptions,
 ) -> Vec<NamingPhaseError> {
-    let is_hhi = program.first_pos().map_or(false, |pos| {
+    let pos = program.first_pos();
+    let dir = pos.and_then(|pos| pos.filename().path().parent());
+
+    let is_hhi = pos.map_or(false, |pos| {
         pos.filename().prefix() == relative_path::Prefix::Hhi
     });
-    elaborate(program, tco, is_hhi)
+
+    let allow_type_constant_in_enum_class = tco
+        .tco_allow_all_locations_for_type_constant_in_enum_class
+        || dir.map_or(false, |dir| {
+            tco.tco_allowed_locations_for_type_constant_in_enum_class
+                .iter()
+                .any(|prefix| dir.starts_with(prefix))
+        });
+
+    elaborate(program, tco, is_hhi, allow_type_constant_in_enum_class)
 }
 
 fn elaborate<T: Transform>(
     node: &mut T,
     tco: &TypecheckerOptions,
     is_hhi: bool,
+    allow_type_constant_in_enum_class: bool,
 ) -> Vec<NamingPhaseError> {
     #[rustfmt::skip]
     let mut passes = passes![
@@ -169,7 +182,7 @@ fn elaborate<T: Transform>(
         // - `allow_all_locations_for_type_constant_in_enum_class`
         // - `allowed_locations_for_type_constant_in_enum_class`
         // typecheck options
-        // passes::validate_enum_class_typeconst::ValidateEnumClassTypeconstPass::default(),
+        passes::validate_enum_class_typeconst::ValidateEnumClassTypeconstPass::default(),
 
         // Validate use of module definitions - depends on:
         // - `allow_all_files_for_module_declarations`
@@ -211,7 +224,7 @@ fn elaborate<T: Transform>(
 
     ];
     let mut errs = Vec::default();
-    let cfg = config::Config::new(tco, is_hhi);
+    let cfg = config::Config::new(tco, is_hhi, allow_type_constant_in_enum_class);
     node.transform(&cfg, &mut errs, &mut passes);
     errs
 }

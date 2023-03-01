@@ -1948,6 +1948,24 @@ std::string deserializeProfData(const std::string& filename,
     read_prof_data(ser, pd);
     pd->setDeserialized(buildHost, tag, buildTime);
 
+    // Optionally log function info from jit profile
+    if (RuntimeOption::EvalDumpJitProfileStats) {
+      auto const logFunc = [&](auto const& func) {
+        StructuredLogEntry entry;
+        entry.force_init = true;
+        entry.setInt("signature", signature);
+        entry.setStr("repo_schema", schema);
+        entry.setStr("build_host", buildHost);
+        entry.setInt("build_time", buildTime);
+        entry.setStr("orig_filepath", func->unit()->origFilepath()->data());
+        entry.setStr("function_name", func->fullName()->data());
+        entry.setInt("function_bytecode_hash", func->bcHash());
+        StructuredLog::log("hhvm_jit_profile_stats", entry);
+      };
+
+      pd->forEachProfilingFunc(logFunc);
+    }
+
     if (RO::EnableIntrinsicsExtension) {
       read_container(ser, [&] { read_class(ser); });
     }
@@ -2001,18 +2019,6 @@ std::string deserializeProfData(const std::string& filename,
     // the unit to be loaded the implementation might never get pulled
     // in (resulting in fatals when the wrapper tries to call it).
     merge_loaded_units(numWorkers);
-
-    if (RuntimeOption::EvalDumpJitProfileStats) {
-      StructuredLogEntry entry;
-      entry.force_init = true;
-      entry.setInt("signature", signature);
-      entry.setStr("repo_schema", schema);
-      entry.setStr("build_host", buildHost);
-      entry.setInt("build_time", buildTime);
-      entry.setInt("units_loaded_count", numLoadedUnits());
-      entry.setInt("profiling_func_count", pd->profilingFuncs());
-      StructuredLog::log("hhvm_jit_profile_stats", entry);
-    }
 
     if (isJitSerializing() && serializeOptProfEnabled()) {
       s_lastMappers = ser.getMappers();

@@ -400,6 +400,14 @@ public:
   Offset bclen() const;
 
   /*
+  * Get a hash of the bytecode of this function. Note that this performs an
+  * order dependent hash of the actual bytes of the bytecode.
+  */
+  uint64_t bcHash() const {
+    return folly::hash::hash_range(entry(), at(bclen()));
+  }
+
+  /*
    * Whether a given PC or Offset (from the beginning of the unit) is within
    * the function's bytecode stream.
    */

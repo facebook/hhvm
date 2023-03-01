@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<737ddd97dda57e27edb5b3ed98e174cd>>
+// @generated SignedSource<<71d23c0fe63eb0422d87b6443127adcc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -251,6 +251,7 @@ pub struct GlobalOptions<'a> {
     pub tco_load_hack_64_distc_saved_state: bool,
     pub tco_ide_should_use_hack_64_distc: bool,
     pub tco_tast_under_dynamic: bool,
+    pub tco_rust_elab: bool,
 }
 impl<'a> TrivialDrop for GlobalOptions<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(GlobalOptions<'arena>);

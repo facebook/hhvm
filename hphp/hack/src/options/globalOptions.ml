@@ -198,6 +198,7 @@ type t = {
   tco_load_hack_64_distc_saved_state: bool;
   tco_ide_should_use_hack_64_distc: bool;
   tco_tast_under_dynamic: bool;
+  tco_rust_elab: bool;
 }
 [@@deriving eq, show]
 
@@ -336,6 +337,7 @@ let default =
     tco_load_hack_64_distc_saved_state = false;
     tco_ide_should_use_hack_64_distc = false;
     tco_tast_under_dynamic = false;
+    tco_rust_elab = false;
   }
 
 let make
@@ -504,6 +506,7 @@ let make
     ?(tco_ide_should_use_hack_64_distc =
       default.tco_ide_should_use_hack_64_distc)
     ?(tco_tast_under_dynamic = default.tco_tast_under_dynamic)
+    ?(tco_rust_elab = default.tco_rust_elab)
     () =
   {
     tco_saved_state;
@@ -639,6 +642,7 @@ let make
     tco_load_hack_64_distc_saved_state;
     tco_ide_should_use_hack_64_distc;
     tco_tast_under_dynamic;
+    tco_rust_elab;
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier

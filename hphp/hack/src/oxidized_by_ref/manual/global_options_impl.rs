@@ -157,6 +157,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_load_hack_64_distc_saved_state: false,
     tco_ide_should_use_hack_64_distc: false,
     tco_tast_under_dynamic: false,
+    tco_rust_elab: false,
 };
 
 impl GlobalOptions<'static> {

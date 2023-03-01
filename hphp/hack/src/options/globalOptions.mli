@@ -355,6 +355,8 @@ type t = {
   (* Produce variations of methods and functions in TASTs that are cheked under
      dynamic assumptions. *)
   tco_tast_under_dynamic: bool;
+  (* Use the Rust implementation of naming elaboration and NAST checks. *)
+  tco_rust_elab: bool;
 }
 [@@deriving eq, show]
 
@@ -491,6 +493,7 @@ val make :
   ?tco_load_hack_64_distc_saved_state:bool ->
   ?tco_ide_should_use_hack_64_distc:bool ->
   ?tco_tast_under_dynamic:bool ->
+  ?tco_rust_elab:bool ->
   unit ->
   t
 

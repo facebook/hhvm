@@ -447,6 +447,8 @@ type t = {
       (** Use Provider_backend.Rust_provider_backend as the global provider
        * backend, servicing File_provider, Naming_provider, and Decl_provider
        * using the hackrs implementation. *)
+  rust_elab: bool;
+      (** Use the Rust implementation of naming elaboration and NAST checks. *)
   naming_sqlite_path: string option;
       (** Enables the reverse naming table to fall back to SQLite for queries. *)
   enable_naming_table_fallback: bool;
@@ -575,6 +577,7 @@ let default =
     remote_version_specifier_required = true;
     remote_version_specifier = None;
     remote_worker_saved_state_manifold_path = None;
+    rust_elab = false;
     rust_provider_backend = false;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
@@ -1296,6 +1299,13 @@ let load_
   let remote_worker_saved_state_manifold_path =
     string_opt "remote_worker_saved_state_manifold_path" config
   in
+  let rust_elab =
+    bool_if_min_version
+      "rust_elab"
+      ~default:default.rust_elab
+      ~current_version
+      config
+  in
   let rust_provider_backend =
     bool_if_min_version
       "rust_provider_backend"
@@ -1460,6 +1470,7 @@ let load_
     remote_version_specifier_required;
     remote_version_specifier;
     remote_worker_saved_state_manifold_path;
+    rust_elab;
     rust_provider_backend;
     naming_sqlite_path;
     enable_naming_table_fallback;

@@ -178,14 +178,14 @@ std::string munge_ident(const std::string& ident, bool exported, bool compat) {
 
   auto result = out.str();
 
-  // Workaround for a bug in the old Go generator.
-  // It would add an underscore before "Arg" and "Result".
-  if (compat) {
-    bool ends_with_args = boost::algorithm::ends_with(result, "Arg");
-    bool ends_with_rslt = boost::algorithm::ends_with(result, "Result");
-    if (ends_with_args || ends_with_rslt) {
-      result += '_';
-    }
+  // Compat: legacy generator adds underscores to names ending with Arg/Result.
+  // Compat: legacy generator adds underscores to names startng with New.
+  // (to avoid name collisions with constructors and helper arg/result structs)
+  bool starts_with_new = boost::algorithm::starts_with(result, "New");
+  bool ends_with_args = boost::algorithm::ends_with(result, "Arg");
+  bool ends_with_rslt = boost::algorithm::ends_with(result, "Result");
+  if (compat && (starts_with_new || ends_with_args || ends_with_rslt)) {
+    result += '_';
   }
 
   return result;

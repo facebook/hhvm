@@ -207,6 +207,8 @@ class type ['a] locl_type_visitor_type =
 
     method on_tclass : 'a -> Reason.t -> pos_id -> exact -> locl_ty list -> 'a
 
+    method on_class_refinement : 'a -> locl_class_refinement -> 'a
+
     method on_tlist : 'a -> Reason.t -> locl_ty list -> 'a
 
     method on_tunapplied_alias : 'a -> Reason.t -> string -> 'a
@@ -271,8 +273,24 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       TShapeMap.fold f fdm acc
 
-    method on_tclass acc _ _ _ tyl =
+    method on_tclass acc _ _ exact tyl =
+      let acc =
+        match exact with
+        | Exact -> acc
+        | Nonexact cr -> this#on_class_refinement acc cr
+      in
       List.fold_left tyl ~f:this#on_type ~init:acc
+
+    method on_class_refinement acc { cr_consts } =
+      SMap.fold
+        (fun _const_name { rc_bound; rc_is_ctx = _ } acc ->
+          match rc_bound with
+          | TRexact ty -> this#on_type acc ty
+          | TRloose { tr_lower = l; tr_upper = u } ->
+            let on_tlist acc = List.fold_left ~f:this#on_type ~init:acc in
+            on_tlist (on_tlist acc u) l)
+        cr_consts
+        acc
 
     method on_tlist acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 

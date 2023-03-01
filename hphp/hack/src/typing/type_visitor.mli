@@ -157,6 +157,8 @@ class type ['a] locl_type_visitor_type =
       Typing_defs.locl_ty list ->
       'a
 
+    method on_class_refinement : 'a -> Typing_defs.locl_class_refinement -> 'a
+
     method on_tlist : 'a -> Typing_reason.t -> Typing_defs.locl_ty list -> 'a
 
     method on_tunapplied_alias : 'a -> Typing_reason.t -> string -> 'a

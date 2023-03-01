@@ -30,29 +30,29 @@ type UintTypedef = IntTypedef
 type HasBitwiseOps int32
 
 const (
-    HasBitwiseOps_None HasBitwiseOps = 0
-    HasBitwiseOps_Zero HasBitwiseOps = 1
-    HasBitwiseOps_One HasBitwiseOps = 2
-    HasBitwiseOps_Two HasBitwiseOps = 4
-    HasBitwiseOps_Three HasBitwiseOps = 8
+    HasBitwiseOps_none HasBitwiseOps = 0
+    HasBitwiseOps_zero HasBitwiseOps = 1
+    HasBitwiseOps_one HasBitwiseOps = 2
+    HasBitwiseOps_two HasBitwiseOps = 4
+    HasBitwiseOps_three HasBitwiseOps = 8
 )
 
 // Enum value maps for HasBitwiseOps
 var (
     HasBitwiseOpsToName = map[HasBitwiseOps]string {
-        HasBitwiseOps_None: "none",
-        HasBitwiseOps_Zero: "zero",
-        HasBitwiseOps_One: "one",
-        HasBitwiseOps_Two: "two",
-        HasBitwiseOps_Three: "three",
+        HasBitwiseOps_none: "none",
+        HasBitwiseOps_zero: "zero",
+        HasBitwiseOps_one: "one",
+        HasBitwiseOps_two: "two",
+        HasBitwiseOps_three: "three",
     }
 
     HasBitwiseOpsToValue = map[string]HasBitwiseOps {
-        "none": HasBitwiseOps_None,
-        "zero": HasBitwiseOps_Zero,
-        "one": HasBitwiseOps_One,
-        "two": HasBitwiseOps_Two,
-        "three": HasBitwiseOps_Three,
+        "none": HasBitwiseOps_none,
+        "zero": HasBitwiseOps_zero,
+        "one": HasBitwiseOps_one,
+        "two": HasBitwiseOps_two,
+        "three": HasBitwiseOps_three,
     }
 
     HasBitwiseOpsNames = []string{
@@ -100,20 +100,20 @@ func HasBitwiseOpsPtr(v HasBitwiseOps) *HasBitwiseOps {
 type IsUnscoped int32
 
 const (
-    IsUnscoped_Hello IsUnscoped = 0
-    IsUnscoped_World IsUnscoped = 1
+    IsUnscoped_hello IsUnscoped = 0
+    IsUnscoped_world IsUnscoped = 1
 )
 
 // Enum value maps for IsUnscoped
 var (
     IsUnscopedToName = map[IsUnscoped]string {
-        IsUnscoped_Hello: "hello",
-        IsUnscoped_World: "world",
+        IsUnscoped_hello: "hello",
+        IsUnscoped_world: "world",
     }
 
     IsUnscopedToValue = map[string]IsUnscoped {
-        "hello": IsUnscoped_Hello,
-        "world": IsUnscoped_World,
+        "hello": IsUnscoped_hello,
+        "world": IsUnscoped_world,
     }
 
     IsUnscopedNames = []string{

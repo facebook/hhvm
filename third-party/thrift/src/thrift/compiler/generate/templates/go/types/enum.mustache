@@ -24,7 +24,7 @@ type {{enum:go_name}} int32
 
 const (
 {{#enum:values}}
-    {{enum:go_name}}_{{enum_value:go_name}} {{enum:go_name}} = {{enum_value:value}}
+    {{enum:go_name}}_{{enum_value:name}} {{enum:go_name}} = {{enum_value:value}}
 {{/enum:values}}
 )
 {{/enum:empty?}}
@@ -33,13 +33,13 @@ const (
 var (
     {{enum:go_name}}ToName = map[{{enum:go_name}}]string {
     {{#enum:values}}
-        {{enum:go_name}}_{{enum_value:go_name}}: "{{enum_value:name}}",
+        {{enum:go_name}}_{{enum_value:name}}: "{{enum_value:name}}",
     {{/enum:values}}
     }
 
     {{enum:go_name}}ToValue = map[string]{{enum:go_name}} {
     {{#enum:values}}
-        "{{enum_value:name}}": {{enum:go_name}}_{{enum_value:go_name}},
+        "{{enum_value:name}}": {{enum:go_name}}_{{enum_value:name}},
     {{/enum:values}}
     }
     {{! create variables compatible with the older codegen}}

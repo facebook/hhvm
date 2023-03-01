@@ -210,14 +210,8 @@ class mstch_go_enum_value : public mstch_enum_value {
       go_codegen_data* data)
       : mstch_enum_value(v, ctx, pos), data_(*data) {
     (void)data_;
-    register_methods(
-        this,
-        {
-            {"enum_value:go_name", &mstch_go_enum_value::go_name},
-        });
+    register_methods(this, {});
   }
-
-  mstch::node go_name() { return go::munge_ident(enum_value_->name()); }
 
  private:
   go_codegen_data& data_;

@@ -4,7 +4,7 @@ state: experimental
 
 # Universal Names
 
-A Universal Name uniquely identifies a Thrift [definition](../../idl/idl-reference#type-definitions), regardless of which program it is defined in. It **must** be a valid [URI](https://tools.ietf.org/html/rfc3986) that meets the following criteria:
+A Universal Name uniquely identifies a Thrift [definition](../../idl/#type-definitions), regardless of which program it is defined in. It **must** be a valid [URI](https://tools.ietf.org/html/rfc3986) that meets the following criteria:
 
 - **Must not** have a scheme; "fbthrift://" is implied.
 - **Must** include a domain name as the 'authority', with at least 2 domain labels.
@@ -15,7 +15,7 @@ A Universal Name uniquely identifies a Thrift [definition](../../idl/idl-referen
   - Path segments **must** be ASCII letters, numbers, -, or _.
 
 ## Naming
-Universal names are generated for each thrift [definition](../../idl/idl-reference#type-definitions) using a package `{package}/{identifier}`. It can also be defined or overridden with an unstructured annotation `thrift.uri`. For example,
+Universal names are generated for each thrift [definition](../../idl/#type-definitions) using a package `{package}/{identifier}`. It can also be defined or overridden with an unstructured annotation `thrift.uri`. For example,
 
 ```
 package "example.com/path/to/file"

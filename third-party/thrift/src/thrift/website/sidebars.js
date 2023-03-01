@@ -59,7 +59,7 @@ module.exports = {
       label: 'Interface Definition Language',
       link: {
         type: 'doc',
-        id: 'idl/idl-reference',
+        id: 'idl/index',
       },
       items: [
         "idl/field-qualifiers",

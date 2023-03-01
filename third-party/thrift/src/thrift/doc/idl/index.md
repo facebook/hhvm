@@ -820,7 +820,3 @@ Please refer [Automatic Retries, RPC idempotency and Error Classification](/spec
 ### **Streaming**
 
 Please refer [Thrift Streaming](/fb/features/streaming/index.md) for more information on Streaming.
-
----
-
-Exhaustive Reference Manual is available [here](https://www.internalfb.com/intern/wiki/Thrift/Reference_Manual/).

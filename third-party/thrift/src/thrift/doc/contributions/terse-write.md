@@ -10,7 +10,7 @@ Please refer to the [spec](../idl/field-qualifiers#fields-annotated-with-thriftt
 
 ### Serialization
 
-If a terse field equals to the [intrinsic default value](../idl/idl-reference#default-values), it will be skipped during the serialization.  A terse struct field is skipped serialization, if all of the nested fields are empty.
+If a terse field equals to the [intrinsic default value](../idl/#default-values), it will be skipped during the serialization.  A terse struct field is skipped serialization, if all of the nested fields are empty.
 
 
 :::note

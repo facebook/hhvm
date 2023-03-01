@@ -330,7 +330,6 @@ function timeSinceCreated(Document $doc): Duration {
 
 * You can only apply one adapter to a field either via field adapter or via type adapter.
 * You can only apply one field wrapper to the field.
-* A field wrapper and type/field adapter can be used together, e.g.
 
 ```
 @hack.Adapter{name = "CustomTypeAdapter"}
@@ -339,9 +338,6 @@ typedef i32 CustomInt
 struct Foo {
   @hack.FieldWrapper{name = "CustomFieldWrapper"}
   1: CustomInt field1;
-  @hack.Adapter{name = "CustomFieldAdapter"}
-  @hack.FieldWrapper{name = "CustomFieldWrapper"}
-  2: i32 field2;
 }
 ```
 ## Python

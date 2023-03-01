@@ -142,7 +142,8 @@ module Lost_env = struct
 
   and params = {
     explanation: string;
-    new_hh_server_state: hh_server_state;
+    new_hh_server_state: hh_server_state option;
+        (** This is the state as we discern through 'connect' and rpc. We use None to indicate Serverless_with_shell *)
     start_on_click: bool;
         (** if user clicks Restart, do we ClientStart before reconnecting? *)
     trigger_on_lsp: bool;
@@ -161,8 +162,12 @@ type state =
   | Main_loop of Main_env.t
       (** Main_loop: we have a working connection to both server and client. *)
   | Lost_server of Lost_env.t
-      (** Lost_server: someone stole the persistent connection from us.
-          We might choose to grab it back if prompted... *)
+      (** Lost_server: this is used for (1) Serverless_with_shell which means
+          that we never want an hh_server connection, in which case
+          Lost_env.params.new_hh_server_state will always be None,
+          or (2) Other modes which do want a persistent connection, but either
+          we failed to start hh_server up, or someone stole the persistent connection
+          from us, in which case we might choose to grab it back if prompted... *)
   | Post_shutdown
       (** Post_shutdown: we received a shutdown request from the client, and
           therefore shut down our connection to the server. We can't handle
@@ -1255,8 +1260,10 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
     In_init state waiting for the server hello, or fail to connect and
     leave in a Lost_server state. You might call this from Pre_init or
     Lost_server states, obviously. But you can also call it from In_init state
-    if you want to give up on the prior attempt at connection and try again.   *)
+    if you want to give up on the prior attempt at connection and try again.
+    NOTE: you naturally shouldn't attempt to call this function if Serverless_with_shell! *)
 let rec connect ~(env : env) (state : state) : state Lwt.t =
+  assert (not (equal_serverless_ide env.serverless_ide Serverless_with_shell));
   begin
     match state with
     | In_init { In_init_env.conn; _ } -> begin
@@ -1350,7 +1357,7 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
         ~env
         {
           Lost_env.explanation;
-          new_hh_server_state;
+          new_hh_server_state = Some new_hh_server_state;
           start_on_click = true;
           trigger_on_lock_file = true;
           trigger_on_lsp = false;
@@ -1363,15 +1370,18 @@ and reconnect_from_lost_if_necessary
     : state Lwt.t =
   Lost_env.(
     let should_reconnect =
-      match (state, reason) with
-      | (Lost_server _, `Force_regain) -> true
-      | ( Lost_server { p = { trigger_on_lsp = true; _ }; _ },
+      match (env.serverless_ide, state, reason) with
+      | (Serverless_with_shell, _, _) -> false
+      | (_, Lost_server _, `Force_regain) -> true
+      | ( _,
+          Lost_server { p = { trigger_on_lsp = true; _ }; _ },
           `Event (Client_message (_, RequestMessage _)) ) ->
         true
-      | ( Lost_server { p = { trigger_on_lock_file = true; _ }; lock_file; _ },
+      | ( _,
+          Lost_server { p = { trigger_on_lock_file = true; _ }; lock_file; _ },
           `Event Tick ) ->
         MonitorConnection.server_exists lock_file
-      | (_, _) -> false
+      | (_, _, _) -> false
     in
     if should_reconnect then
       let%lwt current_version_and_switch =
@@ -1404,6 +1414,7 @@ and reconnect_from_lost_if_necessary
         Lsp_helpers.telemetry_log to_stdout message;
         exit_fail ()
       ) else
+        (* Note: the should_reconnect flag ensures we're not in Serverless_with_shell, hence we're safe to connect here *)
         let%lwt state = connect ~env state in
         Lwt.return state
     else
@@ -1417,48 +1428,46 @@ and do_lost_server
     ~(env : env)
     ?(allow_immediate_reconnect = true)
     (p : Lost_env.params) : state Lwt.t =
-  Lost_env.(
-    set_hh_server_state p.new_hh_server_state;
+  let open Lost_env in
+  Option.iter p.new_hh_server_state ~f:set_hh_server_state;
 
-    let state = dismiss_diagnostics state in
-    let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
-    let editor_open_files =
-      Option.value (get_editor_open_files state) ~default:UriMap.empty
+  let state = dismiss_diagnostics state in
+  let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
+  let editor_open_files =
+    Option.value (get_editor_open_files state) ~default:UriMap.empty
+  in
+  let lock_file = ServerFiles.lock_file (get_root_exn ()) in
+  let reconnect_immediately =
+    allow_immediate_reconnect
+    && p.trigger_on_lock_file
+    && MonitorConnection.server_exists lock_file
+  in
+  if reconnect_immediately then (
+    let lost_state =
+      Lost_server
+        {
+          Lost_env.p;
+          editor_open_files;
+          uris_with_unsaved_changes;
+          lock_file;
+          hh_server_status_diagnostic = None;
+        }
     in
-    let lock_file = ServerFiles.lock_file (get_root_exn ()) in
-    let reconnect_immediately =
-      allow_immediate_reconnect
-      && p.trigger_on_lock_file
-      && MonitorConnection.server_exists lock_file
+    Lsp_helpers.telemetry_log to_stdout "Reconnecting immediately to hh_server";
+    let%lwt new_state =
+      reconnect_from_lost_if_necessary ~env lost_state `Force_regain
     in
-    if reconnect_immediately then (
-      let lost_state =
-        Lost_server
-          {
-            Lost_env.p;
-            editor_open_files;
-            uris_with_unsaved_changes;
-            lock_file;
-            hh_server_status_diagnostic = None;
-          }
-      in
-      Lsp_helpers.telemetry_log
-        to_stdout
-        "Reconnecting immediately to hh_server";
-      let%lwt new_state =
-        reconnect_from_lost_if_necessary ~env lost_state `Force_regain
-      in
-      Lwt.return new_state
-    ) else
-      Lwt.return
-        (Lost_server
-           {
-             Lost_env.p;
-             editor_open_files;
-             uris_with_unsaved_changes;
-             lock_file;
-             hh_server_status_diagnostic = None;
-           }))
+    Lwt.return new_state
+  ) else
+    Lwt.return
+      (Lost_server
+         {
+           Lost_env.p;
+           editor_open_files;
+           uris_with_unsaved_changes;
+           lock_file;
+           hh_server_status_diagnostic = None;
+         })
 
 let report_connect_end (ienv : In_init_env.t) : state =
   log "report_connect_end";
@@ -1706,6 +1715,10 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
        It's produced in clientLsp.do_server_busy upon receipt of a status
        enum from the server. See comments on hh_server_status for invariants. *)
     Some hh_server_status
+  | Lost_server { Lost_env.p; _ }
+    when Option.is_none p.Lost_env.new_hh_server_state ->
+    (* This is the case of Serverless_with_shell, when we don't even track server state *)
+    None
   | Lost_server { Lost_env.p; _ } ->
     Some
       {
@@ -2091,7 +2104,8 @@ let state_to_rage (state : state) : string =
         (lenv.uris_with_unsaved_changes |> UriSet.elements |> uris_to_string)
         lenv.lock_file
         lenv.p.explanation
-        (lenv.p.new_hh_server_state |> hh_server_state_to_string)
+        (lenv.p.new_hh_server_state
+        |> Option.value_map ~f:hh_server_state_to_string ~default:"no-rpc")
         lenv.p.start_on_click
         lenv.p.trigger_on_lsp
         lenv.p.trigger_on_lock_file
@@ -4047,7 +4061,33 @@ let handle_client_message
         (Some (String_utils.lstrip version "^"));
       let%lwt version_and_switch = read_hhconfig_version_and_switch () in
       hhconfig_version_and_switch := version_and_switch;
-      let%lwt new_state = connect ~env !state in
+      let%lwt new_state =
+        match env.serverless_ide with
+        | Serverless_with_shell ->
+          let p =
+            {
+              Lost_env.explanation = "No persistent connection to hh_server";
+              new_hh_server_state = None;
+              start_on_click = false;
+              trigger_on_lsp = false;
+              trigger_on_lock_file = false;
+            }
+          in
+          let new_state =
+            Lost_server
+              {
+                Lost_env.p;
+                editor_open_files = UriMap.empty;
+                uris_with_unsaved_changes = UriSet.empty;
+                lock_file = ServerFiles.lock_file (get_root_exn ());
+                hh_server_status_diagnostic = None;
+              }
+          in
+          Lwt.return new_state
+        | Serverless_with_rpc
+        | Serverless_not ->
+          connect ~env !state
+      in
       state := new_state;
       (* If editor sent 'trace: on' then that will turn on verbose_to_file. But we won't turn off
          verbose here, since the command-line argument --verbose trumps initialization params. *)
@@ -4628,11 +4668,16 @@ let handle_client_message
 
       (* We deny all other requests. This is the only response that won't       *)
       (* produce logs/warnings on most clients...                               *)
+      let message_str =
+        match lenv.p.new_hh_server_state with
+        | None -> "[Not implemented for ide_standalone]"
+        | Some hh_server_state -> hh_server_state_to_string hh_server_state
+      in
       raise
         (Error.LspException
            {
              Error.code = Error.RequestCancelled;
-             message = lenv.p.new_hh_server_state |> hh_server_state_to_string;
+             message = message_str;
              data =
                Some
                  (Hh_json.JSON_Object
@@ -4675,7 +4720,7 @@ let handle_server_message
           !state
           {
             Lost_env.explanation = "hh_server is active in another window.";
-            new_hh_server_state = Hh_server_stolen;
+            new_hh_server_state = Some Hh_server_stolen;
             start_on_click = false;
             trigger_on_lock_file = false;
             trigger_on_lsp = true;
@@ -4829,6 +4874,7 @@ let handle_tick
           Lwt.return_unit
         else
           (* terminate + retry the connection *)
+          (* Note: In_init isn't reachable under Serverless_with_shell, hence we're safe to call connect here *)
           let%lwt new_state = connect ~env !state in
           state := new_state;
           Lwt.return_unit
@@ -5076,7 +5122,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
                   !state
                   {
                     Lost_env.explanation;
-                    new_hh_server_state = Hh_server_stopped;
+                    new_hh_server_state = Some Hh_server_stopped;
                     start_on_click = true;
                     trigger_on_lock_file;
                     trigger_on_lsp = false;

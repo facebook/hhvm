@@ -345,7 +345,7 @@ func (x *reqGetEntityGetEntity) writeField1(p thrift.Protocol) error {  // R
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetR()
+    item := x.GetR()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -483,7 +483,7 @@ func (x *respGetEntityGetEntity) writeField0(p thrift.Protocol) error {  // Valu
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetValue()
+    item := x.GetValue()
     if err := item.Write(p); err != nil {
     return err
 }

@@ -459,7 +459,7 @@ func (x *Vehicle) writeField1(p thrift.Protocol) error {  // Color
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetColor()
+    item := x.GetColor()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -974,7 +974,7 @@ func (x *Person) writeField5(p thrift.Protocol) error {  // FavoriteColor
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetFavoriteColor()
+    item := x.GetFavoriteColor()
     if err := item.Write(p); err != nil {
     return err
 }

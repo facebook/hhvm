@@ -827,7 +827,7 @@ func (x *TypeName) writeField10(p thrift.Protocol) error {  // EnumType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetEnumType()
+    item := x.GetEnumType()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -847,7 +847,7 @@ func (x *TypeName) writeField17(p thrift.Protocol) error {  // TypedefType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetTypedefType()
+    item := x.GetTypedefType()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -867,7 +867,7 @@ func (x *TypeName) writeField11(p thrift.Protocol) error {  // StructType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStructType()
+    item := x.GetStructType()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -887,7 +887,7 @@ func (x *TypeName) writeField12(p thrift.Protocol) error {  // UnionType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetUnionType()
+    item := x.GetUnionType()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -907,7 +907,7 @@ func (x *TypeName) writeField13(p thrift.Protocol) error {  // ExceptionType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetExceptionType()
+    item := x.GetExceptionType()
     if err := item.Write(p); err != nil {
     return err
 }

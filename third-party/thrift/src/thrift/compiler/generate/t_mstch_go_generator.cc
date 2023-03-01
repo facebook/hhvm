@@ -306,6 +306,7 @@ class mstch_go_field : public mstch_field {
             {"field:go_arg_name", &mstch_go_field::go_arg_name},
             {"field:pointer?", &mstch_go_field::is_pointer},
             {"field:nilable?", &mstch_go_field::is_nilable},
+            {"field:dereference?", &mstch_go_field::should_dereference},
             {"field:key_str", &mstch_go_field::key_str},
             {"field:go_tag?", &mstch_go_field::has_go_tag},
             {"field:go_tag", &mstch_go_field::go_tag},
@@ -321,13 +322,33 @@ class mstch_go_field : public mstch_field {
   }
   mstch::node go_arg_name() { return go::munge_arg(field_->name()); }
   mstch::node is_pointer() {
-    // Whether this field is a pointer '*':
-    //  * Struct and union type fields must be pointers
+    // Whether this field is a pointer '*' in Go:
+    //  * Struct type fields must be pointers
+    //  * Fields inside a union must be pointers
     //  * Optional fields must be pointers
     //     * Except (!!!) when the underlying type itself is nilable (map/slice)
-    return is_field_nilable_() && !is_type_nilable_();
+    auto real_type = field_->type()->get_true_type();
+    return (real_type->is_struct() || is_inside_union_() || is_optional_()) &&
+        !go::is_type_nilable(real_type);
   }
-  mstch::node is_nilable() { return is_field_nilable_(); }
+  mstch::node is_nilable() {
+    // Whether this field can be set to 'nil' in Go:
+    //  * Struct type fields can be set to 'nil' (see 'is_pointer' above)
+    //  * Fields inside a union can be set to 'nil' ('is_pointer' above)
+    //  * Optional fields can be set to 'nil' (see 'is_pointer' above)
+    //  * Fields represented by nilable Go types can be set to 'nil' (map/slice)
+    auto real_type = field_->type()->get_true_type();
+    return real_type->is_struct() || is_inside_union_() || is_optional_() ||
+        go::is_type_nilable(real_type);
+  }
+  mstch::node should_dereference() {
+    // Whether this field should be dereferenced when encoding/decoding.
+    // Not all pointer fields need to be dereferenced when they are
+    // processed by the encoder/decoder logic.
+    auto real_type = field_->type()->get_true_type();
+    return (is_inside_union_() || is_optional_()) &&
+        !go::is_type_nilable(real_type) && !real_type->is_struct();
+  }
   mstch::node key_str() {
     // Legacy schemas may have negative tags - replace minus with an underscore.
     if (field_->get_key() < 0) {
@@ -350,21 +371,10 @@ class mstch_go_field : public mstch_field {
  private:
   go_codegen_data& data_;
 
-  bool is_union_field_() {
+  bool is_inside_union_() {
     // Whether field is part of a union
     return field_context_ != nullptr && field_context_->strct != nullptr &&
         field_context_->strct->is_union();
-  }
-  bool is_type_nilable_() {
-    auto real_type = field_->type()->get_true_type();
-    // Whether this type can be set to 'nil'
-    return real_type->is_list() || real_type->is_map() || real_type->is_set() ||
-        real_type->is_binary();
-  }
-  bool is_field_nilable_() {
-    // Whether this field can be set to 'nil'
-    return field_->type()->get_true_type()->is_struct() || is_type_nilable_() ||
-        is_union_field_() || is_optional_();
   }
 };
 

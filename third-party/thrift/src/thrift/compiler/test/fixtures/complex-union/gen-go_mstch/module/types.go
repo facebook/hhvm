@@ -1328,7 +1328,7 @@ func (x *ValUnion) writeField1(p thrift.Protocol) error {  // V1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetV1()
+    item := x.GetV1()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1348,7 +1348,7 @@ func (x *ValUnion) writeField2(p thrift.Protocol) error {  // V2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetV2()
+    item := x.GetV2()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1837,7 +1837,7 @@ func (x *NonCopyableUnion) writeField1(p thrift.Protocol) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetS()
+    item := x.GetS()
     if err := item.Write(p); err != nil {
     return err
 }

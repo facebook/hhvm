@@ -48,6 +48,8 @@ std::string make_unique_name(
 bool is_func_go_supported(const t_function* func);
 bool is_go_reserved_word(const std::string& value);
 
+bool is_type_nilable(const t_type* type);
+
 } // namespace go
 } // namespace compiler
 } // namespace thrift

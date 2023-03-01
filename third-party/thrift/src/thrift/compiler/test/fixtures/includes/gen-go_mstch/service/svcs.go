@@ -201,7 +201,7 @@ func (x *reqMyServiceQuery) writeField1(p thrift.Protocol) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetS()
+    item := x.GetS()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -221,7 +221,7 @@ func (x *reqMyServiceQuery) writeField2(p thrift.Protocol) error {  // I
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI()
+    item := x.GetI()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -477,7 +477,7 @@ func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Protocol) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetS()
+    item := x.GetS()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -497,7 +497,7 @@ func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Protocol) error {  // I
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI()
+    item := x.GetI()
     if err := item.Write(p); err != nil {
     return err
 }

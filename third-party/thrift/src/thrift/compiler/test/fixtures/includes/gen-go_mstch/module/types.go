@@ -84,7 +84,7 @@ func (x *MyStruct) writeField1(p thrift.Protocol) error {  // MyIncludedField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetMyIncludedField()
+    item := x.GetMyIncludedField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -104,7 +104,7 @@ func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MyOtherIncludedFie
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetMyOtherIncludedField()
+    item := x.GetMyOtherIncludedField()
     if err := item.Write(p); err != nil {
     return err
 }

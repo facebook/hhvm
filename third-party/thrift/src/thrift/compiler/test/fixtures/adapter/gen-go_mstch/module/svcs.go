@@ -228,7 +228,7 @@ func (x *reqServiceFunc) writeField3(p thrift.Protocol) error {  // Arg3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetArg3()
+    item := x.GetArg3()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -836,7 +836,7 @@ func (x *respAdapterServiceCount) writeField0(p thrift.Protocol) error {  // Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetValue()
+    item := x.GetValue()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -974,7 +974,7 @@ func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Protocol) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetArg_()
+    item := x.GetArg_()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1112,7 +1112,7 @@ func (x *respAdapterServiceAdaptedTypes) writeField0(p thrift.Protocol) error { 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetValue()
+    item := x.GetValue()
     if err := item.Write(p); err != nil {
     return err
 }

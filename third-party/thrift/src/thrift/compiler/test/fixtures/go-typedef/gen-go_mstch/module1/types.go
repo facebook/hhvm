@@ -1019,7 +1019,7 @@ func (x *Pair) writeField1(p thrift.Protocol) error {  // Automobile
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAutomobile()
+    item := x.GetAutomobile()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1039,7 +1039,7 @@ func (x *Pair) writeField2(p thrift.Protocol) error {  // Car
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetCar()
+    item := x.GetCar()
     if err := item.Write(p); err != nil {
     return err
 }

@@ -647,7 +647,7 @@ func (x *MyStruct) writeField9(p thrift.Protocol) error {  // MyUnion
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetMyUnion()
+    item := x.GetMyUnion()
     if err := item.Write(p); err != nil {
     return err
 }

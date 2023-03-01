@@ -87,7 +87,7 @@ func (x *Included) writeField2(p thrift.Protocol) error {  // MyTransitiveField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetMyTransitiveField()
+    item := x.GetMyTransitiveField()
     if err := item.Write(p); err != nil {
     return err
 }

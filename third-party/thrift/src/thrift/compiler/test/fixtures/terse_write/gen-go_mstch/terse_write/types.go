@@ -700,7 +700,7 @@ func (x *MyUnion) writeField14(p thrift.Protocol) error {  // StructField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStructField()
+    item := x.GetStructField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1768,7 +1768,7 @@ func (x *StructLevelTerseStruct) writeField14(p thrift.Protocol) error {  // Str
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStructField()
+    item := x.GetStructField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1788,7 +1788,7 @@ func (x *StructLevelTerseStruct) writeField15(p thrift.Protocol) error {  // Uni
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetUnionField()
+    item := x.GetUnionField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2940,7 +2940,7 @@ func (x *FieldLevelTerseStruct) writeField14(p thrift.Protocol) error {  // Ters
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetTerseStructField()
+    item := x.GetTerseStructField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2960,7 +2960,7 @@ func (x *FieldLevelTerseStruct) writeField29(p thrift.Protocol) error {  // Ters
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetTerseUnionField()
+    item := x.GetTerseUnionField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3244,7 +3244,7 @@ func (x *FieldLevelTerseStruct) writeField28(p thrift.Protocol) error {  // Stru
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStructField()
+    item := x.GetStructField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3264,7 +3264,7 @@ func (x *FieldLevelTerseStruct) writeField30(p thrift.Protocol) error {  // Unio
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetUnionField()
+    item := x.GetUnionField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4649,7 +4649,7 @@ func (x *TerseStructWithCustomDefault) writeField14(p thrift.Protocol) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStructField()
+    item := x.GetStructField()
     if err := item.Write(p); err != nil {
     return err
 }

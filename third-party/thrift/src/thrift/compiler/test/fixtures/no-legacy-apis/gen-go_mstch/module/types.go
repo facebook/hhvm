@@ -322,7 +322,7 @@ func (x *MyUnion) writeField2(p thrift.Protocol) error {  // MyDataItem
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetMyDataItem()
+    item := x.GetMyDataItem()
     if err := item.Write(p); err != nil {
     return err
 }

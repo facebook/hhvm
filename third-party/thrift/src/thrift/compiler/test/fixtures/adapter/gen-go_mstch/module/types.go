@@ -1867,7 +1867,7 @@ func (x *Bar) writeField1(p thrift.Protocol) error {  // StructField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStructField()
+    item := x.GetStructField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1887,7 +1887,7 @@ func (x *Bar) writeField2(p thrift.Protocol) error {  // OptionalStructField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptionalStructField()
+    item := x.GetOptionalStructField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1969,7 +1969,7 @@ func (x *Bar) writeField5(p thrift.Protocol) error {  // UnionField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetUnionField()
+    item := x.GetUnionField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1989,7 +1989,7 @@ func (x *Bar) writeField6(p thrift.Protocol) error {  // OptionalUnionField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptionalUnionField()
+    item := x.GetOptionalUnionField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2009,7 +2009,7 @@ func (x *Bar) writeField7(p thrift.Protocol) error {  // AdaptedStructField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAdaptedStructField()
+    item := x.GetAdaptedStructField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3146,7 +3146,7 @@ func (x *B) writeField1(p thrift.Protocol) error {  // A
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetA()
+    item := x.GetA()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5751,7 +5751,7 @@ func (x *AdaptTemplatedNestedTestStruct) writeField1(p thrift.Protocol) error { 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAdaptedStruct()
+    item := x.GetAdaptedStruct()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6392,7 +6392,7 @@ func (x *StructFieldAdaptedStruct) writeField1(p thrift.Protocol) error {  // Ad
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAdaptedStruct()
+    item := x.GetAdaptedStruct()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6412,7 +6412,7 @@ func (x *StructFieldAdaptedStruct) writeField2(p thrift.Protocol) error {  // Ad
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAdaptedTypedef()
+    item := x.GetAdaptedTypedef()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6432,7 +6432,7 @@ func (x *StructFieldAdaptedStruct) writeField3(p thrift.Protocol) error {  // Di
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetDirectlyAdapted()
+    item := x.GetDirectlyAdapted()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6452,7 +6452,7 @@ func (x *StructFieldAdaptedStruct) writeField4(p thrift.Protocol) error {  // Ty
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetTypedefOfAdapted()
+    item := x.GetTypedefOfAdapted()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6663,7 +6663,7 @@ func (x *CircularAdaptee) writeField1(p thrift.Protocol) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetField()
+    item := x.GetField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6802,7 +6802,7 @@ func (x *CircularStruct) writeField1(p thrift.Protocol) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetField()
+    item := x.GetField()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6941,7 +6941,7 @@ func (x *ReorderedStruct) writeField1(p thrift.Protocol) error {  // ReorderedDe
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetReorderedDependentAdapted()
+    item := x.GetReorderedDependentAdapted()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7492,7 +7492,7 @@ func (x *MoveOnly) writeField1(p thrift.Protocol) error {  // Ptr
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetPtr()
+    item := x.GetPtr()
     if err := item.Write(p); err != nil {
     return err
 }

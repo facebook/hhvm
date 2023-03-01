@@ -1937,7 +1937,7 @@ func (x *TrivialNestedWithDefault) writeField2(p thrift.Protocol) error {  // N
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetN()
+    item := x.GetN()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2367,7 +2367,7 @@ func (x *ComplexNestedWithDefault) writeField2(p thrift.Protocol) error {  // N
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetN()
+    item := x.GetN()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3266,7 +3266,7 @@ func (x *MyStruct) writeField4(p thrift.Protocol) error {  // Data
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetData()
+    item := x.GetData()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3964,7 +3964,7 @@ func (x *ForwardUsageRoot) writeField1(p thrift.Protocol) error {  // ForwardUsa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetForwardUsageStruct()
+    item := x.GetForwardUsageStruct()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3984,7 +3984,7 @@ func (x *ForwardUsageRoot) writeField2(p thrift.Protocol) error {  // ForwardUsa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetForwardUsageByRef()
+    item := x.GetForwardUsageByRef()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4147,7 +4147,7 @@ func (x *ForwardUsageStruct) writeField1(p thrift.Protocol) error {  // Foo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetFoo()
+    item := x.GetFoo()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4286,7 +4286,7 @@ func (x *ForwardUsageByRef) writeField1(p thrift.Protocol) error {  // Foo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetFoo()
+    item := x.GetFoo()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5596,7 +5596,7 @@ func (x *AdaptedListDep) writeField1(p thrift.Protocol) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetField()
+    item := x.GetField()
     if err := item.Write(p); err != nil {
     return err
 }

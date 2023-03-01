@@ -289,6 +289,12 @@ bool is_go_reserved_word(const std::string& value) {
   return go_reserved_words.count(value) > 0;
 }
 
+bool is_type_nilable(const t_type* type) {
+  // Whether the underlying Go type can be set to 'nil'.
+  return type->is_list() || type->is_map() || type->is_set() ||
+      type->is_binary();
+}
+
 } // namespace go
 } // namespace compiler
 } // namespace thrift

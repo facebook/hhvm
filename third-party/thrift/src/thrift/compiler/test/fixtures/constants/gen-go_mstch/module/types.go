@@ -1018,7 +1018,7 @@ func (x *Struct2) writeField3(p thrift.Protocol) error {  // C
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetC()
+    item := x.GetC()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1329,7 +1329,7 @@ func (x *Struct3) writeField3(p thrift.Protocol) error {  // C
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetC()
+    item := x.GetC()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2051,7 +2051,7 @@ func (x *Union2) writeField3(p thrift.Protocol) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetS()
+    item := x.GetS()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2071,7 +2071,7 @@ func (x *Union2) writeField4(p thrift.Protocol) error {  // U
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetU()
+    item := x.GetU()
     if err := item.Write(p); err != nil {
     return err
 }

@@ -52,7 +52,7 @@ func (x *IncludesAlso) writeField1(p thrift.Protocol) error {  // Also
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAlso()
+    item := x.GetAlso()
     if err := item.Write(p); err != nil {
     return err
 }

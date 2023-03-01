@@ -15,7 +15,7 @@ For more detailed meaning, see [rfc2119](https://www.ietf.org/rfc/rfc2119.txt).
 
 ## Kinds of Types
 
-Terns used classify types.
+Terms used classify types.
 
 - *Thrift type* - The type specified in the Thrift IDL, for example `i32`.
 - *native type* - A language specific type. For example `int` and `java.lang.Integer` are native types in Java.

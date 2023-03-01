@@ -511,3 +511,33 @@ pub fn elaborate_program(e: ocamlrep::rc::RcOc<namespace_env::Env>, defs: &mut P
         visitor.visit_def(&mut env, def).unwrap();
     }
 }
+
+pub fn elaborate_fun_def(e: ocamlrep::rc::RcOc<namespace_env::Env>, fd: &mut FunDef) {
+    let mut env = Env::make(e);
+    let mut visitor = ElaborateNamespacesVisitor {};
+    visitor.visit_fun_def(&mut env, fd).unwrap();
+}
+
+pub fn elaborate_class_(e: ocamlrep::rc::RcOc<namespace_env::Env>, c: &mut Class_) {
+    let mut env = Env::make(e);
+    let mut visitor = ElaborateNamespacesVisitor {};
+    visitor.visit_class_(&mut env, c).unwrap();
+}
+
+pub fn elaborate_module_def(e: ocamlrep::rc::RcOc<namespace_env::Env>, m: &mut ModuleDef) {
+    let mut env = Env::make(e);
+    let mut visitor = ElaborateNamespacesVisitor {};
+    visitor.visit_module_def(&mut env, m).unwrap();
+}
+
+pub fn elaborate_gconst(e: ocamlrep::rc::RcOc<namespace_env::Env>, cst: &mut Gconst) {
+    let mut env = Env::make(e);
+    let mut visitor = ElaborateNamespacesVisitor {};
+    visitor.visit_gconst(&mut env, cst).unwrap();
+}
+
+pub fn elaborate_typedef(e: ocamlrep::rc::RcOc<namespace_env::Env>, td: &mut Typedef) {
+    let mut env = Env::make(e);
+    let mut visitor = ElaborateNamespacesVisitor {};
+    visitor.visit_typedef(&mut env, td).unwrap();
+}

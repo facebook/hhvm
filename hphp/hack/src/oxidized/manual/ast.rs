@@ -48,6 +48,7 @@ pub type Gconst = aast::Gconst<Ex, En>;
 pub type GenCase = aast::GenCase<Ex, En>;
 pub type Method_ = aast::Method_<Ex, En>;
 pub type Module = aast::ModuleDef<Ex, En>;
+pub type ModuleDef = aast::ModuleDef<Ex, En>;
 pub type Rule = aast::MdNameKind;
 pub type Program = aast::Program<Ex, En>;
 pub type Stmt = aast::Stmt<Ex, En>;

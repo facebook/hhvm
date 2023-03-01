@@ -1479,6 +1479,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "elab_ffi"
+version = "0.0.0"
+dependencies = [
+ "elaborate_namespaces_visitor",
+ "ocamlrep",
+ "ocamlrep_ocamlpool",
+ "oxidized",
+]
+
+[[package]]
 name = "elaborate_namespaces_visitor"
 version = "0.0.0"
 dependencies = [

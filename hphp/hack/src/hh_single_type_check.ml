@@ -242,6 +242,7 @@ let parse_options () =
   let set_bool x () = x := Some true in
   let set_bool_ x () = x := true in
   let set_float_ x f = x := f in
+  let rust_elab = ref false in
   let rust_provider_backend = ref false in
   let skip_hierarchy_checks = ref false in
   let skip_tast_checks = ref false in
@@ -562,6 +563,9 @@ let parse_options () =
         Arg.Unit (set_bool disallow_byref_calls),
         " Disallow passing arguments by reference in any form [e.g. foo(&$bar)]"
       );
+      ( "--rust-elab",
+        Arg.Set rust_elab,
+        " Use the Rust implementation of naming elaboration and NAST checks" );
       ( "--rust-provider-backend",
         Arg.Set rust_provider_backend,
         " Use the Rust implementation of Provider_backend (including decl-folding)"
@@ -1044,6 +1048,7 @@ let parse_options () =
       ~tco_allow_all_locations_for_type_constant_in_enum_class:
         !allow_all_locations_for_type_constant_in_enum_class
       ~tco_tast_under_dynamic:!tast_under_dynamic
+      ~tco_rust_elab:!rust_elab
       ()
   in
   Errors.allowed_fixme_codes_strict :=

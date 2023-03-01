@@ -194,6 +194,11 @@ fn elaborate<T: Transform>(
 
         // Validate use of `Await` in sync functions and return in generators
         passes::validate_coroutine::ValidateCoroutinePass::default(),
+
+        // Checks for the presence of a function body in methods, use of traits
+        // and instance and static member variables in an interface definition
+        passes::validate_interface::ValidateInterfacePass::default(),
+
     ];
     let mut errs = Vec::default();
     let cfg = config::Config::new(tco, is_hhi);

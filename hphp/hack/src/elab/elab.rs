@@ -199,6 +199,11 @@ fn elaborate<T: Transform>(
         // and instance and static member variables in an interface definition
         passes::validate_interface::ValidateInterfacePass::default(),
 
+
+        // Checks for use of reserved names in functions, methods, class identifiers
+        // and class constants
+        passes::validate_illegal_name::ValidateIllegalNamePass::default(),
+
     ];
     let mut errs = Vec::default();
     let cfg = config::Config::new(tco, is_hhi);

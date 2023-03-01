@@ -20,10 +20,10 @@ let tast_holes_result_to_tuple
       } =
   (actual_ty_string, actual_ty_json, expected_ty_string, expected_ty_json, pos)
 
-let print_json result =
+let print_json ~print_file result =
   Nuclide_rpc_message_printer.(
     print_json
-    @@ tast_holes_response_to_json
+    @@ tast_holes_response_to_json ~print_file
     @@ List.map ~f:tast_holes_result_to_tuple result)
 
 let print_string ~print_file result =
@@ -48,6 +48,6 @@ let print_string ~print_file result =
 
 let go result ~print_file output_json =
   if output_json then
-    print_json result
+    print_json ~print_file result
   else
     print_string ~print_file result

@@ -12,9 +12,14 @@ class E extends D {
   const type T = string;
 }
 
+abstract class F {
+  abstract const type TD as D;
+}
+
 interface Bad {
   abstract const type BAD0 as C with { type T = int };
   abstract const type BAD1 as D with { ctx T = [] };
+  abstract const type BAD2 as F with { type TD as D with { type TInvalid = int; } };
 }
 
 interface Good {

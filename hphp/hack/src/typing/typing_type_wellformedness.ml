@@ -221,7 +221,16 @@ and hint_ ~in_signature env p h_ =
   end
   | Hrefinement (hr, rl) as h ->
     check_hrefinement env.typedef_tparams env.tenv (p, h) rl;
-    hint env hr
+    let refinement_hints =
+      List.fold rl ~init:[] ~f:(fun rl r ->
+          match r with
+          | Rctx (_, CRexact h) -> h :: rl
+          | Rctx (_, CRloose { cr_lower = hl; cr_upper = hr }) ->
+            Option.to_list hl @ Option.to_list hr @ rl
+          | Rtype (_, TRexact h) -> h :: rl
+          | Rtype (_, TRloose { tr_lower = hl; tr_upper = hr }) -> hl @ hr @ rl)
+    in
+    hints env (hr :: refinement_hints)
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
     let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in
     List.concat_map ~f:compute_hint_for_shape_field_info nsi_field_map

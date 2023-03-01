@@ -159,6 +159,7 @@ module.exports = {
         {
           Beta: [
             'features/any',
+            'features/field-mask',
             'features/terse-write'
           ]
         },

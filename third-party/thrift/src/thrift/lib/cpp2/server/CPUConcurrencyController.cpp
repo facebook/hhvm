@@ -67,20 +67,32 @@ CPUConcurrencyController::~CPUConcurrencyController() {
   cancel();
 }
 
+void CPUConcurrencyController::setEventHandler(
+    std::shared_ptr<EventHandler> eventHandler) {
+  eventHandler_ = std::move(eventHandler);
+}
+
 void CPUConcurrencyController::cycleOnce() {
   if (!enabled()) {
     return;
   }
 
+  auto limit = this->getLimit();
   auto load = getLoad();
+  if (eventHandler_) {
+    eventHandler_->onCycle(limit, load);
+  }
+
   if (load >= config().cpuTarget) {
     lastOverloadStart_ = std::chrono::steady_clock::now();
-    auto lim = this->getLimit();
     auto newLim =
-        lim -
+        limit -
         std::max<uint32_t>(
-            static_cast<uint32_t>(lim * config().decreaseMultiplier), 1);
+            static_cast<uint32_t>(limit * config().decreaseMultiplier), 1);
     this->setLimit(std::max<uint32_t>(newLim, config().concurrencyLowerBound));
+    if (eventHandler_) {
+      eventHandler_->limitDecreased();
+    }
   } else {
     auto currentLimitUsage = this->getLimitUsage();
     if (currentLimitUsage == 0 || load <= 0) {
@@ -118,16 +130,21 @@ void CPUConcurrencyController::cycleOnce() {
             config().concurrencyUpperBound);
         stableEstimate_.store(result, std::memory_order_relaxed);
         this->setLimit(result);
+        if (eventHandler_) {
+          if (result > limit) {
+            eventHandler_->limitIncreased();
+          } else if (result < limit) {
+            eventHandler_->limitDecreased();
+          }
+        }
         return;
       }
     }
 
-    auto lim = this->getLimit();
-
     // We prevent unbounded increase of limits by only changing when
     // necessary (i.e., we are getting near breaching existing limit).
     bool nearExistingLimit = !config().bumpOnError &&
-        (currentLimitUsage >= (1.0 - config().increaseDistanceRatio) * lim);
+        (currentLimitUsage >= (1.0 - config().increaseDistanceRatio) * limit);
 
     // Bump concurrency limit if we saw some load shedding errors recently.
     bool recentLoadShed =
@@ -137,15 +154,18 @@ void CPUConcurrencyController::cycleOnce() {
     // overloaded as after an overload event the limit will be set aggressively
     // and may cause steady-state load shedding due to bursty traffic.
     bool shouldConvergeStable =
-        !isRefractoryPeriod() && lim < getStableEstimate();
+        !isRefractoryPeriod() && limit < getStableEstimate();
 
     if (nearExistingLimit || recentLoadShed || shouldConvergeStable) {
       auto newLim =
-          lim +
+          limit +
           std::max<uint32_t>(
-              static_cast<uint32_t>(lim * config().additiveMultiplier), 1);
+              static_cast<uint32_t>(limit * config().additiveMultiplier), 1);
       this->setLimit(
           std::min<uint32_t>(config().concurrencyUpperBound, newLim));
+      if (eventHandler_) {
+        eventHandler_->limitIncreased();
+      }
     }
   }
 }

@@ -115,6 +115,16 @@ class CPUConcurrencyController {
 
   ~CPUConcurrencyController();
 
+  class EventHandler {
+   public:
+    virtual ~EventHandler() = default;
+    virtual void onCycle(int64_t limit, int64_t load) = 0;
+    virtual void limitIncreased() = 0;
+    virtual void limitDecreased() = 0;
+  };
+
+  void setEventHandler(std::shared_ptr<EventHandler> eventHandler);
+
   void requestStarted();
   void requestShed();
 
@@ -160,6 +170,7 @@ class CPUConcurrencyController {
   apache::thrift::ThriftServerConfig& thriftServerConfig_;
 
   folly::FunctionScheduler scheduler_;
+  std::shared_ptr<EventHandler> eventHandler_{nullptr};
 
   std::chrono::steady_clock::time_point lastOverloadStart_{
       std::chrono::steady_clock::now()};

@@ -3607,7 +3607,9 @@ function start_server_proc(
   $command = hhvm_cmd_impl(
     $options,
     $config,
-    null, // we do not pass Autoload.DB.Path to the server process
+    // Provide a temporary file for `Autoload.DB.Path`: without this, we'll fail
+    // to run the server with native autoloading.
+    tempnam(Status::getRunTmpDir(), 'autoloadDB_%{schema}_'),
     '-m', 'server',
     "-vServer.Port=$port",
     "-vServer.Type=proxygen",

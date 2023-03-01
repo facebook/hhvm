@@ -191,6 +191,9 @@ fn elaborate<T: Transform>(
         // Validate `inout` `FunParam`s ensuring they are not used in functions with
         // special semantics or in memoized functions
         passes::validate_fun_param_inout::ValidateFunParamInoutPass::default(),
+
+        // Validate use of `Await` in sync functions and return in generators
+        passes::validate_coroutine::ValidateCoroutinePass::default(),
     ];
     let mut errs = Vec::default();
     let cfg = config::Config::new(tco, is_hhi);

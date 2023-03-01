@@ -34,6 +34,7 @@ pub mod validate_class_req;
 pub mod validate_class_user_attribute_const;
 pub mod validate_class_var_user_attribute_const;
 pub mod validate_class_var_user_attribute_lsb;
+pub mod validate_coroutine;
 pub mod validate_expr_call_echo;
 pub mod validate_expr_cast;
 pub mod validate_fun_param_inout;

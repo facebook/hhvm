@@ -1,5 +1,7 @@
 <?hh
 
+namespace SealedClass9;
+
 class SomeclassWithConstant {
   const CONSTANT = 'woogity boogity';
 }

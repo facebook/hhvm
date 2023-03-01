@@ -237,5 +237,37 @@ TEST(EnsureTest, Optional) {
   EXPECT_EQ(*opt, 2);
 }
 
+TEST(EnsureTest, IsAbsentAndEnsureValue) {
+  using detail::ensureValue;
+  using detail::isAbsent;
+  {
+    auto obj = op::create<struct_t<testset::struct_with<i32_t>>>();
+    EXPECT_FALSE(isAbsent(obj.field_1()));
+    ensureValue(obj.field_1()) = 1;
+    EXPECT_FALSE(isAbsent(obj.field_1()));
+  }
+  {
+    auto obj = op::create<struct_t<
+        testset::struct_with<i32_t, testset::FieldModifier::Optional>>>();
+    EXPECT_TRUE(isAbsent(obj.field_1()));
+    ensureValue(obj.field_1()) = 1;
+    EXPECT_FALSE(isAbsent(obj.field_1()));
+  }
+  {
+    auto obj = op::create<struct_t<
+        testset::struct_with<i32_t, testset::FieldModifier::Required>>>();
+    EXPECT_FALSE(isAbsent(obj.field_1()));
+    ensureValue(obj.field_1()) = 1;
+    EXPECT_FALSE(isAbsent(obj.field_1()));
+  }
+  {
+    auto obj = op::create<
+        struct_t<testset::struct_with<i32_t, testset::FieldModifier::Terse>>>();
+    EXPECT_FALSE(isAbsent(obj.field_1()));
+    ensureValue(obj.field_1()) = 1;
+    EXPECT_FALSE(isAbsent(obj.field_1()));
+  }
+}
+
 } // namespace
 } // namespace apache::thrift::op

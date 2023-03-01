@@ -86,6 +86,10 @@ constexpr bool isAbsent(terse_intern_boxed_field_ref<T>) {
   return false;
 }
 template <typename T>
+[[deprecated]] constexpr bool isAbsent(required_field_ref<T>) {
+  return false;
+}
+template <typename T>
 constexpr bool isAbsent(std::unique_ptr<T>& ptr) {
   return ptr == nullptr;
 }
@@ -133,6 +137,11 @@ decltype(auto) ensureValue(terse_field_ref<T> val) {
 template <typename T>
 decltype(auto) ensureValue(terse_intern_boxed_field_ref<T> val) {
   // A terse field doesn't have a set or unset state, so ensure is a noop.
+  return *val;
+}
+template <typename T>
+[[deprecated]] decltype(auto) ensureValue(required_field_ref<T> val) {
+  // A required field doesn't have a set or unset state, so ensure is a noop.
   return *val;
 }
 template <typename T>

@@ -222,6 +222,32 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     return transport_;
   }
 
+  /*
+   * This is a thin wrapper over transport->getExportedKeyingMaterial(...). It
+   * will return a nullptr for a conn context that doesn't have a transport
+   * attached. Otherwise the return value should be exactly the same as calling
+   * getExportedKeyingMaterial, note that we don't allow passing in a context
+   * buf for this method
+   */
+  std::unique_ptr<folly::IOBuf> getCachedEkm(
+      folly::StringPiece label, uint16_t length) {
+    for (const auto& ekm : cachedEkms_) {
+      if (ekm.first.label == label && ekm.first.length == length) {
+        return ekm.second->clone();
+      }
+    }
+    if (transport_ == nullptr) {
+      return nullptr;
+    }
+    auto ekm = transport_->getExportedKeyingMaterial(label, nullptr, length);
+    if (ekm != nullptr) {
+      cachedEkms_.emplace_back(
+          std::make_pair(EkmInfo{label.toString(), length}, ekm->clone()));
+      return ekm;
+    }
+    return nullptr;
+  }
+
   /**
    * Get the user data field.
    */
@@ -457,6 +483,17 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     std::shared_ptr<X509> peerCertificate;
   } transportInfo_;
   const folly::AsyncTransport* transport_;
+  /*
+   * Cache the exported keying material from the transport per connection
+   * and per label (key). Note we expect the number of labels to be very small
+   * Computing this per request may be too expensive which is why we cache this
+   * here. This is stored as a vector for efficiency
+   */
+  struct EkmInfo {
+    std::string label;
+    uint16_t length;
+  };
+  std::vector<std::pair<EkmInfo, std::unique_ptr<folly::IOBuf>>> cachedEkms_;
 
   folly::EventBaseManager* manager_;
   std::shared_ptr<RequestChannel> duplexChannel_;

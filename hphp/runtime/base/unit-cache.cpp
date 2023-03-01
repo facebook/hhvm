@@ -880,8 +880,13 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
         unit->makeFilepathPerRequest();
         unit->setNextCachedByHash(cached.copy());
 
+        // We make a copy of the ptr so we can move *that* into the cache. If,
+        // in the future, `unit` became a smart pointer of some kind, we'd
+        // (hopefully) get an error on this line, or avoid an error later when
+        // moving the ptr.
+        auto unit_ptr_copy = unit;
         // Store the Unit in the cache.
-        auto const DEBUG_ONLY old = lock->update(std::move(unit));
+        auto const DEBUG_ONLY old = lock->update(std::move(unit_ptr_copy));
         assertx(!old || !checkDeps(old));
         assertx(old == unit->nextCachedByHash());
         return makeCachedFilePtr(unit);
